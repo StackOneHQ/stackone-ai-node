@@ -19,14 +19,15 @@ jobs:
         with:
           python-version: "3.11"
           enable-cache: true
+          cache-dependency-glob: "**/requirements-docs.txt"
 
-      - name: Install all dependencies
-        run: uv pip install -r requirements-docs.txt
+      - name: Install Python dependencies
+        run: uv pip install --system -r requirements-docs.txt
 
       - name: Install bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Install dependencies
+      - name: Install Node dependencies
         run: bun install
 
       - name: Build documentation

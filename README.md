@@ -89,7 +89,7 @@ const toolset = new StackOneToolSet();
 const tools = toolset.getTools('hris_*', 'your-account-id');
 
 // Convert to OpenAI functions
-const openAIFunctions = tools.toOpenAIFunctions();
+const openAITools = tools.toOpenAI();
 
 // Use with OpenAI
 const openai = new OpenAI({
@@ -102,7 +102,7 @@ const response = await openai.chat.completions.create({
     { role: 'system', content: 'You are a helpful assistant.' },
     { role: 'user', content: 'List all employees' },
   ],
-  tools: openAIFunctions,
+  tools: openAITools,
 });
 ```
 
