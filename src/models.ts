@@ -1,11 +1,16 @@
 /// <reference types="bun-types" />
-import { jsonSchema, tool } from 'ai';
-// Import OpenAI types
+import { type Schema, type Tool, type ToolExecutionOptions, jsonSchema, tool } from 'ai';
+// Import OpenAPI and JSON Schema types
+import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
 
 // Type aliases for common types
 export type JsonDict = Record<string, unknown>;
 export type Headers = Record<string, string>;
+
+// JSON Schema related types
+export type JsonSchemaProperties = Record<string, JSONSchema7Definition>;
+export type JsonSchemaType = JSONSchema7['type'];
 
 /**
  * Base exception for StackOne errors
@@ -60,7 +65,7 @@ export interface ExecuteConfig {
  */
 export interface ToolParameters {
   type: string;
-  properties: JsonDict;
+  properties: JsonSchemaProperties;
 }
 
 /**
@@ -215,7 +220,12 @@ export class StackOneTool {
         } else if (bodyType === 'multipart') {
           const formData = new FormData();
           for (const [key, value] of Object.entries(bodyParams)) {
-            formData.append(key, value);
+            // Convert value to string or Blob as required by FormData.append
+            if (value instanceof Blob) {
+              formData.append(key, value);
+            } else {
+              formData.append(key, String(value));
+            }
           }
           fetchOptions.body = formData;
           // Content-Type is automatically set by the browser for FormData
@@ -227,7 +237,7 @@ export class StackOneTool {
 
       // Handle errors
       if (!response.ok) {
-        let responseBody = null;
+        let responseBody: string | JsonDict = '';
         try {
           responseBody = await response.json();
         } catch (_e) {
@@ -243,7 +253,7 @@ export class StackOneTool {
 
       // Parse response
       const result = await response.json();
-      return typeof result === 'object' ? result : { result };
+      return typeof result === 'object' && result !== null ? result : { result };
     } catch (error) {
       if (error instanceof SyntaxError) {
         throw new Error(`Invalid JSON in arguments: ${error.message}`);
@@ -258,13 +268,14 @@ export class StackOneTool {
    */
   toOpenAI(): ChatCompletionTool {
     // Clean properties and handle special types
-    const properties: JsonDict = {};
+    const properties: Record<string, JSONSchema7> = {};
     const required: string[] = [];
 
-    for (const [name, prop] of Object.entries(this.parameters.properties)) {
-      if (typeof prop === 'object') {
+    for (const [name, propValue] of Object.entries(this.parameters.properties)) {
+      if (typeof propValue === 'object' && propValue !== null) {
+        const prop = propValue as JSONSchema7;
         // Only keep standard JSON Schema properties
-        const cleanedProp: JsonDict = {};
+        const cleanedProp: JSONSchema7 = {};
 
         // Copy basic properties
         if ('type' in prop) {
@@ -280,12 +291,11 @@ export class StackOneTool {
         // Handle array types
         if (cleanedProp.type === 'array') {
           // Ensure all arrays have an items property
-          if ('items' in prop && typeof prop.items === 'object') {
+          if ('items' in prop && typeof prop.items === 'object' && prop.items !== null) {
+            const itemsObj = prop.items as JSONSchema7;
             cleanedProp.items = Object.fromEntries(
-              Object.entries(prop.items).filter(([k]) =>
-                ['type', 'description', 'enum'].includes(k)
-              )
-            );
+              Object.entries(itemsObj).filter(([k]) => ['type', 'description', 'enum'].includes(k))
+            ) as JSONSchema7;
           } else {
             // Default to string items if not specified
             cleanedProp.items = { type: 'string' };
@@ -294,9 +304,10 @@ export class StackOneTool {
 
         // Handle object types
         if (cleanedProp.type === 'object' && 'properties' in prop) {
+          const propProperties = prop.properties as Record<string, JSONSchema7>;
           cleanedProp.properties = Object.fromEntries(
-            Object.entries(prop.properties).map(([k, v]) => {
-              const propValue = v as JsonDict;
+            Object.entries(propProperties).map(([k, v]) => {
+              const propValue = v as JSONSchema7;
               // Recursively ensure arrays in nested objects have items
               if (propValue.type === 'array' && !('items' in propValue)) {
                 return [k, { ...propValue, items: { type: 'string' } }];
@@ -307,10 +318,10 @@ export class StackOneTool {
                   Object.entries(propValue).filter(([sk]) =>
                     ['type', 'description', 'enum', 'items'].includes(sk)
                   )
-                ),
+                ) as JSONSchema7,
               ];
             })
-          );
+          ) as Record<string, JSONSchema7>;
         }
 
         properties[name] = cleanedProp;
@@ -338,11 +349,11 @@ export class StackOneTool {
   toAISDKTool() {
     // Create a wrapper function that will handle the execution
     const executeWrapper = async (
-      args: JsonDict,
-      _options: { toolCallId: string; messages: JsonDict[]; abortSignal?: AbortSignal }
-    ) => {
+      args: unknown,
+      _options: ToolExecutionOptions
+    ): Promise<JsonDict> => {
       try {
-        return await this.execute(args);
+        return await this.execute(args as JsonDict);
       } catch (error) {
         if (error instanceof StackOneError) {
           throw new Error(`StackOne Error: ${error.message}`);
@@ -355,7 +366,7 @@ export class StackOneTool {
     const openAIFormat = this.toOpenAI();
 
     // Use the OpenAI function parameters as our JSON schema
-    const schema = jsonSchema(openAIFormat.function.parameters);
+    const schema = jsonSchema(openAIFormat.function.parameters as JSONSchema7);
 
     // Return the AI SDK tool
     return tool({
@@ -404,8 +415,8 @@ export class Tools {
    * Convert all tools to AI SDK tools
    * @returns Object with tool names as keys and AI SDK tools as values
    */
-  toAISDKTools() {
-    const result: Record<string, any> = {};
+  toAISDKTools(): Record<string, Tool<Schema<unknown>, JsonDict>> {
+    const result: Record<string, Tool<Schema<unknown>, JsonDict>> = {};
 
     for (const stackOneTool of this.tools) {
       result[stackOneTool.name] = stackOneTool.toAISDKTool();
@@ -426,7 +437,7 @@ export class Tools {
         if (index < tools.length) {
           return { value: tools[index++], done: false };
         }
-        return { value: undefined as any, done: true };
+        return { value: undefined, done: true };
       },
     };
   }

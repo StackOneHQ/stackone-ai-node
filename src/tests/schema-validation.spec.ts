@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'bun:test';
 import { jsonSchema } from 'ai';
+import type { JSONSchema7 } from 'json-schema';
 import { StackOneTool } from '../models';
 
 // Helper function to validate array items in a schema
-const validateArrayItems = (obj: any, path = ''): string[] => {
+const validateArrayItems = (obj: Record<string, unknown>, path = ''): string[] => {
   const errors: string[] = [];
 
   if (typeof obj !== 'object' || obj === null) {
@@ -18,16 +19,16 @@ const validateArrayItems = (obj: any, path = ''): string[] => {
   }
 
   // Recursively check properties
-  if (obj.properties) {
+  if (obj.properties && typeof obj.properties === 'object') {
     for (const [key, value] of Object.entries(obj.properties)) {
       const nestedPath = path ? `${path}.${key}` : key;
-      errors.push(...validateArrayItems(value, nestedPath));
+      errors.push(...validateArrayItems(value as Record<string, unknown>, nestedPath));
     }
   }
 
   // Check items of arrays
   if (obj.items && typeof obj.items === 'object') {
-    errors.push(...validateArrayItems(obj.items, `${path}.items`));
+    errors.push(...validateArrayItems(obj.items as Record<string, unknown>, `${path}.items`));
   }
 
   return errors;
@@ -135,54 +136,90 @@ describe('Schema Validation', () => {
       const tool = createArrayTestTool();
       const openAIFormat = tool.toOpenAI();
 
-      const errors = validateArrayItems(openAIFormat.function.parameters);
+      const parameters = openAIFormat.function.parameters;
+      if (!parameters) {
+        throw new Error('Parameters should be defined');
+      }
+
+      const errors = validateArrayItems(parameters as Record<string, unknown>);
       expect(errors.length).toBe(0);
     });
 
     it('should handle simple arrays without items', () => {
       const tool = createArrayTestTool();
       const openAIFormat = tool.toOpenAI();
+      const parameters = openAIFormat.function.parameters;
 
-      // Check that simpleArray has items
-      const simpleArray = openAIFormat.function.parameters.properties.simpleArray;
+      if (!parameters || !parameters.properties) {
+        throw new Error('Parameters or properties should be defined');
+      }
+
+      // TypeScript doesn't know the structure of properties, so we need to cast
+      const properties = parameters.properties as Record<string, JSONSchema7>;
+      const simpleArray = properties.simpleArray;
       expect(simpleArray.items).toBeDefined();
-      expect(simpleArray.items.type).toBe('string');
+      expect((simpleArray.items as JSONSchema7).type).toBe('string');
     });
 
     it('should preserve existing array items', () => {
       const tool = createArrayTestTool();
       const openAIFormat = tool.toOpenAI();
+      const parameters = openAIFormat.function.parameters;
 
-      // Check that arrayWithItems preserved its items
-      const arrayWithItems = openAIFormat.function.parameters.properties.arrayWithItems;
+      if (!parameters || !parameters.properties) {
+        throw new Error('Parameters or properties should be defined');
+      }
+
+      // TypeScript doesn't know the structure of properties, so we need to cast
+      const properties = parameters.properties as Record<string, JSONSchema7>;
+      const arrayWithItems = properties.arrayWithItems;
       expect(arrayWithItems.items).toBeDefined();
-      expect(arrayWithItems.items.type).toBe('string');
+      expect((arrayWithItems.items as JSONSchema7).type).toBe('string');
     });
 
     it('should handle nested arrays in objects', () => {
       const tool = createArrayTestTool();
       const openAIFormat = tool.toOpenAI();
+      const parameters = openAIFormat.function.parameters;
 
-      // Check that nestedArray has items
-      const nestedArray =
-        openAIFormat.function.parameters.properties.nestedObject.properties.nestedArray;
+      if (!parameters || !parameters.properties) {
+        throw new Error('Parameters or properties should be defined');
+      }
+
+      // TypeScript doesn't know the structure of properties, so we need to cast
+      const properties = parameters.properties as Record<string, JSONSchema7>;
+      const nestedObject = properties.nestedObject;
+      if (!nestedObject.properties) {
+        throw new Error('Nested object properties should be defined');
+      }
+
+      const nestedArray = nestedObject.properties.nestedArray as JSONSchema7;
       expect(nestedArray.items).toBeDefined();
     });
 
     it('should handle deeply nested arrays', () => {
       const tool = createArrayTestTool();
       const openAIFormat = tool.toOpenAI();
+      const parameters = openAIFormat.function.parameters;
 
-      // The structure is simplified in the OpenAI format
-      // Just verify that level1 exists and is an object
-      const deeplyNestedProperties =
-        openAIFormat.function.parameters.properties.deeplyNested.properties;
-      expect(deeplyNestedProperties.level1).toBeDefined();
-      expect(deeplyNestedProperties.level1.type).toBe('object');
+      if (!parameters || !parameters.properties) {
+        throw new Error('Parameters or properties should be defined');
+      }
+
+      // TypeScript doesn't know the structure of properties, so we need to cast
+      const properties = parameters.properties as Record<string, JSONSchema7>;
+      const deeplyNested = properties.deeplyNested;
+      if (!deeplyNested.properties) {
+        throw new Error('Deeply nested properties should be defined');
+      }
+
+      const level1 = deeplyNested.properties.level1 as JSONSchema7;
+      expect(level1).toBeDefined();
+      expect(level1.type).toBe('object');
 
       // Since we can't directly test the deeply nested array (it's simplified in the output),
       // we'll verify our validation function doesn't find any errors
-      const errors = validateArrayItems(openAIFormat.function.parameters);
+      const errors = validateArrayItems(parameters as Record<string, unknown>);
       expect(errors.length).toBe(0);
     });
   });
@@ -199,14 +236,24 @@ describe('Schema Validation', () => {
     it('should handle the problematic nested array case', () => {
       const tool = createNestedArrayTestTool();
       const openAIFormat = tool.toOpenAI();
+      const parameters = openAIFormat.function.parameters;
 
-      // Check if the nested array has items
-      const typeIds = openAIFormat.function.parameters.properties.filter.properties.type_ids;
+      if (!parameters || !parameters.properties) {
+        throw new Error('Parameters or properties should be defined');
+      }
+
+      // TypeScript doesn't know the structure of properties, so we need to cast
+      const properties = parameters.properties as Record<string, JSONSchema7>;
+      const filter = properties.filter;
+      if (!filter.properties) {
+        throw new Error('Filter properties should be defined');
+      }
+
+      const typeIds = filter.properties.type_ids as JSONSchema7;
       expect(typeIds.items).toBeDefined();
 
       // Verify that the schema can be used with jsonSchema
-      const schema = openAIFormat.function.parameters;
-      const aiSchema = jsonSchema(schema);
+      const aiSchema = jsonSchema(parameters);
       expect(aiSchema).toBeDefined();
     });
   });

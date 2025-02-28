@@ -61,7 +61,7 @@ describe('Loader', () => {
 
     // Mock fs.readdirSync to return test files
     const mockReadDirSync = spyOn(fs, 'readdirSync');
-    (mockReadDirSync.mockImplementation as (callback: () => string[]) => void)(() => [
+    (mockReadDirSync.mockImplementation as unknown as (callback: () => string[]) => void)(() => [
       'hris.json',
       'ats.json',
       'not-json.txt',
@@ -85,7 +85,7 @@ describe('Loader', () => {
 
         return Buffer.from('{}');
       }
-    ) as typeof fs.readFileSync;
+    ) as unknown as typeof fs.readFileSync;
 
     const specs = loadSpecs();
 

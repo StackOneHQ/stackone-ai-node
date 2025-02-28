@@ -26,8 +26,10 @@ describe('StackOneTool', () => {
 
     expect(tool.name).toBe('test_tool');
     expect(tool.description).toBe('Test tool');
-    expect(tool.parameters.type).toBe('object');
-    expect(tool.parameters.properties.id.type).toBe('string');
+    expect((tool.parameters as { type: string }).type).toBe('object');
+    expect(
+      (tool.parameters as unknown as { properties: { id: { type: string } } }).properties.id.type
+    ).toBe('string');
   });
 
   it('should execute with parameters', async () => {
@@ -111,8 +113,11 @@ describe('StackOneTool', () => {
     expect(openAIFormat.type).toBe('function');
     expect(openAIFormat.function.name).toBe('test_tool');
     expect(openAIFormat.function.description).toBe('Test tool');
-    expect(openAIFormat.function.parameters.type).toBe('object');
-    expect(openAIFormat.function.parameters.properties.id.type).toBe('string');
+    expect(openAIFormat.function.parameters?.type).toBe('object');
+    expect(
+      (openAIFormat.function.parameters as { properties: { id: { type: string } } }).properties.id
+        .type
+    ).toBe('string');
   });
 
   it('should convert to AI SDK tool format', () => {
@@ -132,7 +137,10 @@ describe('StackOneTool', () => {
     expect(aiSdkTool.parameters.jsonSchema.type).toBe('object');
 
     // Use type assertions to handle possibly undefined properties
-    const properties = aiSdkTool.parameters.jsonSchema.properties as Record<string, any>;
+    const properties = aiSdkTool.parameters.jsonSchema.properties as Record<
+      string,
+      { type: string }
+    >;
     expect(properties).toBeDefined();
     expect(properties.id).toBeDefined();
     expect(properties.id.type).toBe('string');
@@ -180,7 +188,7 @@ describe('StackOneTool', () => {
     expect(schema.type).toBe('object');
 
     // Use type assertions to handle possibly undefined properties
-    const properties = schema.properties as Record<string, any>;
+    const properties = schema.properties as Record<string, { type: string }>;
     expect(properties.stringParam.type).toBe('string');
     expect(properties.numberParam.type).toBe('number');
     expect(properties.booleanParam.type).toBe('boolean');
@@ -249,8 +257,11 @@ describe('Tools', () => {
     expect(openAITools[0].type).toBe('function');
     expect(openAITools[0].function.name).toBe('test_tool');
     expect(openAITools[0].function.description).toBe('Test tool');
-    expect(openAITools[0].function.parameters.type).toBe('object');
-    expect(openAITools[0].function.parameters.properties.id.type).toBe('string');
+    expect(openAITools[0].function.parameters?.type).toBe('object');
+    expect(
+      (openAITools[0].function.parameters as { properties: { id: { type: string } } }).properties.id
+        .type
+    ).toBe('string');
   });
 
   it('should convert all tools to AI SDK tools', () => {

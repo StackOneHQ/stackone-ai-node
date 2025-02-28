@@ -1,6 +1,6 @@
 import { describe, expect, it, spyOn } from 'bun:test';
 import { env } from 'bun';
-import { ParameterLocation, StackOneTool } from '../models';
+import { ParameterLocation, StackOneTool, type Tools } from '../models';
 import { OpenAPIParser } from '../openapi/parser';
 import { StackOneToolSet } from '../toolset';
 
@@ -69,7 +69,9 @@ describe('StackOneToolSet', () => {
           [Symbol.iterator]: function* () {
             yield tool;
           },
-        } as Tools;
+          toOpenAI: () => [tool.toOpenAI()],
+          toAISDKTools: () => ({ [tool.name]: tool.toAISDKTool() }),
+        } as unknown as Tools;
       }
 
       // Return empty tools collection for non-matching filter
@@ -77,7 +79,9 @@ describe('StackOneToolSet', () => {
         length: 0,
         getTool: () => undefined,
         [Symbol.iterator]: function* () {},
-      } as Tools;
+        toOpenAI: () => [],
+        toAISDKTools: () => ({}),
+      } as unknown as Tools;
     };
 
     try {
@@ -108,7 +112,9 @@ describe('StackOneToolSet', () => {
         length: 0,
         getTool: () => undefined,
         [Symbol.iterator]: function* () {},
-      } as Tools;
+        toOpenAI: () => [],
+        toAISDKTools: () => ({}),
+      } as unknown as Tools;
     };
 
     try {
@@ -142,7 +148,7 @@ describe('StackOneToolSet', () => {
           execute: {
             headers: {},
             method: 'GET',
-            url: `${(this as { baseUrl: string }).baseUrl}/test/{id}`,
+            url: `${(this as unknown as { baseUrl: string }).baseUrl}/test/{id}`,
             name: 'test_tool',
             parameterLocations: { id: ParameterLocation.PATH },
           },
@@ -201,7 +207,7 @@ describe('StackOneToolSet', () => {
           execute: {
             headers: {},
             method: 'GET',
-            url: `${(this as { baseUrl: string }).baseUrl}/hris/employees/{id}`,
+            url: `${(this as unknown as { baseUrl: string }).baseUrl}/hris/employees/{id}`,
             name: 'hris_get_employee',
             parameterLocations: { id: ParameterLocation.PATH },
           },

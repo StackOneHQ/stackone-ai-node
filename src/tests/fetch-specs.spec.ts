@@ -122,7 +122,7 @@ describe('fetch-specs script', () => {
 
     // Test fetchSpec function
     const hrisSpec = await fetchSpec('hris');
-    expect(hrisSpec.info.title).toBe('HRIS API');
+    expect((hrisSpec.info as { title: string }).title).toBe('HRIS API');
     expect(mockFetch).toHaveBeenCalledTimes(1);
 
     // Reset mock call count
