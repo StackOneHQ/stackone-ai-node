@@ -1,5 +1,7 @@
 /// <reference types="bun-types" />
 import { jsonSchema, tool } from 'ai';
+// Import OpenAI types
+import type { ChatCompletionTool } from 'openai/resources/chat/completions';
 
 // Type aliases for common types
 export type JsonDict = Record<string, unknown>;
@@ -254,7 +256,7 @@ export class StackOneTool {
    * Convert this tool to OpenAI's tool format
    * @returns Tool definition in OpenAI tool format
    */
-  toOpenAI(): JsonDict {
+  toOpenAI(): ChatCompletionTool {
     // Clean properties and handle special types
     const properties: JsonDict = {};
     const required: string[] = [];
@@ -394,7 +396,7 @@ export class Tools {
    * Convert all tools to OpenAI format
    * @returns Array of tools in the format expected by OpenAI's API
    */
-  toOpenAI(): JsonDict[] {
+  toOpenAI(): ChatCompletionTool[] {
     return this.tools.map((tool) => tool.toOpenAI());
   }
 
