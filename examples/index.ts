@@ -1,6 +1,4 @@
 /**
- * StackOne AI provides a unified interface for accessing various SaaS tools through AI-friendly APIs.
- *
  * # Installation
  *
  * ```bash
@@ -72,7 +70,9 @@ quickstart().catch(console.error);
  *
  * Check out some more examples:
  *
- * - OpenAI Integration (openai-integration.ts)
- * - Error Handling (error-handling.ts)
- * - File Uploads (file-uploads.ts)
+ * - [OpenAI Integration](openai-integration.md)
+ * - [AI SDK Integration](ai-sdk-integration.md)
+ * - [Error Handling](error-handling.md)
+ * - [File Uploads](file-uploads.md)
+ * - [Custom Base URL](custom-base-url.md)
  */

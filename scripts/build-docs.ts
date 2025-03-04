@@ -4,14 +4,24 @@ import path from 'node:path';
 const DOCS_DIR = path.join(process.cwd(), '.docs');
 const EXAMPLES_DIR = path.join(process.cwd(), 'examples');
 
+interface JSDocBlock {
+  fullMatch: string;
+  content: string;
+  start: number;
+  end: number;
+}
+
 /**
  * Convert a TypeScript file to markdown, preserving structure.
  */
-const convertFileToMarkdown = (tsFile: string): string => {
-  const content = fs.readFileSync(tsFile, 'utf-8');
+export const convertFileToMarkdown = (tsFile: string): string => {
+  // If the input is a multi-line string with JSDoc blocks, assume it's content
+  // Otherwise, assume it's a file path
+  const isContentString = tsFile.includes('/**') && tsFile.includes('*/');
+  const content = isContentString ? tsFile : fs.readFileSync(tsFile, 'utf-8');
 
   // Add title from filename
-  const fileName = path.basename(tsFile, '.ts');
+  const fileName = isContentString ? 'index' : path.basename(tsFile, '.ts');
   let title: string;
   if (fileName === 'index') {
     title = 'StackOne AI SDK';
@@ -21,50 +31,59 @@ const convertFileToMarkdown = (tsFile: string): string => {
 
   const output: string[] = [`# ${title}\n`];
 
-  // Find all docstrings and their positions
-  // Match docstrings that start and end on their own lines
-  const docstringPattern = /(\n|\A)\s*\/\*\*(.*?)\*\/(\s*\n|\Z)/gs;
-  let currentPos = 0;
+  // Extract JSDoc comments and the code between them
+  const jsDocRegex = /\/\*\*([\s\S]*?)\*\//g;
+  let jsDocMatch: RegExpExecArray | null;
 
-  // Process all matches in the content
-  let match: RegExpExecArray | null = docstringPattern.exec(content);
-  while (match !== null) {
-    const [fullMatch, , docstringContent] = match;
-    const start = match.index;
-    const end = start + fullMatch.length;
+  // Array to store all JSDoc comments and their positions
+  const jsDocBlocks: JSDocBlock[] = [];
 
-    // If there's code before this docstring, wrap it
-    if (currentPos < start) {
-      const code = content.substring(currentPos, start).trim();
-      if (code) {
-        output.push('\n```typescript');
-        output.push(code);
-        output.push('```\n');
-      }
-    }
+  jsDocMatch = jsDocRegex.exec(content);
+  while (jsDocMatch !== null) {
+    jsDocBlocks.push({
+      fullMatch: jsDocMatch[0],
+      content: jsDocMatch[1],
+      start: jsDocMatch.index,
+      end: jsDocMatch.index + jsDocMatch[0].length,
+    });
+    jsDocMatch = jsDocRegex.exec(content);
+  }
 
-    // Add the docstring content as markdown, removing asterisks from each line
-    const cleanedDocstring = docstringContent
+  // Process each JSDoc block and the code after it
+  for (let i = 0; i < jsDocBlocks.length; i++) {
+    const jsDoc = jsDocBlocks[i];
+
+    // Process the docstring content (remove * from the beginning of lines)
+    const cleanedDocstring = jsDoc.content
       .split('\n')
       .map((line) => line.trim().replace(/^\s*\*\s?/, ''))
       .join('\n')
       .trim();
 
-    output.push(cleanedDocstring);
-    currentPos = end;
+    // Add an extra newline between sections if it starts with a header
+    if (cleanedDocstring.trim().startsWith('#') && i > 0) {
+      output.push(`\n${cleanedDocstring}`);
+    } else {
+      output.push(cleanedDocstring);
+    }
 
-    // Get the next match
-    match = docstringPattern.exec(content);
+    // Get the code between this JSDoc block and the next one (or the end of file)
+    const codeStart = jsDoc.end;
+    const codeEnd = i < jsDocBlocks.length - 1 ? jsDocBlocks[i + 1].start : content.length;
+
+    const code = content.substring(codeStart, codeEnd).trim();
+    if (code) {
+      output.push('\n```typescript');
+      output.push(code);
+      output.push('```');
+    }
   }
 
-  // Add any remaining code
-  if (currentPos < content.length) {
-    const remainingCode = content.substring(currentPos).trim();
-    if (remainingCode) {
-      output.push('\n```typescript');
-      output.push(remainingCode);
-      output.push('```\n');
-    }
+  // If no JSDoc blocks were found, just add the content as code
+  if (jsDocBlocks.length === 0) {
+    output.push('\n```typescript');
+    output.push(content);
+    output.push('```');
   }
 
   return output.join('\n');
@@ -106,4 +125,6 @@ const main = (): void => {
 };
 
 // Run the script
-main();
+if (require.main === module) {
+  main();
+}
