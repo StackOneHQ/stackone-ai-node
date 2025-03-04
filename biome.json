@@ -37,6 +37,7 @@
     }
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "include": ["src/**/*.ts"]
   }
 }

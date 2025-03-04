@@ -11,8 +11,17 @@ interface ExtendedJsonSchema extends Omit<JsonSchema, 'type'> {
   type?: ExtendedSchemaType | ExtendedSchemaType[];
 }
 
+// Define a type for OpenAPI document
+type OpenAPIDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
+
+// Define a type for schema objects
+type SchemaObject = OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject;
+
+// Define HTTP methods type
+type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch' | 'trace';
+
 export class OpenAPIParser {
-  private spec: OpenAPIV3.Document | OpenAPIV3_1.Document;
+  private spec: OpenAPIDocument;
   private baseUrl: string;
 
   /**
@@ -20,14 +29,11 @@ export class OpenAPIParser {
    * @param specPathOrObject Path to the OpenAPI specification file or the spec object directly
    * @param customBaseUrl Optional custom base URL to override the one in the spec
    */
-  constructor(
-    specPathOrObject: string | OpenAPIV3.Document | OpenAPIV3_1.Document,
-    customBaseUrl?: string
-  ) {
+  constructor(specPathOrObject: string | OpenAPIDocument, customBaseUrl?: string) {
     // Initialize spec either from file or directly from object
     if (typeof specPathOrObject === 'string') {
       const specContent = fs.readFileSync(specPathOrObject, 'utf-8');
-      this.spec = JSON.parse(specContent) as OpenAPIV3.Document | OpenAPIV3_1.Document;
+      this.spec = JSON.parse(specContent) as OpenAPIDocument;
     } else {
       this.spec = specPathOrObject;
     }
@@ -50,7 +56,7 @@ export class OpenAPIParser {
    * @returns A new OpenAPIParser instance
    */
   static fromString(jsonString: string, customBaseUrl?: string): OpenAPIParser {
-    const spec = JSON.parse(jsonString) as OpenAPIV3.Document | OpenAPIV3_1.Document;
+    const spec = JSON.parse(jsonString) as OpenAPIDocument;
     return new OpenAPIParser(spec, customBaseUrl);
   }
 
@@ -106,33 +112,39 @@ export class OpenAPIParser {
     visited.add(ref);
 
     const parts = ref.split('/').slice(1); // Skip the '#'
-    let current: any = this.spec;
+    let current: unknown = this.spec;
     for (const part of parts) {
-      current = current[part];
+      if (typeof current === 'object' && current !== null) {
+        current = (current as Record<string, unknown>)[part];
+      } else {
+        throw new Error(`Invalid reference path: ${ref}`);
+      }
     }
 
     // After getting the referenced schema, resolve it fully
-    return this._resolveSchema(current, visited);
+    return this._resolveSchema(current as SchemaObject, visited);
   }
 
   /**
    * Resolve all references in a schema, preserving structure
    */
   private _resolveSchema(
-    schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject | any,
+    schema: SchemaObject | unknown,
     visited: Set<string> = new Set()
   ): JsonSchema {
     // Handle primitive types (string, number, etc)
     if (typeof schema !== 'object' || schema === null) {
-      return schema as any;
+      return schema as JsonSchema;
     }
 
     if (Array.isArray(schema)) {
-      return schema.map((item) => this._resolveSchema(item, new Set(visited))) as any;
+      return schema.map((item) =>
+        this._resolveSchema(item, new Set(visited))
+      ) as unknown as JsonSchema;
     }
 
     // Handle direct reference
-    if ('$ref' in schema) {
+    if (typeof schema === 'object' && '$ref' in schema && typeof schema.$ref === 'string') {
       const resolved = this._resolveSchemaRef(schema.$ref, visited);
       if (typeof resolved !== 'object' || resolved === null) {
         return resolved;
@@ -145,32 +157,36 @@ export class OpenAPIParser {
     }
 
     // Handle allOf combinations
-    if ('allOf' in schema) {
-      const mergedSchema: JsonSchema = { ...schema };
-      (mergedSchema as any).allOf = undefined;
+    if (typeof schema === 'object' && 'allOf' in schema) {
+      const schemaObj = schema as OpenAPIV3.SchemaObject;
+      // Create a new object without the allOf property to avoid type issues
+      const { allOf, ...restSchema } = schemaObj;
+      const mergedSchema: JsonSchema = restSchema as JsonSchema;
 
       // Merge all schemas in allOf array
-      for (const subSchema of schema.allOf || []) {
-        const resolved = this._resolveSchema(subSchema, new Set(visited));
-        if (typeof resolved !== 'object' || resolved === null) {
-          continue;
-        }
-
-        // Merge properties
-        if ('properties' in resolved) {
-          if (!mergedSchema.properties) {
-            mergedSchema.properties = {};
+      if (Array.isArray(allOf)) {
+        for (const subSchema of allOf) {
+          const resolved = this._resolveSchema(subSchema, new Set(visited));
+          if (typeof resolved !== 'object' || resolved === null) {
+            continue;
           }
-          mergedSchema.properties = {
-            ...mergedSchema.properties,
-            ...resolved.properties,
-          };
-        }
 
-        // Merge type and other fields
-        for (const [key, value] of Object.entries(resolved)) {
-          if (key !== 'properties' && !(key in mergedSchema)) {
-            (mergedSchema as any)[key] = value;
+          // Merge properties
+          if ('properties' in resolved) {
+            if (!mergedSchema.properties) {
+              mergedSchema.properties = {};
+            }
+            mergedSchema.properties = {
+              ...mergedSchema.properties,
+              ...resolved.properties,
+            };
+          }
+
+          // Merge type and other fields
+          for (const [key, value] of Object.entries(resolved)) {
+            if (key !== 'properties' && !(key in mergedSchema)) {
+              (mergedSchema as Record<string, unknown>)[key] = value;
+            }
           }
         }
       }
@@ -179,20 +195,20 @@ export class OpenAPIParser {
     }
 
     // Recursively resolve all nested objects and arrays
-    const resolved: JsonSchema = {};
+    const resolved: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(schema)) {
       if (typeof value === 'object' && value !== null) {
         if (Array.isArray(value)) {
-          (resolved as any)[key] = value.map((item) => this._resolveSchema(item, new Set(visited)));
+          resolved[key] = value.map((item) => this._resolveSchema(item, new Set(visited)));
         } else {
-          (resolved as any)[key] = this._resolveSchema(value, new Set(visited));
+          resolved[key] = this._resolveSchema(value, new Set(visited));
         }
       } else {
-        (resolved as any)[key] = value;
+        resolved[key] = value;
       }
     }
 
-    return resolved;
+    return resolved as JsonSchema;
   }
 
   /**
@@ -237,9 +253,13 @@ export class OpenAPIParser {
     if ('$ref' in requestBody) {
       const ref = requestBody.$ref as string;
       const parts = ref.split('/').slice(1);
-      let current: any = this.spec;
+      let current: unknown = this.spec;
       for (const part of parts) {
-        current = current[part];
+        if (typeof current === 'object' && current !== null) {
+          current = (current as Record<string, unknown>)[part];
+        } else {
+          throw new Error(`Invalid reference path: ${ref}`);
+        }
       }
       resolvedRequestBody = current as OpenAPIV3.RequestBodyObject;
     } else {
@@ -330,7 +350,7 @@ export class OpenAPIParser {
           // Add to properties for tool parameters
           const schema = { ...(resolvedParam.schema || {}) };
           if ('description' in resolvedParam) {
-            (schema as any).description = resolvedParam.description;
+            (schema as Record<string, unknown>).description = resolvedParam.description;
           }
           properties[paramName] = this._resolveSchema(schema);
         }
@@ -352,7 +372,7 @@ export class OpenAPIParser {
             properties,
           },
           execute: {
-            method: method.toUpperCase() as any,
+            method: method.toUpperCase(),
             url: `${this.baseUrl}${path}`,
             name,
             headers: {},
@@ -375,9 +395,20 @@ export class OpenAPIParser {
     const operations: [string, OpenAPIV3.OperationObject][] = [];
 
     // Handle HTTP methods
-    const methods = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
+    const methods: HttpMethod[] = [
+      'get',
+      'put',
+      'post',
+      'delete',
+      'options',
+      'head',
+      'patch',
+      'trace',
+    ];
     for (const method of methods) {
-      const operation = (pathItem as any)[method] as OpenAPIV3.OperationObject | undefined;
+      const operation = (pathItem as Record<string, unknown>)[method] as
+        | OpenAPIV3.OperationObject
+        | undefined;
       if (operation) {
         operations.push([method, operation]);
       }
@@ -395,9 +426,13 @@ export class OpenAPIParser {
     if ('$ref' in param) {
       const ref = param.$ref as string;
       const parts = ref.split('/').slice(1);
-      let current: any = this.spec;
+      let current: unknown = this.spec;
       for (const part of parts) {
-        current = current[part];
+        if (typeof current === 'object' && current !== null) {
+          current = (current as Record<string, unknown>)[part];
+        } else {
+          throw new Error(`Invalid reference path: ${ref}`);
+        }
       }
       return current as OpenAPIV3.ParameterObject;
     }

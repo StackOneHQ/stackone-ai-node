@@ -3,6 +3,9 @@ import type { OpenAPIV3 } from 'openapi-types';
 import { ParameterLocation } from '../models';
 import { OpenAPIParser } from '../openapi/parser';
 
+// Define a type for customization options
+type SpecCustomization = Partial<OpenAPIV3.Document>;
+
 // Mock OpenAPI specs for testing
 const mockCoreSpec: OpenAPIV3.Document = {
   openapi: '3.0.0',
@@ -43,7 +46,7 @@ const mockCoreSpec: OpenAPIV3.Document = {
 };
 
 // Helper function to create a minimal OpenAPI spec for testing specific functionality
-const createMinimalSpec = (customization: any = {}): OpenAPIV3.Document => {
+const createMinimalSpec = (customization: SpecCustomization = {}): OpenAPIV3.Document => {
   return {
     openapi: '3.0.0',
     info: {
@@ -53,6 +56,42 @@ const createMinimalSpec = (customization: any = {}): OpenAPIV3.Document => {
     paths: {},
     ...customization,
   };
+};
+
+// Define specific function types for private methods
+type IsFileTypeFunction = (schema: Record<string, unknown>) => boolean;
+type ConvertToFileTypeFunction = (schema: Record<string, unknown>) => void;
+type HandleFilePropertiesFunction = (schema: Record<string, unknown>) => void;
+type ResolveSchemaRefFunction = (ref: string, visited?: Set<string>) => Record<string, unknown>;
+type ResolveSchemaFunction = (schema: unknown, visited?: Set<string>) => Record<string, unknown>;
+type ParseContentSchemaFunction = (
+  contentType: string,
+  content: Record<string, OpenAPIV3.MediaTypeObject>
+) => [Record<string, unknown> | null, string | null];
+type ParseRequestBodyFunction = (
+  operation: OpenAPIV3.OperationObject
+) => [Record<string, unknown> | null, string | null];
+type GetParameterLocationFunction = (propSchema: Record<string, unknown>) => ParameterLocation;
+type ExtractOperationsFunction = (
+  pathItem: OpenAPIV3.PathItemObject
+) => [string, OpenAPIV3.OperationObject][];
+type ResolveParameterFunction = (
+  param: OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject
+) => OpenAPIV3.ParameterObject | null;
+
+// Type for accessing private properties/methods via type assertion
+type PrivateAccess = {
+  baseUrl: string;
+  _isFileType: IsFileTypeFunction;
+  _convertToFileType: ConvertToFileTypeFunction;
+  _handleFileProperties: HandleFilePropertiesFunction;
+  _resolveSchemaRef: ResolveSchemaRefFunction;
+  _resolveSchema: ResolveSchemaFunction;
+  _parseContentSchema: ParseContentSchemaFunction;
+  _parseRequestBody: ParseRequestBodyFunction;
+  _getParameterLocation: GetParameterLocationFunction;
+  extractOperations: ExtractOperationsFunction;
+  resolveParameter: ResolveParameterFunction;
 };
 
 describe('OpenAPIParser', () => {
@@ -68,7 +107,7 @@ describe('OpenAPIParser', () => {
       const parser = new OpenAPIParser(mockCoreSpec, customBaseUrl);
 
       // We need to test this indirectly by checking the baseUrl property
-      expect((parser as any).baseUrl).toBe(customBaseUrl);
+      expect((parser as unknown as { baseUrl: string }).baseUrl).toBe(customBaseUrl);
     });
 
     it('should correctly apply default base URL to parsed tools', () => {
@@ -89,7 +128,7 @@ describe('OpenAPIParser', () => {
             execute: {
               headers: {},
               method: 'GET',
-              url: `${(this as any).baseUrl}/core/users/{id}`,
+              url: `${(this as unknown as { baseUrl: string }).baseUrl}/core/users/{id}`,
               name: 'core_get_user',
               parameterLocations: { id: ParameterLocation.PATH },
             },
@@ -127,7 +166,7 @@ describe('OpenAPIParser', () => {
             execute: {
               headers: {},
               method: 'GET',
-              url: `${(this as any).baseUrl}/core/users/{id}`,
+              url: `${(this as unknown as { baseUrl: string }).baseUrl}/core/users/{id}`,
               name: 'core_get_user',
               parameterLocations: { id: ParameterLocation.PATH },
             },
@@ -167,7 +206,7 @@ describe('OpenAPIParser', () => {
             execute: {
               headers: {},
               method: 'GET',
-              url: `${(this as any).baseUrl}/test`,
+              url: `${(this as unknown as { baseUrl: string }).baseUrl}/test`,
               name: 'get_test',
               parameterLocations: {},
             },
@@ -182,6 +221,11 @@ describe('OpenAPIParser', () => {
               get: {
                 operationId: 'get_test',
                 summary: 'Test endpoint',
+                responses: {
+                  '200': {
+                    description: 'OK',
+                  },
+                },
               },
             },
           },
@@ -218,7 +262,7 @@ describe('OpenAPIParser', () => {
             execute: {
               headers: {},
               method: 'GET',
-              url: `${(this as any).baseUrl}/test`,
+              url: `${(this as unknown as { baseUrl: string }).baseUrl}/test`,
               name: 'get_test',
               parameterLocations: {},
             },
@@ -233,6 +277,11 @@ describe('OpenAPIParser', () => {
               get: {
                 operationId: 'get_test',
                 summary: 'Test endpoint',
+                responses: {
+                  '200': {
+                    description: 'OK',
+                  },
+                },
               },
             },
           },
@@ -255,7 +304,7 @@ describe('OpenAPIParser', () => {
   // Test parseTools method with mock specs
   describe('parseTools', () => {
     // Create mock specs for each vertical
-    const mockSpecs = {
+    const mockSpecs: Record<string, OpenAPIV3.Document> = {
       core: mockCoreSpec,
       crm: createMinimalSpec({
         paths: {
@@ -263,6 +312,11 @@ describe('OpenAPIParser', () => {
             get: {
               operationId: 'crm_get_contact',
               summary: 'Get contact details',
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
             },
           },
         },
@@ -273,6 +327,11 @@ describe('OpenAPIParser', () => {
             get: {
               operationId: 'documents_get',
               summary: 'Get document',
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
             },
           },
         },
@@ -283,6 +342,11 @@ describe('OpenAPIParser', () => {
             get: {
               operationId: 'iam_get_user',
               summary: 'Get IAM user',
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
             },
           },
         },
@@ -293,6 +357,11 @@ describe('OpenAPIParser', () => {
             get: {
               operationId: 'lms_get_course',
               summary: 'Get course details',
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
             },
           },
         },
@@ -303,13 +372,19 @@ describe('OpenAPIParser', () => {
             get: {
               operationId: 'marketing_get_campaign',
               summary: 'Get campaign details',
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
             },
           },
         },
       }),
     };
 
-    Object.entries(mockSpecs).forEach(([specName, spec]) => {
+    // Use for...of instead of forEach
+    for (const [specName, spec] of Object.entries(mockSpecs)) {
       it(`should parse tools from ${specName} spec`, () => {
         const parser = new OpenAPIParser(spec);
         const tools = parser.parseTools();
@@ -339,7 +414,7 @@ describe('OpenAPIParser', () => {
           expect(tool.execute.parameterLocations).toBeDefined();
         }
       });
-    });
+    }
 
     it('should throw error if operation ID is missing', () => {
       // Create a spec with missing operationId
@@ -385,7 +460,7 @@ describe('OpenAPIParser', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
 
       // We need to access the private method, which requires a workaround
-      const isFileType = (parser as any)._isFileType.bind(parser);
+      const isFileType = (parser as unknown as PrivateAccess)._isFileType.bind(parser);
 
       expect(isFileType({ type: 'string', format: 'binary' })).toBe(true);
       expect(isFileType({ type: 'string' })).toBe(false);
@@ -396,7 +471,9 @@ describe('OpenAPIParser', () => {
   describe('_convertToFileType', () => {
     it('should convert binary string schema to file type', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const convertToFileType = (parser as any)._convertToFileType.bind(parser);
+      const convertToFileType = (parser as unknown as PrivateAccess)._convertToFileType.bind(
+        parser
+      );
 
       const schema = { type: 'string', format: 'binary' };
       convertToFileType(schema);
@@ -411,7 +488,9 @@ describe('OpenAPIParser', () => {
   describe('_handleFileProperties', () => {
     it('should process file properties in schema', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const handleFileProperties = (parser as any)._handleFileProperties.bind(parser);
+      const handleFileProperties = (parser as unknown as PrivateAccess)._handleFileProperties.bind(
+        parser
+      );
 
       const schema = {
         properties: {
@@ -449,7 +528,7 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(specWithRefs);
-      const resolveSchemaRef = (parser as any)._resolveSchemaRef.bind(parser);
+      const resolveSchemaRef = (parser as unknown as PrivateAccess)._resolveSchemaRef.bind(parser);
 
       const resolved = resolveSchemaRef('#/components/schemas/TestSchema');
       expect(resolved).toBeDefined();
@@ -479,7 +558,7 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(specWithCircularRefs);
-      const resolveSchemaRef = (parser as any)._resolveSchemaRef.bind(parser);
+      const resolveSchemaRef = (parser as unknown as PrivateAccess)._resolveSchemaRef.bind(parser);
 
       expect(() => resolveSchemaRef('#/components/schemas/A')).toThrow(/Circular reference/);
     });
@@ -510,7 +589,7 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(specWithRefs);
-      const resolveSchema = (parser as any)._resolveSchema.bind(parser);
+      const resolveSchema = (parser as unknown as PrivateAccess)._resolveSchema.bind(parser);
 
       const schema = { $ref: '#/components/schemas/Person' };
       const resolved = resolveSchema(schema);
@@ -551,7 +630,7 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(specWithAllOf);
-      const resolveSchema = (parser as any)._resolveSchema.bind(parser);
+      const resolveSchema = (parser as unknown as PrivateAccess)._resolveSchema.bind(parser);
 
       const schema = { $ref: '#/components/schemas/Person' };
       const resolved = resolveSchema(schema);
@@ -566,7 +645,9 @@ describe('OpenAPIParser', () => {
   describe('_parseContentSchema', () => {
     it('should parse content schema for a specific content type', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const parseContentSchema = (parser as any)._parseContentSchema.bind(parser);
+      const parseContentSchema = (parser as unknown as PrivateAccess)._parseContentSchema.bind(
+        parser
+      );
 
       const content = {
         'application/json': {
@@ -589,7 +670,9 @@ describe('OpenAPIParser', () => {
 
     it('should return null for missing content type', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const parseContentSchema = (parser as any)._parseContentSchema.bind(parser);
+      const parseContentSchema = (parser as unknown as PrivateAccess)._parseContentSchema.bind(
+        parser
+      );
 
       const content = {
         'application/json': {
@@ -612,7 +695,7 @@ describe('OpenAPIParser', () => {
   describe('_parseRequestBody', () => {
     it('should parse JSON request body', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const parseRequestBody = (parser as any)._parseRequestBody.bind(parser);
+      const parseRequestBody = (parser as unknown as PrivateAccess)._parseRequestBody.bind(parser);
 
       const operation = {
         requestBody: {
@@ -640,7 +723,7 @@ describe('OpenAPIParser', () => {
 
     it('should parse multipart form-data request body', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const parseRequestBody = (parser as any)._parseRequestBody.bind(parser);
+      const parseRequestBody = (parser as unknown as PrivateAccess)._parseRequestBody.bind(parser);
 
       const operation = {
         requestBody: {
@@ -669,7 +752,7 @@ describe('OpenAPIParser', () => {
 
     it('should parse form-urlencoded request body', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const parseRequestBody = (parser as any)._parseRequestBody.bind(parser);
+      const parseRequestBody = (parser as unknown as PrivateAccess)._parseRequestBody.bind(parser);
 
       const operation = {
         requestBody: {
@@ -717,7 +800,7 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(specWithBodyRefs);
-      const parseRequestBody = (parser as any)._parseRequestBody.bind(parser);
+      const parseRequestBody = (parser as unknown as PrivateAccess)._parseRequestBody.bind(parser);
 
       const operation = {
         requestBody: {
@@ -737,7 +820,9 @@ describe('OpenAPIParser', () => {
   describe('_getParameterLocation', () => {
     it('should determine parameter location based on schema type', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const getParameterLocation = (parser as any)._getParameterLocation.bind(parser);
+      const getParameterLocation = (parser as unknown as PrivateAccess)._getParameterLocation.bind(
+        parser
+      );
 
       expect(getParameterLocation({ type: 'file' })).toBe(ParameterLocation.FILE);
       expect(
@@ -755,16 +840,26 @@ describe('OpenAPIParser', () => {
   describe('extractOperations', () => {
     it('should extract operations from a path item', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const extractOperations = (parser as any).extractOperations.bind(parser);
+      const extractOperations = (parser as unknown as PrivateAccess).extractOperations.bind(parser);
 
-      const pathItem = {
+      const pathItem: OpenAPIV3.PathItemObject = {
         get: {
           operationId: 'get_test',
           summary: 'Get test',
+          responses: {
+            '200': {
+              description: 'OK',
+            },
+          },
         },
         post: {
           operationId: 'create_test',
           summary: 'Create test',
+          responses: {
+            '200': {
+              description: 'OK',
+            },
+          },
         },
       };
 
@@ -794,7 +889,7 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(specWithParamRefs);
-      const resolveParameter = (parser as any).resolveParameter.bind(parser);
+      const resolveParameter = (parser as unknown as PrivateAccess).resolveParameter.bind(parser);
 
       const paramRef = { $ref: '#/components/parameters/ApiVersion' };
       const resolved = resolveParameter(paramRef);
@@ -807,7 +902,7 @@ describe('OpenAPIParser', () => {
 
     it('should return the parameter if it is not a reference', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
-      const resolveParameter = (parser as any).resolveParameter.bind(parser);
+      const resolveParameter = (parser as unknown as PrivateAccess).resolveParameter.bind(parser);
 
       const param = {
         name: 'id',
