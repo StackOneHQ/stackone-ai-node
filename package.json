@@ -1,12 +1,17 @@
 {
   "name": "@stackone/ai",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Agents performing actions on your SaaS",
   "module": "dist/index.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
-  "files": ["dist", ".oas", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    ".oas",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "prepare": "husky && bun run fetch:specs",
     "prebuild": "rimraf dist",
@@ -50,7 +55,13 @@
     "type": "git",
     "url": "git+https://github.com/stackone-ai/stackone-ai-node.git"
   },
-  "keywords": ["stackone", "ai", "saas", "tools", "agents"],
+  "keywords": [
+    "stackone",
+    "ai",
+    "saas",
+    "tools",
+    "agents"
+  ],
   "author": "StackOne",
   "license": "MIT",
   "bugs": {
@@ -58,6 +69,9 @@
   },
   "homepage": "https://github.com/stackone-ai/stackone-ai-node#readme",
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["biome check --write", "biome format --write"]
+    "*.{js,ts,jsx,tsx}": [
+      "biome check --write",
+      "biome format --write"
+    ]
   }
 }
