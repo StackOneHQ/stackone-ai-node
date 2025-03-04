@@ -998,7 +998,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider",
+              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localisations,tags",
               "type": "string"
             }
           },
@@ -1265,7 +1265,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider",
+              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localisations,tags",
               "type": "string"
             }
           }
@@ -2740,7 +2740,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,name,active,level,language,hierarchy,proficiency",
+              "example": "id,remote_id,name,active,hierarchy,language",
               "type": "string"
             }
           }
@@ -2845,7 +2845,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,name,active,level,language,hierarchy,proficiency",
+              "example": "id,remote_id,name,active,hierarchy,language",
               "type": "string"
             }
           },
@@ -4273,6 +4273,47 @@
             "example": "This course is a valuable resource and acts as learning content for...",
             "deprecated": true,
             "nullable": true
+          },
+          "localisations": {
+            "description": "Localised content information",
+            "example": [
+              {
+                "title": "Software Engineer Lv 1",
+                "description": "This video acts as learning content for software engineers.",
+                "languages": {
+                  "value": "en-US",
+                  "source_value": "string"
+                }
+              }
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalisationModel"
+            }
+          },
+          "tags": {
+            "description": "A list of tags associated with the content",
+            "example": ["Sales Techniques", "Customer Service"],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "The date on which the content was last updated.",
+            "example": "2021-07-21T14:00:00.000Z",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "description": "The date on which the content was created.",
+            "example": "2021-07-21T14:00:00.000Z",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
@@ -4325,7 +4366,7 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["video", "quiz", "document", null],
+            "enum": ["video", "quiz", "document", "audio", "article", null],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -4622,6 +4663,12 @@
             "type": "string",
             "description": "The external URL of the content",
             "example": "https://www.youtube.com/watch?v=16873",
+            "nullable": true
+          },
+          "mobile_launch_content_url": {
+            "type": "string",
+            "description": "The mobile friendly URL of the content",
+            "example": "https://www.mobile.youtube.com/watch?v=16873",
             "nullable": true
           },
           "order": {
@@ -5565,6 +5612,47 @@
             "deprecated": true,
             "nullable": true
           },
+          "localisations": {
+            "description": "Localised content information",
+            "example": [
+              {
+                "title": "Software Engineer Lv 1",
+                "description": "This video acts as learning content for software engineers.",
+                "languages": {
+                  "value": "en-US",
+                  "source_value": "string"
+                }
+              }
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalisationModel"
+            }
+          },
+          "tags": {
+            "description": "A list of tags associated with the content",
+            "example": ["Sales Techniques", "Customer Service"],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated_at": {
+            "type": "string",
+            "description": "The date on which the content was last updated.",
+            "example": "2021-07-21T14:00:00.000Z",
+            "format": "date-time",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "description": "The date on which the content was created.",
+            "example": "2021-07-21T14:00:00.000Z",
+            "format": "date-time",
+            "nullable": true
+          },
           "categories": {
             "description": "The categories associated with this content",
             "nullable": true,
@@ -5733,6 +5821,32 @@
             "example": "2021-01-01T01:01:01.000Z",
             "format": "date-time",
             "nullable": true
+          }
+        }
+      },
+      "LocalisationModel": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "The title of the content",
+            "example": "Software Engineer Lv 1",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the content",
+            "example": "This video acts as learning content for software engineers.",
+            "nullable": true
+          },
+          "language": {
+            "description": "The language associated with this localisation details",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LanguageEnum"
+              }
+            ]
           }
         }
       },

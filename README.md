@@ -61,8 +61,8 @@ import { StackOneToolSet } from "@stackone/ai";
 
 // Initialize with a custom base URL
 const toolset = new StackOneToolSet(
-  process.env.STACKONE_API_KEY,
-  process.env.STACKONE_ACCOUNT_ID,
+  "your-api-key",
+  "your-account-id",
   "https://api.example-dev.com"
 );
 
@@ -77,7 +77,7 @@ if (employeeTool) {
 }
 ```
 
-## AI Framework Integrations
+## Integrations
 
 ### OpenAI
 
@@ -97,12 +97,34 @@ const openai = new OpenAI({
 });
 
 const response = await openai.chat.completions.create({
-  model: "gpt-4-turbo",
+  model: "gpt-4o-mini",
   messages: [
     { role: "system", content: "You are a helpful assistant." },
     { role: "user", content: "List all employees" },
   ],
   tools: openAITools,
+});
+```
+
+### AI SDK
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+
+const toolset = new StackOneToolSet();
+const tools = toolset.getTools("hris_*", "your-account-id");
+
+// Convert to AI SDK tools
+const aiSdkTools = tools.toAISDKTools();
+// Use max steps to automatically call the tool if it's needed
+const { text } = await generateText({
+  model: openai("gpt-4o-mini"),
+  tools: aiSdkTools,
+  prompt:
+    "Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA",
+  maxSteps: 3,
 });
 ```
 

@@ -3,21 +3,16 @@
  * Script to fetch OpenAPI specifications from the StackOne documentation
  *
  * This script scrapes the StackOne documentation page to find all available
- * OpenAPI specifications, then downloads and saves them to the src/openapi directory.
+ * OpenAPI specifications, then downloads and saves them to the .oas directory.
  */
-
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { config } from 'dotenv';
-
-// Load environment variables
-config();
 
 // Configuration
 const STACKONE_DOCS_BASE = 'https://docs.stackone.com';
 const STACKONE_DOCS_URL = `${STACKONE_DOCS_BASE}/openapi`;
-const OUTPUT_DIR = join(process.cwd(), 'src', 'oas');
+const OUTPUT_DIR = join(process.cwd(), '.oas');
 
 /**
  * Scrape OpenAPI spec URLs and their IDs from the documentation page

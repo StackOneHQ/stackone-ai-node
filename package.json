@@ -6,9 +6,12 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": ["dist", ".oas", "README.md", "LICENSE"],
   "scripts": {
+    "prepare": "husky && bun run fetch:specs",
+    "prebuild": "rimraf dist",
     "build": "bun build ./src/index.ts --outdir ./dist --target node",
+    "rebuild": "bun run fetch:specs && bun run build",
     "publish-package": "bun run build && bun publish --access=public",
     "test": "bun test",
     "fetch:specs": "bun run ./scripts/fetch-specs.ts",
@@ -31,6 +34,7 @@
     "lint-staged": "^15.2.0",
     "mkdocs": "^0.0.1",
     "openapi-types": "^12.1.3",
+    "rimraf": "^6.0.1",
     "typescript": "^5.0.0"
   },
   "dependencies": {

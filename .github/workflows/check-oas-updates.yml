@@ -1,0 +1,87 @@
+name: Check OAS Updates
+
+on:
+  schedule:
+    # Run at 00:00 UTC on Monday, Wednesday, and Friday
+    - cron: "0 0 * * 1,3,5"
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  check-oas-updates:
+    name: Check for OAS updates
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Fetch latest OAS specs
+        run: bun run fetch:specs
+
+      - name: Check for OAS changes
+        id: check-oas-changes
+        run: |
+          if [[ -n "$(git status --porcelain .oas/)" ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "::notice::OAS changes detected"
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "::notice::No OAS changes detected"
+          fi
+
+      - name: Verify changes work with the codebase
+        if: steps.check-oas-changes.outputs.changes == 'true'
+        run: |
+          # Run tests to ensure the updated OAS files don't break anything
+          bun run test
+
+          # Run linter to ensure code quality
+          bun run lint
+
+          # Verify the package builds correctly with the updated OAS files
+          bun run build
+
+      - name: Configure Git
+        if: steps.check-oas-changes.outputs.changes == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Create Pull Request
+        if: steps.check-oas-changes.outputs.changes == 'true'
+        id: create-pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: "chore: update OAS specifications"
+          title: "chore: update OAS specifications"
+          body: |
+            This PR updates the OpenAPI specifications to the latest version.
+
+            Changes were automatically detected and committed by the GitHub Actions workflow.
+
+            - [x] OAS files updated
+            - [x] Verified changes work with the codebase (tests, lint, build)
+          branch: auto-update-oas
+          base: main
+          delete-branch: true
+          labels: |
+            automated
+            dependencies
+
+      - name: PR Summary
+        if: steps.create-pr.outputs.pull-request-number
+        run: |
+          echo "::notice::Created PR #${{ steps.create-pr.outputs.pull-request-number }} with OAS updates"
+          echo "::notice::PR URL: ${{ steps.create-pr.outputs.pull-request-url }}"

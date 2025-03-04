@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
 import fs from 'node:fs';
-import path from 'node:path';
 
 // Mock the fetch function with the correct signature
 const mockFetch = mock((input: URL | RequestInfo, _init?: RequestInit) => {
@@ -76,8 +75,14 @@ const mockFetch = mock((input: URL | RequestInfo, _init?: RequestInit) => {
 // Mock environment variables
 Bun.env.STACKONE_API_KEY = 'test_api_key';
 
-// Create a temporary output directory for testing
-const TEST_OUTPUT_DIR = path.join(process.cwd(), 'tests', 'tmp', 'oas');
+// Mock fs module
+const mockWriteFileSync = mock((_: string, __: string) => {
+  // Do nothing, just track that it was called
+  return undefined;
+});
+
+// Store the original fs.writeFileSync
+const originalWriteFileSync = fs.writeFileSync;
 
 describe('fetch-specs script', () => {
   // Save original functions
@@ -86,21 +91,13 @@ describe('fetch-specs script', () => {
   beforeAll(() => {
     // Replace functions with mocks
     globalThis.fetch = mockFetch as typeof fetch;
-
-    // Create test output directory
-    if (!fs.existsSync(TEST_OUTPUT_DIR)) {
-      fs.mkdirSync(TEST_OUTPUT_DIR, { recursive: true });
-    }
+    fs.writeFileSync = mockWriteFileSync as typeof fs.writeFileSync;
   });
 
   afterAll(() => {
     // Restore original functions
     globalThis.fetch = originalFetch;
-
-    // Clean up test directory
-    if (fs.existsSync(TEST_OUTPUT_DIR)) {
-      fs.rmSync(TEST_OUTPUT_DIR, { recursive: true, force: true });
-    }
+    fs.writeFileSync = originalWriteFileSync;
   });
 
   it('should fetch and save OpenAPI specs', async () => {
@@ -138,25 +135,20 @@ describe('fetch-specs script', () => {
       expect((error as Error).message).toContain('Failed to fetch');
     }
 
-    // Since we can't properly mock the fs/promises functions in Bun yet,
-    // we'll just test that the saveSpec function can be called without errors
+    // Test saveSpec function using mocked fs.writeFileSync
     const saveSpec = async (category: string, spec: Record<string, unknown>): Promise<void> => {
-      // Just a simple implementation that doesn't use the mocked functions
-      const outputPath = path.join(TEST_OUTPUT_DIR, `${category}.json`);
-      // Write to the file directly instead of using the mocked functions
+      // Use a mock path that doesn't need to be created
+      const outputPath = `/mock/path/${category}.json`;
       fs.writeFileSync(outputPath, JSON.stringify(spec, null, 2));
     };
 
     // Test saveSpec function
     await saveSpec('hris', hrisSpec);
 
-    // Verify the file was created
-    const outputPath = path.join(TEST_OUTPUT_DIR, 'hris.json');
-    expect(fs.existsSync(outputPath)).toBe(true);
+    // Verify that writeFileSync was called
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
 
-    // Clean up
-    if (fs.existsSync(outputPath)) {
-      fs.unlinkSync(outputPath);
-    }
+    // Reset mock call count
+    mockWriteFileSync.mockClear();
   });
 });

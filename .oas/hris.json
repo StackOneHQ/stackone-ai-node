@@ -775,7 +775,7 @@
             "description": "The comma separated list of fields that will be expanded in the response",
             "schema": {
               "nullable": true,
-              "example": "company,employments,work_location,home_location,groups",
+              "example": "company,employments,work_location,home_location,groups,skills",
               "type": "string"
             }
           },
@@ -1005,7 +1005,7 @@
             "description": "The comma separated list of fields that will be expanded in the response",
             "schema": {
               "nullable": true,
-              "example": "company,employments,work_location,home_location,groups",
+              "example": "company,employments,work_location,home_location,groups,skills",
               "type": "string"
             }
           },
@@ -7353,6 +7353,195 @@
       }
     },
     "/unified/hris/employees/{id}/skills": {
+      "get": {
+        "operationId": "hris_list_employee_skills",
+        "parameters": [
+          {
+            "name": "x-account-id",
+            "in": "header",
+            "description": "The account identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "raw",
+            "required": false,
+            "in": "query",
+            "description": "Indicates that the raw request result is returned",
+            "schema": {
+              "nullable": true,
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "proxy",
+            "required": false,
+            "in": "query",
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "style": "deepObject",
+            "explode": true,
+            "schema": {
+              "additionalProperties": true,
+              "nullable": true,
+              "type": "object"
+            }
+          },
+          {
+            "name": "fields",
+            "required": false,
+            "in": "query",
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "schema": {
+              "nullable": true,
+              "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+              "type": "string"
+            }
+          },
+          {
+            "name": "filter",
+            "required": false,
+            "in": "query",
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "explode": true,
+            "style": "deepObject",
+            "schema": {
+              "properties": {
+                "updated_after": {
+                  "description": "Use a string with a date to only select results updated after that given date",
+                  "example": "2020-01-01T00:00:00.000Z",
+                  "type": "string",
+                  "nullable": true,
+                  "additionalProperties": false
+                }
+              },
+              "nullable": true,
+              "type": "object"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "The page number of the results to fetch",
+            "deprecated": true,
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": false,
+            "in": "query",
+            "description": "The number of results per page",
+            "schema": {
+              "nullable": true,
+              "default": "25",
+              "type": "string"
+            }
+          },
+          {
+            "name": "next",
+            "required": false,
+            "in": "query",
+            "description": "The unified cursor",
+            "schema": {
+              "nullable": true,
+              "type": "string"
+            }
+          },
+          {
+            "name": "updated_after",
+            "required": false,
+            "in": "query",
+            "description": "Use a string with a date to only select results updated after that given date",
+            "deprecated": true,
+            "schema": {
+              "nullable": true,
+              "example": "2020-01-01T00:00:00.000Z",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The skills related to the employee with the given identifier were retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySkillsPaginated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "403": {
+            "description": "Forbidden."
+          },
+          "408": {
+            "description": "The request has timed out.",
+            "headers": {
+              "Retry-After": {
+                "description": "A time in seconds after which the request can be retried.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition failed: linked account belongs to a disabled integration."
+          },
+          "429": {
+            "description": "Too many requests."
+          },
+          "500": {
+            "description": "Server error while executing the request."
+          },
+          "501": {
+            "description": "This functionality is not implemented."
+          }
+        },
+        "security": [
+          {
+            "basic": []
+          }
+        ],
+        "summary": "List Employee Skills",
+        "tags": ["Employees"],
+        "x-speakeasy-group": "hris",
+        "x-speakeasy-name-override": "list_employee_skills",
+        "x-speakeasy-pagination": {
+          "type": "cursor",
+          "inputs": [
+            {
+              "name": "next",
+              "in": "parameters",
+              "type": "cursor"
+            }
+          ],
+          "outputs": {
+            "nextCursor": "$.next"
+          }
+        },
+        "x-speakeasy-retries": {
+          "statusCodes": [429, 408],
+          "strategy": "backoff"
+        }
+      },
       "post": {
         "operationId": "hris_create_employee_skill",
         "parameters": [
@@ -7434,6 +7623,127 @@
         "tags": ["Employees"],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_employee_skill",
+        "x-speakeasy-retries": {
+          "statusCodes": [429, 408],
+          "strategy": "backoff"
+        }
+      }
+    },
+    "/unified/hris/employees/{id}/skills/{subResourceId}": {
+      "get": {
+        "operationId": "hris_get_employee_skill",
+        "parameters": [
+          {
+            "name": "x-account-id",
+            "in": "header",
+            "description": "The account identifier",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subResourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "raw",
+            "required": false,
+            "in": "query",
+            "description": "Indicates that the raw request result is returned",
+            "schema": {
+              "nullable": true,
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "proxy",
+            "required": false,
+            "in": "query",
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "style": "deepObject",
+            "explode": true,
+            "schema": {
+              "additionalProperties": true,
+              "nullable": true,
+              "type": "object"
+            }
+          },
+          {
+            "name": "fields",
+            "required": false,
+            "in": "query",
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "schema": {
+              "nullable": true,
+              "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The skill related to the employee with the given identifiers was retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitySkillResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "403": {
+            "description": "Forbidden."
+          },
+          "408": {
+            "description": "The request has timed out.",
+            "headers": {
+              "Retry-After": {
+                "description": "A time in seconds after which the request can be retried.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Precondition failed: linked account belongs to a disabled integration."
+          },
+          "429": {
+            "description": "Too many requests."
+          },
+          "500": {
+            "description": "Server error while executing the request."
+          },
+          "501": {
+            "description": "This functionality is not implemented."
+          }
+        },
+        "security": [
+          {
+            "basic": []
+          }
+        ],
+        "summary": "Get Employee Skill",
+        "tags": ["Employees"],
+        "x-speakeasy-group": "hris",
+        "x-speakeasy-name-override": "get_employee_skill",
         "x-speakeasy-retries": {
           "statusCodes": [429, 408],
           "strategy": "backoff"
@@ -9837,6 +10147,78 @@
           }
         }
       },
+      "EntitySkillResult": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/EntitySkills"
+          },
+          "raw": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RawResponse"
+            }
+          }
+        },
+        "required": ["data"]
+      },
+      "EntitySkills": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID associated with this skill",
+            "example": "16873-IT345",
+            "nullable": true
+          },
+          "remote_id": {
+            "type": "string",
+            "description": "Provider's unique identifier",
+            "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "description": "The name associated with this skill",
+            "example": "Information-Technology",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the skill is active and therefore available for use",
+            "example": true,
+            "nullable": true
+          },
+          "language": {
+            "description": "The language associated with this skill",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LanguageEnum"
+              }
+            ]
+          },
+          "maximum_proficiency": {
+            "description": "The proficiency level of the skill",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Proficiency"
+              }
+            ]
+          },
+          "minimum_proficiency": {
+            "description": "The proficiency level of the skill",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Proficiency"
+              }
+            ]
+          }
+        }
+      },
       "EntitySkillsCreateRequestDto": {
         "type": "object",
         "properties": {
@@ -9871,6 +10253,29 @@
             ]
           }
         }
+      },
+      "EntitySkillsPaginated": {
+        "type": "object",
+        "properties": {
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EntitySkills"
+            }
+          },
+          "raw": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RawResponse"
+            }
+          }
+        },
+        "required": ["data"]
       },
       "EthnicityEnum": {
         "type": "object",
@@ -17380,6 +17785,452 @@
           "code": {
             "type": "string",
             "example": "ABC123",
+            "nullable": true
+          }
+        }
+      },
+      "LanguageEnum": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "enum": [
+              "ar_AR",
+              "aa_ER",
+              "af_NA",
+              "af_ZA",
+              "am_ET",
+              "ar_AE",
+              "ar_BH",
+              "ar_DJ",
+              "ar_DZ",
+              "ar_EG",
+              "ar_ER",
+              "ar_IQ",
+              "ar_JO",
+              "ar_KM",
+              "ar_KW",
+              "ar_LB",
+              "ar_LY",
+              "ar_MA",
+              "ar_MR",
+              "ar_OM",
+              "ar_PS",
+              "ar_QA",
+              "ar_SA",
+              "ar_SD",
+              "ar_SY",
+              "ar_TD",
+              "ar_TN",
+              "ar_YE",
+              "ay_BO",
+              "ay_PE",
+              "az_AZ",
+              "az_IR",
+              "be_BY",
+              "bg_BG",
+              "bi_VU",
+              "bn_BD",
+              "bn_IN",
+              "bs_BA",
+              "bs-ME",
+              "byn_ER",
+              "ca_AD",
+              "ca_ES",
+              "ca_FR",
+              "ca_IT",
+              "ch_GU",
+              "cs_CZ",
+              "da_DK",
+              "de_AT",
+              "de_BE",
+              "de_CH",
+              "de_DE",
+              "de_LI",
+              "de_LU",
+              "de_VA",
+              "de_MV",
+              "dv_MV",
+              "dz_BT",
+              "el_CY",
+              "el_GR",
+              "en_AG",
+              "en_AI",
+              "en_AS",
+              "en_AU",
+              "en_BB",
+              "en_BE",
+              "en_BM",
+              "en_BS",
+              "en_BW",
+              "en_BZ",
+              "en_CA",
+              "en_CC",
+              "en_CK",
+              "en_CM",
+              "en_CW",
+              "en_CX",
+              "en_DG",
+              "en_DM",
+              "en_ER",
+              "en_FJ",
+              "en_FK",
+              "en_FM",
+              "en_GB",
+              "en_GD",
+              "en_GG",
+              "en_GH",
+              "en_GI",
+              "en_GM",
+              "en_GS",
+              "en_GU",
+              "en_GY",
+              "en_HK",
+              "en_IE",
+              "en_IM",
+              "en_IN",
+              "en_IO",
+              "en_JE",
+              "en_JM",
+              "en_KE",
+              "en_KI",
+              "en_KN",
+              "en_KY",
+              "en_LC",
+              "en_LR",
+              "en_LS",
+              "en_MF",
+              "en_MG",
+              "en_MH",
+              "en_MO",
+              "en_MP",
+              "en_MS",
+              "en_MT",
+              "en_MU",
+              "en_MW",
+              "en_MY",
+              "en_NA",
+              "en_NF",
+              "en_NG",
+              "en_NL",
+              "en_NR",
+              "en_NU",
+              "en_NZ",
+              "en_PG",
+              "en_PH",
+              "en_PK",
+              "en_PN",
+              "en_PR",
+              "en_PW",
+              "en_RW",
+              "en_SB",
+              "en_SC",
+              "en_SD",
+              "en_SG",
+              "en_SH",
+              "en_SL",
+              "en_SS",
+              "en_SX",
+              "en_SZ",
+              "en_TC",
+              "en_TK",
+              "en_TO",
+              "en_TT",
+              "en_TV",
+              "en_TZ",
+              "en_UG",
+              "en_UM",
+              "en_US",
+              "en_VC",
+              "en_VG",
+              "en_VI",
+              "en_VU",
+              "en_WS",
+              "en_ZA",
+              "en_ZM",
+              "en_ZW",
+              "es_AR",
+              "es_BO",
+              "es_BZ",
+              "es_CL",
+              "es_CO",
+              "es_CR",
+              "es_CU",
+              "es_DO",
+              "es_EA",
+              "es_EC",
+              "es_EH",
+              "es_ES",
+              "es_GQ",
+              "es_GT",
+              "es_HN",
+              "es_IC",
+              "es_LA",
+              "es_MX",
+              "es_NI",
+              "es_PA",
+              "es_PE",
+              "es_PH",
+              "es_PR",
+              "es_PY",
+              "es_SV",
+              "es_US",
+              "es_UY",
+              "es_VE",
+              "et_EE",
+              "fa_AF",
+              "fa_IR",
+              "fan_GA",
+              "ff_CM",
+              "ff_GN",
+              "ff_MR",
+              "ff_SN",
+              "ff_BF",
+              "fi_FI",
+              "fj_FJ",
+              "fo_FO",
+              "fr_BE",
+              "fr_BF",
+              "fr_BI",
+              "fr_BJ",
+              "fr_BL",
+              "fr_CA",
+              "fr_CD",
+              "fr_CF",
+              "fr_CG",
+              "fr_CH",
+              "fr_CI",
+              "fr_CM",
+              "fr_DJ",
+              "fr_DZ",
+              "fr_FR",
+              "fr_GA",
+              "fr_GF",
+              "fr_GG",
+              "fr_GN",
+              "fr_GP",
+              "fr_GQ",
+              "fr_HT",
+              "fr_KM",
+              "fr_JE",
+              "fr_LU",
+              "fr_LB",
+              "fr_MA",
+              "fr_MC",
+              "fr_MF",
+              "fr_MG",
+              "fr_ML",
+              "fr_MQ",
+              "fr_MR",
+              "fr_MU",
+              "fr_NC",
+              "fr_NE",
+              "fr_PF",
+              "fr_PM",
+              "fr_RE",
+              "fr_RW",
+              "fr_SC",
+              "fr_SN",
+              "fr_SY",
+              "fr_TD",
+              "fr_TF",
+              "fr_TG",
+              "fr_TN",
+              "fr_VU",
+              "fr_VA",
+              "fr_WF",
+              "fr_YT",
+              "ga_IE",
+              "gn_PY",
+              "gn_AR",
+              "gu_IN",
+              "gv_IM",
+              "he_IL",
+              "hi_IN",
+              "hr_BA",
+              "hr_HR",
+              "hr_ME",
+              "ht_HT",
+              "hu_HU",
+              "hy_AM",
+              "hy_CY",
+              "id_ID",
+              "is_IS",
+              "it_CH",
+              "it_IT",
+              "it_SM",
+              "it_VA",
+              "ja_JP",
+              "ka_GE",
+              "kg_CD",
+              "kk_KZ",
+              "kl_GL",
+              "km_KH",
+              "ko_KP",
+              "ko_KR",
+              "ku_IQ",
+              "ky_KG",
+              "la_VA",
+              "lb_LU",
+              "ln_AO",
+              "ln_CD",
+              "ln_CF",
+              "ln_CG",
+              "lo_LA",
+              "lt_LT",
+              "lu_CD",
+              "lv_LV",
+              "mg_MG",
+              "mh_MH",
+              "mi_NZ",
+              "mk_MK",
+              "mn_MN",
+              "mr_IN",
+              "ms_BN",
+              "ms_MY",
+              "ms_SG",
+              "mt_MT",
+              "my_MM",
+              "nb_NO",
+              "nb_BV",
+              "nb_ZW",
+              "ne_NP",
+              "nl_AW",
+              "nl_BE",
+              "nl_BQ",
+              "nl_CW",
+              "nl_NL",
+              "nl_SR",
+              "nl_SX",
+              "nl_MF",
+              "nn_NO",
+              "nn_BV",
+              "no_NO",
+              "no_BV",
+              "no_SJ",
+              "nr_ZA",
+              "ny_MW",
+              "pa_IN",
+              "pa_PK",
+              "pl_PL",
+              "ps_AF",
+              "pt_AO",
+              "pt_BR",
+              "pt_CH",
+              "pt_CV",
+              "pt_GQ",
+              "pt_GW",
+              "pt_LU",
+              "pt_MO",
+              "pt_MZ",
+              "pt_PT",
+              "pt_ST",
+              "pt_TL",
+              "qu_BO",
+              "qu_EC",
+              "qu_PE",
+              "rar_CK",
+              "rm_CH",
+              "rup_MK",
+              "ro_MD",
+              "ro_RO",
+              "ru_BY",
+              "ru_KG",
+              "ru_KZ",
+              "ru_MD",
+              "ru_RU",
+              "ru_UA",
+              "ru_AQ",
+              "ru_TJ",
+              "ru_TM",
+              "ru_UZ",
+              "rw_RW",
+              "se_SE",
+              "sg_CF",
+              "si_LK",
+              "sk_SK",
+              "sl_SI",
+              "sm_AS",
+              "sm_WS",
+              "sn_ZW",
+              "so_DJ",
+              "so_ET",
+              "so_KE",
+              "so_SO",
+              "sq_AL",
+              "sq_ME",
+              "sq_XK",
+              "sr_BA",
+              "sr_ME",
+              "sr_RS",
+              "sr_XK",
+              "ss_SZ",
+              "ss_ZA",
+              "sv_AX",
+              "sv_FI",
+              "sv_SE",
+              "sw_KE",
+              "sw_TZ",
+              "sw_UG",
+              "sw_CD",
+              "ta_IN",
+              "ta_MY",
+              "ta_SG",
+              "ta_LK",
+              "te_IN",
+              "tg_TJ",
+              "th_TH",
+              "ti_ER",
+              "ti_ET",
+              "tig_ER",
+              "tk_TM",
+              "tk_AF",
+              "tn_BW",
+              "tn_ZA",
+              "to_TO",
+              "tr_CY",
+              "tr_TR",
+              "ts_ZA",
+              "uk_UA",
+              "ur_IN",
+              "ur_PK",
+              "uz_AF",
+              "uz_UZ",
+              "ve_ZA",
+              "vi_VN",
+              "xh_ZA",
+              "zh_CN",
+              "zh_HK",
+              "zh_MO",
+              "zh_SG",
+              "zh_TW",
+              "zu_ZA",
+              null
+            ],
+            "description": "The Locale Code of the language",
+            "example": "en_GB",
+            "x-speakeasy-unknown-values": "allow",
+            "nullable": true
+          },
+          "source_value": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "object"
+              },
+              {
+                "type": "array",
+                "items": {}
+              }
+            ],
             "nullable": true
           }
         }
