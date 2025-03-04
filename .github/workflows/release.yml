@@ -33,7 +33,8 @@ jobs:
       - name: Build and publish package
         if: ${{ steps.release.outputs.release_created }}
         env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           bun build
-          bun publish
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          bun publish --access=public
