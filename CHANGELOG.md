@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.4...ai-v0.0.5) (2025-03-05)
+
+
+### Features
+
+* breaking change ai sdk name and toolset config object ([#14](https://github.com/StackOneHQ/stackone-ai-node/issues/14)) ([ad1f207](https://github.com/StackOneHQ/stackone-ai-node/commit/ad1f2075a1fb9fd9e851577aef78b138ae8f3264))
+
 ## [0.0.4](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.3...ai-v0.0.4) (2025-03-05)
 
 
