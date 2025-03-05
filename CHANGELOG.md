@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.4](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.3...ai-v0.0.4) (2025-03-05)
+
+
+### Features
+
+* readme ai sdk ([#10](https://github.com/StackOneHQ/stackone-ai-node/issues/10)) ([34d39cd](https://github.com/StackOneHQ/stackone-ai-node/commit/34d39cd11619a95572cae063af5813444bad609d))
+
+
+### Bug Fixes
+
+* types ([#13](https://github.com/StackOneHQ/stackone-ai-node/issues/13)) ([076766c](https://github.com/StackOneHQ/stackone-ai-node/commit/076766cc46c7bea8714f3f1aee7db0ff43f89979))
+
 ## [0.0.3](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.2...ai-v0.0.3) (2025-03-04)
 
 
