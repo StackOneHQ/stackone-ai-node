@@ -158,7 +158,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "security": [
           {
             "basic": []
@@ -267,7 +269,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "security": [
           {
             "basic": []
@@ -432,7 +436,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Roles"],
+        "tags": [
+          "Roles"
+        ],
         "security": [
           {
             "basic": []
@@ -541,7 +547,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Roles"],
+        "tags": [
+          "Roles"
+        ],
         "security": [
           {
             "basic": []
@@ -706,7 +714,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "security": [
           {
             "basic": []
@@ -815,7 +825,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "security": [
           {
             "basic": []
@@ -980,7 +992,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Policies"],
+        "tags": [
+          "Policies"
+        ],
         "security": [
           {
             "basic": []
@@ -1089,7 +1103,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Policies"],
+        "tags": [
+          "Policies"
+        ],
         "security": [
           {
             "basic": []
@@ -1590,7 +1606,13 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["enabled", "disabled", "pending", "unmapped_value", null],
+            "enum": [
+              "enabled",
+              "disabled",
+              "pending",
+              "unmapped_value",
+              null
+            ],
             "description": "The status of the user, e.g. whether the user is enabled, has been disabled (eg. by an admin), or is pending (ie: awaiting approval by the user or an admin).",
             "example": "enabled",
             "x-speakeasy-unknown-values": "allow",
@@ -3115,7 +3137,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -3210,7 +3235,10 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "IamUsersPaginated": {
         "type": "object",
@@ -3238,7 +3266,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamUserResult": {
         "type": "object",
@@ -3254,7 +3284,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamRolesPaginated": {
         "type": "object",
@@ -3282,7 +3314,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamRoleResult": {
         "type": "object",
@@ -3298,7 +3332,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamGroupsPaginated": {
         "type": "object",
@@ -3326,7 +3362,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamGroupResult": {
         "type": "object",
@@ -3342,7 +3380,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamPoliciesPaginated": {
         "type": "object",
@@ -3370,7 +3410,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "IamPolicyResult": {
         "type": "object",
@@ -3386,7 +3428,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       }
     }
   },

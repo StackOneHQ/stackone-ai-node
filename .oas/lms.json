@@ -72,11 +72,16 @@
           }
         ],
         "summary": "Batch Upsert Course",
-        "tags": ["Courses"],
+        "tags": [
+          "Courses"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "batch_upsert_course",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -242,7 +247,9 @@
           }
         ],
         "summary": "List Courses",
-        "tags": ["Courses"],
+        "tags": [
+          "Courses"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_courses",
         "x-speakeasy-pagination": {
@@ -259,7 +266,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -333,11 +343,16 @@
           }
         ],
         "summary": "Upsert Course",
-        "tags": ["Courses"],
+        "tags": [
+          "Courses"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "upsert_course",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -444,11 +459,16 @@
           }
         ],
         "summary": "Get Course",
-        "tags": ["Courses"],
+        "tags": [
+          "Courses"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_course",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -524,7 +544,12 @@
                 "status": {
                   "description": "Filter to select assignment by status",
                   "type": "string",
-                  "enum": ["pending", "in_progress", "completed", null],
+                  "enum": [
+                    "pending",
+                    "in_progress",
+                    "completed",
+                    null
+                  ],
                   "nullable": true
                 }
               },
@@ -646,7 +671,9 @@
           }
         ],
         "summary": "List User Assignments",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_user_assignments",
         "x-speakeasy-pagination": {
@@ -663,7 +690,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -745,11 +775,16 @@
           }
         ],
         "summary": "Create User Assignment",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "create_user_assignment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -865,11 +900,16 @@
           }
         ],
         "summary": "Get User Assignment",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_user_assignment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -945,11 +985,16 @@
           }
         ],
         "summary": "Batch Upsert Content",
-        "tags": ["Content"],
+        "tags": [
+          "Content"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "batch_upsert_content",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1115,7 +1160,9 @@
           }
         ],
         "summary": "List Content",
-        "tags": ["Content"],
+        "tags": [
+          "Content"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_content",
         "x-speakeasy-pagination": {
@@ -1132,7 +1179,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1206,11 +1256,16 @@
           }
         ],
         "summary": "Upsert Content",
-        "tags": ["Content"],
+        "tags": [
+          "Content"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "upsert_content",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1317,11 +1372,16 @@
           }
         ],
         "summary": "Get Content",
-        "tags": ["Content"],
+        "tags": [
+          "Content"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_content",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1491,7 +1551,9 @@
           }
         ],
         "summary": "List User Completions",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_user_completions",
         "x-speakeasy-pagination": {
@@ -1508,7 +1570,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1590,11 +1655,16 @@
           }
         ],
         "summary": "Create User Completion",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "create_user_completion",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1710,11 +1780,16 @@
           }
         ],
         "summary": "Get User Completion",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_user_completion",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1797,11 +1872,16 @@
           }
         ],
         "summary": "Delete User Completion",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "delete_user_completion",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1967,7 +2047,9 @@
           }
         ],
         "summary": "List Completions",
-        "tags": ["Completions"],
+        "tags": [
+          "Completions"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_completions",
         "x-speakeasy-pagination": {
@@ -1984,7 +2066,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2090,11 +2175,16 @@
           }
         ],
         "summary": "Get Completion",
-        "tags": ["Completions"],
+        "tags": [
+          "Completions"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_completion",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2201,11 +2291,16 @@
           }
         ],
         "summary": "Get Category",
-        "tags": ["Categories"],
+        "tags": [
+          "Categories"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_category",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2369,7 +2464,9 @@
           }
         ],
         "summary": "List Categories",
-        "tags": ["Categories"],
+        "tags": [
+          "Categories"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_categories",
         "x-speakeasy-pagination": {
@@ -2386,7 +2483,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2557,7 +2657,9 @@
           }
         ],
         "summary": "List Users",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_users",
         "x-speakeasy-pagination": {
@@ -2574,7 +2676,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2681,11 +2786,16 @@
           }
         ],
         "summary": "Get User",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_user",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2792,11 +2902,16 @@
           }
         ],
         "summary": "Get Skill",
-        "tags": ["Skills"],
+        "tags": [
+          "Skills"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_skill",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2960,7 +3075,9 @@
           }
         ],
         "summary": "List Skills",
-        "tags": ["Skills"],
+        "tags": [
+          "Skills"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_skills",
         "x-speakeasy-pagination": {
@@ -2977,7 +3094,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3045,7 +3165,12 @@
                 "status": {
                   "description": "Filter to select assignment by status",
                   "type": "string",
-                  "enum": ["pending", "in_progress", "completed", null],
+                  "enum": [
+                    "pending",
+                    "in_progress",
+                    "completed",
+                    null
+                  ],
                   "nullable": true
                 }
               },
@@ -3167,7 +3292,9 @@
           }
         ],
         "summary": "List Assignments",
-        "tags": ["Assignments"],
+        "tags": [
+          "Assignments"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "list_assignments",
         "x-speakeasy-pagination": {
@@ -3184,7 +3311,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3292,11 +3422,16 @@
           }
         ],
         "summary": "Get Assignment",
-        "tags": ["Assignments"],
+        "tags": [
+          "Assignments"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "get_assignment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3372,11 +3507,16 @@
           }
         ],
         "summary": "Create Collection",
-        "tags": ["Collections"],
+        "tags": [
+          "Collections"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "create_collection",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3460,11 +3600,16 @@
           }
         ],
         "summary": "Update Collection",
-        "tags": ["Collections"],
+        "tags": [
+          "Collections"
+        ],
         "x-speakeasy-group": "lms",
         "x-speakeasy-name-override": "update_collection",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3690,7 +3835,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AssignmentsPaginated": {
         "type": "object",
@@ -3713,14 +3860,21 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AssignmentStatusEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["pending", "in_progress", "completed", null],
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              null
+            ],
             "example": "in-progress",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -3769,7 +3923,13 @@
           },
           "errors": {
             "type": "array",
-            "example": [["Missing field: name"], [], []],
+            "example": [
+              [
+                "Missing field: name"
+              ],
+              [],
+              []
+            ],
             "items": {
               "type": "array",
               "items": {
@@ -3801,7 +3961,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Category": {
         "type": "object",
@@ -3875,7 +4037,12 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["primary", "secondary", "tertiary", null],
+            "enum": [
+              "primary",
+              "secondary",
+              "tertiary",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -3916,7 +4083,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Completion": {
         "type": "object",
@@ -4081,7 +4250,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CompletionsPaginated": {
         "type": "object",
@@ -4104,7 +4275,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Content": {
         "type": "object",
@@ -4139,7 +4312,10 @@
           },
           "course_ids": {
             "description": "The parent ID/IDs associated with this content",
-            "example": ["16873-SOFTWARE-ENG-COURSE", "16874-SOFTWARE-ENG-COURSE"],
+            "example": [
+              "16873-SOFTWARE-ENG-COURSE",
+              "16874-SOFTWARE-ENG-COURSE"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -4294,7 +4470,10 @@
           },
           "tags": {
             "description": "A list of tags associated with the content",
-            "example": ["Sales Techniques", "Customer Service"],
+            "example": [
+              "Sales Techniques",
+              "Customer Service"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -4343,7 +4522,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ContentResult": {
         "type": "object",
@@ -4359,14 +4540,23 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ContentTypeEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["video", "quiz", "document", "audio", "article", null],
+            "enum": [
+              "video",
+              "quiz",
+              "document",
+              "audio",
+              "article",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -4426,7 +4616,10 @@
           },
           "content_ids": {
             "description": "The child ID/IDs associated with this course",
-            "example": ["16873-SOFTWARE-ENG-COURSE", "16874-SOFTWARE-ENG-COURSE"],
+            "example": [
+              "16873-SOFTWARE-ENG-COURSE",
+              "16874-SOFTWARE-ENG-COURSE"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -4565,7 +4758,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CourseResult": {
         "type": "object",
@@ -4581,7 +4776,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CreateCategoriesApiModel": {
         "type": "object",
@@ -4700,7 +4897,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "CreateResultDataApiModel": {
         "type": "object",
@@ -4790,7 +4992,11 @@
             "format": "date-time"
           }
         },
-        "required": ["statusCode", "message", "timestamp"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp"
+        ]
       },
       "LanguageEnum": {
         "type": "object",
@@ -5243,7 +5449,12 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["content", "course", "collection", null],
+            "enum": [
+              "content",
+              "course",
+              "collection",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -5282,7 +5493,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "LmsBatchUpsertCourseRequestDto": {
         "type": "object",
@@ -5296,7 +5509,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "LmsCreateAssignmentRequestDto": {
         "type": "object",
@@ -5379,7 +5594,10 @@
           },
           "learning_object_ids": {
             "description": "The child ID/IDs associated with this collection",
-            "example": ["16873-SOFTWARE-ENG-COURSE", "16874-SOFTWARE-ENG-COURSE"],
+            "example": [
+              "16873-SOFTWARE-ENG-COURSE",
+              "16874-SOFTWARE-ENG-COURSE"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -5632,7 +5850,10 @@
           },
           "tags": {
             "description": "A list of tags associated with the content",
-            "example": ["Sales Techniques", "Customer Service"],
+            "example": [
+              "Sales Techniques",
+              "Customer Service"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -5869,14 +6090,21 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "ResultStatusEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["Pass", "Fail", null],
+            "enum": [
+              "Pass",
+              "Fail",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -5908,7 +6136,12 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["primary", "secondary", "tertiary", null],
+            "enum": [
+              "primary",
+              "secondary",
+              "tertiary",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -5940,7 +6173,14 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["1", "2", "3", "4", "5", null],
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -5981,7 +6221,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Skills": {
         "type": "object",
@@ -6070,7 +6312,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "UpdateResult": {
         "type": "object",
@@ -6089,7 +6333,11 @@
             "format": "date-time"
           }
         },
-        "required": ["statusCode", "message", "timestamp"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp"
+        ]
       },
       "UpsertResult": {
         "type": "object",
@@ -6111,7 +6359,12 @@
             "$ref": "#/components/schemas/UpsertResultDataExternalReferenceModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "UpsertResultDataExternalReferenceModel": {
         "type": "object",
@@ -6150,7 +6403,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "UsersPaginated": {
         "type": "object",
@@ -6173,7 +6428,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       }
     }
   },

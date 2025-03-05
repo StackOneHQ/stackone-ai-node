@@ -169,7 +169,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "security": [
           {
             "basic": []
@@ -243,7 +245,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "security": [
           {
             "basic": []
@@ -363,7 +367,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "security": [
           {
             "basic": []
@@ -445,7 +451,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Contacts"],
+        "tags": [
+          "Contacts"
+        ],
         "security": [
           {
             "basic": []
@@ -610,7 +618,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "security": [
           {
             "basic": []
@@ -719,7 +729,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "security": [
           {
             "basic": []
@@ -884,7 +896,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Lists"],
+        "tags": [
+          "Lists"
+        ],
         "security": [
           {
             "basic": []
@@ -993,7 +1007,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Lists"],
+        "tags": [
+          "Lists"
+        ],
         "security": [
           {
             "basic": []
@@ -1158,7 +1174,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "security": [
           {
             "basic": []
@@ -1331,7 +1349,9 @@
             "description": "This functionality is not implemented."
           }
         },
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "security": [
           {
             "basic": []
@@ -1480,7 +1500,9 @@
           },
           "emails": {
             "description": "List of contact email addresses",
-            "example": ["steve@apple.com"],
+            "example": [
+              "steve@apple.com"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1489,7 +1511,9 @@
           },
           "phone_numbers": {
             "description": "List of contact phone numbers",
-            "example": ["123-456-7890"],
+            "example": [
+              "123-456-7890"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1498,7 +1522,10 @@
           },
           "deal_ids": {
             "description": "List of associated deal IDs",
-            "example": ["deal-001", "deal-002"],
+            "example": [
+              "deal-001",
+              "deal-002"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1519,7 +1546,10 @@
           },
           "account_ids": {
             "description": "List of associated account IDs",
-            "example": ["account-123", "account-456"],
+            "example": [
+              "account-123",
+              "account-456"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1581,7 +1611,10 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "ContactsPaginated": {
         "type": "object",
@@ -1609,7 +1642,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CrmCreateContactRequestDto": {
         "type": "object",
@@ -1634,7 +1669,9 @@
           },
           "emails": {
             "description": "List of contact email addresses",
-            "example": ["steve@apple.com"],
+            "example": [
+              "steve@apple.com"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1643,7 +1680,9 @@
           },
           "phone_numbers": {
             "description": "List of contact phone numbers",
-            "example": ["123-456-7890"],
+            "example": [
+              "123-456-7890"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1652,7 +1691,10 @@
           },
           "deal_ids": {
             "description": "List of associated deal IDs",
-            "example": ["deal-001", "deal-002"],
+            "example": [
+              "deal-001",
+              "deal-002"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1661,7 +1703,10 @@
           },
           "account_ids": {
             "description": "List of associated account IDs",
-            "example": ["account-123", "account-456"],
+            "example": [
+              "account-123",
+              "account-456"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -1701,7 +1746,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CountryEnum": {
         "type": "object",
@@ -1994,7 +2041,12 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["home", "work", "unmapped_value", null],
+            "enum": [
+              "home",
+              "work",
+              "unmapped_value",
+              null
+            ],
             "description": "The type of the location.",
             "example": "home",
             "x-speakeasy-unknown-values": "allow",
@@ -2141,7 +2193,9 @@
           },
           "phone_numbers": {
             "description": "List of account phone numbers",
-            "example": ["+1123425334"],
+            "example": [
+              "+1123425334"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -2190,7 +2244,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AccountResult": {
         "type": "object",
@@ -2206,7 +2262,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ListItem": {
         "type": "object",
@@ -2230,7 +2288,13 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["candidates", "contacts", "companies", "unmapped_value", null],
+            "enum": [
+              "candidates",
+              "contacts",
+              "companies",
+              "unmapped_value",
+              null
+            ],
             "description": "The type of the list.",
             "example": "contacts",
             "x-speakeasy-unknown-values": "allow",
@@ -2348,7 +2412,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ListResult": {
         "type": "object",
@@ -2364,7 +2430,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CustomFieldTypeEnum": {
         "type": "object",
@@ -2446,7 +2514,12 @@
           },
           "options": {
             "description": "An array of possible options for the custom field.",
-            "example": ["Not Started", "In Progress", "Completed", "Overdue"],
+            "example": [
+              "Not Started",
+              "In Progress",
+              "Completed",
+              "Overdue"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -2498,7 +2571,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CustomFieldDefinitionResultApiModel": {
         "type": "object",
@@ -2514,7 +2589,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       }
     }
   },

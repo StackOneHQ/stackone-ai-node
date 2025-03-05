@@ -162,7 +162,9 @@
           }
         ],
         "summary": "List Email Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_email_templates",
         "x-speakeasy-pagination": {
@@ -179,7 +181,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -253,11 +258,16 @@
           }
         ],
         "summary": "Create Email Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "create_email_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -366,11 +376,16 @@
           }
         ],
         "summary": "Get Email Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_email_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -452,11 +467,16 @@
           }
         ],
         "summary": "Update Email Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "update_email_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -622,7 +642,9 @@
           }
         ],
         "summary": "List In-App Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_in_app_templates",
         "x-speakeasy-pagination": {
@@ -639,7 +661,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -713,11 +738,16 @@
           }
         ],
         "summary": "Create In-App Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "create_in_app_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -826,11 +856,16 @@
           }
         ],
         "summary": "Get In-App Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_in_app_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -912,11 +947,16 @@
           }
         ],
         "summary": "Update In-App Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "update_in_app_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1082,7 +1122,9 @@
           }
         ],
         "summary": "List SMS Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_sms_templates",
         "x-speakeasy-pagination": {
@@ -1099,7 +1141,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1173,11 +1218,16 @@
           }
         ],
         "summary": "Create SMS Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "create_sms_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1286,11 +1336,16 @@
           }
         ],
         "summary": "Get SMS Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_sms_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1372,11 +1427,16 @@
           }
         ],
         "summary": "Update SMS Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "update_sms_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1543,7 +1603,9 @@
           }
         ],
         "summary": "List Omni-Channel Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_omni_channel_templates",
         "x-speakeasy-pagination": {
@@ -1560,7 +1622,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1635,11 +1700,16 @@
           }
         ],
         "summary": "Create Omni-Channel Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "create_omni_channel_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1749,11 +1819,16 @@
           }
         ],
         "summary": "Get Omni-Channel Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_omni_channel_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1836,11 +1911,16 @@
           }
         ],
         "summary": "Update Omni-Channel Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "update_omni_channel_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2006,7 +2086,9 @@
           }
         ],
         "summary": "List Push Templates",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_push_templates",
         "x-speakeasy-pagination": {
@@ -2023,7 +2105,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -2097,11 +2182,16 @@
           }
         ],
         "summary": "Create Push Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "create_push_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2210,11 +2300,16 @@
           }
         ],
         "summary": "Get Push Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_push_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -2296,11 +2391,16 @@
           }
         ],
         "summary": "Update Push Template",
-        "tags": ["Templates"],
+        "tags": [
+          "Templates"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "update_push_template",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2466,7 +2566,9 @@
           }
         ],
         "summary": "List campaigns",
-        "tags": ["Campaigns"],
+        "tags": [
+          "Campaigns"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_campaigns",
         "x-speakeasy-pagination": {
@@ -2483,7 +2585,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2592,11 +2697,16 @@
           }
         ],
         "summary": "Get campaign",
-        "tags": ["Campaigns"],
+        "tags": [
+          "Campaigns"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_campaign",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2762,7 +2872,9 @@
           }
         ],
         "summary": "List Content Blocks",
-        "tags": ["Content Blocks"],
+        "tags": [
+          "Content Blocks"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "list_content_blocks",
         "x-speakeasy-pagination": {
@@ -2779,7 +2891,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -2853,11 +2968,16 @@
           }
         ],
         "summary": "Create Content Block",
-        "tags": ["Content Blocks"],
+        "tags": [
+          "Content Blocks"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "create_content_block",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2966,11 +3086,16 @@
           }
         ],
         "summary": "Get Content Blocks",
-        "tags": ["Content Blocks"],
+        "tags": [
+          "Content Blocks"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "get_content_block",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -3052,11 +3177,16 @@
           }
         ],
         "summary": "Update Content Block",
-        "tags": ["Content Blocks"],
+        "tags": [
+          "Content Blocks"
+        ],
         "x-speakeasy-group": "marketing",
         "x-speakeasy-name-override": "update_content_block",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3157,7 +3287,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -3169,7 +3302,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -3266,7 +3402,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CampaignsPaginated": {
         "type": "object",
@@ -3294,7 +3432,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ChannelsEnum": {
         "type": "object",
@@ -3419,7 +3559,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ContentBlocksPaginated": {
         "type": "object",
@@ -3447,14 +3589,21 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ContentBlockStatusEnumApiModel": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["draft", "live", "archived", null],
+            "enum": [
+              "draft",
+              "live",
+              "archived",
+              null
+            ],
             "description": "The Status of the content blocks.",
             "example": "live",
             "x-speakeasy-unknown-values": "allow",
@@ -3490,7 +3639,13 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["text", "html", "image", "code-snippet", null],
+            "enum": [
+              "text",
+              "html",
+              "image",
+              "code-snippet",
+              null
+            ],
             "description": "The type of the content blocks.",
             "example": "html",
             "x-speakeasy-unknown-values": "allow",
@@ -3579,7 +3734,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "CreateResultDataApiModel": {
         "type": "object",
@@ -3723,7 +3883,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EmailTemplatesPaginated": {
         "type": "object",
@@ -3751,7 +3913,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "InAppMessageContents": {
         "type": "object",
@@ -3862,7 +4026,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "InAppTemplatesPaginated": {
         "type": "object",
@@ -3890,7 +4056,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "MarketingCreateContentBlocksRequestDto": {
         "type": "object",
@@ -4301,7 +4469,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "PushTemplatesPaginated": {
         "type": "object",
@@ -4329,7 +4499,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "RawResponse": {
         "type": "object",
@@ -4350,14 +4522,24 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "ScheduleTypeEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["immediate", "scheduled", "recurring", "custom", "triggered", null],
+            "enum": [
+              "immediate",
+              "scheduled",
+              "recurring",
+              "custom",
+              "triggered",
+              null
+            ],
             "description": "The schedule type of the campaign.",
             "example": "immediate",
             "x-speakeasy-unknown-values": "allow",
@@ -4501,7 +4683,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "SmsTemplatesPaginated": {
         "type": "object",
@@ -4529,14 +4713,21 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "StatusEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["draft", "archived", "live", null],
+            "enum": [
+              "draft",
+              "archived",
+              "live",
+              null
+            ],
             "description": "The Status of the campaign.",
             "example": "email",
             "x-speakeasy-unknown-values": "allow",
@@ -4623,7 +4814,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TemplatesPaginated": {
         "type": "object",
@@ -4651,7 +4844,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       }
     }
   },

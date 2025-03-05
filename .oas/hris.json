@@ -162,7 +162,9 @@
           }
         ],
         "summary": "List Companies",
-        "tags": ["Companies"],
+        "tags": [
+          "Companies"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_companies",
         "x-speakeasy-pagination": {
@@ -179,7 +181,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -288,11 +293,16 @@
           }
         ],
         "summary": "Get Company",
-        "tags": ["Companies"],
+        "tags": [
+          "Companies"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_company",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -458,11 +468,16 @@
           }
         ],
         "summary": "List employee Custom Field Definitions",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_custom_field_definitions",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -636,11 +651,16 @@
           }
         ],
         "summary": "Get employee Custom Field Definition",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee_custom_field_definition",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -838,7 +858,9 @@
           }
         ],
         "summary": "List Employees",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employees",
         "x-speakeasy-pagination": {
@@ -855,7 +877,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         },
         "x-speakeasy-usage-example": {
@@ -933,11 +958,16 @@
           }
         ],
         "summary": "Creates an employee",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_employee",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1068,11 +1098,16 @@
           }
         ],
         "summary": "Get Employee",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1154,11 +1189,16 @@
           }
         ],
         "summary": "Updates an employee",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "update_employee",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1242,11 +1282,16 @@
           }
         ],
         "summary": "Invite Employee",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "invite_employee",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1428,7 +1473,9 @@
           }
         ],
         "summary": "List Employee Time Off Requests",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_time_off_requests",
         "x-speakeasy-pagination": {
@@ -1445,7 +1492,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1527,11 +1577,16 @@
           }
         ],
         "summary": "Create Employee Time Off Request",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_employee_time_off_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1648,11 +1703,16 @@
           }
         ],
         "summary": "Get Employees Time Off Request",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employees_time_off_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1736,11 +1796,16 @@
           }
         ],
         "summary": "Batch Upload Employee Document",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "batch_upload_employee_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1824,11 +1889,16 @@
           }
         ],
         "summary": "Upload Employee Document",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "upload_employee_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1922,11 +1992,16 @@
           }
         ],
         "summary": "Download Employee Document",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "download_employee_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2100,7 +2175,9 @@
           }
         ],
         "summary": "List Employee Documents",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_documents",
         "x-speakeasy-pagination": {
@@ -2117,7 +2194,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2234,11 +2314,16 @@
           }
         ],
         "summary": "Get Employee Document",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2404,7 +2489,9 @@
           }
         ],
         "summary": "List Employee Document Categories",
-        "tags": ["Documents"],
+        "tags": [
+          "Documents"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_categories",
         "x-speakeasy-pagination": {
@@ -2421,7 +2508,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2530,11 +2620,16 @@
           }
         ],
         "summary": "Get Employee Document Category",
-        "tags": ["Documents"],
+        "tags": [
+          "Documents"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee_document_category",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2708,7 +2803,9 @@
           }
         ],
         "summary": "List Employee Work Eligibility",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_work_eligibility",
         "x-speakeasy-pagination": {
@@ -2725,7 +2822,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -2807,11 +2907,16 @@
           }
         ],
         "summary": "Create Employee Work Eligibility Request",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_employee_work_eligibility_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2928,11 +3033,16 @@
           }
         ],
         "summary": "Get Employees Work Eligibility",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employees_work_eligibility",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -3015,11 +3125,16 @@
           }
         ],
         "summary": "Update Employee Work Eligibility Request",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "update_employee_work_eligibility_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3214,7 +3329,9 @@
           }
         ],
         "summary": "List Employee Time Off Balances",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_time_off_balances",
         "x-speakeasy-pagination": {
@@ -3231,7 +3348,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3359,11 +3479,16 @@
           }
         ],
         "summary": "Get Employee Time Off Balance",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee_time_off_balance",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3540,7 +3665,9 @@
           }
         ],
         "summary": "List Employments",
-        "tags": ["Employments"],
+        "tags": [
+          "Employments"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employments",
         "x-speakeasy-pagination": {
@@ -3557,7 +3684,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3677,11 +3807,16 @@
           }
         ],
         "summary": "Get Employment",
-        "tags": ["Employments"],
+        "tags": [
+          "Employments"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3866,7 +4001,9 @@
           }
         ],
         "summary": "List Employee Employments",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_employments",
         "x-speakeasy-pagination": {
@@ -3883,7 +4020,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -3965,11 +4105,16 @@
           }
         ],
         "summary": "Create Employee Employment",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_employee_employment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4097,11 +4242,16 @@
           }
         ],
         "summary": "Get Employee Employment",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee_employment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -4191,11 +4341,16 @@
           }
         ],
         "summary": "Update Employee Employment",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "update_employee_employment",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4361,7 +4516,9 @@
           }
         ],
         "summary": "List locations",
-        "tags": ["Locations"],
+        "tags": [
+          "Locations"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_locations",
         "x-speakeasy-pagination": {
@@ -4378,7 +4535,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4487,11 +4647,16 @@
           }
         ],
         "summary": "Get Location",
-        "tags": ["Locations"],
+        "tags": [
+          "Locations"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_location",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4665,7 +4830,9 @@
           }
         ],
         "summary": "List time off requests",
-        "tags": ["Time Off"],
+        "tags": [
+          "Time Off"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_time_off_requests",
         "x-speakeasy-pagination": {
@@ -4682,7 +4849,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -4756,11 +4926,16 @@
           }
         ],
         "summary": "Creates a time off request",
-        "tags": ["Time Off"],
+        "tags": [
+          "Time Off"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_time_off_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4869,11 +5044,16 @@
           }
         ],
         "summary": "Get time off request",
-        "tags": ["Time Off"],
+        "tags": [
+          "Time Off"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_time_off_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -4955,11 +5135,16 @@
           }
         ],
         "summary": "Update time off request",
-        "tags": ["Time Off"],
+        "tags": [
+          "Time Off"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "update_time_off_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5125,7 +5310,9 @@
           }
         ],
         "summary": "List time off types",
-        "tags": ["Time Off"],
+        "tags": [
+          "Time Off"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_time_off_types",
         "x-speakeasy-pagination": {
@@ -5142,7 +5329,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5251,11 +5441,16 @@
           }
         ],
         "summary": "Get time off type",
-        "tags": ["Time Off"],
+        "tags": [
+          "Time Off"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_time_off_type",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5441,7 +5636,9 @@
           }
         ],
         "summary": "List Time Entries",
-        "tags": ["Time Entries"],
+        "tags": [
+          "Time Entries"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_time_entries",
         "x-speakeasy-pagination": {
@@ -5458,7 +5655,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5567,11 +5767,16 @@
           }
         ],
         "summary": "Get Time Entry",
-        "tags": ["Time Entries"],
+        "tags": [
+          "Time Entries"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_time_entries",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5737,7 +5942,9 @@
           }
         ],
         "summary": "List benefits",
-        "tags": ["Benefits"],
+        "tags": [
+          "Benefits"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_benefits",
         "x-speakeasy-pagination": {
@@ -5754,7 +5961,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5863,11 +6073,16 @@
           }
         ],
         "summary": "Get Benefit",
-        "tags": ["Benefits"],
+        "tags": [
+          "Benefits"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_benefit",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6033,7 +6248,9 @@
           }
         ],
         "summary": "List Groups",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_groups",
         "x-speakeasy-pagination": {
@@ -6050,7 +6267,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6216,7 +6436,9 @@
           }
         ],
         "summary": "List Department Groups",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_department_groups",
         "x-speakeasy-pagination": {
@@ -6233,7 +6455,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6399,7 +6624,9 @@
           }
         ],
         "summary": "List Cost Center Groups",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_cost_center_groups",
         "x-speakeasy-pagination": {
@@ -6416,7 +6643,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6582,7 +6812,9 @@
           }
         ],
         "summary": "List Team Groups",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_team_groups",
         "x-speakeasy-pagination": {
@@ -6599,7 +6831,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6708,11 +6943,16 @@
           }
         ],
         "summary": "Get Group",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_group",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6821,11 +7061,16 @@
           }
         ],
         "summary": "Get Department Group",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_department_group",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6934,11 +7179,16 @@
           }
         ],
         "summary": "Get Cost Center Group",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_cost_center_group",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7047,11 +7297,16 @@
           }
         ],
         "summary": "Get Team Group",
-        "tags": ["Groups"],
+        "tags": [
+          "Groups"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_team_group",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7217,7 +7472,9 @@
           }
         ],
         "summary": "List Jobs",
-        "tags": ["Jobs"],
+        "tags": [
+          "Jobs"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_jobs",
         "x-speakeasy-pagination": {
@@ -7234,7 +7491,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7343,11 +7603,16 @@
           }
         ],
         "summary": "Get Job",
-        "tags": ["Jobs"],
+        "tags": [
+          "Jobs"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_job",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7521,7 +7786,9 @@
           }
         ],
         "summary": "List Employee Skills",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_employee_skills",
         "x-speakeasy-pagination": {
@@ -7538,7 +7805,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -7620,11 +7890,16 @@
           }
         ],
         "summary": "Create Employee Skill",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "create_employee_skill",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7741,11 +8016,16 @@
           }
         ],
         "summary": "Get Employee Skill",
-        "tags": ["Employees"],
+        "tags": [
+          "Employees"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_employee_skill",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7911,7 +8191,9 @@
           }
         ],
         "summary": "List Time Off Policies",
-        "tags": ["Time Off Policies"],
+        "tags": [
+          "Time Off Policies"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "list_time_off_policies",
         "x-speakeasy-pagination": {
@@ -7928,7 +8210,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8037,11 +8322,16 @@
           }
         ],
         "summary": "Get Time Off Policy",
-        "tags": ["Time Off Policies"],
+        "tags": [
+          "Time Off Policies"
+        ],
         "x-speakeasy-group": "hris",
         "x-speakeasy-name-override": "get_time_off_policy",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8141,7 +8431,13 @@
           },
           "errors": {
             "type": "array",
-            "example": [["Missing field: name"], [], []],
+            "example": [
+              [
+                "Missing field: name"
+              ],
+              [],
+              []
+            ],
             "items": {
               "type": "array",
               "items": {
@@ -8219,7 +8515,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Company": {
         "type": "object",
@@ -8288,7 +8586,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ConfidentialEnumApiModel": {
         "type": "object",
@@ -8296,7 +8596,11 @@
           "value": {
             "type": "string",
             "description": "Whether the file is confidential or not",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "example": "true",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -8389,7 +8693,13 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["full_time", "shifts", "part_time", "unmapped_value", null],
+            "enum": [
+              "full_time",
+              "shifts",
+              "part_time",
+              "unmapped_value",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -8995,7 +9305,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "CreateResultDataApiModel": {
         "type": "object",
@@ -9049,7 +9364,12 @@
           },
           "options": {
             "description": "An array of possible options for the custom field.",
-            "example": ["Not Started", "In Progress", "Completed", "Overdue"],
+            "example": [
+              "Not Started",
+              "In Progress",
+              "Completed",
+              "Overdue"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -9089,7 +9409,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CustomFieldDefinitionsPaginated": {
         "type": "object",
@@ -9117,7 +9439,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CustomFields": {
         "type": "object",
@@ -9227,7 +9551,14 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["department", "company", "division", "group", "project", null],
+            "enum": [
+              "department",
+              "company",
+              "division",
+              "group",
+              "project",
+              null
+            ],
             "example": "department",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -9660,7 +9991,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EmployeesPaginated": {
         "type": "object",
@@ -9688,7 +10021,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Employment": {
         "type": "object",
@@ -9993,14 +10328,22 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EmploymentScheduleTypeEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["full_time", "shifts", "part_time", "unmapped_value", null],
+            "enum": [
+              "full_time",
+              "shifts",
+              "part_time",
+              "unmapped_value",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -10053,7 +10396,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EmploymentStatusEnum": {
         "type": "object",
@@ -10161,7 +10506,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EntitySkills": {
         "type": "object",
@@ -10275,7 +10622,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EthnicityEnum": {
         "type": "object",
@@ -11778,7 +12127,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "HRISBenefit": {
         "type": "object",
@@ -11852,7 +12203,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISBenefitsPaginated": {
         "type": "object",
@@ -11880,7 +12233,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISCostCenter": {
         "type": "object",
@@ -11915,7 +12270,10 @@
           },
           "parent_ids": {
             "description": "The list of parent group ids of the given group",
-            "example": ["cxIQNjUyNDM0", "cxIQNjQzNzI0MQ"],
+            "example": [
+              "cxIQNjUyNDM0",
+              "cxIQNjQzNzI0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11924,7 +12282,10 @@
           },
           "remote_parent_ids": {
             "description": "Provider's list of parent group remote ids of the given group",
-            "example": ["652434", "6437241"],
+            "example": [
+              "652434",
+              "6437241"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11933,7 +12294,10 @@
           },
           "owner_ids": {
             "description": "The list of group owner ids of the given group",
-            "example": ["cxIQNjUyEDM0", "cxIQNjQzNzA0MQ"],
+            "example": [
+              "cxIQNjUyEDM0",
+              "cxIQNjQzNzA0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11942,7 +12306,10 @@
           },
           "remote_owner_ids": {
             "description": "The list of remote group owner ids of the given group",
-            "example": ["475364", "4327652"],
+            "example": [
+              "475364",
+              "4327652"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11992,7 +12359,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISCostCenterResult": {
         "type": "object",
@@ -12008,7 +12377,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HrisCreateEmployeeRequestDto": {
         "type": "object",
@@ -12495,7 +12866,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -12509,7 +12883,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -12620,7 +12997,10 @@
           },
           "parent_ids": {
             "description": "The list of parent group ids of the given group",
-            "example": ["cxIQNjUyNDM0", "cxIQNjQzNzI0MQ"],
+            "example": [
+              "cxIQNjUyNDM0",
+              "cxIQNjQzNzI0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -12629,7 +13009,10 @@
           },
           "remote_parent_ids": {
             "description": "Provider's list of parent group remote ids of the given group",
-            "example": ["652434", "6437241"],
+            "example": [
+              "652434",
+              "6437241"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -12638,7 +13021,10 @@
           },
           "owner_ids": {
             "description": "The list of group owner ids of the given group",
-            "example": ["cxIQNjUyEDM0", "cxIQNjQzNzA0MQ"],
+            "example": [
+              "cxIQNjUyEDM0",
+              "cxIQNjQzNzA0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -12647,7 +13033,10 @@
           },
           "remote_owner_ids": {
             "description": "The list of remote group owner ids of the given group",
-            "example": ["475364", "4327652"],
+            "example": [
+              "475364",
+              "4327652"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -12692,7 +13081,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISDepartmentsResult": {
         "type": "object",
@@ -12708,7 +13099,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HrisDocumentApiModel": {
         "type": "object",
@@ -12827,7 +13220,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HrisDocumentsPaginated": {
         "type": "object",
@@ -12855,7 +13250,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HrisDocumentsUploadCategoryEnumApiModel": {
         "type": "object",
@@ -13056,7 +13453,10 @@
           },
           "parent_ids": {
             "description": "The list of parent group ids of the given group",
-            "example": ["cxIQNjUyNDM0", "cxIQNjQzNzI0MQ"],
+            "example": [
+              "cxIQNjUyNDM0",
+              "cxIQNjQzNzI0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13065,7 +13465,10 @@
           },
           "remote_parent_ids": {
             "description": "Provider's list of parent group remote ids of the given group",
-            "example": ["652434", "6437241"],
+            "example": [
+              "652434",
+              "6437241"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13074,7 +13477,10 @@
           },
           "owner_ids": {
             "description": "The list of group owner ids of the given group",
-            "example": ["cxIQNjUyEDM0", "cxIQNjQzNzA0MQ"],
+            "example": [
+              "cxIQNjUyEDM0",
+              "cxIQNjQzNzA0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13083,7 +13489,10 @@
           },
           "remote_owner_ids": {
             "description": "The list of remote group owner ids of the given group",
-            "example": ["475364", "4327652"],
+            "example": [
+              "475364",
+              "4327652"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13127,7 +13536,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISGroupsResult": {
         "type": "object",
@@ -13143,7 +13554,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HrisInviteEmployeeRequestDto": {
         "type": "object",
@@ -13287,7 +13700,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISLocationsPaginated": {
         "type": "object",
@@ -13315,7 +13730,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISTeam": {
         "type": "object",
@@ -13350,7 +13767,10 @@
           },
           "parent_ids": {
             "description": "The list of parent group ids of the given group",
-            "example": ["cxIQNjUyNDM0", "cxIQNjQzNzI0MQ"],
+            "example": [
+              "cxIQNjUyNDM0",
+              "cxIQNjQzNzI0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13359,7 +13779,10 @@
           },
           "remote_parent_ids": {
             "description": "Provider's list of parent group remote ids of the given group",
-            "example": ["652434", "6437241"],
+            "example": [
+              "652434",
+              "6437241"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13368,7 +13791,10 @@
           },
           "owner_ids": {
             "description": "The list of group owner ids of the given group",
-            "example": ["cxIQNjUyEDM0", "cxIQNjQzNzA0MQ"],
+            "example": [
+              "cxIQNjUyEDM0",
+              "cxIQNjQzNzA0MQ"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13377,7 +13803,10 @@
           },
           "remote_owner_ids": {
             "description": "The list of remote group owner ids of the given group",
-            "example": ["475364", "4327652"],
+            "example": [
+              "475364",
+              "4327652"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13422,7 +13851,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HRISTeamsResult": {
         "type": "object",
@@ -13438,7 +13869,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "HrisUpdateEmployeeRequestDto": {
         "type": "object",
@@ -13778,7 +14211,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "ISO3166_2SubDivisionEnum": {
         "type": "object",
@@ -17714,7 +18152,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "JobsPaginated": {
         "type": "object",
@@ -17742,14 +18182,24 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "JobStatusEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["draft", "pending", "archived", "closed", "open", "deleted", null],
+            "enum": [
+              "draft",
+              "pending",
+              "archived",
+              "closed",
+              "open",
+              "deleted",
+              null
+            ],
             "description": "The status of the job.",
             "example": "active",
             "x-speakeasy-unknown-values": "allow",
@@ -18240,7 +18690,12 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["home", "work", "unmapped_value", null],
+            "enum": [
+              "home",
+              "work",
+              "unmapped_value",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -18801,7 +19256,14 @@
           },
           "value": {
             "type": "string",
-            "enum": ["1", "2", "3", "4", "5", null],
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -18876,7 +19338,10 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "Reference": {
         "type": "object",
@@ -18908,7 +19373,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -18941,7 +19409,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ReferenceResult": {
         "type": "object",
@@ -18957,7 +19427,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "RoleTypeEnum": {
         "type": "object",
@@ -19006,7 +19478,10 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["team", null],
+            "enum": [
+              "team",
+              null
+            ],
             "example": "team",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -19166,7 +19641,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeEntriesResult": {
         "type": "object",
@@ -19182,14 +19659,20 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeEntryStatusEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["approved", "unmapped_value", null],
+            "enum": [
+              "approved",
+              "unmapped_value",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -19296,7 +19779,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -19310,7 +19796,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -19352,7 +19841,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeOffBalances": {
         "type": "object",
@@ -19468,14 +19959,25 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeOffBalanceUnitEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["minutes", "hours", "days", "weeks", "months", "years", "unknown", null],
+            "enum": [
+              "minutes",
+              "hours",
+              "days",
+              "weeks",
+              "months",
+              "years",
+              "unknown",
+              null
+            ],
             "description": "The unified value for the duration unit of the time off balance. If the provider does not specify this unit, the value will be set to unknown",
             "example": "hours",
             "x-speakeasy-unknown-values": "allow",
@@ -19530,7 +20032,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeOffPolicies": {
         "type": "object",
@@ -19606,7 +20110,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeOffPolicyResult": {
         "type": "object",
@@ -19622,7 +20128,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeOffPolicyTypeEnum": {
         "type": "object",
@@ -19684,14 +20192,23 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "TimeOffStatusEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["approved", "cancelled", "rejected", "pending", "unmapped_value", null],
+            "enum": [
+              "approved",
+              "cancelled",
+              "rejected",
+              "pending",
+              "unmapped_value",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -20250,7 +20767,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "WorkEligibilityResult": {
         "type": "object",
@@ -20266,14 +20785,23 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "WorkEligibilityTypeEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["visa", "passport", "driver_license", "birth_certificate", "other", null],
+            "enum": [
+              "visa",
+              "passport",
+              "driver_license",
+              "birth_certificate",
+              "other",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },

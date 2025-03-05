@@ -82,11 +82,16 @@
           }
         ],
         "summary": "Download File",
-        "tags": ["Files"],
+        "tags": [
+          "Files"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "download_file",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -162,11 +167,16 @@
           }
         ],
         "summary": "Upload File",
-        "tags": ["Files"],
+        "tags": [
+          "Files"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "upload_file",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -328,7 +338,9 @@
           }
         ],
         "summary": "List Files",
-        "tags": ["Files"],
+        "tags": [
+          "Files"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "list_files",
         "x-speakeasy-pagination": {
@@ -345,7 +357,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -454,11 +469,16 @@
           }
         ],
         "summary": "Get File",
-        "tags": ["Files"],
+        "tags": [
+          "Files"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "get_file",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -542,7 +562,9 @@
           }
         ],
         "summary": "Search Files",
-        "tags": ["Files"],
+        "tags": [
+          "Files"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "search_files",
         "x-speakeasy-pagination": {
@@ -559,7 +581,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -721,7 +746,9 @@
           }
         ],
         "summary": "List Folders",
-        "tags": ["Folders"],
+        "tags": [
+          "Folders"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "list_folders",
         "x-speakeasy-pagination": {
@@ -738,7 +765,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -847,11 +877,16 @@
           }
         ],
         "summary": "Get Folder",
-        "tags": ["Folders"],
+        "tags": [
+          "Folders"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "get_folder",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1013,7 +1048,9 @@
           }
         ],
         "summary": "List Drives",
-        "tags": ["Drives"],
+        "tags": [
+          "Drives"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "list_drives",
         "x-speakeasy-pagination": {
@@ -1030,7 +1067,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1139,11 +1179,16 @@
           }
         ],
         "summary": "Get Drive",
-        "tags": ["Drives"],
+        "tags": [
+          "Drives"
+        ],
         "x-speakeasy-group": "documents",
         "x-speakeasy-name-override": "get_drive",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1188,7 +1233,11 @@
           "value": {
             "type": "string",
             "description": "Whether the file is confidential or not",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "example": "true",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -1250,7 +1299,9 @@
             ]
           }
         },
-        "required": ["query"]
+        "required": [
+          "query"
+        ]
       },
       "DriveResult": {
         "type": "object",
@@ -1266,7 +1317,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Drives": {
         "type": "object",
@@ -1338,7 +1391,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "FileFormatEnum": {
         "type": "object",
@@ -2602,7 +2657,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Files": {
         "type": "object",
@@ -2666,7 +2723,9 @@
           },
           "export_formats": {
             "description": "List of supported export formats",
-            "example": ["application/pdf"],
+            "example": [
+              "application/pdf"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -2740,7 +2799,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "FolderResult": {
         "type": "object",
@@ -2756,7 +2817,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Folders": {
         "type": "object",
@@ -2876,7 +2939,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "OperationTypeEnumApiModel": {
         "type": "object",
@@ -2884,7 +2949,13 @@
           "value": {
             "type": "string",
             "description": "The operation type of the query",
-            "enum": ["contains", "equals", "not_equals", "unmapped_value", null],
+            "enum": [
+              "contains",
+              "equals",
+              "not_equals",
+              "unmapped_value",
+              null
+            ],
             "example": "contains",
             "default": "contains",
             "x-speakeasy-unknown-values": "allow",
@@ -2962,7 +3033,10 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "UnifiedListRequestDto": {
         "type": "object",

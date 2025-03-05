@@ -59,10 +59,15 @@
           }
         ],
         "summary": "Create Connect Session",
-        "tags": ["Connect Sessions"],
+        "tags": [
+          "Connect Sessions"
+        ],
         "x-speakeasy-name-override": "create_connect_session",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -126,10 +131,15 @@
           }
         ],
         "summary": "Authenticate Connect Session",
-        "tags": ["Connect Sessions"],
+        "tags": [
+          "Connect Sessions"
+        ],
         "x-speakeasy-name-override": "authenticate_connect_session",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -264,10 +274,15 @@
           }
         ],
         "summary": "List Accounts",
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "x-speakeasy-name-override": "list_linked_accounts",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -329,10 +344,15 @@
           }
         ],
         "summary": "Get Account",
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "x-speakeasy-name-override": "get_account",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -402,10 +422,15 @@
           }
         ],
         "summary": "Update Account",
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "x-speakeasy-name-override": "update_account",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -468,10 +493,15 @@
           }
         ],
         "summary": "Delete Account",
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "x-speakeasy-name-override": "delete_account",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -536,10 +566,15 @@
           }
         ],
         "summary": "Get meta information of the account",
-        "tags": ["Accounts"],
+        "tags": [
+          "Accounts"
+        ],
         "x-speakeasy-name-override": "get_account_meta_info",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -607,10 +642,15 @@
           }
         ],
         "summary": "List Connectors Meta Information for all providers",
-        "tags": ["Connectors"],
+        "tags": [
+          "Connectors"
+        ],
         "x-speakeasy-name-override": "list_connectors_meta",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -686,10 +726,15 @@
           }
         ],
         "summary": "Get Connector Meta information for the given provider key",
-        "tags": ["Connectors"],
+        "tags": [
+          "Connectors"
+        ],
         "x-speakeasy-name-override": "get_connector_meta",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -759,10 +804,15 @@
           }
         ],
         "summary": "Proxy Request",
-        "tags": ["Proxy"],
+        "tags": [
+          "Proxy"
+        ],
         "x-speakeasy-name-override": "proxy_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -901,7 +951,12 @@
             ]
           }
         },
-        "required": ["provider", "provider_name", "category", "models"]
+        "required": [
+          "provider",
+          "provider_name",
+          "category",
+          "models"
+        ]
       },
       "ConnectorsMetaResources": {
         "type": "object",
@@ -1021,7 +1076,9 @@
             "description": "The token to authenticate with"
           }
         },
-        "required": ["token"]
+        "required": [
+          "token"
+        ]
       },
       "ConnectSessionCreate": {
         "type": "object",
@@ -1104,7 +1161,10 @@
             "nullable": true
           }
         },
-        "required": ["origin_owner_id", "origin_owner_name"]
+        "required": [
+          "origin_owner_id",
+          "origin_owner_name"
+        ]
       },
       "ConnectSessionTokenAuthLink": {
         "type": "object",
@@ -1208,7 +1268,11 @@
           },
           "status": {
             "type": "string",
-            "enum": ["active", "inactive", "error"],
+            "enum": [
+              "active",
+              "inactive",
+              "error"
+            ],
             "x-speakeasy-unknown-values": "allow"
           },
           "status_reasons": {
@@ -1285,7 +1349,11 @@
             "additionalProperties": true
           }
         },
-        "required": ["provider", "category", "models"]
+        "required": [
+          "provider",
+          "category",
+          "models"
+        ]
       },
       "PatchAccountExternalDto": {
         "type": "object",
@@ -1347,7 +1415,14 @@
           "method": {
             "type": "string",
             "description": "The method of the request",
-            "enum": ["get", "post", "put", "delete", "patch", null],
+            "enum": [
+              "get",
+              "post",
+              "put",
+              "delete",
+              "patch",
+              null
+            ],
             "default": "get",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -1391,7 +1466,9 @@
             "type": "string"
           }
         },
-        "required": ["timestamp"]
+        "required": [
+          "timestamp"
+        ]
       }
     }
   },

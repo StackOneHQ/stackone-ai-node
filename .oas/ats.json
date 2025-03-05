@@ -224,7 +224,9 @@
           }
         ],
         "summary": "List Applications",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_applications",
         "x-speakeasy-pagination": {
@@ -241,7 +243,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -315,11 +320,16 @@
           }
         ],
         "summary": "Create Application",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_application",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -450,11 +460,16 @@
           }
         ],
         "summary": "Get Application",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -536,11 +551,16 @@
           }
         ],
         "summary": "Update an Application",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "update_application",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -725,7 +745,9 @@
           }
         ],
         "summary": "List Application Offers",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_applications_offers",
         "x-speakeasy-pagination": {
@@ -742,7 +764,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -826,11 +851,16 @@
           }
         ],
         "summary": "Move Application",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "move_application",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -914,11 +944,16 @@
           }
         ],
         "summary": "Reject Application",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "reject_application",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1035,11 +1070,16 @@
           }
         ],
         "summary": "Get Application Offer",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application_offer",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1224,7 +1264,9 @@
           }
         ],
         "summary": "List Application Scorecards",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_application_scorecards",
         "x-speakeasy-pagination": {
@@ -1241,7 +1283,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1358,11 +1403,16 @@
           }
         ],
         "summary": "Get Application Scorecard",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application_scorecard",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1547,7 +1597,9 @@
           }
         ],
         "summary": "List Application Notes",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_application_notes",
         "x-speakeasy-pagination": {
@@ -1564,7 +1616,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1646,11 +1701,16 @@
           }
         ],
         "summary": "Create Application Note",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_application_note",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -1767,11 +1827,16 @@
           }
         ],
         "summary": "Get Application Note",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application_note",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -1861,11 +1926,16 @@
           }
         ],
         "summary": "Update an Application Note",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "update_application_note",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2050,7 +2120,9 @@
           }
         ],
         "summary": "List Applications scheduled interviews",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_applications_scheduled_interviews",
         "x-speakeasy-pagination": {
@@ -2067,7 +2139,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2184,11 +2259,16 @@
           }
         ],
         "summary": "Get Applications scheduled interview",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application_scheduled_interview",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2272,11 +2352,16 @@
           }
         ],
         "summary": "Upload Application Document",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "upload_application_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2370,11 +2455,16 @@
           }
         ],
         "summary": "Download Application Document",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "download_application_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2564,7 +2654,9 @@
           }
         ],
         "summary": "List Application Documents",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_application_documents",
         "x-speakeasy-pagination": {
@@ -2581,7 +2673,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2698,11 +2793,16 @@
           }
         ],
         "summary": "Get Application Document",
-        "tags": ["Applications"],
+        "tags": [
+          "Applications"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application_document",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -2902,7 +3002,9 @@
           }
         ],
         "summary": "List Candidates",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_candidates",
         "x-speakeasy-pagination": {
@@ -2919,7 +3021,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -2993,11 +3098,16 @@
           }
         ],
         "summary": "Create Candidate",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_candidate",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3117,11 +3227,16 @@
           }
         ],
         "summary": "Get Candidate",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_candidate",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -3203,11 +3318,16 @@
           }
         ],
         "summary": "Update Candidate",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "update_candidate",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3392,7 +3512,9 @@
           }
         ],
         "summary": "List Candidate Notes",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_candidate_notes",
         "x-speakeasy-pagination": {
@@ -3409,7 +3531,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -3491,11 +3616,16 @@
           }
         ],
         "summary": "Create Candidate Note",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_candidate_note",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3612,11 +3742,16 @@
           }
         ],
         "summary": "Get Candidate Note",
-        "tags": ["Candidates"],
+        "tags": [
+          "Candidates"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_candidate_note",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3782,7 +3917,9 @@
           }
         ],
         "summary": "List Application Custom Field Definitions",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_application_custom_field_definitions",
         "x-speakeasy-pagination": {
@@ -3799,7 +3936,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -3973,11 +4113,16 @@
           }
         ],
         "summary": "Get Application Custom Field Definition",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_application_custom_field_definition",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4143,7 +4288,9 @@
           }
         ],
         "summary": "List Candidate Custom Field Definitions",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_candidate_custom_field_definitions",
         "x-speakeasy-pagination": {
@@ -4160,7 +4307,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4334,11 +4484,16 @@
           }
         ],
         "summary": "Get Candidate Custom Field Definition",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_candidate_custom_field_definition",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4504,7 +4659,9 @@
           }
         ],
         "summary": "List Job Custom Field Definitions",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_job_custom_field_definitions",
         "x-speakeasy-pagination": {
@@ -4521,7 +4678,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4695,11 +4855,16 @@
           }
         ],
         "summary": "Get Job Custom Field Definition",
-        "tags": ["Custom Field Definitions"],
+        "tags": [
+          "Custom Field Definitions"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_job_custom_field_definition",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -4876,7 +5041,9 @@
           }
         ],
         "summary": "List Departments",
-        "tags": ["Departments"],
+        "tags": [
+          "Departments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_departments",
         "x-speakeasy-pagination": {
@@ -4893,7 +5060,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5002,11 +5172,16 @@
           }
         ],
         "summary": "Get Department",
-        "tags": ["Departments"],
+        "tags": [
+          "Departments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_department",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5183,7 +5358,9 @@
           }
         ],
         "summary": "List Interview Stages",
-        "tags": ["Interview Stages"],
+        "tags": [
+          "Interview Stages"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_interview_stages",
         "x-speakeasy-pagination": {
@@ -5200,7 +5377,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5309,11 +5489,16 @@
           }
         ],
         "summary": "Get Interview Stage",
-        "tags": ["Interview Stages"],
+        "tags": [
+          "Interview Stages"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_interview_stage",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5497,7 +5682,9 @@
           }
         ],
         "summary": "List Interviews",
-        "tags": ["Interviews"],
+        "tags": [
+          "Interviews"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_interviews",
         "x-speakeasy-pagination": {
@@ -5514,7 +5701,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5623,11 +5813,16 @@
           }
         ],
         "summary": "Get Interview",
-        "tags": ["Interviews"],
+        "tags": [
+          "Interviews"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_interview",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -5705,14 +5900,22 @@
                 },
                 "status": {
                   "description": "The status of the job",
-                  "enum": ["open", "draft", null],
+                  "enum": [
+                    "open",
+                    "draft",
+                    null
+                  ],
                   "nullable": true,
                   "type": "string",
                   "deprecated": true
                 },
                 "job_status": {
                   "description": "The job_status of the job",
-                  "enum": ["open", "draft", null],
+                  "enum": [
+                    "open",
+                    "draft",
+                    null
+                  ],
                   "nullable": true,
                   "type": "string"
                 }
@@ -5846,7 +6049,9 @@
           }
         ],
         "summary": "List Jobs",
-        "tags": ["Jobs"],
+        "tags": [
+          "Jobs"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_jobs",
         "x-speakeasy-pagination": {
@@ -5863,7 +6068,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -5937,11 +6145,16 @@
           }
         ],
         "summary": "Create Job",
-        "tags": ["Jobs"],
+        "tags": [
+          "Jobs"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_job",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6072,11 +6285,16 @@
           }
         ],
         "summary": "Get Job",
-        "tags": ["Jobs"],
+        "tags": [
+          "Jobs"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_job",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -6158,11 +6376,16 @@
           }
         ],
         "summary": "Update Job",
-        "tags": ["Jobs"],
+        "tags": [
+          "Jobs"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "update_job",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6328,7 +6551,9 @@
           }
         ],
         "summary": "Get all Lists",
-        "tags": ["Lists"],
+        "tags": [
+          "Lists"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_lists",
         "x-speakeasy-pagination": {
@@ -6345,7 +6570,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6454,11 +6682,16 @@
           }
         ],
         "summary": "Get List",
-        "tags": ["Lists"],
+        "tags": [
+          "Lists"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_list",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6635,7 +6868,9 @@
           }
         ],
         "summary": "List locations",
-        "tags": ["Locations"],
+        "tags": [
+          "Locations"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_locations",
         "x-speakeasy-pagination": {
@@ -6652,7 +6887,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6761,11 +6999,16 @@
           }
         ],
         "summary": "Get Location",
-        "tags": ["Locations"],
+        "tags": [
+          "Locations"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_location",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -6942,7 +7185,9 @@
           }
         ],
         "summary": "List Rejected Reasons",
-        "tags": ["Rejected Reasons"],
+        "tags": [
+          "Rejected Reasons"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_rejected_reasons",
         "x-speakeasy-pagination": {
@@ -6959,7 +7204,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7068,11 +7316,16 @@
           }
         ],
         "summary": "Get Rejected Reason",
-        "tags": ["Rejected Reasons"],
+        "tags": [
+          "Rejected Reasons"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_rejected_reason",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7249,7 +7502,9 @@
           }
         ],
         "summary": "List Users",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_users",
         "x-speakeasy-pagination": {
@@ -7266,7 +7521,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7375,11 +7633,16 @@
           }
         ],
         "summary": "Get User",
-        "tags": ["Users"],
+        "tags": [
+          "Users"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_user",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7574,7 +7837,9 @@
           }
         ],
         "summary": "List Job Postings",
-        "tags": ["Job Postings"],
+        "tags": [
+          "Job Postings"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_job_postings",
         "x-speakeasy-pagination": {
@@ -7591,7 +7856,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7711,11 +7979,16 @@
           }
         ],
         "summary": "Get Job Posting",
-        "tags": ["Job Postings"],
+        "tags": [
+          "Job Postings"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_job_posting",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -7892,7 +8165,9 @@
           }
         ],
         "summary": "List Offers",
-        "tags": ["Offers"],
+        "tags": [
+          "Offers"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_offers",
         "x-speakeasy-pagination": {
@@ -7909,7 +8184,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -7983,11 +8261,16 @@
           }
         ],
         "summary": "Creates an offer",
-        "tags": ["Offers"],
+        "tags": [
+          "Offers"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_offer",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8096,11 +8379,16 @@
           }
         ],
         "summary": "Get Offer",
-        "tags": ["Offers"],
+        "tags": [
+          "Offers"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_offer",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8261,7 +8549,9 @@
           }
         ],
         "summary": "List Assessments Packages",
-        "tags": ["Assessments"],
+        "tags": [
+          "Assessments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_assessments_packages",
         "x-speakeasy-pagination": {
@@ -8278,7 +8568,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8384,11 +8677,16 @@
           }
         ],
         "summary": "Get Assessments Package",
-        "tags": ["Assessments"],
+        "tags": [
+          "Assessments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_assessments_package",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8464,11 +8762,16 @@
           }
         ],
         "summary": "Order Assessments Request",
-        "tags": ["Assessments"],
+        "tags": [
+          "Assessments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "order_assessments_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8575,11 +8878,16 @@
           }
         ],
         "summary": "Get Assessments Requests",
-        "tags": ["Assessments"],
+        "tags": [
+          "Assessments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_assessments_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8663,11 +8971,16 @@
           }
         ],
         "summary": "Update Assessments Result",
-        "tags": ["Assessments"],
+        "tags": [
+          "Assessments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "update_assessments_result",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8776,11 +9089,16 @@
           }
         ],
         "summary": "Get Assessments Results",
-        "tags": ["Assessments"],
+        "tags": [
+          "Assessments"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_assessments_result",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -8942,7 +9260,9 @@
           }
         ],
         "summary": "List Background Check Packages",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_background_check_packages",
         "x-speakeasy-pagination": {
@@ -8959,7 +9279,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -9033,11 +9356,16 @@
           }
         ],
         "summary": "Create Background Check Package",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "create_background_check_package",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -9144,11 +9472,16 @@
           }
         ],
         "summary": "Get Background Check Package",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_background_check_package",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -9310,7 +9643,9 @@
           }
         ],
         "summary": "List Background Check Request",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "list_background_check_request",
         "x-speakeasy-pagination": {
@@ -9327,7 +9662,10 @@
           }
         },
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       },
@@ -9401,11 +9739,16 @@
           }
         ],
         "summary": "Order Background Check Request",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "order_background_check_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -9512,11 +9855,16 @@
           }
         ],
         "summary": "Get Background Check Request",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_background_check_request",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -9600,11 +9948,16 @@
           }
         ],
         "summary": "Update Background Check Result",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "update_background_check_result",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -9713,11 +10066,16 @@
           }
         ],
         "summary": "Get Background Check Results",
-        "tags": ["Background Checks"],
+        "tags": [
+          "Background Checks"
+        ],
         "x-speakeasy-group": "ats",
         "x-speakeasy-name-override": "get_background_check_result",
         "x-speakeasy-retries": {
-          "statusCodes": [429, 408],
+          "statusCodes": [
+            429,
+            408
+          ],
           "strategy": "backoff"
         }
       }
@@ -9830,7 +10188,13 @@
           },
           "values": {
             "description": "Values of the answer",
-            "example": ["Yes", "No Travel", "It sounds pretty cool.", "Excel", "Power Point"],
+            "example": [
+              "Yes",
+              "No Travel",
+              "It sounds pretty cool.",
+              "Excel",
+              "Power Point"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -9964,7 +10328,9 @@
           },
           "rejected_reason_ids": {
             "description": "Unique identifiers of the rejection reasons",
-            "example": ["f223d7f6-908b-48f0-9237-b201c307f609"],
+            "example": [
+              "f223d7f6-908b-48f0-9237-b201c307f609"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -9973,7 +10339,9 @@
           },
           "remote_rejected_reason_ids": {
             "description": "Provider's unique identifiers of the rejection reasons",
-            "example": ["f223d7f6-908b-48f0-9237-b201c307f609"],
+            "example": [
+              "f223d7f6-908b-48f0-9237-b201c307f609"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -10002,7 +10370,9 @@
           },
           "location_ids": {
             "description": "Unique identifiers of the locations",
-            "example": ["dd8d41d1-5eb8-4408-9c87-9ba44604eae4"],
+            "example": [
+              "dd8d41d1-5eb8-4408-9c87-9ba44604eae4"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -10011,7 +10381,9 @@
           },
           "remote_location_ids": {
             "description": "Remote's unique identifiers of the locations",
-            "example": ["dd8d41d1-5eb8-4408-9c87-9ba44604eae4"],
+            "example": [
+              "dd8d41d1-5eb8-4408-9c87-9ba44604eae4"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -10034,7 +10406,9 @@
                 {
                   "id": "answer1",
                   "type": "text",
-                  "values": ["Yes"]
+                  "values": [
+                    "Yes"
+                  ]
                 }
               ]
             },
@@ -10218,7 +10592,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ApplicationsPaginated": {
         "type": "object",
@@ -10246,7 +10622,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ApplicationStatusEnum": {
         "type": "object",
@@ -10383,7 +10761,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AssessmentPackage": {
         "type": "object",
@@ -10440,7 +10820,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AssessmentPackageResult": {
         "type": "object",
@@ -10456,7 +10838,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AssessmentResult": {
         "type": "object",
@@ -10546,7 +10930,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AssessmentTypeEnum": {
         "type": "object",
@@ -10638,7 +11024,9 @@
                 {
                   "id": "answer1",
                   "type": "text",
-                  "values": ["Yes"]
+                  "values": [
+                    "Yes"
+                  ]
                 }
               ]
             },
@@ -10983,7 +11371,11 @@
           },
           "department_ids": {
             "description": "Department ids of the job",
-            "example": ["308570", "308571", "308572"],
+            "example": [
+              "308570",
+              "308571",
+              "308572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -10992,7 +11384,11 @@
           },
           "location_ids": {
             "description": "Location ids of the job",
-            "example": ["668570", "678571", "688572"],
+            "example": [
+              "668570",
+              "678571",
+              "688572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11018,7 +11414,11 @@
           "confidential": {
             "type": "string",
             "description": "Confidential status of the job",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -11243,7 +11643,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AtsDocumentsPaginated": {
         "type": "object",
@@ -11271,7 +11673,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AtsDocumentTypeEnum": {
         "type": "object",
@@ -11368,7 +11772,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ATSLocationsPaginated": {
         "type": "object",
@@ -11396,7 +11802,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "AtsMoveApplicationRequestDto": {
         "type": "object",
@@ -11797,7 +12205,11 @@
           },
           "department_ids": {
             "description": "Department ids of the job",
-            "example": ["308570", "308571", "308572"],
+            "example": [
+              "308570",
+              "308571",
+              "308572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11806,7 +12218,11 @@
           },
           "location_ids": {
             "description": "Location ids of the job",
-            "example": ["668570", "678571", "688572"],
+            "example": [
+              "668570",
+              "678571",
+              "688572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -11832,7 +12248,11 @@
           "confidential": {
             "type": "string",
             "description": "Confidential status of the job",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -11916,7 +12336,11 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["text", "unmapped_value", null],
+            "enum": [
+              "text",
+              "unmapped_value",
+              null
+            ],
             "description": "The content type of the attachment.",
             "example": "text",
             "x-speakeasy-unknown-values": "allow",
@@ -12036,7 +12460,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "BackgroundCheckOrderResult": {
         "type": "object",
@@ -12052,7 +12478,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "BackgroundCheckPackage": {
         "type": "object",
@@ -12117,7 +12545,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "BackgroundCheckPackageResult": {
         "type": "object",
@@ -12133,7 +12563,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "BackgroundCheckResult": {
         "type": "object",
@@ -12223,7 +12655,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "Candidate": {
         "type": "object",
@@ -12409,7 +12843,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CandidatesPaginated": {
         "type": "object",
@@ -12437,7 +12873,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CompensationTypeEnum": {
         "type": "object",
@@ -12489,7 +12927,11 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["equals_to", "contains", null],
+            "enum": [
+              "equals_to",
+              "contains",
+              null
+            ],
             "description": "The type of the question's condition",
             "example": "equals_to",
             "x-speakeasy-unknown-values": "allow",
@@ -12526,7 +12968,11 @@
           "value": {
             "type": "string",
             "description": "Whether the file is confidential or not",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "example": "true",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -12601,7 +13047,13 @@
           },
           "values": {
             "description": "Values of the answer",
-            "example": ["Yes", "No Travel", "It sounds pretty cool.", "Excel", "Power Point"],
+            "example": [
+              "Yes",
+              "No Travel",
+              "It sounds pretty cool.",
+              "Excel",
+              "Power Point"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -12806,7 +13258,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "CreateResultDataApiModel": {
         "type": "object",
@@ -12877,7 +13334,12 @@
           },
           "options": {
             "description": "An array of possible options for the custom field.",
-            "example": ["Not Started", "In Progress", "Completed", "Overdue"],
+            "example": [
+              "Not Started",
+              "In Progress",
+              "Completed",
+              "Overdue"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -12917,7 +13379,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CustomFieldDefinitionsPaginated": {
         "type": "object",
@@ -12945,7 +13409,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "CustomFields": {
         "type": "object",
@@ -13095,7 +13561,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "DepartmentsPaginated": {
         "type": "object",
@@ -13123,14 +13591,22 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "EmploymentContractTypeEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["full_time", "shifts", "part_time", "unmapped_value", null],
+            "enum": [
+              "full_time",
+              "shifts",
+              "part_time",
+              "unmapped_value",
+              null
+            ],
             "description": "The employment contract type.",
             "example": "full_time",
             "x-speakeasy-unknown-values": "allow",
@@ -13261,7 +13737,12 @@
           },
           "values": {
             "description": "The possible values for the field",
-            "example": ["Excellent", "Good", "Average", "Poor"],
+            "example": [
+              "Excellent",
+              "Good",
+              "Average",
+              "Poor"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -13277,7 +13758,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -14755,7 +15239,10 @@
           },
           "interviewer_ids": {
             "description": "The user (interviewer) IDs taking part in this specific interview.",
-            "example": ["cx28iQahdfDHa", "cx28iQokkD78das"],
+            "example": [
+              "cx28iQahdfDHa",
+              "cx28iQokkD78das"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -14764,7 +15251,10 @@
           },
           "remote_interviewer_ids": {
             "description": "Provider's user (interviewer) IDs taking part in this specific interview.",
-            "example": ["cx28iQahdfDHa", "cx28iQokkD78das"],
+            "example": [
+              "cx28iQahdfDHa",
+              "cx28iQokkD78das"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -14839,7 +15329,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "InterviewsResult": {
         "type": "object",
@@ -14855,7 +15347,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "InterviewStage": {
         "type": "object",
@@ -14920,7 +15414,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "InterviewStagesPaginated": {
         "type": "object",
@@ -14948,7 +15444,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "InterviewStatusEnum": {
         "type": "object",
@@ -15098,7 +15596,11 @@
           },
           "department_ids": {
             "description": "Department ids of the job",
-            "example": ["308570", "308571", "308572"],
+            "example": [
+              "308570",
+              "308571",
+              "308572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -15116,7 +15618,11 @@
           },
           "location_ids": {
             "description": "Location ids of the job",
-            "example": ["668570", "678571", "688572"],
+            "example": [
+              "668570",
+              "678571",
+              "688572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -15125,7 +15631,11 @@
           },
           "remote_location_ids": {
             "description": "Provider's location ids of the job",
-            "example": ["668570", "678571", "688572"],
+            "example": [
+              "668570",
+              "678571",
+              "688572"
+            ],
             "nullable": true,
             "type": "array",
             "items": {
@@ -15151,7 +15661,11 @@
           "confidential": {
             "type": "string",
             "description": "Confidential status of the job",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -15269,7 +15783,11 @@
           },
           "internal": {
             "type": "string",
-            "enum": ["true", "false", null],
+            "enum": [
+              "true",
+              "false",
+              null
+            ],
             "example": "true",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -15441,7 +15959,9 @@
                     ],
                     "parent_question": {
                       "id": "question004",
-                      "option_ids": ["1"],
+                      "option_ids": [
+                        "1"
+                      ],
                       "condition_type": "equals_to"
                     }
                   }
@@ -15539,7 +16059,9 @@
                     ],
                     "parent_question": {
                       "id": "question009",
-                      "option_ids": ["1"],
+                      "option_ids": [
+                        "1"
+                      ],
                       "condition_type": "equals_to"
                     }
                   }
@@ -15719,7 +16241,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -15747,7 +16272,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "JobPostingsPaginated": {
         "type": "object",
@@ -15775,7 +16302,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "JobPostingStatusEnum": {
         "type": "object",
@@ -15837,7 +16366,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "JobsPaginated": {
         "type": "object",
@@ -15865,7 +16396,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "JobStatusEnum": {
         "type": "object",
@@ -16007,7 +16540,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ListsPaginated": {
         "type": "object",
@@ -16035,14 +16570,22 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ListTypeEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["candidates", "contacts", "companies", "unmapped_value", null],
+            "enum": [
+              "candidates",
+              "contacts",
+              "companies",
+              "unmapped_value",
+              null
+            ],
             "description": "The type of the list.",
             "example": "contacts",
             "x-speakeasy-unknown-values": "allow",
@@ -16093,7 +16636,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "Note": {
         "type": "object",
@@ -16197,7 +16745,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "NotesPaginated": {
         "type": "object",
@@ -16225,14 +16775,20 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "NotesVisibilityEnum": {
         "type": "object",
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["private", "public", null],
+            "enum": [
+              "private",
+              "public",
+              null
+            ],
             "description": "The visibility of the notes.",
             "example": "public",
             "x-speakeasy-unknown-values": "allow",
@@ -16404,7 +16960,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "OffersResult": {
         "type": "object",
@@ -16420,7 +16978,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "OfferStatusEnum": {
         "type": "object",
@@ -16889,7 +17449,15 @@
           "type": {
             "type": "string",
             "description": "Type of phone number",
-            "enum": ["personal", "work", "mobile", "home", "unknown", "other", null],
+            "enum": [
+              "personal",
+              "work",
+              "mobile",
+              "home",
+              "unknown",
+              "other",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -16968,7 +17536,10 @@
               },
               {
                 "type": "string",
-                "enum": ["true", "false"]
+                "enum": [
+                  "true",
+                  "false"
+                ]
               }
             ],
             "nullable": true
@@ -17101,7 +17672,10 @@
             "nullable": true
           }
         },
-        "required": ["method", "url"]
+        "required": [
+          "method",
+          "url"
+        ]
       },
       "RejectApplicationResult": {
         "type": "object",
@@ -17123,7 +17697,12 @@
             "$ref": "#/components/schemas/CreateResultDataApiModel"
           }
         },
-        "required": ["statusCode", "message", "timestamp", "data"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "data"
+        ]
       },
       "RejectedReason": {
         "type": "object",
@@ -17187,7 +17766,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "RejectedReasonsPaginated": {
         "type": "object",
@@ -17215,7 +17796,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "RejectedReasonTypeEnum": {
         "type": "object",
@@ -17288,7 +17871,14 @@
         "properties": {
           "value": {
             "type": "string",
-            "enum": ["cancelled", "completed", "expired", "failed", "passed", null],
+            "enum": [
+              "cancelled",
+              "completed",
+              "expired",
+              "failed",
+              "passed",
+              null
+            ],
             "description": "The result of the test.",
             "example": "passed",
             "x-speakeasy-unknown-values": "allow",
@@ -17480,7 +18070,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ScheduledInterviewsResult": {
         "type": "object",
@@ -17496,7 +18088,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ScoreApiModel": {
         "type": "object",
@@ -17608,7 +18202,15 @@
             "type": "string",
             "description": "The overall recommendation",
             "example": "recommended",
-            "enum": ["strong_yes", "yes", "no", "strong_no", "no_decision", "unmapped_value", null],
+            "enum": [
+              "strong_yes",
+              "yes",
+              "no",
+              "strong_no",
+              "no_decision",
+              "unmapped_value",
+              null
+            ],
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
           },
@@ -17685,7 +18287,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "ScorecardsResult": {
         "type": "object",
@@ -17701,7 +18305,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "SocialLink": {
         "type": "object",
@@ -17843,7 +18449,11 @@
             "format": "date-time"
           }
         },
-        "required": ["statusCode", "message", "timestamp"]
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp"
+        ]
       },
       "UpdateResultCandidateApiModel": {
         "type": "object",
@@ -17923,7 +18533,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "UsersPaginated": {
         "type": "object",
@@ -17951,7 +18563,9 @@
             }
           }
         },
-        "required": ["data"]
+        "required": [
+          "data"
+        ]
       },
       "WriteResultApiModel": {
         "type": "object",
