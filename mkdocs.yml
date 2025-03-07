@@ -1,7 +1,7 @@
 site_name: StackOne AI SDK
-site_url: https://stackonehq.github.io/stackone-ai-python
-repo_url: https://github.com/StackOneHQ/stackone-ai-python
-repo_name: StackOneHQ/stackone-ai-python
+site_url: https://stackonehq.github.io/stackone-ai-node§
+repo_url: https://github.com/StackOneHQ/stackone-ai-node
+repo_name: StackOneHQ/stackone-ai-node
 
 docs_dir: .docs
 
@@ -42,7 +42,10 @@ nav:
   - Home: index.md
   - Usage:
       - Getting Started: index.md
+      - Account IDs: account-id-usage.md
       - Error Handling: error-handling.md
       - File Uploads: file-uploads.md
-      - Integrations:
-        - OpenAI: openai-integration.md
+      - Custom Base URL: custom-base-url.md
+  - Integrations:
+      - OpenAI: openai-integration.md
+      - AI SDK: ai-sdk-integration.md
