@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.6](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.5...ai-v0.0.6) (2025-03-07)
+
+
+### Bug Fixes
+
+* docs links ([#16](https://github.com/StackOneHQ/stackone-ai-node/issues/16)) ([29fc021](https://github.com/StackOneHQ/stackone-ai-node/commit/29fc021729504db78e11ffc261d9e48bf3dd3c98))
+
 ## [0.0.5](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.4...ai-v0.0.5) (2025-03-05)
 
 
