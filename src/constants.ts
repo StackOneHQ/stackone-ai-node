@@ -1,6 +1,6 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { directoryExists, joinPaths } from './utils/file';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -12,16 +12,16 @@ const determineOasDir = (): string => {
   // First, try to find the .oas directory relative to the module's parent directory
   // This handles both development and when used as a dependency
   const projectRoot = path.resolve(__dirname, '..');
-  const oasDir = path.join(projectRoot, '.oas');
+  const oasDir = joinPaths(projectRoot, '.oas');
 
-  if (fs.existsSync(oasDir)) {
+  if (directoryExists(oasDir)) {
     return oasDir;
   }
 
   // If not found, try to find it relative to the current working directory
   // This is a fallback for unusual project structures
-  const cwdOasDir = path.join(process.cwd(), '.oas');
-  if (fs.existsSync(cwdOasDir)) {
+  const cwdOasDir = joinPaths(process.cwd(), '.oas');
+  if (directoryExists(cwdOasDir)) {
     return cwdOasDir;
   }
 
