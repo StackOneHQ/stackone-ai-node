@@ -336,12 +336,29 @@ describe('OpenAPIParser', () => {
     it('should determine parameter location based on schema type', () => {
       const parser = new OpenAPIParser(createMinimalSpec());
 
-      // All parameters should be BODY now
+      // Default case - no 'in' property should return BODY
       expect(parser.getParameterLocation({ type: 'string' })).toBe(ParameterLocation.BODY);
       expect(parser.getParameterLocation({ type: 'string', format: 'binary' })).toBe(
         ParameterLocation.BODY
       );
       expect(parser.getParameterLocation({ type: 'array', items: { type: 'string' } })).toBe(
+        ParameterLocation.BODY
+      );
+
+      // Test with explicit 'in' property
+      expect(parser.getParameterLocation({ in: 'header', type: 'string' })).toBe(
+        ParameterLocation.HEADER
+      );
+      expect(parser.getParameterLocation({ in: 'query', type: 'string' })).toBe(
+        ParameterLocation.QUERY
+      );
+      expect(parser.getParameterLocation({ in: 'path', type: 'string' })).toBe(
+        ParameterLocation.PATH
+      );
+      expect(parser.getParameterLocation({ in: 'cookie', type: 'string' })).toBe(
+        ParameterLocation.HEADER
+      );
+      expect(parser.getParameterLocation({ in: 'unknown', type: 'string' })).toBe(
         ParameterLocation.BODY
       );
     });
