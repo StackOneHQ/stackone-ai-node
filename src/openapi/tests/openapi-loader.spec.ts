@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { OAS_DIR } from '../constants';
-import { loadSpecs } from '../openapi/loader';
+import { OAS_DIR } from '../../constants';
+import { loadSpecs } from '../loader';
 
 describe('Loader', () => {
   it('should load specs from OAS directory', () => {

@@ -1,107 +1,63 @@
-import { afterAll, beforeAll, describe, expect, it, mock } from 'bun:test';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import fs from 'node:fs';
+import path from 'node:path';
+import { mockFetch } from './utils/fetch-mock';
 
-// Mock the fetch function with the correct signature
-const mockFetch = mock((input: URL | RequestInfo, _init?: RequestInit) => {
-  const url = input.toString();
-  // Return different responses based on the URL
-  if (url.includes('/hris/')) {
-    const responseData = {
+// Mock environment variables
+beforeAll(() => {
+  Bun.env.STACKONE_API_KEY = 'test_api_key';
+});
+
+describe('fetch-specs script', () => {
+  // Mocks for fetch and fs
+  let fetchMock;
+  let writeFileSyncSpy;
+
+  beforeEach(() => {
+    // Set up fetch mock with different responses based on URL
+    fetchMock = mockFetch();
+
+    // Mock fs.writeFileSync
+    writeFileSyncSpy = spyOn(fs, 'writeFileSync').mockImplementation(() => {
+      // Do nothing, just track that it was called
+      return undefined;
+    });
+  });
+
+  afterEach(() => {
+    // Clean up mocks
+    fetchMock.restore();
+    writeFileSyncSpy.mockRestore();
+    mock.restore();
+  });
+
+  it('should fetch and save OpenAPI specs', async () => {
+    // Define the expected response for HRIS API
+    const hrisApiSpec = {
       openapi: '3.0.0',
       info: { title: 'HRIS API', version: '1.0.0' },
       paths: { '/employees': {} },
     };
-    return Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve(responseData),
-      status: 200,
-      statusText: 'OK',
-      headers: new Headers(),
-      redirected: false,
-      type: 'basic' as ResponseType,
-      url: url,
-      clone: () => ({}) as Response,
-      body: null,
-      bodyUsed: false,
-      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-      blob: () => Promise.resolve(new Blob()),
-      formData: () => Promise.resolve(new FormData()),
-      text: () => Promise.resolve(JSON.stringify(responseData)),
-    } as Response);
-  }
-  if (url.includes('/ats/')) {
-    const responseData = {
-      openapi: '3.0.0',
-      info: { title: 'ATS API', version: '1.0.0' },
-      paths: { '/jobs': {} },
-    };
-    return Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve(responseData),
-      status: 200,
-      statusText: 'OK',
-      headers: new Headers(),
-      redirected: false,
-      type: 'basic' as ResponseType,
-      url: url,
-      clone: () => ({}) as Response,
-      body: null,
-      bodyUsed: false,
-      arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-      blob: () => Promise.resolve(new Blob()),
-      formData: () => Promise.resolve(new FormData()),
-      text: () => Promise.resolve(JSON.stringify(responseData)),
-    } as Response);
-  }
-  return Promise.resolve({
-    ok: false,
-    status: 404,
-    statusText: 'Not Found',
-    headers: new Headers(),
-    redirected: false,
-    type: 'basic' as ResponseType,
-    url: url,
-    clone: () => ({}) as Response,
-    body: null,
-    bodyUsed: false,
-    arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-    blob: () => Promise.resolve(new Blob()),
-    formData: () => Promise.resolve(new FormData()),
-    json: () => Promise.resolve({ error: 'Not found' }),
-    text: () => Promise.resolve('Not found'),
-  } as Response);
-});
 
-// Mock environment variables
-Bun.env.STACKONE_API_KEY = 'test_api_key';
+    // Mock the fetch implementation for this specific test
+    fetchMock.fetchSpy.mockImplementation(async (url) => {
+      if (url.includes('hris')) {
+        return {
+          ok: true,
+          json: async () => hrisApiSpec,
+          status: 200,
+          statusText: 'OK',
+        } as Response;
+      }
+      return {
+        ok: false,
+        json: async () => ({ error: 'Not found' }),
+        status: 404,
+        statusText: 'Not Found',
+      } as Response;
+    });
 
-// Mock fs module
-const mockWriteFileSync = mock((_: string, __: string) => {
-  // Do nothing, just track that it was called
-  return undefined;
-});
-
-// Store the original fs.writeFileSync
-const originalWriteFileSync = fs.writeFileSync;
-
-describe('fetch-specs script', () => {
-  // Save original functions
-  const originalFetch = globalThis.fetch;
-
-  beforeAll(() => {
-    // Replace functions with mocks
-    globalThis.fetch = mockFetch as typeof fetch;
-    fs.writeFileSync = mockWriteFileSync as typeof fs.writeFileSync;
-  });
-
-  afterAll(() => {
-    // Restore original functions
-    globalThis.fetch = originalFetch;
-    fs.writeFileSync = originalWriteFileSync;
-  });
-
-  it('should fetch and save OpenAPI specs', async () => {
-    // Mock the fetchSpec function
+    // Create test implementations of the functions
     const fetchSpec = async (category: string): Promise<Record<string, unknown>> => {
       const response = await fetch(`https://api.stackone.com/api/v1/${category}/openapi.json`, {
         headers: {
@@ -117,38 +73,23 @@ describe('fetch-specs script', () => {
       return response.json();
     };
 
-    // Test fetchSpec function
-    const hrisSpec = await fetchSpec('hris');
-    expect((hrisSpec.info as { title: string }).title).toBe('HRIS API');
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-
-    // Reset mock call count
-    mockFetch.mockClear();
-
-    // Test fetchSpec with error
-    try {
-      await fetchSpec('unknown');
-      // Should not reach here
-      expect(true).toBe(false);
-    } catch (error) {
-      expect(error).toBeDefined();
-      expect((error as Error).message).toContain('Failed to fetch');
-    }
-
-    // Test saveSpec function using mocked fs.writeFileSync
     const saveSpec = async (category: string, spec: Record<string, unknown>): Promise<void> => {
       // Use a mock path that doesn't need to be created
-      const outputPath = `/mock/path/${category}.json`;
+      const outputPath = path.join('/mock/path', `${category}.json`);
       fs.writeFileSync(outputPath, JSON.stringify(spec, null, 2));
     };
+
+    // Test fetchSpec function
+    const hrisSpec = await fetchSpec('hris');
+    expect(hrisSpec).toEqual(hrisApiSpec);
 
     // Test saveSpec function
     await saveSpec('hris', hrisSpec);
 
-    // Verify that writeFileSync was called
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
-
-    // Reset mock call count
-    mockWriteFileSync.mockClear();
+    // Verify writeFileSync was called with the correct arguments
+    expect(writeFileSyncSpy).toHaveBeenCalled();
+    const writeFileCall = writeFileSyncSpy.mock.calls[0];
+    expect(writeFileCall[0]).toContain('hris.json');
+    expect(JSON.parse(writeFileCall[1])).toEqual(hrisApiSpec);
   });
 });

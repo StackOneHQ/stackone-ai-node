@@ -11,11 +11,16 @@ describe('Module Exports', () => {
     // Check errors
     expect(StackOneAI.StackOneError).toBeDefined();
     expect(StackOneAI.StackOneAPIError).toBeDefined();
-    expect(StackOneAI.ToolsetError).toBeDefined();
-    expect(StackOneAI.ToolsetConfigError).toBeDefined();
-    expect(StackOneAI.ToolsetLoadError).toBeDefined();
+    expect(StackOneAI.ToolSetError).toBeDefined();
+    expect(StackOneAI.ToolSetConfigError).toBeDefined();
+    expect(StackOneAI.ToolSetLoadError).toBeDefined();
 
     // Check enums
     expect(StackOneAI.ParameterLocation).toBeDefined();
+
+    // Check OpenAPI classes
+    expect(StackOneAI.OpenAPIToolSet).toBeDefined();
+    expect(StackOneAI.OpenAPILoader).toBeDefined();
+    expect(StackOneAI.OpenAPIParser).toBeDefined();
   });
 });
