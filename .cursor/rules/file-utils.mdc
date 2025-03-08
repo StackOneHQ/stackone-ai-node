@@ -1,0 +1,111 @@
+---
+description: Standards for using file utilities in the StackOne repository
+globs: *.ts
+alwaysApply: false
+---
+ # File Utilities Standards
+
+Standards for using file utilities in the StackOne repository.
+
+<rule>
+name: file_utils_standards
+description: Standards for using file utilities from the file.ts module instead of direct fs/path operations
+
+filters:
+  - type: path
+    pattern: "^src/.*\\.ts$"
+
+actions:
+  - type: suggest
+    message: |
+      When working with files and directories:
+
+      1. Use the file utilities from `src/utils/file.ts`:
+         - Import the required utilities: `import { ... } from './utils/file'`
+         - Do not use fs/path modules directly unless absolutely necessary
+
+      2. Available utilities:
+         - `isBase64(str)`: Check if a string is base64 encoded
+         - `isValidFilePath(filePath)`: Check if a file path is valid and the file exists
+         - `readFileAsBase64(filePath)`: Read a file and return its contents as a base64 string
+         - `extractFileInfo(filePath)`: Extract file name and extension from a path
+         - `directoryExists(dirPath)`: Check if a directory exists
+         - `listFilesInDirectory(dirPath, filter?)`: List files in a directory with optional filtering
+         - `readJsonFile<T>(filePath)`: Read and parse a JSON file with type safety
+         - `getFileNameWithoutExtension(filePath)`: Get file name without extension
+         - `joinPaths(...segments)`: Join path segments safely
+
+      3. Benefits of using these utilities:
+         - Consistent error handling
+         - Type safety
+         - Centralized file operations
+         - Easier testing and mocking
+
+examples:
+  - input: |
+      import fs from 'node:fs';
+      import path from 'node:path';
+      
+      function processJsonFile(filePath: string) {
+        if (fs.existsSync(filePath)) {
+          const content = fs.readFileSync(filePath, 'utf-8');
+          const data = JSON.parse(content);
+          return data;
+        }
+        throw new Error(`File not found: ${filePath}`);
+      }
+    output: |
+      import { isValidFilePath, readJsonFile } from '../utils/file';
+      
+      function processJsonFile<T>(filePath: string): T {
+        if (isValidFilePath(filePath)) {
+          return readJsonFile<T>(filePath);
+        }
+        throw new Error(`File not found: ${filePath}`);
+      }
+
+  - input: |
+      import * as fs from 'node:fs';
+      import * as path from 'node:path';
+      
+      function getFilesInDirectory(dirPath: string) {
+        if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
+          return fs.readdirSync(dirPath).filter(file => file.endsWith('.json'));
+        }
+        return [];
+      }
+    output: |
+      import { directoryExists, listFilesInDirectory } from '../utils/file';
+      
+      function getFilesInDirectory(dirPath: string): string[] {
+        if (directoryExists(dirPath)) {
+          return listFilesInDirectory(dirPath, file => file.endsWith('.json'));
+        }
+        return [];
+      }
+
+  - input: |
+      import fs from 'node:fs';
+      import path from 'node:path';
+      
+      function getFileNameWithoutExt(filePath: string): string {
+        const fileName = path.basename(filePath);
+        const dotIndex = fileName.lastIndexOf('.');
+        return dotIndex === -1 ? fileName : fileName.substring(0, dotIndex);
+      }
+    output: |
+      import { getFileNameWithoutExtension } from '../utils/file';
+      
+      function getFileNameWithoutExt(filePath: string): string {
+        return getFileNameWithoutExtension(filePath);
+      }
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - files
+    - directories
+    - utilities
+    - standards
+</rule>

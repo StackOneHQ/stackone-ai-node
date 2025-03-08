@@ -1,0 +1,128 @@
+---
+description: how to use fetch
+globs: *.ts
+alwaysApply: false
+---
+ # Native Fetch Standards
+
+Standards for using the native fetch API in the StackOne repository.
+
+<rule>
+name: native_fetch_standards
+description: Standards for using the native fetch API instead of external fetch implementations
+
+filters:
+  - type: path
+    pattern: "^src/.*\\.ts$"
+
+actions:
+  - type: suggest
+    message: |
+      When making HTTP requests:
+
+      1. Use the native fetch API:
+         - Node.js now includes a built-in fetch API, so external packages like node-fetch are no longer needed
+         - Do not import fetch from any external packages (e.g., `import fetch from 'node-fetch'`)
+         - Simply use the globally available `fetch` function
+
+      2. Error handling:
+         - Always check `response.ok` before processing the response
+         - Use try/catch blocks to handle network errors
+         - Provide meaningful error messages that include the URL and status code
+
+      3. Response processing:
+         - Use the appropriate method based on the expected response type:
+           - `response.json()` for JSON responses
+           - `response.text()` for text responses
+           - `response.arrayBuffer()` for binary data
+
+      4. Request configuration:
+         - Set appropriate headers (Content-Type, Authorization, etc.)
+         - Use the correct HTTP method (GET, POST, PUT, DELETE, etc.)
+         - For JSON requests, use `JSON.stringify()` for the body and set Content-Type to application/json
+
+examples:
+  - input: |
+      import fetch from 'node-fetch';
+      
+      async function fetchData() {
+        const response = await fetch('https://api.example.com/data');
+        return response.json();
+      }
+    output: |
+      // No import needed for fetch
+      
+      async function fetchData() {
+        const response = await fetch('https://api.example.com/data');
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} for https://api.example.com/data`);
+        }
+        return response.json();
+      }
+
+  - input: |
+      import { default as fetch } from 'node-fetch';
+      
+      async function postData(data) {
+        const response = await fetch('https://api.example.com/data', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        return result;
+      }
+    output: |
+      async function postData(data) {
+        try {
+          const response = await fetch('https://api.example.com/data', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`API error: ${response.status} for https://api.example.com/data`);
+          }
+          
+          return await response.json();
+        } catch (error) {
+          throw new Error(`Failed to post data: ${error.message}`);
+        }
+      }
+
+  - input: |
+      import * as nodeFetch from 'node-fetch';
+      
+      async function fetchWithAuth(token) {
+        const response = await nodeFetch.default('https://api.example.com/protected', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        return await response.json();
+      }
+    output: |
+      async function fetchWithAuth(token) {
+        try {
+          const response = await fetch('https://api.example.com/protected', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Auth API error: ${response.status} for https://api.example.com/protected`);
+          }
+          
+          return await response.json();
+        } catch (error) {
+          throw new Error(`Authentication request failed: ${error.message}`);
+        }
+      }
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - fetch
+    - http
+    - api
+    - standards
+</rule>
