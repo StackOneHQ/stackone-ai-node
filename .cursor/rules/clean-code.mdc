@@ -1,6 +1,6 @@
 ---
 description: Standards for maintaining clean, readable, and maintainable code in the repository.
-globs: *.ts
+globs: src/**/*.ts
 alwaysApply: false
 ---
 # Clean Code Standards
