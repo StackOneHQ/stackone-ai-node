@@ -73,8 +73,7 @@ describe('OpenAPIToolSet', () => {
     expect(toolset).toBeDefined();
     expect(loadFromFileSpy).toHaveBeenCalledWith(
       petstoreJsonPath,
-      'https://petstore.swagger.io/v2',
-      false
+      'https://petstore.swagger.io/v2'
     );
 
     // Get all tools
@@ -92,9 +91,6 @@ describe('OpenAPIToolSet', () => {
   });
 
   it('should load tools from a URL', async () => {
-    // Mock the OpenAPILoader.loadFromFile method to avoid the error
-    const _loadFromFileSpy = spyOn(OpenAPILoader, 'loadFromFile').mockImplementation(() => ({}));
-
     // Create a mock for the OpenAPILoader.loadFromUrl method
     const loadFromUrlSpy = spyOn(OpenAPILoader, 'loadFromUrl').mockImplementation(async () => ({
       pet_findById: {
@@ -128,8 +124,7 @@ describe('OpenAPIToolSet', () => {
     expect(toolset).toBeDefined();
     expect(loadFromUrlSpy).toHaveBeenCalledWith(
       'https://example.com/petstore.json',
-      'https://petstore.swagger.io/v2',
-      false
+      'https://petstore.swagger.io/v2'
     );
 
     // Get all tools
@@ -143,6 +138,7 @@ describe('OpenAPIToolSet', () => {
   });
 
   it('should throw error if URL is not provided to fromUrl', async () => {
+    // @ts-expect-error - This is expected to throw
     await expect(OpenAPIToolSet.fromUrl({})).rejects.toThrow();
   });
 

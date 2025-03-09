@@ -508,8 +508,7 @@ describe('OpenAPIToolSet', () => {
     expect(toolset).toBeDefined();
     expect(loadFromFileSpy).toHaveBeenCalledWith(
       '/path/to/petstore.json',
-      'https://petstore.swagger.io/v2',
-      false
+      'https://petstore.swagger.io/v2'
     );
 
     // Get all tools
@@ -526,11 +525,8 @@ describe('OpenAPIToolSet', () => {
     expect(() => new OpenAPIToolSet({})).toThrow();
   });
 
-  it('should load tools from a URL', async () => {
-    // Skip this test for now since we can't easily mock the private loadToolsFromUrl method
-    // In a real-world scenario, we would use dependency injection or a more testable design
-
-    // Instead, we'll test that the fromUrl method throws an error when URL is not provided
+  it('should throw error if URL is not provided', async () => {
+    // @ts-expect-error - This is expected to throw
     await expect(OpenAPIToolSet.fromUrl({})).rejects.toThrow('URL must be provided');
   });
 
