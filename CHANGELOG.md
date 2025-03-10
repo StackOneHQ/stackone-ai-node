@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.6...ai-v0.0.7) (2025-03-10)
+
+
+### Features
+
+* build in ci ([#19](https://github.com/StackOneHQ/stackone-ai-node/issues/19)) ([40131d0](https://github.com/StackOneHQ/stackone-ai-node/commit/40131d08fae4f37007cc94be6980be6b2cf6e616))
+
 ## [0.0.6](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.5...ai-v0.0.6) (2025-03-10)
 
 
