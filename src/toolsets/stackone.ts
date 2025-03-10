@@ -1,5 +1,7 @@
 import { OAS_DIR } from '../constants';
-import { StackOneTool, type ToolDefinition } from '../tools';
+import { loadSpecs } from '../openapi/loader';
+import { StackOneTool, type ToolDefinition, type Tools } from '../tools';
+import type { ParameterTransformer } from '../types';
 import { extractFileInfo, isValidFilePath, readFileAsBase64 } from '../utils/file';
 import { removeJsonSchemaProperty } from '../utils/schema';
 import { type BaseToolSetConfig, ToolSet, ToolSetError } from './base';
@@ -51,8 +53,8 @@ export class StackOneToolSet extends ToolSet {
             throw new ToolSetError('file_path must be a string');
           }
 
-          const fileInfo = extractFileInfo(filePath);
-          return fileInfo.name;
+          const { fileName } = extractFileInfo(filePath);
+          return fileName;
         },
       },
     });
@@ -111,7 +113,9 @@ export class StackOneToolSet extends ToolSet {
     const effectiveAccountId = accountId || this.accountId;
 
     // Create headers with account ID if provided
-    const headers = effectiveAccountId ? { 'x-account-id': effectiveAccountId } : {};
+    const headers: Record<string, string> = effectiveAccountId
+      ? { 'x-account-id': effectiveAccountId }
+      : {};
 
     // Get tools with headers
     return this.getTools(filterPattern, headers);
@@ -125,7 +129,7 @@ export class StackOneToolSet extends ToolSet {
     const specs = loadSpecs(OAS_DIR);
 
     // Process each vertical
-    for (const [vertical, tools] of Object.entries(specs)) {
+    for (const [_, tools] of Object.entries(specs)) {
       // Process each tool
       for (const [toolName, toolDef] of Object.entries(tools)) {
         // Process derived values
@@ -138,14 +142,12 @@ export class StackOneToolSet extends ToolSet {
 
         // Create tool
         const tool = new StackOneTool(
-          `${vertical}_${toolName}`,
-          processedDef,
-          this.baseUrl,
-          this.authentication
+          toolName,
+          processedDef.description,
+          processedDef.parameters,
+          processedDef.execute,
+          this.headers
         );
-
-        // Set headers
-        tool.setHeaders(this.headers);
 
         // Add tool to the list
         this.tools.push(tool);
@@ -171,7 +173,3 @@ export class StackOneToolSet extends ToolSet {
     }
   }
 }
-
-// Import at the end to avoid circular dependencies
-import { loadSpecs } from '../openapi/loader';
-import type { ParameterTransformer } from '../types';

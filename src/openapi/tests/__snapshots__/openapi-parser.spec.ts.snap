@@ -26,7 +26,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/upload/batch",
     },
-    "name": "hris_batch_upload_employee_document",
     "parameters": {
       "properties": {
         "id": {
@@ -1642,7 +1641,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees",
     },
-    "name": "hris_create_employee",
     "parameters": {
       "properties": {
         "avatar": {
@@ -12405,7 +12403,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/employments",
     },
-    "name": "hris_create_employee_employment",
     "parameters": {
       "properties": {
         "effective_date": {
@@ -12706,7 +12703,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
     },
-    "name": "hris_create_employee_skill",
     "parameters": {
       "properties": {
         "id": {
@@ -12912,7 +12908,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off",
     },
-    "name": "hris_create_employee_time_off_request",
     "parameters": {
       "properties": {
         "approver_id": {
@@ -13149,7 +13144,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility",
     },
-    "name": "hris_create_employee_work_eligibility_request",
     "parameters": {
       "properties": {
         "document": {
@@ -16193,7 +16187,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off",
     },
-    "name": "hris_create_time_off_request",
     "parameters": {
       "properties": {
         "approver_id": {
@@ -16395,7 +16388,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/{subResourceId}/download",
     },
-    "name": "hris_download_employee_document",
     "parameters": {
       "properties": {
         "format": {
@@ -16456,7 +16448,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/benefits/{id}",
     },
-    "name": "hris_get_benefit",
     "parameters": {
       "properties": {
         "fields": {
@@ -16525,7 +16516,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/companies/{id}",
     },
-    "name": "hris_get_company",
     "parameters": {
       "properties": {
         "fields": {
@@ -16594,7 +16584,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/cost_centers/{id}",
     },
-    "name": "hris_get_cost_center_group",
     "parameters": {
       "properties": {
         "fields": {
@@ -16663,7 +16652,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/departments/{id}",
     },
-    "name": "hris_get_department_group",
     "parameters": {
       "properties": {
         "fields": {
@@ -16742,7 +16730,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}",
     },
-    "name": "hris_get_employee",
     "parameters": {
       "properties": {
         "expand": {
@@ -16848,7 +16835,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/custom_field_definitions/employees/{id}",
     },
-    "name": "hris_get_employee_custom_field_definition",
     "parameters": {
       "properties": {
         "fields": {
@@ -16958,7 +16944,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/{subResourceId}",
     },
-    "name": "hris_get_employee_document",
     "parameters": {
       "properties": {
         "fields": {
@@ -17031,7 +17016,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/documents/employee_categories/{id}",
     },
-    "name": "hris_get_employee_document_category",
     "parameters": {
       "properties": {
         "fields": {
@@ -17110,7 +17094,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/employments/{subResourceId}",
     },
-    "name": "hris_get_employee_employment",
     "parameters": {
       "properties": {
         "expand": {
@@ -17194,7 +17177,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/skills/{subResourceId}",
     },
-    "name": "hris_get_employee_skill",
     "parameters": {
       "properties": {
         "fields": {
@@ -17277,7 +17259,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_balances/{subResourceId}",
     },
-    "name": "hris_get_employee_time_off_balance",
     "parameters": {
       "properties": {
         "expand": {
@@ -17361,7 +17342,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
     },
-    "name": "hris_get_employees_time_off_request",
     "parameters": {
       "properties": {
         "fields": {
@@ -17439,7 +17419,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility/{subResourceId}",
     },
-    "name": "hris_get_employees_work_eligibility",
     "parameters": {
       "properties": {
         "fields": {
@@ -17517,7 +17496,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employments/{id}",
     },
-    "name": "hris_get_employment",
     "parameters": {
       "properties": {
         "expand": {
@@ -17592,7 +17570,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/{id}",
     },
-    "name": "hris_get_group",
     "parameters": {
       "properties": {
         "fields": {
@@ -17661,7 +17638,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/jobs/{id}",
     },
-    "name": "hris_get_job",
     "parameters": {
       "properties": {
         "fields": {
@@ -17730,7 +17706,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/locations/{id}",
     },
-    "name": "hris_get_location",
     "parameters": {
       "properties": {
         "fields": {
@@ -17799,7 +17774,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/teams/{id}",
     },
-    "name": "hris_get_team_group",
     "parameters": {
       "properties": {
         "fields": {
@@ -17868,7 +17842,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_entries/{id}",
     },
-    "name": "hris_get_time_entries",
     "parameters": {
       "properties": {
         "fields": {
@@ -17937,7 +17910,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off_policies/{id}",
     },
-    "name": "hris_get_time_off_policy",
     "parameters": {
       "properties": {
         "fields": {
@@ -18006,7 +17978,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off/{id}",
     },
-    "name": "hris_get_time_off_request",
     "parameters": {
       "properties": {
         "fields": {
@@ -18075,7 +18046,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off_types/{id}",
     },
-    "name": "hris_get_time_off_type",
     "parameters": {
       "properties": {
         "fields": {
@@ -18134,7 +18104,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/invite",
     },
-    "name": "hris_invite_employee",
     "parameters": {
       "properties": {
         "id": {
@@ -18214,7 +18183,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/benefits",
     },
-    "name": "hris_list_benefits",
     "parameters": {
       "properties": {
         "fields": {
@@ -18334,7 +18302,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/companies",
     },
-    "name": "hris_list_companies",
     "parameters": {
       "properties": {
         "fields": {
@@ -18454,7 +18421,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/cost_centers",
     },
-    "name": "hris_list_cost_center_groups",
     "parameters": {
       "properties": {
         "fields": {
@@ -18574,7 +18540,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/departments",
     },
-    "name": "hris_list_department_groups",
     "parameters": {
       "properties": {
         "fields": {
@@ -18694,7 +18659,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/documents/employee_categories",
     },
-    "name": "hris_list_employee_categories",
     "parameters": {
       "properties": {
         "fields": {
@@ -18814,7 +18778,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/custom_field_definitions/employees",
     },
-    "name": "hris_list_employee_custom_field_definitions",
     "parameters": {
       "properties": {
         "fields": {
@@ -18939,7 +18902,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/documents",
     },
-    "name": "hris_list_employee_documents",
     "parameters": {
       "properties": {
         "fields": {
@@ -19074,7 +19036,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/employments",
     },
-    "name": "hris_list_employee_employments",
     "parameters": {
       "properties": {
         "expand": {
@@ -19210,7 +19171,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
     },
-    "name": "hris_list_employee_skills",
     "parameters": {
       "properties": {
         "fields": {
@@ -19345,7 +19305,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_balances",
     },
-    "name": "hris_list_employee_time_off_balances",
     "parameters": {
       "properties": {
         "expand": {
@@ -19491,7 +19450,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off",
     },
-    "name": "hris_list_employee_time_off_requests",
     "parameters": {
       "properties": {
         "fields": {
@@ -19629,7 +19587,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility",
     },
-    "name": "hris_list_employee_work_eligibility",
     "parameters": {
       "properties": {
         "fields": {
@@ -19764,7 +19721,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees",
     },
-    "name": "hris_list_employees",
     "parameters": {
       "properties": {
         "expand": {
@@ -19911,7 +19867,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employments",
     },
-    "name": "hris_list_employments",
     "parameters": {
       "properties": {
         "expand": {
@@ -20037,7 +19992,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups",
     },
-    "name": "hris_list_groups",
     "parameters": {
       "properties": {
         "fields": {
@@ -20157,7 +20111,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/jobs",
     },
-    "name": "hris_list_jobs",
     "parameters": {
       "properties": {
         "fields": {
@@ -20277,7 +20230,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/locations",
     },
-    "name": "hris_list_locations",
     "parameters": {
       "properties": {
         "fields": {
@@ -20397,7 +20349,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/groups/teams",
     },
-    "name": "hris_list_team_groups",
     "parameters": {
       "properties": {
         "fields": {
@@ -20517,7 +20468,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_entries",
     },
-    "name": "hris_list_time_entries",
     "parameters": {
       "properties": {
         "fields": {
@@ -20657,7 +20607,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off_policies",
     },
-    "name": "hris_list_time_off_policies",
     "parameters": {
       "properties": {
         "fields": {
@@ -20777,7 +20726,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off",
     },
-    "name": "hris_list_time_off_requests",
     "parameters": {
       "properties": {
         "fields": {
@@ -20905,7 +20853,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off_types",
     },
-    "name": "hris_list_time_off_types",
     "parameters": {
       "properties": {
         "fields": {
@@ -21190,7 +21137,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}",
     },
-    "name": "hris_update_employee",
     "parameters": {
       "properties": {
         "avatar": {
@@ -31683,7 +31629,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/employments/{subResourceId}",
     },
-    "name": "hris_update_employee_employment",
     "parameters": {
       "properties": {
         "effective_date": {
@@ -32018,7 +31963,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility/{subResourceId}",
     },
-    "name": "hris_update_employee_work_eligibility_request",
     "parameters": {
       "properties": {
         "document": {
@@ -35071,7 +35015,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/time_off/{id}",
     },
-    "name": "hris_update_time_off_request",
     "parameters": {
       "properties": {
         "approver_id": {
@@ -35303,7 +35246,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       ],
       "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/upload",
     },
-    "name": "hris_upload_employee_document",
     "parameters": {
       "properties": {
         "category": {
