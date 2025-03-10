@@ -1,0 +1,168 @@
+---
+description: Standards for writing clean, type-safe TypeScript code in the repository
+globs: *.ts
+alwaysApply: false
+---
+# TypeScript Best Practices
+
+Standards for writing clean, type-safe TypeScript code in the repository.
+
+<rule>
+name: typescript_best_practices
+description: Standards for writing clean, type-safe TypeScript code to avoid common linting errors
+
+filters:
+  - type: path
+    pattern: "^src/.*\\.ts$"
+
+actions:
+  - type: suggest
+    message: |
+      When writing TypeScript code, follow these best practices to avoid common linting errors:
+
+      1. Avoid classes with only static members:
+         - Use namespaces or simple exported functions instead of classes with only static methods
+         - Example: `export namespace Utils { export function doSomething() {...} }` instead of a class with static methods
+
+      2. Avoid explicit `any` types:
+         - Always use specific types instead of `any` when possible
+         - Use `unknown` when the type is truly not known, then narrow it with type guards
+         - Use `Record<string, unknown>` instead of `Record<string, any>` for objects with unknown property values
+         - Use union types to represent multiple possible types
+
+      3. Avoid non-null assertions (`!`):
+         - Use proper null checking with if statements instead of non-null assertions
+         - Example: `if (value) { /* use value */ }` instead of `value!.property`
+         - Use optional chaining (`?.`) and nullish coalescing (`??`) operators
+         - Consider using the `assertIsDefined` pattern for runtime validation
+
+      4. Avoid parameter reassignment:
+         - Create new variables instead of reassigning function parameters
+         - Example: `const newHeaders = { ...headers, ...additionalHeaders }` instead of `headers = { ...headers, ...additionalHeaders }`
+
+      5. Handle property deletion properly:
+         - Use proper type-safe methods to remove properties
+         - Use the spread operator to create a new object without the property
+         - For typed objects, set to null or use proper type handling instead of undefined
+
+      6. Use proper TypeScript return types:
+         - Always specify return types for functions
+         - Use arrow functions with explicit return types: `const func = (): ReturnType => { ... }`
+         - Use void for functions that don't return a value
+
+examples:
+  - input: |
+      // Class with only static members
+      export class Utils {
+        public static formatDate(date: Date): string {
+          return date.toISOString();
+        }
+        
+        public static parseDate(dateStr: string): Date {
+          return new Date(dateStr);
+        }
+      }
+    output: |
+      // Namespace with exported functions
+      export namespace Utils {
+        export const formatDate = (date: Date): string => {
+          return date.toISOString();
+        };
+        
+        export const parseDate = (dateStr: string): Date => {
+          return new Date(dateStr);
+        };
+      }
+      
+      // Or even better, simple exported functions
+      export const formatDate = (date: Date): string => {
+        return date.toISOString();
+      };
+      
+      export const parseDate = (dateStr: string): Date => {
+        return new Date(dateStr);
+      };
+
+  - input: |
+      // Using any type
+      function processData(data: any): any {
+        return data.value;
+      }
+    output: |
+      // Using specific or unknown type with type narrowing
+      function processData<T>(data: unknown): unknown {
+        if (typeof data === 'object' && data !== null && 'value' in data) {
+          return (data as Record<string, unknown>).value;
+        }
+        throw new Error('Invalid data format');
+      }
+      
+      // Or with generics and type constraints
+      function processData<T extends { value: U }, U>(data: T): U {
+        return data.value;
+      }
+
+  - input: |
+      // Using non-null assertion
+      function getConfig(configMap: Map<string, Config>): Config {
+        const config = configMap.get('default');
+        return config!;
+      }
+    output: |
+      // Using proper null checking
+      function getConfig(configMap: Map<string, Config>): Config {
+        const config = configMap.get('default');
+        if (!config) {
+          throw new Error('Default config not found');
+        }
+        return config;
+      }
+      
+      // Or with a default value
+      function getConfig(configMap: Map<string, Config>): Config {
+        const config = configMap.get('default');
+        if (!config) {
+          return { /* default config values */ };
+        }
+        return config;
+      }
+
+  - input: |
+      // Parameter reassignment
+      function mergeOptions(options: Options, overrides?: Options): Options {
+        options = { ...options, ...overrides };
+        return options;
+      }
+    output: |
+      // Using a new variable instead
+      function mergeOptions(options: Options, overrides?: Options): Options {
+        const mergedOptions = { ...options, ...overrides };
+        return mergedOptions;
+      }
+
+  - input: |
+      // Incorrect property deletion
+      function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
+        obj['propertyToRemove'] = undefined;
+      }
+    output: |
+      // Proper property handling
+      function removeProperty(obj: Record<string, JSONSchema7Definition>): Record<string, JSONSchema7Definition> {
+        // Create a new object without the property
+        const { propertyToRemove, ...rest } = obj;
+        return rest;
+      }
+      
+      // Or if you need to modify in place
+      function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
+        delete obj['propertyToRemove'];
+      }
+
+metadata:
+  priority: high
+  version: 1.0
+  tags:
+    - typescript
+    - linting
+    - best-practices
+</rule> 

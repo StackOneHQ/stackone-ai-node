@@ -3,6 +3,7 @@ import { OpenAPILoader } from './openapi/loader';
 import { ParameterLocation, StackOneTool, Tool, type ToolDefinition, Tools } from './tools';
 import type { JsonDict, ParameterTransformer, ParameterTransformerMap } from './types';
 import { extractFileInfo, isValidFilePath, readFileAsBase64 } from './utils/file';
+import { removeJsonSchemaProperty } from './utils/schema';
 
 /**
  * Base exception for toolset errors
@@ -433,7 +434,7 @@ export class StackOneToolSet extends ToolSet {
   private removeAccountIdParameter(toolDef: ToolDefinition): void {
     // Remove from parameters
     if (toolDef.parameters.properties && 'x-account-id' in toolDef.parameters.properties) {
-      toolDef.parameters.properties['x-account-id'] = undefined;
+      removeJsonSchemaProperty(toolDef.parameters.properties, 'x-account-id');
     }
 
     // Remove from required parameters
