@@ -130,7 +130,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider",
+              "example": "id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations",
               "type": "string"
             }
           },
@@ -407,7 +407,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider",
+              "example": "id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations",
               "type": "string"
             }
           }
@@ -1043,7 +1043,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localisations,tags",
+              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags",
               "type": "string"
             }
           },
@@ -1320,7 +1320,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localisations,tags",
+              "example": "id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags",
               "type": "string"
             }
           }
@@ -4346,14 +4346,6 @@
             "example": "This video acts as learning content for software engineers.",
             "nullable": true
           },
-          "additional_data": {
-            "description": "The additional_data associated with this content",
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdditionalData"
-            }
-          },
           "languages": {
             "description": "The languages associated with this content",
             "nullable": true,
@@ -4450,7 +4442,7 @@
             "deprecated": true,
             "nullable": true
           },
-          "localisations": {
+          "localizations": {
             "description": "Localised content information",
             "example": [
               {
@@ -4465,7 +4457,7 @@
             "nullable": true,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/LocalisationModel"
+              "$ref": "#/components/schemas/LocalizationModel"
             }
           },
           "tags": {
@@ -5746,14 +5738,6 @@
             "example": "This video acts as learning content for software engineers.",
             "nullable": true
           },
-          "additional_data": {
-            "description": "The additional_data associated with this content",
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdditionalData"
-            }
-          },
           "languages": {
             "description": "The languages associated with this content",
             "nullable": true,
@@ -5830,12 +5814,20 @@
             "deprecated": true,
             "nullable": true
           },
-          "localisations": {
-            "description": "Localised content information",
+          "localizations": {
+            "description": "The localization data for this course",
             "example": [
               {
                 "title": "Software Engineer Lv 1",
-                "description": "This video acts as learning content for software engineers.",
+                "description": "This course acts as learning resource for software engineers.",
+                "languages": {
+                  "value": "en-GB",
+                  "source_value": "string"
+                }
+              },
+              {
+                "title": "Software Engineer: A comprehensive guide",
+                "description": "This course acts as learning resource for software engineers.",
                 "languages": {
                   "value": "en-US",
                   "source_value": "string"
@@ -5845,7 +5837,7 @@
             "nullable": true,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/LocalisationModel"
+              "$ref": "#/components/schemas/LocalizationModel"
             }
           },
           "tags": {
@@ -5880,6 +5872,14 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CreateCategoriesApiModel"
+            }
+          },
+          "additional_data": {
+            "description": "The additional_data associated with this content",
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdditionalData"
             }
           }
         }
@@ -5971,6 +5971,32 @@
             "items": {
               "$ref": "#/components/schemas/CreateContentApiModel"
             }
+          },
+          "localizations": {
+            "description": "The localization data for this course",
+            "example": [
+              {
+                "title": "Software Engineer Lv 1",
+                "description": "This course acts as learning resource for software engineers.",
+                "languages": {
+                  "value": "en-GB",
+                  "source_value": "string"
+                }
+              },
+              {
+                "title": "Software Engineer: A comprehensive guide",
+                "description": "This course acts as learning resource for software engineers.",
+                "languages": {
+                  "value": "en-US",
+                  "source_value": "string"
+                }
+              }
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalizationModel"
+            }
           }
         }
       },
@@ -6045,7 +6071,7 @@
           }
         }
       },
-      "LocalisationModel": {
+      "LocalizationModel": {
         "type": "object",
         "properties": {
           "title": {
@@ -6061,7 +6087,7 @@
             "nullable": true
           },
           "language": {
-            "description": "The language associated with this localisation details",
+            "description": "The language associated with the localization details",
             "nullable": true,
             "allOf": [
               {

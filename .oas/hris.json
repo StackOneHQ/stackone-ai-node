@@ -1348,7 +1348,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
               "type": "string"
             }
           },
@@ -1651,7 +1651,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
               "type": "string"
             }
           }
@@ -4705,7 +4705,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
               "type": "string"
             }
           },
@@ -4992,7 +4992,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+              "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
               "type": "string"
             }
           }
@@ -8074,7 +8074,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,name,description,type,updated_at,created_at",
+              "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
               "type": "string"
             }
           },
@@ -8270,7 +8270,7 @@
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
             "schema": {
               "nullable": true,
-              "example": "id,remote_id,name,description,type,updated_at,created_at",
+              "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
               "type": "string"
             }
           }
@@ -9557,6 +9557,7 @@
               "division",
               "group",
               "project",
+              "team",
               null
             ],
             "example": "department",
@@ -12890,6 +12891,20 @@
               }
             ],
             "nullable": true
+          },
+          "time_off_policy_id": {
+            "type": "string",
+            "description": "The time off policy id associated with this time off request",
+            "example": "cx280928933",
+            "nullable": true
+          },
+          "reason": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Reason"
+              }
+            ]
           },
           "passthrough": {
             "type": "object",
@@ -19343,6 +19358,27 @@
           "url"
         ]
       },
+      "Reason": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier",
+            "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+            "nullable": true
+          },
+          "remote_id": {
+            "type": "string",
+            "description": "Provider's unique identifier",
+            "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "Reference": {
         "type": "object",
         "properties": {
@@ -19811,6 +19847,26 @@
             "format": "duration",
             "nullable": true
           },
+          "time_off_policy_id": {
+            "type": "string",
+            "description": "The time off policy id associated with this time off request",
+            "example": "cx280928933",
+            "nullable": true
+          },
+          "remote_time_off_policy_id": {
+            "type": "string",
+            "description": "Provider's unique identifier of the time off policy id associated with this time off request",
+            "example": "e3cb75bf-aa84-466e-a6c1-b8322b257a48",
+            "nullable": true
+          },
+          "reason": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Reason"
+              }
+            ]
+          },
           "created_date": {
             "type": "string",
             "description": "The created date of the time off request",
@@ -19978,7 +20034,7 @@
               "unknown",
               null
             ],
-            "description": "The unified value for the duration unit of the time off balance. If the provider does not specify this unit, the value will be set to unknown",
+            "description": "The unified value for the duration unit. If the provider does not specify this unit, the value will be set to unknown",
             "example": "hours",
             "x-speakeasy-unknown-values": "allow",
             "nullable": true
@@ -20072,6 +20128,23 @@
                 "$ref": "#/components/schemas/TimeOffPolicyTypeEnum"
               }
             ]
+          },
+          "duration_unit": {
+            "description": "The duration unit of the current policy",
+            "example": "hours",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TimeOffBalanceUnitEnum"
+              }
+            ]
+          },
+          "reasons": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            }
           },
           "created_at": {
             "type": "string",
