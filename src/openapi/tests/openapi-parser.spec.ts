@@ -450,7 +450,6 @@ describe('OpenAPIParser', () => {
       // Check that each tool has the required properties
       for (const toolName in tools) {
         const tool = tools[toolName];
-        expect(tool).toHaveProperty('name');
         expect(tool).toHaveProperty('description');
         expect(tool).toHaveProperty('parameters');
         expect(tool).toHaveProperty('execute');

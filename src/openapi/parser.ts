@@ -392,7 +392,7 @@ export class OpenAPIParser {
                   // Create a deep copy of the propSchema to avoid shared state
                   properties[propName] = JSON.parse(JSON.stringify(propSchema)) as JsonSchema;
                   parameterLocations[propName] = this.getParameterLocation(
-                    propSchema as JsonSchema
+                    propSchema as Record<string, unknown>
                   );
                 } catch (_propError) {
                   // Continue with other properties even if one fails
@@ -402,7 +402,6 @@ export class OpenAPIParser {
 
             // Create tool definition with deep copies to prevent shared state
             tools[name] = {
-              name,
               description: operation.summary || '',
               parameters: {
                 type: 'object',

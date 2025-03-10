@@ -12,7 +12,7 @@ import {
 import { type FetchMockResult, mockFetch } from './utils/fetch-mock';
 
 // Create a mock tool for testing
-const createMockTool = (authentication?: AuthConfig, headers?: Record<string, string>): Tool => {
+const createMockTool = (headers?: Record<string, string>): Tool => {
   const name = 'test_tool';
   const description = 'Test tool';
   const parameters: ToolParameters = {
@@ -32,7 +32,7 @@ const createMockTool = (authentication?: AuthConfig, headers?: Record<string, st
     ],
   };
 
-  return new Tool(name, description, parameters, executeConfig, authentication, headers);
+  return new Tool(name, description, parameters, executeConfig, headers);
 };
 
 // Set up and tear down mocks
@@ -154,8 +154,11 @@ describe('StackOneTool', () => {
     expect(openAIFormat.function.description).toBe('Test tool');
     expect(openAIFormat.function.parameters?.type).toBe('object');
     expect(
-      (openAIFormat.function.parameters as { properties: { id: { type: string } } }).properties.id
-        .type
+      (
+        openAIFormat.function.parameters as {
+          properties: { id: { type: string } };
+        }
+      ).properties.id.type
     ).toBe('string');
   });
 
@@ -285,12 +288,7 @@ describe('Tools', () => {
           },
         ],
       },
-      {
-        type: 'bearer',
-        credentials: {
-          token: 'test_key',
-        },
-      }
+      {}
     );
 
     const tool2 = new Tool(
@@ -313,10 +311,7 @@ describe('Tools', () => {
         ],
       },
       {
-        type: 'bearer',
-        credentials: {
-          token: 'test_key',
-        },
+        authentication: 'Bearer test_key',
       }
     );
 
@@ -352,10 +347,7 @@ describe('Tools', () => {
         ],
       },
       {
-        type: 'bearer',
-        credentials: {
-          token: 'test_key',
-        },
+        authentication: 'Bearer test_key',
       }
     );
 
@@ -392,10 +384,7 @@ describe('Tools', () => {
         ],
       },
       {
-        type: 'bearer',
-        credentials: {
-          token: 'test_key',
-        },
+        authentication: 'Bearer test_key',
       }
     );
 
@@ -445,15 +434,11 @@ describe('Tool', () => {
   });
 
   it('should use basic authentication', async () => {
-    // Create a tool with basic authentication
-    const auth: AuthConfig = {
-      type: 'basic',
-      credentials: {
-        username: 'testuser',
-        password: 'testpass',
-      },
+    // Create tool with authentication header already set
+    const headers = {
+      Authorization: `Basic ${Buffer.from('testuser:testpass').toString('base64')}`,
     };
-    const tool = createMockTool(auth);
+    const tool = createMockTool(headers);
 
     // Mock fetch to capture the headers
     const fetchMock = mockFetch();
@@ -470,14 +455,11 @@ describe('Tool', () => {
   });
 
   it('should use bearer authentication', async () => {
-    // Create a tool with bearer authentication
-    const auth: AuthConfig = {
-      type: 'bearer',
-      credentials: {
-        token: 'test-token',
-      },
+    // Create tool with authentication header already set
+    const headers = {
+      Authorization: 'Bearer test-token',
     };
-    const tool = createMockTool(auth);
+    const tool = createMockTool(headers);
 
     // Mock fetch to capture the headers
     const fetchMock = mockFetch();
@@ -494,12 +476,12 @@ describe('Tool', () => {
 
   it('should use api-key authentication', () => {
     const apiKey = 'test-api-key';
-    const tool = createMockTool({
-      type: 'bearer',
-      credentials: {
-        token: apiKey,
-      },
-    });
+
+    // Create tool with authentication header already set
+    const headers = {
+      Authorization: `Bearer ${apiKey}`,
+    };
+    const tool = createMockTool(headers);
 
     // Execute the tool to trigger authentication header generation
     // Mock fetch to capture the headers
@@ -559,8 +541,11 @@ describe('Tool', () => {
     expect(openAIFormat.function.description).toBe('Test tool');
     expect(openAIFormat.function.parameters?.type).toBe('object');
     expect(
-      (openAIFormat.function.parameters as { properties: { id: { type: string } } }).properties.id
-        .type
+      (
+        openAIFormat.function.parameters as {
+          properties: { id: { type: string } };
+        }
+      ).properties.id.type
     ).toBe('string');
   });
 

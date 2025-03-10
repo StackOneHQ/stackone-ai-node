@@ -174,7 +174,6 @@ export interface ToolParameters {
  * Complete definition of a tool including its schema and execution config
  */
 export interface ToolDefinition {
-  name?: string; // Make name optional to maintain backward compatibility
   description: string;
   parameters: ToolParameters;
   execute: ExecuteConfig;
@@ -202,7 +201,6 @@ export class Tool {
   parameters: ToolParameters;
   _executeConfig: ExecuteConfig;
   protected _headers: Record<string, string>;
-  protected _authentication?: AuthConfig;
   protected _transformers: ParameterTransformerMap;
 
   constructor(
@@ -210,7 +208,6 @@ export class Tool {
     description: string,
     parameters: ToolParameters,
     executeConfig: ExecuteConfig,
-    authentication?: AuthConfig,
     headers?: Record<string, string>,
     transformers?: ParameterTransformerMap
   ) {
@@ -218,7 +215,6 @@ export class Tool {
     this.description = description;
     this.parameters = parameters;
     this._executeConfig = executeConfig;
-    this._authentication = authentication;
     this._headers = headers || {};
     this._transformers = transformers || new Map<string, ParameterTransformer>();
   }
@@ -268,25 +264,6 @@ export class Tool {
       'User-Agent': 'stackone-ai-node',
       ...this._headers,
     };
-
-    // Add authentication header if needed
-    if (this._authentication) {
-      switch (this._authentication.type) {
-        case 'basic':
-          if (this._authentication.credentials?.username) {
-            const username = this._authentication.credentials.username;
-            const password = this._authentication.credentials.password || '';
-            const authString = Buffer.from(`${username}:${password}`).toString('base64');
-            headers.Authorization = `Basic ${authString}`;
-          }
-          break;
-        case 'bearer':
-          if (this._authentication.credentials?.token) {
-            headers.Authorization = `Bearer ${this._authentication.credentials.token}`;
-          }
-          break;
-      }
-    }
 
     return headers;
   }

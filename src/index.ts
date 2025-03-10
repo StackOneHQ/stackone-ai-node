@@ -16,7 +16,12 @@ export {
   ToolSetConfigError,
   ToolSetError,
   ToolSetLoadError,
-} from './toolset';
+  type AuthenticationConfig,
+  type BaseToolSetConfig,
+  type OpenAPIToolSetConfigFromFilePath,
+  type OpenAPIToolSetConfigFromUrl,
+  type StackOneToolSetConfig,
+} from './toolsets';
 
 // Export types that might be useful for consumers
 export { ParameterLocation } from './tools';

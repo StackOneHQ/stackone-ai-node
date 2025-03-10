@@ -8,7 +8,7 @@
  */
 
 import assert from 'node:assert';
-import { OpenAPIToolSet } from '../src/toolset';
+import { OpenAPIToolSet } from '../src/toolsets/openapi';
 import { joinPaths } from '../src/utils/file';
 
 /**
