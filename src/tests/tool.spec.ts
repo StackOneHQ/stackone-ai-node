@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import {
-  type AuthConfig,
   type ExecuteConfig,
   ParameterLocation,
   StackOneAPIError,
