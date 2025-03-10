@@ -1,6 +1,6 @@
 import type { JSONSchema7 as JsonSchema } from 'json-schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { ParameterLocation, type ToolDefinition } from '../models';
+import { ParameterLocation, type ToolDefinition } from '../tools';
 
 // Define a type for OpenAPI document
 type OpenAPIDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
@@ -17,8 +17,6 @@ type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patc
 export class OpenAPIParser {
   _spec: OpenAPIDocument;
   _baseUrl: string;
-  _derivedParameters: Map<string, string>;
-  _uiOnlyParameters: Set<string>;
 
   /**
    * Create a new OpenAPIParser
@@ -28,8 +26,6 @@ export class OpenAPIParser {
   constructor(spec: OpenAPIDocument, customBaseUrl?: string) {
     this._spec = spec;
     this._baseUrl = customBaseUrl || this.determineBaseUrl();
-    this._derivedParameters = new Map<string, string>();
-    this._uiOnlyParameters = new Set<string>();
   }
 
   /**
@@ -51,55 +47,6 @@ export class OpenAPIParser {
   public static fromString(specString: string, customBaseUrl?: string): OpenAPIParser {
     const spec = JSON.parse(specString) as OpenAPIDocument;
     return new OpenAPIParser(spec, customBaseUrl);
-  }
-
-  /**
-   * Check if a schema represents a file type
-   */
-  public isFileType(schema: JsonSchema | OpenAPIV3.SchemaObject): boolean {
-    return (
-      (schema.type === 'string' && schema.format === 'binary') ||
-      (schema.type === 'string' && schema.format === 'base64')
-    );
-  }
-
-  /**
-   * Convert a binary string schema to a file name field
-   */
-  public convertToFileType(schema: JsonSchema | OpenAPIV3.SchemaObject): void {
-    if (this.isFileType(schema)) {
-      // Keep the type as string but set the name to file_name
-      schema.type = 'string';
-      schema.description = schema.description || 'Path to the file to upload';
-      // Remove binary format to avoid confusion
-      schema.format = undefined;
-    }
-  }
-
-  /**
-   * Process schema properties to handle file uploads
-   */
-  public handleFileProperties(schema: JsonSchema | OpenAPIV3.SchemaObject): void {
-    if (!schema.properties) {
-      return;
-    }
-
-    for (const propName of Object.keys(schema.properties)) {
-      const propSchema = schema.properties[propName] as JsonSchema;
-
-      // Handle direct file uploads
-      if (propSchema.type === 'string' && propSchema.format === 'binary') {
-        this.convertToFileType(propSchema);
-      }
-
-      // Handle array of files
-      if (propSchema.type === 'array' && propSchema.items) {
-        const itemsSchema = propSchema.items as JsonSchema;
-        if (itemsSchema.type === 'string' && itemsSchema.format === 'binary') {
-          this.convertToFileType(itemsSchema);
-        }
-      }
-    }
   }
 
   /**
@@ -137,68 +84,6 @@ export class OpenAPIParser {
   }
 
   /**
-   * Filter out vendor-specific extensions from schema objects
-   */
-  private filterVendorExtensions(schema: Record<string, unknown>): Record<string, unknown> {
-    const filtered: Record<string, unknown> = {};
-
-    for (const [key, value] of Object.entries(schema)) {
-      // Skip vendor extensions (properties starting with x-)
-      if (key.startsWith('x-')) {
-        continue;
-      }
-
-      // Recursively filter nested objects
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        filtered[key] = this.filterVendorExtensions(value as Record<string, unknown>);
-      } else if (Array.isArray(value)) {
-        // Handle arrays by filtering each item if it's an object
-        filtered[key] = value.map((item) =>
-          typeof item === 'object' && item !== null
-            ? this.filterVendorExtensions(item as Record<string, unknown>)
-            : item
-        );
-      } else {
-        // Keep non-object values as is
-        filtered[key] = value;
-      }
-    }
-
-    return filtered;
-  }
-
-  /**
-   * Filter out source_value properties from schema objects
-   */
-  private stripSourceValueProperties(schema: Record<string, unknown>): Record<string, unknown> {
-    const filtered: Record<string, unknown> = {};
-
-    for (const [key, value] of Object.entries(schema)) {
-      // Skip source_value properties
-      if (key === 'source_value') {
-        continue;
-      }
-
-      // Recursively filter nested objects
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        filtered[key] = this.stripSourceValueProperties(value as Record<string, unknown>);
-      } else if (Array.isArray(value)) {
-        // Handle arrays by filtering each item if it's an object
-        filtered[key] = value.map((item) =>
-          typeof item === 'object' && item !== null
-            ? this.stripSourceValueProperties(item as Record<string, unknown>)
-            : item
-        );
-      } else {
-        // Keep non-object values as is
-        filtered[key] = value;
-      }
-    }
-
-    return filtered;
-  }
-
-  /**
    * Resolve all references in a schema, preserving structure
    */
   public resolveSchema(
@@ -228,9 +113,7 @@ export class OpenAPIParser {
         ...JSON.parse(JSON.stringify(resolved)),
         ...Object.fromEntries(Object.entries(schema).filter(([k]) => k !== '$ref')),
       };
-      // Filter out vendor extensions and source_value properties
-      const filteredResult = this.filterVendorExtensions(result as Record<string, unknown>);
-      return this.stripSourceValueProperties(filteredResult) as JsonSchema;
+      return result as JsonSchema;
     }
 
     // Handle allOf combinations
@@ -268,9 +151,7 @@ export class OpenAPIParser {
         }
       }
 
-      // Filter out vendor extensions and source_value properties
-      const filteredResult = this.filterVendorExtensions(mergedSchema as Record<string, unknown>);
-      return this.stripSourceValueProperties(filteredResult) as JsonSchema;
+      return mergedSchema;
     }
 
     // Recursively resolve all nested objects and arrays
@@ -295,8 +176,7 @@ export class OpenAPIParser {
       }
     }
 
-    // Filter out source_value properties
-    return this.stripSourceValueProperties(resolved) as JsonSchema;
+    return resolved as JsonSchema;
   }
 
   /**
@@ -401,124 +281,33 @@ export class OpenAPIParser {
   }
 
   /**
-   * Determine parameter location based on schema type
+   * Get the parameter location from a property schema
+   * @param propSchema The schema of the property
+   * @returns The parameter location (HEADER, QUERY, PATH, or BODY)
    */
-  public getParameterLocation(propSchema: any): ParameterLocation {
-    if (
-      propSchema.type === 'string' &&
-      (propSchema.format === 'binary' || propSchema.format === 'base64')
-    ) {
-      return ParameterLocation.FILE;
+  public getParameterLocation(
+    propSchema: OpenAPIV3.ParameterObject | Record<string, unknown>
+  ): ParameterLocation {
+    // If the parameter has an explicit 'in' property, use that
+    if (propSchema && typeof propSchema === 'object' && 'in' in propSchema) {
+      const location = propSchema.in;
+
+      switch (location) {
+        case 'header':
+          return ParameterLocation.HEADER;
+        case 'query':
+          return ParameterLocation.QUERY;
+        case 'path':
+          return ParameterLocation.PATH;
+        case 'cookie': // Cookies are sent in headers
+          return ParameterLocation.HEADER;
+        default:
+          return ParameterLocation.BODY;
+      }
     }
 
-    if (
-      propSchema.type === 'array' &&
-      propSchema.items &&
-      propSchema.items.type === 'string' &&
-      (propSchema.items.format === 'binary' || propSchema.items.format === 'base64')
-    ) {
-      return ParameterLocation.FILE;
-    }
-
+    // Default to BODY for request body properties
     return ParameterLocation.BODY;
-  }
-
-  /**
-   * Checks if an operation is a file upload operation
-   * @param properties The properties object
-   * @param parameterLocations The parameter locations mapping
-   * @param requestBodySchema The request body schema
-   * @returns True if this is a file upload operation
-   */
-  public isFileUploadOperation(
-    parameterLocations: Record<string, ParameterLocation>,
-    requestBodySchema?: JsonSchema | OpenAPIV3.SchemaObject | null
-  ): boolean {
-    // Check parameter locations
-    const hasFileParam = Object.values(parameterLocations).some(
-      (location) => location === ParameterLocation.FILE
-    );
-
-    if (hasFileParam) {
-      return true;
-    }
-
-    // Check if the request body has file-related properties
-    if (
-      requestBodySchema &&
-      typeof requestBodySchema === 'object' &&
-      'properties' in requestBodySchema
-    ) {
-      const properties = requestBodySchema.properties as Record<string, any>;
-
-      // Check for common file upload parameters
-      const hasFileProperties = ['content', 'file', 'file_format'].some(
-        (prop) => prop in properties
-      );
-
-      // Also check for binary format properties
-      const hasBinaryFormat = Object.values(properties).some(
-        (prop) => prop && typeof prop === 'object' && prop.format === 'binary'
-      );
-
-      if (hasFileProperties || hasBinaryFormat) {
-        return true;
-      }
-    }
-
-    // If no file parameters found, it's not a file upload operation
-    return false;
-  }
-
-  /**
-   * Simplifies parameters for file upload operations
-   * @param properties The properties object to modify
-   * @param parameterLocations The parameter locations mapping
-   */
-  public simplifyFileUploadParameters(
-    properties: Record<string, JsonSchema | OpenAPIV3.SchemaObject>,
-    parameterLocations: Record<string, ParameterLocation>
-  ): void {
-    // For file upload operations, we'll add a file_path parameter for the user interface
-    // but keep the original parameters for the execution config
-    const fileParams = ['name', 'content', 'file_format'];
-
-    // Check if we already have a file_path parameter
-    if ('file_path' in properties) {
-      return; // Already simplified
-    }
-
-    // Add the file_path parameter with a brand new object to avoid references
-    properties.file_path = {
-      type: 'string',
-      description:
-        'Path to the file to upload. The filename and format will be automatically extracted from the path.',
-    } as JsonSchema;
-
-    // Add file_path to parameter locations
-    parameterLocations.file_path = ParameterLocation.FILE;
-
-    // Store information about which parameters should be in the execution config
-    // but not exposed to the user interface
-    if (!this._uiOnlyParameters) {
-      this._uiOnlyParameters = new Set<string>();
-    }
-
-    // Mark file_path as a UI-only parameter (not part of the execution config)
-    this._uiOnlyParameters.add('file_path');
-
-    // Store derivation information for the original parameters
-    if (!this._derivedParameters) {
-      this._derivedParameters = new Map<string, string>();
-    }
-
-    // Mark the original file parameters as derived from file_path
-    for (const key of fileParams) {
-      if (key in properties) {
-        // Store the derivation information in our map
-        this._derivedParameters.set(key, 'file_path');
-      }
-    }
   }
 
   /**
@@ -611,87 +400,28 @@ export class OpenAPIParser {
               }
             }
 
-            // Check if this is a file upload operation using our improved method
-            const isFileUpload = this.isFileUploadOperation(parameterLocations, requestBodySchema);
-
-            if (isFileUpload) {
-              // Remove the file-related parameters from required list
-              const fileParams = ['name', 'content', 'file_format'];
-              requiredParams = requiredParams.filter((param) => !fileParams.includes(param));
-
-              // Add file_path to required params
-              requiredParams.push('file_path');
-
-              // Store the original properties for execution config
-              const executionProperties = { ...properties };
-
-              // Apply file upload simplification
-              this.simplifyFileUploadParameters(properties, parameterLocations);
-
-              // For file upload operations, we need to remove the file parameters from the user-facing properties
-              // but keep them in the execution config
-              for (const key of fileParams) {
-                if (key in properties) {
-                  // Remove the parameter from properties
-                  delete properties[key];
-                }
-              }
-
-              // Create tool definition with deep copies to prevent shared state
-              tools[name] = {
-                name,
-                description: operation.summary || '',
-                parameters: {
-                  type: 'object',
-                  properties: JSON.parse(JSON.stringify(properties)),
-                  required: requiredParams.length > 0 ? requiredParams : undefined,
-                },
-                execute: {
-                  method: method.toUpperCase(),
-                  url: `${this._baseUrl}${path}`,
-                  bodyType: (bodyType as 'json' | 'multipart-form') || 'json',
-                  params: Object.entries(parameterLocations)
-                    // Filter out UI-only parameters from the execution config
-                    .filter(([name]) => !this._uiOnlyParameters.has(name))
-                    .map(([name, location]) => {
-                      return {
-                        name,
-                        location,
-                        type: (executionProperties[name]?.type as JsonSchema['type']) || 'string',
-                        // Add derivedFrom if it exists in our derivation map
-                        ...(this._derivedParameters.has(name)
-                          ? {
-                              derivedFrom: this._derivedParameters.get(name),
-                            }
-                          : {}),
-                      };
-                    }),
-                },
-              };
-            } else {
-              // Create tool definition with deep copies to prevent shared state
-              tools[name] = {
-                name,
-                description: operation.summary || '',
-                parameters: {
-                  type: 'object',
-                  properties: JSON.parse(JSON.stringify(properties)),
-                  required: requiredParams.length > 0 ? requiredParams : undefined,
-                },
-                execute: {
-                  method: method.toUpperCase(),
-                  url: `${this._baseUrl}${path}`,
-                  bodyType: (bodyType as 'json' | 'multipart-form') || 'json',
-                  params: Object.entries(parameterLocations).map(([name, location]) => {
-                    return {
-                      name,
-                      location,
-                      type: (properties[name]?.type as JsonSchema['type']) || 'string',
-                    };
-                  }),
-                },
-              };
-            }
+            // Create tool definition with deep copies to prevent shared state
+            tools[name] = {
+              name,
+              description: operation.summary || '',
+              parameters: {
+                type: 'object',
+                properties: JSON.parse(JSON.stringify(properties)),
+                required: requiredParams.length > 0 ? requiredParams : undefined,
+              },
+              execute: {
+                method: method.toUpperCase(),
+                url: `${this._baseUrl}${path}`,
+                bodyType: (bodyType as 'json' | 'multipart-form') || 'json',
+                params: Object.entries(parameterLocations).map(([name, location]) => {
+                  return {
+                    name,
+                    location,
+                    type: (properties[name]?.type as JsonSchema['type']) || 'string',
+                  };
+                }),
+              },
+            };
           } catch (operationError) {
             console.error(`Error processing operation ${name}: ${operationError}`);
             // Continue with other operations even if one fails
@@ -699,8 +429,7 @@ export class OpenAPIParser {
         }
       }
     } catch (error) {
-      console.error(`Error parsing tools: ${error}`);
-      // Even if there's an error, we'll return any tools that were successfully parsed
+      console.error('Error parsing OpenAPI spec:', error);
     }
 
     return tools;
@@ -713,8 +442,7 @@ export class OpenAPIParser {
     pathItem: OpenAPIV3.PathItemObject
   ): [string, OpenAPIV3.OperationObject][] {
     const operations: [string, OpenAPIV3.OperationObject][] = [];
-
-    for (const method of [
+    const methods: HttpMethod[] = [
       'get',
       'put',
       'post',
@@ -723,9 +451,11 @@ export class OpenAPIParser {
       'head',
       'patch',
       'trace',
-    ] as HttpMethod[]) {
-      if (method in pathItem) {
-        const operation = pathItem[method] as OpenAPIV3.OperationObject;
+    ];
+
+    for (const method of methods) {
+      const operation = pathItem[method];
+      if (operation) {
         operations.push([method, operation]);
       }
     }
@@ -734,36 +464,33 @@ export class OpenAPIParser {
   }
 
   /**
-   * Resolve parameter reference
+   * Resolve a parameter reference
    */
   public resolveParameter(
     param: OpenAPIV3.ParameterObject | OpenAPIV3.ReferenceObject
   ): OpenAPIV3.ParameterObject | null {
-    if (!('$ref' in param)) {
-      return param as OpenAPIV3.ParameterObject;
-    }
-
-    const ref = param.$ref;
-    if (!ref.startsWith('#/components/parameters/')) {
+    try {
+      if ('$ref' in param) {
+        const ref = param.$ref;
+        const parts = ref.split('/').slice(1); // Skip the '#'
+        let current: unknown = this._spec;
+        for (const part of parts) {
+          if (typeof current === 'object' && current !== null) {
+            current = (current as Record<string, unknown>)[part];
+          } else {
+            return null;
+          }
+        }
+        return current as OpenAPIV3.ParameterObject;
+      }
+      return param;
+    } catch (_error) {
       return null;
     }
-
-    const name = ref.split('/').pop() as string;
-    const parameters = this._spec.components?.parameters;
-    if (!parameters || !(name in parameters)) {
-      return null;
-    }
-
-    const refParam = parameters[name];
-    if ('$ref' in refParam) {
-      return null; // Don't support nested references
-    }
-
-    return refParam;
   }
 
   /**
-   * Get the base URL for the API
+   * Get the base URL
    */
   public get baseUrl(): string {
     return this._baseUrl;

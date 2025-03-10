@@ -23,7 +23,7 @@ markdown_extensions:
   - md_in_html
   - meta
   - toc:
-      permalink: '#'
+      permalink: "#"
       permalink_title: Anchor link to this section for reference
   - pymdownx.caret
   - pymdownx.mark
@@ -40,7 +40,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Usage:
+  - StackOne Usage:
       - Getting Started: index.md
       - Account IDs: account-id-usage.md
       - Error Handling: error-handling.md
@@ -49,3 +49,6 @@ nav:
   - Integrations:
       - OpenAI: openai-integration.md
       - AI SDK: ai-sdk-integration.md
+  - OpenAPI Usage:
+      - Getting Started: openapi-toolset.md
+      - Custom Transformations: openapi-transformations.md

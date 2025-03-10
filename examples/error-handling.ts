@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { StackOneAPIError, StackOneError, StackOneToolSet, ToolsetConfigError } from '../src';
+import { StackOneAPIError, StackOneError, StackOneToolSet, ToolSetConfigError } from '../src';
 
 const errorHandling = async (): Promise<void> => {
   // Example 1: Handle initialization errors
@@ -18,9 +18,9 @@ const errorHandling = async (): Promise<void> => {
     try {
       // This will throw a ToolsetConfigError
       const _toolset = new StackOneToolSet();
-      assert(false, 'Expected ToolsetConfigError was not thrown');
+      assert(false, 'Expected ToolSetConfigError was not thrown');
     } catch (error) {
-      assert(error instanceof ToolsetConfigError, 'Expected error to be ToolsetConfigError');
+      assert(error instanceof ToolSetConfigError, 'Expected error to be ToolSetConfigError');
     } finally {
       // Restore the API key
       process.env.STACKONE_API_KEY = originalKey;
@@ -33,7 +33,7 @@ const errorHandling = async (): Promise<void> => {
     const accountId = 'invalid-account-id'; // Invalid account ID to force an error
 
     try {
-      const tools = toolset.getTools('hris_*', accountId);
+      const tools = toolset.getStackOneTools('hris_*', accountId);
       const employeeTool = tools.getTool('hris_list_employees');
 
       if (employeeTool) {

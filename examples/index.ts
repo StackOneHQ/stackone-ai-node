@@ -48,8 +48,8 @@ import { StackOneToolSet } from '../src';
 const quickstart = async (): Promise<void> => {
   const toolset = new StackOneToolSet();
 
-  // Get all HRIS-related tools
-  const tools = toolset.getTools('hris_*', accountId);
+  // Get all HRIS-related tools using the StackOneTool method (adds accountId to the request)
+  const tools = toolset.getStackOneTools('hris_*', accountId);
 
   // Verify we have tools
   assert(tools.length > 0, 'Expected to find HRIS tools');

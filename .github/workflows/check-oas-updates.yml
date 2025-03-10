@@ -45,7 +45,7 @@ jobs:
         if: steps.check-oas-changes.outputs.changes == 'true'
         run: |
           # Run tests to ensure the updated OAS files don't break anything
-          bun run test
+          bun test -u
 
           # Run linter to ensure code quality
           bun run lint

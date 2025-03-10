@@ -18,27 +18,33 @@ import assert from 'node:assert';
 import { StackOneToolSet } from '../src';
 
 const accountIdUsage = async (): Promise<void> => {
-  // Set account ID from toolset initialization
+  /*
+   * Set account ID on toolset initialization
+   */
   const toolset = new StackOneToolSet({ accountId: 'initial-account-id' });
 
   const tools = toolset.getTools('hris_*');
-  const employeeTool = tools.getTool('hris_list_employees');
+  const employeeTool = tools.getStackOneTool('hris_list_employees');
 
   assert(
-    employeeTool?.getAccountId() === 'initial-account-id',
+    employeeTool.getAccountId() === 'initial-account-id',
     'Account ID should match what was set'
   );
 
-  // Setting account ID when getting tools (overrides toolset account ID)
-  const toolsWithOverride = toolset.getTools('hris_*', 'override-account-id');
-  const employeeToolWithOverride = toolsWithOverride.getTool('hris_list_employees');
+  /*
+   * Setting account ID when getting tools (overrides toolset account ID)
+   */
+  const toolsWithOverride = toolset.getStackOneTools('hris_*', 'override-account-id');
+  const employeeToolWithOverride = toolsWithOverride.getStackOneTool('hris_list_employees');
 
   assert(
     employeeToolWithOverride?.getAccountId() === 'override-account-id',
     'Account ID should match what was set'
   );
 
-  // Set the account ID directly on the tool
+  /*
+   * Set the account ID directly on the tool
+   */
   employeeTool.setAccountId('direct-account-id');
 
   assert(

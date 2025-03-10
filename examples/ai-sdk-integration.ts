@@ -13,7 +13,7 @@ const aiSdkIntegration = async (): Promise<void> => {
   const accountId = '45072196112816593343';
 
   // Get HRIS tools
-  const tools = toolset.getTools('hris_*', accountId);
+  const tools = toolset.getStackOneTools('hris_*', accountId);
 
   // Convert to AI SDK tools
   const aiSdkTools = tools.toAISDK();

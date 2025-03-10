@@ -23,7 +23,7 @@ const fileUploads = async (): Promise<void> => {
     const toolset = new StackOneToolSet();
 
     // Get tools for documents
-    const tools = toolset.getTools('hris_*', accountId);
+    const tools = toolset.getStackOneTools('hris_*', accountId);
 
     // Get the upload file tool
     const uploadTool = tools.getTool('hris_upload_employee_document');
@@ -31,8 +31,11 @@ const fileUploads = async (): Promise<void> => {
     // Check if upload tool exists
     assert(uploadTool !== undefined, 'Upload document tool not found');
 
-    // Upload a file using the file_path parameter
-    // The SDK will automatically derive content, name, and file_format from the file_path
+    /*
+     * Upload a file using the file_path parameter
+     * The SDK will automatically derive content, name, and file_format from the file_path
+     * Read more about transformed parameters in the [Derived Parameters](parameter-derivation.md)
+     */
     const result = await uploadTool.execute({
       file_path: sampleFilePath,
       id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
