@@ -60,7 +60,6 @@ describe('Parameter Transformations', () => {
       // Test data
       const sourceParam = 'source_param';
       const sourceValue = 'test_value';
-      const _params = { [sourceParam]: sourceValue };
 
       // Transform parameters for derived_param1
       const result1 = transformParameter(

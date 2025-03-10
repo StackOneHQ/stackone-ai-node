@@ -239,11 +239,10 @@ This is particularly useful for features like file uploads, where you can derive
 You can also define your own transformations for any type of parameter:
 
 ```typescript
-import { OpenAPIToolSet, ParameterTransformer } from "@stackone/ai";
+import { OpenAPIToolSet } from "@stackone/ai";
 
 // Define a custom transformation configuration for user data
-const config: ParameterTransformer = {
-  sourceParameter: "user_id",
+const userTransforms = {
   transforms: {
     first_name: (userId) => {
       // Fetch user data and return first name
@@ -261,10 +260,12 @@ const config: ParameterTransformer = {
   derivedParameters: ["first_name", "last_name", "email"],
 };
 
-// Initialize the toolset with custom derivation config
+// Initialize the toolset with custom transformation config
 const toolset = new OpenAPIToolSet({
   filePath: "/path/to/openapi.json",
-  derivationConfig: userDerivationConfig,
+  transformers: {
+    user_id: userTransforms,
+  },
 });
 
 // Execute with just the user_id parameter

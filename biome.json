@@ -8,7 +8,11 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnusedFunctionParameters": "error",
+        "noUnusedLabels": "error",
+        "noUnusedPrivateClassMembers": "error"
       },
       "suspicious": {
         "noExplicitAny": "warn",

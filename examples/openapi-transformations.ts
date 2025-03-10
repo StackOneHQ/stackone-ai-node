@@ -10,7 +10,7 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import { OpenAPIToolSet } from '../src/toolset';
+import { OpenAPIToolSet } from '../src/toolsets/openapi';
 import type { ParameterTransformer } from '../src/types';
 
 /**
