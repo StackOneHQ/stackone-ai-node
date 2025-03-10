@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.6](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.5...ai-v0.0.6) (2025-03-10)
+
+
+### Features
+
+* use any openapi spec as tools ([#18](https://github.com/StackOneHQ/stackone-ai-node/issues/18)) ([6dd7aeb](https://github.com/StackOneHQ/stackone-ai-node/commit/6dd7aebd1b7b24dfa52abfa6442a336666cedbca))
+
+
+### Bug Fixes
+
+* docs links ([#16](https://github.com/StackOneHQ/stackone-ai-node/issues/16)) ([29fc021](https://github.com/StackOneHQ/stackone-ai-node/commit/29fc021729504db78e11ffc261d9e48bf3dd3c98))
+
 ## [0.0.5](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.4...ai-v0.0.5) (2025-03-05)
 
 
