@@ -80,7 +80,7 @@ await generateText({
 
 ## OpenAPIToolSet
 
-The OpenAPIToolSet class allows you to parse OpenAPI specifications from either a local file or a remote URL.
+The OpenAPIToolSet class allows you to parse OpenAPI specifications as tools from either a local file or a remote URL.
 
 ### Loading from a File
 
@@ -88,13 +88,9 @@ The OpenAPIToolSet class allows you to parse OpenAPI specifications from either 
 import { OpenAPIToolSet } from "@stackone/ai";
 import path from "node:path";
 
-// Path to your OpenAPI spec file
-const filePath = path.join(__dirname, "path/to/openapi-spec.json");
-
 // Create the toolset
 const toolset = new OpenAPIToolSet({
-  filePath,
-  baseUrl: "https://api.example.com", // Optional base URL override
+  filePath: path.join(__dirname, "path/to/openapi-spec.json");
 });
 
 // Get all tools
@@ -109,25 +105,15 @@ const filteredTools = toolset.getTools("user_*");
 ```typescript
 import { OpenAPIToolSet } from "@stackone/ai";
 
-// URL to your OpenAPI spec
-const url = "https://example.com/path/to/openapi-spec.json";
-
 // Create the toolset using the factory method
 const toolset = await OpenAPIToolSet.fromUrl({
-  url,
-  baseUrl: "https://api.example.com", // Optional base URL override
+  url: "https://example.com/path/to/openapi-spec.json",
 });
-
-// Get all tools
-const allTools = toolset.getTools();
-
-// Get filtered tools
-const filteredTools = toolset.getTools("crm_*");
 ```
 
 ### Authentication Options
 
-The OpenAPIToolSet supports easy usage of bothBasic and Bearer authentication:
+The OpenAPIToolSet supports easy usage of bot Basic and Bearer authentication:
 
 ```typescript
 // Basic Authentication
@@ -320,19 +306,3 @@ The `dryRun` option returns an object containing:
 - `body`: The request body (or '[FormData]' for multipart form data)
 - `mappedParams`: The parameters after mapping and derivation
 - `originalParams`: The original parameters provided to the execute method
-
-### Error Handling
-
-```typescript
-import { StackOneAPIError, StackOneError } from "@stackone/ai";
-
-try {
-  await tool.execute();
-} catch (error) {
-  if (error instanceof StackOneAPIError) {
-    // Handle API errors
-  }
-}
-```
-
-[View full example](examples/error-handling.ts)
