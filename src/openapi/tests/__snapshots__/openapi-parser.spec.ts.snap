@@ -12902,6 +12902,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "time_off_policy_id",
+          "type": "string",
+        },
+        {
+          "location": "body",
+          "name": "reason",
+          "type": "object",
+        },
+        {
+          "location": "body",
           "name": "passthrough",
           "type": "object",
         },
@@ -12956,6 +12966,28 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "other_known_names": "John Doe",
           },
           "nullable": true,
+          "type": "object",
+        },
+        "reason": {
+          "nullable": true,
+          "properties": {
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "nullable": true,
+              "type": "string",
+            },
+            "name": {
+              "nullable": true,
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "nullable": true,
+              "type": "string",
+            },
+          },
           "type": "object",
         },
         "start_date": {
@@ -13021,6 +13053,12 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             },
           },
           "type": "object",
+        },
+        "time_off_policy_id": {
+          "description": "The time off policy id associated with this time off request",
+          "example": "cx280928933",
+          "nullable": true,
+          "type": "string",
         },
         "type": {
           "description": "The type of the time off request",
@@ -16181,6 +16219,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "time_off_policy_id",
+          "type": "string",
+        },
+        {
+          "location": "body",
+          "name": "reason",
+          "type": "object",
+        },
+        {
+          "location": "body",
           "name": "passthrough",
           "type": "object",
         },
@@ -16232,6 +16280,28 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "other_known_names": "John Doe",
           },
           "nullable": true,
+          "type": "object",
+        },
+        "reason": {
+          "nullable": true,
+          "properties": {
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "nullable": true,
+              "type": "string",
+            },
+            "name": {
+              "nullable": true,
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "nullable": true,
+              "type": "string",
+            },
+          },
           "type": "object",
         },
         "start_date": {
@@ -16297,6 +16367,12 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             },
           },
           "type": "object",
+        },
+        "time_off_policy_id": {
+          "description": "The time off policy id associated with this time off request",
+          "example": "cx280928933",
+          "nullable": true,
+          "type": "string",
         },
         "type": {
           "description": "The type of the time off request",
@@ -17346,7 +17422,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
           "nullable": true,
           "type": "string",
         },
@@ -17914,7 +17990,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,updated_at,created_at",
+          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
           "nullable": true,
           "type": "string",
         },
@@ -17982,7 +18058,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
           "nullable": true,
           "type": "string",
         },
@@ -19454,7 +19530,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
           "nullable": true,
           "type": "string",
         },
@@ -20611,7 +20687,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,updated_at,created_at",
+          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
           "nullable": true,
           "type": "string",
         },
@@ -20730,7 +20806,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
           "nullable": true,
           "type": "string",
         },
@@ -35009,6 +35085,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "time_off_policy_id",
+          "type": "string",
+        },
+        {
+          "location": "body",
+          "name": "reason",
+          "type": "object",
+        },
+        {
+          "location": "body",
           "name": "passthrough",
           "type": "object",
         },
@@ -35063,6 +35149,28 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "other_known_names": "John Doe",
           },
           "nullable": true,
+          "type": "object",
+        },
+        "reason": {
+          "nullable": true,
+          "properties": {
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "nullable": true,
+              "type": "string",
+            },
+            "name": {
+              "nullable": true,
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "nullable": true,
+              "type": "string",
+            },
+          },
           "type": "object",
         },
         "start_date": {
@@ -35128,6 +35236,12 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             },
           },
           "type": "object",
+        },
+        "time_off_policy_id": {
+          "description": "The time off policy id associated with this time off request",
+          "example": "cx280928933",
+          "nullable": true,
+          "type": "string",
         },
         "type": {
           "description": "The type of the time off request",
