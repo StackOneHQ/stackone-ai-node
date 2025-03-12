@@ -1,6 +1,58 @@
-# StackOne AI Node.js SDK
+# StackOne AI SDK
 
-StackOne AI provides a unified interface for accessing various SaaS tools through AI-friendly APIs.
+> A unified interface for performing actions on SaaS tools through AI-friendly APIs.
+
+## Toolsets
+
+StackOne provides two toolsets:
+
+- `OpenAPIToolSet`: A toolset generated from supplied OpenAPI specifications
+- `StackOneToolSet`: A toolset preloaded with StackOne APIs
+
+These toolsets provide functionality to filter, transform, and execute tools and have integrations to common AI Agent libraries.
+
+Under the hood the StackOneToolSet uses the same OpenAPIParser as the OpenAPIToolSet, but provides some convenience methods for using StackOne API keys and account IDs.
+
+### Workflow Planning
+
+While building agents you may find that your workflow is too complex for a general purpose agent.
+
+StackOne AI SDK provides access to a state of the art planning agent which allows you to create, cache, and execute complex workflows on [verticals supported by StackOne](https://www.stackone.com/integrations).
+
+For example, onboard a new hire from your ATS to your HRIS.
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet();
+
+const onboardWorkflow = await toolset.plan({
+  key: "custom_onboarding",
+  input: "Onboard the last new hire from Teamtailor to Workday",
+  model: "stackone-planner-latest",
+  tools: ["hris_*", "ats_*"],
+  accountIds: ["teamtailor_account_id", "workday_account_id"],
+  cache: true, // saves the plan to $HOME/.stackone/plans
+});
+
+// Execute the workflow
+await onboardWorkflow.execute();
+```
+
+Or use it as a tool in a larger agent (using AI SDK)
+
+```typescript
+await generateText({
+  model: openai("gpt-4o"),
+  prompt: "You are a workplace agent, onboard the latest hires to our systems",
+  tools: onboardWorkflow.toAISDK(),
+  maxSteps: 3,
+});
+```
+
+[View full example](examples/planning.ts)
+
+> The planning model is in closed beta and only available to design partners. Apply for the waitlist [here](https://www.stackone.com/demo).
 
 ## Installation
 
@@ -14,15 +66,6 @@ yarn add @stackone/ai
 # Using bun
 bun add @stackone/ai
 ```
-
-## Toolsets
-
-StackOne provides two toolsets:
-
-- `OpenAPIToolSet`: A toolset generated from OpenAPI specifications
-- `StackOneToolSet`: A toolset for StackOne APIs
-
-Under the hood the StackOneToolSet uses the same OpenAPIParser as the OpenAPIToolSet, but provides some convenience methods for using StackOne API keys and account IDs.
 
 ## Integrations
 
@@ -151,6 +194,8 @@ const toolsetWithHeaders = new OpenAPIToolSet({
 });
 ```
 
+[View full example](examples/openapi-toolset.ts)
+
 ## StackOneToolSet
 
 The StackOneToolSet is an extension of the OpenAPIToolSet that adds some convenience methods for using StackOne API keys and account IDs and some other features.
@@ -272,6 +317,8 @@ const toolset = new OpenAPIToolSet({
 // The first_name, last_name, and email will be derived automatically
 const result = await tool.execute({ user_id: "user123" });
 ```
+
+[View full example](examples/openapi-transformations.ts)
 
 ### Testing with dryRun
 

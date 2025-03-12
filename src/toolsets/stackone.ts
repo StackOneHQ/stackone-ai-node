@@ -15,6 +15,18 @@ export interface StackOneToolSetConfig extends BaseToolSetConfig {
 }
 
 /**
+ * Configuration for workflow
+ */
+export interface WorkflowConfig {
+  key: string;
+  input: string;
+  model: string;
+  tools: string[];
+  accountIds: string[];
+  cache?: boolean;
+}
+
+/**
  * Class for loading StackOne tools from the OAS directory
  */
 export class StackOneToolSet extends ToolSet {
@@ -119,6 +131,15 @@ export class StackOneToolSet extends ToolSet {
 
     // Get tools with headers
     return this.getTools(filterPattern, headers);
+  }
+
+  /**
+   * Plan a workflow
+   * @param config Configuration object containing workflow details
+   * @returns Workflow object
+   */
+  plan(_: WorkflowConfig): Promise<StackOneTool> {
+    throw new Error('Not implemented yet');
   }
 
   /**
