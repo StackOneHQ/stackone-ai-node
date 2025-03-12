@@ -49,10 +49,10 @@ await generateText({
   maxSteps: 3,
 });
 ```
+> [!NOTE]  
+> The workflow planner is in closed beta and only available to design partners. Apply for the waitlist [here](https://www.stackone.com/demo).
 
 [View full example](examples/planning.ts)
-
-> The planning model is in closed beta and only available to design partners. Apply for the waitlist [here](https://www.stackone.com/demo).
 
 ## Installation
 
@@ -69,7 +69,7 @@ bun add @stackone/ai
 
 ## Integrations
 
-These integrations work with both the OpenAPIToolSet and StackOneToolSet. They make it super easy to use these APIs in your AI applications.
+The OpenAPIToolSet and StackOneToolSet make it super easy to use these APIs as tools in your AI applications.
 
 ### OpenAI
 
