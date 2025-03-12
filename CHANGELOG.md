@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.8](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.7...ai-v0.0.8) (2025-03-12)
+
+
+### Features
+
+* update oas and add planner docs ([#21](https://github.com/StackOneHQ/stackone-ai-node/issues/21)) ([6dd4269](https://github.com/StackOneHQ/stackone-ai-node/commit/6dd42697b8ea11bc4d62e62a3bab16b34fb49f4a))
+
 ## [0.0.7](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.6...ai-v0.0.7) (2025-03-10)
 
 
