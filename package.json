@@ -50,21 +50,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stackone-ai/stackone-ai-node.git"
+    "url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
   },
   "keywords": [
     "stackone",
     "ai",
     "saas",
     "tools",
-    "agents"
+    "agents",
+    "ai sdk",
+    "mcp",
+    "model context protocol"
   ],
   "author": "StackOne",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/stackone-ai/stackone-ai-node/issues"
-  },
-  "homepage": "https://github.com/stackone-ai/stackone-ai-node#readme",
+  "license": "Apache-2.0",
+  "bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
+  "homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": [
       "biome check --write",
