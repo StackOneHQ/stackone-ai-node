@@ -8,81 +8,51 @@
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { SPECS } from '../src/constants';
 
 // Configuration
-const STACKONE_DOCS_BASE = 'https://docs.stackone.com';
-const STACKONE_DOCS_URL = `${STACKONE_DOCS_BASE}/openapi`;
+const STACKONE_DOCS_BASE = 'https://api.eu1.stackone.com/oas';
+
 const OUTPUT_DIR = join(process.cwd(), '.oas');
 
 /**
- * Scrape OpenAPI spec URLs and their IDs from the documentation page
+ * Get the list of API specs to download
  */
 const getApiSpecs = async (): Promise<Record<string, string>> => {
-  console.log('Scraping OpenAPI specs from documentation...');
-
-  const response = await fetch(STACKONE_DOCS_URL);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch documentation page: ${response.statusText}`);
-  }
-
-  const html = await response.text();
-
-  // Simple HTML parsing to find links (similar to BeautifulSoup in Python)
+  console.log('Preparing OpenAPI specs to download...');
+  
   const specs: Record<string, string> = {};
-  const linkRegex = /<a[^>]+href="([^"]+)"[^>]*>([^<]+)<\/a>/g;
-  let match: RegExpExecArray | null = null;
-
-  // Rewrite the while loop to avoid assignment in expression
-  match = linkRegex.exec(html);
-  while (match !== null) {
-    const href = match[1];
-    const text = match[2];
-
-    if (href.startsWith('/openapi/')) {
-      // Extract the ID from the link
-      const specId = href.split('/').pop() || '';
-
-      // Parse the name from the link text (e.g., "CRM - v1.0" -> "crm")
-      let name = text.split('-')[0].trim().toLowerCase();
-      if (name === 'stackone') {
-        name = 'core';
-      }
-
-      specs[name] = specId;
-    }
-
-    // Get the next match
-    match = linkRegex.exec(html);
+  
+  for (const name of SPECS) {
+    // Include .json extension for the filename
+    const filename = `${name}.json`;
+    
+    // Special handling for stackone - rename to core for backward compatibility
+    const specName = name === 'stackone' ? 'core' : name;
+    
+    specs[specName] = filename;
   }
-
+  
   return specs;
 };
 
 /**
- * Fetch an OpenAPI specification using its ID
+ * Fetch an OpenAPI specification
  */
-const fetchOasSpec = async (specId: string): Promise<Record<string, unknown>> => {
-  const url = `${STACKONE_DOCS_BASE}/openapi/${specId}`;
+const fetchOasSpec = async (filename: string): Promise<Record<string, unknown>> => {
+  const url = `${STACKONE_DOCS_BASE}/${filename}`;
+  console.log(`Fetching spec from ${url}...`);
+  
   const response = await fetch(url);
-
   if (!response.ok) {
-    throw new Error(`Failed to fetch spec ${specId}: ${response.statusText}`);
+    throw new Error(`Failed to fetch spec ${filename}: ${response.statusText}`);
   }
 
-  // Try to parse as JSON first
-  try {
-    return await response.json();
-  } catch (_error) {
-    // If JSON parsing fails, try to parse as YAML
-    // Note: In a real implementation, you'd need to add a YAML parser dependency
-    // For now, we'll just return the text and handle the error
-    console.warn(`Spec ${specId} is not valid JSON. YAML parsing not implemented.`);
-    return { error: 'YAML parsing not implemented' };
-  }
+  return response.json();
 };
 
 /**
- * Save an OpenAPI specification to a file
+ * Save an OpenAPI specification to a TypeScript file
  */
 const saveSpec = async (name: string, spec: Record<string, unknown>): Promise<void> => {
   // Ensure the output directory exists
@@ -90,8 +60,11 @@ const saveSpec = async (name: string, spec: Record<string, unknown>): Promise<vo
     await mkdir(OUTPUT_DIR, { recursive: true });
   }
 
-  const outputPath = join(OUTPUT_DIR, `${name}.json`);
-  await writeFile(outputPath, JSON.stringify(spec, null, 2));
+  const outputPath = join(OUTPUT_DIR, `${name}.ts`);
+  const tsContent = `// Generated OpenAPI specification for ${name}
+export const ${name}Spec = ${JSON.stringify(spec, null, 2)} as const;
+`;
+  await writeFile(outputPath, tsContent);
   console.log(`✓ Saved ${name} API specification to ${outputPath}`);
 };
 
@@ -103,18 +76,31 @@ const main = async (): Promise<void> => {
   const specs = await getApiSpecs();
   console.log(`Found ${Object.keys(specs).length} API specs to download:`);
 
-  for (const [name, specId] of Object.entries(specs)) {
-    console.log(`  - ${name} (${specId})`);
+  for (const [name, filename] of Object.entries(specs)) {
+    console.log(`  - ${name} (${filename})`);
   }
 
   // Download each spec
-  for (const [name, specId] of Object.entries(specs)) {
+  for (const [name, filename] of Object.entries(specs)) {
     try {
-      const spec = await fetchOasSpec(specId);
+      const spec = await fetchOasSpec(filename);
       await saveSpec(name, spec);
     } catch (error) {
       console.error(`✗ Failed to download ${name} spec:`, error);
     }
+  }
+
+  // Create an index.ts file that exports all specs
+  const specNames = Object.keys(specs);
+  if (specNames.length > 0) {
+    const indexContent = specNames
+      .map(name => `export { ${name}Spec } from './${name}';`)
+      .join('\n') + '\n';
+    
+    await writeFile(join(OUTPUT_DIR, 'index.ts'), indexContent);
+    console.log(`✓ Created index.ts file with exports for all ${specNames.length} specs`);
+  } else {
+    console.warn('No specs found. Index file not created.');
   }
 
   console.log('Done fetching OpenAPI specifications');
