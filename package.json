@@ -18,14 +18,13 @@
     "rebuild": "bun run fetch:specs && bun run build",
     "publish-package": "bun run build && bun publish --access=public",
     "test": "bun test",
-    "fetch:specs": "bun run ./scripts/fetch-specs.ts",
+    "fetch:specs": "bun run ./scripts/fetch-specs.ts && bun run format",
     "build:docs": "bun run ./scripts/build-docs.ts",
     "docs:serve": "mkdocs serve",
     "docs:build": "bun run build:docs && mkdocs build",
     "docs:deploy": "bun run build:docs && mkdocs gh-deploy --force",
     "lint": "biome check .",
-    "format": "biome format --write .",
-    "check": "biome check --write ."
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.5.3",

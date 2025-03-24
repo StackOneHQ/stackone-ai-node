@@ -42,7 +42,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["dist/**", "node_modules/**", "src/openapi/generated/**"],
+    "ignore": ["dist/**", "node_modules/**"],
     "include": ["src/**/*.ts", "examples/**/*.ts"]
   }
 }
