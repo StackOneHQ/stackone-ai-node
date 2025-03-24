@@ -32,6 +32,32 @@ export class OpenAPIParser {
   }
 
   /**
+   * Helper method to check if a parameter should be removed
+   */
+  private isRemovedParam(paramName: string): boolean {
+    return this._removedParams.includes(paramName);
+  }
+
+  /**
+   * Helper method to check if a schema is deprecated
+   */
+  private isDeprecated(schema: unknown): boolean {
+    return (
+      typeof schema === 'object' &&
+      schema !== null &&
+      'deprecated' in schema &&
+      (schema as { deprecated?: boolean }).deprecated === true
+    );
+  }
+
+  /**
+   * Helper method to check if a value is a non-null object
+   */
+  private isObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+  }
+
+  /**
    * Determine the base URL from the servers array in the OpenAPI spec
    * @returns The base URL to use for all operations
    */
@@ -78,8 +104,8 @@ export class OpenAPIParser {
     const parts = ref.split('/').slice(1); // Skip the '#'
     let current: unknown = this._spec;
     for (const part of parts) {
-      if (typeof current === 'object' && current !== null) {
-        current = (current as Record<string, unknown>)[part];
+      if (this.isObject(current)) {
+        current = current[part];
       } else {
         const errorMsg = `Invalid reference path: ${ref}`;
         throw new Error(errorMsg);
@@ -100,17 +126,12 @@ export class OpenAPIParser {
     visited: Set<string> = new Set()
   ): JsonSchema {
     // Handle primitive types (string, number, etc)
-    if (typeof schema !== 'object' || schema === null) {
+    if (!this.isObject(schema)) {
       return schema as JsonSchema;
     }
 
     // Skip if schema is deprecated
-    if (
-      schema &&
-      typeof schema === 'object' &&
-      'deprecated' in schema &&
-      schema.deprecated === true
-    ) {
+    if (this.isDeprecated(schema)) {
       return {} as JsonSchema;
     }
 
@@ -121,9 +142,9 @@ export class OpenAPIParser {
     }
 
     // Handle direct reference
-    if (typeof schema === 'object' && '$ref' in schema && typeof schema.$ref === 'string') {
+    if ('$ref' in schema && typeof schema.$ref === 'string') {
       const resolved = this.resolveSchemaRef(schema.$ref, visited);
-      if (typeof resolved !== 'object' || resolved === null) {
+      if (!this.isObject(resolved)) {
         return resolved;
       }
       // Merge any additional properties from the original schema
@@ -136,7 +157,7 @@ export class OpenAPIParser {
     }
 
     // Handle allOf combinations
-    if (typeof schema === 'object' && 'allOf' in schema) {
+    if ('allOf' in schema) {
       const schemaObj = schema as OpenAPIV3.SchemaObject;
       // Create a new object without the allOf property to avoid type issues
       const { allOf, ...restSchema } = schemaObj;
@@ -146,7 +167,7 @@ export class OpenAPIParser {
       if (Array.isArray(allOf)) {
         for (const subSchema of allOf) {
           const resolved = this.resolveSchema(subSchema, new Set(visited));
-          if (typeof resolved !== 'object' || resolved === null) {
+          if (!this.isObject(resolved)) {
             continue;
           }
 
@@ -155,18 +176,26 @@ export class OpenAPIParser {
             if (!mergedSchema.properties) {
               mergedSchema.properties = {};
             }
+            // Ensure both are objects before spreading
+            const resolvedProps = resolved.properties || {};
             mergedSchema.properties = {
-              ...mergedSchema.properties,
-              ...resolved.properties,
+              ...(mergedSchema.properties || {}),
+              ...resolvedProps,
             };
           }
 
           // Merge required fields
           if ('required' in resolved && Array.isArray(resolved.required)) {
-            if (!mergedSchema.required) {
-              mergedSchema.required = [];
+            // Just use a simple array concat approach without spreading
+            if (mergedSchema.required) {
+              for (const req of resolved.required) {
+                if (!mergedSchema.required.includes(req)) {
+                  mergedSchema.required.push(req);
+                }
+              }
+            } else {
+              mergedSchema.required = resolved.required.slice();
             }
-            mergedSchema.required = [...new Set([...mergedSchema.required, ...resolved.required])];
           }
 
           // Merge other fields
@@ -193,28 +222,18 @@ export class OpenAPIParser {
         // Skip null properties
         if (propSchema === null) continue;
 
-        // Skip properties in removedParams
-        if (this._removedParams.includes(propName)) continue;
-
-        // Skip deprecated properties
-        if (
-          typeof propSchema === 'object' &&
-          'deprecated' in propSchema &&
-          propSchema.deprecated === true
-        )
-          continue;
+        // Skip properties that should be removed or are deprecated
+        if (this.isRemovedParam(propName) || this.isDeprecated(propSchema)) continue;
 
         // A property is required if:
         // 1. It's in the parent's required array AND
         // 2. It's not marked as nullable in OpenAPI
         const isNullable =
-          typeof propSchema === 'object' &&
-          'nullable' in propSchema &&
-          propSchema.nullable === true;
+          this.isObject(propSchema) && 'nullable' in propSchema && propSchema.nullable === true;
         const isRequired =
           Array.isArray(schemaObj.required) &&
           schemaObj.required.includes(propName) &&
-          !this._removedParams.includes(propName);
+          !this.isRemovedParam(propName);
 
         if (isRequired && !isNullable) {
           requiredProps.push(propName);
@@ -233,9 +252,7 @@ export class OpenAPIParser {
       }
     } else if ('required' in schemaObj && Array.isArray(schemaObj.required)) {
       // Filter the required array to remove any properties in removedParams
-      const filteredRequired = schemaObj.required.filter(
-        (prop) => !this._removedParams.includes(prop)
-      );
+      const filteredRequired = schemaObj.required.filter((prop) => !this.isRemovedParam(prop));
       if (filteredRequired.length > 0) {
         resolved.required = filteredRequired;
       }
@@ -254,7 +271,7 @@ export class OpenAPIParser {
         continue;
       }
 
-      if (typeof value === 'object' && value !== null) {
+      if (this.isObject(value)) {
         if (Array.isArray(value)) {
           resolved[key] = value.map((item) => this.resolveSchema(item, new Set(visited)));
         } else {
@@ -370,6 +387,13 @@ export class OpenAPIParser {
   }
 
   /**
+   * Helper method to check if an item should be skipped (removed or deprecated)
+   */
+  private shouldSkipItem(name: string, item: unknown): boolean {
+    return this.isRemovedParam(name) || this.isDeprecated(item);
+  }
+
+  /**
    * Get the parameter location from a property schema
    * @param propSchema The schema of the property
    * @returns The parameter location (HEADER, QUERY, PATH, or BODY)
@@ -378,7 +402,7 @@ export class OpenAPIParser {
     propSchema: OpenAPIV3.ParameterObject | Record<string, unknown>
   ): ParameterLocation {
     // If the parameter has an explicit 'in' property, use that
-    if (propSchema && typeof propSchema === 'object' && 'in' in propSchema) {
+    if (this.isObject(propSchema) && 'in' in propSchema) {
       const location = propSchema.in;
 
       switch (location) {
@@ -400,8 +424,7 @@ export class OpenAPIParser {
   }
 
   /**
-   * Final cleanup of removed parameters and validation
-   * This provides a final check to ensure no removed parameters remain
+   * Filter out removed parameters from both properties and required arrays
    */
   private filterRemovedParams(
     properties: Record<string, JsonSchema>,
@@ -414,7 +437,7 @@ export class OpenAPIParser {
     }
 
     // Final cleanup of required fields
-    const filteredRequired = required?.filter((param) => !this._removedParams.includes(param));
+    const filteredRequired = required?.filter((param) => !this.isRemovedParam(param));
 
     return [
       filteredProperties,
@@ -469,8 +492,9 @@ export class OpenAPIParser {
                 }
 
                 const paramName = resolvedParam.name;
-                // Skip removed parameters and deprecated parameters
-                if (this._removedParams.includes(paramName) || resolvedParam.deprecated === true) {
+
+                // Skip parameters that should be removed or are deprecated
+                if (this.shouldSkipItem(paramName, resolvedParam)) {
                   continue;
                 }
 
@@ -505,13 +529,8 @@ export class OpenAPIParser {
 
               for (const [propName, propSchema] of Object.entries(bodyProps)) {
                 try {
-                  // Skip removed parameters and deprecated properties
-                  if (
-                    this._removedParams.includes(propName) ||
-                    (typeof propSchema === 'object' &&
-                      'deprecated' in propSchema &&
-                      propSchema.deprecated === true)
-                  ) {
+                  // Skip items that should be removed or are deprecated
+                  if (this.shouldSkipItem(propName, propSchema)) {
                     continue;
                   }
 
@@ -545,7 +564,7 @@ export class OpenAPIParser {
                 url: `${this._baseUrl}${path}`,
                 bodyType: (bodyType as 'json' | 'multipart-form') || 'json',
                 params: Object.entries(parameterLocations)
-                  .filter(([name]) => !this._removedParams.includes(name))
+                  .filter(([name]) => !this.isRemovedParam(name))
                   .map(([name, location]) => {
                     return {
                       name,
@@ -608,8 +627,8 @@ export class OpenAPIParser {
         const parts = ref.split('/').slice(1); // Skip the '#'
         let current: unknown = this._spec;
         for (const part of parts) {
-          if (typeof current === 'object' && current !== null) {
-            current = (current as Record<string, unknown>)[part];
+          if (this.isObject(current)) {
+            current = current[part];
           } else {
             return null;
           }
