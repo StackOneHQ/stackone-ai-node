@@ -222,8 +222,8 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Convert all tools to AI SDK format
    */
-  toAISDK(): Record<string, any> {
-    const result: Record<string, any> = {};
+  toAISDK(): ToolSet {
+    const result: ToolSet = {};
     for (const tool of this.tools) {
       Object.assign(result, tool.toAISDK());
     }
@@ -249,7 +249,7 @@ export class Tools implements Iterable<BaseTool> {
         if (index < tools.length) {
           return { value: tools[index++], done: false };
         }
-        return { value: undefined as any, done: true };
+        return { value: undefined as unknown as BaseTool, done: true };
       },
     };
   }

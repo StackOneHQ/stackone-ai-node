@@ -18,6 +18,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { transformParameter } from '../modules/parameterMapper';
+import type { Tools } from '../tool';
 import { OpenAPIToolSet } from '../toolsets';
 import type { ParameterTransformer } from '../types';
 import { mockFetch } from './utils/fetch-mock';
@@ -139,7 +140,21 @@ describe('Parameter Transformation Edge Cases', () => {
   let tempDir: string;
   let tempSpecFile: string;
   let fetchMock: ReturnType<typeof mockFetch>;
-  let mockTool: { execute: Mock<any> };
+  let mockTool: {
+    execute: Mock<
+      (
+        params: Record<string, unknown>,
+        options?: unknown
+      ) => Promise<{
+        mappedParams: Record<string, unknown>;
+        url: string;
+        method: string;
+        headers: Record<string, unknown>;
+        body: unknown;
+        originalParams: Record<string, unknown>;
+      }>
+    >;
+  };
 
   // Set up before each test
   beforeEach(() => {
@@ -208,7 +223,7 @@ describe('Parameter Transformation Edge Cases', () => {
     spyOn(OpenAPIToolSet.prototype, 'getTools').mockImplementation(() => {
       return {
         getTool: mock(() => mockTool),
-      } as any;
+      } as unknown as Tools;
     });
   });
 
