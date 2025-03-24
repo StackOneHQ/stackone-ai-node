@@ -12,7 +12,7 @@ const openaiIntegration = async (): Promise<void> => {
   const accountId = '45072196112816593343';
 
   // Get the correct tool
-  const tools = toolset.getStackOneTools('hris_*', accountId);
+  const tools = toolset.getStackOneTools('hris_get_*', accountId);
   const openAITools = tools.toOpenAI();
 
   // Initialize OpenAI client

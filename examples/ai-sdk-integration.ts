@@ -13,7 +13,7 @@ const aiSdkIntegration = async (): Promise<void> => {
   const accountId = '45072196112816593343';
 
   // Get HRIS tools
-  const tools = toolset.getStackOneTools('hris_*', accountId);
+  const tools = toolset.getStackOneTools('hris_get_*', accountId);
 
   // Convert to AI SDK tools
   const aiSdkTools = tools.toAISDK();
@@ -26,7 +26,7 @@ const aiSdkIntegration = async (): Promise<void> => {
     maxSteps: 3,
   });
 
-  assert(text.includes('Isac Newton'), 'Expected employee name to be included in the response');
+  assert(text.includes('Isacc Newton'), 'Expected employee name to be included in the response');
 };
 
 aiSdkIntegration();

@@ -46,7 +46,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   "source_value": {
                     "description": "The provider specific category for associating uploaded files, if provided, the value will be ignored.",
                     "example": "550e8400-e29b-41d4-a716-446655440000",
-                    "nullable": true,
                     "type": "string",
                   },
                   "value": {
@@ -80,7 +79,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "reports",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -89,7 +87,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "category_id": {
                 "description": "The categoryId of the documents",
                 "example": "6530",
-                "nullable": true,
                 "type": "string",
               },
               "confidential": {
@@ -98,7 +95,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "properties": {
                   "source_value": {
                     "example": "public",
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -126,7 +122,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "true",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -135,7 +130,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "content": {
                 "description": "The base64 encoded content of the file to upload",
                 "example": "VGhpcyBpc24ndCByZWFsbHkgYSBzYW1wbGUgZmlsZSwgYnV0IG5vIG9uZSB3aWxsIGV2ZXIga25vdyE",
-                "nullable": true,
                 "type": "string",
               },
               "file_format": {
@@ -144,7 +138,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "properties": {
                   "source_value": {
                     "example": "abc",
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -1381,7 +1374,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "pdf",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -1390,19 +1382,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "name": {
                 "description": "The filename of the file to upload",
                 "example": "weather-forecast",
-                "nullable": true,
                 "type": "string",
               },
               "path": {
                 "description": "The path for the file to be uploaded to",
                 "example": "/path/to/file",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": false,
           "type": "array",
         },
         "x-account-id": {
@@ -1649,11 +1638,9 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "base64": {
-              "nullable": true,
               "type": "string",
             },
             "url": {
-              "nullable": true,
               "type": "string",
             },
           },
@@ -1662,7 +1649,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "avatar_url": {
           "description": "The employee avatar Url",
           "example": "https://example.com/avatar.png",
-          "nullable": true,
           "type": "string",
         },
         "benefits": {
@@ -1674,7 +1660,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -1705,7 +1690,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       "unmapped_value",
                       null,
                     ],
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -1715,51 +1699,43 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "description": "The date and time the benefit was created",
                 "example": "2021-01-01T00:00:00Z",
                 "format": "date-time",
-                "nullable": true,
                 "type": "string",
               },
               "description": {
                 "description": "The description of the benefit",
                 "example": "Health insurance for employees",
-                "nullable": true,
                 "type": "string",
               },
               "id": {
                 "description": "Unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "name": {
                 "description": "The name of the benefit",
                 "example": "Health Insurance",
-                "nullable": true,
                 "type": "string",
               },
               "provider": {
                 "description": "The provider of the benefit",
                 "example": "Aetna",
-                "nullable": true,
                 "type": "string",
               },
               "updated_at": {
                 "description": "The date and time the benefit was last updated",
                 "example": "2021-01-01T00:00:00Z",
                 "format": "date-time",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "birthday": {
           "description": "The employee birthday",
           "example": "2021-01-01T00:00:00Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "citizenships": {
@@ -1767,7 +1743,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "items": {
             "properties": {
               "source_value": {
-                "nullable": true,
                 "oneOf": [
                   {
                     "type": "string",
@@ -2042,26 +2017,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   null,
                 ],
                 "example": "US",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "company_id": {
           "description": "The employee company id",
           "example": "1234567890",
-          "nullable": true,
           "type": "string",
         },
         "company_name": {
           "deprecated": true,
           "description": "The employee company name",
           "example": "Example Corp",
-          "nullable": true,
           "type": "string",
         },
         "cost_centers": {
@@ -2070,24 +2041,20 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "properties": {
               "distribution_percentage": {
                 "example": 100,
-                "nullable": true,
                 "type": "number",
               },
               "id": {
                 "description": "Unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "name": {
                 "example": "R&D",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "custom_fields": {
@@ -2097,31 +2064,26 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "id": {
                 "description": "Unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "name": {
                 "description": "The name of the custom field.",
                 "example": "Training Completion Status",
-                "nullable": true,
                 "type": "string",
               },
               "remote_id": {
                 "description": "Provider's unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "remote_value_id": {
                 "description": "Provider's unique identifier for the value of the custom field.",
                 "example": "e3cb75bf-aa84-466e-a6c1-b8322b257a48",
-                "nullable": true,
                 "type": "string",
               },
               "value": {
                 "description": "The value associated with the custom field.",
                 "example": "Completed",
-                "nullable": true,
                 "oneOf": [
                   {
                     "type": "string",
@@ -2144,44 +2106,37 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "value_id": {
                 "description": "The unique identifier for the value of the custom field.",
                 "example": "value_456",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "date_of_birth": {
           "description": "The employee date_of_birth",
           "example": "1990-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "department": {
           "description": "The employee department",
           "example": "Physics",
-          "nullable": true,
           "type": "string",
         },
         "department_id": {
           "description": "The employee department id",
           "example": "3093",
-          "nullable": true,
           "type": "string",
         },
         "display_name": {
           "description": "The employee display name",
           "example": "Sir Issac Newton",
-          "nullable": true,
           "type": "string",
         },
         "employee_number": {
           "description": "The assigned employee number",
           "example": "125",
-          "nullable": true,
           "type": "string",
         },
         "employment_contract_type": {
@@ -2190,7 +2145,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -2218,7 +2172,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -2230,7 +2183,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -2261,7 +2213,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -2273,7 +2224,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -2314,7 +2264,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -2328,13 +2277,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "description": "The effective date of the employment contract",
                 "example": "2021-01-01T01:01:01.000Z",
                 "format": "date-time",
-                "nullable": true,
                 "type": "string",
               },
               "employee_id": {
                 "description": "The employee ID associated with this employment",
                 "example": "1687-3",
-                "nullable": true,
                 "type": "string",
               },
               "employment_contract_type": {
@@ -2343,7 +2290,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -2371,7 +2317,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       "unmapped_value",
                       null,
                     ],
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -2383,7 +2328,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -2424,7 +2368,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       "unmapped_value",
                       null,
                     ],
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -2433,19 +2376,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "id": {
                 "description": "Unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "job_title": {
                 "description": "The job title of the employee",
                 "example": "Software Engineer",
-                "nullable": true,
                 "type": "string",
               },
               "pay_currency": {
                 "description": "The currency used for pay",
                 "example": "USD",
-                "nullable": true,
                 "type": "string",
               },
               "pay_frequency": {
@@ -2454,7 +2394,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -2494,7 +2433,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       "fixed",
                       null,
                     ],
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -2506,7 +2444,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -2539,7 +2476,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       "unmapped_value",
                       null,
                     ],
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -2548,14 +2484,12 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "pay_rate": {
                 "description": "The pay rate for the employee",
                 "example": "40.00",
-                "nullable": true,
                 "type": "string",
               },
               "time_worked": {
                 "description": "The time worked for the employee in ISO 8601 duration format",
                 "example": "P0Y0M0DT8H0M0S",
                 "format": "duration",
-                "nullable": true,
                 "type": "string",
               },
               "unified_custom_fields": {
@@ -2565,13 +2499,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   "my_project_custom_field_1": "REF-1236",
                   "my_project_custom_field_2": "some other value",
                 },
-                "nullable": true,
                 "type": "object",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "ethnicity": {
@@ -2580,7 +2512,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -2614,7 +2545,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -2623,7 +2553,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "first_name": {
           "description": "The employee first name",
           "example": "Issac",
-          "nullable": true,
           "type": "string",
         },
         "gender": {
@@ -2632,7 +2561,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -2663,7 +2591,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -2673,7 +2600,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The employee hire date",
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "home_location": {
@@ -2683,7 +2609,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "city": {
               "description": "The city where the location is situated",
               "example": "Grantham",
-              "nullable": true,
               "type": "string",
             },
             "country": {
@@ -2691,7 +2616,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -2966,7 +2890,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "US",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -2975,13 +2898,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name of the location",
               "example": "Woolsthorpe Manor",
-              "nullable": true,
               "type": "string",
             },
             "passthrough": {
@@ -2990,13 +2911,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "example": {
                 "other_known_names": "John Doe",
               },
-              "nullable": true,
               "type": "object",
             },
             "phone_number": {
               "description": "The phone number of the location",
               "example": "+44 1476 860 364",
-              "nullable": true,
               "type": "string",
             },
             "state": {
@@ -3005,7 +2924,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -6853,7 +6771,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "ZW-MI",
                     null,
                   ],
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -6862,19 +6779,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "street_1": {
               "description": "The first line of the address",
               "example": "Water Lane",
-              "nullable": true,
               "type": "string",
             },
             "street_2": {
               "description": "The second line of the address",
               "example": "Woolsthorpe by Colsterworth",
-              "nullable": true,
               "type": "string",
             },
             "zip_code": {
               "description": "The ZIP code/Postal code of the location",
               "example": "NG33 5NR",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -6883,25 +6797,21 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "job_id": {
           "description": "The employee job id",
           "example": "R-6789",
-          "nullable": true,
           "type": "string",
         },
         "job_title": {
           "description": "The employee job title",
           "example": "Physicist",
-          "nullable": true,
           "type": "string",
         },
         "last_name": {
           "description": "The employee last name",
           "example": "Newton",
-          "nullable": true,
           "type": "string",
         },
         "manager_id": {
           "description": "The employee manager ID",
           "example": "67890",
-          "nullable": true,
           "type": "string",
         },
         "marital_status": {
@@ -6910,7 +6820,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -6944,7 +6853,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -6953,7 +6861,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "name": {
           "description": "The employee name",
           "example": "Issac Newton",
-          "nullable": true,
           "type": "string",
         },
         "national_identity_number": {
@@ -6966,7 +6873,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -7241,7 +7147,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "US",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -7251,7 +7156,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -7420,7 +7324,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "ssn",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -7428,7 +7331,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             },
             "value": {
               "example": "123456789",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -7443,7 +7345,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -7718,7 +7619,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "US",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -7728,7 +7628,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -7897,7 +7796,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "ssn",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -7905,13 +7803,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               },
               "value": {
                 "example": "123456789",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "passthrough": {
@@ -7920,19 +7816,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "personal_email": {
           "description": "The employee personal email",
           "example": "isaac.newton@example.com",
-          "nullable": true,
           "type": "string",
         },
         "personal_phone_number": {
           "description": "The employee personal phone number",
           "example": "+1234567890",
-          "nullable": true,
           "type": "string",
         },
         "preferred_language": {
@@ -7941,7 +7834,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -8066,7 +7958,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "eng",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -8076,33 +7967,28 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The employee start date",
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "tenure": {
           "description": "The employee tenure",
           "example": 2,
-          "nullable": true,
           "type": "number",
         },
         "termination_date": {
           "description": "The employee termination date",
           "example": "2021-01-01T00:00:00Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "work_anniversary": {
           "description": "The employee work anniversary",
           "example": "2021-01-01T00:00:00Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "work_email": {
           "description": "The employee work email",
           "example": "newton@example.com",
-          "nullable": true,
           "type": "string",
         },
         "work_location": {
@@ -8112,7 +7998,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "city": {
               "description": "The city where the location is situated",
               "example": "Grantham",
-              "nullable": true,
               "type": "string",
             },
             "country": {
@@ -8120,7 +8005,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -8395,7 +8279,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "US",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -8404,13 +8287,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name of the location",
               "example": "Woolsthorpe Manor",
-              "nullable": true,
               "type": "string",
             },
             "passthrough": {
@@ -8419,13 +8300,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "example": {
                 "other_known_names": "John Doe",
               },
-              "nullable": true,
               "type": "object",
             },
             "phone_number": {
               "description": "The phone number of the location",
               "example": "+44 1476 860 364",
-              "nullable": true,
               "type": "string",
             },
             "state": {
@@ -8434,7 +8313,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -12282,7 +12160,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "ZW-MI",
                     null,
                   ],
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -12291,19 +12168,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "street_1": {
               "description": "The first line of the address",
               "example": "Water Lane",
-              "nullable": true,
               "type": "string",
             },
             "street_2": {
               "description": "The second line of the address",
               "example": "Woolsthorpe by Colsterworth",
-              "nullable": true,
               "type": "string",
             },
             "zip_code": {
               "description": "The ZIP code/Postal code of the location",
               "example": "NG33 5NR",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12312,7 +12186,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "work_phone_number": {
           "description": "The employee work phone number",
           "example": "+1234567890",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -12409,13 +12282,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The effective date of the employment contract",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "employee_id": {
           "description": "The employee ID associated with this employment",
           "example": "1687-3",
-          "nullable": true,
           "type": "string",
         },
         "employment_contract_type": {
@@ -12424,7 +12295,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -12452,7 +12322,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12464,7 +12333,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -12505,7 +12373,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12514,13 +12381,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "id": {
           "description": "Unique identifier",
           "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-          "nullable": true,
           "type": "string",
         },
         "job_title": {
           "description": "The job title of the employee",
           "example": "Software Engineer",
-          "nullable": true,
           "type": "string",
         },
         "passthrough": {
@@ -12529,13 +12394,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "pay_currency": {
           "description": "The currency used for pay",
           "example": "USD",
-          "nullable": true,
           "type": "string",
         },
         "pay_frequency": {
@@ -12544,7 +12407,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -12584,7 +12446,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "fixed",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12596,7 +12457,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -12629,7 +12489,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12638,14 +12497,12 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "pay_rate": {
           "description": "The pay rate for the employee",
           "example": "40.00",
-          "nullable": true,
           "type": "string",
         },
         "time_worked": {
           "description": "The time worked for the employee in ISO 8601 duration format",
           "example": "P0Y0M0DT8H0M0S",
           "format": "duration",
-          "nullable": true,
           "type": "string",
         },
         "unified_custom_fields": {
@@ -12655,7 +12512,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "my_project_custom_field_1": "REF-1236",
             "my_project_custom_field_2": "some other value",
           },
-          "nullable": true,
           "type": "object",
         },
         "x-account-id": {
@@ -12708,7 +12564,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "id": {
           "description": "The ID associated with this skill",
           "example": "16873-IT345",
-          "nullable": true,
           "type": "string",
         },
         "maximum_proficiency": {
@@ -12718,23 +12573,19 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name associated with this proficiency",
               "example": "Expert",
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -12763,7 +12614,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "5",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12776,23 +12626,19 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name associated with this proficiency",
               "example": "Expert",
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -12821,7 +12667,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "5",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12830,7 +12675,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "name": {
           "description": "The name associated with this skill",
           "example": "Information-Technology",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -12923,26 +12767,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "approver_id": {
           "description": "The approver ID",
           "example": "1687-4",
-          "nullable": true,
           "type": "string",
         },
         "employee_id": {
           "description": "The employee ID",
           "example": "1687-3",
-          "nullable": true,
           "type": "string",
         },
         "end_date": {
           "description": "The end date of the time off request",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "end_half_day": {
           "description": "True if the end of the time off request ends half way through the day",
           "example": true,
-          "nullable": true,
           "oneOf": [
             {
               "type": "boolean",
@@ -12965,7 +12805,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "reason": {
@@ -12974,17 +12813,14 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -12994,13 +12830,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The start date of the time off request",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "start_half_day": {
           "description": "True if the start of the time off request begins half way through the day",
           "example": true,
-          "nullable": true,
           "oneOf": [
             {
               "type": "boolean",
@@ -13019,7 +12853,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -13048,7 +12881,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -13057,7 +12889,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "time_off_policy_id": {
           "description": "The time off policy id associated with this time off request",
           "example": "cx280928933",
-          "nullable": true,
           "type": "string",
         },
         "type": {
@@ -13065,7 +12896,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -13106,7 +12936,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "accident",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -13193,7 +13022,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -13215,7 +13043,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 },
                 "value": {
                   "description": "The category of the file",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -13224,7 +13051,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "category_id": {
               "description": "The categoryId of the documents",
               "example": "6530",
-              "nullable": true,
               "type": "string",
             },
             "contents": {
@@ -13238,7 +13064,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "properties": {
                       "source_value": {
                         "example": "abc",
-                        "nullable": true,
                         "oneOf": [
                           {
                             "type": "string",
@@ -14475,7 +14300,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                           null,
                         ],
                         "example": "pdf",
-                        "nullable": true,
                         "type": "string",
                       },
                     },
@@ -14484,26 +14308,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   "unified_url": {
                     "description": "Unified download URL for retrieving file content.",
                     "example": "https://api.stackone.com/unified/hris/employees/12345/documents/67890/download",
-                    "nullable": true,
                     "type": "string",
                   },
                   "url": {
                     "description": "URL where the file content is located",
                     "example": "https://example.com/file.pdf",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
                 "type": "object",
               },
-              "nullable": true,
               "type": "array",
             },
             "created_at": {
               "description": "The creation date of the file",
               "example": "2021-01-01T01:01:01.000Z",
               "format": "date-time",
-              "nullable": true,
               "type": "string",
             },
             "file_format": {
@@ -14512,7 +14332,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "properties": {
                 "source_value": {
                   "example": "abc",
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -15749,7 +15568,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "pdf",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -15758,38 +15576,32 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name of the file",
               "example": "My Document",
-              "nullable": true,
               "type": "string",
             },
             "path": {
               "description": "The path where the file is stored",
               "example": "/path/to/file",
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "remote_url": {
               "description": "URL where the file content is located",
               "example": "https://example.com/file.pdf",
-              "nullable": true,
               "type": "string",
             },
             "updated_at": {
               "description": "The update date of the file",
               "example": "2021-01-02T01:01:01.000Z",
               "format": "date-time",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -15803,7 +15615,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -16078,7 +15889,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "US",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -16086,7 +15896,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "number": {
           "example": "1234567890",
-          "nullable": true,
           "type": "string",
         },
         "passthrough": {
@@ -16095,12 +15904,10 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "sub_type": {
           "example": "H1B",
-          "nullable": true,
           "type": "string",
         },
         "type": {
@@ -16108,7 +15915,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -16137,7 +15943,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "other",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -16146,13 +15951,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "valid_from": {
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "valid_to": {
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -16240,26 +16043,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "approver_id": {
           "description": "The approver ID",
           "example": "1687-4",
-          "nullable": true,
           "type": "string",
         },
         "employee_id": {
           "description": "The employee ID",
           "example": "1687-3",
-          "nullable": true,
           "type": "string",
         },
         "end_date": {
           "description": "The end date of the time off request",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "end_half_day": {
           "description": "True if the end of the time off request ends half way through the day",
           "example": true,
-          "nullable": true,
           "oneOf": [
             {
               "type": "boolean",
@@ -16279,7 +16078,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "reason": {
@@ -16288,17 +16086,14 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -16308,13 +16103,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The start date of the time off request",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "start_half_day": {
           "description": "True if the start of the time off request begins half way through the day",
           "example": true,
-          "nullable": true,
           "oneOf": [
             {
               "type": "boolean",
@@ -16333,7 +16126,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -16362,7 +16154,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -16371,7 +16162,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "time_off_policy_id": {
           "description": "The time off policy id associated with this time off request",
           "example": "cx280928933",
-          "nullable": true,
           "type": "string",
         },
         "type": {
@@ -16379,7 +16169,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -16420,7 +16209,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "accident",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -16469,7 +16257,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "format": {
           "description": "The format to download the file in",
           "example": "base64",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -16529,7 +16316,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -16538,13 +16324,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -16597,7 +16381,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -16606,13 +16389,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -16665,7 +16446,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -16674,13 +16454,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -16733,7 +16511,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -16742,13 +16519,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -16811,13 +16586,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "company,employments,work_location,home_location,groups,skills",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,benefits,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,employee_number,national_identity_number,national_identity_numbers",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -16826,19 +16599,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "include": {
           "description": "The comma separated list of fields that will be included in the response",
           "example": "avatar_url,avatar,custom_fields,job_description,benefits",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -16916,18 +16686,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,description,type,options",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -16938,36 +16705,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -17025,7 +16786,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,path,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17034,13 +16794,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "subResourceId": {
@@ -17097,7 +16855,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,active",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17106,13 +16863,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17175,13 +16930,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "groups",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17190,13 +16943,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "subResourceId": {
@@ -17258,7 +17009,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17267,13 +17017,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "subResourceId": {
@@ -17340,13 +17088,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "policy",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17355,13 +17101,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "subResourceId": {
@@ -17423,7 +17167,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17432,13 +17175,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "subResourceId": {
@@ -17500,7 +17241,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17509,13 +17249,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "subResourceId": {
@@ -17577,13 +17315,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "groups",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17592,13 +17328,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17651,7 +17385,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17660,13 +17393,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17719,7 +17450,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17728,13 +17458,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17787,7 +17515,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17796,13 +17523,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17855,7 +17580,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17864,13 +17588,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17923,7 +17645,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -17932,13 +17653,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -17991,7 +17710,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -18000,13 +17718,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -18059,7 +17775,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -18068,13 +17783,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -18127,7 +17840,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,active",
-          "nullable": true,
           "type": "string",
         },
         "id": {
@@ -18136,13 +17848,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "x-account-id": {
@@ -18191,7 +17901,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "x-account-id": {
@@ -18264,18 +17973,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -18283,36 +17989,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -18383,18 +18083,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -18402,36 +18099,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -18502,18 +18193,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -18521,36 +18209,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -18621,18 +18303,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -18640,36 +18319,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -18740,18 +18413,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,active",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -18759,36 +18429,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -18859,18 +18523,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,description,type,options",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -18878,36 +18539,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -18983,18 +18638,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,path,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19005,36 +18657,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19117,24 +18763,20 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "groups",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19145,36 +18787,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19252,18 +18888,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19274,36 +18907,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19386,18 +19013,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "policy",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "HRIS Time Off Balance filters",
-          "nullable": true,
           "properties": {
             "policy_ids": {
               "additionalProperties": false,
@@ -19405,15 +19029,12 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "items": {
                 "type": "string",
               },
-              "nullable": true,
-              "required": false,
               "type": "array",
             },
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19424,36 +19045,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19531,26 +19146,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "HRIS Time Off filters",
-          "nullable": true,
           "properties": {
             "type_ids": {
               "description": "List of time off type ids to filter by.",
               "items": {
                 "type": "string",
               },
-              "nullable": true,
               "type": "array",
             },
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19561,36 +19172,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19668,18 +19273,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19690,36 +19292,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19802,34 +19398,28 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "company,employments,work_location,home_location,groups,skills",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,benefits,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,employee_number,national_identity_number,national_identity_numbers",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "HRIS Employees filters",
-          "nullable": true,
           "properties": {
             "email": {
               "description": "Filter to select employees by email",
-              "nullable": true,
               "type": "string",
             },
             "employee_number": {
               "description": "Filter to select employees by employee_number",
-              "nullable": true,
               "type": "string",
             },
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19838,41 +19428,34 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "include": {
           "description": "The comma separated list of fields that will be included in the response",
           "example": "avatar_url,avatar,custom_fields,job_description,benefits",
-          "nullable": true,
           "type": "string",
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -19948,24 +19531,20 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "expand": {
           "description": "The comma separated list of fields that will be expanded in the response",
           "example": "groups",
-          "nullable": true,
           "type": "string",
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -19973,36 +19552,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20073,18 +19646,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20092,36 +19662,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20192,18 +19756,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20211,36 +19772,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20311,18 +19866,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20330,36 +19882,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20430,18 +19976,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20449,36 +19992,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20549,38 +20086,32 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "HRIS Time Entries filters",
-          "nullable": true,
           "properties": {
             "employee_id": {
               "additionalProperties": false,
               "description": "Filter to select time entries by employee_id",
-              "nullable": true,
               "type": "string",
             },
             "end_time": {
               "additionalProperties": false,
               "description": "Filter to select time entries before a given time",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
             "start_time": {
               "additionalProperties": false,
               "description": "Filter to select time entries after a given time",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20588,36 +20119,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20688,18 +20213,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20707,36 +20229,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20807,26 +20323,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "HRIS Time Off filters",
-          "nullable": true,
           "properties": {
             "type_ids": {
               "description": "List of time off type ids to filter by.",
               "items": {
                 "type": "string",
               },
-              "nullable": true,
               "type": "array",
             },
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20834,36 +20346,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -20934,18 +20440,15 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
           "example": "id,remote_id,name,active",
-          "nullable": true,
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
-          "nullable": true,
           "properties": {
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -20953,36 +20456,30 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "next": {
           "description": "The unified cursor",
-          "nullable": true,
           "type": "string",
         },
         "page": {
           "description": "The page number of the results to fetch",
-          "nullable": true,
           "type": "string",
         },
         "page_size": {
           "default": "25",
           "description": "The number of results per page",
-          "nullable": true,
           "type": "string",
         },
         "proxy": {
           "additionalProperties": true,
           "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-          "nullable": true,
           "type": "object",
         },
         "raw": {
           "default": false,
           "description": "Indicates that the raw request result is returned",
-          "nullable": true,
           "type": "boolean",
         },
         "updated_after": {
           "description": "Use a string with a date to only select results updated after that given date",
           "example": "2020-01-01T00:00:00.000Z",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -21221,11 +20718,9 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "base64": {
-              "nullable": true,
               "type": "string",
             },
             "url": {
-              "nullable": true,
               "type": "string",
             },
           },
@@ -21234,7 +20729,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "avatar_url": {
           "description": "The employee avatar Url",
           "example": "https://example.com/avatar.png",
-          "nullable": true,
           "type": "string",
         },
         "benefits": {
@@ -21246,7 +20740,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -21277,7 +20770,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       "unmapped_value",
                       null,
                     ],
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -21287,51 +20779,43 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "description": "The date and time the benefit was created",
                 "example": "2021-01-01T00:00:00Z",
                 "format": "date-time",
-                "nullable": true,
                 "type": "string",
               },
               "description": {
                 "description": "The description of the benefit",
                 "example": "Health insurance for employees",
-                "nullable": true,
                 "type": "string",
               },
               "id": {
                 "description": "Unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "name": {
                 "description": "The name of the benefit",
                 "example": "Health Insurance",
-                "nullable": true,
                 "type": "string",
               },
               "provider": {
                 "description": "The provider of the benefit",
                 "example": "Aetna",
-                "nullable": true,
                 "type": "string",
               },
               "updated_at": {
                 "description": "The date and time the benefit was last updated",
                 "example": "2021-01-01T00:00:00Z",
                 "format": "date-time",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "birthday": {
           "description": "The employee birthday",
           "example": "2021-01-01T00:00:00Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "citizenships": {
@@ -21339,7 +20823,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "items": {
             "properties": {
               "source_value": {
-                "nullable": true,
                 "oneOf": [
                   {
                     "type": "string",
@@ -21614,26 +21097,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   null,
                 ],
                 "example": "US",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "company_id": {
           "description": "The employee company id",
           "example": "1234567890",
-          "nullable": true,
           "type": "string",
         },
         "company_name": {
           "deprecated": true,
           "description": "The employee company name",
           "example": "Example Corp",
-          "nullable": true,
           "type": "string",
         },
         "custom_fields": {
@@ -21643,31 +21122,26 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "id": {
                 "description": "Unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "name": {
                 "description": "The name of the custom field.",
                 "example": "Training Completion Status",
-                "nullable": true,
                 "type": "string",
               },
               "remote_id": {
                 "description": "Provider's unique identifier",
                 "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "nullable": true,
                 "type": "string",
               },
               "remote_value_id": {
                 "description": "Provider's unique identifier for the value of the custom field.",
                 "example": "e3cb75bf-aa84-466e-a6c1-b8322b257a48",
-                "nullable": true,
                 "type": "string",
               },
               "value": {
                 "description": "The value associated with the custom field.",
                 "example": "Completed",
-                "nullable": true,
                 "oneOf": [
                   {
                     "type": "string",
@@ -21690,44 +21164,37 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "value_id": {
                 "description": "The unique identifier for the value of the custom field.",
                 "example": "value_456",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "date_of_birth": {
           "description": "The employee date_of_birth",
           "example": "1990-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "department": {
           "description": "The employee department",
           "example": "Physics",
-          "nullable": true,
           "type": "string",
         },
         "department_id": {
           "description": "The employee department id",
           "example": "3093",
-          "nullable": true,
           "type": "string",
         },
         "display_name": {
           "description": "The employee display name",
           "example": "Sir Issac Newton",
-          "nullable": true,
           "type": "string",
         },
         "employee_number": {
           "description": "The assigned employee number",
           "example": "125",
-          "nullable": true,
           "type": "string",
         },
         "employment_contract_type": {
@@ -21736,7 +21203,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -21764,7 +21230,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -21776,7 +21241,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -21807,7 +21271,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -21819,7 +21282,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -21860,7 +21322,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -21872,7 +21333,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -21906,7 +21366,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -21915,7 +21374,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "first_name": {
           "description": "The employee first name",
           "example": "Issac",
-          "nullable": true,
           "type": "string",
         },
         "gender": {
@@ -21924,7 +21382,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -21955,7 +21412,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -21965,7 +21421,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The employee hire date",
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "home_location": {
@@ -21975,7 +21430,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "city": {
               "description": "The city where the location is situated",
               "example": "Grantham",
-              "nullable": true,
               "type": "string",
             },
             "country": {
@@ -21983,7 +21437,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -22258,7 +21711,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "US",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -22267,13 +21719,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name of the location",
               "example": "Woolsthorpe Manor",
-              "nullable": true,
               "type": "string",
             },
             "passthrough": {
@@ -22282,13 +21732,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "example": {
                 "other_known_names": "John Doe",
               },
-              "nullable": true,
               "type": "object",
             },
             "phone_number": {
               "description": "The phone number of the location",
               "example": "+44 1476 860 364",
-              "nullable": true,
               "type": "string",
             },
             "state": {
@@ -22297,7 +21745,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -26145,7 +25592,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "ZW-MI",
                     null,
                   ],
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -26154,19 +25600,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "street_1": {
               "description": "The first line of the address",
               "example": "Water Lane",
-              "nullable": true,
               "type": "string",
             },
             "street_2": {
               "description": "The second line of the address",
               "example": "Woolsthorpe by Colsterworth",
-              "nullable": true,
               "type": "string",
             },
             "zip_code": {
               "description": "The ZIP code/Postal code of the location",
               "example": "NG33 5NR",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -26178,25 +25621,21 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "job_id": {
           "description": "The employee job id",
           "example": "R-6789",
-          "nullable": true,
           "type": "string",
         },
         "job_title": {
           "description": "The employee job title",
           "example": "Physicist",
-          "nullable": true,
           "type": "string",
         },
         "last_name": {
           "description": "The employee last name",
           "example": "Newton",
-          "nullable": true,
           "type": "string",
         },
         "manager_id": {
           "description": "The employee manager ID",
           "example": "67890",
-          "nullable": true,
           "type": "string",
         },
         "marital_status": {
@@ -26205,7 +25644,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -26239,7 +25677,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -26248,7 +25685,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "name": {
           "description": "The employee name",
           "example": "Issac Newton",
-          "nullable": true,
           "type": "string",
         },
         "national_identity_number": {
@@ -26261,7 +25697,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -26536,7 +25971,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "US",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -26546,7 +25980,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -26715,7 +26148,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "ssn",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -26723,7 +26155,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             },
             "value": {
               "example": "123456789",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -26738,7 +26169,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -27013,7 +26443,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "US",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -27023,7 +26452,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "nullable": true,
                 "properties": {
                   "source_value": {
-                    "nullable": true,
                     "oneOf": [
                       {
                         "type": "string",
@@ -27192,7 +26620,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                       null,
                     ],
                     "example": "ssn",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
@@ -27200,13 +26627,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               },
               "value": {
                 "example": "123456789",
-                "nullable": true,
                 "type": "string",
               },
             },
             "type": "object",
           },
-          "nullable": true,
           "type": "array",
         },
         "passthrough": {
@@ -27215,19 +26640,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "personal_email": {
           "description": "The employee personal email",
           "example": "isaac.newton@example.com",
-          "nullable": true,
           "type": "string",
         },
         "personal_phone_number": {
           "description": "The employee personal phone number",
           "example": "+1234567890",
-          "nullable": true,
           "type": "string",
         },
         "preferred_language": {
@@ -27236,7 +26658,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -27361,7 +26782,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "eng",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -27371,33 +26791,28 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The employee start date",
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "tenure": {
           "description": "The employee tenure",
           "example": 2,
-          "nullable": true,
           "type": "number",
         },
         "termination_date": {
           "description": "The employee termination date",
           "example": "2021-01-01T00:00:00Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "work_anniversary": {
           "description": "The employee work anniversary",
           "example": "2021-01-01T00:00:00Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "work_email": {
           "description": "The employee work email",
           "example": "newton@example.com",
-          "nullable": true,
           "type": "string",
         },
         "work_location": {
@@ -27407,7 +26822,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "city": {
               "description": "The city where the location is situated",
               "example": "Grantham",
-              "nullable": true,
               "type": "string",
             },
             "country": {
@@ -27415,7 +26829,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -27690,7 +27103,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "US",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -27699,13 +27111,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name of the location",
               "example": "Woolsthorpe Manor",
-              "nullable": true,
               "type": "string",
             },
             "passthrough": {
@@ -27714,13 +27124,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "example": {
                 "other_known_names": "John Doe",
               },
-              "nullable": true,
               "type": "object",
             },
             "phone_number": {
               "description": "The phone number of the location",
               "example": "+44 1476 860 364",
-              "nullable": true,
               "type": "string",
             },
             "state": {
@@ -27729,7 +27137,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -31577,7 +30984,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "ZW-MI",
                     null,
                   ],
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -31586,19 +30992,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "street_1": {
               "description": "The first line of the address",
               "example": "Water Lane",
-              "nullable": true,
               "type": "string",
             },
             "street_2": {
               "description": "The second line of the address",
               "example": "Woolsthorpe by Colsterworth",
-              "nullable": true,
               "type": "string",
             },
             "zip_code": {
               "description": "The ZIP code/Postal code of the location",
               "example": "NG33 5NR",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -31607,7 +31010,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "work_phone_number": {
           "description": "The employee work phone number",
           "example": "+1234567890",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -31711,13 +31113,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The effective date of the employment contract",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "employee_id": {
           "description": "The employee ID associated with this employment",
           "example": "1687-3",
-          "nullable": true,
           "type": "string",
         },
         "employment_contract_type": {
@@ -31726,7 +31126,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -31754,7 +31153,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -31766,7 +31164,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -31807,7 +31204,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -31816,13 +31212,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "id": {
           "description": "Unique identifier",
           "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-          "nullable": true,
           "type": "string",
         },
         "job_title": {
           "description": "The job title of the employee",
           "example": "Software Engineer",
-          "nullable": true,
           "type": "string",
         },
         "passthrough": {
@@ -31831,13 +31225,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "pay_currency": {
           "description": "The currency used for pay",
           "example": "USD",
-          "nullable": true,
           "type": "string",
         },
         "pay_frequency": {
@@ -31846,7 +31238,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -31886,7 +31277,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "fixed",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -31898,7 +31288,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -31931,7 +31320,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -31940,7 +31328,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "pay_rate": {
           "description": "The pay rate for the employee",
           "example": "40.00",
-          "nullable": true,
           "type": "string",
         },
         "subResourceId": {
@@ -31950,7 +31337,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The time worked for the employee in ISO 8601 duration format",
           "example": "P0Y0M0DT8H0M0S",
           "format": "duration",
-          "nullable": true,
           "type": "string",
         },
         "unified_custom_fields": {
@@ -31960,7 +31346,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "my_project_custom_field_1": "REF-1236",
             "my_project_custom_field_2": "some other value",
           },
-          "nullable": true,
           "type": "object",
         },
         "x-account-id": {
@@ -32050,7 +31435,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "nullable": true,
               "properties": {
                 "source_value": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -32072,7 +31456,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 },
                 "value": {
                   "description": "The category of the file",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -32081,7 +31464,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "category_id": {
               "description": "The categoryId of the documents",
               "example": "6530",
-              "nullable": true,
               "type": "string",
             },
             "contents": {
@@ -32095,7 +31477,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "properties": {
                       "source_value": {
                         "example": "abc",
-                        "nullable": true,
                         "oneOf": [
                           {
                             "type": "string",
@@ -33332,7 +32713,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                           null,
                         ],
                         "example": "pdf",
-                        "nullable": true,
                         "type": "string",
                       },
                     },
@@ -33341,26 +32721,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   "unified_url": {
                     "description": "Unified download URL for retrieving file content.",
                     "example": "https://api.stackone.com/unified/hris/employees/12345/documents/67890/download",
-                    "nullable": true,
                     "type": "string",
                   },
                   "url": {
                     "description": "URL where the file content is located",
                     "example": "https://example.com/file.pdf",
-                    "nullable": true,
                     "type": "string",
                   },
                 },
                 "type": "object",
               },
-              "nullable": true,
               "type": "array",
             },
             "created_at": {
               "description": "The creation date of the file",
               "example": "2021-01-01T01:01:01.000Z",
               "format": "date-time",
-              "nullable": true,
               "type": "string",
             },
             "file_format": {
@@ -33369,7 +32745,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "properties": {
                 "source_value": {
                   "example": "abc",
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "string",
@@ -34606,7 +33981,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     null,
                   ],
                   "example": "pdf",
-                  "nullable": true,
                   "type": "string",
                 },
               },
@@ -34615,38 +33989,32 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
               "description": "The name of the file",
               "example": "My Document",
-              "nullable": true,
               "type": "string",
             },
             "path": {
               "description": "The path where the file is stored",
               "example": "/path/to/file",
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "remote_url": {
               "description": "URL where the file content is located",
               "example": "https://example.com/file.pdf",
-              "nullable": true,
               "type": "string",
             },
             "updated_at": {
               "description": "The update date of the file",
               "example": "2021-01-02T01:01:01.000Z",
               "format": "date-time",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -34660,7 +34028,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -34935,7 +34302,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "US",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -34943,7 +34309,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "number": {
           "example": "1234567890",
-          "nullable": true,
           "type": "string",
         },
         "passthrough": {
@@ -34952,7 +34317,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "subResourceId": {
@@ -34960,7 +34324,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "sub_type": {
           "example": "H1B",
-          "nullable": true,
           "type": "string",
         },
         "type": {
@@ -34968,7 +34331,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -34997,7 +34359,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "other",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -35006,13 +34367,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "valid_from": {
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "valid_to": {
           "example": "2021-01-01T00:00.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {
@@ -35106,26 +34465,22 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "approver_id": {
           "description": "The approver ID",
           "example": "1687-4",
-          "nullable": true,
           "type": "string",
         },
         "employee_id": {
           "description": "The employee ID",
           "example": "1687-3",
-          "nullable": true,
           "type": "string",
         },
         "end_date": {
           "description": "The end date of the time off request",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "end_half_day": {
           "description": "True if the end of the time off request ends half way through the day",
           "example": true,
-          "nullable": true,
           "oneOf": [
             {
               "type": "boolean",
@@ -35148,7 +34503,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "example": {
             "other_known_names": "John Doe",
           },
-          "nullable": true,
           "type": "object",
         },
         "reason": {
@@ -35157,17 +34511,14 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "id": {
               "description": "Unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
             "name": {
-              "nullable": true,
               "type": "string",
             },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -35177,13 +34528,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The start date of the time off request",
           "example": "2021-01-01T01:01:01.000Z",
           "format": "date-time",
-          "nullable": true,
           "type": "string",
         },
         "start_half_day": {
           "description": "True if the start of the time off request begins half way through the day",
           "example": true,
-          "nullable": true,
           "oneOf": [
             {
               "type": "boolean",
@@ -35202,7 +34551,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -35231,7 +34579,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "unmapped_value",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -35240,7 +34587,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "time_off_policy_id": {
           "description": "The time off policy id associated with this time off request",
           "example": "cx280928933",
-          "nullable": true,
           "type": "string",
         },
         "type": {
@@ -35248,7 +34594,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "nullable": true,
           "properties": {
             "source_value": {
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -35289,7 +34634,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "accident",
                 null,
               ],
-              "nullable": true,
               "type": "string",
             },
           },
@@ -35373,7 +34717,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "source_value": {
               "description": "The provider specific category for associating uploaded files, if provided, the value will be ignored.",
               "example": "550e8400-e29b-41d4-a716-446655440000",
-              "nullable": true,
               "type": "string",
             },
             "value": {
@@ -35407,7 +34750,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "reports",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -35416,7 +34758,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "category_id": {
           "description": "The categoryId of the documents",
           "example": "6530",
-          "nullable": true,
           "type": "string",
         },
         "confidential": {
@@ -35425,7 +34766,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "properties": {
             "source_value": {
               "example": "public",
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -35453,7 +34793,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "true",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -35462,7 +34801,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "content": {
           "description": "The base64 encoded content of the file to upload",
           "example": "VGhpcyBpc24ndCByZWFsbHkgYSBzYW1wbGUgZmlsZSwgYnV0IG5vIG9uZSB3aWxsIGV2ZXIga25vdyE",
-          "nullable": true,
           "type": "string",
         },
         "file_format": {
@@ -35471,7 +34809,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "properties": {
             "source_value": {
               "example": "abc",
-              "nullable": true,
               "oneOf": [
                 {
                   "type": "string",
@@ -36708,7 +36045,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 null,
               ],
               "example": "pdf",
-              "nullable": true,
               "type": "string",
             },
           },
@@ -36720,13 +36056,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "name": {
           "description": "The filename of the file to upload",
           "example": "weather-forecast",
-          "nullable": true,
           "type": "string",
         },
         "path": {
           "description": "The path for the file to be uploaded to",
           "example": "/path/to/file",
-          "nullable": true,
           "type": "string",
         },
         "x-account-id": {

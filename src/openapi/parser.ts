@@ -141,9 +141,17 @@ export class OpenAPIParser {
             };
           }
 
-          // Merge type and other fields
+          // Merge required fields
+          if ('required' in resolved && Array.isArray(resolved.required)) {
+            if (!mergedSchema.required) {
+              mergedSchema.required = [];
+            }
+            mergedSchema.required = [...new Set([...mergedSchema.required, ...resolved.required])];
+          }
+
+          // Merge other fields
           for (const [key, value] of Object.entries(resolved)) {
-            if (key !== 'properties' && !(key in mergedSchema)) {
+            if (key !== 'properties' && key !== 'required' && !(key in mergedSchema)) {
               (mergedSchema as Record<string, unknown>)[key] = value;
             }
           }
@@ -153,24 +161,64 @@ export class OpenAPIParser {
       return mergedSchema;
     }
 
-    // Recursively resolve all nested objects and arrays
+    const schemaObj = schema as OpenAPIV3.SchemaObject;
     const resolved: Record<string, unknown> = {};
+
+    // Handle properties
+    if ('properties' in schemaObj && typeof schemaObj.properties === 'object') {
+      resolved.properties = {};
+      const requiredProps: string[] = [];
+
+      for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
+        // Skip null properties
+        if (propSchema === null) continue;
+
+        // A property is required if:
+        // 1. It's in the parent's required array AND
+        // 2. It's not marked as nullable in OpenAPI
+        const isNullable =
+          typeof propSchema === 'object' &&
+          'nullable' in propSchema &&
+          propSchema.nullable === true;
+        const isRequired =
+          Array.isArray(schemaObj.required) && schemaObj.required.includes(propName);
+
+        if (isRequired && !isNullable) {
+          requiredProps.push(propName);
+        }
+
+        // Process the property schema
+        (resolved.properties as Record<string, unknown>)[propName] = this.resolveSchema(
+          propSchema,
+          new Set(visited)
+        );
+      }
+
+      // Only add required array if there are required properties
+      if (requiredProps.length > 0) {
+        resolved.required = requiredProps;
+      }
+    }
+
+    // Process remaining fields
     for (const [key, value] of Object.entries(schema)) {
-      // Skip vendor extensions
-      if (key.startsWith('x-')) {
+      // Skip already handled or special properties
+      if (
+        key === 'properties' ||
+        key === 'required' ||
+        key === 'nullable' ||
+        key.startsWith('x-')
+      ) {
         continue;
       }
 
       if (typeof value === 'object' && value !== null) {
         if (Array.isArray(value)) {
-          // Handle arrays
           resolved[key] = value.map((item) => this.resolveSchema(item, new Set(visited)));
         } else {
-          // Handle objects
           resolved[key] = this.resolveSchema(value, new Set(visited));
         }
       } else {
-        // Handle primitive values
         resolved[key] = value;
       }
     }
@@ -404,7 +452,7 @@ export class OpenAPIParser {
               description: operation.summary || '',
               parameters: {
                 type: 'object',
-                properties: JSON.parse(JSON.stringify(properties)),
+                properties,
                 required: requiredParams.length > 0 ? requiredParams : undefined,
               },
               execute: {

@@ -4,7 +4,7 @@ import { StackOneTool, type Tools } from '../tool';
 import type { ParameterTransformer, ToolDefinition } from '../types';
 import { extractFileInfo, isValidFilePath, readFileAsBase64 } from '../utils/file';
 import { removeJsonSchemaProperty } from '../utils/schema';
-import { type BaseToolSetConfig, ToolSet, ToolSetError } from './base';
+import { type BaseToolSetConfig, ToolSet, ToolSetConfigError, ToolSetError } from './base';
 
 /**
  * Configuration for StackOne toolset
@@ -12,6 +12,7 @@ import { type BaseToolSetConfig, ToolSet, ToolSetError } from './base';
 export interface StackOneToolSetConfig extends BaseToolSetConfig {
   apiKey?: string;
   accountId?: string;
+  strict?: boolean;
 }
 
 /**
@@ -31,14 +32,57 @@ export interface WorkflowConfig {
  */
 export class StackOneToolSet extends ToolSet {
   /**
-   * API key for StackOne API
-   */
-  private apiKey: string;
-
-  /**
    * Account ID for StackOne API
    */
   private accountId?: string;
+
+  /**
+   * Initialize StackOne toolset with API key and optional account ID
+   * @param config Configuration object containing API key and optional account ID
+   */
+  constructor(config?: StackOneToolSetConfig) {
+    const apiKey = config?.apiKey || process.env.STACKONE_API_KEY;
+
+    if (!apiKey && config?.strict) {
+      throw new ToolSetConfigError(
+        'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.'
+      );
+    }
+
+    if (!apiKey) {
+      console.warn(
+        'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.'
+      );
+    }
+
+    const authentication = {
+      type: 'basic' as const,
+      credentials: {
+        username: apiKey || '',
+        password: '',
+      },
+    };
+
+    // Initialize base class
+    super({
+      baseUrl: config?.baseUrl,
+      authentication,
+      headers: config?.headers,
+      transformers: config?.transformers,
+    });
+
+    // Set account ID
+    this.accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
+
+    // Add default parameter transformers
+    const defaultTransformers = StackOneToolSet.getDefaultParameterTransformers();
+    for (const [sourceParam, config] of defaultTransformers.entries()) {
+      this.addParameterTransformer(sourceParam, config);
+    }
+
+    // Load tools
+    this.loadTools();
+  }
 
   /**
    * Get the default derivation configurations for StackOne tools
@@ -72,46 +116,6 @@ export class StackOneToolSet extends ToolSet {
     });
 
     return transformers;
-  }
-
-  /**
-   * Initialize StackOne toolset with API key and optional account ID
-   * @param config Configuration object containing API key and optional account ID
-   */
-  constructor(config?: StackOneToolSetConfig) {
-    // Initialize base class
-    super({
-      baseUrl: config?.baseUrl,
-      authentication: config?.authentication,
-      headers: config?.headers,
-      transformers: config?.transformers,
-    });
-
-    // Set API key
-    this.apiKey = config?.apiKey || process.env.STACKONE_API_KEY || '';
-    if (!this.apiKey) {
-      console.warn(
-        'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.'
-      );
-    }
-
-    // Set account ID
-    this.accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
-
-    // Set default headers
-    this.headers = {
-      ...this.headers,
-      'x-api-key': this.apiKey,
-    };
-
-    // Add default parameter transformers
-    const defaultTransformers = StackOneToolSet.getDefaultParameterTransformers();
-    for (const [sourceParam, config] of defaultTransformers.entries()) {
-      this.addParameterTransformer(sourceParam, config);
-    }
-
-    // Load tools
-    this.loadTools();
   }
 
   /**

@@ -103,15 +103,3 @@ export interface ToolDefinition {
   parameters: ToolParameters;
   execute: ExecuteConfig;
 }
-
-/**
- * Authentication configuration for tools
- */
-export interface AuthConfig {
-  type: 'basic' | 'bearer';
-  credentials?: {
-    username?: string;
-    password?: string;
-    token?: string;
-  };
-}

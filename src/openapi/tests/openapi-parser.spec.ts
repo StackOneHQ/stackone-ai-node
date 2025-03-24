@@ -2,7 +2,7 @@ import { describe, expect, it, mock, spyOn } from 'bun:test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { OpenAPIV3 } from 'openapi-types';
-import { ParameterLocation } from '../../tools';
+import { ParameterLocation } from '../../types';
 import { OpenAPIParser } from '../parser';
 
 // Load mock specs for testing
