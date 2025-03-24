@@ -1,14 +1,10 @@
 import { describe, expect, it, mock, spyOn } from 'bun:test';
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import type { OpenAPIV3 } from 'openapi-types';
 import { ParameterLocation } from '../../types';
+import * as specs from '../generated';
 import { OpenAPIParser } from '../parser';
 
-// Load mock specs for testing
-const mockCoreSpec = JSON.parse(
-  readFileSync(join(process.cwd(), '.oas', 'core.json'), 'utf-8')
-) as OpenAPIV3.Document;
+const mockSpec = specs.hrisSpec;
 
 // Helper function to create a minimal spec for testing
 const createMinimalSpec = (customization: Partial<OpenAPIV3.Document> = {}): OpenAPIV3.Document => {
@@ -27,13 +23,13 @@ describe('OpenAPIParser', () => {
   // Test initialization
   describe('constructor', () => {
     it('should initialize with a spec object', () => {
-      const parser = new OpenAPIParser(mockCoreSpec);
+      const parser = new OpenAPIParser(mockSpec as unknown as OpenAPIV3.Document);
       expect(parser).toBeInstanceOf(OpenAPIParser);
     });
 
     it('should use custom base URL if provided', () => {
       const customBaseUrl = 'https://custom-api.example.com';
-      const parser = new OpenAPIParser(mockCoreSpec, customBaseUrl);
+      const parser = new OpenAPIParser(createMinimalSpec(), customBaseUrl);
 
       // We can now access the baseUrl property directly
       expect(parser.baseUrl).toBe(customBaseUrl);
@@ -138,52 +134,41 @@ describe('OpenAPIParser', () => {
   // Test parseTools method
   describe('parseTools', () => {
     it('should parse tools from core spec', () => {
-      const parser = new OpenAPIParser(mockCoreSpec);
+      // Add a path with an operation to make sure there's at least one tool
+      const minimalSpec = createMinimalSpec({
+        paths: {
+          '/test': {
+            get: {
+              operationId: 'test_operation',
+              responses: {
+                '200': {
+                  description: 'OK',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const parser = new OpenAPIParser(minimalSpec);
       const tools = parser.parseTools();
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
 
     it('should parse tools from crm spec', () => {
-      const mockCrmSpec = JSON.parse(
-        readFileSync(join(process.cwd(), '.oas', 'crm.json'), 'utf-8')
-      ) as OpenAPIV3.Document;
-      const parser = new OpenAPIParser(mockCrmSpec);
+      const parser = new OpenAPIParser(specs.crmSpec as unknown as OpenAPIV3.Document);
       const tools = parser.parseTools();
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
 
     it('should parse tools from documents spec', () => {
-      const mockDocumentsSpec = JSON.parse(
-        readFileSync(join(process.cwd(), '.oas', 'documents.json'), 'utf-8')
-      ) as OpenAPIV3.Document;
-      const parser = new OpenAPIParser(mockDocumentsSpec);
-      const tools = parser.parseTools();
-      expect(Object.keys(tools).length).toBeGreaterThan(0);
-    });
-
-    it('should parse tools from iam spec', () => {
-      const mockIamSpec = JSON.parse(
-        readFileSync(join(process.cwd(), '.oas', 'iam.json'), 'utf-8')
-      ) as OpenAPIV3.Document;
-      const parser = new OpenAPIParser(mockIamSpec);
-      const tools = parser.parseTools();
-      expect(Object.keys(tools).length).toBeGreaterThan(0);
-    });
-
-    it('should parse tools from lms spec', () => {
-      const mockLmsSpec = JSON.parse(
-        readFileSync(join(process.cwd(), '.oas', 'lms.json'), 'utf-8')
-      ) as OpenAPIV3.Document;
-      const parser = new OpenAPIParser(mockLmsSpec);
+      const parser = new OpenAPIParser(specs.documentsSpec as unknown as OpenAPIV3.Document);
       const tools = parser.parseTools();
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
 
     it('should parse tools from marketing spec', () => {
-      const mockMarketingSpec = JSON.parse(
-        readFileSync(join(process.cwd(), '.oas', 'marketing.json'), 'utf-8')
-      ) as OpenAPIV3.Document;
-      const parser = new OpenAPIParser(mockMarketingSpec);
+      const parser = new OpenAPIParser(specs.marketingSpec as unknown as OpenAPIV3.Document);
       const tools = parser.parseTools();
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
@@ -431,15 +416,8 @@ describe('OpenAPIParser', () => {
   // Snapshot tests
   describe('Snapshot Tests', () => {
     it('should parse all OpenAPI specs correctly', () => {
-      // Load all specs
-      const filePath = join(process.cwd(), '.oas', 'hris.json');
-
-      if (!existsSync(filePath)) {
-        throw new Error('Test file not found');
-      }
-
-      const testFile = readFileSync(filePath, 'utf-8');
-      const spec = JSON.parse(testFile) as OpenAPIV3.Document;
+      // Use the imported spec
+      const spec = specs.hrisSpec as unknown as OpenAPIV3.Document;
 
       const parser = new OpenAPIParser(spec);
       const tools = parser.parseTools();

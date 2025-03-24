@@ -1,14 +1,10 @@
-import { OAS_DIR } from '../constants';
 import { ToolSetLoadError } from '../toolsets/base';
 import type { ToolDefinition } from '../types';
-import {
-  directoryExists,
-  getFileNameWithoutExtension,
-  joinPaths,
-  listFilesInDirectory,
-  readJsonFile,
-} from '../utils/file';
+import { readJsonFile } from '../utils/file';
 import { OpenAPIParser } from './parser';
+
+// Import all specs from the generated index file
+import * as specs from '../openapi/generated';
 
 // Import the OpenAPIDocument type
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
@@ -16,32 +12,21 @@ type OpenAPIDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
 
 /**
  * Load all OpenAPI specs from the oas directory
- * @param directory Optional custom directory to load specs from
  * @param baseUrl Optional base URL to use for all operations
  * @param removedParams Optional array of parameter names to remove from all tools
  * @returns Dict mapping vertical names to their tool definitions
  */
-export const loadSpecs = (
-  directory?: string,
+export const loadStackOneSpecs = (
   baseUrl?: string,
   removedParams: string[] = []
 ): Record<string, Record<string, ToolDefinition>> => {
   const tools: Record<string, Record<string, ToolDefinition>> = {};
 
-  const oasDir = directory || OAS_DIR;
-
-  // Check if directory exists
-  if (!directoryExists(oasDir)) {
-    return tools;
-  }
-
-  // Read all JSON files in the directory
-  const files = listFilesInDirectory(oasDir, (file) => file.endsWith('.json'));
-
-  for (const file of files) {
-    const vertical = getFileNameWithoutExtension(file);
-    const specPath = joinPaths(oasDir, file);
-    const spec = readJsonFile<OpenAPIDocument>(specPath);
+  // Process each spec from the imported specs object
+  for (const [key, value] of Object.entries(specs)) {
+    // The key will be in the format 'verticalSpec', we need to extract 'vertical'
+    const vertical = key.replace('Spec', '');
+    const spec = value as unknown as OpenAPIDocument;
     const parser = new OpenAPIParser(spec, baseUrl, removedParams);
     tools[vertical] = parser.parseTools();
   }
@@ -53,48 +38,6 @@ export const loadSpecs = (
  * Functions for loading OpenAPI specs from various sources
  */
 export namespace OpenAPILoader {
-  /**
-   * Load OpenAPI specs from a directory
-   * @param directory Directory containing OpenAPI spec files
-   * @param baseUrl Optional base URL to use for all operations
-   * @param removedParams Optional array of parameter names to remove from all tools
-   * @returns Dict mapping vertical names to their tool definitions
-   * @throws ToolSetLoadError If there is an error loading the specs
-   */
-  export const loadFromDirectory = (
-    directory: string,
-    baseUrl?: string,
-    removedParams: string[] = []
-  ): Record<string, Record<string, ToolDefinition>> => {
-    try {
-      // Check if directory exists
-      if (!directoryExists(directory)) {
-        throw new ToolSetLoadError(`OpenAPI spec directory not found: ${directory}`);
-      }
-
-      // Read all JSON files in the directory
-      const files = listFilesInDirectory(directory, (file) => file.endsWith('.json'));
-      const tools: Record<string, Record<string, ToolDefinition>> = {};
-
-      for (const file of files) {
-        const vertical = getFileNameWithoutExtension(file);
-        const specPath = joinPaths(directory, file);
-        const spec = readJsonFile<OpenAPIDocument>(specPath);
-        const parser = new OpenAPIParser(spec, baseUrl, removedParams);
-        tools[vertical] = parser.parseTools();
-      }
-
-      return tools;
-    } catch (error) {
-      if (error instanceof ToolSetLoadError) {
-        throw error;
-      }
-      throw new ToolSetLoadError(
-        `Error loading specs from directory: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  };
-
   /**
    * Load OpenAPI spec from a file
    * @param filePath Path to the OpenAPI spec file

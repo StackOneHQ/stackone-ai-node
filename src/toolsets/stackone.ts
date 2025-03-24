@@ -1,5 +1,4 @@
-import { OAS_DIR } from '../constants';
-import { loadSpecs } from '../openapi/loader';
+import { loadStackOneSpecs } from '../openapi/loader';
 import { StackOneTool, type Tools } from '../tool';
 import type { ParameterTransformer, ToolDefinition } from '../types';
 import { extractFileInfo, isValidFilePath, readFileAsBase64 } from '../utils/file';
@@ -168,7 +167,7 @@ export class StackOneToolSet extends ToolSet {
    * Load tools from the OAS directory
    */
   private loadTools(): void {
-    const specs = loadSpecs(OAS_DIR, this.baseUrl, this._removedParams);
+    const specs = loadStackOneSpecs(this.baseUrl, this._removedParams);
 
     // Process each vertical
     for (const [_, tools] of Object.entries(specs)) {
