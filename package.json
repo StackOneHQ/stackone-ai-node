@@ -67,7 +67,6 @@
   "homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
   "lint-staged": {
     "*.{js,ts,jsx,tsx}": [
-      "biome check --write",
       "biome format --write"
     ]
   }
