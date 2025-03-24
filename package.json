@@ -1,7 +1,7 @@
 {
   "name": "@stackone/ai",
   "version": "0.0.10",
-  "description": "Tools to let agents perform actions on your SaaS",
+  "description": "Tools for agents to perform actions on your SaaS",
   "module": "dist/index.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
