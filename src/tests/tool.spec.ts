@@ -156,14 +156,22 @@ describe('StackOneTool', () => {
 
   it('should convert to AI SDK tool format', () => {
     const tool = createMockTool();
+
     const aiSdkTool = tool.toAISDK();
 
+    // Test the basic structure
     expect(aiSdkTool).toBeDefined();
     expect(aiSdkTool.test_tool).toBeDefined();
     expect(typeof aiSdkTool.test_tool.execute).toBe('function');
     expect(aiSdkTool.test_tool.description).toBe('Test tool');
     expect(aiSdkTool.test_tool.parameters).toBeDefined();
-    expect(aiSdkTool.test_tool.parameters.type).toBe('object');
+
+    // The actual schema is in parameters.jsonSchema
+    const schema = aiSdkTool.test_tool.parameters.jsonSchema;
+    expect(schema).toBeDefined();
+    expect(schema.type).toBe('object');
+    expect(schema.properties.id).toBeDefined();
+    expect(schema.properties.id.type).toBe('string');
   });
 
   it('should convert complex parameter types to zod schema', () => {
@@ -204,16 +212,19 @@ describe('StackOneTool', () => {
 
     // Check that parameters are defined
     expect(aiSdkTool.complex_tool.parameters).toBeDefined();
-    expect(aiSdkTool.complex_tool.parameters.type).toBe('object');
 
-    // Check that properties are defined
-    const properties = aiSdkTool.complex_tool.parameters.properties;
-    expect(properties).toBeDefined();
-    expect(properties.stringParam.type).toBe('string');
-    expect(properties.numberParam.type).toBe('number');
-    expect(properties.booleanParam.type).toBe('boolean');
-    expect(properties.arrayParam.type).toBe('array');
-    expect(properties.objectParam.type).toBe('object');
+    // The actual schema is in parameters.jsonSchema
+    const schema = aiSdkTool.complex_tool.parameters.jsonSchema;
+    expect(schema).toBeDefined();
+    expect(schema.type).toBe('object');
+
+    // Check that the properties are defined with correct types
+    expect(schema.properties).toBeDefined();
+    expect(schema.properties.stringParam.type).toBe('string');
+    expect(schema.properties.numberParam.type).toBe('number');
+    expect(schema.properties.booleanParam.type).toBe('boolean');
+    expect(schema.properties.arrayParam.type).toBe('array');
+    expect(schema.properties.objectParam.type).toBe('object');
   });
 
   it('should execute AI SDK tool with parameters', async () => {
@@ -282,8 +293,7 @@ describe('Tools', () => {
             type: 'string',
           },
         ],
-      },
-      {}
+      }
     );
 
     const tool2 = new BaseTool(
@@ -306,7 +316,7 @@ describe('Tools', () => {
         ],
       },
       {
-        authentication: 'Bearer test_key',
+        authorization: 'Bearer test_key',
       }
     );
 
@@ -342,7 +352,7 @@ describe('Tools', () => {
         ],
       },
       {
-        authentication: 'Bearer test_key',
+        authorization: 'Bearer test_key',
       }
     );
 
@@ -379,7 +389,7 @@ describe('Tools', () => {
         ],
       },
       {
-        authentication: 'Bearer test_key',
+        authorization: 'Bearer test_key',
       }
     );
 
@@ -542,17 +552,5 @@ describe('Tool', () => {
         }
       ).properties.id.type
     ).toBe('string');
-  });
-
-  it('should convert to AI SDK tool format', () => {
-    const tool = createMockTool();
-    const aiSdkTool = tool.toAISDK();
-
-    expect(aiSdkTool).toBeDefined();
-    expect(aiSdkTool.test_tool).toBeDefined();
-    expect(typeof aiSdkTool.test_tool.execute).toBe('function');
-    expect(aiSdkTool.test_tool.description).toBe('Test tool');
-    expect(aiSdkTool.test_tool.parameters).toBeDefined();
-    expect(aiSdkTool.test_tool.parameters.type).toBe('object');
   });
 });

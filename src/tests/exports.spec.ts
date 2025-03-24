@@ -15,9 +15,6 @@ describe('Module Exports', () => {
     expect(StackOneAI.ToolSetConfigError).toBeDefined();
     expect(StackOneAI.ToolSetLoadError).toBeDefined();
 
-    // Check enums
-    expect(StackOneAI.ParameterLocation).toBeDefined();
-
     // Check OpenAPI classes
     expect(StackOneAI.OpenAPIToolSet).toBeDefined();
     expect(StackOneAI.OpenAPILoader).toBeDefined();

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:te
 import path from 'node:path';
 import { OpenAPILoader } from '../../openapi/loader';
 import { mockFetch } from '../../tests/utils/fetch-mock';
-import { ParameterLocation } from '../../tools';
+import { ParameterLocation } from '../../types';
 import type { AuthenticationConfig } from '../base';
 import { OpenAPIToolSet } from '../openapi';
 
@@ -129,12 +129,11 @@ describe('OpenAPIToolSet', () => {
     });
 
     // Get the tool
-    // @ts-expect-error - Accessing protected property for testing
-    const tool = toolset.tools[0];
+    const tool = toolset.getTool('pet_findById');
 
     // Verify the header was set
-    // @ts-expect-error - Accessing protected property for testing
-    expect(tool._headers).toHaveProperty('X-Test-Header', 'test-value');
+    const headers = tool.getHeaders();
+    expect(headers).toHaveProperty('X-Test-Header', 'test-value');
   });
 
   it('should use basic authentication', () => {

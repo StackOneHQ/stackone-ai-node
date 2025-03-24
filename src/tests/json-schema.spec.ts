@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { jsonSchema } from 'ai';
 import type { JSONSchema7 } from 'json-schema';
-import { StackOneTool } from '../tools';
+import { StackOneTool } from '../tool';
 
 // Helper function to validate and fix array items in a schema
 const validateArrayItems = (obj: Record<string, unknown>, path = ''): string[] => {
@@ -92,11 +92,7 @@ const createArrayTestTool = (): StackOneTool => {
       params: [],
     },
     {
-      type: 'basic',
-      credentials: {
-        username: 'test_api_key',
-        password: '',
-      },
+      authorization: 'Bearer test_api_key',
     }
   );
 };
@@ -137,11 +133,7 @@ const createNestedArrayTestTool = (): StackOneTool => {
       params: [],
     },
     {
-      type: 'basic',
-      credentials: {
-        username: 'test_api_key',
-        password: '',
-      },
+      authorization: 'Bearer test_api_key',
     }
   );
 };
@@ -263,6 +255,25 @@ describe('Schema Validation', () => {
       const toolObj = aiSdkTool[tool.name];
       expect(toolObj).toBeDefined();
       expect(typeof toolObj.execute).toBe('function');
+
+      // Check that parameters and jsonSchema are properly structured
+      expect(toolObj.parameters).toBeDefined();
+      expect(toolObj.parameters.jsonSchema).toBeDefined();
+      expect(toolObj.parameters.jsonSchema.type).toBe('object');
+      expect(toolObj.parameters.jsonSchema.properties).toBeDefined();
+
+      // Check array item properties specifically
+      // Using simpleArray which is defined in createArrayTestTool
+      const simpleArray = toolObj.parameters.jsonSchema.properties.simpleArray;
+      expect(simpleArray).toBeDefined();
+      expect(simpleArray.type).toBe('array');
+
+      // Check that array with items is properly structured
+      const arrayWithItems = toolObj.parameters.jsonSchema.properties.arrayWithItems;
+      expect(arrayWithItems).toBeDefined();
+      expect(arrayWithItems.type).toBe('array');
+      expect(arrayWithItems.items).toBeDefined();
+      expect(arrayWithItems.items.type).toBe('string');
     });
 
     it('should handle the problematic nested array case', () => {
@@ -290,6 +301,24 @@ describe('Schema Validation', () => {
       // Verify that the schema can be used with jsonSchema
       const aiSchema = jsonSchema(parameters);
       expect(aiSchema).toBeDefined();
+
+      // Generate the SDK tool and verify its structure
+      const aiSdkTool = tool.toAISDK();
+      expect(aiSdkTool).toBeDefined();
+
+      const toolObj = aiSdkTool[tool.name];
+      expect(toolObj).toBeDefined();
+      expect(toolObj.parameters).toBeDefined();
+      expect(toolObj.parameters.jsonSchema).toBeDefined();
+
+      // Specifically check the nested schema structure
+      const filterProp = toolObj.parameters.jsonSchema.properties.filter;
+      expect(filterProp).toBeDefined();
+      expect(filterProp.type).toBe('object');
+      expect(filterProp.properties).toBeDefined();
+      expect(filterProp.properties.type_ids).toBeDefined();
+      expect(filterProp.properties.type_ids.type).toBe('array');
+      expect(filterProp.properties.type_ids.items).toBeDefined();
     });
   });
 });

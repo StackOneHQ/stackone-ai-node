@@ -17,8 +17,8 @@ import {
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { transformParameter } from '../modules/parameterMapper';
 import { OpenAPIToolSet } from '../toolsets';
-import { transformParameter } from '../transformations';
 import type { ParameterTransformer } from '../types';
 import { mockFetch } from './utils/fetch-mock';
 
