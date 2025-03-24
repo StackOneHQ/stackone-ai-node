@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.13](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.12...ai-v0.0.13) (2025-03-24)
+
+
+### Features
+
+* error from tools ([#31](https://github.com/StackOneHQ/stackone-ai-node/issues/31)) ([96e6745](https://github.com/StackOneHQ/stackone-ai-node/commit/96e6745da689da313658c881a2e144c238f85274))
+
 ## [0.0.12](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.11...ai-v0.0.12) (2025-03-24)
 
 
