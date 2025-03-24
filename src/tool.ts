@@ -43,7 +43,7 @@ export class BaseTool {
   /**
    * Add a parameter transformer
    */
-  public addParameterTransformer(sourceParam: string, config: ParameterTransformer): void {
+  public setParameterTransformer(sourceParam: string, config: ParameterTransformer): void {
     this.parameterMapper.addTransformer(sourceParam, config);
   }
 

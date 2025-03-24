@@ -60,7 +60,6 @@ describe('ParameterMapper', () => {
     const result = mapper.mapParameters(params);
 
     expect(result).toEqual({
-      sourceParam: 'value',
       otherParam: 'not-transformed',
       targetParam: 'transformed-value',
     });
@@ -114,7 +113,6 @@ describe('ParameterMapper', () => {
     const result = mapper.mapParameters(params);
 
     expect(result).toEqual({
-      sourceParam: 'value',
       targetParam1: 'value-1',
       targetParam2: 'value-2',
     });
@@ -141,8 +139,6 @@ describe('ParameterMapper', () => {
     const result = mapper.mapParameters(params);
 
     expect(result).toEqual({
-      sourceParam1: 'value1',
-      sourceParam2: 'value2',
       targetParam1: 'value1-1',
       targetParam2: 'value2-2',
     });

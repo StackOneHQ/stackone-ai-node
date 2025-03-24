@@ -4,6 +4,9 @@
  * This example demonstrates how to upload files using the simplified file_path parameter,
  * which is the only parameter needed for file uploads. The SDK automatically derives
  * the necessary file parameters (content, name, file_format) from the file_path.
+ *
+ * Run this example with:
+ * bun run examples/file-uploads.ts
  */
 
 import assert from 'node:assert';
@@ -34,17 +37,21 @@ const fileUploads = async (): Promise<void> => {
     /*
      * Upload a file using the file_path parameter
      * The SDK will automatically derive content, name, and file_format from the file_path
-     * Read more about transformed parameters in the [Derived Parameters](parameter-derivation.md)
      */
-    const result = await uploadTool.execute({
-      file_path: sampleFilePath,
-      id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
-      category: { value: 'shared' },
-    });
+    // Use dry run to check parameter mapping
+    const dryRunResult = await uploadTool.execute(
+      {
+        file_path: sampleFilePath,
+        id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+        category: { value: 'shared' },
+      },
+      { dryRun: true }
+    );
 
-    // Verify the result
-    assert(result !== undefined, 'Expected result to be defined');
-    assert(typeof result === 'object', 'Expected result to be an object');
+    assert(
+      (dryRunResult.mappedParams as Record<string, { value: string }>).file_format.value === 'txt',
+      'File format was not mapped correctly'
+    );
   } finally {
     // Clean up the sample file
     if (fs.existsSync(sampleFilePath)) {

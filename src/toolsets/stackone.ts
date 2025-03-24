@@ -79,7 +79,7 @@ export class StackOneToolSet extends ToolSet {
     // Add default parameter transformers
     const defaultTransformers = StackOneToolSet.getDefaultParameterTransformers();
     for (const [sourceParam, config] of defaultTransformers.entries()) {
-      this.addParameterTransformer(sourceParam, config);
+      this.setParameterTransformer(sourceParam, config);
     }
 
     // Load tools
@@ -114,14 +114,14 @@ export class StackOneToolSet extends ToolSet {
           const { fileName } = extractFileInfo(filePath);
           return fileName;
         },
-        file_format: (filePath: unknown): string => {
+        file_format: (filePath: unknown): { value: string } => {
           if (typeof filePath !== 'string') {
             throw new ToolSetError('file_path must be a string');
           }
 
           // get the file extension
           const { extension } = extractFileInfo(filePath);
-          return extension || '';
+          return { value: extension || '' };
         },
       },
     });
@@ -175,13 +175,17 @@ export class StackOneToolSet extends ToolSet {
           this.removeAccountIdParameter(processedDef);
         }
 
+        // Add transformation source parameters to the tool's parameters schema
+        this.addTransformationSourceParameters(processedDef);
+
         // Create tool
         const tool = new StackOneTool(
           toolName,
           processedDef.description,
           processedDef.parameters,
           processedDef.execute,
-          this.headers
+          this.headers,
+          this.transformers
         );
 
         // Add tool to the list
@@ -205,6 +209,29 @@ export class StackOneToolSet extends ToolSet {
       toolDef.parameters.required = toolDef.parameters.required.filter(
         (param) => param !== 'x-account-id'
       );
+    }
+  }
+
+  /**
+   * Add transformation source parameters to the tool's parameters schema
+   * This ensures parameters like file_path are included in the schema for model consumption
+   * @param toolDef Tool definition to modify
+   */
+  private addTransformationSourceParameters(toolDef: ToolDefinition): void {
+    // Skip if there are no transformers or no parameters
+    if (!this.transformers || !toolDef.parameters.properties) return;
+
+    // Add each transformer source parameter to the schema
+    for (const [sourceParam, _] of this.transformers.entries()) {
+      // Skip if the parameter is already in the schema
+      if (sourceParam in toolDef.parameters.properties) continue;
+
+      // Add the parameter to the schema
+      toolDef.parameters.properties[sourceParam] = {
+        type: 'string',
+        description:
+          'Convenience parameter that will be transformed into other parameters. Try and use this parameter in your tool call.',
+      };
     }
   }
 }

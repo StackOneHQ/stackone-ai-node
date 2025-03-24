@@ -66,6 +66,9 @@ export class ParameterMapper {
           console.error(`Error deriving parameter ${targetParam}:`, error);
         }
       }
+
+      // Always remove source parameters after transformation
+      delete mappedParams[sourceParam];
     }
 
     return mappedParams;

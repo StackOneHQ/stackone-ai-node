@@ -110,7 +110,7 @@ export abstract class ToolSet {
    * @param sourceParam Source parameter name
    * @param config Transformer configuration
    */
-  public addParameterTransformer(sourceParam: string, config: ParameterTransformer): void {
+  public setParameterTransformer(sourceParam: string, config: ParameterTransformer): void {
     this.transformers.set(sourceParam, config);
   }
 
