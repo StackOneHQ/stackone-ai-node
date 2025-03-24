@@ -82,25 +82,33 @@ export abstract class ToolSet {
 
     // Set Authentication headers if provided
     if (this.authentication) {
-      switch (this.authentication.type) {
-        case 'basic':
-          if (this.authentication.credentials?.username) {
-            const username = this.authentication.credentials.username;
-            const password = this.authentication.credentials.password || '';
-            const authString = Buffer.from(`${username}:${password}`).toString('base64');
-            this.headers.Authorization = `Basic ${authString}`;
-          }
-          break;
-        case 'bearer':
-          if (this.authentication.credentials?.token) {
-            this.headers.Authorization = `Bearer ${this.authentication.credentials.token}`;
-          }
-          break;
+      // Only set auth headers if they don't already exist in custom headers
+      const needsAuthHeader = !('Authorization' in this.headers);
+
+      if (needsAuthHeader) {
+        switch (this.authentication.type) {
+          case 'basic':
+            if (this.authentication.credentials?.username) {
+              const username = this.authentication.credentials.username;
+              const password = this.authentication.credentials.password || '';
+              const authString = Buffer.from(`${username}:${password}`).toString('base64');
+              this.headers.Authorization = `Basic ${authString}`;
+            }
+            break;
+          case 'bearer':
+            if (this.authentication.credentials?.token) {
+              this.headers.Authorization = `Bearer ${this.authentication.credentials.token}`;
+            }
+            break;
+
+          default:
+            throw new ToolSetError(`Unsupported authentication type: ${this.authentication.type}`);
+        }
       }
 
-      // Add any additional headers from authentication config
+      // Add any additional headers from authentication config, but don't override existing ones
       if (this.authentication.headers) {
-        this.headers = { ...this.headers, ...this.authentication.headers };
+        this.headers = { ...this.authentication.headers, ...this.headers };
       }
     }
   }
