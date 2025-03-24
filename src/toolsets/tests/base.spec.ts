@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { ParameterLocation, Tool } from '../../tools';
+import { BaseTool } from '../../tool';
+import { ParameterLocation } from '../../types';
 import { ToolSet } from '../base';
 
 // Create a concrete implementation of the abstract ToolSet class for testing
@@ -14,7 +15,7 @@ class TestToolSet extends ToolSet {
   }
 
   // Add a tool for testing
-  public addTool(tool: Tool): void {
+  public addTool(tool: BaseTool): void {
     this.tools.push(tool);
   }
 }
@@ -69,7 +70,7 @@ describe('ToolSet', () => {
     const toolset = new TestToolSet();
 
     // Create mock tools
-    const tool1 = new Tool(
+    const tool1 = new BaseTool(
       'hris_get_employee',
       'Get employee details',
       {
@@ -90,7 +91,7 @@ describe('ToolSet', () => {
       }
     );
 
-    const tool2 = new Tool(
+    const tool2 = new BaseTool(
       'crm_get_contact',
       'Get contact details',
       {

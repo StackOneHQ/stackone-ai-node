@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { StackOneError } from '../tools';
+import { StackOneError } from './errors';
 
 /**
  * Utilities for handling file operations

@@ -1,7 +1,7 @@
 import { OAS_DIR } from '../constants';
 import { loadSpecs } from '../openapi/loader';
-import { StackOneTool, type ToolDefinition, type Tools } from '../tools';
-import type { ParameterTransformer } from '../types';
+import { StackOneTool, type Tools } from '../tool';
+import type { ParameterTransformer, ToolDefinition } from '../types';
 import { extractFileInfo, isValidFilePath, readFileAsBase64 } from '../utils/file';
 import { removeJsonSchemaProperty } from '../utils/schema';
 import { type BaseToolSetConfig, ToolSet, ToolSetError } from './base';

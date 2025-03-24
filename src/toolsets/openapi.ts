@@ -1,5 +1,6 @@
 import { OpenAPILoader } from '../openapi/loader';
-import { Tool, type ToolDefinition } from '../tools';
+import { BaseTool } from '../tool';
+import type { ToolDefinition } from '../types';
 import { type BaseToolSetConfig, ToolSet, ToolSetConfigError, ToolSetLoadError } from './base';
 
 /**
@@ -137,10 +138,10 @@ export class OpenAPIToolSet extends ToolSet {
    * @param toolDef Tool definition
    * @returns Tool instance
    */
-  private createTool(toolName: string, toolDef: ToolDefinition): Tool {
+  private createTool(toolName: string, toolDef: ToolDefinition): BaseTool {
     // Create tool
     const { description, parameters, execute } = toolDef;
-    const tool = new Tool(toolName, description, parameters, execute);
+    const tool = new BaseTool(toolName, description, parameters, execute);
 
     // Set headers
     if (this.headers) {

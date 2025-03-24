@@ -1,7 +1,6 @@
 import type { JSONSchema7 as JsonSchema } from 'json-schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { ParameterLocation, type ToolDefinition } from '../tools';
-
+import { ParameterLocation, type ToolDefinition } from '../types';
 // Define a type for OpenAPI document
 type OpenAPIDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
 

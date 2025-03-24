@@ -1,5 +1,10 @@
-import { ParameterLocation, type Tool, type ToolDefinition, Tools } from '../tools';
-import type { ParameterTransformer, ParameterTransformerMap } from '../types';
+import { type BaseTool, Tools } from '../tool';
+import {
+  ParameterLocation,
+  type ParameterTransformer,
+  type ParameterTransformerMap,
+  type ToolDefinition,
+} from '../types';
 
 /**
  * Base exception for toolset errors
@@ -62,7 +67,7 @@ export abstract class ToolSet {
   protected baseUrl?: string;
   protected authentication?: AuthenticationConfig;
   protected headers: Record<string, string>;
-  protected tools: Tool[] = [];
+  protected tools: BaseTool[] = [];
   protected transformers: ParameterTransformerMap;
 
   /**
@@ -193,7 +198,7 @@ export abstract class ToolSet {
    * @param headers Optional headers to apply to the tool
    * @returns Tool instance
    */
-  getTool(name: string, headers?: Record<string, string>): Tool {
+  getTool(name: string, headers?: Record<string, string>): BaseTool {
     const tool = this.tools.find((tool) => tool.name === name);
     if (!tool) {
       throw new ToolSetError(`Tool with name ${name} not found`);
@@ -254,7 +259,7 @@ export abstract class ToolSet {
     // Check if the parameter exists in any of the tools
     for (const tool of this.tools) {
       // Check if the parameter exists in the execute config
-      const param = tool._executeConfig.params.find((p) => p.name === paramName);
+      const param = tool.executeConfig.params.find((p) => p.name === paramName);
       if (param) {
         return param.location;
       }

@@ -1,6 +1,6 @@
 import { OAS_DIR } from '../constants';
-import type { ToolDefinition } from '../tools';
 import { ToolSetLoadError } from '../toolsets/base';
+import type { ToolDefinition } from '../types';
 import {
   directoryExists,
   getFileNameWithoutExtension,

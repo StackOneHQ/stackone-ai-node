@@ -4,12 +4,9 @@
 
 export { OpenAPILoader } from './openapi/loader';
 export { OpenAPIParser } from './openapi/parser';
-export {
-  StackOneAPIError,
-  StackOneError,
-  StackOneTool,
-  Tools,
-} from './tools';
+export { BaseTool, StackOneTool, Tools } from './tool';
+export { StackOneAPIError, StackOneError } from './utils/errors';
+
 export {
   OpenAPIToolSet,
   StackOneToolSet,
@@ -23,10 +20,12 @@ export {
   type StackOneToolSetConfig,
 } from './toolsets';
 
-// Export types that might be useful for consumers
-export { ParameterLocation } from './tools';
 export type {
   ExecuteConfig,
+  ExecuteOptions,
+  JsonDict,
+  ParameterLocation,
+  ParameterTransformer,
+  ParameterTransformerMap,
   ToolDefinition,
-  ToolParameters,
-} from './tools';
+} from './types';

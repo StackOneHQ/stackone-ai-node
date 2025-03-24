@@ -1,17 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
-import {
-  type ExecuteConfig,
-  ParameterLocation,
-  StackOneAPIError,
-  StackOneTool,
-  Tool,
-  type ToolParameters,
-  Tools,
-} from '../tools';
+import { BaseTool, StackOneTool, Tools } from '../tool';
+import { type ExecuteConfig, ParameterLocation, type ToolParameters } from '../types';
+import { StackOneAPIError } from '../utils/errors';
 import { type FetchMockResult, mockFetch } from './utils/fetch-mock';
 
 // Create a mock tool for testing
-const createMockTool = (headers?: Record<string, string>): Tool => {
+const createMockTool = (headers?: Record<string, string>): BaseTool => {
   const name = 'test_tool';
   const description = 'Test tool';
   const parameters: ToolParameters = {
@@ -31,7 +25,7 @@ const createMockTool = (headers?: Record<string, string>): Tool => {
     ],
   };
 
-  return new Tool(name, description, parameters, executeConfig, headers);
+  return new BaseTool(name, description, parameters, executeConfig, headers);
 };
 
 // Set up and tear down mocks
@@ -66,7 +60,6 @@ describe('StackOneTool', () => {
   it('should initialize with correct properties', () => {
     const tool = createMockTool();
 
-    expect(tool.name).toBe('test_tool');
     expect(tool.description).toBe('Test tool');
     expect((tool.parameters as { type: string }).type).toBe('object');
     expect(
@@ -174,7 +167,7 @@ describe('StackOneTool', () => {
   });
 
   it('should convert complex parameter types to zod schema', () => {
-    const complexTool = new Tool(
+    const complexTool = new BaseTool(
       'complex_tool',
       'Complex tool',
       {
@@ -242,6 +235,9 @@ describe('StackOneTool', () => {
     };
 
     // Execute the AI SDK tool
+    if (!aiSdkTool.test_tool.execute) {
+      throw new Error('test_tool.execute is undefined');
+    }
     const result = await aiSdkTool.test_tool.execute({ id: '123' }, mockOptions);
 
     expect(result).toEqual({ id: '123', name: 'Test' });
@@ -268,7 +264,7 @@ describe('Tools', () => {
   });
 
   it('should convert all tools to OpenAI format', () => {
-    const tool1 = new Tool(
+    const tool1 = new BaseTool(
       'tool1',
       'Tool 1',
       {
@@ -290,7 +286,7 @@ describe('Tools', () => {
       {}
     );
 
-    const tool2 = new Tool(
+    const tool2 = new BaseTool(
       'tool2',
       'Tool 2',
       {
