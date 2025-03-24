@@ -19,7 +19,6 @@
     "rebuild": "bun run fetch:specs && bun run build",
     "publish-package": "bun run build && bun publish --access=public",
     "test": "bun test",
-    "test:examples": "bun run examples/tests/run-examples.ts",
     "fetch:specs": "bun run ./scripts/fetch-specs.ts",
     "build:docs": "bun run ./scripts/build-docs.ts",
     "docs:serve": "mkdocs serve",
