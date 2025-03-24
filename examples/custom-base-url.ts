@@ -50,11 +50,11 @@ const customBaseUrl = async (): Promise<void> => {
   if (defaultTool && devTool) {
     assert(defaultTool.name === devTool.name, 'Tool names should be the same');
     assert(
-      defaultTool._executeConfig.url.includes('https://api.stackone.com'),
+      defaultTool.executeConfig.url.includes('https://api.stackone.com'),
       'Default tool should use the default base URL'
     );
     assert(
-      devTool._executeConfig.url.includes('https://api.example-dev.com'),
+      devTool.executeConfig.url.includes('https://api.example-dev.com'),
       'Custom tool should use the custom base URL'
     );
   }

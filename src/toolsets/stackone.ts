@@ -65,15 +65,22 @@ export class StackOneToolSet extends ToolSet {
       },
     };
 
+    const accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
+
+    const headers = {
+      ...config?.headers,
+      ...(accountId ? { 'x-account-id': accountId } : {}),
+    };
+
     // Initialize base class
     super({
       baseUrl: config?.baseUrl,
       authentication,
-      headers: config?.headers,
+      headers,
       transformers: config?.transformers,
     });
 
-    this.accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
+    this.accountId = accountId;
     this._removedParams = ['source_value'];
 
     // Add default parameter transformers

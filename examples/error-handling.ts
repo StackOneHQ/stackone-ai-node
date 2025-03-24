@@ -17,7 +17,9 @@ const errorHandling = async (): Promise<void> => {
 
     try {
       // This will throw a ToolsetConfigError
-      const _toolset = new StackOneToolSet();
+      const _toolset = new StackOneToolSet({
+        strict: true,
+      });
       assert(false, 'Expected ToolSetConfigError was not thrown');
     } catch (error) {
       assert(error instanceof ToolSetConfigError, 'Expected error to be ToolSetConfigError');

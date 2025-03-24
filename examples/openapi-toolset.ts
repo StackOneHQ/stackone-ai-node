@@ -27,7 +27,7 @@ type DryRunResult = {
 async function fromFileExample(): Promise<void> {
   // Create an OpenAPIToolSet from a local file
   const toolset = new OpenAPIToolSet({
-    filePath: joinPaths(__dirname, 'specs', 'petstore.json'),
+    filePath: joinPaths(process.cwd(), 'src', 'toolsets', 'tests', 'fixtures', 'petstore.json'),
   });
 
   // Get all tools

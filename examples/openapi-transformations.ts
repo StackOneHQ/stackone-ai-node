@@ -35,10 +35,6 @@ const createMockOpenAPISpec = (): string => {
                 schema: {
                   type: 'object',
                   properties: {
-                    file_path: {
-                      type: 'string',
-                      description: 'Path to the file to upload',
-                    },
                     file_content: {
                       type: 'string',
                       description: 'Base64-encoded file content',
@@ -52,7 +48,7 @@ const createMockOpenAPISpec = (): string => {
                       description: 'Format of the file',
                     },
                   },
-                  required: ['file_path'],
+                  required: ['file_content', 'file_name', 'file_format'],
                 },
               },
             },
@@ -164,144 +160,48 @@ const createFileTransformer = (): ParameterTransformer => {
 };
 
 /**
- * Create a user transformer
- * This transformer extracts user_name, user_email, and user_role from user_id
- */
-const createUserTransformer = (): ParameterTransformer => {
-  // Mock user database
-  const userDb: Record<string, { name: string; email: string; role: string }> = {
-    user123: { name: 'John Doe', email: 'john.doe@example.com', role: 'admin' },
-    user456: { name: 'Jane Smith', email: 'jane.smith@example.com', role: 'user' },
-  };
-
-  return {
-    transforms: {
-      // Extract user name
-      user_name: (userId: unknown): string => {
-        if (typeof userId !== 'string') {
-          throw new Error('user_id must be a string');
-        }
-
-        if (!(userId in userDb)) {
-          throw new Error(`User not found: ${userId}`);
-        }
-
-        return userDb[userId].name;
-      },
-
-      // Extract user email
-      user_email: (userId: unknown): string => {
-        if (typeof userId !== 'string') {
-          throw new Error('user_id must be a string');
-        }
-
-        if (!(userId in userDb)) {
-          throw new Error(`User not found: ${userId}`);
-        }
-
-        return userDb[userId].email;
-      },
-
-      // Extract user role
-      user_role: (userId: unknown): string => {
-        if (typeof userId !== 'string') {
-          throw new Error('user_id must be a string');
-        }
-
-        if (!(userId in userDb)) {
-          throw new Error(`User not found: ${userId}`);
-        }
-
-        return userDb[userId].role;
-      },
-    },
-  };
-};
-
-/**
  * Example of using parameter transformations with OpenAPI
  */
 async function main(): Promise<void> {
-  console.log('Starting Parameter Transformation Example...');
-
-  // Step 1: Create a mock OpenAPI spec file
   const specFilePath = createMockOpenAPISpec();
-  console.log(`Created mock OpenAPI spec at: ${specFilePath}`);
-
-  // Step 2: Create parameter transformers
   const fileTransformer = createFileTransformer();
-  const userTransformer = createUserTransformer();
 
-  // Step 3: Create a map of parameter transformers
+  // Create a transformers map for the toolset
   const transformers = new Map<string, ParameterTransformer>();
   transformers.set('file_path', fileTransformer);
-  transformers.set('user_id', userTransformer);
 
-  console.log('Created parameter transformers');
-
-  // Step 4: Create an OpenAPIToolSet with the parameter transformers
+  // Create the toolset with transformers
   const toolset = new OpenAPIToolSet({
     filePath: specFilePath,
     transformers,
   });
 
-  console.log('Created OpenAPIToolSet with parameter transformers');
-
-  // Step 5: Get the tools
+  // Get the tools
   const tools = toolset.getTools();
   const fileUploadTool = tools.getTool('upload_file');
-  const updateUserTool = tools.getTool('update_user');
 
   assert(fileUploadTool, 'Expected to find upload_file tool');
-  assert(updateUserTool, 'Expected to find update_user tool');
 
-  console.log('Found tools: upload_file, update_user');
-
-  // Step 6: Create a temp file for testing
   const tempFilePath = path.join(__dirname, 'temp.txt');
   fs.writeFileSync(tempFilePath, 'Hello, world!');
-  console.log(`Created temp file at: ${tempFilePath}`);
 
   try {
-    // Step 7: Test file upload transformations
-    console.log('\n=== File Upload Transformations ===\n');
-
     // Execute with just file_path - other parameters will be transformed
     const fileUploadResult = await fileUploadTool.execute(
       { file_path: tempFilePath },
       { dryRun: true }
     );
 
-    console.log('File upload result:');
-    console.log(JSON.stringify(fileUploadResult, null, 2));
-
-    // Step 8: Test user data transformations
-    console.log('\n=== User Data Transformations ===\n');
-
-    // Execute with just user_id - other parameters will be transformed
-    const updateUserResult = await updateUserTool.execute({ user_id: 'user123' }, { dryRun: true });
-
-    console.log('Update user result:');
-    console.log(JSON.stringify(updateUserResult, null, 2));
-
-    // Step 9: Print transformed parameters
-    console.log('\nTransformed file parameters:');
     const fileParams = fileUploadResult.mappedParams as Record<string, unknown>;
-    console.log(`- file_name: ${fileParams.file_name}`);
-    console.log(`- file_format: ${fileParams.file_format}`);
-    console.log(
-      `- file_content: ${(fileParams.file_content as string).substring(0, 20)}... (base64)`
+
+    // Assertions to validate the transformations worked
+    assert(fileParams.file_name === 'temp.txt', 'Expected file_name to be transformed correctly');
+    assert(fileParams.file_format === 'txt', 'Expected file_format to be transformed correctly');
+    assert(
+      typeof fileParams.file_content === 'string' && fileParams.file_content.length > 0,
+      'Expected file_content to be transformed correctly'
     );
-
-    console.log('\nTransformed user parameters:');
-    const userParams = updateUserResult.mappedParams as Record<string, unknown>;
-    console.log(`- user_name: ${userParams.user_name}`);
-    console.log(`- user_email: ${userParams.user_email}`);
-    console.log(`- user_role: ${userParams.user_role}`);
-
-    console.log('\nParameter Transformation Example completed successfully!');
   } finally {
-    // Step 10: Clean up
     try {
       fs.unlinkSync(tempFilePath);
       fs.unlinkSync(specFilePath);
@@ -312,8 +212,4 @@ async function main(): Promise<void> {
   }
 }
 
-// Run the example
-main().catch((error) => {
-  console.error('Error:', error);
-  process.exit(1);
-});
+main();
