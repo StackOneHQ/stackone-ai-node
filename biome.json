@@ -42,6 +42,7 @@
   },
   "files": {
     "ignoreUnknown": true,
+    "ignore": ["dist/**", "node_modules/**", "src/openapi/generated/**"],
     "include": ["src/**/*.ts", "examples/**/*.ts"]
   }
 }
