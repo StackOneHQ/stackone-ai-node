@@ -135,7 +135,11 @@ export class BaseTool {
         description: this.description,
         ...(options.executable && {
           execute: async (args: Record<string, unknown>) => {
-            return await this.execute(args as JsonDict);
+            try {
+              return await this.execute(args as JsonDict);
+            } catch (error) {
+              return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+            }
           },
         }),
       },

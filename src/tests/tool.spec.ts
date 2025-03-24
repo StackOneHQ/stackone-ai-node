@@ -239,22 +239,40 @@ describe('StackOneTool', () => {
     const tool = createMockTool();
     const aiSdkTool = tool.toAISDK();
 
-    // Mock the ToolExecutionOptions
-    const mockOptions = {
-      toolCallId: 'test-tool-call-id',
-      messages: [],
-    };
-
     // Execute the AI SDK tool
     if (!aiSdkTool.test_tool.execute) {
       throw new Error('test_tool.execute is undefined');
     }
-    const result = await aiSdkTool.test_tool.execute({ id: '123' }, mockOptions);
 
+    const result = await aiSdkTool.test_tool.execute(
+      { id: '123' },
+      { toolCallId: 'test-tool-call-id', messages: [] }
+    );
     expect(result).toEqual({ id: '123', name: 'Test' });
 
-    // Restore the original fetch
     fetchMock.restore();
+  });
+
+  it('should return error message as string when AI SDK tool execution fails', async () => {
+    const tool = createMockTool();
+
+    // Mock the execute method to throw an error
+    const mockError = new Error('Test execution error');
+    spyOn(tool, 'execute').mockImplementation(() => {
+      throw mockError;
+    });
+
+    const aiSdkTool = tool.toAISDK();
+
+    if (!aiSdkTool.test_tool.execute) {
+      throw new Error('test_tool.execute is undefined');
+    }
+
+    const result = await aiSdkTool.test_tool.execute(
+      { id: '123' },
+      { toolCallId: 'test-tool-call-id', messages: [] }
+    );
+    expect(result).toBe('Error executing tool: Test execution error');
   });
 });
 
