@@ -31,7 +31,7 @@ async function fromFileExample(): Promise<void> {
   });
 
   // Get all tools
-  const tools = toolset.getTools();
+  const tools = toolset.getTools('*Pet*');
   assert(tools.length > 0, 'Expected to find tools in the specification');
 
   // Get a specific tool
@@ -53,37 +53,31 @@ async function fromUrlExample(): Promise<void> {
   try {
     // Create an OpenAPIToolSet from a URL
     const toolset = await OpenAPIToolSet.fromUrl({
-      url: 'https://petstore3.swagger.io/api/v3/openapi.json',
+      url: 'https://api.eu1.stackone.com/oas/hris.json',
     });
 
     // Get tools matching a pattern
-    const petTools = toolset.getTools('pet*');
-    assert(petTools.length > 0, 'Expected to find pet-related tools');
+    const hrisTools = toolset.getTools('hris_*');
+    assert(hrisTools.length > 0, 'Expected to find a bunch of tools');
 
     // Get a specific tool
-    const updatePetTool = petTools.getTool('updatePet');
-    assert(updatePetTool !== undefined, 'Expected to find updatePet tool');
+    const getEmployeeTool = hrisTools.getTool('hris_get_employee');
+    assert(getEmployeeTool !== undefined, 'Expected to find hris_get_employee tool');
+    assert(
+      typeof getEmployeeTool.parameters.properties.id === 'object' &&
+        getEmployeeTool.parameters.properties.id !== null &&
+        getEmployeeTool.parameters.properties.id.type === 'string',
+      'Expected to find string parameter for id'
+    );
 
     // Execute the tool with dry run to see what would be sent
-    const result = (await updatePetTool.execute(
-      {
-        id: 123,
-        name: 'Fluffy',
-        status: 'available',
-        category: { id: 1, name: 'Dogs' },
-        tags: [{ id: 1, name: 'friendly' }],
-        photoUrls: ['https://example.com/dog.jpg'],
-      },
-      { dryRun: true }
-    )) as DryRunResult;
+    const result = (await getEmployeeTool.execute({ id: 123 }, { dryRun: true })) as DryRunResult;
 
     assert(result !== undefined, 'Expected to get a result from dry run');
-    assert(result.method === 'PUT', 'Expected PUT method');
-    assert(result.url.includes('/pet'), 'Expected URL to contain pet endpoint');
-    assert(result.body && typeof result.body === 'string', 'Expected body to be a string');
+    assert(result.method === 'GET', 'Expected GET method');
 
-    const bodyData = JSON.parse(result.body);
-    assert(bodyData.name === 'Fluffy', 'Expected body to contain pet data');
+    assert(result.url.includes('/employees/123'), 'Expected URL to contain employee ID');
+    assert(result.body === undefined, 'Expected body to be undefined');
   } catch (error) {
     throw new Error(
       `Failed to load from URL: ${error instanceof Error ? error.message : String(error)}`
