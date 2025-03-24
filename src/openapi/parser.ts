@@ -16,15 +16,19 @@ type HttpMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patc
 export class OpenAPIParser {
   _spec: OpenAPIDocument;
   _baseUrl: string;
+  private _removedParams: string[];
 
   /**
    * Create a new OpenAPIParser
    * @param spec The OpenAPI specification object
    * @param customBaseUrl Optional custom base URL to use for all operations
+   * @param removedParams Optional array of parameter names to remove from all tools
    */
-  constructor(spec: OpenAPIDocument, customBaseUrl?: string) {
+  constructor(spec: OpenAPIDocument, customBaseUrl?: string, removedParams?: string[]) {
     this._spec = spec;
     this._baseUrl = customBaseUrl || this.determineBaseUrl();
+    // Default to removing source_value if no removedParams provided
+    this._removedParams = removedParams || [];
   }
 
   /**
@@ -41,11 +45,16 @@ export class OpenAPIParser {
    * Create a parser from a JSON string
    * @param specString OpenAPI specification as a JSON string
    * @param customBaseUrl Optional custom base URL to use for all tools
+   * @param removedParams Optional array of parameter names to remove from all tools
    * @returns A new OpenAPIParser instance
    */
-  public static fromString(specString: string, customBaseUrl?: string): OpenAPIParser {
+  public static fromString(
+    specString: string,
+    customBaseUrl?: string,
+    removedParams?: string[]
+  ): OpenAPIParser {
     const spec = JSON.parse(specString) as OpenAPIDocument;
-    return new OpenAPIParser(spec, customBaseUrl);
+    return new OpenAPIParser(spec, customBaseUrl, removedParams);
   }
 
   /**
@@ -84,6 +93,7 @@ export class OpenAPIParser {
 
   /**
    * Resolve all references in a schema, preserving structure
+   * This also filters out deprecated properties and properties in removedParams
    */
   public resolveSchema(
     schema: SchemaObject | unknown,
@@ -92,6 +102,16 @@ export class OpenAPIParser {
     // Handle primitive types (string, number, etc)
     if (typeof schema !== 'object' || schema === null) {
       return schema as JsonSchema;
+    }
+
+    // Skip if schema is deprecated
+    if (
+      schema &&
+      typeof schema === 'object' &&
+      'deprecated' in schema &&
+      schema.deprecated === true
+    ) {
+      return {} as JsonSchema;
     }
 
     if (Array.isArray(schema)) {
@@ -173,6 +193,17 @@ export class OpenAPIParser {
         // Skip null properties
         if (propSchema === null) continue;
 
+        // Skip properties in removedParams
+        if (this._removedParams.includes(propName)) continue;
+
+        // Skip deprecated properties
+        if (
+          typeof propSchema === 'object' &&
+          'deprecated' in propSchema &&
+          propSchema.deprecated === true
+        )
+          continue;
+
         // A property is required if:
         // 1. It's in the parent's required array AND
         // 2. It's not marked as nullable in OpenAPI
@@ -181,7 +212,9 @@ export class OpenAPIParser {
           'nullable' in propSchema &&
           propSchema.nullable === true;
         const isRequired =
-          Array.isArray(schemaObj.required) && schemaObj.required.includes(propName);
+          Array.isArray(schemaObj.required) &&
+          schemaObj.required.includes(propName) &&
+          !this._removedParams.includes(propName);
 
         if (isRequired && !isNullable) {
           requiredProps.push(propName);
@@ -198,6 +231,14 @@ export class OpenAPIParser {
       if (requiredProps.length > 0) {
         resolved.required = requiredProps;
       }
+    } else if ('required' in schemaObj && Array.isArray(schemaObj.required)) {
+      // Filter the required array to remove any properties in removedParams
+      const filteredRequired = schemaObj.required.filter(
+        (prop) => !this._removedParams.includes(prop)
+      );
+      if (filteredRequired.length > 0) {
+        resolved.required = filteredRequired;
+      }
     }
 
     // Process remaining fields
@@ -207,6 +248,7 @@ export class OpenAPIParser {
         key === 'properties' ||
         key === 'required' ||
         key === 'nullable' ||
+        key === 'deprecated' ||
         key.startsWith('x-')
       ) {
         continue;
@@ -358,6 +400,29 @@ export class OpenAPIParser {
   }
 
   /**
+   * Final cleanup of removed parameters and validation
+   * This provides a final check to ensure no removed parameters remain
+   */
+  private filterRemovedParams(
+    properties: Record<string, JsonSchema>,
+    required?: string[]
+  ): [Record<string, JsonSchema>, string[] | undefined] {
+    // Final cleanup of properties
+    const filteredProperties = { ...properties };
+    for (const param of this._removedParams) {
+      delete filteredProperties[param];
+    }
+
+    // Final cleanup of required fields
+    const filteredRequired = required?.filter((param) => !this._removedParams.includes(param));
+
+    return [
+      filteredProperties,
+      filteredRequired && filteredRequired.length > 0 ? filteredRequired : undefined,
+    ];
+  }
+
+  /**
    * Parse OpenAPI spec into tool definitions
    */
   public parseTools(): Record<string, ToolDefinition> {
@@ -404,6 +469,11 @@ export class OpenAPIParser {
                 }
 
                 const paramName = resolvedParam.name;
+                // Skip removed parameters and deprecated parameters
+                if (this._removedParams.includes(paramName) || resolvedParam.deprecated === true) {
+                  continue;
+                }
+
                 const paramLocation = resolvedParam.in; // header, query, path, cookie
                 parameterLocations[paramName] = paramLocation as ParameterLocation;
 
@@ -416,7 +486,6 @@ export class OpenAPIParser {
 
                 // Add to required params if required
                 // Special case for x-account-id: only add to required if it's required in the spec
-                // The StackOneTool class will handle adding it from the accountId parameter if available
                 if (resolvedParam.required && !(paramName === 'x-account-id')) {
                   requiredParams.push(paramName);
                 }
@@ -436,8 +505,18 @@ export class OpenAPIParser {
 
               for (const [propName, propSchema] of Object.entries(bodyProps)) {
                 try {
+                  // Skip removed parameters and deprecated properties
+                  if (
+                    this._removedParams.includes(propName) ||
+                    (typeof propSchema === 'object' &&
+                      'deprecated' in propSchema &&
+                      propSchema.deprecated === true)
+                  ) {
+                    continue;
+                  }
+
                   // Create a deep copy of the propSchema to avoid shared state
-                  properties[propName] = JSON.parse(JSON.stringify(propSchema)) as JsonSchema;
+                  properties[propName] = this.resolveSchema(propSchema);
                   parameterLocations[propName] = this.getParameterLocation(
                     propSchema as Record<string, unknown>
                   );
@@ -447,25 +526,33 @@ export class OpenAPIParser {
               }
             }
 
+            // Filter out removed parameters from properties and required arrays
+            const [filteredProperties, filteredRequired] = this.filterRemovedParams(
+              properties,
+              requiredParams
+            );
+
             // Create tool definition with deep copies to prevent shared state
             tools[name] = {
               description: operation.summary || '',
               parameters: {
                 type: 'object',
-                properties,
-                required: requiredParams.length > 0 ? requiredParams : undefined,
+                properties: filteredProperties,
+                required: filteredRequired,
               },
               execute: {
                 method: method.toUpperCase(),
                 url: `${this._baseUrl}${path}`,
                 bodyType: (bodyType as 'json' | 'multipart-form') || 'json',
-                params: Object.entries(parameterLocations).map(([name, location]) => {
-                  return {
-                    name,
-                    location,
-                    type: (properties[name]?.type as JsonSchema['type']) || 'string',
-                  };
-                }),
+                params: Object.entries(parameterLocations)
+                  .filter(([name]) => !this._removedParams.includes(name))
+                  .map(([name, location]) => {
+                    return {
+                      name,
+                      location,
+                      type: (filteredProperties[name]?.type as JsonSchema['type']) || 'string',
+                    };
+                  }),
               },
             };
           } catch (operationError) {

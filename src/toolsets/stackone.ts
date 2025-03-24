@@ -13,6 +13,7 @@ export interface StackOneToolSetConfig extends BaseToolSetConfig {
   apiKey?: string;
   accountId?: string;
   strict?: boolean;
+  removedParams?: string[]; // List of parameters to remove from all tools
 }
 
 /**
@@ -35,6 +36,7 @@ export class StackOneToolSet extends ToolSet {
    * Account ID for StackOne API
    */
   private accountId?: string;
+  private readonly _removedParams: string[];
 
   /**
    * Initialize StackOne toolset with API key and optional account ID
@@ -71,8 +73,8 @@ export class StackOneToolSet extends ToolSet {
       transformers: config?.transformers,
     });
 
-    // Set account ID
     this.accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
+    this._removedParams = ['source_value'];
 
     // Add default parameter transformers
     const defaultTransformers = StackOneToolSet.getDefaultParameterTransformers();
@@ -112,6 +114,15 @@ export class StackOneToolSet extends ToolSet {
           const { fileName } = extractFileInfo(filePath);
           return fileName;
         },
+        file_format: (filePath: unknown): string => {
+          if (typeof filePath !== 'string') {
+            throw new ToolSetError('file_path must be a string');
+          }
+
+          // get the file extension
+          const { extension } = extractFileInfo(filePath);
+          return extension || '';
+        },
       },
     });
 
@@ -150,8 +161,7 @@ export class StackOneToolSet extends ToolSet {
    * Load tools from the OAS directory
    */
   private loadTools(): void {
-    // Load specs from the OAS directory
-    const specs = loadSpecs(OAS_DIR);
+    const specs = loadSpecs(OAS_DIR, this.baseUrl, this._removedParams);
 
     // Process each vertical
     for (const [_, tools] of Object.entries(specs)) {

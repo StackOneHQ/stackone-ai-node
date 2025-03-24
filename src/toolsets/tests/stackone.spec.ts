@@ -1,7 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import { describe, expect, it, spyOn } from 'bun:test';
 import { env } from 'bun';
-import { OpenAPILoader } from '../../openapi/loader';
-import { ParameterLocation } from '../../types';
 import { ToolSetConfigError } from '../base';
 import { StackOneToolSet } from '../stackone';
 
@@ -9,41 +7,17 @@ import { StackOneToolSet } from '../stackone';
 env.STACKONE_API_KEY = 'test_key';
 
 describe('StackOneToolSet', () => {
-  // Clean up all mocks after each test
-  afterEach(() => {
-    mock.restore();
-  });
+  // Snapshot tests
+  describe('Snapshot Tests', () => {
+    it('should parse the all the oas files correctly', () => {
+      const toolset = new StackOneToolSet();
+      const hrisTools = toolset.getStackOneTools('hris_*');
 
-  beforeEach(() => {
-    // Mock the OpenAPILoader.loadFromDirectory method to return an empty object
-    spyOn(OpenAPILoader, 'loadFromDirectory').mockImplementation(() => ({
-      hris: {
-        hris_get_employee: {
-          description: 'Get employee',
-          parameters: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-            },
-            required: ['id'],
-          },
-          execute: {
-            method: 'GET',
-            url: 'https://api.stackone.com/hris/employees/{id}',
-            bodyType: 'json',
-            params: [
-              {
-                name: 'id',
-                location: ParameterLocation.PATH,
-                type: 'string',
-              },
-            ],
-          },
-        },
-      },
-    }));
-  });
+      expect(Object.keys(hrisTools).length).toBeGreaterThan(0);
 
+      expect(hrisTools).toMatchSnapshot();
+    });
+  });
   describe('Authentication Configuration', () => {
     it('should configure basic auth with API key from constructor', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });

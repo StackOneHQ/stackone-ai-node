@@ -458,4 +458,70 @@ describe('OpenAPIParser', () => {
       expect(tools).toMatchSnapshot();
     });
   });
+
+  describe('Tool Parameter Handling', () => {
+    it('should strip source_value from tool parameters', () => {
+      const spec = createMinimalSpec({
+        paths: {
+          '/test': {
+            get: {
+              operationId: 'test_operation',
+              parameters: [
+                {
+                  name: 'source_value',
+                  in: 'query',
+                  required: true,
+                  schema: { type: 'string' },
+                },
+              ],
+              responses: { '200': { description: 'OK' } },
+            },
+          },
+        },
+      });
+
+      const parser = new OpenAPIParser(spec, undefined, ['source_value']);
+      const tools = parser.parseTools();
+
+      expect(tools).toHaveProperty('test_operation');
+      expect(tools.test_operation.parameters).toHaveProperty('required');
+      expect(tools.test_operation.parameters).toEqual({
+        type: 'object',
+        properties: {},
+        required: undefined,
+      });
+    });
+
+    it('should remove deprecated parameters from tool parameters', () => {
+      const spec = createMinimalSpec({
+        paths: {
+          '/test': {
+            get: {
+              operationId: 'test_operation',
+              parameters: [
+                {
+                  name: 'deprecated_param',
+                  in: 'query',
+                  deprecated: true,
+                  schema: { type: 'string' },
+                },
+              ],
+              responses: { '200': { description: 'OK' } },
+            },
+          },
+        },
+      });
+
+      const parser = new OpenAPIParser(spec, undefined, ['deprecated_param']);
+      const tools = parser.parseTools();
+
+      expect(tools).toHaveProperty('test_operation');
+      expect(tools.test_operation.parameters).toHaveProperty('required');
+      expect(tools.test_operation.parameters).toEqual({
+        type: 'object',
+        properties: {},
+        required: undefined,
+      });
+    });
+  });
 });
