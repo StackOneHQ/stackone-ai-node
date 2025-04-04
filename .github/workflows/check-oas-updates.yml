@@ -33,7 +33,7 @@ jobs:
       - name: Check for OAS changes
         id: check-oas-changes
         run: |
-          if [[ -n "$(git status --porcelain .oas/)" ]]; then
+          if [[ -n "$(git status --porcelain src/openapi/generated/)" ]]; then
             echo "changes=true" >> $GITHUB_OUTPUT
             echo "::notice::OAS changes detected"
           else
