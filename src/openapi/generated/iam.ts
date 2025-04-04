@@ -145,9 +145,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -159,18 +193,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -285,9 +384,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -299,18 +432,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -364,16 +562,50 @@ export const iamSpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/UpdateUserApiModel',
+                  $ref: '#/components/schemas/UpdateResult',
                 },
               },
             },
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -385,18 +617,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -450,9 +747,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -464,18 +795,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -634,9 +1030,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -648,18 +1078,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -773,9 +1268,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -787,18 +1316,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -958,9 +1552,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -972,18 +1600,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -1098,9 +1791,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -1112,18 +1839,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -1282,9 +2074,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -1296,18 +2122,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -1421,9 +2312,43 @@ export const iamSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -1435,18 +2360,83 @@ export const iamSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -1510,6 +2500,89 @@ export const iamSpec = {
       },
     },
     schemas: {
+      BadGatewayResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 502,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Bad Gateway',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      BadRequestResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 400,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Bad Request',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+          data: {
+            description: 'Error details',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/UnifiedError',
+              },
+            ],
+          },
+          provider_errors: {
+            description: 'List of provider-specific errors',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ProviderError',
+            },
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      ConflictResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 409,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Conflict',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       Content: {
         type: 'object',
         properties: {
@@ -2919,6 +3992,28 @@ export const iamSpec = {
           },
         },
       },
+      ForbiddenResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 403,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Forbidden resource',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       GroupTypeEnum: {
         type: 'object',
         properties: {
@@ -3747,6 +4842,128 @@ export const iamSpec = {
         },
         required: ['data'],
       },
+      InternalServerErrorResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 500,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Internal server error',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      NotFoundResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 404,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Not Found',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      NotImplementedResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 501,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Not Implemented',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      PreconditionFailedResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 412,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Precondition failed',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      ProviderError: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'number',
+            description: 'HTTP status code of the provider error',
+            example: 400,
+            nullable: true,
+          },
+          url: {
+            type: 'string',
+            description: 'URL that caused the error',
+            example: 'https://api.provider.com/v1/resource',
+            nullable: true,
+          },
+          raw: {
+            type: 'object',
+            description: 'Raw error response from the provider',
+            example: {
+              message: 'Invalid input parameters',
+            },
+            nullable: true,
+          },
+          headers: {
+            type: 'object',
+            description: 'Response headers',
+            example: {
+              'content-type': 'application/json',
+              'x-request-id': '5678c28b211dace4e0a0f9171e6b88c5',
+            },
+            nullable: true,
+          },
+        },
+      },
       RawResponse: {
         type: 'object',
         properties: {
@@ -3793,6 +5010,28 @@ export const iamSpec = {
         },
         required: ['method', 'url'],
       },
+      RequestTimedOutResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 408,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Request timed out',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       RoleTypeEnum: {
         type: 'object',
         properties: {
@@ -3836,69 +5075,116 @@ export const iamSpec = {
           },
         },
       },
-      UpdateUserApiModel: {
+      TooManyRequestsResponse: {
         type: 'object',
         properties: {
-          primary_email_address: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 429,
+          },
+          message: {
             type: 'string',
-            description:
-              'Primary email address of the user. This is generally a work email address.',
-            example: 'han@stackone.com',
-            nullable: true,
+            description: 'Error message',
+            example: 'Too many requests',
           },
-          first_name: {
+          timestamp: {
             type: 'string',
-            example: 'Han',
-            nullable: true,
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
           },
-          last_name: {
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      UnauthorizedResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 401,
+          },
+          message: {
             type: 'string',
-            example: 'Solo',
-            nullable: true,
+            description: 'Error message',
+            example: 'Unauthorized',
           },
-          name: {
+          timestamp: {
             type: 'string',
-            description: "User's name which (can be a full name or display name)",
-            example: 'Han Solo',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      UnifiedError: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 400,
             nullable: true,
           },
-          username: {
+          message: {
             type: 'string',
-            example: 'hansolo1977',
+            description: 'Error message',
+            example: 'Bad Request',
             nullable: true,
           },
-          is_bot_user: {
-            description: 'Indicates if the user is a bot or service user',
-            example: true,
-            oneOf: [
-              {
-                type: 'boolean',
-              },
-              {
-                type: 'string',
-                enum: ['true', 'false'],
-              },
-            ],
-            nullable: true,
-          },
-          status: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/UserStatusEnum',
-              },
-            ],
-          },
-          passthrough: {
+          headers: {
             type: 'object',
-            description: 'Value to pass through to the provider',
+            description: 'Response headers',
             example: {
-              other_known_names: 'John Doe',
+              'content-type': 'application/json',
+              'x-request-id': '5678c28b211dace4e0a0f9171e6b88c5',
             },
-            additionalProperties: true,
             nullable: true,
           },
         },
+      },
+      UnprocessableEntityResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 422,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Unprocessable Entity',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      UpdateResult: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            example: 200,
+          },
+          message: {
+            type: 'string',
+            example: 'Record updated successfully.',
+          },
+          timestamp: {
+            type: 'string',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
       },
       UserStatusEnum: {
         type: 'object',

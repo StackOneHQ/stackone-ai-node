@@ -30,9 +30,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -44,15 +78,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -97,9 +189,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -111,15 +237,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -235,9 +419,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -249,15 +467,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -300,9 +576,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -314,15 +624,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -373,9 +741,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -387,15 +789,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -436,12 +896,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
           },
           '404': {
-            description: 'The account with the given identifier does not exist',
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -453,15 +944,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -504,12 +1053,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
           },
           '404': {
-            description: 'The account with the given identifier does not exist',
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -521,15 +1101,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -540,6 +1178,862 @@ export const stackoneSpec = {
         summary: 'Get meta information of the account',
         tags: ['Accounts'],
         'x-speakeasy-name-override': 'get_account_meta_info',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/requests/logs/{id}': {
+      get: {
+        operationId: 'stackone_get_log',
+        parameters: [
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description:
+              'The include parameter allows you to include additional data in the response.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              nullable: true,
+              example: 'step_logs',
+              enum: ['step_logs', 'advanced_logs', null],
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The log was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnifiedLogResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get a Log',
+        tags: ['Request Logs'],
+        'x-speakeasy-name-override': 'get_log',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/requests/logs': {
+      get: {
+        operationId: 'stackone_list_logs',
+        parameters: [
+          {
+            name: 'order_by',
+            required: false,
+            in: 'query',
+            description: 'The field to order the results by.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              additionalProperties: false,
+              nullable: true,
+              example: 'created_at',
+              enum: ['provider', 'service', 'status', 'eventDatetime', 'duration', null],
+              type: 'string',
+            },
+          },
+          {
+            name: 'order_direction',
+            required: false,
+            in: 'query',
+            description: 'The direction to order the results by.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              additionalProperties: false,
+              nullable: true,
+              example: 'asc',
+              enum: ['asc', 'desc', null],
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              maximum: 100,
+              nullable: true,
+              type: 'number',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description:
+              'The include parameter allows you to include additional data in the response.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              nullable: true,
+              example: 'step_logs',
+              enum: ['step_logs', null],
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            schema: {
+              properties: {
+                account_ids: {
+                  description: 'A comma-separated list of account IDs to filter the results by.',
+                  example: '45355976281015164504,45355976281015164505',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description: 'A ISO8601 date string to filter the results by start_date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description: 'A ISO8601 date string to filter the results by end_date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                request_ids: {
+                  description: 'A comma-separated list of request IDs to filter the results by.',
+                  example:
+                    'adbf752f-6457-4ddd-89b3-98ae2252b83b,adbf752f-6457-4ddd-89b3-98ae2252b83c',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                source_types: {
+                  description: 'A comma-separated list of source types to filter the results by.',
+                  example: 'DASHBOARD,SYNTHETIC_WEBHOOK',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                source_values: {
+                  description: 'A comma-separated list of source values to filter the results by.',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                source_ids: {
+                  description: 'A comma-separated list of source IDs to filter the results by.',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                http_methods: {
+                  description: 'A comma-separated list of HTTP methods to filter the results by.',
+                  example: 'GET,POST',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                providers: {
+                  description: 'A comma-separated list of provider keys to filter the results by.',
+                  example: 'ashby,greenhouse',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                services: {
+                  description: 'A comma-separated list of services to filter the results by.',
+                  example: 'hris,ats',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                resources: {
+                  description: 'A comma-separated list of resources to filter the results by.',
+                  example: 'employees,users',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                child_resources: {
+                  description:
+                    'A comma-separated list of child resources to filter the results by.',
+                  example: 'documents,time-off',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                sub_resources: {
+                  description: 'A comma-separated list of sub resources to filter the results by.',
+                  example: 'documents,employees',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                actions: {
+                  description: 'A comma-separated list of actions to filter the results by.',
+                  example: 'download,upload',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                status_codes: {
+                  description: 'A comma-separated list of status codes to filter the results by.',
+                  example: '200,400',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                success: {
+                  description: 'A boolean value to filter the results by success or failure.',
+                  example: true,
+                  type: 'boolean',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                order_by: {
+                  description: 'The field to order the results by.',
+                  example: 'created_at',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['provider', 'service', 'status', 'eventDatetime', 'duration'],
+                  additionalProperties: false,
+                },
+                order_direction: {
+                  description: 'The direction to order the results by.',
+                  example: 'asc',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['asc', 'desc'],
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of logs was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnifiedLogsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Logs',
+        tags: ['Request Logs'],
+        'x-speakeasy-name-override': 'list_logs',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/requests/logs/steps': {
+      get: {
+        operationId: 'stackone_list_step_logs',
+        parameters: [
+          {
+            name: 'order_by',
+            required: false,
+            in: 'query',
+            description: 'The field to order the results by.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              additionalProperties: false,
+              nullable: true,
+              example: 'created_at',
+              enum: ['provider', 'service', 'status', 'eventDatetime', 'duration', null],
+              type: 'string',
+            },
+          },
+          {
+            name: 'order_direction',
+            required: false,
+            in: 'query',
+            description: 'The direction to order the results by.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              additionalProperties: false,
+              nullable: true,
+              example: 'asc',
+              enum: ['asc', 'desc', null],
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              maximum: 100,
+              nullable: true,
+              type: 'number',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description:
+              'The include parameter allows you to include additional data in the response.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              nullable: true,
+              example: 'step_logs',
+              enum: ['step_logs', 'advanced_logs', null],
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            schema: {
+              properties: {
+                account_ids: {
+                  description: 'A comma-separated list of account IDs to filter the results by.',
+                  example: '45355976281015164504,45355976281015164505',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description: 'A ISO8601 date string to filter the results by start_date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description: 'A ISO8601 date string to filter the results by end_date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                request_ids: {
+                  description: 'A comma-separated list of request IDs to filter the results by.',
+                  example:
+                    'adbf752f-6457-4ddd-89b3-98ae2252b83b,adbf752f-6457-4ddd-89b3-98ae2252b83c',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                http_methods: {
+                  description: 'A comma-separated list of HTTP methods to filter the results by.',
+                  example: 'GET,POST',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                providers: {
+                  description: 'A comma-separated list of provider keys to filter the results by.',
+                  example: 'ashby,greenhouse',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                services: {
+                  description: 'A comma-separated list of services to filter the results by.',
+                  example: 'hris,ats',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                resources: {
+                  description: 'A comma-separated list of resources to filter the results by.',
+                  example: 'employees,users',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                child_resources: {
+                  description:
+                    'A comma-separated list of child resources to filter the results by.',
+                  example: 'documents,time-off',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                sub_resources: {
+                  description: 'A comma-separated list of sub resources to filter the results by.',
+                  example: 'documents,employees',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                actions: {
+                  description: 'A comma-separated list of actions to filter the results by.',
+                  example: 'download,upload',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                status_codes: {
+                  description: 'A comma-separated list of status codes to filter the results by.',
+                  example: '200,400',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                success: {
+                  description: 'A boolean value to filter the results by success or failure.',
+                  example: true,
+                  type: 'boolean',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                order_by: {
+                  description: 'The field to order the results by.',
+                  example: 'created_at',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['provider', 'service', 'status', 'eventDatetime', 'duration'],
+                  additionalProperties: false,
+                },
+                order_direction: {
+                  description: 'The direction to order the results by.',
+                  example: 'asc',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['asc', 'desc'],
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of step logs was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/StepLogsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Step Logs',
+        tags: ['Request Logs'],
+        'x-speakeasy-name-override': 'list_step_logs',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -578,9 +2072,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -592,15 +2120,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -654,12 +2240,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
           },
           '404': {
-            description: 'No connector with the given provider key exist',
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -671,15 +2288,73 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -727,9 +2402,43 @@ export const stackoneSpec = {
           },
           '400': {
             description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
           },
           '403': {
             description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
           },
           '408': {
             description: 'The request has timed out.',
@@ -741,18 +2450,83 @@ export const stackoneSpec = {
                 },
               },
             },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
           },
           '412': {
             description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
           },
           '429': {
             description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
           },
           '500': {
             description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
           },
           '501': {
             description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
           },
         },
         security: [
@@ -797,6 +2571,14 @@ export const stackoneSpec = {
       name: 'Proxy',
       description: '',
     },
+    {
+      name: 'Request Logs',
+      description: '',
+    },
+    {
+      name: 'Webhooks',
+      description: '',
+    },
   ],
   servers: [
     {
@@ -811,6 +2593,251 @@ export const stackoneSpec = {
       },
     },
     schemas: {
+      AdvancedLogRequestData: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The request ID',
+            example: 'adbf752f-6457-4ddd-89b3-98ae2252b83b',
+            nullable: true,
+          },
+          method: {
+            type: 'string',
+            description: 'The request method',
+            example: 'get',
+            nullable: true,
+          },
+          headers: {
+            type: 'object',
+            additionalProperties: true,
+            example: {
+              'content-type': 'application/json',
+              authorization: 'Bearer token',
+            },
+            nullable: true,
+          },
+          url: {
+            description: 'The request URL data',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/AdvancedLogRequestDataUrl',
+              },
+            ],
+          },
+          body: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'string',
+                format: 'binary',
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                  format: 'int32',
+                  minimum: 0,
+                  maximum: 255,
+                },
+              },
+              {
+                type: 'string',
+                format: 'byte',
+              },
+            ],
+            additionalProperties: true,
+            nullable: true,
+          },
+        },
+      },
+      AdvancedLogRequestDataUrl: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'The request URL',
+            example: 'https://example.com/api/v1/resource',
+            nullable: true,
+          },
+          hostname: {
+            type: 'string',
+            description: 'The request URL hostname',
+            example: 'example.com',
+            nullable: true,
+          },
+          path: {
+            type: 'string',
+            description: 'The request path',
+            example: '/api/v1/resource',
+            nullable: true,
+          },
+          query_params: {
+            type: 'object',
+            description: 'The request query parameters',
+            additionalProperties: true,
+            example: {
+              page: 1,
+              limit: 10,
+            },
+            nullable: true,
+          },
+        },
+      },
+      AdvancedLogResponseData: {
+        type: 'object',
+        properties: {
+          status_code: {
+            type: 'number',
+            description: 'The response status code',
+            example: 200,
+            nullable: true,
+          },
+          headers: {
+            type: 'object',
+            additionalProperties: true,
+            example: {
+              'content-type': 'application/json',
+              authorization: 'Bearer token',
+            },
+            nullable: true,
+          },
+          body: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'string',
+                format: 'binary',
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                  format: 'int32',
+                  minimum: 0,
+                  maximum: 255,
+                },
+              },
+              {
+                type: 'string',
+                format: 'byte',
+              },
+            ],
+            additionalProperties: true,
+            nullable: true,
+          },
+          custom_mapping_errors: {
+            description: 'The custom mapping errors',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/CustomMappingError',
+            },
+          },
+          provider_errors: {
+            description: 'The provider errors',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ProviderError',
+            },
+          },
+        },
+      },
+      BadGatewayResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 502,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Bad Gateway',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      BadRequestResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 400,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Bad Request',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+          data: {
+            description: 'Error details',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/UnifiedError',
+              },
+            ],
+          },
+          provider_errors: {
+            description: 'List of provider-specific errors',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ProviderError',
+            },
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      ConflictResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 409,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Conflict',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       ConnectorsMeta: {
         type: 'object',
         properties: {
@@ -1020,6 +3047,12 @@ export const stackoneSpec = {
               'Arbitrary set of key and values defined during the session token creation. This can be used to tag an account (eg. based on their pricing plan)',
             nullable: true,
           },
+          external_trigger_token: {
+            type: 'string',
+            description: 'External trigger token to be used to trigger actions on the account',
+            example: 'f0bc3d88-2178-5423-8c81-b81d6c9da824',
+            nullable: true,
+          },
         },
         required: [
           'id',
@@ -1209,6 +3242,12 @@ export const stackoneSpec = {
               'Arbitrary set of key and values defined during the session token creation. This can be used to tag an account (eg. based on their pricing plan)',
             nullable: true,
           },
+          external_trigger_token: {
+            type: 'string',
+            description: 'External trigger token to be used to trigger actions on the account',
+            example: 'f0bc3d88-2178-5423-8c81-b81d6c9da824',
+            nullable: true,
+          },
           token: {
             type: 'string',
           },
@@ -1226,6 +3265,73 @@ export const stackoneSpec = {
           'token',
           'auth_link_url',
         ],
+      },
+      CustomMappingError: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The custom mapping identifier',
+            example: 'adbf752f-6457-4ddd-89b3-98ae2252b83b',
+            nullable: true,
+          },
+          message: {
+            type: 'string',
+            description: 'The error message',
+            example: 'Invalid value',
+            nullable: true,
+          },
+          targetField: {
+            type: 'string',
+            description: 'The target field where the error occurred',
+            example: 'first_name',
+            nullable: true,
+          },
+        },
+      },
+      ForbiddenResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 403,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Forbidden resource',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      InternalServerErrorResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 500,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Internal server error',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
       },
       LinkedAccount: {
         type: 'object',
@@ -1323,6 +3429,50 @@ export const stackoneSpec = {
         },
         required: ['provider', 'category', 'models'],
       },
+      NotFoundResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 404,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Not Found',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      NotImplementedResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 501,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Not Implemented',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       PatchAccountExternalDto: {
         type: 'object',
         properties: {
@@ -1376,6 +3526,62 @@ export const stackoneSpec = {
           },
         },
       },
+      PreconditionFailedResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 412,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Precondition failed',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      ProviderError: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'number',
+            description: 'HTTP status code of the provider error',
+            example: 400,
+            nullable: true,
+          },
+          url: {
+            type: 'string',
+            description: 'URL that caused the error',
+            example: 'https://api.provider.com/v1/resource',
+            nullable: true,
+          },
+          raw: {
+            type: 'object',
+            description: 'Raw error response from the provider',
+            example: {
+              message: 'Invalid input parameters',
+            },
+            nullable: true,
+          },
+          headers: {
+            type: 'object',
+            description: 'Response headers',
+            example: {
+              'content-type': 'application/json',
+              'x-request-id': '5678c28b211dace4e0a0f9171e6b88c5',
+            },
+            nullable: true,
+          },
+        },
+      },
       ProxyRequestBody: {
         type: 'object',
         properties: {
@@ -1416,6 +3622,28 @@ export const stackoneSpec = {
           },
         },
       },
+      RequestTimedOutResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 408,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Request timed out',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       StatusReason: {
         type: 'object',
         properties: {
@@ -1433,6 +3661,445 @@ export const stackoneSpec = {
           },
         },
         required: ['timestamp'],
+      },
+      StepLogsApiModel: {
+        type: 'object',
+        properties: {
+          request_id: {
+            type: 'string',
+            description: 'The request ID',
+            example: 'adbf752f-6457-4ddd-89b3-98ae2252b83b',
+            nullable: true,
+          },
+          start_time: {
+            type: 'string',
+            description: 'The request start time ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          end_time: {
+            type: 'string',
+            description: 'The request end time ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          account_id: {
+            type: 'string',
+            description: 'The account ID of the request',
+            example: '45355976281015164504',
+            nullable: true,
+          },
+          project_id: {
+            type: 'string',
+            description: 'The project ID of the request',
+            example: 'dev-project-68574',
+            nullable: true,
+          },
+          http_method: {
+            type: 'string',
+            description: 'The requested HTTP method',
+            example: 'get',
+            nullable: true,
+          },
+          path: {
+            type: 'string',
+            description: 'The requested path',
+            example: '/unified/hris/employees',
+            nullable: true,
+          },
+          url: {
+            type: 'string',
+            description: 'The requested URL',
+            example: 'https://api.stackone.com/unified/hris/employees?raw=false',
+            nullable: true,
+          },
+          status: {
+            type: 'number',
+            description: 'The requests response status code',
+            example: 200,
+            nullable: true,
+          },
+          duration: {
+            type: 'number',
+            description: 'The request duration in milliseconds',
+            example: 356,
+            nullable: true,
+          },
+          success: {
+            type: 'boolean',
+            description: 'The request success flag',
+            example: true,
+            nullable: true,
+          },
+          provider: {
+            type: 'string',
+            description: 'The requested provider',
+            example: 'planday',
+            nullable: true,
+          },
+          service: {
+            type: 'string',
+            description: 'The requested service',
+            example: 'hris',
+            nullable: true,
+          },
+          resource: {
+            type: 'string',
+            description: 'The requested resource',
+            example: 'employees',
+            nullable: true,
+          },
+          child_resource: {
+            type: 'string',
+            description: 'The requested child resource',
+            example: 'time-off',
+            nullable: true,
+          },
+          sub_resource: {
+            type: 'string',
+            description: 'The requested sub resource',
+            example: 'documents',
+            nullable: true,
+          },
+          action: {
+            type: 'string',
+            description: 'The requested action',
+            example: 'download',
+            nullable: true,
+          },
+          is_worker: {
+            type: 'boolean',
+            description: 'The asynchronous worker flag',
+            example: false,
+            nullable: true,
+          },
+          id: {
+            type: 'string',
+            description: 'The provider request ID',
+            example: 'adbf752f-6457-4ddd-89b3-98ae2252b83b',
+            nullable: true,
+          },
+          request: {
+            description: 'The advanced log request data',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/AdvancedLogRequestData',
+              },
+            ],
+          },
+          response: {
+            description: 'The advanced log response data',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/AdvancedLogResponseData',
+              },
+            ],
+          },
+        },
+      },
+      StepLogsPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/StepLogsApiModel',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      TooManyRequestsResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 429,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Too many requests',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      UnauthorizedResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 401,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Unauthorized',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
+      UnifiedError: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 400,
+            nullable: true,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Bad Request',
+            nullable: true,
+          },
+          headers: {
+            type: 'object',
+            description: 'Response headers',
+            example: {
+              'content-type': 'application/json',
+              'x-request-id': '5678c28b211dace4e0a0f9171e6b88c5',
+            },
+            nullable: true,
+          },
+        },
+      },
+      UnifiedLogResult: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/UnifiedLogs',
+          },
+        },
+        required: ['data'],
+      },
+      UnifiedLogs: {
+        type: 'object',
+        properties: {
+          request_id: {
+            type: 'string',
+            description: 'The request ID',
+            example: 'adbf752f-6457-4ddd-89b3-98ae2252b83b',
+            nullable: true,
+          },
+          event_datetime: {
+            type: 'string',
+            description: 'The event ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          start_time: {
+            type: 'string',
+            description: 'The request start time ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          end_time: {
+            type: 'string',
+            description: 'The request end time ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          account_id: {
+            type: 'string',
+            description: 'The account ID of the request',
+            example: '45355976281015164504',
+            nullable: true,
+          },
+          project_id: {
+            type: 'string',
+            description: 'The project ID of the request',
+            example: 'dev-project-68574',
+            nullable: true,
+          },
+          http_method: {
+            type: 'string',
+            description: 'The requested HTTP method',
+            example: 'get',
+            nullable: true,
+          },
+          path: {
+            type: 'string',
+            description: 'The requested path',
+            example: '/unified/hris/employees',
+            nullable: true,
+          },
+          url: {
+            type: 'string',
+            description: 'The requested URL',
+            example: 'https://api.stackone.com/unified/hris/employees?raw=false',
+            nullable: true,
+          },
+          status: {
+            type: 'number',
+            description: 'The requests response status code',
+            example: 200,
+            nullable: true,
+          },
+          duration: {
+            type: 'number',
+            description: 'The request duration in milliseconds',
+            example: 356,
+            nullable: true,
+          },
+          success: {
+            type: 'boolean',
+            description: 'The request success flag',
+            example: true,
+            nullable: true,
+          },
+          provider: {
+            type: 'string',
+            description: 'The requested provider',
+            example: 'planday',
+            nullable: true,
+          },
+          service: {
+            type: 'string',
+            description: 'The requested service',
+            example: 'hris',
+            nullable: true,
+          },
+          resource: {
+            type: 'string',
+            description: 'The requested resource',
+            example: 'employees',
+            nullable: true,
+          },
+          child_resource: {
+            type: 'string',
+            description: 'The requested child resource',
+            example: 'time-off',
+            nullable: true,
+          },
+          sub_resource: {
+            type: 'string',
+            description: 'The requested sub resource',
+            example: 'documents',
+            nullable: true,
+          },
+          action: {
+            type: 'string',
+            description: 'The requested action',
+            example: 'download',
+            nullable: true,
+          },
+          is_worker: {
+            type: 'boolean',
+            description: 'The asynchronous worker flag',
+            example: false,
+            nullable: true,
+          },
+          source_type: {
+            type: 'string',
+            description: 'The requests source type',
+            example: 'DASHBOARD',
+            nullable: true,
+          },
+          source_value: {
+            type: 'string',
+            description: 'The requests source value',
+            example: 'ACCOUNT_TESTER',
+            nullable: true,
+          },
+          source_id: {
+            type: 'string',
+            description: 'The requests source ID',
+            example: '1234567890',
+            nullable: true,
+          },
+          request: {
+            description: 'The advanced log request data',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/AdvancedLogRequestData',
+              },
+            ],
+          },
+          response: {
+            description: 'The advanced log response data',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/AdvancedLogResponseData',
+              },
+            ],
+          },
+          step_requests: {
+            description: 'The list of provider requests',
+            example: 'Account Tester',
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+      },
+      UnifiedLogsPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/UnifiedLogs',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      UnprocessableEntityResponse: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            description: 'HTTP status code',
+            example: 422,
+          },
+          message: {
+            type: 'string',
+            description: 'Error message',
+            example: 'Unprocessable Entity',
+          },
+          timestamp: {
+            type: 'string',
+            description: 'Timestamp when the error occurred',
+            example: '2023-05-30T00:00:00.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
       },
     },
   },
