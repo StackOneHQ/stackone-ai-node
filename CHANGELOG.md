@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.14](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.13...ai-v0.0.14) (2025-04-04)
+
+
+### Bug Fixes
+
+* oas regen ([#33](https://github.com/StackOneHQ/stackone-ai-node/issues/33)) ([80a8dbb](https://github.com/StackOneHQ/stackone-ai-node/commit/80a8dbb03e4e2324c351d34cfd7e88eb5058688f))
+
 ## [0.0.13](https://github.com/StackOneHQ/stackone-ai-node/compare/ai-v0.0.12...ai-v0.0.13) (2025-03-24)
 
 
