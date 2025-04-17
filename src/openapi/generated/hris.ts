@@ -3088,6 +3088,189 @@ export const hrisSpec = {
           strategy: 'backoff',
         },
       },
+      delete: {
+        operationId: 'hris_cancel_employee_time_off_request',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Record cancelled successfully.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/DeleteResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Cancel Employee Time Off Request',
+        tags: ['Employees', 'Time Off'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'cancel_employee_time_off_request',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
     },
     '/unified/hris/employees/{id}/documents/upload/batch': {
       post: {
@@ -3501,6 +3684,17 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example: 'base64',
+              type: 'string',
+            },
+          },
+          {
+            name: 'export_format',
+            required: false,
+            in: 'query',
+            description: 'The export format of the file',
+            schema: {
+              nullable: true,
+              example: 'text/plain',
               type: 'string',
             },
           },
@@ -6166,7 +6360,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,work_time,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -6471,7 +6665,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,work_time,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -6697,7 +6891,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,work_time,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -7195,7 +7389,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,work_time,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -10523,7 +10717,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -11674,7 +11868,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -12525,7 +12719,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -12819,7 +13013,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -15438,12 +15632,13 @@ export const hrisSpec = {
               },
             ],
           },
-          time_worked: {
-            type: 'string',
-            description: 'The time worked for the employee in ISO 8601 duration format',
-            example: 'P0Y0M0DT8H0M0S',
-            format: 'duration',
+          work_time: {
             nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
           },
         },
       },
@@ -15745,6 +15940,25 @@ export const hrisSpec = {
             nullable: true,
           },
         },
+      },
+      DeleteResult: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            example: 204,
+          },
+          message: {
+            type: 'string',
+            example: 'Record deleted successfully.',
+          },
+          timestamp: {
+            type: 'string',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
       },
       DepartmentTypeEnum: {
         type: 'object',
@@ -16328,12 +16542,13 @@ export const hrisSpec = {
               },
             ],
           },
-          time_worked: {
-            type: 'string',
-            description: 'The time worked for the employee in ISO 8601 duration format',
-            example: 'P0Y0M0DT8H0M0S',
-            format: 'duration',
+          work_time: {
             nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
           },
           created_at: {
             type: 'string',
@@ -18505,6 +18720,18 @@ export const hrisSpec = {
               type: 'string',
             },
           },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
+          },
           distribution_percentage: {
             type: 'number',
             example: 85,
@@ -18975,12 +19202,13 @@ export const hrisSpec = {
               },
             ],
           },
-          time_worked: {
-            type: 'string',
-            description: 'The time worked for the employee in ISO 8601 duration format',
-            example: 'P0Y0M0DT8H0M0S',
-            format: 'duration',
+          work_time: {
             nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
           },
           passthrough: {
             type: 'object',
@@ -19223,6 +19451,18 @@ export const hrisSpec = {
             items: {
               type: 'string',
             },
+          },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
           },
           type: {
             description: 'The type of the department group',
@@ -19664,6 +19904,18 @@ export const hrisSpec = {
               type: 'string',
             },
           },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
+          },
           type: {
             description: 'The type of the group',
             nullable: true,
@@ -19957,6 +20209,18 @@ export const hrisSpec = {
             items: {
               type: 'string',
             },
+          },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
           },
           type: {
             description: 'The type of the team group',
@@ -23097,6 +23361,62 @@ export const hrisSpec = {
           value: {
             type: 'string',
             enum: ['visa', 'passport', 'driver_license', 'birth_certificate', 'other', null],
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
+      WorkTimeApiModel: {
+        type: 'object',
+        properties: {
+          duration: {
+            type: 'string',
+            description: 'The work time duration in ISO 8601 duration format',
+            example: 'P0Y0M0DT8H0M0S',
+            format: 'duration',
+            nullable: true,
+          },
+          duration_unit: {
+            description: 'The duration unit of the work time',
+            example: 'month',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeUnitEnum',
+              },
+            ],
+          },
+        },
+      },
+      WorkTimeUnitEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: ['day', 'week', 'month', 'year', 'unmapped_value', null],
+            description: 'The unified value for the duration unit.',
+            example: 'month',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },

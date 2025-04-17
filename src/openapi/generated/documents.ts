@@ -35,6 +35,17 @@ export const documentsSpec = {
               type: 'string',
             },
           },
+          {
+            name: 'export_format',
+            required: false,
+            in: 'query',
+            description: 'The export format of the file',
+            schema: {
+              nullable: true,
+              example: 'text/plain',
+              type: 'string',
+            },
+          },
         ],
         responses: {
           '200': {
@@ -898,7 +909,7 @@ export const documentsSpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/FilesPaginated',
+                  $ref: '#/components/schemas/FilesSearchResponse',
                 },
               },
             },
@@ -1041,19 +1052,6 @@ export const documentsSpec = {
         tags: ['Files'],
         'x-speakeasy-group': 'documents',
         'x-speakeasy-name-override': 'search_files',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -3726,6 +3724,25 @@ export const documentsSpec = {
             type: 'string',
             nullable: true,
           },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Files',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      FilesSearchResponse: {
+        type: 'object',
+        properties: {
           data: {
             type: 'array',
             items: {
