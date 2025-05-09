@@ -17,6 +17,15 @@ export const documentsSpec = {
             },
           },
           {
+            name: 'x-stackone-api-session-token',
+            in: 'header',
+            description: 'The session token',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
             name: 'id',
             required: true,
             in: 'path',
@@ -35,12 +44,23 @@ export const documentsSpec = {
               type: 'string',
             },
           },
+          {
+            name: 'export_format',
+            required: false,
+            in: 'query',
+            description: 'The export format of the file',
+            schema: {
+              nullable: true,
+              example: 'text/plain',
+              type: 'string',
+            },
+          },
         ],
         responses: {
           '200': {
             description: 'The file with the given identifiers was retrieved.',
             content: {
-              'application/octet-stream': {
+              '*/*': {
                 schema: {
                   type: 'string',
                   format: 'binary',
@@ -201,6 +221,15 @@ export const documentsSpec = {
             in: 'header',
             description: 'The account identifier',
             required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'x-stackone-api-session-token',
+            in: 'header',
+            description: 'The session token',
+            required: false,
             schema: {
               type: 'string',
             },
@@ -380,6 +409,15 @@ export const documentsSpec = {
             in: 'header',
             description: 'The account identifier',
             required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'x-stackone-api-session-token',
+            in: 'header',
+            description: 'The session token',
+            required: false,
             schema: {
               type: 'string',
             },
@@ -667,6 +705,15 @@ export const documentsSpec = {
             },
           },
           {
+            name: 'x-stackone-api-session-token',
+            in: 'header',
+            description: 'The session token',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
             name: 'id',
             required: true,
             in: 'path',
@@ -881,6 +928,15 @@ export const documentsSpec = {
               type: 'string',
             },
           },
+          {
+            name: 'x-stackone-api-session-token',
+            in: 'header',
+            description: 'The session token',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+          },
         ],
         requestBody: {
           required: true,
@@ -898,7 +954,7 @@ export const documentsSpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/FilesPaginated',
+                  $ref: '#/components/schemas/FilesSearchResponse',
                 },
               },
             },
@@ -1041,19 +1097,6 @@ export const documentsSpec = {
         tags: ['Files'],
         'x-speakeasy-group': 'documents',
         'x-speakeasy-name-override': 'search_files',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -3726,6 +3769,25 @@ export const documentsSpec = {
             type: 'string',
             nullable: true,
           },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Files',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      FilesSearchResponse: {
+        type: 'object',
+        properties: {
           data: {
             type: 'array',
             items: {

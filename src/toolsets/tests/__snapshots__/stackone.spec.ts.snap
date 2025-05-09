@@ -656,7 +656,7 @@ Map {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,benefits,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,employee_number,national_identity_number,national_identity_numbers,skills",
+            "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
             "type": "string",
           },
           "file_path": {
@@ -1510,6 +1510,14 @@ Map {
                 "example": "Software Engineer",
                 "type": "string",
               },
+              "passthrough": {
+                "additionalProperties": true,
+                "description": "Value to pass through to the provider",
+                "example": {
+                  "other_known_names": "John Doe",
+                },
+                "type": "object",
+              },
               "pay_currency": {
                 "description": "The currency used for pay",
                 "example": "USD",
@@ -1571,10 +1579,9 @@ Map {
                 "example": "40.00",
                 "type": "string",
               },
-              "time_worked": {
-                "description": "The time worked for the employee in ISO 8601 duration format",
-                "example": "P0Y0M0DT8H0M0S",
-                "format": "duration",
+              "payroll_code": {
+                "description": "The payroll code of the employee",
+                "example": "PC1",
                 "type": "string",
               },
               "unified_custom_fields": {
@@ -1583,6 +1590,37 @@ Map {
                 "example": {
                   "my_project_custom_field_1": "REF-1236",
                   "my_project_custom_field_2": "some other value",
+                },
+                "type": "object",
+              },
+              "work_time": {
+                "properties": {
+                  "duration": {
+                    "description": "The work time duration in ISO 8601 duration format",
+                    "example": "P0Y0M0DT8H0M0S",
+                    "format": "duration",
+                    "type": "string",
+                  },
+                  "duration_unit": {
+                    "description": "The duration unit of the work time",
+                    "example": "month",
+                    "properties": {
+                      "value": {
+                        "description": "The unified value for the duration unit.",
+                        "enum": [
+                          "day",
+                          "week",
+                          "month",
+                          "year",
+                          "unmapped_value",
+                          null,
+                        ],
+                        "example": "month",
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
                 },
                 "type": "object",
               },
@@ -2500,6 +2538,7 @@ Map {
                         "ein",
                         "other",
                         "unknown",
+                        "unmapped_value",
                         null,
                       ],
                       "example": "ssn",
@@ -3282,7 +3321,7 @@ Map {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,benefits,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,employee_number,national_identity_number,national_identity_numbers,skills",
+            "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
             "type": "string",
           },
           "file_path": {
@@ -4081,6 +4120,14 @@ Map {
                 "example": "Software Engineer",
                 "type": "string",
               },
+              "passthrough": {
+                "additionalProperties": true,
+                "description": "Value to pass through to the provider",
+                "example": {
+                  "other_known_names": "John Doe",
+                },
+                "type": "object",
+              },
               "pay_currency": {
                 "description": "The currency used for pay",
                 "example": "USD",
@@ -4142,10 +4189,9 @@ Map {
                 "example": "40.00",
                 "type": "string",
               },
-              "time_worked": {
-                "description": "The time worked for the employee in ISO 8601 duration format",
-                "example": "P0Y0M0DT8H0M0S",
-                "format": "duration",
+              "payroll_code": {
+                "description": "The payroll code of the employee",
+                "example": "PC1",
                 "type": "string",
               },
               "unified_custom_fields": {
@@ -4154,6 +4200,37 @@ Map {
                 "example": {
                   "my_project_custom_field_1": "REF-1236",
                   "my_project_custom_field_2": "some other value",
+                },
+                "type": "object",
+              },
+              "work_time": {
+                "properties": {
+                  "duration": {
+                    "description": "The work time duration in ISO 8601 duration format",
+                    "example": "P0Y0M0DT8H0M0S",
+                    "format": "duration",
+                    "type": "string",
+                  },
+                  "duration_unit": {
+                    "description": "The duration unit of the work time",
+                    "example": "month",
+                    "properties": {
+                      "value": {
+                        "description": "The unified value for the duration unit.",
+                        "enum": [
+                          "day",
+                          "week",
+                          "month",
+                          "year",
+                          "unmapped_value",
+                          null,
+                        ],
+                        "example": "month",
+                        "type": "string",
+                      },
+                    },
+                    "type": "object",
+                  },
                 },
                 "type": "object",
               },
@@ -5074,6 +5151,7 @@ Map {
                         "ein",
                         "other",
                         "unknown",
+                        "unmapped_value",
                         null,
                       ],
                       "example": "ssn",
@@ -5925,6 +6003,11 @@ Map {
             "name": "next",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off",
       },
@@ -5944,9 +6027,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -6044,6 +6132,11 @@ Map {
           {
             "location": "query",
             "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -6231,6 +6324,8 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
+                  "draft",
                   "unmapped_value",
                   null,
                 ],
@@ -6358,6 +6453,11 @@ Map {
             "name": "fields",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
       },
@@ -6377,9 +6477,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -6444,6 +6549,95 @@ Map {
           {
             "location": "query",
             "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
+      },
+    },
+    StackOneTool {
+      "description": "Cancel Employee Time Off Request",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "DELETE",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "subResourceId",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
+      },
+      "name": "hris_cancel_employee_time_off_request",
+      "parameterMapper": ParameterMapper {
+        "transformers": 
+Map {
+          "file_path" => {
+            "transforms": {
+              "content": [Function],
+              "file_format": [Function],
+              "name": [Function],
+            },
+          },
+        }
+,
+      },
+      "parameters": {
+        "properties": {
+          "file_path": {
+            "description": "Convenience parameter that will be transformed into other parameters. Try and use this parameter in your tool call.",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "subResourceId": {
+            "type": "string",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+          "subResourceId",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "DELETE",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "subResourceId",
             "type": "string",
           },
         ],
@@ -6636,6 +6830,8 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
+                  "draft",
                   "unmapped_value",
                   null,
                 ],
@@ -9600,6 +9796,11 @@ Map {
             "name": "format",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "export_format",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/{subResourceId}/download",
       },
@@ -9619,6 +9820,11 @@ Map {
       },
       "parameters": {
         "properties": {
+          "export_format": {
+            "description": "The export format of the file",
+            "example": "text/plain",
+            "type": "string",
+          },
           "file_path": {
             "description": "Convenience parameter that will be transformed into other parameters. Try and use this parameter in your tool call.",
             "type": "string",
@@ -9667,6 +9873,11 @@ Map {
           {
             "location": "query",
             "name": "format",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "export_format",
             "type": "string",
           },
         ],
@@ -14414,7 +14625,7 @@ Map {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
             "type": "string",
           },
           "file_path": {
@@ -14568,7 +14779,7 @@ Map {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
             "type": "string",
           },
           "file_path": {
@@ -14712,7 +14923,7 @@ Map {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
             "type": "string",
           },
           "file_path": {
@@ -14842,6 +15053,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "job_id",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "pay_rate",
             "type": "string",
           },
@@ -14862,6 +15078,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "effective_date",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "employment_type",
             "type": "object",
           },
@@ -14872,7 +15093,12 @@ Map {
           },
           {
             "location": "body",
-            "name": "time_worked",
+            "name": "work_time",
+            "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "payroll_code",
             "type": "string",
           },
           {
@@ -14899,6 +15125,12 @@ Map {
       },
       "parameters": {
         "properties": {
+          "effective_date": {
+            "description": "The effective date of the employment contract",
+            "example": "2021-01-01T01:01:01.000Z",
+            "format": "date-time",
+            "type": "string",
+          },
           "employment_contract_type": {
             "description": "The employment work schedule type (e.g., full-time, part-time)",
             "example": "full_time",
@@ -14953,6 +15185,11 @@ Map {
           "id": {
             "description": "Unique identifier",
             "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+            "type": "string",
+          },
+          "job_id": {
+            "description": "The employee job id",
+            "example": "5290",
             "type": "string",
           },
           "job_title": {
@@ -15029,10 +15266,9 @@ Map {
             "example": "40.00",
             "type": "string",
           },
-          "time_worked": {
-            "description": "The time worked for the employee in ISO 8601 duration format",
-            "example": "P0Y0M0DT8H0M0S",
-            "format": "duration",
+          "payroll_code": {
+            "description": "The payroll code of the employee",
+            "example": "PC1",
             "type": "string",
           },
           "unified_custom_fields": {
@@ -15041,6 +15277,37 @@ Map {
             "example": {
               "my_project_custom_field_1": "REF-1236",
               "my_project_custom_field_2": "some other value",
+            },
+            "type": "object",
+          },
+          "work_time": {
+            "properties": {
+              "duration": {
+                "description": "The work time duration in ISO 8601 duration format",
+                "example": "P0Y0M0DT8H0M0S",
+                "format": "duration",
+                "type": "string",
+              },
+              "duration_unit": {
+                "description": "The duration unit of the work time",
+                "example": "month",
+                "properties": {
+                  "value": {
+                    "description": "The unified value for the duration unit.",
+                    "enum": [
+                      "day",
+                      "week",
+                      "month",
+                      "year",
+                      "unmapped_value",
+                      null,
+                    ],
+                    "example": "month",
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
             },
             "type": "object",
           },
@@ -15080,6 +15347,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "job_id",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "pay_rate",
             "type": "string",
           },
@@ -15100,6 +15372,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "effective_date",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "employment_type",
             "type": "object",
           },
@@ -15110,7 +15387,12 @@ Map {
           },
           {
             "location": "body",
-            "name": "time_worked",
+            "name": "work_time",
+            "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "payroll_code",
             "type": "string",
           },
           {
@@ -15189,7 +15471,7 @@ Map {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
             "type": "string",
           },
           "file_path": {
@@ -15298,6 +15580,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "job_id",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "pay_rate",
             "type": "string",
           },
@@ -15318,6 +15605,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "effective_date",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "employment_type",
             "type": "object",
           },
@@ -15328,7 +15620,12 @@ Map {
           },
           {
             "location": "body",
-            "name": "time_worked",
+            "name": "work_time",
+            "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "payroll_code",
             "type": "string",
           },
           {
@@ -15355,6 +15652,12 @@ Map {
       },
       "parameters": {
         "properties": {
+          "effective_date": {
+            "description": "The effective date of the employment contract",
+            "example": "2021-01-01T01:01:01.000Z",
+            "format": "date-time",
+            "type": "string",
+          },
           "employment_contract_type": {
             "description": "The employment work schedule type (e.g., full-time, part-time)",
             "example": "full_time",
@@ -15409,6 +15712,11 @@ Map {
           "id": {
             "description": "Unique identifier",
             "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+            "type": "string",
+          },
+          "job_id": {
+            "description": "The employee job id",
+            "example": "5290",
             "type": "string",
           },
           "job_title": {
@@ -15485,13 +15793,12 @@ Map {
             "example": "40.00",
             "type": "string",
           },
-          "subResourceId": {
+          "payroll_code": {
+            "description": "The payroll code of the employee",
+            "example": "PC1",
             "type": "string",
           },
-          "time_worked": {
-            "description": "The time worked for the employee in ISO 8601 duration format",
-            "example": "P0Y0M0DT8H0M0S",
-            "format": "duration",
+          "subResourceId": {
             "type": "string",
           },
           "unified_custom_fields": {
@@ -15500,6 +15807,37 @@ Map {
             "example": {
               "my_project_custom_field_1": "REF-1236",
               "my_project_custom_field_2": "some other value",
+            },
+            "type": "object",
+          },
+          "work_time": {
+            "properties": {
+              "duration": {
+                "description": "The work time duration in ISO 8601 duration format",
+                "example": "P0Y0M0DT8H0M0S",
+                "format": "duration",
+                "type": "string",
+              },
+              "duration_unit": {
+                "description": "The duration unit of the work time",
+                "example": "month",
+                "properties": {
+                  "value": {
+                    "description": "The unified value for the duration unit.",
+                    "enum": [
+                      "day",
+                      "week",
+                      "month",
+                      "year",
+                      "unmapped_value",
+                      null,
+                    ],
+                    "example": "month",
+                    "type": "string",
+                  },
+                },
+                "type": "object",
+              },
             },
             "type": "object",
           },
@@ -15545,6 +15883,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "job_id",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "pay_rate",
             "type": "string",
           },
@@ -15565,6 +15908,11 @@ Map {
           },
           {
             "location": "body",
+            "name": "effective_date",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "employment_type",
             "type": "object",
           },
@@ -15575,7 +15923,12 @@ Map {
           },
           {
             "location": "body",
-            "name": "time_worked",
+            "name": "work_time",
+            "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "payroll_code",
             "type": "string",
           },
           {
@@ -15891,6 +16244,11 @@ Map {
             "name": "next",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/time_off",
       },
@@ -15910,9 +16268,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -16000,6 +16363,11 @@ Map {
           {
             "location": "query",
             "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -16179,6 +16547,8 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
+                  "draft",
                   "unmapped_value",
                   null,
                 ],
@@ -16294,6 +16664,11 @@ Map {
             "name": "fields",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/time_off/{id}",
       },
@@ -16313,9 +16688,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -16371,6 +16751,11 @@ Map {
           {
             "location": "query",
             "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -16558,6 +16943,8 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
+                  "draft",
                   "unmapped_value",
                   null,
                 ],
@@ -17517,7 +17904,7 @@ Map {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
             "type": "string",
           },
           "file_path": {
@@ -18103,7 +18490,7 @@ Map {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
             "type": "string",
           },
           "file_path": {
@@ -18569,7 +18956,7 @@ Map {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
             "type": "string",
           },
           "file_path": {
@@ -18708,7 +19095,7 @@ Map {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
             "type": "string",
           },
           "file_path": {
@@ -19303,8 +19690,32 @@ Map {
             "type": "string",
           },
           "filter": {
-            "description": "Filter parameters that allow greater customisation of the list response",
+            "description": "HRIS Time-Off Policies filters",
             "properties": {
+              "type": {
+                "description": "Filter to select time-off policies by type",
+                "enum": [
+                  "sick",
+                  "unmapped_value",
+                  "vacation",
+                  "long_term_disability",
+                  "short_term_disability",
+                  "absent",
+                  "comp_time",
+                  "training",
+                  "annual_leave",
+                  "leave_of_absence",
+                  "break",
+                  "child_care_leave",
+                  "maternity_leave",
+                  "jury_duty",
+                  "bereavement_leave",
+                  "sabbatical",
+                  "accident",
+                  null,
+                ],
+                "type": "string",
+              },
               "updated_after": {
                 "additionalProperties": false,
                 "description": "Use a string with a date to only select results updated after that given date",
@@ -19494,6 +19905,194 @@ Map {
           },
         ],
         "url": "https://api.stackone.com/unified/hris/time_off_policies/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List Assigned Time Off Policies",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_policies",
+      },
+      "name": "hris_list_employee_time_off_policies",
+      "parameterMapper": ParameterMapper {
+        "transformers": 
+Map {
+          "file_path" => {
+            "transforms": {
+              "content": [Function],
+              "file_format": [Function],
+              "name": [Function],
+            },
+          },
+        }
+,
+      },
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
+            "type": "string",
+          },
+          "file_path": {
+            "description": "Convenience parameter that will be transformed into other parameters. Try and use this parameter in your tool call.",
+            "type": "string",
+          },
+          "filter": {
+            "description": "HRIS Time-Off Policies filters",
+            "properties": {
+              "type": {
+                "description": "Filter to select time-off policies by type",
+                "enum": [
+                  "sick",
+                  "unmapped_value",
+                  "vacation",
+                  "long_term_disability",
+                  "short_term_disability",
+                  "absent",
+                  "comp_time",
+                  "training",
+                  "annual_leave",
+                  "leave_of_absence",
+                  "break",
+                  "child_care_leave",
+                  "maternity_leave",
+                  "jury_duty",
+                  "bereavement_leave",
+                  "sabbatical",
+                  "accident",
+                  null,
+                ],
+                "type": "string",
+              },
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "id": {
+            "type": "string",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_policies",
       },
     },
   ],

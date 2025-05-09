@@ -7575,15 +7575,6 @@ export const lmsSpec = {
               },
             ],
           },
-          proficiency: {
-            description: 'The user proficiency level of the skill ranked out of 5',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/SkillProficiencyLevelEnum',
-              },
-            ],
-          },
           language: {
             description: 'The language associated with this skill',
             nullable: true,
@@ -8766,6 +8757,15 @@ export const lmsSpec = {
               },
             ],
           },
+          tags: {
+            description: 'The tags associated with the localization details',
+            example: ['Sales Techniques', 'Customer Service'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
         },
       },
       NotFoundResponse: {
@@ -9000,38 +9000,6 @@ export const lmsSpec = {
           },
         },
       },
-      SkillProficiencyLevelEnum: {
-        type: 'object',
-        properties: {
-          value: {
-            type: 'string',
-            enum: ['1', '2', '3', '4', '5', null],
-            'x-speakeasy-unknown-values': 'allow',
-            nullable: true,
-          },
-          source_value: {
-            oneOf: [
-              {
-                type: 'string',
-              },
-              {
-                type: 'number',
-              },
-              {
-                type: 'boolean',
-              },
-              {
-                type: 'object',
-              },
-              {
-                type: 'array',
-                items: {},
-              },
-            ],
-            nullable: true,
-          },
-        },
-      },
       SkillResult: {
         type: 'object',
         properties: {
@@ -9081,15 +9049,6 @@ export const lmsSpec = {
             allOf: [
               {
                 $ref: '#/components/schemas/SkillLevelEnum',
-              },
-            ],
-          },
-          proficiency: {
-            description: 'The user proficiency level of the skill ranked out of 5',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/SkillProficiencyLevelEnum',
               },
             ],
           },
