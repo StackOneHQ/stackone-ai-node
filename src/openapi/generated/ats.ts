@@ -4050,6 +4050,17 @@ export const atsSpec = {
               type: 'string',
             },
           },
+          {
+            name: 'export_format',
+            required: false,
+            in: 'query',
+            description: 'The export format of the file',
+            schema: {
+              nullable: true,
+              example: 'text/plain',
+              type: 'string',
+            },
+          },
         ],
         responses: {
           '200': {
@@ -17354,6 +17365,7 @@ export const atsSpec = {
               'number',
               'date',
               'video',
+              'url',
               null,
             ],
             description: 'The type of the answer.',
@@ -24879,6 +24891,7 @@ export const atsSpec = {
               'number',
               'date',
               'video',
+              'url',
               null,
             ],
             description: 'The type of the questions.',
