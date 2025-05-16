@@ -1101,7 +1101,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,benefits,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
               type: 'string',
             },
           },
@@ -1608,7 +1608,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,benefits,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
               type: 'string',
             },
           },
@@ -3088,6 +3088,193 @@ export const hrisSpec = {
           strategy: 'backoff',
         },
       },
+      delete: {
+        operationId: 'hris_cancel_employee_time_off_request',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Record cancelled successfully.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/DeleteResult',
+                },
+              },
+            },
+          },
+          '204': {
+            description:
+              'The time off request was cancelled successfully but no content was returned.',
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Cancel Employee Time Off Request',
+        tags: ['Employees', 'Time Off'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'cancel_employee_time_off_request',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
     },
     '/unified/hris/employees/{id}/documents/upload/batch': {
       post: {
@@ -3501,6 +3688,17 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example: 'base64',
+              type: 'string',
+            },
+          },
+          {
+            name: 'export_format',
+            required: false,
+            in: 'query',
+            description: 'The export format of the file',
+            schema: {
+              nullable: true,
+              example: 'text/plain',
               type: 'string',
             },
           },
@@ -6166,7 +6364,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -6471,7 +6669,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -6697,7 +6895,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -7195,7 +7393,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,employment_type,employment_contract_type,time_worked,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,fte,effective_date,employment_type,employment_contract_type,work_time,payroll_code,created_at,updated_at,start_date,end_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
               type: 'string',
             },
           },
@@ -10523,7 +10721,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -11094,7 +11292,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -11674,7 +11872,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -12103,7 +12301,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -12525,7 +12723,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -12819,7 +13017,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -13736,7 +13934,7 @@ export const hrisSpec = {
             name: 'filter',
             required: false,
             in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
+            description: 'HRIS Time-Off Policies filters',
             explode: true,
             style: 'deepObject',
             schema: {
@@ -13748,6 +13946,31 @@ export const hrisSpec = {
                   type: 'string',
                   nullable: true,
                   additionalProperties: false,
+                },
+                type: {
+                  description: 'Filter to select time-off policies by type',
+                  enum: [
+                    'sick',
+                    'unmapped_value',
+                    'vacation',
+                    'long_term_disability',
+                    'short_term_disability',
+                    'absent',
+                    'comp_time',
+                    'training',
+                    'annual_leave',
+                    'leave_of_absence',
+                    'break',
+                    'child_care_leave',
+                    'maternity_leave',
+                    'jury_duty',
+                    'bereavement_leave',
+                    'sabbatical',
+                    'accident',
+                    null,
+                  ],
+                  nullable: true,
+                  type: 'string',
                 },
               },
               nullable: true,
@@ -14245,7 +14468,7 @@ export const hrisSpec = {
             name: 'filter',
             required: false,
             in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
+            description: 'HRIS Time-Off Policies filters',
             explode: true,
             style: 'deepObject',
             schema: {
@@ -14257,6 +14480,31 @@ export const hrisSpec = {
                   type: 'string',
                   nullable: true,
                   additionalProperties: false,
+                },
+                type: {
+                  description: 'Filter to select time-off policies by type',
+                  enum: [
+                    'sick',
+                    'unmapped_value',
+                    'vacation',
+                    'long_term_disability',
+                    'short_term_disability',
+                    'absent',
+                    'comp_time',
+                    'training',
+                    'annual_leave',
+                    'leave_of_absence',
+                    'break',
+                    'child_care_leave',
+                    'maternity_leave',
+                    'jury_duty',
+                    'bereavement_leave',
+                    'sabbatical',
+                    'accident',
+                    null,
+                  ],
+                  nullable: true,
+                  type: 'string',
                 },
               },
               nullable: true,
@@ -14477,6 +14725,747 @@ export const hrisSpec = {
         },
       },
     },
+    '/unified/hris/employees/{id}/tasks': {
+      get: {
+        operationId: 'hris_list_employee_tasks',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+          {
+            name: 'expand',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be expanded in the response',
+            schema: {
+              nullable: true,
+              example: 'attachments',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The list of tasks for the employee with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TasksPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Employee Tasks',
+        tags: ['Employees', 'Tasks'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_employee_tasks',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/employees/{id}/tasks/{subResourceId}': {
+      get: {
+        operationId: 'hris_get_employee_task',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'expand',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be expanded in the response',
+            schema: {
+              nullable: true,
+              example: 'attachments',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The task with the given identifier for the employee was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TaskResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Employee Task',
+        tags: ['Employees', 'Tasks'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_employee_task',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+      patch: {
+        operationId: 'hris_complete_employee_task',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            style: 'deepObject',
+            explode: true,
+            schema: {},
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/CompleteTaskRequestDto',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'The task has been successfully completed',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TaskResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Complete Employee Task',
+        tags: ['Employees', 'Tasks'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'complete_employee_task',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
   },
   info: {
     title: 'HRIS',
@@ -14523,6 +15512,10 @@ export const hrisSpec = {
     },
     {
       name: 'Skills',
+      description: '',
+    },
+    {
+      name: 'Tasks',
       description: '',
     },
     {
@@ -14796,13 +15789,24 @@ export const hrisSpec = {
         },
         required: ['data'],
       },
+      CompleteTaskRequestDto: {
+        type: 'object',
+        properties: {
+          comment: {
+            type: 'string',
+            description: 'Comment or note about the task completion',
+            example: 'All required documents have been submitted',
+            nullable: true,
+          },
+        },
+      },
       ConfidentialEnumApiModel: {
         type: 'object',
         properties: {
           value: {
             type: 'string',
             description: 'Whether the file is confidential or not',
-            enum: ['true', 'false', null],
+            enum: ['true', 'false', 'unmapped_value', null],
             example: 'true',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -15278,6 +16282,116 @@ export const hrisSpec = {
           },
         },
       },
+      CreateEmployeeEmploymentApiModel: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          unified_custom_fields: {
+            type: 'object',
+            description: 'Custom Unified Fields configured in your StackOne project',
+            additionalProperties: true,
+            example: {
+              my_project_custom_field_1: 'REF-1236',
+              my_project_custom_field_2: 'some other value',
+            },
+            nullable: true,
+          },
+          job_title: {
+            type: 'string',
+            description: 'The job title of the employee',
+            example: 'Software Engineer',
+            nullable: true,
+          },
+          pay_rate: {
+            type: 'string',
+            description: 'The pay rate for the employee',
+            example: '40.00',
+            nullable: true,
+          },
+          pay_period: {
+            description: 'The pay period',
+            example: 'monthly',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/PayPeriodEnum',
+              },
+            ],
+          },
+          pay_frequency: {
+            description: 'The pay frequency',
+            example: 'hourly',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/PayFrequencyEnum',
+              },
+            ],
+          },
+          pay_currency: {
+            type: 'string',
+            description: 'The currency used for pay',
+            example: 'USD',
+            nullable: true,
+          },
+          employment_type: {
+            description: 'The type of employment (e.g., contractor, permanent)',
+            example: 'permanent',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/EmploymentTypeEnum',
+              },
+            ],
+          },
+          employment_contract_type: {
+            description: 'The employment work schedule type (e.g., full-time, part-time)',
+            example: 'full_time',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/EmploymentScheduleTypeEnum',
+              },
+            ],
+          },
+          work_time: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
+          },
+          payroll_code: {
+            type: 'string',
+            description: 'The payroll code of the employee',
+            example: 'PC1',
+            nullable: true,
+          },
+          passthrough: {
+            type: 'object',
+            description: 'Value to pass through to the provider',
+            example: {
+              other_known_names: 'John Doe',
+            },
+            additionalProperties: true,
+            nullable: true,
+          },
+          effective_date: {
+            type: 'string',
+            description: 'The employee effective date',
+            example: '2021-01-01T00:00.000Z',
+            format: 'date-time',
+            deprecated: true,
+            nullable: true,
+          },
+        },
+      },
       CreateEmployeeLocationApiModel: {
         type: 'object',
         properties: {
@@ -15378,6 +16492,12 @@ export const hrisSpec = {
             example: 'Software Engineer',
             nullable: true,
           },
+          job_id: {
+            type: 'string',
+            description: 'The employee job id',
+            example: '5290',
+            nullable: true,
+          },
           pay_rate: {
             type: 'string',
             description: 'The pay rate for the employee',
@@ -15415,7 +16535,6 @@ export const hrisSpec = {
             description: 'The effective date of the employment contract',
             example: '2021-01-01T01:01:01.000Z',
             format: 'date-time',
-            deprecated: true,
             nullable: true,
           },
           employment_type: {
@@ -15438,11 +16557,18 @@ export const hrisSpec = {
               },
             ],
           },
-          time_worked: {
+          work_time: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
+          },
+          payroll_code: {
             type: 'string',
-            description: 'The time worked for the employee in ISO 8601 duration format',
-            example: 'P0Y0M0DT8H0M0S',
-            format: 'duration',
+            description: 'The payroll code of the employee',
+            example: 'PC1',
             nullable: true,
           },
         },
@@ -15718,6 +16844,7 @@ export const hrisSpec = {
               'multi_select',
               'url',
               'other',
+              'unmapped_value',
               null,
             ],
             'x-speakeasy-unknown-values': 'allow',
@@ -15746,12 +16873,40 @@ export const hrisSpec = {
           },
         },
       },
+      DeleteResult: {
+        type: 'object',
+        properties: {
+          statusCode: {
+            type: 'number',
+            example: 204,
+          },
+          message: {
+            type: 'string',
+            example: 'Record deleted successfully.',
+          },
+          timestamp: {
+            type: 'string',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+          },
+        },
+        required: ['statusCode', 'message', 'timestamp'],
+      },
       DepartmentTypeEnum: {
         type: 'object',
         properties: {
           value: {
             type: 'string',
-            enum: ['department', 'company', 'division', 'group', 'project', 'team', null],
+            enum: [
+              'department',
+              'company',
+              'division',
+              'group',
+              'project',
+              'team',
+              'unmapped_value',
+              null,
+            ],
             example: 'department',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -16299,6 +17454,12 @@ export const hrisSpec = {
             example: 'USD',
             nullable: true,
           },
+          fte: {
+            type: 'number',
+            description: 'the employee’s working percentage relative to a full-time employee',
+            example: '1',
+            nullable: true,
+          },
           effective_date: {
             type: 'string',
             description: 'The effective date of the employment contract',
@@ -16328,11 +17489,18 @@ export const hrisSpec = {
               },
             ],
           },
-          time_worked: {
+          work_time: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
+          },
+          payroll_code: {
             type: 'string',
-            description: 'The time worked for the employee in ISO 8601 duration format',
-            example: 'P0Y0M0DT8H0M0S',
-            format: 'duration',
+            description: 'The payroll code of the employee',
+            example: 'PC1',
             nullable: true,
           },
           created_at: {
@@ -18505,6 +19673,18 @@ export const hrisSpec = {
               type: 'string',
             },
           },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
+          },
           distribution_percentage: {
             type: 'number',
             example: 85,
@@ -18809,7 +19989,7 @@ export const hrisSpec = {
             nullable: true,
             allOf: [
               {
-                $ref: '#/components/schemas/CreateEmploymentApiModel',
+                $ref: '#/components/schemas/CreateEmployeeEmploymentApiModel',
               },
             ],
           },
@@ -18915,6 +20095,12 @@ export const hrisSpec = {
             example: 'Software Engineer',
             nullable: true,
           },
+          job_id: {
+            type: 'string',
+            description: 'The employee job id',
+            example: '5290',
+            nullable: true,
+          },
           pay_rate: {
             type: 'string',
             description: 'The pay rate for the employee',
@@ -18952,7 +20138,6 @@ export const hrisSpec = {
             description: 'The effective date of the employment contract',
             example: '2021-01-01T01:01:01.000Z',
             format: 'date-time',
-            deprecated: true,
             nullable: true,
           },
           employment_type: {
@@ -18975,11 +20160,18 @@ export const hrisSpec = {
               },
             ],
           },
-          time_worked: {
+          work_time: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeApiModel',
+              },
+            ],
+          },
+          payroll_code: {
             type: 'string',
-            description: 'The time worked for the employee in ISO 8601 duration format',
-            example: 'P0Y0M0DT8H0M0S',
-            format: 'duration',
+            description: 'The payroll code of the employee',
+            example: 'PC1',
             nullable: true,
           },
           passthrough: {
@@ -19224,6 +20416,18 @@ export const hrisSpec = {
               type: 'string',
             },
           },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
+          },
           type: {
             description: 'The type of the department group',
             example: 'department',
@@ -19434,8 +20638,6 @@ export const hrisSpec = {
           value: {
             type: 'string',
             description: 'The category name to associate with the file',
-            example: 'reports',
-            nullable: true,
             enum: [
               'application',
               'academic',
@@ -19464,7 +20666,9 @@ export const hrisSpec = {
               'unmapped_value',
               null,
             ],
+            example: 'reports',
             'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
           },
           source_value: {
             type: 'string',
@@ -19512,26 +20716,26 @@ export const hrisSpec = {
             example: '/path/to/file',
             nullable: true,
           },
-          category: {
-            description:
-              'The category to be associated with the file to be uploaded. Id will take precedence over name.',
-            nullable: true,
-            example: {
-              name: 'reports',
-              id: '550e8400-e29b-41d4-a716-446655440000',
-            },
-            allOf: [
-              {
-                $ref: '#/components/schemas/HrisDocumentsUploadCategoryEnumApiModel',
-              },
-            ],
-          },
           confidential: {
             description: 'The confidentiality level of the file to be uploaded',
             nullable: true,
             allOf: [
               {
                 $ref: '#/components/schemas/ConfidentialEnumApiModel',
+              },
+            ],
+          },
+          category: {
+            description:
+              'The category to be associated with the file to be uploaded. Id will take precedence over name.',
+            example: {
+              name: 'reports',
+              id: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/HrisDocumentsUploadCategoryEnumApiModel',
               },
             ],
           },
@@ -19663,6 +20867,18 @@ export const hrisSpec = {
             items: {
               type: 'string',
             },
+          },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
           },
           type: {
             description: 'The type of the group',
@@ -19958,6 +21174,18 @@ export const hrisSpec = {
               type: 'string',
             },
           },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
+          },
           type: {
             description: 'The type of the team group',
             example: 'team',
@@ -20248,7 +21476,7 @@ export const hrisSpec = {
             nullable: true,
             allOf: [
               {
-                $ref: '#/components/schemas/CreateEmploymentApiModel',
+                $ref: '#/components/schemas/CreateEmployeeEmploymentApiModel',
               },
             ],
           },
@@ -20526,7 +21754,16 @@ export const hrisSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['draft', 'pending', 'archived', 'closed', 'open', 'deleted', null],
+            enum: [
+              'draft',
+              'pending',
+              'archived',
+              'closed',
+              'open',
+              'deleted',
+              'unmapped_value',
+              null,
+            ],
             description: 'The status of the job.',
             example: 'active',
             'x-speakeasy-unknown-values': 'allow',
@@ -20982,6 +22219,7 @@ export const hrisSpec = {
               'zh_SG',
               'zh_TW',
               'zu_ZA',
+              'unmapped_value',
               null,
             ],
             description: 'The Locale Code of the language',
@@ -21645,7 +22883,7 @@ export const hrisSpec = {
           },
           value: {
             type: 'string',
-            enum: ['1', '2', '3', '4', '5', null],
+            enum: ['1', '2', '3', '4', '5', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -21947,12 +23185,291 @@ export const hrisSpec = {
           },
         },
       },
+      Task: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          employee_id: {
+            type: 'string',
+            description: 'The employee ID associated with this task',
+            example: 'cx280928937',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The name of the task',
+            example: 'Complete onboarding documents',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'The description of the task',
+            example: 'Please complete all required onboarding documents in the employee portal',
+            nullable: true,
+          },
+          type: {
+            description: 'The type of the task',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TaskTypeEnum',
+              },
+            ],
+          },
+          status: {
+            description: 'The status of the task',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TaskStatusEnum',
+              },
+            ],
+          },
+          due_date: {
+            type: 'string',
+            description: 'The due date of the task',
+            example: '2024-03-20T23:59:59.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          completion_date: {
+            type: 'string',
+            description: 'The completion date of the task',
+            example: '2024-03-19T15:30:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          assigned_by_employee_id: {
+            type: 'string',
+            description: 'The ID of the employee who assigned this task',
+            example: 'cx280928938',
+            nullable: true,
+          },
+          assigned_by_employee_name: {
+            type: 'string',
+            description: 'The name of the employee who assigned this task',
+            example: 'John Smith',
+            nullable: true,
+          },
+          link_to_task: {
+            type: 'string',
+            description: 'Link to the task in the provider system',
+            example: 'https://provider.com/tasks/123',
+            nullable: true,
+          },
+          extracted_links: {
+            description: 'List of extracted links from the task',
+            example: ['https://provider.com/docs/1', 'https://provider.com/forms/2'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          next_task_id: {
+            type: 'string',
+            description: 'ID of the next task in sequence',
+            example: 'cx280928939',
+            nullable: true,
+          },
+          parent_process_name: {
+            type: 'string',
+            description: 'Name of the parent process of this task',
+            example: 'Onboarding Tasks',
+            nullable: true,
+          },
+          comments: {
+            description: 'The comments associated with this task',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/TaskCommentApiModel',
+            },
+          },
+          attachments: {
+            description: 'The documents attached to this task',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/File',
+            },
+          },
+          created_at: {
+            type: 'string',
+            description: 'The creation date of this task',
+            example: '2024-03-15T10:00:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          updated_at: {
+            type: 'string',
+            description: 'The last updated date of this task',
+            example: '2024-03-19T15:30:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      TaskCommentApiModel: {
+        type: 'object',
+        properties: {
+          author_employee_id: {
+            type: 'string',
+            description: 'The Employee ID of the author of the comment',
+            nullable: true,
+          },
+          comment: {
+            type: 'string',
+            description: 'The text of the comment',
+            example: 'Approved based on in-person assessment',
+            nullable: true,
+          },
+          created_at: {
+            type: 'string',
+            description: 'The creation date of this comment',
+            example: '2024-03-15T10:00:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      TaskResult: {
+        type: 'object',
+        properties: {
+          data: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Task',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      TasksPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Task',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      TaskStatusEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: [
+              'open',
+              'in_progress',
+              'blocked',
+              'completed',
+              'cancelled',
+              'unmapped_value',
+              null,
+            ],
+            description:
+              'The unified value for the status of the task. If the provider does not specify this status, the value will be set to UnmappedValue',
+            example: 'open',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
+      TaskTypeEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: ['action', 'review', 'acknowledgment', 'edit', 'approve', 'unmapped_value', null],
+            description:
+              'The unified value for the type of the task. If the provider does not specify this type, the value will be set to UnmappedValue',
+            example: 'action',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
       TeamTypeEnum: {
         type: 'object',
         properties: {
           value: {
             type: 'string',
-            enum: ['team', null],
+            enum: ['team', 'unmapped_value', null],
             example: 'team',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -22458,7 +23975,17 @@ export const hrisSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['minutes', 'hours', 'days', 'weeks', 'months', 'years', 'unknown', null],
+            enum: [
+              'minutes',
+              'hours',
+              'days',
+              'weeks',
+              'months',
+              'years',
+              'unknown',
+              'unmapped_value',
+              null,
+            ],
             description:
               'The unified value for the duration unit. If the provider does not specify this unit, the value will be set to unknown',
             example: 'hours',
@@ -22697,6 +24224,7 @@ export const hrisSpec = {
               'rejected',
               'pending',
               'deleted',
+              'draft',
               'unmapped_value',
               null,
             ],
@@ -23096,7 +24624,71 @@ export const hrisSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['visa', 'passport', 'driver_license', 'birth_certificate', 'other', null],
+            enum: [
+              'visa',
+              'passport',
+              'driver_license',
+              'birth_certificate',
+              'other',
+              'unmapped_value',
+              null,
+            ],
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
+      WorkTimeApiModel: {
+        type: 'object',
+        properties: {
+          duration: {
+            type: 'string',
+            description: 'The work time duration in ISO 8601 duration format',
+            example: 'P0Y0M0DT8H0M0S',
+            format: 'duration',
+            nullable: true,
+          },
+          duration_unit: {
+            description: 'The duration unit of the work time',
+            example: 'month',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/WorkTimeUnitEnum',
+              },
+            ],
+          },
+        },
+      },
+      WorkTimeUnitEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: ['day', 'week', 'month', 'year', 'unmapped_value', null],
+            description: 'The unified value for the duration unit.',
+            example: 'month',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
