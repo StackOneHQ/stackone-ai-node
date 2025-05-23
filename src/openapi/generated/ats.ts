@@ -4050,6 +4050,17 @@ export const atsSpec = {
               type: 'string',
             },
           },
+          {
+            name: 'export_format',
+            required: false,
+            in: 'query',
+            description: 'The export format of the file',
+            schema: {
+              nullable: true,
+              example: 'text/plain',
+              type: 'string',
+            },
+          },
         ],
         responses: {
           '200': {
@@ -17354,6 +17365,9 @@ export const atsSpec = {
               'number',
               'date',
               'video',
+              'reference_check',
+              'url',
+              'unmapped_value',
               null,
             ],
             description: 'The type of the answer.',
@@ -18062,6 +18076,7 @@ export const atsSpec = {
               'company_overview',
               'description',
               'other',
+              'unmapped_value',
               null,
             ],
             description: 'The type of the description.',
@@ -18538,7 +18553,7 @@ export const atsSpec = {
           confidential: {
             type: 'string',
             description: 'Confidential status of the job',
-            enum: ['true', 'false', null],
+            enum: ['true', 'false', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -19394,7 +19409,7 @@ export const atsSpec = {
           confidential: {
             type: 'string',
             description: 'Confidential status of the job',
-            enum: ['true', 'false', null],
+            enum: ['true', 'false', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -20113,7 +20128,7 @@ export const atsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['equals_to', 'contains', null],
+            enum: ['equals_to', 'contains', 'unmapped_value', null],
             description: "The type of the question's condition",
             example: 'equals_to',
             'x-speakeasy-unknown-values': 'allow',
@@ -20150,7 +20165,7 @@ export const atsSpec = {
           value: {
             type: 'string',
             description: 'Whether the file is confidential or not',
-            enum: ['true', 'false', null],
+            enum: ['true', 'false', 'unmapped_value', null],
             example: 'true',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -20679,6 +20694,7 @@ export const atsSpec = {
               'multi_select',
               'url',
               'other',
+              'unmapped_value',
               null,
             ],
             'x-speakeasy-unknown-values': 'allow',
@@ -22234,7 +22250,7 @@ export const atsSpec = {
                 items: {},
               },
             ],
-            example: 'abc',
+            example: 'application/pdf',
             nullable: true,
           },
         },
@@ -22880,7 +22896,7 @@ export const atsSpec = {
           confidential: {
             type: 'string',
             description: 'Confidential status of the job',
-            enum: ['true', 'false', null],
+            enum: ['true', 'false', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -22998,7 +23014,7 @@ export const atsSpec = {
           },
           internal: {
             type: 'string',
-            enum: ['true', 'false', null],
+            enum: ['true', 'false', 'unmapped_value', null],
             example: 'true',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -23961,7 +23977,7 @@ export const atsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['private', 'public', null],
+            enum: ['private', 'public', 'unmapped_value', null],
             description: 'The visibility of the notes.',
             example: 'public',
             'x-speakeasy-unknown-values': 'allow',
@@ -24662,7 +24678,16 @@ export const atsSpec = {
           type: {
             type: 'string',
             description: 'Type of phone number',
-            enum: ['personal', 'work', 'mobile', 'home', 'unknown', 'other', null],
+            enum: [
+              'personal',
+              'work',
+              'mobile',
+              'home',
+              'unknown',
+              'other',
+              'unmapped_value',
+              null,
+            ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -24879,6 +24904,9 @@ export const atsSpec = {
               'number',
               'date',
               'video',
+              'reference_check',
+              'url',
+              'unmapped_value',
               null,
             ],
             description: 'The type of the questions.',
@@ -25164,7 +25192,7 @@ export const atsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['cancelled', 'completed', 'expired', 'failed', 'passed', null],
+            enum: ['cancelled', 'completed', 'expired', 'failed', 'passed', 'unmapped_value', null],
             description: 'The result of the test.',
             example: 'passed',
             'x-speakeasy-unknown-values': 'allow',

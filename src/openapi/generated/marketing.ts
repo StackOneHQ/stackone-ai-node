@@ -6170,7 +6170,7 @@ export const marketingSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['draft', 'live', 'archived', null],
+            enum: ['draft', 'live', 'archived', 'unmapped_value', null],
             description: 'The Status of the content blocks.',
             example: 'live',
             'x-speakeasy-unknown-values': 'allow',
@@ -6206,7 +6206,7 @@ export const marketingSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['text', 'html', 'image', 'code-snippet', null],
+            enum: ['text', 'html', 'image', 'code-snippet', 'unmapped_value', null],
             description: 'The type of the content blocks.',
             example: 'html',
             'x-speakeasy-unknown-values': 'allow',
@@ -7267,7 +7267,15 @@ export const marketingSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['immediate', 'scheduled', 'recurring', 'custom', 'triggered', null],
+            enum: [
+              'immediate',
+              'scheduled',
+              'recurring',
+              'custom',
+              'triggered',
+              'unmapped_value',
+              null,
+            ],
             description: 'The schedule type of the campaign.',
             example: 'immediate',
             'x-speakeasy-unknown-values': 'allow',
@@ -7446,7 +7454,7 @@ export const marketingSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['draft', 'archived', 'live', null],
+            enum: ['draft', 'archived', 'live', 'unmapped_value', null],
             description: 'The Status of the campaign.',
             example: 'email',
             'x-speakeasy-unknown-values': 'allow',
