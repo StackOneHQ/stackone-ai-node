@@ -3987,7 +3987,7 @@ export const iamSpec = {
                 items: {},
               },
             ],
-            example: 'abc',
+            example: 'application/pdf',
             nullable: true,
           },
         },
