@@ -76,6 +76,14 @@ export interface ExecuteConfig {
 }
 
 /**
+ * EXPERIMENTAL: Function to preprocess parameters before tool execution
+ * Can be used to transform parameters, fetch documents from external sources, etc.
+ * @param params - The input parameters
+ * @returns Modified parameters or Promise<JsonDict>
+ */
+export type ExperimentalPreExecuteFunction = (params: JsonDict) => Promise<JsonDict> | JsonDict;
+
+/**
  * Options for executing a tool
  */
 export interface ExecuteOptions {
@@ -84,6 +92,12 @@ export interface ExecuteOptions {
    * Useful for debugging and testing transformed parameters
    */
   dryRun?: boolean;
+
+  /**
+   * EXPERIMENTAL: Function to preprocess parameters before execution
+   * Allows for document fetching, parameter override, etc.
+   */
+  experimentalPreExecute?: ExperimentalPreExecuteFunction;
 }
 
 /**

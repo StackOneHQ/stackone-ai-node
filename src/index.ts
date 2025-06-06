@@ -23,6 +23,7 @@ export {
 export type {
   ExecuteConfig,
   ExecuteOptions,
+  ExperimentalPreExecuteFunction,
   JsonDict,
   ParameterLocation,
   ParameterTransformer,
