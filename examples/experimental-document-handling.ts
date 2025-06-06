@@ -13,14 +13,14 @@
 import assert from 'node:assert';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { StackOneToolSet, type ExperimentalPreExecuteFunction } from '../src';
+import { StackOneToolSet, type Experimental_PreExecuteFunction } from '../src';
 
 const accountId = '45072196112816593343';
 
 /**
  * EXPERIMENTAL: Create a document handler that fetches files from local storage
  */
-const createLocalFileHandler = (allowedPaths: string[]): ExperimentalPreExecuteFunction => {
+const createLocalFileHandler = (allowedPaths: string[]): Experimental_PreExecuteFunction => {
   return async (params) => {
     const { document_id, ...otherParams } = params;
 
@@ -58,7 +58,7 @@ const createLocalFileHandler = (allowedPaths: string[]): ExperimentalPreExecuteF
 /**
  * EXPERIMENTAL: Create a document handler for external sources (S3, databases, etc.)
  */
-const createExternalDocumentHandler = (): ExperimentalPreExecuteFunction => {
+const createExternalDocumentHandler = (): Experimental_PreExecuteFunction => {
   return async (params) => {
     const { document_reference, ...otherParams } = params;
 
@@ -85,7 +85,7 @@ const createExternalDocumentHandler = (): ExperimentalPreExecuteFunction => {
 /**
  * EXPERIMENTAL: Create a multi-source document handler with fallback logic
  */
-const createMultiSourceHandler = (localPaths: string[]): ExperimentalPreExecuteFunction => {
+const createMultiSourceHandler = (localPaths: string[]): Experimental_PreExecuteFunction => {
   const localHandler = createLocalFileHandler(localPaths);
   const externalHandler = createExternalDocumentHandler();
 
@@ -141,7 +141,7 @@ const experimentalDocumentHandling = async (): Promise<void> => {
       },
       {
         dryRun: true,
-        experimentalPreExecute: localFileHandler,
+        experimental_PreExecute: localFileHandler,
       }
     );
 
@@ -165,7 +165,7 @@ const experimentalDocumentHandling = async (): Promise<void> => {
       },
       {
         dryRun: true,
-        experimentalPreExecute: externalHandler,
+        experimental_PreExecute: externalHandler,
       }
     );
 
@@ -188,7 +188,7 @@ const experimentalDocumentHandling = async (): Promise<void> => {
       },
       {
         dryRun: true,
-        experimentalPreExecute: multiSourceHandler,
+        experimental_PreExecute: multiSourceHandler,
       }
     );
 

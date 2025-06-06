@@ -81,7 +81,7 @@ export interface ExecuteConfig {
  * @param params - The input parameters
  * @returns Modified parameters or Promise<JsonDict>
  */
-export type ExperimentalPreExecuteFunction = (params: JsonDict) => Promise<JsonDict> | JsonDict;
+export type Experimental_PreExecuteFunction = (params: JsonDict) => Promise<JsonDict> | JsonDict;
 
 /**
  * Options for executing a tool
@@ -97,7 +97,7 @@ export interface ExecuteOptions {
    * EXPERIMENTAL: Function to preprocess parameters before execution
    * Allows for document fetching, parameter override, etc.
    */
-  experimentalPreExecute?: ExperimentalPreExecuteFunction;
+  experimental_PreExecute?: Experimental_PreExecuteFunction;
 }
 
 /**

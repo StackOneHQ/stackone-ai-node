@@ -87,8 +87,8 @@ export class BaseTool {
 
       // Apply experimental preExecute function if provided
       let processedParams = inputParams;
-      if (options?.experimentalPreExecute) {
-        processedParams = await options.experimentalPreExecute(
+      if (options?.experimental_PreExecute) {
+        processedParams = await options.experimental_PreExecute(
           typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {}
         );
       }
