@@ -23,9 +23,10 @@ export {
 export type {
   ExecuteConfig,
   ExecuteOptions,
+  Experimental_PreExecuteFunction,
+  Experimental_SchemaOverride,
+  Experimental_ToolCreationOptions,
   JsonDict,
   ParameterLocation,
-  ParameterTransformer,
-  ParameterTransformerMap,
   ToolDefinition,
 } from './types';

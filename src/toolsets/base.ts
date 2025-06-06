@@ -1,10 +1,5 @@
 import { type BaseTool, Tools } from '../tool';
-import {
-  ParameterLocation,
-  type ParameterTransformer,
-  type ParameterTransformerMap,
-  type ToolDefinition,
-} from '../types';
+import type { Experimental_ToolCreationOptions } from '../types';
 
 /**
  * Base exception for toolset errors
@@ -56,7 +51,6 @@ export interface BaseToolSetConfig {
   baseUrl?: string;
   authentication?: AuthenticationConfig;
   headers?: Record<string, string>;
-  transformers?: ParameterTransformerMap;
   _oasUrl?: string;
 }
 
@@ -68,7 +62,6 @@ export abstract class ToolSet {
   protected authentication?: AuthenticationConfig;
   protected headers: Record<string, string>;
   protected tools: BaseTool[] = [];
-  protected transformers: ParameterTransformerMap;
 
   /**
    * Initialize a toolset with optional configuration
@@ -78,7 +71,6 @@ export abstract class ToolSet {
     this.baseUrl = config?.baseUrl;
     this.authentication = config?.authentication;
     this.headers = config?.headers || {};
-    this.transformers = new Map(config?.transformers || []);
 
     // Set Authentication headers if provided
     if (this.authentication) {
@@ -111,15 +103,6 @@ export abstract class ToolSet {
         this.headers = { ...this.authentication.headers, ...this.headers };
       }
     }
-  }
-
-  /**
-   * Add a parameter transformer to the toolset
-   * @param sourceParam Source parameter name
-   * @param config Transformer configuration
-   */
-  public setParameterTransformer(sourceParam: string, config: ParameterTransformer): void {
-    this.transformers.set(sourceParam, config);
   }
 
   /**
@@ -206,74 +189,48 @@ export abstract class ToolSet {
    * @param headers Optional headers to apply to the tool
    * @returns Tool instance
    */
-  getTool(name: string, headers?: Record<string, string>): BaseTool {
+  getTool(name: string, headers?: Record<string, string>): BaseTool;
+  getTool(name: string, options: Experimental_ToolCreationOptions): BaseTool;
+  getTool(
+    name: string,
+    headersOrOptions?: Record<string, string> | Experimental_ToolCreationOptions
+  ): BaseTool {
     const tool = this.tools.find((tool) => tool.name === name);
     if (!tool) {
       throw new ToolSetError(`Tool with name ${name} not found`);
     }
 
+    // Determine if the second parameter is headers or experimental options
+    const isExperimentalOptions =
+      headersOrOptions &&
+      ('experimental_schemaOverride' in headersOrOptions ||
+        'experimental_preExecute' in headersOrOptions);
+
+    if (isExperimentalOptions) {
+      const options = headersOrOptions as Experimental_ToolCreationOptions;
+
+      // Get the tools collection and use its getTool method with experimental options
+      const toolsCollection = new Tools([tool]);
+      const experimentalTool = toolsCollection.getTool(name, options);
+
+      if (!experimentalTool) {
+        throw new ToolSetError(`Tool with name ${name} not found`);
+      }
+
+      // Apply instance headers to the tool
+      if (this.headers && experimentalTool.setHeaders) {
+        experimentalTool.setHeaders(this.headers);
+      }
+
+      return experimentalTool;
+    }
+
+    // Traditional headers-based approach
+    const headers = headersOrOptions as Record<string, string> | undefined;
     const mergedHeaders = { ...this.headers, ...headers };
     if (mergedHeaders && tool.setHeaders) {
       tool.setHeaders(mergedHeaders);
     }
     return tool;
-  }
-  /**
-   * Process transformed parameters in a tool definition
-   * @param toolDef Tool definition to process
-   * @returns Updated tool definition with transformed parameters
-   */
-  protected processDerivedValues(toolDef: ToolDefinition): ToolDefinition {
-    // Create a copy of the tool definition to avoid modifying the original
-    const processedDef = { ...toolDef };
-
-    // Process each parameter in the execute config
-    for (const param of processedDef.execute.params) {
-      // Skip parameters that are already derived
-      if (param.derivedFrom) continue;
-
-      // Check if this parameter is a source for any derivation config
-      if (this.transformers.has(param.name)) {
-        const config = this.transformers.get(param.name);
-
-        // Only proceed if config exists
-        if (config) {
-          // Add transformed parameters to the tool definition
-          for (const targetParam of Object.keys(config.transforms)) {
-            // Skip if the parameter already exists in execute params
-            if (processedDef.execute.params.some((p) => p.name === targetParam)) continue;
-
-            // Add the transformed parameter to execute params
-            processedDef.execute.params.push({
-              name: targetParam,
-              location: this.determineParameterLocation(targetParam),
-              type: param.type,
-              derivedFrom: param.name,
-            });
-          }
-        }
-      }
-    }
-
-    return processedDef;
-  }
-
-  /**
-   * Determine the location of a parameter
-   * @param paramName Parameter name
-   * @returns Parameter location (HEADER, QUERY, PATH, or BODY)
-   */
-  protected determineParameterLocation(paramName: string): ParameterLocation {
-    // Check if the parameter exists in any of the tools
-    for (const tool of this.tools) {
-      // Check if the parameter exists in the execute config
-      const param = tool.executeConfig.params.find((p) => p.name === paramName);
-      if (param) {
-        return param.location;
-      }
-    }
-
-    // Default to BODY if not found
-    return ParameterLocation.BODY;
   }
 }

@@ -1,9 +1,8 @@
 import { loadStackOneSpecs } from '../openapi/loader';
 import { StackOneTool, type Tools } from '../tool';
-import type { ParameterTransformer, ToolDefinition } from '../types';
-import { extractFileInfo, isValidFilePath, readFileAsBase64 } from '../utils/file';
+import type { ToolDefinition } from '../types';
 import { removeJsonSchemaProperty } from '../utils/schema';
-import { type BaseToolSetConfig, ToolSet, ToolSetConfigError, ToolSetError } from './base';
+import { type BaseToolSetConfig, ToolSet, ToolSetConfigError } from './base';
 
 /**
  * Configuration for StackOne toolset
@@ -76,63 +75,13 @@ export class StackOneToolSet extends ToolSet {
       baseUrl: config?.baseUrl,
       authentication,
       headers,
-      transformers: config?.transformers,
     });
 
     this.accountId = accountId;
     this._removedParams = ['source_value'];
 
-    // Add default parameter transformers
-    const defaultTransformers = StackOneToolSet.getDefaultParameterTransformers();
-    for (const [sourceParam, config] of defaultTransformers.entries()) {
-      this.setParameterTransformer(sourceParam, config);
-    }
-
     // Load tools
     this.loadTools();
-  }
-
-  /**
-   * Get the default derivation configurations for StackOne tools
-   */
-  private static getDefaultParameterTransformers(): Map<string, ParameterTransformer> {
-    const transformers = new Map<string, ParameterTransformer>();
-
-    // File path derivation config
-    transformers.set('file_path', {
-      transforms: {
-        content: (filePath: unknown): string => {
-          if (typeof filePath !== 'string') {
-            throw new ToolSetError('file_path must be a string');
-          }
-
-          if (!isValidFilePath(filePath)) {
-            throw new ToolSetError(`Invalid file path or file not found: ${filePath}`);
-          }
-
-          return readFileAsBase64(filePath);
-        },
-        name: (filePath: unknown): string => {
-          if (typeof filePath !== 'string') {
-            throw new ToolSetError('file_path must be a string');
-          }
-
-          const { fileName } = extractFileInfo(filePath);
-          return fileName;
-        },
-        file_format: (filePath: unknown): { value: string } => {
-          if (typeof filePath !== 'string') {
-            throw new ToolSetError('file_path must be a string');
-          }
-
-          // get the file extension
-          const { extension } = extractFileInfo(filePath);
-          return { value: extension || '' };
-        },
-      },
-    });
-
-    return transformers;
   }
 
   /**
@@ -173,25 +122,18 @@ export class StackOneToolSet extends ToolSet {
     for (const [_, tools] of Object.entries(specs)) {
       // Process each tool
       for (const [toolName, toolDef] of Object.entries(tools)) {
-        // Process derived values
-        const processedDef = this.processDerivedValues(toolDef);
-
         // Remove account ID parameter if not provided
         if (!this.accountId) {
-          this.removeAccountIdParameter(processedDef);
+          this.removeAccountIdParameter(toolDef);
         }
-
-        // Add transformation source parameters to the tool's parameters schema
-        this.addTransformationSourceParameters(processedDef);
 
         // Create tool
         const tool = new StackOneTool(
           toolName,
-          processedDef.description,
-          processedDef.parameters,
-          processedDef.execute,
-          this.headers,
-          this.transformers
+          toolDef.description,
+          toolDef.parameters,
+          toolDef.execute,
+          this.headers
         );
 
         // Add tool to the list
@@ -215,29 +157,6 @@ export class StackOneToolSet extends ToolSet {
       toolDef.parameters.required = toolDef.parameters.required.filter(
         (param) => param !== 'x-account-id'
       );
-    }
-  }
-
-  /**
-   * Add transformation source parameters to the tool's parameters schema
-   * This ensures parameters like file_path are included in the schema for model consumption
-   * @param toolDef Tool definition to modify
-   */
-  private addTransformationSourceParameters(toolDef: ToolDefinition): void {
-    // Skip if there are no transformers or no parameters
-    if (!this.transformers || !toolDef.parameters.properties) return;
-
-    // Add each transformer source parameter to the schema
-    for (const [sourceParam, _] of this.transformers.entries()) {
-      // Skip if the parameter is already in the schema
-      if (sourceParam in toolDef.parameters.properties) continue;
-
-      // Add the parameter to the schema
-      toolDef.parameters.properties[sourceParam] = {
-        type: 'string',
-        description:
-          'Convenience parameter that will be transformed into other parameters. Try and use this parameter in your tool call.',
-      };
     }
   }
 }

@@ -75,7 +75,7 @@ quickstart();
  * - [OpenAI Integration](openai-integration.md)
  * - [AI SDK Integration](ai-sdk-integration.md)
  * - [Error Handling](error-handling.md)
- * - [File Uploads](file-uploads.md)
+ * - [EXPERIMENTAL: Document Handling](experimental-document-handling.md)
  * - [Custom Base URL](custom-base-url.md)
  * - [Account ID Usage](account-id-usage.md)
  */

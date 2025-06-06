@@ -39,7 +39,6 @@ export class OpenAPIToolSet extends ToolSet {
       baseUrl: config?.baseUrl,
       authentication: config?.authentication,
       headers: config?.headers,
-      transformers: config?.transformers,
     });
 
     if ('filePath' in config) {
@@ -67,7 +66,6 @@ export class OpenAPIToolSet extends ToolSet {
       baseUrl: config.baseUrl,
       authentication: config.authentication,
       headers: config.headers,
-      transformers: config.transformers,
       _oasUrl: config.url,
     });
 
@@ -88,11 +86,8 @@ export class OpenAPIToolSet extends ToolSet {
 
       // Process each tool
       for (const [toolName, toolDef] of Object.entries(tools)) {
-        // Process derived values
-        const processedDef = this.processDerivedValues(toolDef);
-
         // Create tool
-        const tool = this.createTool(toolName, processedDef);
+        const tool = this.createTool(toolName, toolDef);
 
         // Add tool to the list
         this.tools.push(tool);
@@ -116,11 +111,8 @@ export class OpenAPIToolSet extends ToolSet {
 
       // Process each tool
       for (const [toolName, toolDef] of Object.entries(tools)) {
-        // Process derived values
-        const processedDef = this.processDerivedValues(toolDef);
-
         // Create tool
-        const tool = this.createTool(toolName, processedDef);
+        const tool = this.createTool(toolName, toolDef);
 
         // Add tool to the list
         this.tools.push(tool);
@@ -141,14 +133,7 @@ export class OpenAPIToolSet extends ToolSet {
   private createTool(toolName: string, toolDef: ToolDefinition): BaseTool {
     // Create tool
     const { description, parameters, execute } = toolDef;
-    const tool = new BaseTool(
-      toolName,
-      description,
-      parameters,
-      execute,
-      this.headers,
-      this.transformers
-    );
+    const tool = new BaseTool(toolName, description, parameters, execute, this.headers);
 
     return tool;
   }
