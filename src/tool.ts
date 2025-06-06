@@ -193,8 +193,6 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Get a tool by name
    */
-  getTool(name: string): BaseTool | undefined;
-  getTool(name: string, options: Experimental_ToolCreationOptions): BaseTool | undefined;
   getTool(name: string, options?: Experimental_ToolCreationOptions): BaseTool | undefined {
     const originalTool = this.tools.find((tool) => tool.name === name);
     if (!originalTool) {

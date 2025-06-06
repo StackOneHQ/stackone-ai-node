@@ -1,5 +1,5 @@
 import { type BaseTool, Tools } from '../tool';
-import { type Experimental_ToolCreationOptions, type ToolDefinition } from '../types';
+import type { Experimental_ToolCreationOptions } from '../types';
 
 /**
  * Base exception for toolset errors
@@ -223,14 +223,14 @@ export abstract class ToolSet {
       }
 
       return experimentalTool;
-    } else {
-      // Traditional headers-based approach
-      const headers = headersOrOptions as Record<string, string> | undefined;
-      const mergedHeaders = { ...this.headers, ...headers };
-      if (mergedHeaders && tool.setHeaders) {
-        tool.setHeaders(mergedHeaders);
-      }
-      return tool;
     }
+
+    // Traditional headers-based approach
+    const headers = headersOrOptions as Record<string, string> | undefined;
+    const mergedHeaders = { ...this.headers, ...headers };
+    if (mergedHeaders && tool.setHeaders) {
+      tool.setHeaders(mergedHeaders);
+    }
+    return tool;
   }
 }

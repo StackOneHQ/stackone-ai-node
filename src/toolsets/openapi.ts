@@ -133,13 +133,7 @@ export class OpenAPIToolSet extends ToolSet {
   private createTool(toolName: string, toolDef: ToolDefinition): BaseTool {
     // Create tool
     const { description, parameters, execute } = toolDef;
-    const tool = new BaseTool(
-      toolName,
-      description,
-      parameters,
-      execute,
-      this.headers
-    );
+    const tool = new BaseTool(toolName, description, parameters, execute, this.headers);
 
     return tool;
   }
