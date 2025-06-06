@@ -6,6 +6,18 @@ import {
 } from '../types';
 import { StackOneAPIError } from '../utils/errors';
 
+interface SerializationOptions {
+  maxDepth?: number;
+  strictValidation?: boolean;
+}
+
+class ParameterSerializationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ParameterSerializationError';
+  }
+}
+
 /**
  * Builds and executes HTTP requests
  */
@@ -138,32 +150,92 @@ export class RequestBuilder {
   }
 
   /**
-   * Serialize an object into deep object query parameters
+   * Validates parameter keys to prevent injection attacks
+   */
+  private validateParameterKey(key: string): void {
+    if (!/^[a-zA-Z0-9_.-]+$/.test(key)) {
+      throw new ParameterSerializationError(`Invalid parameter key: ${key}`);
+    }
+  }
+
+  /**
+   * Safely serializes values to strings with special type handling
+   */
+  private serializeValue(value: unknown): string {
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    if (value instanceof RegExp) {
+      return value.toString();
+    }
+    if (typeof value === 'function') {
+      throw new ParameterSerializationError('Functions cannot be serialized as parameters');
+    }
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return String(value);
+  }
+
+  /**
+   * Serialize an object into deep object query parameters with security protections
    * Converts {filter: {updated_after: "2020-01-01", job_id: "123"}}
    * to filter[updated_after]=2020-01-01&filter[job_id]=123
    */
-  private serializeDeepObject(obj: unknown, prefix: string): [string, string][] {
+  private serializeDeepObject(
+    obj: unknown,
+    prefix: string,
+    depth = 0,
+    visited = new WeakSet<object>(),
+    options: SerializationOptions = {}
+  ): [string, string][] {
+    const maxDepth = options.maxDepth ?? 10;
+    const strictValidation = options.strictValidation ?? true;
     const params: [string, string][] = [];
+
+    // Recursion depth protection
+    if (depth > maxDepth) {
+      throw new ParameterSerializationError(
+        `Maximum nesting depth (${maxDepth}) exceeded for parameter serialization`
+      );
+    }
 
     if (obj === null || obj === undefined) {
       return params;
     }
 
     if (typeof obj === 'object' && !Array.isArray(obj)) {
-      for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-        const nestedKey = `${prefix}[${key}]`;
-        if (value !== null && value !== undefined) {
-          if (typeof value === 'object' && !Array.isArray(value)) {
-            // Recursively handle nested objects
-            params.push(...this.serializeDeepObject(value, nestedKey));
-          } else {
-            params.push([nestedKey, String(value)]);
+      // Circular reference protection
+      if (visited.has(obj)) {
+        throw new ParameterSerializationError('Circular reference detected in parameter object');
+      }
+      visited.add(obj);
+
+      try {
+        for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+          if (strictValidation) {
+            this.validateParameterKey(key);
+          }
+
+          const nestedKey = `${prefix}[${key}]`;
+          if (value !== null && value !== undefined) {
+            if (this.shouldUseDeepObjectSerialization(key, value)) {
+              // Recursively handle nested objects
+              params.push(
+                ...this.serializeDeepObject(value, nestedKey, depth + 1, visited, options)
+              );
+            } else {
+              params.push([nestedKey, this.serializeValue(value)]);
+            }
           }
         }
+      } finally {
+        // Remove from visited set to allow the same object in different branches
+        visited.delete(obj);
       }
     } else {
       // For non-object values, use the prefix as-is
-      params.push([prefix, String(obj)]);
+      params.push([prefix, this.serializeValue(obj)]);
     }
 
     return params;
@@ -171,10 +243,36 @@ export class RequestBuilder {
 
   /**
    * Check if a parameter should use deep object serialization
-   * Now applies to all object parameters for consistent handling
+   * Applies to all plain object parameters (excludes special types and arrays)
    */
   private shouldUseDeepObjectSerialization(_key: string, value: unknown): boolean {
-    return typeof value === 'object' && value !== null && !Array.isArray(value);
+    return (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      !(value instanceof Date) &&
+      !(value instanceof RegExp) &&
+      typeof value !== 'function'
+    );
+  }
+
+  /**
+   * Builds all query parameters with optimized batching
+   */
+  private buildQueryParameters(queryParams: JsonDict): [string, string][] {
+    const allParams: [string, string][] = [];
+
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (this.shouldUseDeepObjectSerialization(key, value)) {
+        // Use deep object serialization for complex parameters
+        allParams.push(...this.serializeDeepObject(value, key));
+      } else {
+        // Use safe string conversion for primitive values
+        allParams.push([key, this.serializeValue(value)]);
+      }
+    }
+
+    return allParams;
   }
 
   /**
@@ -184,19 +282,13 @@ export class RequestBuilder {
     // Prepare request parameters
     const [url, bodyParams, queryParams] = this.prepareRequestParams(params);
 
-    // Prepare URL with query parameters
+    // Prepare URL with query parameters using optimized batching
     const urlWithQuery = new URL(url);
-    for (const [key, value] of Object.entries(queryParams)) {
-      if (this.shouldUseDeepObjectSerialization(key, value)) {
-        // Use deep object serialization for complex parameters
-        const serializedParams = this.serializeDeepObject(value, key);
-        for (const [paramKey, paramValue] of serializedParams) {
-          urlWithQuery.searchParams.append(paramKey, paramValue);
-        }
-      } else {
-        // Use simple string conversion for primitive values
-        urlWithQuery.searchParams.append(key, String(value));
-      }
+    const serializedParams = this.buildQueryParameters(queryParams);
+    
+    // Batch append all parameters
+    for (const [paramKey, paramValue] of serializedParams) {
+      urlWithQuery.searchParams.append(paramKey, paramValue);
     }
 
     // Build fetch options

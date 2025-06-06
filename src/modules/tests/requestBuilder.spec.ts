@@ -23,6 +23,8 @@ describe('RequestBuilder', () => {
       { name: 'simpleNumber', location: ParameterLocation.QUERY },
       { name: 'simpleBoolean', location: ParameterLocation.QUERY },
       { name: 'complexObject', location: ParameterLocation.QUERY },
+      { name: 'deepFilter', location: ParameterLocation.QUERY },
+      { name: 'emptyFilter', location: ParameterLocation.QUERY },
     ],
   };
 
@@ -283,5 +285,215 @@ describe('RequestBuilder', () => {
 
     // Original complex object should not be present
     expect(url.searchParams.get('complexObject')).toBeNull();
+  });
+
+  describe('Security and Performance Improvements', () => {
+    it('should throw error when recursion depth limit is exceeded', async () => {
+      // Create a deeply nested object that exceeds the default depth limit of 10
+      let deepObject: any = { value: 'test' };
+      for (let i = 0; i < 12; i++) {
+        deepObject = { nested: deepObject };
+      }
+
+      const params = {
+        pathParam: 'test-value',
+        deepFilter: deepObject,
+      };
+
+      await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
+        'Maximum nesting depth (10) exceeded for parameter serialization'
+      );
+    });
+
+    it('should throw error when circular reference is detected', async () => {
+      const circular: any = { a: { b: 'test' } };
+      circular.a.circular = circular; // Create circular reference
+
+      const params = {
+        pathParam: 'test-value',
+        filter: circular,
+      };
+
+      await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
+        'Circular reference detected in parameter object'
+      );
+    });
+
+    it('should validate parameter keys and reject invalid characters', async () => {
+      const params = {
+        pathParam: 'test-value',
+        filter: {
+          'valid_key': 'test',
+          'invalid key with spaces': 'test', // Should trigger validation error
+        },
+      };
+
+      await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
+        'Invalid parameter key: invalid key with spaces'
+      );
+    });
+
+    it('should handle special types correctly', async () => {
+      const testDate = new Date('2023-01-01T00:00:00.000Z');
+      const testRegex = /test-pattern/gi;
+
+      const params = {
+        pathParam: 'test-value',
+        filter: {
+          dateField: testDate,
+          regexField: testRegex,
+          nullField: null,
+          undefinedField: undefined,
+          emptyString: '',
+        },
+      };
+
+      const result = await builder.execute(params, { dryRun: true });
+      const url = new URL(result.url as string);
+
+      // Date should be serialized to ISO string
+      expect(url.searchParams.get('filter[dateField]')).toBe('2023-01-01T00:00:00.000Z');
+      
+      // RegExp should be serialized to string representation
+      expect(url.searchParams.get('filter[regexField]')).toBe('/test-pattern/gi');
+      
+      // Null and undefined should result in empty string (but won't be added since they're filtered out)
+      expect(url.searchParams.get('filter[nullField]')).toBeNull();
+      expect(url.searchParams.get('filter[undefinedField]')).toBeNull();
+      
+      // Empty string should be preserved
+      expect(url.searchParams.get('filter[emptyString]')).toBe('');
+    });
+
+    it('should throw error when trying to serialize functions', async () => {
+      const params = {
+        pathParam: 'test-value',
+        filter: {
+          validField: 'test',
+          functionField: () => 'test', // Functions should not be serializable
+        },
+      };
+
+      await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
+        'Functions cannot be serialized as parameters'
+      );
+    });
+
+    it('should handle empty objects correctly', async () => {
+      const params = {
+        pathParam: 'test-value',
+        emptyFilter: {},
+        filter: {
+          validField: 'test',
+          emptyNested: {},
+        },
+      };
+
+      const result = await builder.execute(params, { dryRun: true });
+      const url = new URL(result.url as string);
+
+      // Empty objects should not create any parameters
+      expect(url.searchParams.get('emptyFilter')).toBeNull();
+      expect(url.searchParams.get('filter[emptyNested]')).toBeNull();
+      
+      // Valid fields should still work
+      expect(url.searchParams.get('filter[validField]')).toBe('test');
+    });
+
+    it('should handle arrays correctly within objects', async () => {
+      const params = {
+        pathParam: 'test-value',
+        filter: {
+          arrayField: [1, 2, 3],
+          stringArray: ['a', 'b', 'c'],
+          mixed: ['string', 42, true],
+        },
+      };
+
+      const result = await builder.execute(params, { dryRun: true });
+      const url = new URL(result.url as string);
+
+      // Arrays should be converted to comma-separated strings
+      expect(url.searchParams.get('filter[arrayField]')).toBe('1,2,3');
+      expect(url.searchParams.get('filter[stringArray]')).toBe('a,b,c');
+      expect(url.searchParams.get('filter[mixed]')).toBe('string,42,true');
+    });
+
+    it('should handle nested objects with special types', async () => {
+      const params = {
+        pathParam: 'test-value',
+        filter: {
+          nested: {
+            dateField: new Date('2023-01-01T00:00:00.000Z'),
+            level2: {
+              regexField: /test/,
+              stringField: 'normal-string',
+            },
+          },
+        },
+      };
+
+      const result = await builder.execute(params, { dryRun: true });
+      const url = new URL(result.url as string);
+
+      expect(url.searchParams.get('filter[nested][dateField]')).toBe('2023-01-01T00:00:00.000Z');
+      expect(url.searchParams.get('filter[nested][level2][regexField]')).toBe('/test/');
+      expect(url.searchParams.get('filter[nested][level2][stringField]')).toBe('normal-string');
+    });
+
+    it('should maintain performance with large objects', async () => {
+      // Create a moderately large object to test performance optimizations
+      const largeFilter: any = {};
+      for (let i = 0; i < 100; i++) {
+        largeFilter[`field_${i}`] = `value_${i}`;
+        if (i % 10 === 0) {
+          largeFilter[`nested_${i}`] = {
+            subField1: `sub_value_${i}_1`,
+            subField2: `sub_value_${i}_2`,
+          };
+        }
+      }
+
+      const params = {
+        pathParam: 'test-value',
+        filter: largeFilter,
+      };
+
+      const startTime = performance.now();
+      const result = await builder.execute(params, { dryRun: true });
+      const endTime = performance.now();
+
+      // Should complete in reasonable time (less than 100ms for this size)
+      expect(endTime - startTime).toBeLessThan(100);
+
+      const url = new URL(result.url as string);
+      
+      // Verify some parameters are correctly serialized
+      expect(url.searchParams.get('filter[field_0]')).toBe('value_0');
+      expect(url.searchParams.get('filter[field_99]')).toBe('value_99');
+      expect(url.searchParams.get('filter[nested_0][subField1]')).toBe('sub_value_0_1');
+    });
+
+    it('should allow the same object in different branches after circular check', async () => {
+      const sharedObject = { shared: 'value' };
+      const params = {
+        pathParam: 'test-value',
+        filter: {
+          branch1: {
+            shared: sharedObject,
+          },
+          branch2: {
+            shared: sharedObject, // Same object reference in different branch - should be allowed
+          },
+        },
+      };
+
+      const result = await builder.execute(params, { dryRun: true });
+      const url = new URL(result.url as string);
+
+      // Both branches should be serialized correctly
+      expect(url.searchParams.get('filter[branch1][shared][shared]')).toBe('value');
+      expect(url.searchParams.get('filter[branch2][shared][shared]')).toBe('value');
+    });
   });
 });
