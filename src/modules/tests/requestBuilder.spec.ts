@@ -19,6 +19,10 @@ describe('RequestBuilder', () => {
       { name: 'proxy', location: ParameterLocation.QUERY },
       { name: 'regularObject', location: ParameterLocation.QUERY },
       { name: 'simple', location: ParameterLocation.QUERY },
+      { name: 'simpleString', location: ParameterLocation.QUERY },
+      { name: 'simpleNumber', location: ParameterLocation.QUERY },
+      { name: 'simpleBoolean', location: ParameterLocation.QUERY },
+      { name: 'complexObject', location: ParameterLocation.QUERY },
     ],
   };
 
@@ -170,15 +174,15 @@ describe('RequestBuilder', () => {
         nested: {
           level2: 'value',
           level3: {
-            deep: 'nested-value'
-          }
-        }
+            deep: 'nested-value',
+          },
+        },
       },
       proxy: {
         custom_field: 'custom-value',
-        sort: 'first_name'
+        sort: 'first_name',
       },
-      simple: 'simple-value'
+      simple: 'simple-value',
     };
 
     const result = await builder.execute(params, { dryRun: true });
@@ -209,8 +213,8 @@ describe('RequestBuilder', () => {
         undefined_field: undefined,
         empty_string: '',
         zero: 0,
-        false_value: false
-      }
+        false_value: false,
+      },
     };
 
     const result = await builder.execute(params, { dryRun: true });
@@ -227,19 +231,57 @@ describe('RequestBuilder', () => {
     expect(url.searchParams.get('filter[undefined_field]')).toBeNull();
   });
 
-  it('should not apply deep object serialization to non-filter/proxy parameters', async () => {
+  it('should apply deep object serialization to all object parameters', async () => {
     const params = {
       pathParam: 'test-value',
       regularObject: {
-        nested: 'value'
-      }
+        nested: 'value',
+        deepNested: {
+          level2: 'deep-value',
+        },
+      },
     };
 
     const result = await builder.execute(params, { dryRun: true });
     const url = new URL(result.url as string);
 
-    // Non-filter/proxy objects should be converted to string as before
-    expect(url.searchParams.get('regularObject')).toBe('[object Object]');
-    expect(url.searchParams.get('regularObject[nested]')).toBeNull();
+    // All objects should now be serialized using deep object notation
+    expect(url.searchParams.get('regularObject[nested]')).toBe('value');
+    expect(url.searchParams.get('regularObject[deepNested][level2]')).toBe('deep-value');
+
+    // The original object parameter should not be present as a string
+    expect(url.searchParams.get('regularObject')).toBeNull();
+  });
+
+  it('should handle mixed parameter types with deep object serialization', async () => {
+    const params = {
+      pathParam: 'test-value',
+      simpleString: 'simple-value',
+      simpleNumber: 42,
+      simpleBoolean: true,
+      complexObject: {
+        nested: 'nested-value',
+        array: [1, 2, 3], // Arrays should be converted to string
+        nestedObject: {
+          deep: 'deep-value',
+        },
+      },
+    };
+
+    const result = await builder.execute(params, { dryRun: true });
+    const url = new URL(result.url as string);
+
+    // Primitive values should be handled normally
+    expect(url.searchParams.get('simpleString')).toBe('simple-value');
+    expect(url.searchParams.get('simpleNumber')).toBe('42');
+    expect(url.searchParams.get('simpleBoolean')).toBe('true');
+
+    // Complex object should use deep object serialization
+    expect(url.searchParams.get('complexObject[nested]')).toBe('nested-value');
+    expect(url.searchParams.get('complexObject[array]')).toBe('1,2,3'); // Arrays become strings
+    expect(url.searchParams.get('complexObject[nestedObject][deep]')).toBe('deep-value');
+
+    // Original complex object should not be present
+    expect(url.searchParams.get('complexObject')).toBeNull();
   });
 });

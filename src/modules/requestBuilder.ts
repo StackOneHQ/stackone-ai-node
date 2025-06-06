@@ -139,12 +139,12 @@ export class RequestBuilder {
 
   /**
    * Serialize an object into deep object query parameters
-   * Converts {filter: {updated_after: "2020-01-01", job_id: "123"}} 
+   * Converts {filter: {updated_after: "2020-01-01", job_id: "123"}}
    * to filter[updated_after]=2020-01-01&filter[job_id]=123
    */
   private serializeDeepObject(obj: unknown, prefix: string): [string, string][] {
     const params: [string, string][] = [];
-    
+
     if (obj === null || obj === undefined) {
       return params;
     }
@@ -171,18 +171,10 @@ export class RequestBuilder {
 
   /**
    * Check if a parameter should use deep object serialization
-   * Based on common StackOne parameter patterns
+   * Now applies to all object parameters for consistent handling
    */
-  private shouldUseDeepObjectSerialization(key: string, value: unknown): boolean {
-    // Known parameters that use deep object serialization in StackOne API
-    const deepObjectParams = ['filter', 'proxy'];
-    
-    return (
-      deepObjectParams.includes(key) &&
-      typeof value === 'object' &&
-      value !== null &&
-      !Array.isArray(value)
-    );
+  private shouldUseDeepObjectSerialization(_key: string, value: unknown): boolean {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
   }
 
   /**
