@@ -138,6 +138,54 @@ export class RequestBuilder {
   }
 
   /**
+   * Serialize an object into deep object query parameters
+   * Converts {filter: {updated_after: "2020-01-01", job_id: "123"}} 
+   * to filter[updated_after]=2020-01-01&filter[job_id]=123
+   */
+  private serializeDeepObject(obj: unknown, prefix: string): [string, string][] {
+    const params: [string, string][] = [];
+    
+    if (obj === null || obj === undefined) {
+      return params;
+    }
+
+    if (typeof obj === 'object' && !Array.isArray(obj)) {
+      for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+        const nestedKey = `${prefix}[${key}]`;
+        if (value !== null && value !== undefined) {
+          if (typeof value === 'object' && !Array.isArray(value)) {
+            // Recursively handle nested objects
+            params.push(...this.serializeDeepObject(value, nestedKey));
+          } else {
+            params.push([nestedKey, String(value)]);
+          }
+        }
+      }
+    } else {
+      // For non-object values, use the prefix as-is
+      params.push([prefix, String(obj)]);
+    }
+
+    return params;
+  }
+
+  /**
+   * Check if a parameter should use deep object serialization
+   * Based on common StackOne parameter patterns
+   */
+  private shouldUseDeepObjectSerialization(key: string, value: unknown): boolean {
+    // Known parameters that use deep object serialization in StackOne API
+    const deepObjectParams = ['filter', 'proxy'];
+    
+    return (
+      deepObjectParams.includes(key) &&
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value)
+    );
+  }
+
+  /**
    * Execute the request
    */
   async execute(params: JsonDict, options?: ExecuteOptions): Promise<JsonDict> {
@@ -147,7 +195,16 @@ export class RequestBuilder {
     // Prepare URL with query parameters
     const urlWithQuery = new URL(url);
     for (const [key, value] of Object.entries(queryParams)) {
-      urlWithQuery.searchParams.append(key, String(value));
+      if (this.shouldUseDeepObjectSerialization(key, value)) {
+        // Use deep object serialization for complex parameters
+        const serializedParams = this.serializeDeepObject(value, key);
+        for (const [paramKey, paramValue] of serializedParams) {
+          urlWithQuery.searchParams.append(paramKey, paramValue);
+        }
+      } else {
+        // Use simple string conversion for primitive values
+        urlWithQuery.searchParams.append(key, String(value));
+      }
     }
 
     // Build fetch options

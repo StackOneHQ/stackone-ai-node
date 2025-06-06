@@ -15,6 +15,10 @@ describe('RequestBuilder', () => {
       { name: 'headerParam', location: ParameterLocation.HEADER },
       { name: 'bodyParam', location: ParameterLocation.BODY },
       { name: 'defaultParam' /* default to body */ },
+      { name: 'filter', location: ParameterLocation.QUERY },
+      { name: 'proxy', location: ParameterLocation.QUERY },
+      { name: 'regularObject', location: ParameterLocation.QUERY },
+      { name: 'simple', location: ParameterLocation.QUERY },
     ],
   };
 
@@ -155,5 +159,87 @@ describe('RequestBuilder', () => {
 
     await expect(builder.execute(params)).rejects.toThrow(StackOneAPIError);
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('should serialize deep object query parameters correctly', async () => {
+    const params = {
+      pathParam: 'test-value',
+      filter: {
+        updated_after: '2020-01-01T00:00:00.000Z',
+        job_id: '123',
+        nested: {
+          level2: 'value',
+          level3: {
+            deep: 'nested-value'
+          }
+        }
+      },
+      proxy: {
+        custom_field: 'custom-value',
+        sort: 'first_name'
+      },
+      simple: 'simple-value'
+    };
+
+    const result = await builder.execute(params, { dryRun: true });
+    const url = new URL(result.url as string);
+
+    // Check that deep object parameters are serialized correctly
+    expect(url.searchParams.get('filter[updated_after]')).toBe('2020-01-01T00:00:00.000Z');
+    expect(url.searchParams.get('filter[job_id]')).toBe('123');
+    expect(url.searchParams.get('filter[nested][level2]')).toBe('value');
+    expect(url.searchParams.get('filter[nested][level3][deep]')).toBe('nested-value');
+    expect(url.searchParams.get('proxy[custom_field]')).toBe('custom-value');
+    expect(url.searchParams.get('proxy[sort]')).toBe('first_name');
+
+    // Check that simple parameters are still handled normally
+    expect(url.searchParams.get('simple')).toBe('simple-value');
+
+    // Ensure the original filter/proxy objects are not added as strings
+    expect(url.searchParams.get('filter')).toBeNull();
+    expect(url.searchParams.get('proxy')).toBeNull();
+  });
+
+  it('should handle null and undefined values in deep objects', async () => {
+    const params = {
+      pathParam: 'test-value',
+      filter: {
+        valid_field: 'value',
+        null_field: null,
+        undefined_field: undefined,
+        empty_string: '',
+        zero: 0,
+        false_value: false
+      }
+    };
+
+    const result = await builder.execute(params, { dryRun: true });
+    const url = new URL(result.url as string);
+
+    // Check that valid values are included
+    expect(url.searchParams.get('filter[valid_field]')).toBe('value');
+    expect(url.searchParams.get('filter[empty_string]')).toBe('');
+    expect(url.searchParams.get('filter[zero]')).toBe('0');
+    expect(url.searchParams.get('filter[false_value]')).toBe('false');
+
+    // Check that null and undefined values are excluded
+    expect(url.searchParams.get('filter[null_field]')).toBeNull();
+    expect(url.searchParams.get('filter[undefined_field]')).toBeNull();
+  });
+
+  it('should not apply deep object serialization to non-filter/proxy parameters', async () => {
+    const params = {
+      pathParam: 'test-value',
+      regularObject: {
+        nested: 'value'
+      }
+    };
+
+    const result = await builder.execute(params, { dryRun: true });
+    const url = new URL(result.url as string);
+
+    // Non-filter/proxy objects should be converted to string as before
+    expect(url.searchParams.get('regularObject')).toBe('[object Object]');
+    expect(url.searchParams.get('regularObject[nested]')).toBeNull();
   });
 });
