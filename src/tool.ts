@@ -146,17 +146,6 @@ export class BaseTool {
  * StackOne-specific tool class with additional functionality
  */
 export class StackOneTool extends BaseTool {
-  constructor(
-    name: string,
-    description: string,
-    parameters: ToolParameters,
-    executeConfig: ExecuteConfig,
-    headers?: Record<string, string>,
-    experimental_preExecute?: Experimental_PreExecuteFunction
-  ) {
-    super(name, description, parameters, executeConfig, headers, experimental_preExecute);
-  }
-
   /**
    * Get the current account ID
    */
@@ -223,17 +212,16 @@ export class Tools implements Iterable<BaseTool> {
         options.experimental_preExecute
       );
       return newTool;
-    } else {
-      const newTool = new BaseTool(
-        originalTool.name,
-        originalTool.description,
-        parameters,
-        originalTool.executeConfig,
-        originalTool.getHeaders(),
-        options.experimental_preExecute
-      );
-      return newTool;
     }
+    const newTool = new BaseTool(
+      originalTool.name,
+      originalTool.description,
+      parameters,
+      originalTool.executeConfig,
+      originalTool.getHeaders(),
+      options.experimental_preExecute
+    );
+    return newTool;
   }
 
   /**
