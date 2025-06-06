@@ -1,13 +1,12 @@
 import { type ToolSet, jsonSchema } from 'ai';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
-import { ParameterMapper } from './modules/parameterMapper';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
   ExecuteConfig,
   ExecuteOptions,
+  Experimental_PreExecuteFunction,
+  Experimental_ToolCreationOptions,
   JsonDict,
-  ParameterTransformer,
-  ParameterTransformerMap,
   ToolParameters,
 } from './types';
 import { StackOneError } from './utils/errors';
@@ -21,8 +20,8 @@ export class BaseTool {
   description: string;
   parameters: ToolParameters;
   executeConfig: ExecuteConfig;
-  protected parameterMapper: ParameterMapper;
   protected requestBuilder: RequestBuilder;
+  protected experimental_preExecute?: Experimental_PreExecuteFunction;
 
   constructor(
     name: string,
@@ -30,28 +29,14 @@ export class BaseTool {
     parameters: ToolParameters,
     executeConfig: ExecuteConfig,
     headers?: Record<string, string>,
-    transformers?: ParameterTransformerMap
+    experimental_preExecute?: Experimental_PreExecuteFunction
   ) {
     this.name = name;
     this.description = description;
     this.parameters = parameters;
     this.executeConfig = executeConfig;
-    this.parameterMapper = new ParameterMapper(transformers);
     this.requestBuilder = new RequestBuilder(executeConfig, headers);
-  }
-
-  /**
-   * Add a parameter transformer
-   */
-  public setParameterTransformer(sourceParam: string, config: ParameterTransformer): void {
-    this.parameterMapper.addTransformer(sourceParam, config);
-  }
-
-  /**
-   * Get a parameter transformer
-   */
-  public getParameterTransformer(sourceParam: string): ParameterTransformer | undefined {
-    return this.parameterMapper.getTransformer(sourceParam);
+    this.experimental_preExecute = experimental_preExecute;
   }
 
   /**
@@ -85,19 +70,21 @@ export class BaseTool {
         );
       }
 
-      // Apply experimental preExecute function if provided
-      let processedParams = inputParams;
-      if (options?.experimental_PreExecute) {
-        processedParams = await options.experimental_PreExecute(
-          typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {}
-        );
+      // Convert string params to object
+      const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
+
+      // Apply experimental preExecute function (either from tool creation or execution options)
+      let processedParams = params;
+
+      // Prioritize tool-level experimental_preExecute over execution-time experimental_PreExecute
+      const preExecuteFunction = this.experimental_preExecute || options?.experimental_PreExecute;
+
+      if (preExecuteFunction) {
+        processedParams = await preExecuteFunction(params);
       }
 
-      // Map parameters from user input to API parameters
-      const mappedParams = this.parameterMapper.mapParameters(processedParams);
-
-      // Execute the request
-      return await this.requestBuilder.execute(mappedParams, options);
+      // Execute the request directly with processed parameters
+      return await this.requestBuilder.execute(processedParams, options);
     } catch (error) {
       if (error instanceof StackOneError) {
         throw error;
@@ -159,6 +146,17 @@ export class BaseTool {
  * StackOne-specific tool class with additional functionality
  */
 export class StackOneTool extends BaseTool {
+  constructor(
+    name: string,
+    description: string,
+    parameters: ToolParameters,
+    executeConfig: ExecuteConfig,
+    headers?: Record<string, string>,
+    experimental_preExecute?: Experimental_PreExecuteFunction
+  ) {
+    super(name, description, parameters, executeConfig, headers, experimental_preExecute);
+  }
+
   /**
    * Get the current account ID
    */
@@ -195,8 +193,49 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Get a tool by name
    */
-  getTool(name: string): BaseTool | undefined {
-    return this.tools.find((tool) => tool.name === name);
+  getTool(name: string): BaseTool | undefined;
+  getTool(name: string, options: Experimental_ToolCreationOptions): BaseTool | undefined;
+  getTool(name: string, options?: Experimental_ToolCreationOptions): BaseTool | undefined {
+    const originalTool = this.tools.find((tool) => tool.name === name);
+    if (!originalTool) {
+      return undefined;
+    }
+
+    // If no experimental options provided, return original tool
+    if (!options?.experimental_schemaOverride && !options?.experimental_preExecute) {
+      return originalTool;
+    }
+
+    // Create a new tool with experimental schema override and preExecute
+    let parameters = originalTool.parameters;
+
+    // Apply schema override if provided
+    if (options.experimental_schemaOverride) {
+      parameters = options.experimental_schemaOverride(originalTool.parameters);
+    }
+
+    // Create new tool instance with modified schema and preExecute function
+    if (originalTool instanceof StackOneTool) {
+      const newTool = new StackOneTool(
+        originalTool.name,
+        originalTool.description,
+        parameters,
+        originalTool.executeConfig,
+        originalTool.getHeaders(),
+        options.experimental_preExecute
+      );
+      return newTool;
+    } else {
+      const newTool = new BaseTool(
+        originalTool.name,
+        originalTool.description,
+        parameters,
+        originalTool.executeConfig,
+        originalTool.getHeaders(),
+        options.experimental_preExecute
+      );
+      return newTool;
+    }
   }
 
   /**

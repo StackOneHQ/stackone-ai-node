@@ -76,7 +76,6 @@ quickstart();
  * - [AI SDK Integration](ai-sdk-integration.md)
  * - [Error Handling](error-handling.md)
  * - [EXPERIMENTAL: Document Handling](experimental-document-handling.md)
- * - [EXPERIMENTAL: Transformations](experimental_transformations.md)
  * - [Custom Base URL](custom-base-url.md)
  * - [Account ID Usage](account-id-usage.md)
  */

@@ -25,30 +25,20 @@ export type JsonSchemaProperties = Record<string, JSONSchema7Definition>;
 export type JsonSchemaType = JSONSchema7['type'];
 
 /**
- * Type definition for a derivation function
- * Takes a source value and returns a derived value
+ * EXPERIMENTAL: Function to override the tool schema at creation time
+ * Takes the original tool parameters and returns a new schema
+ * @param originalSchema - The original tool parameters schema from OpenAPI
+ * @returns New schema definition for the tool
  */
-export type TransformFunction = (sourceValue: unknown) => unknown;
+export type Experimental_SchemaOverride = (originalSchema: ToolParameters) => ToolParameters;
 
 /**
- * Type definition for a map of derivation functions
- * Keys are transformed parameter names, values are functions to derive that parameter
+ * EXPERIMENTAL: Function to preprocess parameters before tool execution
+ * Transforms parameters from override schema format back to original API format
+ * @param params - The input parameters in override schema format
+ * @returns Parameters in original API format
  */
-export type TransformFunctions = Record<string, TransformFunction>;
-
-/**
- * Configuration for parameter transformations
- * The key in the derivation configs map is the source parameter name
- */
-export type ParameterTransformer = {
-  transforms: TransformFunctions;
-};
-
-/**
- * Type definition for a map of derivation configurations
- * Keys are source parameter names, values are derivation functions
- */
-export type ParameterTransformerMap = Map<string, ParameterTransformer>;
+export type Experimental_PreExecuteFunction = (params: JsonDict) => Promise<JsonDict> | JsonDict;
 
 /**
  * Valid locations for parameters in requests
@@ -76,12 +66,21 @@ export interface ExecuteConfig {
 }
 
 /**
- * EXPERIMENTAL: Function to preprocess parameters before tool execution
- * Can be used to transform parameters, fetch documents from external sources, etc.
- * @param params - The input parameters
- * @returns Modified parameters or Promise<JsonDict>
+ * EXPERIMENTAL: Options for creating tools with schema overrides and preExecute functions
  */
-export type Experimental_PreExecuteFunction = (params: JsonDict) => Promise<JsonDict> | JsonDict;
+export interface Experimental_ToolCreationOptions {
+  /**
+   * EXPERIMENTAL: Function to override the tool schema at creation time
+   * Takes the original schema and returns a new schema for the tool
+   */
+  experimental_schemaOverride?: Experimental_SchemaOverride;
+
+  /**
+   * EXPERIMENTAL: Function to preprocess parameters before execution
+   * Transforms parameters from override schema format back to original API format
+   */
+  experimental_preExecute?: Experimental_PreExecuteFunction;
+}
 
 /**
  * Options for executing a tool
@@ -96,6 +95,7 @@ export interface ExecuteOptions {
   /**
    * EXPERIMENTAL: Function to preprocess parameters before execution
    * Allows for document fetching, parameter override, etc.
+   * @deprecated Use experimental_preExecute in tool creation options instead
    */
   experimental_PreExecute?: Experimental_PreExecuteFunction;
 }

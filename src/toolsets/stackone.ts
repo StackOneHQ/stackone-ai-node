@@ -75,7 +75,6 @@ export class StackOneToolSet extends ToolSet {
       baseUrl: config?.baseUrl,
       authentication,
       headers,
-      transformers: config?.transformers,
     });
 
     this.accountId = accountId;
@@ -123,22 +122,18 @@ export class StackOneToolSet extends ToolSet {
     for (const [_, tools] of Object.entries(specs)) {
       // Process each tool
       for (const [toolName, toolDef] of Object.entries(tools)) {
-        // Process derived values
-        const processedDef = this.processDerivedValues(toolDef);
-
         // Remove account ID parameter if not provided
         if (!this.accountId) {
-          this.removeAccountIdParameter(processedDef);
+          this.removeAccountIdParameter(toolDef);
         }
 
         // Create tool
         const tool = new StackOneTool(
           toolName,
-          processedDef.description,
-          processedDef.parameters,
-          processedDef.execute,
-          this.headers,
-          this.transformers
+          toolDef.description,
+          toolDef.parameters,
+          toolDef.execute,
+          this.headers
         );
 
         // Add tool to the list
