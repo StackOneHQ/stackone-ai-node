@@ -17,6 +17,7 @@
 import assert from 'node:assert';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import type { JSONSchema7Definition } from 'json-schema';
 import {
   type Experimental_PreExecuteFunction,
   type Experimental_SchemaOverride,
@@ -25,13 +26,24 @@ import {
 
 const accountId = '45072196112816593343';
 
+interface FileFormatParam {
+  value: string;
+}
+
+interface DocumentParams {
+  content: string;
+  name: string;
+  file_format: FileFormatParam;
+  [key: string]: unknown;
+}
+
 /**
  * EXPERIMENTAL: Schema override for document upload - changes from complex schema to simple doc_id
  */
 const createDocumentSchemaOverride = (): Experimental_SchemaOverride => {
   return (originalSchema) => {
     // Extract only the category from original schema, replace file-related params with doc_id
-    const newProperties: Record<string, any> = {};
+    const newProperties: Record<string, JSONSchema7Definition> = {};
 
     // Keep non-file parameters from original schema
     for (const [key, value] of Object.entries(originalSchema.properties)) {
@@ -102,7 +114,7 @@ const createDocumentPreExecute = (allowedPaths: string[]): Experimental_PreExecu
  */
 const createExternalDocumentSchemaOverride = (): Experimental_SchemaOverride => {
   return (originalSchema) => {
-    const newProperties: Record<string, any> = {};
+    const newProperties: Record<string, JSONSchema7Definition> = {};
 
     // Keep non-file parameters from original schema
     for (const [key, value] of Object.entries(originalSchema.properties)) {
@@ -163,7 +175,7 @@ const createExternalDocumentPreExecute = (): Experimental_PreExecuteFunction => 
  */
 const createMultiSourceSchemaOverride = (): Experimental_SchemaOverride => {
   return (originalSchema) => {
-    const newProperties: Record<string, any> = {};
+    const newProperties: Record<string, JSONSchema7Definition> = {};
 
     // Keep non-file parameters from original schema
     for (const [key, value] of Object.entries(originalSchema.properties)) {
@@ -257,10 +269,20 @@ const experimentalDocumentHandling = async (): Promise<void> => {
     );
 
     console.log('✅ Local file schema override + preExecute successful');
-    const localParams = localFileResult.mappedParams as Record<string, any>;
-    assert(localParams.file_format?.value === 'txt', 'File format was not transformed correctly');
-    assert(localParams.name === 'sample-document.txt', 'File name was not transformed correctly');
-    assert(typeof localParams.content === 'string', 'File content was not transformed correctly');
+    const localParams = localFileResult.mappedParams as Record<string, unknown>;
+    const localDocumentParams = localParams as DocumentParams & Record<string, unknown>;
+    assert(
+      localDocumentParams.file_format?.value === 'txt',
+      'File format was not transformed correctly'
+    );
+    assert(
+      localDocumentParams.name === 'sample-document.txt',
+      'File name was not transformed correctly'
+    );
+    assert(
+      typeof localDocumentParams.content === 'string',
+      'File content was not transformed correctly'
+    );
 
     console.log('🧪 Testing EXPERIMENTAL schema override + preExecute for external documents...');
 
@@ -269,6 +291,8 @@ const experimentalDocumentHandling = async (): Promise<void> => {
       experimental_schemaOverride: createExternalDocumentSchemaOverride(),
       experimental_preExecute: createExternalDocumentPreExecute(),
     });
+
+    assert(externalDocumentTool !== undefined, 'External document tool not found');
 
     const externalResult = await externalDocumentTool.execute(
       {
@@ -282,9 +306,10 @@ const experimentalDocumentHandling = async (): Promise<void> => {
     );
 
     console.log('✅ External document schema override + preExecute successful');
-    const externalParams = externalResult.mappedParams as Record<string, any>;
+    const externalParams = externalResult.mappedParams as Record<string, unknown>;
+    const externalDocumentParams = externalParams as DocumentParams & Record<string, unknown>;
     assert(
-      externalParams.name.includes('external-doc-123'),
+      externalDocumentParams.name.includes('external-doc-123'),
       'External document name was not transformed correctly'
     );
 
@@ -295,6 +320,8 @@ const experimentalDocumentHandling = async (): Promise<void> => {
       experimental_schemaOverride: createMultiSourceSchemaOverride(),
       experimental_preExecute: createMultiSourcePreExecute([__dirname]),
     });
+
+    assert(multiSourceTool !== undefined, 'Multi-source tool not found');
 
     // Test with local file
     const multiSourceLocalResult = await multiSourceTool.execute(
@@ -309,9 +336,10 @@ const experimentalDocumentHandling = async (): Promise<void> => {
     );
 
     console.log('✅ Multi-source (local) schema override + preExecute successful');
-    const multiLocalParams = multiSourceLocalResult.mappedParams as Record<string, any>;
+    const multiLocalParams = multiSourceLocalResult.mappedParams as Record<string, unknown>;
+    const multiLocalDocumentParams = multiLocalParams as DocumentParams & Record<string, unknown>;
     assert(
-      multiLocalParams.name === 'sample-document.txt',
+      multiLocalDocumentParams.name === 'sample-document.txt',
       'Multi-source local document name was not transformed correctly'
     );
 
@@ -328,9 +356,11 @@ const experimentalDocumentHandling = async (): Promise<void> => {
     );
 
     console.log('✅ Multi-source (external) schema override + preExecute successful');
-    const multiExternalParams = multiSourceExternalResult.mappedParams as Record<string, any>;
+    const multiExternalParams = multiSourceExternalResult.mappedParams as Record<string, unknown>;
+    const multiExternalDocumentParams = multiExternalParams as DocumentParams &
+      Record<string, unknown>;
     assert(
-      multiExternalParams.name.includes('external-doc-456'),
+      multiExternalDocumentParams.name.includes('external-doc-456'),
       'Multi-source external document name was not transformed correctly'
     );
 

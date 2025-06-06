@@ -47,10 +47,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/companies",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_companies",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -172,10 +170,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/companies/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_company",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -282,10 +278,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/custom_field_definitions/employees",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_custom_field_definitions",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -422,10 +416,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/custom_field_definitions/employees/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee_custom_field_definition",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -577,10 +569,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employees",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -905,10 +895,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_create_employee",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "avatar": {
@@ -3176,10 +3164,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -3471,10 +3457,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_update_employee",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "avatar": {
@@ -5705,10 +5689,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/invite",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_invite_employee",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "id": {
@@ -5809,10 +5791,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_time_off_requests",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -5996,10 +5976,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_create_employee_time_off_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "approver_id": {
@@ -6230,10 +6208,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employees_time_off_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -6389,10 +6365,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_update_employee_time_off_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "approver_id": {
@@ -6612,10 +6586,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/upload/batch",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_batch_upload_employee_document",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "id": {
@@ -8022,10 +7994,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/upload",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_upload_employee_document",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "category": {
@@ -9427,10 +9397,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/{subResourceId}/download",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_download_employee_document",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "format": {
@@ -9532,10 +9500,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/documents",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_documents",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -9672,10 +9638,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/documents/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee_document",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -9791,10 +9755,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/documents/employee_categories",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_categories",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -9916,10 +9878,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/documents/employee_categories/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee_document_category",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -10031,10 +9991,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_work_eligibility",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -10191,10 +10149,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_create_employee_work_eligibility_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "document": {
@@ -11896,10 +11852,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employees_work_eligibility",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -12035,10 +11989,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/work_eligibility/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_update_employee_work_eligibility_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "document": {
@@ -13764,10 +13716,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_balances",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_time_off_balances",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -13927,10 +13877,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_balances/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee_time_off_balance",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -14061,10 +14009,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employments",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employments",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -14201,10 +14147,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employments/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employment",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -14331,10 +14275,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/employments",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_employments",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -14511,10 +14453,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/employments",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_create_employee_employment",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "employment_contract_type": {
@@ -14780,10 +14720,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/employments/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee_employment",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -14939,10 +14877,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/employments/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_update_employee_employment",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "employment_contract_type": {
@@ -15217,10 +15153,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/locations",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_locations",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -15342,10 +15276,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/locations/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_location",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -15457,10 +15389,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_time_off_requests",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -15629,10 +15559,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_create_time_off_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "approver_id": {
@@ -15848,10 +15776,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_time_off_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "expand": {
@@ -15993,10 +15919,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_update_time_off_request",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "approver_id": {
@@ -16227,10 +16151,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off_types",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_time_off_types",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -16352,10 +16274,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off_types/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_time_off_type",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -16462,10 +16382,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_entries",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_time_entries",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -16604,10 +16522,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_entries/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_time_entries",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -16714,10 +16630,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/benefits",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_benefits",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -16839,10 +16753,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/benefits/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_benefit",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -16949,10 +16861,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_groups",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17084,10 +16994,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/departments",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_department_groups",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17219,10 +17127,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/cost_centers",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_cost_center_groups",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17354,10 +17260,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/teams",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_team_groups",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17479,10 +17383,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_group",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17579,10 +17481,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/departments/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_department_group",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17679,10 +17579,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/cost_centers/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_cost_center_group",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17779,10 +17677,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/groups/teams/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_team_group",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -17889,10 +17785,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/jobs",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_jobs",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -18014,10 +17908,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/jobs/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_job",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -18129,10 +18021,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_skills",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -18264,10 +18154,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_create_employee_skill",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "id": {
@@ -18426,10 +18314,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/skills/{subResourceId}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_employee_skill",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -18545,10 +18431,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off_policies",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_time_off_policies",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -18670,10 +18554,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/time_off_policies/{id}",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_get_time_off_policy",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
@@ -18785,10 +18667,8 @@ Tools {
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_policies",
       },
+      "experimental_preExecute": undefined,
       "name": "hris_list_employee_time_off_policies",
-      "parameterMapper": ParameterMapper {
-        "transformers": Map {},
-      },
       "parameters": {
         "properties": {
           "fields": {
