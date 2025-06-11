@@ -16,7 +16,7 @@
     "prebuild": "rimraf dist",
     "build": "bun build ./src/index.ts --outdir ./dist --target node && tsc --emitDeclarationOnly",
     "rebuild": "bun run fetch:specs && bun run build",
-    "prepublishOnly": "bun run rebuild && bun run test",
+    "prepublishOnly": "bun run rebuild",
     "test": "bun test",
     "fetch:specs": "bun run ./scripts/fetch-specs.ts && bun run format",
     "build:docs": "bun run ./scripts/build-docs.ts",

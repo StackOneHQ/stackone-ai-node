@@ -3182,6 +3182,7 @@ export const crmSpec = {
               'YE',
               'ZM',
               'ZW',
+              'unmapped_value',
               null,
             ],
             description: 'The ISO 3166-1 alpha-2 code of the country.',
@@ -3470,6 +3471,7 @@ export const crmSpec = {
               'multi_select',
               'url',
               'other',
+              'unmapped_value',
               null,
             ],
             'x-speakeasy-unknown-values': 'allow',
@@ -3854,10 +3856,6 @@ export const crmSpec = {
                 type: 'object',
               },
               {
-                type: 'string',
-                format: 'binary',
-              },
-              {
                 type: 'array',
                 items: {
                   type: 'integer',
@@ -3866,17 +3864,24 @@ export const crmSpec = {
                   maximum: 255,
                 },
               },
-              {
-                type: 'string',
-                format: 'byte',
-              },
             ],
             additionalProperties: true,
             nullable: true,
           },
           response: {
-            type: 'object',
-            additionalProperties: true,
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: true,
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+              {
+                type: 'string',
+              },
+            ],
             nullable: true,
           },
         },

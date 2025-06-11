@@ -6466,7 +6466,7 @@ export const lmsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['pending', 'in_progress', 'completed', null],
+            enum: ['pending', 'in_progress', 'completed', 'unmapped_value', null],
             example: 'in_progress',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -6682,7 +6682,7 @@ export const lmsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['primary', 'secondary', 'tertiary', null],
+            enum: ['primary', 'secondary', 'tertiary', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -7195,7 +7195,7 @@ export const lmsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['video', 'quiz', 'document', 'audio', 'article', null],
+            enum: ['video', 'quiz', 'document', 'audio', 'article', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -7572,15 +7572,6 @@ export const lmsSpec = {
             allOf: [
               {
                 $ref: '#/components/schemas/SkillLevelEnum',
-              },
-            ],
-          },
-          proficiency: {
-            description: 'The user proficiency level of the skill ranked out of 5',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/SkillProficiencyLevelEnum',
               },
             ],
           },
@@ -8084,6 +8075,7 @@ export const lmsSpec = {
               'zh_SG',
               'zh_TW',
               'zu_ZA',
+              'unmapped_value',
               null,
             ],
             description: 'The Locale Code of the language',
@@ -8119,7 +8111,7 @@ export const lmsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['content', 'course', 'collection', null],
+            enum: ['content', 'course', 'collection', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -8766,6 +8758,15 @@ export const lmsSpec = {
               },
             ],
           },
+          tags: {
+            description: 'The tags associated with the localization details',
+            example: ['Sales Techniques', 'Customer Service'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
         },
       },
       NotFoundResponse: {
@@ -8886,10 +8887,6 @@ export const lmsSpec = {
                 type: 'object',
               },
               {
-                type: 'string',
-                format: 'binary',
-              },
-              {
                 type: 'array',
                 items: {
                   type: 'integer',
@@ -8898,17 +8895,24 @@ export const lmsSpec = {
                   maximum: 255,
                 },
               },
-              {
-                type: 'string',
-                format: 'byte',
-              },
             ],
             additionalProperties: true,
             nullable: true,
           },
           response: {
-            type: 'object',
-            additionalProperties: true,
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: true,
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+              {
+                type: 'string',
+              },
+            ],
             nullable: true,
           },
         },
@@ -8941,7 +8945,7 @@ export const lmsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['Pass', 'Fail', null],
+            enum: ['Pass', 'Fail', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -8973,39 +8977,7 @@ export const lmsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['primary', 'secondary', 'tertiary', null],
-            'x-speakeasy-unknown-values': 'allow',
-            nullable: true,
-          },
-          source_value: {
-            oneOf: [
-              {
-                type: 'string',
-              },
-              {
-                type: 'number',
-              },
-              {
-                type: 'boolean',
-              },
-              {
-                type: 'object',
-              },
-              {
-                type: 'array',
-                items: {},
-              },
-            ],
-            nullable: true,
-          },
-        },
-      },
-      SkillProficiencyLevelEnum: {
-        type: 'object',
-        properties: {
-          value: {
-            type: 'string',
-            enum: ['1', '2', '3', '4', '5', null],
+            enum: ['primary', 'secondary', 'tertiary', 'unmapped_value', null],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -9081,15 +9053,6 @@ export const lmsSpec = {
             allOf: [
               {
                 $ref: '#/components/schemas/SkillLevelEnum',
-              },
-            ],
-          },
-          proficiency: {
-            description: 'The user proficiency level of the skill ranked out of 5',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/SkillProficiencyLevelEnum',
               },
             ],
           },
