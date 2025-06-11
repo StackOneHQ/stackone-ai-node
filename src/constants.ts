@@ -6,6 +6,8 @@ export const SPECS = [
   'documents',
   'marketing',
   'ticketing',
+  'screening',
+  'messaging',
   'iam',
   'lms',
 ];

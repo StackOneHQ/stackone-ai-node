@@ -5,5 +5,7 @@ export { hrisSpec } from './hris';
 export { documentsSpec } from './documents';
 export { marketingSpec } from './marketing';
 export { ticketingSpec } from './ticketing';
+export { screeningSpec } from './screening';
+export { messagingSpec } from './messaging';
 export { iamSpec } from './iam';
 export { lmsSpec } from './lms';
