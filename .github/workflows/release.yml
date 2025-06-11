@@ -1,5 +1,4 @@
-name: Release Please
-
+name: Release Package
 on:
   push:
     branches:
@@ -8,47 +7,47 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release-please.outputs.release_created }}
     steps:
       - uses: googleapis/release-please-action@v4
-        id: release
+        id: release-please
         with:
-          config-file: .release-please-config.json
-          manifest-file: .release-please-manifest.json
+          release-type: node
 
-      - uses: actions/checkout@v4
-        if: ${{ steps.release.outputs.release_created }}
+  publish-package:
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created  }}
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_CONFIG_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install bun
-        if: ${{ steps.release.outputs.release_created }}
+      - name: Setup Bun
         uses: oven-sh/setup-bun@v2
-
-      - name: Install Node
-        if: ${{ steps.release.outputs.release_created }}
-        uses: actions/setup-node@v4
         with:
-          node-version: 22
+          bun-version: latest
 
-      - name: Install dependencies
-        if: ${{ steps.release.outputs.release_created }}
-        run: bun install
+      - name: Setup Node.js for npm
+        uses: actions/setup-node@v4
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_CONFIG_TOKEN }}
+        with:
+          node-version: "latest"
+          registry-url: "https://registry.npmjs.org"
 
-      - name: Build package
-        if: ${{ steps.release.outputs.release_created }}
+      - name: 💫 Install dependencies
+        run: bun i
+
+      - name: 🏡 Build package
         run: bun run build
 
-      - name: Creating .npmrc
-        if: ${{ steps.release.outputs.release_created }}
-        run: |
-          cat << EOF > "$HOME/.npmrc"
-            //registry.npmjs.org/:_authToken=$NPM_TOKEN
-          EOF
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_CONFIG_TOKEN }}
-
-      - name: Publish package
-        if: ${{ steps.release.outputs.release_created }}
+      - name: 🚀 Publish package
         run: npm publish --access public
