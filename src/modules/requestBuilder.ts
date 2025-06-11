@@ -285,7 +285,7 @@ export class RequestBuilder {
     // Prepare URL with query parameters using optimized batching
     const urlWithQuery = new URL(url);
     const serializedParams = this.buildQueryParameters(queryParams);
-    
+
     // Batch append all parameters
     for (const [paramKey, paramValue] of serializedParams) {
       urlWithQuery.searchParams.append(paramKey, paramValue);

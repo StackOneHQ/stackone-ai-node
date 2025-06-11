@@ -1,7 +1,17 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import {
+  type Mock,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+} from 'bun:test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { mockFetch } from './utils/fetch-mock';
+import { type FetchMockResult, mockFetch } from './utils/fetch-mock';
 
 // Mock environment variables
 beforeAll(() => {
@@ -10,8 +20,8 @@ beforeAll(() => {
 
 describe('fetch-specs script', () => {
   // Mocks for fetch and fs
-  let fetchMock;
-  let writeFileSyncSpy;
+  let fetchMock: FetchMockResult;
+  let writeFileSyncSpy: Mock<typeof fs.writeFileSync>;
 
   beforeEach(() => {
     // Set up fetch mock with different responses based on URL
@@ -90,6 +100,6 @@ describe('fetch-specs script', () => {
     expect(writeFileSyncSpy).toHaveBeenCalled();
     const writeFileCall = writeFileSyncSpy.mock.calls[0];
     expect(writeFileCall[0]).toContain('hris.json');
-    expect(JSON.parse(writeFileCall[1])).toEqual(hrisApiSpec);
+    expect(JSON.parse(writeFileCall[1] as string)).toEqual(hrisApiSpec);
   });
 });

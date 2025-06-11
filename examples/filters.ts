@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * HRIS Employee Filters Example
+ * Filters Example
  *
  * This example demonstrates how to use filters with the HRIS list employees endpoint.
  * It showcases the deep object serialization implementation that properly converts
@@ -15,12 +15,14 @@
  * Usage:
  *
  * ```bash
- * bun run examples/hris-employee-filters.ts
+ * bun run examples/filters.ts
  * ```
  */
 
 import assert from 'node:assert';
 import { StackOneToolSet } from '../src';
+
+type DryRunResult = { url: string };
 
 const hriseEmployeeFilters = async (): Promise<void> => {
   // Initialize the toolset
@@ -40,14 +42,14 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates filtering employees updated after a specific date
    */
   console.log('1️⃣ Basic Date Filter Test');
-  const basicDateFilter = await employeesTool.execute(
+  const basicDateFilter = (await employeesTool.execute(
     {
       filter: {
         updated_after: '2023-01-01T00:00:00.000Z',
       },
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Filter object:', { filter: { updated_after: '2023-01-01T00:00:00.000Z' } });
   console.log('Serialized URL:', basicDateFilter.url);
@@ -64,14 +66,14 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates filtering employees by email address
    */
   console.log('2️⃣ Email Filter Test');
-  const emailFilter = await employeesTool.execute(
+  const emailFilter = (await employeesTool.execute(
     {
       filter: {
         email: 'john.doe@company.com',
       },
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Filter object:', { filter: { email: 'john.doe@company.com' } });
   console.log('Serialized URL:', emailFilter.url);
@@ -87,14 +89,14 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates filtering employees by employee number
    */
   console.log('3️⃣ Employee Number Filter Test');
-  const employeeNumberFilter = await employeesTool.execute(
+  const employeeNumberFilter = (await employeesTool.execute(
     {
       filter: {
         employee_number: 'EMP001',
       },
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Filter object:', { filter: { employee_number: 'EMP001' } });
   console.log('Serialized URL:', employeeNumberFilter.url);
@@ -110,7 +112,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates using multiple filter parameters together
    */
   console.log('4️⃣ Multiple Filters Combined Test');
-  const multipleFilters = await employeesTool.execute(
+  const multipleFilters = (await employeesTool.execute(
     {
       filter: {
         updated_after: '2023-06-01T00:00:00.000Z',
@@ -119,7 +121,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
       },
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Filter object:', {
     filter: {
@@ -128,7 +130,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
       employee_number: 'EMP002',
     },
   });
-  console.log('Serialized URL:', multipleFilters.url);
+  console.log('Serialized URL:', (multipleFilters as { url: string }).url);
 
   // Verify all filters are present in the URL
   assert(
@@ -150,7 +152,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates using proxy parameters which also use deepObject serialization
    */
   console.log('5️⃣ Proxy Parameters Test');
-  const proxyParameters = await employeesTool.execute(
+  const proxyParameters = (await employeesTool.execute(
     {
       proxy: {
         custom_field: 'value123',
@@ -161,7 +163,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
       },
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Proxy object:', {
     proxy: {
@@ -194,7 +196,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates combining filters, proxy parameters, and other query parameters
    */
   console.log('6️⃣ Complex Combined Scenario Test');
-  const complexScenario = await employeesTool.execute(
+  const complexScenario = (await employeesTool.execute(
     {
       filter: {
         updated_after: '2023-09-01T00:00:00.000Z',
@@ -211,7 +213,7 @@ const hriseEmployeeFilters = async (): Promise<void> => {
       page_size: '50',
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Complex parameters:', {
     filter: {
@@ -266,13 +268,13 @@ const hriseEmployeeFilters = async (): Promise<void> => {
    * Demonstrates handling of empty filter objects
    */
   console.log('7️⃣ Edge Case - Empty Filter Objects Test');
-  const emptyFilterTest = await employeesTool.execute(
+  const emptyFilterTest = (await employeesTool.execute(
     {
       filter: {},
       fields: 'id,first_name,last_name',
     },
     { dryRun: true }
-  );
+  )) as DryRunResult;
 
   console.log('Empty filter object:', { filter: {}, fields: 'id,first_name,last_name' });
   console.log('Serialized URL:', emptyFilterTest.url);
@@ -288,22 +290,6 @@ const hriseEmployeeFilters = async (): Promise<void> => {
     'Expected URL to not contain empty filter parameter'
   );
   console.log('✅ Empty filter objects handled correctly\n');
-
-  console.log('🎉 All HRIS Employee Filter Tests Passed!');
-  console.log('\n📋 Summary:');
-  console.log('✅ Basic date filtering with updated_after');
-  console.log('✅ Email-based employee filtering');
-  console.log('✅ Employee number filtering');
-  console.log('✅ Multiple filters combined');
-  console.log('✅ Proxy parameters with nested objects');
-  console.log('✅ Complex combined scenarios');
-  console.log('✅ Edge case handling for empty objects');
-  console.log('\n🔧 Deep Object Serialization Features Demonstrated:');
-  console.log('• Nested objects converted to OpenAPI deepObject style (key[nested]=value)');
-  console.log('• Proper URL encoding of special characters');
-  console.log('• Support for multiple levels of nesting');
-  console.log('• Safe handling of empty objects');
-  console.log('• Backward compatibility with primitive parameters');
 };
 
 // Run the example

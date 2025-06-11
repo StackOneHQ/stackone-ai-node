@@ -10,7 +10,7 @@ export interface MockFetchResponse {
   status?: number;
   statusText?: string;
   ok?: boolean;
-  json?: () => Promise<any>;
+  json?: () => Promise<unknown>;
   text?: () => Promise<string>;
   headers?: Record<string, string>;
 }
@@ -48,7 +48,7 @@ export interface FetchMockResult {
   /**
    * The captured request body from the last fetch call
    */
-  requestBody: any;
+  requestBody: unknown;
 
   /**
    * The captured URL from the last fetch call

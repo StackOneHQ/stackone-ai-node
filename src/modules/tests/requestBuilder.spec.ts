@@ -10,21 +10,21 @@ describe('RequestBuilder', () => {
     url: 'https://api.example.com/test/{pathParam}',
     bodyType: 'json' as const,
     params: [
-      { name: 'pathParam', location: ParameterLocation.PATH },
-      { name: 'queryParam', location: ParameterLocation.QUERY },
-      { name: 'headerParam', location: ParameterLocation.HEADER },
-      { name: 'bodyParam', location: ParameterLocation.BODY },
-      { name: 'defaultParam' /* default to body */ },
-      { name: 'filter', location: ParameterLocation.QUERY },
-      { name: 'proxy', location: ParameterLocation.QUERY },
-      { name: 'regularObject', location: ParameterLocation.QUERY },
-      { name: 'simple', location: ParameterLocation.QUERY },
-      { name: 'simpleString', location: ParameterLocation.QUERY },
-      { name: 'simpleNumber', location: ParameterLocation.QUERY },
-      { name: 'simpleBoolean', location: ParameterLocation.QUERY },
-      { name: 'complexObject', location: ParameterLocation.QUERY },
-      { name: 'deepFilter', location: ParameterLocation.QUERY },
-      { name: 'emptyFilter', location: ParameterLocation.QUERY },
+      { name: 'pathParam', location: ParameterLocation.PATH, type: 'string' as const },
+      { name: 'queryParam', location: ParameterLocation.QUERY, type: 'string' as const },
+      { name: 'headerParam', location: ParameterLocation.HEADER, type: 'string' as const },
+      { name: 'bodyParam', location: ParameterLocation.BODY, type: 'string' as const },
+      { name: 'defaultParam', location: ParameterLocation.BODY, type: 'string' as const },
+      { name: 'filter', location: ParameterLocation.QUERY, type: 'object' as const },
+      { name: 'proxy', location: ParameterLocation.QUERY, type: 'object' as const },
+      { name: 'regularObject', location: ParameterLocation.QUERY, type: 'object' as const },
+      { name: 'simple', location: ParameterLocation.QUERY, type: 'string' as const },
+      { name: 'simpleString', location: ParameterLocation.QUERY, type: 'string' as const },
+      { name: 'simpleNumber', location: ParameterLocation.QUERY, type: 'number' as const },
+      { name: 'simpleBoolean', location: ParameterLocation.QUERY, type: 'boolean' as const },
+      { name: 'complexObject', location: ParameterLocation.QUERY, type: 'object' as const },
+      { name: 'deepFilter', location: ParameterLocation.QUERY, type: 'object' as const },
+      { name: 'emptyFilter', location: ParameterLocation.QUERY, type: 'object' as const },
     ],
   };
 
@@ -290,7 +290,7 @@ describe('RequestBuilder', () => {
   describe('Security and Performance Improvements', () => {
     it('should throw error when recursion depth limit is exceeded', async () => {
       // Create a deeply nested object that exceeds the default depth limit of 10
-      let deepObject: any = { value: 'test' };
+      let deepObject: Record<string, unknown> = { value: 'test' };
       for (let i = 0; i < 12; i++) {
         deepObject = { nested: deepObject };
       }
@@ -306,7 +306,7 @@ describe('RequestBuilder', () => {
     });
 
     it('should throw error when circular reference is detected', async () => {
-      const circular: any = { a: { b: 'test' } };
+      const circular: Record<string, unknown> = { a: { b: 'test' } };
       circular.a.circular = circular; // Create circular reference
 
       const params = {
@@ -323,7 +323,7 @@ describe('RequestBuilder', () => {
       const params = {
         pathParam: 'test-value',
         filter: {
-          'valid_key': 'test',
+          valid_key: 'test',
           'invalid key with spaces': 'test', // Should trigger validation error
         },
       };
@@ -353,14 +353,14 @@ describe('RequestBuilder', () => {
 
       // Date should be serialized to ISO string
       expect(url.searchParams.get('filter[dateField]')).toBe('2023-01-01T00:00:00.000Z');
-      
+
       // RegExp should be serialized to string representation
       expect(url.searchParams.get('filter[regexField]')).toBe('/test-pattern/gi');
-      
+
       // Null and undefined should result in empty string (but won't be added since they're filtered out)
       expect(url.searchParams.get('filter[nullField]')).toBeNull();
       expect(url.searchParams.get('filter[undefinedField]')).toBeNull();
-      
+
       // Empty string should be preserved
       expect(url.searchParams.get('filter[emptyString]')).toBe('');
     });
@@ -395,7 +395,7 @@ describe('RequestBuilder', () => {
       // Empty objects should not create any parameters
       expect(url.searchParams.get('emptyFilter')).toBeNull();
       expect(url.searchParams.get('filter[emptyNested]')).toBeNull();
-      
+
       // Valid fields should still work
       expect(url.searchParams.get('filter[validField]')).toBe('test');
     });
@@ -443,7 +443,7 @@ describe('RequestBuilder', () => {
 
     it('should maintain performance with large objects', async () => {
       // Create a moderately large object to test performance optimizations
-      const largeFilter: any = {};
+      const largeFilter: Record<string, unknown> = {};
       for (let i = 0; i < 100; i++) {
         largeFilter[`field_${i}`] = `value_${i}`;
         if (i % 10 === 0) {
@@ -467,7 +467,7 @@ describe('RequestBuilder', () => {
       expect(endTime - startTime).toBeLessThan(100);
 
       const url = new URL(result.url as string);
-      
+
       // Verify some parameters are correctly serialized
       expect(url.searchParams.get('filter[field_0]')).toBe('value_0');
       expect(url.searchParams.get('filter[field_99]')).toBe('value_99');

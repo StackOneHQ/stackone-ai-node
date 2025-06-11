@@ -4,7 +4,7 @@ import { OpenAPILoader } from '../../openapi/loader';
 import { mockFetch } from '../../tests/utils/fetch-mock';
 import { ParameterLocation } from '../../types';
 import type { AuthenticationConfig } from '../base';
-import { OpenAPIToolSet } from '../openapi';
+import { OpenAPIToolSet, type OpenAPIToolSetConfigFromUrl } from '../openapi';
 
 describe('OpenAPIToolSet', () => {
   // Path to test fixtures
@@ -116,7 +116,7 @@ describe('OpenAPIToolSet', () => {
 
   it('should throw error if URL is not provided to fromUrl', async () => {
     // Attempt to create an instance without URL
-    await expect(OpenAPIToolSet.fromUrl({} as any)).rejects.toThrow();
+    await expect(OpenAPIToolSet.fromUrl({} as OpenAPIToolSetConfigFromUrl)).rejects.toThrow();
   });
 
   it('should set headers on tools', () => {
