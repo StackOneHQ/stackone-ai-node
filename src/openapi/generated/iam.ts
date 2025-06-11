@@ -3987,7 +3987,7 @@ export const iamSpec = {
                 items: {},
               },
             ],
-            example: 'abc',
+            example: 'application/pdf',
             nullable: true,
           },
         },
@@ -4982,10 +4982,6 @@ export const iamSpec = {
                 type: 'object',
               },
               {
-                type: 'string',
-                format: 'binary',
-              },
-              {
                 type: 'array',
                 items: {
                   type: 'integer',
@@ -4994,17 +4990,24 @@ export const iamSpec = {
                   maximum: 255,
                 },
               },
-              {
-                type: 'string',
-                format: 'byte',
-              },
             ],
             additionalProperties: true,
             nullable: true,
           },
           response: {
-            type: 'object',
-            additionalProperties: true,
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: true,
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+              {
+                type: 'string',
+              },
+            ],
             nullable: true,
           },
         },
