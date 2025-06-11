@@ -2500,6 +2500,7 @@ Map {
                         "ein",
                         "other",
                         "unknown",
+                        "unmapped_value",
                         null,
                       ],
                       "example": "ssn",
@@ -5074,6 +5075,7 @@ Map {
                         "ein",
                         "other",
                         "unknown",
+                        "unmapped_value",
                         null,
                       ],
                       "example": "ssn",
@@ -5925,6 +5927,11 @@ Map {
             "name": "next",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off",
       },
@@ -5944,9 +5951,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -6044,6 +6056,11 @@ Map {
           {
             "location": "query",
             "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -6231,6 +6248,7 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
                   "unmapped_value",
                   null,
                 ],
@@ -6358,6 +6376,11 @@ Map {
             "name": "fields",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off/{subResourceId}",
       },
@@ -6377,9 +6400,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -6444,6 +6472,11 @@ Map {
           {
             "location": "query",
             "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -6636,6 +6669,7 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
                   "unmapped_value",
                   null,
                 ],
@@ -15891,6 +15925,11 @@ Map {
             "name": "next",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/time_off",
       },
@@ -15910,9 +15949,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -16000,6 +16044,11 @@ Map {
           {
             "location": "query",
             "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -16179,6 +16228,7 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
                   "unmapped_value",
                   null,
                 ],
@@ -16294,6 +16344,11 @@ Map {
             "name": "fields",
             "type": "string",
           },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
         ],
         "url": "https://api.stackone.com/unified/hris/time_off/{id}",
       },
@@ -16313,9 +16368,14 @@ Map {
       },
       "parameters": {
         "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,duration,time_off_policy_id,remote_time_off_policy_id,reason,created_at,updated_at,policy",
             "type": "string",
           },
           "file_path": {
@@ -16371,6 +16431,11 @@ Map {
           {
             "location": "query",
             "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
             "type": "string",
           },
         ],
@@ -16558,6 +16623,7 @@ Map {
                   "cancelled",
                   "rejected",
                   "pending",
+                  "deleted",
                   "unmapped_value",
                   null,
                 ],
@@ -19494,6 +19560,170 @@ Map {
           },
         ],
         "url": "https://api.stackone.com/unified/hris/time_off_policies/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List Assigned Time Off Policies",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_policies",
+      },
+      "name": "hris_list_employee_time_off_policies",
+      "parameterMapper": ParameterMapper {
+        "transformers": 
+Map {
+          "file_path" => {
+            "transforms": {
+              "content": [Function],
+              "file_format": [Function],
+              "name": [Function],
+            },
+          },
+        }
+,
+      },
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
+            "type": "string",
+          },
+          "file_path": {
+            "description": "Convenience parameter that will be transformed into other parameters. Try and use this parameter in your tool call.",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "id": {
+            "type": "string",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/time_off_policies",
       },
     },
   ],
