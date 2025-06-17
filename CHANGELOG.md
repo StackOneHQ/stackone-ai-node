@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.1.0...v0.2.0) (2025-06-17)
+
+
+### Features
+
+* experimental doc handling ([#50](https://github.com/StackOneHQ/stackone-ai-node/issues/50)) ([366f3ca](https://github.com/StackOneHQ/stackone-ai-node/commit/366f3ca82e6f1acb19c6d62aa180efc4c8e6cdef))
+
 ## [0.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.0.14...v0.1.0) (2025-06-11)
 
 
