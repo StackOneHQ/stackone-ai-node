@@ -49,6 +49,7 @@ await generateText({
   maxSteps: 3,
 });
 ```
+
 > [!NOTE]  
 > The workflow planner is in closed beta and only available to design partners. Apply for the waitlist [here](https://www.stackone.com/demo).
 
@@ -275,50 +276,80 @@ const toolset = new StackOneToolSet({ baseUrl: "https://api.example-dev.com" });
 
 [View full example](examples/custom-base-url.ts)
 
-### Parameter Transformations
+### Advanced Parameter Transformations
 
-You can derive multiple parameters from a single source parameter.
+**⚠️ EXPERIMENTAL**: For advanced use cases, you can dynamically transform tool schemas and parameters using the experimental schema override and preExecute functionality.
 
-This is particularly useful for features like file uploads, where you can derive file content, name, and format from a file path, or for user data, where you can derive multiple user attributes from a user ID by doing a database lookup.
+This two-stage transformation approach allows you to:
 
-You can also define your own transformations for any type of parameter:
+1. **Schema Override**: Change the tool's input schema at creation time
+2. **PreExecute**: Transform parameters from the override schema back to the original API format at execution time
+
+This is particularly powerful for document handling, where you can simplify complex file upload parameters:
 
 ```typescript
-import { OpenAPIToolSet } from "@stackone/ai";
+import { StackOneToolSet } from "@stackone/ai";
+import type {
+  Experimental_SchemaOverride,
+  Experimental_PreExecuteFunction,
+} from "@stackone/ai";
 
-// Define a custom transformation configuration for user data
-const userTransforms = {
-  transforms: {
-    first_name: (userId) => {
-      // Fetch user data and return first name
-      return getUserFirstName(userId);
-    },
-    last_name: (userId) => {
-      // Fetch user data and return last name
-      return getUserLastName(userId);
-    },
-    email: (userId) => {
-      // Fetch user data and return email
-      return getUserEmail(userId);
-    },
-  },
-  derivedParameters: ["first_name", "last_name", "email"],
+// 1. Schema Override: Simplify the input schema
+const documentSchemaOverride: Experimental_SchemaOverride = (
+  originalSchema
+) => {
+  // Replace complex file parameters with simple doc_id
+  const newProperties = { ...originalSchema.properties };
+  delete newProperties.content;
+  delete newProperties.name;
+  delete newProperties.file_format;
+
+  newProperties.doc_id = {
+    type: "string",
+    description: "Document path or identifier",
+  };
+
+  return { ...originalSchema, properties: newProperties };
 };
 
-// Initialize the toolset with custom transformation config
-const toolset = new OpenAPIToolSet({
-  filePath: "/path/to/openapi.json",
-  transformers: {
-    user_id: userTransforms,
-  },
+// 2. PreExecute: Transform the simplified parameters back to API format
+const documentPreExecute: Experimental_PreExecuteFunction = async (params) => {
+  const { doc_id, ...otherParams } = params;
+
+  // Read file and convert to required API format
+  const fileContent = readFileSync(doc_id);
+  const base64Content = fileContent.toString("base64");
+  const fileName = basename(doc_id);
+  const extension = extname(doc_id).slice(1);
+
+  return {
+    ...otherParams,
+    content: base64Content,
+    name: fileName,
+    file_format: { value: extension },
+  };
+};
+
+// Use the experimental transformation
+const toolset = new StackOneToolSet();
+const tools = toolset.getStackOneTools("hris_*", "account_id");
+
+const documentTool = tools.getTool("hris_upload_employee_document", {
+  experimental_schemaOverride: documentSchemaOverride,
+  experimental_preExecute: documentPreExecute,
 });
 
-// Execute with just the user_id parameter
-// The first_name, last_name, and email will be derived automatically
-const result = await tool.execute({ user_id: "user123" });
+// Now you can use the simplified schema
+const result = await documentTool.execute({
+  doc_id: "/path/to/document.pdf", // Simplified input
+  id: "employee_123",
+  category: { value: "shared" },
+});
 ```
 
-[View full example](examples/openapi-transformations.ts)
+⚠️ **Important**: This is experimental functionality and the API may change in future versions.
+
+[View full example](examples/experimental-document-handling.ts)
 
 ### Testing with dryRun
 

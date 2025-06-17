@@ -4,7 +4,6 @@
  * These account IDs are organized by vertical and can be reused across examples.
  * Update these values with your actual account IDs for each integration.
  */
-
 export const ACCOUNT_IDS = {
   // Human Resources Information System
   HRIS: '46132201201510402136',
@@ -25,21 +24,3 @@ export const ACCOUNT_IDS = {
     INVALID: 'invalid_test_account_id',
   },
 } as const;
-
-/**
- * Helper function to get account ID by vertical
- */
-export const getAccountId = (vertical: keyof typeof ACCOUNT_IDS): string => {
-  const accountId = ACCOUNT_IDS[vertical];
-
-  if (typeof accountId === 'string') {
-    return accountId;
-  }
-
-  // For TEST vertical, return VALID as default
-  if (vertical === 'TEST') {
-    return ACCOUNT_IDS.TEST.VALID;
-  }
-
-  throw new Error(`Invalid vertical: ${vertical}`);
-};
