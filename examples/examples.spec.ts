@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { $ } from 'bun';
-import { directoryExists, listFilesInDirectory, joinPaths } from '../src/utils/file';
+import { directoryExists, joinPaths, listFilesInDirectory } from '../src/utils/file';
 
 describe('Examples', () => {
   it(

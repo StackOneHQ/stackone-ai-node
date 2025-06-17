@@ -6,9 +6,9 @@
  * For example, onboard a new hire from your ATS to your HRIS.
  */
 
-import { StackOneToolSet } from '../src';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
+import { StackOneToolSet } from '../src';
 import { ACCOUNT_IDS } from './constants';
 
 export const planningModule = async (): Promise<void> => {
