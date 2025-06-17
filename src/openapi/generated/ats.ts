@@ -18190,6 +18190,15 @@ export const atsSpec = {
               },
             ],
           },
+          documents: {
+            description:
+              'Document Properties. Providing this attempts to upload files with the application.',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/UnifiedUploadRequestDto',
+            },
+          },
         },
       },
       AtsCreateBackgroundCheckOrderRequestDto: {
