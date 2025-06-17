@@ -11,6 +11,7 @@ import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { StackOneToolSet } from '../src';
 import type { JsonDict } from '../src/types';
+import { ACCOUNT_IDS } from './constants';
 
 interface ToolCall {
   toolName: string;
@@ -20,7 +21,7 @@ interface ToolCall {
 const humanInTheLoopExample = async (): Promise<void> => {
   // Create a toolset
   const toolset = new StackOneToolSet();
-  const hrisAccountId = 'workday_account_id';
+  const hrisAccountId = ACCOUNT_IDS.HRIS;
 
   // Get the create employee tool
   const createEmployeeTool = toolset.getTool('hris_create_employee', {

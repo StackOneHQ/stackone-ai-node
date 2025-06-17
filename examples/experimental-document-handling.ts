@@ -23,8 +23,9 @@ import {
   type Experimental_SchemaOverride,
   StackOneToolSet,
 } from '../src';
+import { ACCOUNT_IDS } from './constants';
 
-const accountId = '45072196112816593343';
+const accountId = ACCOUNT_IDS.HRIS;
 
 interface FileFormatParam {
   value: string;

@@ -16,39 +16,40 @@
 
 import assert from 'node:assert';
 import { StackOneToolSet } from '../src';
+import { ACCOUNT_IDS } from './constants';
 
 const accountIdUsage = async (): Promise<void> => {
   /*
    * Set account ID on toolset initialization
    */
-  const toolset = new StackOneToolSet({ accountId: 'initial-account-id' });
+  const toolset = new StackOneToolSet({ accountId: ACCOUNT_IDS.TEST.VALID });
 
   const tools = toolset.getTools('hris_*');
   const employeeTool = tools.getStackOneTool('hris_list_employees');
 
   assert(
-    employeeTool.getAccountId() === 'initial-account-id',
+    employeeTool.getAccountId() === ACCOUNT_IDS.TEST.VALID,
     'Account ID should match what was set'
   );
 
   /*
    * Setting account ID when getting tools (overrides toolset account ID)
    */
-  const toolsWithOverride = toolset.getStackOneTools('hris_*', 'override-account-id');
+  const toolsWithOverride = toolset.getStackOneTools('hris_*', ACCOUNT_IDS.TEST.OVERRIDE);
   const employeeToolWithOverride = toolsWithOverride.getStackOneTool('hris_list_employees');
 
   assert(
-    employeeToolWithOverride?.getAccountId() === 'override-account-id',
+    employeeToolWithOverride?.getAccountId() === ACCOUNT_IDS.TEST.OVERRIDE,
     'Account ID should match what was set'
   );
 
   /*
    * Set the account ID directly on the tool
    */
-  employeeTool.setAccountId('direct-account-id');
+  employeeTool.setAccountId(ACCOUNT_IDS.TEST.DIRECT);
 
   assert(
-    employeeTool.getAccountId() === 'direct-account-id',
+    employeeTool.getAccountId() === ACCOUNT_IDS.TEST.DIRECT,
     'Account ID should match what was set'
   );
 };

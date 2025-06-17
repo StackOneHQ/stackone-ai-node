@@ -5,11 +5,12 @@
 import assert from 'node:assert';
 import OpenAI from 'openai';
 import { StackOneToolSet } from '../src';
+import { ACCOUNT_IDS } from './constants';
 
 const openaiIntegration = async (): Promise<void> => {
   // Initialize StackOne
   const toolset = new StackOneToolSet();
-  const accountId = '45072196112816593343';
+  const accountId = ACCOUNT_IDS.HRIS;
 
   // Get the correct tool
   const tools = toolset.getStackOneTools('hris_get_*', accountId);

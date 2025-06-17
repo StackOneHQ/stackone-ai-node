@@ -33,10 +33,12 @@ dotenv.config();
  * StackOne uses account IDs to identify different integrations.
  * See the example in the README for more details.
  *
- * This example will hardcode the account ID:
+ * This example will use the centralized account ID:
  */
 
-const accountId = '45072196112816593343';
+import { ACCOUNT_IDS } from './constants';
+
+const accountId = ACCOUNT_IDS.HRIS;
 
 /**
  * # Quickstart
@@ -59,9 +61,9 @@ const quickstart = async (): Promise<void> => {
   assert(employeeTool !== undefined, 'Expected to find hris_list_employees tool');
 
   // Execute the tool and verify the response
-  const employees = await employeeTool.execute();
-  assert(Array.isArray(employees), 'Expected employees to be an array');
-  assert(employees.length > 0, 'Expected to find at least one employee');
+  const result = await employeeTool.execute();
+  assert(Array.isArray(result.data), 'Expected employees to be an array');
+  assert(result.data.length > 0, 'Expected to find at least one employee');
 };
 
 // Run the example

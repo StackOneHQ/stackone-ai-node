@@ -19,4 +19,4 @@ jobs:
 
       # TODO change this to bun test
       - name: Run tests
-        run: bun test -u
+        run: bun test:unit -u

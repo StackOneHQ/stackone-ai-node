@@ -6,11 +6,12 @@ import assert from 'node:assert';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { StackOneToolSet } from '../src';
+import { ACCOUNT_IDS } from './constants';
 
 const aiSdkIntegration = async (): Promise<void> => {
   // Initialize StackOne
   const toolset = new StackOneToolSet();
-  const accountId = '45072196112816593343';
+  const accountId = ACCOUNT_IDS.HRIS;
 
   // Get HRIS tools
   const tools = toolset.getStackOneTools('hris_get_*', accountId);
@@ -20,13 +21,13 @@ const aiSdkIntegration = async (): Promise<void> => {
 
   // Use max steps to automatically call the tool if it's needed
   const { text } = await generateText({
-    model: openai('gpt-4o-mini'),
+    model: openai('gpt-4.1-mini'),
     tools: aiSdkTools,
     prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
     maxSteps: 3,
   });
 
-  assert(text.includes('Isacc Newton'), 'Expected employee name to be included in the response');
+  assert(text.includes('Michael'), 'Expected employee name to be included in the response');
 };
 
 aiSdkIntegration();

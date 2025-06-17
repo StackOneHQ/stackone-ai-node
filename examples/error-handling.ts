@@ -6,6 +6,7 @@
 
 import assert from 'node:assert';
 import { StackOneAPIError, StackOneError, StackOneToolSet, ToolSetConfigError } from '../src';
+import { ACCOUNT_IDS } from './constants';
 
 const errorHandling = async (): Promise<void> => {
   // Example 1: Handle initialization errors
@@ -32,7 +33,7 @@ const errorHandling = async (): Promise<void> => {
   // Example 2: Handle API errors
   const testApiErrors = async (): Promise<void> => {
     const toolset = new StackOneToolSet();
-    const accountId = 'invalid-account-id'; // Invalid account ID to force an error
+    const accountId = ACCOUNT_IDS.TEST.INVALID; // Invalid account ID to force an error
 
     try {
       const tools = toolset.getStackOneTools('hris_*', accountId);

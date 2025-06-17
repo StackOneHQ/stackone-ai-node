@@ -21,13 +21,14 @@
 
 import assert from 'node:assert';
 import { StackOneToolSet } from '../src';
+import { ACCOUNT_IDS } from './constants';
 
 type DryRunResult = { url: string };
 
 const hriseEmployeeFilters = async (): Promise<void> => {
   // Initialize the toolset
   const toolset = new StackOneToolSet();
-  const accountId = 'test-account-id';
+  const accountId = ACCOUNT_IDS.TEST.VALID;
 
   // Get the HRIS tools with account ID
   const tools = toolset.getStackOneTools('hris_*', accountId);
