@@ -29,6 +29,9 @@
     "lint": "biome check .",
     "format": "biome format --write ."
   },
+  "dependencies": {
+    "json-schema": "^0.4.0"
+  },
   "devDependencies": {
     "@ai-sdk/openai": "^1.1.14",
     "@biomejs/biome": "^1.5.3",
@@ -38,7 +41,6 @@
     "openai": "^4.85.4",
     "dotenv": "^16.3.1",
     "husky": "^9.1.7",
-    "json-schema": "^0.4.0",
     "lint-staged": "^15.2.0",
     "mkdocs": "^0.0.1",
     "openapi-types": "^12.1.3",
