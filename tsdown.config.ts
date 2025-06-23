@@ -16,3 +16,8 @@ export default defineConfig({
 	unbundle: true,
 	exports: true,
  });
+  hooks:{
+    'build:done': async () => {
+      // sourcemap files for generated code are not needed
+      await $`rm -rf ./dist/openapi/generated/*.map`
+    }

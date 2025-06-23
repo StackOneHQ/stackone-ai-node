@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "prepare": "husky && bun run fetch:specs",
-    "build": "tsdown",
+    "build": "bun -b tsdown",
     "rebuild": "bun run fetch:specs && bun run build",
     "prepublishOnly": "bun run rebuild",
     "test:unit": "bun test src",
