@@ -8,6 +8,7 @@ export default defineConfig({
 	sourcemap: true,
 	treeshake: true,
 	dts: {
+    tsgo: true,
     resolve: [/^@types\//]
   },
 	publint: true,
