@@ -43,6 +43,6 @@
   "files": {
     "ignoreUnknown": true,
     "ignore": ["dist/**", "node_modules/**"],
-    "include": ["src/**/*.ts", "examples/**/*.ts"]
+    "include": ["src/**/*.ts", "examples/**/*.ts", "./tsdown.config.ts"]
   }
 }
