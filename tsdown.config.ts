@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsdown';
 import { $ } from 'bun';
+import { defineConfig } from 'tsdown';
 
 export default defineConfig({
   entry: ['./src/index.ts'],
