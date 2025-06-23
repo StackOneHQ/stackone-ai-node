@@ -13,7 +13,6 @@
   ],
   "scripts": {
     "prepare": "husky && bun run fetch:specs",
-    "prebuild": "bun run --shell bun dist",
     "build": "tsdown",
     "rebuild": "bun run fetch:specs && bun run build",
     "prepublishOnly": "bun run rebuild",
