@@ -13,4 +13,5 @@ export default defineConfig({
 	publint: true,
 	unused: true,
 	unbundle: true,
+	exports: true,
  });

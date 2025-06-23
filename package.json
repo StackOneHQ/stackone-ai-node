@@ -2,9 +2,13 @@
   "name": "@stackone/ai",
   "version": "0.2.0",
   "description": "Tools for agents to perform actions on your SaaS",
-  "module": "dist/index.js",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "type": "module",
   "files": [
     "dist",
