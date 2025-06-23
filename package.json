@@ -46,9 +46,6 @@
     "typescript": "^5.0.0",
     "ai": "^4.1.46"
   },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
