@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "prepare": "husky && bun run fetch:specs",
-    "prebuild": "rimraf dist",
+    "prebuild": "bun run --shell bun dist",
     "build": "bun build ./src/index.ts --outdir ./dist --target node && tsc --emitDeclarationOnly",
     "rebuild": "bun run fetch:specs && bun run build",
     "prepublishOnly": "bun run rebuild",
@@ -42,7 +42,6 @@
     "lint-staged": "^15.2.0",
     "mkdocs": "^0.0.1",
     "openapi-types": "^12.1.3",
-    "rimraf": "^6.0.1",
     "typescript": "^5.0.0",
     "ai": "^4.1.46"
   },
