@@ -30,11 +30,11 @@
     "format": "biome format --write ."
   },
   "devDependencies": {
+    "@ai-sdk/openai": "^1.1.14",
     "@biomejs/biome": "^1.5.3",
     "@types/bun": "^1.2.4",
     "@types/json-schema": "^7.0.15",
     "@types/node": "^22.13.5",
-    "@ai-sdk/openai": "^1.1.14",
     "openai": "^4.85.4",
     "dotenv": "^16.3.1",
     "husky": "^9.1.7",
@@ -45,6 +45,11 @@
     "rimraf": "^6.0.1",
     "typescript": "^5.0.0",
     "ai": "^4.1.46"
+  },
+  "peerDependencies": {
+    "ai": "4.x",
+    "@ai-sdk/openai": "1.x",
+    "openai": "4.x"
   },
   "repository": {
     "type": "git",
