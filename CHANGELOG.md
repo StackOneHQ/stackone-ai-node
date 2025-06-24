@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.2.0...v0.2.1) (2025-06-24)
+
+
+### Bug Fixes
+
+* **tooling:** typecheck ([#54](https://github.com/StackOneHQ/stackone-ai-node/issues/54)) ([025ae5c](https://github.com/StackOneHQ/stackone-ai-node/commit/025ae5c2f503e3132fd2bcb5946a38128b701316))
+
 ## [0.2.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.1.0...v0.2.0) (2025-06-17)
 
 
