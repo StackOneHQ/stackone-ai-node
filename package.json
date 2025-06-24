@@ -30,6 +30,7 @@
     "docs:build": "bun run build:docs && mkdocs build",
     "docs:deploy": "bun run build:docs && mkdocs gh-deploy --force",
     "lint": "biome check .",
+    "typecheck": "tsgo --noEmit",
     "format": "biome format --write ."
   },
   "dependencies": {
