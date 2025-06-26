@@ -77,9 +77,8 @@
   "bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
   "homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": [
-      "biome format --write",
-      "bun run typecheck"
+    "*": [
+      "biome check --write --no-errors-on-unmatched"
     ]
   }
 }
