@@ -2463,19 +2463,19 @@ export const crmSpec = {
   tags: [
     {
       name: 'Accounts',
-      description: '',
+      description: 'Customer or business accounts.',
     },
     {
       name: 'Contacts',
-      description: '',
+      description: 'People or organizations that can be contacted.',
     },
     {
       name: 'Custom Field Definitions',
-      description: '',
+      description: 'Definitions for custom fields on CRM resources.',
     },
     {
       name: 'Lists',
-      description: '',
+      description: 'Lists for organizing contacts or accounts.',
     },
   ],
   servers: [
@@ -3326,28 +3326,24 @@ export const crmSpec = {
           },
           options: {
             description: 'An array of possible options for the custom field.',
-            example: ['Not Started', 'In Progress', 'Completed', 'Overdue'],
+            example: [
+              {
+                id: 'option_1',
+                value: 'Not Started',
+              },
+              {
+                id: 'option_2',
+                value: 'In Progress',
+              },
+              {
+                id: 'option_3',
+                value: 'Completed',
+              },
+            ],
             nullable: true,
             type: 'array',
             items: {
-              oneOf: [
-                {
-                  type: 'string',
-                },
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'boolean',
-                },
-                {
-                  type: 'object',
-                },
-                {
-                  type: 'array',
-                  items: {},
-                },
-              ],
+              $ref: '#/components/schemas/CustomFieldOption',
             },
           },
         },
@@ -3395,6 +3391,23 @@ export const crmSpec = {
           },
         },
         required: ['data'],
+      },
+      CustomFieldOption: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description:
+              'The unique identifier for the option to be used when updating the custom field',
+            example: 'option_123',
+          },
+          value: {
+            type: 'string',
+            description: 'The human readable value of the option',
+            example: 'Not Started',
+          },
+        },
+        required: ['id', 'value'],
       },
       CustomFields: {
         type: 'object',

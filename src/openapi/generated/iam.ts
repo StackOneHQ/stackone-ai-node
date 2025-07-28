@@ -2464,27 +2464,27 @@ export const iamSpec = {
   tags: [
     {
       name: 'Users',
-      description: '',
+      description: 'People or accounts with access to the system.',
     },
     {
       name: 'Roles',
-      description: '',
+      description: 'Roles assigned to users for access control.',
     },
     {
       name: 'Groups',
-      description: '',
+      description: 'Groups for organizing users.',
     },
     {
       name: 'Policies',
-      description: '',
+      description: 'Security and access policies.',
     },
     {
       name: 'Permissions',
-      description: '',
+      description: 'Specific permissions granted to users or roles.',
     },
     {
       name: 'Resources',
-      description: '',
+      description: 'Resources that can be accessed or managed.',
     },
   ],
   servers: [

@@ -454,7 +454,7 @@ export const documentsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,url,size,file_format,path,owner_id,remote_owner_id,folder_id,remote_folder_id,drive_id,remote_drive_id,export_formats,created_at,updated_at,has_content,has_children',
+                'id,remote_id,name,description,url,size,file_format,path,owner_id,remote_owner_id,folder_id,remote_folder_id,drive_id,remote_drive_id,export_formats,default_download_format,created_at,updated_at,has_content,has_children,all_parent_folder_ids,remote_all_parent_folder_ids',
               type: 'string',
             },
           },
@@ -463,6 +463,8 @@ export const documentsSpec = {
             required: false,
             in: 'query',
             description: 'Documents Files Filter',
+            explode: true,
+            style: 'deepObject',
             schema: {
               properties: {
                 updated_after: {
@@ -472,6 +474,40 @@ export const documentsSpec = {
                   type: 'string',
                   nullable: true,
                   additionalProperties: false,
+                },
+                name: {
+                  description: 'Search if the name of the file contains the string',
+                  example: 'john_doe_resume.pdf',
+                  type: 'string',
+                  nullable: true,
+                },
+                content: {
+                  description:
+                    'Search if the contents of the file contains the string (contents can include file metadata)',
+                  example: 'FAQ of the project',
+                  type: 'string',
+                  nullable: true,
+                },
+                created_after: {
+                  description:
+                    'Use a string with a date to only select results created after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                drive_id: {
+                  description: 'Use to only include Files within the specified Drive',
+                  example: '1234567890',
+                  type: 'string',
+                  nullable: true,
+                },
+                folder_id: {
+                  description:
+                    'Use to only include Files within the specified Folder. Required when requesting nested items',
+                  example: '1234567890',
+                  type: 'string',
+                  nullable: true,
                 },
               },
               nullable: true,
@@ -519,6 +555,42 @@ export const documentsSpec = {
             schema: {
               nullable: true,
               example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+          {
+            name: 'folder_id',
+            required: false,
+            in: 'query',
+            description:
+              'Use to only include Files within the specified Folder. Required when requesting nested items',
+            schema: {
+              nullable: true,
+              example: '1234567890',
+              type: 'string',
+            },
+          },
+          {
+            name: 'nested_items',
+            required: false,
+            in: 'query',
+            description:
+              'When "true" and used with filter[folder_id], the response includes Files and Files within descendant Folders',
+            schema: {
+              nullable: true,
+              default: 'false',
+              example: 'true',
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be included in the response',
+            schema: {
+              nullable: true,
+              example: 'all_parent_folder_ids',
               type: 'string',
             },
           },
@@ -755,7 +827,18 @@ export const documentsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,url,size,file_format,path,owner_id,remote_owner_id,folder_id,remote_folder_id,drive_id,remote_drive_id,export_formats,created_at,updated_at,has_content,has_children',
+                'id,remote_id,name,description,url,size,file_format,path,owner_id,remote_owner_id,folder_id,remote_folder_id,drive_id,remote_drive_id,export_formats,default_download_format,created_at,updated_at,has_content,has_children,all_parent_folder_ids,remote_all_parent_folder_ids',
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be included in the response',
+            schema: {
+              nullable: true,
+              example: 'all_parent_folder_ids',
               type: 'string',
             },
           },
@@ -915,194 +998,6 @@ export const documentsSpec = {
         },
       },
     },
-    '/unified/documents/files/search': {
-      post: {
-        operationId: 'documents_search_files',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'x-stackone-api-session-token',
-            in: 'header',
-            description: 'The session token',
-            required: false,
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/DocumentsFilesSearchRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '200': {
-            description: 'The list of files matching the search query was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/FilesSearchResponse',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Search Files',
-        tags: ['Files'],
-        'x-speakeasy-group': 'documents',
-        'x-speakeasy-name-override': 'search_files',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
     '/unified/documents/folders': {
       get: {
         operationId: 'documents_list_folders',
@@ -1148,7 +1043,7 @@ export const documentsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,url,size,path,owner_id,remote_owner_id,parent_folder_id,remote_parent_folder_id,drive_id,remote_drive_id,created_at,updated_at,has_content,has_children,is_root',
+                'id,remote_id,name,description,url,size,path,owner_id,remote_owner_id,parent_folder_id,remote_parent_folder_id,drive_id,remote_drive_id,created_at,updated_at,has_content,has_children,is_root,all_parent_folder_ids,remote_all_parent_folder_ids',
               type: 'string',
             },
           },
@@ -1157,12 +1052,29 @@ export const documentsSpec = {
             required: false,
             in: 'query',
             description: 'Documents Folders Filter',
+            explode: true,
+            style: 'deepObject',
             schema: {
               properties: {
                 updated_after: {
                   description:
                     'Use a string with a date to only select results updated after that given date',
                   example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                drive_id: {
+                  description: 'Use to only include Folders within the specified Drive',
+                  example: '1234567890',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                folder_id: {
+                  description:
+                    'Use to only include Folders within the specified Folder. Required when requesting nested items',
+                  example: '1234567890',
                   type: 'string',
                   nullable: true,
                   additionalProperties: false,
@@ -1213,6 +1125,42 @@ export const documentsSpec = {
             schema: {
               nullable: true,
               example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+          {
+            name: 'folder_id',
+            required: false,
+            in: 'query',
+            description:
+              'Use to only include Folders within the specified Folder. Required when requesting nested items',
+            schema: {
+              nullable: true,
+              example: '1234567890',
+              type: 'string',
+            },
+          },
+          {
+            name: 'nested_items',
+            required: false,
+            in: 'query',
+            description:
+              'When "true" and used with filter[folder_id], the response includes Folders and their descendant Folders',
+            schema: {
+              nullable: true,
+              default: 'false',
+              example: 'true',
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be included in the response',
+            schema: {
+              nullable: true,
+              example: 'all_parent_folder_ids',
               type: 'string',
             },
           },
@@ -1440,7 +1388,18 @@ export const documentsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,url,size,path,owner_id,remote_owner_id,parent_folder_id,remote_parent_folder_id,drive_id,remote_drive_id,created_at,updated_at,has_content,has_children,is_root',
+                'id,remote_id,name,description,url,size,path,owner_id,remote_owner_id,parent_folder_id,remote_parent_folder_id,drive_id,remote_drive_id,created_at,updated_at,has_content,has_children,is_root,all_parent_folder_ids,remote_all_parent_folder_ids',
+              type: 'string',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be included in the response',
+            schema: {
+              nullable: true,
+              example: 'all_parent_folder_ids',
               type: 'string',
             },
           },
@@ -1653,6 +1612,8 @@ export const documentsSpec = {
             required: false,
             in: 'query',
             description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
             schema: {
               properties: {
                 updated_after: {
@@ -2105,15 +2066,15 @@ export const documentsSpec = {
   tags: [
     {
       name: 'Files',
-      description: '',
+      description: 'Files that can be uploaded or managed.',
     },
     {
       name: 'Folders',
-      description: '',
+      description: 'Folders for organizing files.',
     },
     {
       name: 'Drives',
-      description: '',
+      description: 'Drives for storing and managing files.',
     },
   ],
   servers: [
@@ -2246,52 +2207,6 @@ export const documentsSpec = {
           },
         },
         required: ['statusCode', 'message', 'timestamp'],
-      },
-      DocumentsFilesSearchRequestDto: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'string',
-            description: 'The query to search for',
-            example: 'test',
-          },
-          field: {
-            type: 'string',
-            description:
-              'The specific field to search within. If not provided, the search will be performed across all searchable text fields',
-            example: 'name',
-            nullable: true,
-          },
-          operation_type: {
-            description:
-              'The operation type to use for the query. If not provided, the default operation is `contains`.',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OperationTypeEnumApiModel',
-              },
-            ],
-          },
-          params: {
-            description: 'The additional parameters of the query',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/UnifiedSearchParamsRequestDto',
-              },
-            ],
-          },
-          passthrough: {
-            type: 'object',
-            description: 'Value to pass through to the provider',
-            example: {
-              other_known_names: 'John Doe',
-            },
-            additionalProperties: true,
-            nullable: true,
-          },
-        },
-        required: ['query'],
       },
       DriveResult: {
         type: 'object',
@@ -3714,6 +3629,12 @@ export const documentsSpec = {
               type: 'string',
             },
           },
+          default_download_format: {
+            type: 'string',
+            description: 'Default download format',
+            example: 'application/pdf',
+            nullable: true,
+          },
           remote_owner_id: {
             type: 'string',
             description: "Provider's unique identifier of the owner of this file",
@@ -3761,16 +3682,41 @@ export const documentsSpec = {
             nullable: true,
           },
           has_content: {
-            type: 'boolean',
             description: 'Whether the file has content',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           has_children: {
-            type: 'boolean',
             description: 'Whether the file has children',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
+          },
+          all_parent_folder_ids: {
+            description: 'List of containing parent Folder IDs in descending order',
+            example: ['0123456789'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
           },
         },
       },
@@ -3781,25 +3727,6 @@ export const documentsSpec = {
             type: 'string',
             nullable: true,
           },
-          data: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/Files',
-            },
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-        required: ['data'],
-      },
-      FilesSearchResponse: {
-        type: 'object',
-        properties: {
           data: {
             type: 'array',
             items: {
@@ -3930,22 +3857,55 @@ export const documentsSpec = {
             nullable: true,
           },
           has_content: {
-            type: 'boolean',
             description: 'Whether the folder has content',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           has_children: {
-            type: 'boolean',
             description: 'Whether the folder has children',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           is_root: {
-            type: 'boolean',
             description: 'Whether the folder is at the root level of the drive',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
+          },
+          all_parent_folder_ids: {
+            description: 'List of containing parent Folder IDs in descending order',
+            example: ['0123456789'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
           },
         },
       },
@@ -4059,42 +4019,6 @@ export const documentsSpec = {
           },
         },
         required: ['statusCode', 'message', 'timestamp'],
-      },
-      OperationTypeEnumApiModel: {
-        type: 'object',
-        properties: {
-          value: {
-            type: 'string',
-            description: 'The operation type of the query',
-            enum: ['contains', 'equals', 'not_equals', 'unmapped_value', null],
-            example: 'contains',
-            default: 'contains',
-            'x-speakeasy-unknown-values': 'allow',
-            nullable: true,
-          },
-          source_value: {
-            oneOf: [
-              {
-                type: 'string',
-              },
-              {
-                type: 'number',
-              },
-              {
-                type: 'boolean',
-              },
-              {
-                type: 'object',
-              },
-              {
-                type: 'array',
-                items: {},
-              },
-            ],
-            example: 'contains',
-            nullable: true,
-          },
-        },
       },
       PreconditionFailedResponse: {
         type: 'object',
@@ -4318,62 +4242,6 @@ export const documentsSpec = {
               'content-type': 'application/json',
               'x-request-id': '5678c28b211dace4e0a0f9171e6b88c5',
             },
-            nullable: true,
-          },
-        },
-      },
-      UnifiedSearchParamsRequestDto: {
-        type: 'object',
-        properties: {
-          raw: {
-            type: 'boolean',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            nullable: true,
-          },
-          fields: {
-            type: 'string',
-            description:
-              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
-            nullable: true,
-          },
-          filter: {
-            type: 'object',
-            description: 'Filter parameters that allow greater customisation of the list response',
-            properties: {
-              updated_after: {
-                description:
-                  'Use a string with a date to only select results updated after that given date',
-                example: '2020-01-01T00:00:00.000Z',
-                type: 'string',
-                nullable: true,
-                additionalProperties: false,
-              },
-            },
-            nullable: true,
-          },
-          page: {
-            type: 'string',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            nullable: true,
-          },
-          page_size: {
-            type: 'string',
-            description: 'The number of results per page (default value is 25)',
-            nullable: true,
-          },
-          next: {
-            type: 'string',
-            description: 'The unified cursor',
-            nullable: true,
-          },
-          updated_after: {
-            type: 'string',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            example: '2020-01-01T00:00:00.000Z',
-            deprecated: true,
             nullable: true,
           },
         },

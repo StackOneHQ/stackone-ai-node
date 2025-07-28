@@ -5,6 +5,7 @@ export const ticketingSpec = {
   paths: {
     '/unified/ticketing/tickets': {
       get: {
+        description: 'Retrieve a paginated list of tickets.',
         operationId: 'ticketing_list_tickets',
         parameters: [
           {
@@ -50,7 +51,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,collections,organization,created_at,updated_at',
+                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,projects,components,organization,created_at,updated_at',
               type: 'string',
             },
           },
@@ -289,6 +290,7 @@ export const ticketingSpec = {
         },
       },
       post: {
+        description: 'Create a new ticket record.',
         operationId: 'ticketing_create_ticket',
         parameters: [
           {
@@ -468,6 +470,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}': {
       get: {
+        description: 'Retrieve a single ticket by its identifier.',
         operationId: 'ticketing_get_ticket',
         parameters: [
           {
@@ -521,7 +524,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,collections,organization,created_at,updated_at',
+                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,projects,components,organization,created_at,updated_at',
               type: 'string',
             },
           },
@@ -681,6 +684,7 @@ export const ticketingSpec = {
         },
       },
       patch: {
+        description: 'Update an existing ticket record by its identifier.',
         operationId: 'ticketing_update_ticket',
         parameters: [
           {
@@ -868,6 +872,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/users': {
       get: {
+        description: 'Retrieve a paginated list of users.',
         operationId: 'ticketing_list_users',
         parameters: [
           {
@@ -1154,6 +1159,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/users/{id}': {
       get: {
+        description: 'Retrieve a single user by their identifier.',
         operationId: 'ticketing_get_user',
         parameters: [
           {
@@ -1369,6 +1375,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}/comments': {
       get: {
+        description: 'Retrieve a paginated list of comments for a ticket.',
         operationId: 'ticketing_list_comments',
         parameters: [
           {
@@ -1663,6 +1670,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}/comments/{subResourceId}': {
       get: {
+        description: 'Retrieve a single comment by its identifier for a ticket.',
         operationId: 'ticketing_get_comment',
         parameters: [
           {
@@ -1886,6 +1894,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}/attachments/{subResourceId}/download': {
       get: {
+        description: 'Download the attachment file from a ticket.',
         operationId: 'ticketing_download_ticketing_attachment',
         parameters: [
           {
@@ -2095,6 +2104,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}/attachments': {
       get: {
+        description: 'Retrieve a paginated list of attachment details for a ticket.',
         operationId: 'ticketing_list_attachments',
         parameters: [
           {
@@ -2389,6 +2399,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}/attachments/{subResourceId}': {
       get: {
+        description: 'Retrieve the details of a single attachment for a ticket.',
         operationId: 'ticketing_get_attachment',
         parameters: [
           {
@@ -2612,6 +2623,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/ticket_types': {
       get: {
+        description: 'Retrieve a paginated list of all ticket types.',
         operationId: 'ticketing_list_ticket_types',
         parameters: [
           {
@@ -2656,7 +2668,7 @@ export const ticketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,parent_collection_id,remote_parent_collection_id',
+              example: 'id,remote_id,name,project_id,remote_project_id',
               type: 'string',
             },
           },
@@ -2897,6 +2909,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/ticket_types/{id}': {
       get: {
+        description: 'Retrieve a single ticket type by its identifier.',
         operationId: 'ticketing_get_ticket_type',
         parameters: [
           {
@@ -2949,7 +2962,7 @@ export const ticketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,parent_collection_id,remote_parent_collection_id',
+              example: 'id,remote_id,name,project_id,remote_project_id',
               type: 'string',
             },
           },
@@ -3109,9 +3122,10 @@ export const ticketingSpec = {
         },
       },
     },
-    '/unified/ticketing/collections': {
+    '/unified/ticketing/projects': {
       get: {
-        operationId: 'ticketing_list_collections',
+        description: 'Retrieve a paginated list of projects.',
+        operationId: 'ticketing_list_projects',
         parameters: [
           {
             name: 'x-account-id',
@@ -3156,521 +3170,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,organization_id,remote_organization_id,parent_id,remote_parent_id,key,name,description,type,created_at,updated_at',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'Ticketing Collections filters',
-            explode: true,
-            style: 'deepObject',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-                type: {
-                  description: 'Filter collections by type',
-                  enum: ['project', 'component', null],
-                  type: 'string',
-                  nullable: true,
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of collections was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TicketingCollectionsPaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List Collections',
-        tags: ['Collections'],
-        'x-speakeasy-group': 'ticketing',
-        'x-speakeasy-name-override': 'list_collections',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/ticketing/collections/{id}': {
-      get: {
-        operationId: 'ticketing_get_collection',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,organization_id,remote_organization_id,parent_id,remote_parent_id,key,name,description,type,created_at,updated_at',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The collection with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TicketingCollectionResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get Collection',
-        tags: ['Collections'],
-        'x-speakeasy-group': 'ticketing',
-        'x-speakeasy-name-override': 'get_collection',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/ticketing/collections/{id}/ticket_types': {
-      get: {
-        operationId: 'ticketing_list_collection_ticket_types',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example: 'id,remote_id,name,parent_collection_id,remote_parent_collection_id',
+                'id,remote_id,organization_id,remote_organization_id,name,description,created_at,updated_at',
               type: 'string',
             },
           },
@@ -3743,7 +3243,1036 @@ export const ticketingSpec = {
         ],
         responses: {
           '200': {
-            description: 'The list of collection ticket types was retrieved.',
+            description: 'The list of projects was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TicketingProjectsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Projects',
+        tags: ['Projects'],
+        'x-speakeasy-group': 'ticketing',
+        'x-speakeasy-name-override': 'list_projects',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/ticketing/projects/{id}': {
+      get: {
+        description: 'Retrieve a single project by its identifier.',
+        operationId: 'ticketing_get_project',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,organization_id,remote_organization_id,name,description,created_at,updated_at',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The project with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TicketingProjectResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Project',
+        tags: ['Projects'],
+        'x-speakeasy-group': 'ticketing',
+        'x-speakeasy-name-override': 'get_project',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/ticketing/projects/{id}/components': {
+      get: {
+        description: 'Retrieve a paginated list of project components.',
+        operationId: 'ticketing_list_project_components',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,organization_id,remote_organization_id,project_id,remote_project_id,name,description,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of project components was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TicketingComponentsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Project Components',
+        tags: ['Projects', 'Components'],
+        'x-speakeasy-group': 'ticketing',
+        'x-speakeasy-name-override': 'list_project_components',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/ticketing/projects/{id}/components/{subResourceId}': {
+      get: {
+        description: 'Retrieve a single project component by its identifier.',
+        operationId: 'ticketing_get_project_component',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,organization_id,remote_organization_id,project_id,remote_project_id,name,description,created_at,updated_at',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The project component with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TicketingComponentResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Project Component',
+        tags: ['Projects', 'Components'],
+        'x-speakeasy-group': 'ticketing',
+        'x-speakeasy-name-override': 'get_project_component',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/ticketing/projects/{id}/ticket_types': {
+      get: {
+        description: 'Retrieve a paginated list of ticket types for a project.',
+        operationId: 'ticketing_list_project_ticket_types',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,project_id,remote_project_id',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of project ticket types was retrieved.',
             content: {
               'application/json': {
                 schema: {
@@ -3886,10 +4415,10 @@ export const ticketingSpec = {
             basic: [],
           },
         ],
-        summary: 'List Collection Ticket Types',
-        tags: ['Collections', 'Ticket Types'],
+        summary: 'List Project Ticket Types',
+        tags: ['Projects', 'Ticket Types'],
         'x-speakeasy-group': 'ticketing',
-        'x-speakeasy-name-override': 'list_collection_ticket_types',
+        'x-speakeasy-name-override': 'list_project_ticket_types',
         'x-speakeasy-pagination': {
           type: 'cursor',
           inputs: [
@@ -3911,6 +4440,7 @@ export const ticketingSpec = {
     },
     '/unified/ticketing/tickets/{id}/statuses': {
       get: {
+        description: 'Retrieve a paginated list of statuses for a ticket.',
         operationId: 'ticketing_list_ticket_statuses',
         parameters: [
           {
@@ -4211,31 +4741,40 @@ export const ticketingSpec = {
   tags: [
     {
       name: 'Tickets',
-      description: '',
+      description: 'Requests for support, assistance, or resolution.',
     },
     {
       name: 'Users',
-      description: '',
+      description: 'Accounts that can create or work on tickets.',
     },
     {
       name: 'Comments',
-      description: '',
+      description: 'Notes or messages added to tickets.',
     },
     {
       name: 'Attachments',
-      description: '',
+      description: 'Files attached to tickets.',
     },
     {
       name: 'Ticket Types',
-      description: '',
+      description: 'Types or categories of tickets.',
     },
     {
       name: 'Collections',
-      description: '',
+      description: 'Groupings in which related tickets can be classified under.',
+    },
+    {
+      name: 'Projects',
+      description: 'The top level grouping of tickets.',
+    },
+    {
+      name: 'Components',
+      description:
+        'A sub grouping under projects in which related tickets can be classified together.',
     },
     {
       name: 'Ticket Statuses',
-      description: '',
+      description: 'Statuses representing ticket progress.',
     },
   ],
   servers: [
@@ -5949,118 +6488,6 @@ export const ticketingSpec = {
           },
         },
       },
-      TicketingCollection: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            description: 'Unique identifier',
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          remote_id: {
-            type: 'string',
-            description: "Provider's unique identifier",
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          parent_id: {
-            type: 'string',
-            description: 'The parent collection of the collection',
-            example: 'collection-001',
-            nullable: true,
-          },
-          name: {
-            type: 'string',
-            description: 'The name of the collection',
-            example: 'Project Falcon',
-            nullable: true,
-          },
-          description: {
-            type: 'string',
-            description: 'The description of the collection',
-            example: 'Description of the project',
-            nullable: true,
-          },
-          key: {
-            type: 'string',
-            description: 'The user-friendly key of the collection',
-            example: 'project-falcon',
-            nullable: true,
-          },
-          type: {
-            type: 'string',
-            enum: ['project', 'component', 'unmapped_value', null],
-            description: 'The type of the collection.',
-            example: 'project',
-            'x-speakeasy-unknown-values': 'allow',
-            nullable: true,
-          },
-          organization_id: {
-            type: 'string',
-            description: 'The organization id related to the collection',
-            example: 'organization-001',
-            nullable: true,
-          },
-          created_at: {
-            type: 'string',
-            description: 'The timestamp when the record was created',
-            example: '2021-01-01T01:01:01.000Z',
-            format: 'date-time',
-            nullable: true,
-          },
-          updated_at: {
-            type: 'string',
-            description: 'The timestamp when the record was last updated',
-            example: '2021-01-01T01:01:01.000Z',
-            format: 'date-time',
-            nullable: true,
-          },
-        },
-      },
-      TicketingCollectionResult: {
-        type: 'object',
-        properties: {
-          data: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/TicketingCollection',
-              },
-            ],
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-      },
-      TicketingCollectionsPaginated: {
-        type: 'object',
-        properties: {
-          next: {
-            type: 'string',
-            nullable: true,
-          },
-          data: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/TicketingCollection',
-            },
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-      },
       TicketingComment: {
         type: 'object',
         properties: {
@@ -6161,6 +6588,104 @@ export const ticketingSpec = {
           },
         },
       },
+      TicketingComponent: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          organization_id: {
+            type: 'string',
+            description: 'The organization id related to the component',
+            example: 'organization-001',
+            nullable: true,
+          },
+          project_id: {
+            type: 'string',
+            description: 'The project id related to the component',
+            example: 'project-001',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The name of the component',
+            example: 'Component Falcon',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'The description of the component',
+            example: 'Description of the component',
+            nullable: true,
+          },
+          created_at: {
+            type: 'string',
+            description: 'The timestamp when the record was created',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          updated_at: {
+            type: 'string',
+            description: 'The timestamp when the record was last updated',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      TicketingComponentResult: {
+        type: 'object',
+        properties: {
+          data: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TicketingComponent',
+              },
+            ],
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      TicketingComponentsPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/TicketingComponent',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
       TicketingContent: {
         type: 'object',
         properties: {
@@ -6204,6 +6729,98 @@ export const ticketingSpec = {
             description: 'The name of the organization',
             example: 'Company',
             nullable: true,
+          },
+        },
+      },
+      TicketingProject: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The name of the project',
+            example: 'Project Falcon',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'The description of the project',
+            example: 'Description of the project',
+            nullable: true,
+          },
+          organization_id: {
+            type: 'string',
+            description: 'The organization id related to the project',
+            example: 'organization-001',
+            nullable: true,
+          },
+          created_at: {
+            type: 'string',
+            description: 'The timestamp when the record was created',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          updated_at: {
+            type: 'string',
+            description: 'The timestamp when the record was last updated',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      TicketingProjectResult: {
+        type: 'object',
+        properties: {
+          data: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TicketingProject',
+              },
+            ],
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      TicketingProjectsPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/TicketingProject',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
           },
         },
       },
@@ -6294,12 +6911,12 @@ export const ticketingSpec = {
               type: 'string',
             },
           },
-          collections: {
-            description: 'Collections the ticket belongs to',
+          projects: {
+            description: 'Projects the ticket belongs to',
             nullable: true,
             type: 'array',
             items: {
-              $ref: '#/components/schemas/TicketingCollection',
+              $ref: '#/components/schemas/TicketingProject',
             },
           },
           ticket_number: {
@@ -6347,6 +6964,14 @@ export const ticketingSpec = {
                 $ref: '#/components/schemas/TicketingOrganization',
               },
             ],
+          },
+          components: {
+            description: 'Components associated with the ticket',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/TicketingComponent',
+            },
           },
           created_at: {
             type: 'string',
@@ -6439,25 +7064,28 @@ export const ticketingSpec = {
               type: 'string',
             },
           },
-          collection_ids: {
-            description: 'Collections the ticket belongs to',
-            example: ['collection-001', 'collection-002'],
+          organization_id: {
+            type: 'string',
+            description: 'Organization associated with the ticket',
+            example: 'organization-001',
             nullable: true,
-            type: 'array',
-            items: {
-              type: 'string',
-            },
+          },
+          project_id: {
+            type: 'string',
+            description: 'Project the ticket belongs to',
+            example: 'project-001',
+            nullable: true,
+          },
+          component_ids: {
+            type: 'string',
+            description: 'Components to associate with the ticket',
+            example: ['component-001', 'component-002'],
+            nullable: true,
           },
           type: {
             type: 'string',
             description: 'The type of the ticket',
             example: 'ticket-type-001',
-            nullable: true,
-          },
-          organization_id: {
-            type: 'string',
-            description: 'Organization associated with the ticket',
-            example: 'organization-001',
             nullable: true,
           },
         },
@@ -6647,10 +7275,10 @@ export const ticketingSpec = {
             example: 'Task',
             nullable: true,
           },
-          parent_collection_id: {
+          project_id: {
             type: 'string',
-            description: 'The collection the ticket type belongs to.',
-            example: 'collection-001',
+            description: 'The project the ticket type belongs to.',
+            example: 'project-001',
             nullable: true,
           },
         },
@@ -6767,14 +7395,17 @@ export const ticketingSpec = {
               type: 'string',
             },
           },
-          collection_ids: {
-            description: 'Collections the ticket belongs to',
-            example: ['collection-001', 'collection-002'],
+          project_id: {
+            type: 'string',
+            description: 'Project the ticket belongs to',
+            example: 'project-001',
             nullable: true,
-            type: 'array',
-            items: {
-              type: 'string',
-            },
+          },
+          component_ids: {
+            type: 'string',
+            description: 'Components to associate with the ticket',
+            example: ['component-001', 'component-002'],
+            nullable: true,
           },
           status: {
             description: 'Current status of the ticket',

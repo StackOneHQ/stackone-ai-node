@@ -679,7 +679,7 @@ export const messagingSpec = {
         },
       },
     },
-    '/unified/messaging/attachments/{id}/download': {
+    '/unified/messaging/messages/{id}/attachments/{subResourceId}/download': {
       get: {
         operationId: 'messaging_download_messaging_attachment',
         parameters: [
@@ -694,6 +694,14 @@ export const messagingSpec = {
           },
           {
             name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
             required: true,
             in: 'path',
             schema: {
@@ -2187,6 +2195,410 @@ export const messagingSpec = {
         },
       },
     },
+    '/unified/messaging/messages/{id}': {
+      get: {
+        operationId: 'messaging_get_message',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,content,parent_message_id,remote_parent_message_id,attachments,author,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              type: 'object',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The message was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/MessagingMessageResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Message',
+        tags: ['Messages'],
+        'x-speakeasy-group': 'messaging',
+        'x-speakeasy-name-override': 'get_message',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/messaging/messages': {
+      post: {
+        operationId: 'messaging_send_message',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/MessagingMessageSendRequestDto',
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'The message was sent successfully.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CreateResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Send Message',
+        tags: ['Messages'],
+        'x-speakeasy-group': 'messaging',
+        'x-speakeasy-name-override': 'send_message',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
   },
   info: {
     title: 'Messaging',
@@ -2197,19 +2609,19 @@ export const messagingSpec = {
   tags: [
     {
       name: 'Conversations',
-      description: '',
+      description: 'Spaces for exchanging messages between users.',
     },
     {
       name: 'Messages',
-      description: '',
+      description: 'Messages exchanged in conversations.',
     },
     {
       name: 'Attachments',
-      description: '',
+      description: 'Files attached to messages.',
     },
     {
       name: 'Users',
-      description: '',
+      description: 'Accounts that can participate in conversations.',
     },
   ],
   servers: [
@@ -2441,9 +2853,17 @@ export const messagingSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'The user active status',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           created_at: {
@@ -2741,6 +3161,49 @@ export const messagingSpec = {
             type: 'string',
             description: 'Plain text content of the message',
             example: 'Hello world',
+            nullable: true,
+          },
+        },
+      },
+      MessagingMessageResult: {
+        type: 'object',
+        properties: {
+          data: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/MessagingMessage',
+              },
+            ],
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      MessagingMessageSendRequestDto: {
+        type: 'object',
+        properties: {
+          content: {
+            type: 'string',
+            description: 'Content body of the message',
+            example: 'Hello, world!',
+            nullable: true,
+          },
+          recipient: {
+            type: 'string',
+            description: 'Can be a conversation ID, user ID, email or phone number.',
+            example: 'c28xyrc55866bvuv',
+            nullable: true,
+          },
+          sender: {
+            type: 'string',
+            description: 'The account_id or phone number of the message sender',
+            example: '+34820398402',
             nullable: true,
           },
         },

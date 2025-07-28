@@ -2230,7 +2230,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy',
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
               type: 'string',
             },
           },
@@ -2737,7 +2737,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy',
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
               type: 'string',
             },
           },
@@ -7770,2559 +7770,6 @@ export const hrisSpec = {
         },
       },
     },
-    '/unified/hris/locations': {
-      get: {
-        operationId: 'hris_list_locations',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
-            explode: true,
-            style: 'deepObject',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of work locations was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/HRISLocationsPaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List Work Locations',
-        tags: ['Locations'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'list_locations',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/locations/{id}': {
-      get: {
-        operationId: 'hris_get_location',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The work location with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/HRISLocationResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get Work Location',
-        tags: ['Locations'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'get_location',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/time_off': {
-      get: {
-        operationId: 'hris_list_time_off_requests',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'HRIS Time Off filters',
-            explode: true,
-            style: 'deepObject',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-                type_ids: {
-                  description: 'List of time off type ids to filter by.',
-                  nullable: true,
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                  },
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-          {
-            name: 'expand',
-            required: false,
-            in: 'query',
-            description: 'The comma separated list of fields that will be expanded in the response',
-            schema: {
-              nullable: true,
-              example: 'policy',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of time off requests was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TimeOffPaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List time off requests',
-        tags: ['Time Off'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'list_time_off_requests',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/time_off/{id}': {
-      get: {
-        operationId: 'hris_get_time_off_request',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy',
-              type: 'string',
-            },
-          },
-          {
-            name: 'expand',
-            required: false,
-            in: 'query',
-            description: 'The comma separated list of fields that will be expanded in the response',
-            schema: {
-              nullable: true,
-              example: 'policy',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The time off request with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TimeOffResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get time off request',
-        tags: ['Time Off'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'get_time_off_request',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/time_off_types': {
-      get: {
-        deprecated: true,
-        operationId: 'hris_list_time_off_types',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example: 'id,remote_id,name,active',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
-            explode: true,
-            style: 'deepObject',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of time off types was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ReferencePaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List time off types',
-        tags: ['Time Off'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'list_time_off_types',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/time_off_types/{id}': {
-      get: {
-        deprecated: true,
-        operationId: 'hris_get_time_off_type',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example: 'id,remote_id,name,active',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The time off type with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ReferenceResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get time off type',
-        tags: ['Time Off'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'get_time_off_type',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/time_entries': {
-      get: {
-        operationId: 'hris_list_time_entries',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'HRIS Time Entries filters',
-            explode: true,
-            style: 'deepObject',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-                employee_id: {
-                  description: 'Filter to select time entries by employee_id',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-                start_time: {
-                  description: 'Filter to select time entries after a given time',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-                end_time: {
-                  description: 'Filter to select time entries before a given time',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of time entries was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TimeEntriesPaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List Time Entries',
-        tags: ['Time Entries'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'list_time_entries',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/time_entries/{id}': {
-      get: {
-        operationId: 'hris_get_time_entries',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The time entry with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TimeEntriesResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get Time Entry',
-        tags: ['Time Entries'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'get_time_entries',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/benefits': {
-      get: {
-        operationId: 'hris_list_benefits',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example: 'id,remote_id,name,benefit_type,provider,description,created_at,updated_at',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
-            explode: true,
-            style: 'deepObject',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of Benefits was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/HRISBenefitsPaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List benefits',
-        tags: ['Benefits'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'list_benefits',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/hris/benefits/{id}': {
-      get: {
-        operationId: 'hris_get_benefit',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            style: 'deepObject',
-            explode: true,
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example: 'id,remote_id,name,benefit_type,provider,description,created_at,updated_at',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The Benefit with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/HRISBenefitResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get Benefit',
-        tags: ['Benefits'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'get_benefit',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
     '/unified/hris/groups': {
       get: {
         operationId: 'hris_list_groups',
@@ -10655,7 +8102,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name',
+              example:
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -11466,6 +8914,577 @@ export const hrisSpec = {
         },
       },
     },
+    '/unified/hris/groups/divisions': {
+      get: {
+        operationId: 'hris_list_division_groups',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of division groups was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HRISDivisionsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Division Groups',
+        tags: ['Groups'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_division_groups',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/groups/companies': {
+      get: {
+        operationId: 'hris_list_companies_groups',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,full_name,display_name,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of companies groups was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CompaniesPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Companies Groups',
+        tags: ['Groups'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_companies_groups',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
     '/unified/hris/groups/{id}': {
       get: {
         operationId: 'hris_get_group',
@@ -11735,7 +9754,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name',
+              example:
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
               type: 'string',
             },
           },
@@ -12325,6 +10345,435 @@ export const hrisSpec = {
         },
       },
     },
+    '/unified/hris/groups/divisions/{id}': {
+      get: {
+        operationId: 'hris_get_division_group',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The division group with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HRISDivisionsResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Division Group',
+        tags: ['Groups'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_division_group',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/groups/companies/{id}': {
+      get: {
+        operationId: 'hris_get_company_group',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,full_name,display_name,created_at,updated_at',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The company group with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CompanyResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Company Group',
+        tags: ['Groups'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_company_group',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
     '/unified/hris/jobs': {
       get: {
         operationId: 'hris_list_jobs',
@@ -12826,23 +11275,15 @@ export const hrisSpec = {
         },
       },
     },
-    '/unified/hris/employees/{id}/skills': {
+    '/unified/hris/locations': {
       get: {
-        operationId: 'hris_list_employee_skills',
+        operationId: 'hris_list_locations',
         parameters: [
           {
             name: 'x-account-id',
             in: 'header',
             description: 'The account identifier',
             required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
             schema: {
               type: 'string',
             },
@@ -12880,7 +11321,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency',
+              example:
+                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at',
               type: 'string',
             },
           },
@@ -12953,12 +11395,11 @@ export const hrisSpec = {
         ],
         responses: {
           '200': {
-            description:
-              'The skills related to the employee with the given identifier were retrieved.',
+            description: 'The list of work locations was retrieved.',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/EntitySkillsPaginated',
+                  $ref: '#/components/schemas/HRISLocationsPaginated',
                 },
               },
             },
@@ -13097,10 +11538,10 @@ export const hrisSpec = {
             basic: [],
           },
         ],
-        summary: 'List Employee Skills',
-        tags: ['Employees', 'Skills'],
+        summary: 'List Work Locations',
+        tags: ['Locations'],
         'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'list_employee_skills',
+        'x-speakeasy-name-override': 'list_locations',
         'x-speakeasy-pagination': {
           type: 'cursor',
           inputs: [
@@ -13119,195 +11560,10 @@ export const hrisSpec = {
           strategy: 'backoff',
         },
       },
-      post: {
-        operationId: 'hris_create_employee_skill',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/EntitySkillsCreateRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '201': {
-            description: 'The skill was created successfully.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/CreateResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Create Employee Skill',
-        tags: ['Employees', 'Skills'],
-        'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'create_employee_skill',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
     },
-    '/unified/hris/employees/{id}/skills/{subResourceId}': {
+    '/unified/hris/locations/{id}': {
       get: {
-        operationId: 'hris_get_employee_skill',
+        operationId: 'hris_get_location',
         parameters: [
           {
             name: 'x-account-id',
@@ -13320,14 +11576,6 @@ export const hrisSpec = {
           },
           {
             name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'subResourceId',
             required: true,
             in: 'path',
             schema: {
@@ -13367,19 +11615,19 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency',
+              example:
+                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at',
               type: 'string',
             },
           },
         ],
         responses: {
           '200': {
-            description:
-              'The skill related to the employee with the given identifiers was retrieved.',
+            description: 'The work location with the given identifier was retrieved.',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/EntitySkillResult',
+                  $ref: '#/components/schemas/HRISLocationResult',
                 },
               },
             },
@@ -13518,10 +11766,2593 @@ export const hrisSpec = {
             basic: [],
           },
         ],
-        summary: 'Get Employee Skill',
-        tags: ['Employees', 'Skills'],
+        summary: 'Get Work Location',
+        tags: ['Locations'],
         'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'get_employee_skill',
+        'x-speakeasy-name-override': 'get_location',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/positions': {
+      get: {
+        operationId: 'hris_list_positions',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+          {
+            name: 'status',
+            required: false,
+            in: 'query',
+            description: 'Filter positions by status',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              nullable: true,
+              example: 'open',
+              type: 'string',
+              enum: ['open', 'closed', 'paused', 'unmapped_value', null],
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of positions was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PositionsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Positions',
+        tags: ['Positions'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_positions',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/positions/{id}': {
+      get: {
+        operationId: 'hris_get_position',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The position with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PositionResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Position',
+        tags: ['Positions'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_position',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/time_entries': {
+      get: {
+        operationId: 'hris_list_time_entries',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'HRIS Time Entries filters',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                employee_id: {
+                  description: 'Filter to select time entries by employee_id',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                start_time: {
+                  description: 'Filter to select time entries after a given time',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                end_time: {
+                  description: 'Filter to select time entries before a given time',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of time entries was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TimeEntriesPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Time Entries',
+        tags: ['Time Entries'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_time_entries',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/time_entries/{id}': {
+      get: {
+        operationId: 'hris_get_time_entries',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The time entry with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TimeEntriesResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Time Entry',
+        tags: ['Time Entries'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_time_entries',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/time_off': {
+      get: {
+        operationId: 'hris_list_time_off_requests',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'HRIS Time Off filters',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                type_ids: {
+                  description: 'List of time off type ids to filter by.',
+                  nullable: true,
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+          {
+            name: 'expand',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be expanded in the response',
+            schema: {
+              nullable: true,
+              example: 'policy',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of time off requests was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TimeOffPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List time off requests',
+        tags: ['Time Off'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_time_off_requests',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/time_off/{id}': {
+      get: {
+        operationId: 'hris_get_time_off_request',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
+              type: 'string',
+            },
+          },
+          {
+            name: 'expand',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be expanded in the response',
+            schema: {
+              nullable: true,
+              example: 'policy',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The time off request with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TimeOffResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get time off request',
+        tags: ['Time Off'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_time_off_request',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/shifts': {
+      get: {
+        operationId: 'hris_list_shifts',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'HRIS Shifts filters',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                employee_id: {
+                  description: 'Filter to select shifts by employee ID',
+                  type: 'string',
+                  nullable: true,
+                },
+                status: {
+                  description: 'Filter to select shifts by status',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['draft', 'published', 'confirmed', 'cancelled', 'unmapped_value'],
+                },
+                starts_after: {
+                  description: 'Filter shifts that start after this date',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                },
+                ends_before: {
+                  description: 'Filter shifts that end before this date',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of shifts was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HrisShiftsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Shifts',
+        tags: ['Shifts'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_shifts',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/shifts/{id}': {
+      get: {
+        operationId: 'hris_get_shift',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The shift with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HrisShiftResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Shift',
+        tags: ['Shifts'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_shift',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/time_off_types': {
+      get: {
+        deprecated: true,
+        operationId: 'hris_list_time_off_types',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,active',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of time off types was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ReferencePaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List time off types',
+        tags: ['Time Off'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_time_off_types',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/time_off_types/{id}': {
+      get: {
+        deprecated: true,
+        operationId: 'hris_get_time_off_type',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,active',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The time off type with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ReferenceResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get time off type',
+        tags: ['Time Off'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_time_off_type',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -14384,6 +15215,1207 @@ export const hrisSpec = {
         },
       },
     },
+    '/unified/hris/benefits': {
+      get: {
+        operationId: 'hris_list_benefits',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,benefit_type,provider,description,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of Benefits was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HRISBenefitsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List benefits',
+        tags: ['Benefits'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_benefits',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/benefits/{id}': {
+      get: {
+        operationId: 'hris_get_benefit',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,benefit_type,provider,description,created_at,updated_at',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The Benefit with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HRISBenefitResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Benefit',
+        tags: ['Benefits'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_benefit',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/employees/{id}/skills': {
+      get: {
+        operationId: 'hris_list_employee_skills',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The skills related to the employee with the given identifier were retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/EntitySkillsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Employee Skills',
+        tags: ['Employees', 'Skills'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_employee_skills',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+      post: {
+        operationId: 'hris_create_employee_skill',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/EntitySkillsCreateRequestDto',
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'The skill was created successfully.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CreateResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Create Employee Skill',
+        tags: ['Employees', 'Skills'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'create_employee_skill',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/employees/{id}/skills/{subResourceId}': {
+      get: {
+        operationId: 'hris_get_employee_skill',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The skill related to the employee with the given identifiers was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/EntitySkillResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Employee Skill',
+        tags: ['Employees', 'Skills'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_employee_skill',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
     '/unified/hris/employees/{id}/tasks': {
       get: {
         operationId: 'hris_list_employee_tasks',
@@ -15125,6 +17157,529 @@ export const hrisSpec = {
         },
       },
     },
+    '/unified/hris/tasks': {
+      get: {
+        operationId: 'hris_list_tasks',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+          {
+            name: 'expand',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be expanded in the response',
+            schema: {
+              nullable: true,
+              example: 'attachments',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of tasks was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TasksPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Tasks',
+        tags: ['Tasks'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_tasks',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/tasks/{id}': {
+      get: {
+        operationId: 'hris_get_task',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+              type: 'string',
+            },
+          },
+          {
+            name: 'expand',
+            required: false,
+            in: 'query',
+            description: 'The comma separated list of fields that will be expanded in the response',
+            schema: {
+              nullable: true,
+              example: 'attachments',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The task with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TaskResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Task',
+        tags: ['Tasks'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_task',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
   },
   info: {
     title: 'HRIS',
@@ -15135,67 +17690,75 @@ export const hrisSpec = {
   tags: [
     {
       name: 'Benefits',
-      description: '',
+      description: 'Employee benefits and entitlements.',
     },
     {
       name: 'Companies',
-      description: '',
+      description: 'Organizations or legal entities.',
     },
     {
       name: 'Custom Field Definitions',
-      description: '',
+      description: 'Definitions for custom fields.',
     },
     {
       name: 'Documents',
-      description: '',
+      description: 'Employee related documents.',
     },
     {
       name: 'Employees',
-      description: '',
+      description: 'People employed by the company.',
     },
     {
       name: 'Employments',
-      description: '',
+      description: "Details of an employee's employment.",
     },
     {
       name: 'Groups',
-      description: '',
+      description: 'Organizational groups or teams.',
     },
     {
       name: 'Jobs',
-      description: '',
+      description: 'Job positions or roles.',
     },
     {
       name: 'Locations',
-      description: '',
+      description: 'Physical or virtual work locations.',
+    },
+    {
+      name: 'Positions',
+      description: 'Job positions available for hiring.',
+    },
+    {
+      name: 'Shifts',
+      description: 'Employee work shifts and schedules.',
     },
     {
       name: 'Skills',
-      description: '',
+      description: 'Skills and competencies tracked for employees.',
     },
     {
       name: 'Tasks',
-      description: '',
+      description: 'Tasks or assignments for employees.',
     },
     {
       name: 'Time Entries',
-      description: '',
+      description: 'Records of hours worked or activities performed.',
     },
     {
       name: 'Time Off',
-      description: '',
+      description: 'Employee leave and time off records.',
     },
     {
       name: 'Time Off Balances',
-      description: '',
+      description: 'Available leave balances for employees.',
     },
     {
       name: 'Time Off Policies',
-      description: '',
+      description: 'Rules and policies for employee leave.',
     },
     {
       name: 'Work Eligibility',
-      description: '',
+      description: 'Eligibility status for employment.',
     },
   ],
   servers: [
@@ -16382,28 +18945,24 @@ export const hrisSpec = {
           },
           options: {
             description: 'An array of possible options for the custom field.',
-            example: ['Not Started', 'In Progress', 'Completed', 'Overdue'],
+            example: [
+              {
+                id: 'option_1',
+                value: 'Not Started',
+              },
+              {
+                id: 'option_2',
+                value: 'In Progress',
+              },
+              {
+                id: 'option_3',
+                value: 'Completed',
+              },
+            ],
             nullable: true,
             type: 'array',
             items: {
-              oneOf: [
-                {
-                  type: 'string',
-                },
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'boolean',
-                },
-                {
-                  type: 'object',
-                },
-                {
-                  type: 'array',
-                  items: {},
-                },
-              ],
+              $ref: '#/components/schemas/CustomFieldOption',
             },
           },
         },
@@ -16451,6 +19010,23 @@ export const hrisSpec = {
           },
         },
         required: ['data'],
+      },
+      CustomFieldOption: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description:
+              'The unique identifier for the option to be used when updating the custom field',
+            example: 'option_123',
+          },
+          value: {
+            type: 'string',
+            description: 'The human readable value of the option',
+            example: 'Not Started',
+          },
+        },
+        required: ['id', 'value'],
       },
       CustomFields: {
         type: 'object',
@@ -16591,6 +19167,49 @@ export const hrisSpec = {
               null,
             ],
             example: 'department',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
+      DivisionTypeEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: [
+              'department',
+              'company',
+              'division',
+              'group',
+              'project',
+              'cost_center',
+              'team',
+              'unmapped_value',
+              null,
+            ],
+            example: 'division',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -20008,6 +22627,13 @@ export const hrisSpec = {
               },
             ],
           },
+          comment: {
+            type: 'string',
+            description:
+              'Allows users to provide additional context or notes for their time off request',
+            example: 'Taking a day off for personal reasons',
+            nullable: true,
+          },
           passthrough: {
             type: 'object',
             description: 'Value to pass through to the provider',
@@ -20205,6 +22831,141 @@ export const hrisSpec = {
         properties: {
           data: {
             $ref: '#/components/schemas/HRISDepartment',
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      HRISDivision: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          unified_custom_fields: {
+            type: 'object',
+            description: 'Custom Unified Fields configured in your StackOne project',
+            additionalProperties: true,
+            example: {
+              my_project_custom_field_1: 'REF-1236',
+              my_project_custom_field_2: 'some other value',
+            },
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The name of the group',
+            example: 'Engineering',
+            nullable: true,
+          },
+          parent_ids: {
+            description: 'The list of parent group ids of the given group',
+            example: ['cxIQNjUyNDM0', 'cxIQNjQzNzI0MQ'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          remote_parent_ids: {
+            description: "Provider's list of parent group remote ids of the given group",
+            example: ['652434', '6437241'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          owner_ids: {
+            description: 'The list of group owner ids of the given group',
+            example: ['cxIQNjUyEDM0', 'cxIQNjQzNzA0MQ'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          remote_owner_ids: {
+            description: 'The list of remote group owner ids of the given group',
+            example: ['475364', '4327652'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          company_id: {
+            type: 'string',
+            description: 'The id of the company that the group belongs to',
+            example: '1234567890',
+            nullable: true,
+          },
+          remote_company_id: {
+            type: 'string',
+            description: "Provider's id of the company that the group belongs to",
+            example: '1234567890',
+            nullable: true,
+          },
+          type: {
+            description: 'The type of the division group',
+            example: 'division',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/DivisionTypeEnum',
+              },
+            ],
+          },
+        },
+      },
+      HRISDivisionsPaginated: {
+        type: 'object',
+        properties: {
+          next_page: {
+            type: 'string',
+            deprecated: true,
+            nullable: true,
+          },
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/HRISDivision',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      HRISDivisionsResult: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/HRISDivision',
           },
           raw: {
             nullable: true,
@@ -20838,6 +23599,144 @@ export const hrisSpec = {
           },
         },
         required: ['data'],
+      },
+      HrisShift: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          employee_id: {
+            type: 'string',
+            description: 'The employee ID associated with this shift',
+            example: 'emp_123456789',
+            nullable: true,
+          },
+          location_id: {
+            type: 'string',
+            description: 'The location ID where this shift takes place',
+            example: 'loc_123456789',
+            nullable: true,
+          },
+          company_id: {
+            type: 'string',
+            description: 'The company ID associated with this shift',
+            example: 'comp_123456789',
+            nullable: true,
+          },
+          start_time: {
+            type: 'string',
+            description: 'The start time of the shift',
+            example: '2024-03-20T09:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          end_time: {
+            type: 'string',
+            description: 'The end time of the shift',
+            example: '2024-03-20T17:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          break_duration: {
+            type: 'string',
+            description: 'The total break duration for this shift in ISO 8601 duration format',
+            example: 'PT1H30M',
+            nullable: true,
+          },
+          status: {
+            description: 'The status of the shift',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ShiftStatusEnum',
+              },
+            ],
+          },
+          approval_status: {
+            description: 'The approval status of the shift',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ShiftApprovalStatusEnum',
+              },
+            ],
+          },
+          breaks: {
+            description: 'The breaks taken during this shift',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ShiftBreak',
+            },
+          },
+          created_at: {
+            type: 'string',
+            description: 'The date and time the shift was created',
+            example: '2024-03-20T08:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          updated_at: {
+            type: 'string',
+            description: 'The date and time the shift was last updated',
+            example: '2024-03-20T08:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      HrisShiftResult: {
+        type: 'object',
+        properties: {
+          data: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/HrisShift',
+              },
+            ],
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      HrisShiftsPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/HrisShift',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
       },
       HRISTeam: {
         type: 'object',
@@ -22560,6 +25459,154 @@ export const hrisSpec = {
           },
         },
       },
+      Position: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          job_id: {
+            type: 'string',
+            description: 'Job ID from the HRIS provider',
+            example: 'JOB-12345',
+            nullable: true,
+          },
+          title: {
+            type: 'string',
+            description: 'Title of the position',
+            example: 'Senior Software Engineer',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'Description of the position',
+            example: 'Responsible for developing and maintaining software applications',
+            nullable: true,
+          },
+          department_id: {
+            type: 'string',
+            description: 'Department ID associated with the position',
+            example: 'dept-123',
+            nullable: true,
+          },
+          location_id: {
+            type: 'string',
+            description: 'Location ID associated with the position',
+            example: 'loc-456',
+            nullable: true,
+          },
+          employment_type: {
+            type: 'string',
+            description: 'Employment type for the position',
+            example: 'full-time',
+            nullable: true,
+          },
+          status: {
+            description: 'Status of the position',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/PositionStatusEnum',
+              },
+            ],
+          },
+          posted_date: {
+            type: 'string',
+            description: 'Date when the position was posted',
+            example: '2024-01-15T10:00:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      PositionResult: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/Position',
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      PositionsPaginated: {
+        type: 'object',
+        properties: {
+          next_page: {
+            type: 'string',
+            deprecated: true,
+            nullable: true,
+          },
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Position',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      PositionStatusEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: ['open', 'closed', 'paused', 'unmapped_value', null],
+            description: 'The status of the position.',
+            example: 'open',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            description: 'The source value of the position status.',
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
       PreconditionFailedResponse: {
         type: 'object',
         properties: {
@@ -23061,6 +26108,127 @@ export const hrisSpec = {
                 items: {},
               },
             ],
+            nullable: true,
+          },
+        },
+      },
+      ShiftApprovalStatusEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            description: 'The approval status of the shift',
+            enum: ['pending', 'approved', 'rejected', 'unmapped_value', null],
+            example: 'approved',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            example: 'Approved',
+            nullable: true,
+          },
+        },
+      },
+      ShiftBreak: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The unique identifier of the break',
+            example: 'break_123456789',
+            nullable: true,
+          },
+          start_time: {
+            type: 'string',
+            description: 'The start time of the break',
+            example: '2024-03-20T12:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          end_time: {
+            type: 'string',
+            description: 'The end time of the break',
+            example: '2024-03-20T13:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          duration: {
+            type: 'string',
+            description: 'The duration of the break in ISO 8601 duration format',
+            example: 'PT1H',
+            nullable: true,
+          },
+          is_paid: {
+            type: 'boolean',
+            description: 'Whether the break is paid',
+            example: true,
+            nullable: true,
+          },
+          created_at: {
+            type: 'string',
+            description: 'The date and time the break was created',
+            example: '2024-03-20T10:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          updated_at: {
+            type: 'string',
+            description: 'The date and time the break was last updated',
+            example: '2024-03-20T10:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      ShiftStatusEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            description: 'The status of the shift',
+            enum: ['draft', 'published', 'confirmed', 'cancelled', 'unmapped_value', null],
+            example: 'confirmed',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            example: 'Confirmed',
             nullable: true,
           },
         },
@@ -23713,6 +26881,13 @@ export const hrisSpec = {
                 $ref: '#/components/schemas/TimeOffPolicies',
               },
             ],
+          },
+          comment: {
+            type: 'string',
+            description:
+              'Allows users to provide additional context or notes for their time off request',
+            example: 'Taking a day off for personal reasons',
+            nullable: true,
           },
         },
       },

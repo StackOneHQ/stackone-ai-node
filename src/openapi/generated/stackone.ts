@@ -2010,6 +2010,322 @@ export const stackoneSpec = {
         },
       },
     },
+    '/requests/platform-logs': {
+      get: {
+        operationId: 'stackone_list_platform_logs',
+        parameters: [
+          {
+            name: 'order_by',
+            required: false,
+            in: 'query',
+            description: 'The field to order the results by.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              additionalProperties: false,
+              nullable: true,
+              example: 'created_at',
+              type: 'string',
+              enum: ['provider', 'service', 'status', 'eventDatetime', 'duration', null],
+            },
+          },
+          {
+            name: 'order_direction',
+            required: false,
+            in: 'query',
+            description: 'The direction to order the results by.',
+            'x-speakeasy-unknown-values': 'allow',
+            schema: {
+              additionalProperties: false,
+              nullable: true,
+              example: 'asc',
+              type: 'string',
+              enum: ['asc', 'desc', null],
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              maximum: 100,
+              nullable: true,
+              type: 'number',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            schema: {
+              properties: {
+                account_ids: {
+                  description: 'A comma-separated list of account IDs to filter the results by.',
+                  example: '45355976281015164504,45355976281015164505',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description: 'A ISO8601 date string to filter the results by start_date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description: 'A ISO8601 date string to filter the results by end_date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                request_ids: {
+                  description: 'A comma-separated list of request IDs to filter the results by.',
+                  example:
+                    'adbf752f-6457-4ddd-89b3-98ae2252b83b,adbf752f-6457-4ddd-89b3-98ae2252b83c',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                source_types: {
+                  description: 'A comma-separated list of source types to filter the results by.',
+                  example: 'DASHBOARD,SYNTHETIC_WEBHOOK',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                source_values: {
+                  description: 'A comma-separated list of source values to filter the results by.',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                source_ids: {
+                  description: 'A comma-separated list of source IDs to filter the results by.',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                http_methods: {
+                  description: 'A comma-separated list of HTTP methods to filter the results by.',
+                  example: 'GET,POST',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                categories: {
+                  description: 'A comma-separated list of categories to filter the results by.',
+                  example: 'hris,ats',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                resources: {
+                  description: 'A comma-separated list of resources to filter the results by.',
+                  example: 'employees,users',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                actions: {
+                  description: 'A comma-separated list of actions to filter the results by.',
+                  example: 'download,upload',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                status_codes: {
+                  description: 'A comma-separated list of status codes to filter the results by.',
+                  example: '200,400',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                success: {
+                  description: 'A boolean value to filter the results by success or failure.',
+                  example: true,
+                  type: 'boolean',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                order_by: {
+                  description: 'The field to order the results by.',
+                  example: 'created_at',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['provider', 'service', 'status', 'eventDatetime', 'duration', null],
+                  additionalProperties: false,
+                },
+                order_direction: {
+                  description: 'The direction to order the results by.',
+                  example: 'asc',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['asc', 'desc', null],
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of platform logs was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PlatformLogsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Platform Logs',
+        tags: ['Request Logs'],
+        'x-speakeasy-name-override': 'list_platform_logs',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
     '/connectors/meta': {
       get: {
         operationId: 'stackone_list_connectors_meta',
@@ -2522,32 +2838,33 @@ export const stackoneSpec = {
   },
   tags: [
     {
-      name: 'AI',
-      description: '',
+      name: 'Accounts',
+      description: 'View and manage linked accounts.',
     },
     {
-      name: 'Accounts',
-      description: '',
+      name: 'AI',
+      description: 'AI-powered features.',
     },
     {
       name: 'Connect Sessions',
-      description: '',
+      description:
+        'Generate connection session tokens or auth URLs to allow your customers to connect their accounts.',
     },
     {
       name: 'Connectors',
-      description: '',
+      description: 'Retrieve metadata for connectors.',
     },
     {
       name: 'Proxy',
-      description: '',
+      description: 'Routing API requests through StackOne directly to the underlying provider.',
     },
     {
       name: 'Request Logs',
-      description: '',
+      description: 'API requests and response logs.',
     },
     {
       name: 'Webhooks',
-      description: '',
+      description: 'Configure and manage webhooks.',
     },
   ],
   servers: [
@@ -2836,6 +3153,7 @@ export const stackoneSpec = {
               'ticketing',
               'screening',
               'messaging',
+              'accounting',
             ],
             example: 'hris',
             description: 'The provider service category',
@@ -2966,6 +3284,7 @@ export const stackoneSpec = {
               'ticketing',
               'screening',
               'messaging',
+              'accounting',
             ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -2984,6 +3303,7 @@ export const stackoneSpec = {
                 'ticketing',
                 'screening',
                 'messaging',
+                'accounting',
                 null,
               ],
             },
@@ -3026,6 +3346,14 @@ export const stackoneSpec = {
             example: 'f0bc3d88-2178-5423-8c81-b81d6c9da824',
             nullable: true,
           },
+          type: {
+            type: 'string',
+            description: 'The connect session account type',
+            enum: ['production', 'test', 'unmapped_value', null],
+            example: ['PRODUCTION', 'TEST'],
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
         },
         required: [
           'id',
@@ -3065,6 +3393,7 @@ export const stackoneSpec = {
               'ticketing',
               'screening',
               'messaging',
+              'accounting',
             ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -3083,6 +3412,7 @@ export const stackoneSpec = {
                 'ticketing',
                 'screening',
                 'messaging',
+                'accounting',
                 null,
               ],
             },
@@ -3140,6 +3470,15 @@ export const stackoneSpec = {
               'The label to be applied to the account associated with this connect session.',
             nullable: true,
           },
+          type: {
+            type: 'string',
+            description: 'The connect session account type',
+            enum: ['production', 'test', null],
+            example: ['PRODUCTION', 'TEST'],
+            default: 'production',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
         },
         required: ['origin_owner_id', 'origin_owner_name'],
       },
@@ -3170,6 +3509,7 @@ export const stackoneSpec = {
               'ticketing',
               'screening',
               'messaging',
+              'accounting',
             ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -3188,6 +3528,7 @@ export const stackoneSpec = {
                 'ticketing',
                 'screening',
                 'messaging',
+                'accounting',
                 null,
               ],
             },
@@ -3228,6 +3569,14 @@ export const stackoneSpec = {
             type: 'string',
             description: 'External trigger token to be used to trigger actions on the account',
             example: 'f0bc3d88-2178-5423-8c81-b81d6c9da824',
+            nullable: true,
+          },
+          type: {
+            type: 'string',
+            description: 'The connect session account type',
+            enum: ['production', 'test', 'unmapped_value', null],
+            example: ['PRODUCTION', 'TEST'],
+            'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
           token: {
@@ -3370,6 +3719,14 @@ export const stackoneSpec = {
             format: 'date-time',
             type: 'string',
           },
+          type: {
+            type: 'string',
+            description: 'The account type',
+            enum: ['production', 'test', 'unmapped_value', null],
+            example: ['PRODUCTION', 'TEST'],
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
         },
         required: [
           'id',
@@ -3402,6 +3759,7 @@ export const stackoneSpec = {
               'ticketing',
               'screening',
               'messaging',
+              'accounting',
             ],
             'x-speakeasy-unknown-values': 'allow',
           },
@@ -3507,7 +3865,166 @@ export const stackoneSpec = {
             additionalProperties: false,
             nullable: true,
           },
+          type: {
+            type: 'string',
+            description: 'The account type',
+            enum: ['production', 'test', null],
+            example: ['PRODUCTION', 'TEST'],
+            default: 'production',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
         },
+      },
+      PlatformLog: {
+        type: 'object',
+        properties: {
+          request_id: {
+            type: 'string',
+            description: 'The request ID',
+            example: 'adbf752f-6457-4ddd-89b3-98ae2252b83b',
+            nullable: true,
+          },
+          event_datetime: {
+            type: 'string',
+            description: 'The event ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          start_time: {
+            type: 'string',
+            description: 'The request start time ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          end_time: {
+            type: 'string',
+            description: 'The request end time ISO8601 date string',
+            example: '2021-01-01T00:00:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          account_id: {
+            type: 'string',
+            description: 'The account ID of the request',
+            example: '45355976281015164504',
+            nullable: true,
+          },
+          project_id: {
+            type: 'string',
+            description: 'The project ID of the request',
+            example: 'dev-project-68574',
+            nullable: true,
+          },
+          http_method: {
+            type: 'string',
+            description: 'The requested HTTP method',
+            example: 'get',
+            nullable: true,
+          },
+          path: {
+            type: 'string',
+            description: 'The requested path',
+            example: '/unified/hris/employees',
+            nullable: true,
+          },
+          url: {
+            type: 'string',
+            description: 'The requested URL',
+            example: 'https://api.stackone.com/unified/hris/employees?raw=false',
+            nullable: true,
+          },
+          status: {
+            type: 'number',
+            description: 'The requests response status code',
+            example: 200,
+            nullable: true,
+          },
+          duration: {
+            type: 'number',
+            description: 'The request duration in milliseconds',
+            example: 356,
+            nullable: true,
+          },
+          success: {
+            type: 'boolean',
+            description: 'The request success flag',
+            example: true,
+            nullable: true,
+          },
+          resource: {
+            type: 'string',
+            description: 'The requested resource',
+            example: 'employees',
+            nullable: true,
+          },
+          child_resource: {
+            type: 'string',
+            description: 'The requested child resource',
+            example: 'time-off',
+            nullable: true,
+          },
+          sub_resource: {
+            type: 'string',
+            description: 'The requested sub resource',
+            example: 'documents',
+            nullable: true,
+          },
+          action: {
+            type: 'string',
+            description: 'The requested action',
+            example: 'download',
+            nullable: true,
+          },
+          source_type: {
+            type: 'string',
+            description: 'The requests source type',
+            example: 'DASHBOARD',
+            nullable: true,
+          },
+          source_value: {
+            type: 'string',
+            description: 'The requests source value',
+            example: 'ACCOUNT_TESTER',
+            nullable: true,
+          },
+          source_id: {
+            type: 'string',
+            description: 'The requests source ID',
+            example: '1234567890',
+            nullable: true,
+          },
+          source_ip: {
+            type: 'string',
+            description: 'The requests source IPV4 ip address',
+            example: '192.168.1.1',
+            nullable: true,
+          },
+          category: {
+            type: 'string',
+            description: 'The requested category',
+            example: 'hris',
+            nullable: true,
+          },
+        },
+      },
+      PlatformLogsPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/PlatformLog',
+            },
+          },
+        },
+        required: ['data'],
       },
       PreconditionFailedResponse: {
         type: 'object',
@@ -3756,6 +4273,12 @@ export const stackoneSpec = {
             type: 'boolean',
             description: 'The asynchronous worker flag',
             example: false,
+            nullable: true,
+          },
+          source_ip: {
+            type: 'string',
+            description: 'The requests source IPV4 ip address',
+            example: '192.168.1.1',
             nullable: true,
           },
           id: {
@@ -4156,6 +4679,12 @@ export const stackoneSpec = {
               },
             ],
           },
+          source_ip: {
+            type: 'string',
+            description: 'The requests source IPV4 ip address',
+            example: '192.168.1.1',
+            nullable: true,
+          },
           step_requests: {
             type: 'array',
             description: 'The list of provider requests',
@@ -4318,6 +4847,12 @@ export const stackoneSpec = {
             type: 'string',
             description: 'The requests source ID',
             example: '1234567890',
+            nullable: true,
+          },
+          source_ip: {
+            type: 'string',
+            description: 'The requests source IPV4 ip address',
+            example: '192.168.1.1',
             nullable: true,
           },
           step_requests: {

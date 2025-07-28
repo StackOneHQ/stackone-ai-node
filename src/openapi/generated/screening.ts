@@ -44,9 +44,10 @@ export const screeningSpec = {
             required: false,
             in: 'query',
             description:
-              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
+              example: 'id,remote_id,name,description',
               type: 'string',
             },
           },
@@ -332,9 +333,10 @@ export const screeningSpec = {
             required: false,
             in: 'query',
             description:
-              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
+              example: 'id,remote_id,name,description',
               type: 'string',
             },
           },
@@ -862,15 +864,15 @@ export const screeningSpec = {
   tags: [
     {
       name: 'Orders',
-      description: '',
+      description: 'Requests for screening services.',
     },
     {
       name: 'Results',
-      description: '',
+      description: 'Outcomes of screening services.',
     },
     {
       name: 'Packages',
-      description: '',
+      description: 'Collections of screening services.',
     },
   ],
   servers: [

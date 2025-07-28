@@ -5684,35 +5684,35 @@ export const marketingSpec = {
   tags: [
     {
       name: 'Campaigns',
-      description: '',
+      description: 'Marketing campaigns and initiatives.',
     },
     {
       name: 'Content Blocks',
-      description: '',
+      description: 'Reusable content blocks for marketing.',
     },
     {
       name: 'Email',
-      description: '',
+      description: 'Email marketing messages.',
     },
     {
       name: 'In App',
-      description: '',
+      description: 'In-app marketing messages.',
     },
     {
       name: 'Omni-Channel',
-      description: '',
+      description: 'Omni-channel marketing communications.',
     },
     {
       name: 'Push',
-      description: '',
+      description: 'Push notifications for marketing.',
     },
     {
       name: 'SMS',
-      description: '',
+      description: 'SMS marketing messages.',
     },
     {
       name: 'Templates',
-      description: '',
+      description: 'Templates for marketing content or campaigns.',
     },
   ],
   servers: [

@@ -3,185 +3,6 @@
 export const lmsSpec = {
   openapi: '3.1.0',
   paths: {
-    '/unified/lms/courses/batch': {
-      post: {
-        operationId: 'lms_batch_upsert_course',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/LmsBatchUpsertCourseRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '202': {
-            description: 'Batch operation accepted',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BatchResultApiModel',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Batch Upsert Course',
-        tags: ['Courses'],
-        'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'batch_upsert_course',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
     '/unified/lms/courses': {
       get: {
         operationId: 'lms_list_courses',
@@ -229,7 +50,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations',
+                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations,authors',
               type: 'string',
             },
           },
@@ -472,183 +293,6 @@ export const lmsSpec = {
           strategy: 'backoff',
         },
       },
-      put: {
-        operationId: 'lms_upsert_course',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/LmsUpsertCourseRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '201': {
-            description: 'The course was upserted successfully.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UpsertResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Upsert Course',
-        tags: ['Courses'],
-        'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'upsert_course',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
     },
     '/unified/lms/courses/{id}': {
       get: {
@@ -703,7 +347,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations',
+                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations,authors',
               type: 'string',
             },
           },
@@ -1814,7 +1458,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags',
+                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags,authors',
               type: 'string',
             },
           },
@@ -2283,7 +1927,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags',
+                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags,authors',
               type: 'string',
             },
           },
@@ -6030,372 +5674,6 @@ export const lmsSpec = {
         },
       },
     },
-    '/unified/lms/collections': {
-      post: {
-        operationId: 'lms_create_collection',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/LmsCreateCollectionRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '201': {
-            description: 'The collection was created successfully.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/CreateResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Create Collection',
-        tags: ['Collections'],
-        'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'create_collection',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/lms/collections/{id}': {
-      patch: {
-        operationId: 'lms_update_collection',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/LmsCreateCollectionRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '201': {
-            description: 'The collection was updated successfully.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UpdateResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Update Collection',
-        tags: ['Collections'],
-        'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'update_collection',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
   },
   info: {
     title: 'LMS',
@@ -6406,35 +5684,35 @@ export const lmsSpec = {
   tags: [
     {
       name: 'Courses',
-      description: '',
+      description: 'Collections of learning materials or modules.',
     },
     {
       name: 'Content',
-      description: '',
+      description: 'Learning content or materials.',
     },
     {
       name: 'Categories',
-      description: '',
+      description: 'Categories for organizing learning content.',
     },
     {
       name: 'Users',
-      description: '',
+      description: 'People enrolled in or using the LMS.',
     },
     {
       name: 'Skills',
-      description: '',
+      description: 'Skills or competencies taught or tracked.',
     },
     {
       name: 'Assignments',
-      description: '',
+      description: 'Tasks or assignments for learners.',
     },
     {
       name: 'Completions',
-      description: '',
+      description: 'Records of completed assignments or courses.',
     },
     {
       name: 'Collections',
-      description: '',
+      description: 'Groups of courses or learning resources.',
     },
   ],
   servers: [
@@ -6679,6 +5957,23 @@ export const lmsSpec = {
           },
         },
       },
+      AuthorModel: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The ID of the author',
+            example: '123',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The name of the author',
+            example: 'John Doe',
+            nullable: true,
+          },
+        },
+      },
       BadGatewayResponse: {
         type: 'object',
         properties: {
@@ -6827,9 +6122,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the category is active and therefore available for use',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           hierarchy: {
@@ -7234,9 +6537,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the content is active and available for users.',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           duration: {
@@ -7321,6 +6632,20 @@ export const lmsSpec = {
             type: 'array',
             items: {
               type: 'string',
+            },
+          },
+          authors: {
+            description: 'The authors of the content',
+            example: [
+              {
+                id: '123',
+                name: 'John Doe',
+              },
+            ],
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/AuthorModel',
             },
           },
           updated_at: {
@@ -7501,9 +6826,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the course is active and available for users.',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           duration: {
@@ -7548,6 +6881,20 @@ export const lmsSpec = {
             example: 'Course Provider',
             format: 'string',
             nullable: true,
+          },
+          authors: {
+            description: 'The authors of the course',
+            example: [
+              {
+                id: '123',
+                name: 'John Doe',
+              },
+            ],
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/AuthorModel',
+            },
           },
           updated_at: {
             type: 'string',
@@ -7659,49 +7006,6 @@ export const lmsSpec = {
                 $ref: '#/components/schemas/LanguageEnum',
               },
             ],
-          },
-        },
-      },
-      CreateContentApiModel: {
-        type: 'object',
-        properties: {
-          external_reference: {
-            type: 'string',
-            description: 'The external ID associated with this content',
-            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
-            nullable: true,
-          },
-          title: {
-            type: 'string',
-            description: 'The title of the content',
-            example: 'Software Engineer Lv 1',
-            nullable: true,
-          },
-          description: {
-            type: 'string',
-            description: 'The description of the content',
-            example: 'This video acts as learning content for software engineers.',
-            nullable: true,
-          },
-          content_url: {
-            type: 'string',
-            description: 'The external URL of the content',
-            example: 'https://www.youtube.com/watch?v=16873',
-            nullable: true,
-          },
-          mobile_launch_content_url: {
-            type: 'string',
-            description: 'The mobile friendly URL of the content',
-            example: 'https://www.mobile.youtube.com/watch?v=16873',
-            nullable: true,
-          },
-          order: {
-            type: 'number',
-            description:
-              'The order of the individual content within a content grouping. This is not applicable for pushing individual content.',
-            example: 1,
-            format: 'number',
-            nullable: true,
           },
         },
       },
@@ -8345,20 +7649,6 @@ export const lmsSpec = {
         },
         required: ['items'],
       },
-      LmsBatchUpsertCourseRequestDto: {
-        type: 'object',
-        properties: {
-          items: {
-            description: 'The batch of items to upsert',
-            nullable: false,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/LmsUpsertCourseRequestDto',
-            },
-          },
-        },
-        required: ['items'],
-      },
       LmsCreateAssignmentRequestDto: {
         type: 'object',
         properties: {
@@ -8418,91 +7708,6 @@ export const lmsSpec = {
                 $ref: '#/components/schemas/AssignmentStatusEnum',
               },
             ],
-          },
-        },
-      },
-      LmsCreateCollectionRequestDto: {
-        type: 'object',
-        properties: {
-          unified_custom_fields: {
-            type: 'object',
-            description: 'Custom Unified Fields configured in your StackOne project',
-            additionalProperties: true,
-            example: {
-              my_project_custom_field_1: 'REF-1236',
-              my_project_custom_field_2: 'some other value',
-            },
-            nullable: true,
-          },
-          external_reference: {
-            type: 'string',
-            description: 'The external ID associated with this collection',
-            example: 'SOFTWARE-ENG-LV1-TRAINING-collection-1',
-            nullable: true,
-          },
-          learning_object_ids: {
-            description: 'The child ID/IDs associated with this collection',
-            example: ['16873-SOFTWARE-ENG-COURSE', '16874-SOFTWARE-ENG-COURSE'],
-            nullable: true,
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-          },
-          remote_learning_object_ids: {
-            description:
-              "Provider's unique identifiers of the child ID/IDs associated with this collection",
-            example: [
-              'e3cb75bf-aa84-466e-a6c1-b8322b257a48',
-              'e3cb75bf-aa84-466e-a6c1-b8322b257a49',
-            ],
-            nullable: true,
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-          },
-          title: {
-            type: 'string',
-            description: 'The title of the collection',
-            example: 'Software Engineer Lv 1 Collection',
-            nullable: true,
-          },
-          description: {
-            type: 'string',
-            description: 'The description of the collection',
-            example: 'This collection acts as learning pathway for software engineers.',
-            nullable: true,
-          },
-          languages: {
-            description: 'The languages associated with this collection',
-            nullable: true,
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-          },
-          cover_url: {
-            type: 'string',
-            description: 'The URL of the thumbnail image associated with the collection.',
-            example: 'https://www.googledrive.com/?v=16873',
-            nullable: true,
-          },
-          categories: {
-            description: 'The categories associated with this content',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateCategoriesApiModel',
-            },
-          },
-          skills: {
-            description: 'The skills associated with this content',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateSkillsApiModel',
-            },
           },
         },
       },
@@ -8638,9 +7843,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the content is active and available for users.',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           duration: {
@@ -8713,6 +7926,20 @@ export const lmsSpec = {
             type: 'array',
             items: {
               type: 'string',
+            },
+          },
+          authors: {
+            description: 'The authors of the content',
+            example: [
+              {
+                id: '123',
+                name: 'John Doe',
+              },
+            ],
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/AuthorModel',
             },
           },
           updated_at: {
@@ -8819,9 +8046,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the content is active and available for users.',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           duration: {
@@ -8896,6 +8131,20 @@ export const lmsSpec = {
               type: 'string',
             },
           },
+          authors: {
+            description: 'The authors of the content',
+            example: [
+              {
+                id: '123',
+                name: 'John Doe',
+              },
+            ],
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/AuthorModel',
+            },
+          },
           updated_at: {
             type: 'string',
             description: 'The date on which the content was last updated.',
@@ -8924,123 +8173,6 @@ export const lmsSpec = {
             type: 'array',
             items: {
               $ref: '#/components/schemas/AdditionalData',
-            },
-          },
-        },
-      },
-      LmsUpsertCourseRequestDto: {
-        type: 'object',
-        properties: {
-          unified_custom_fields: {
-            type: 'object',
-            description: 'Custom Unified Fields configured in your StackOne project',
-            additionalProperties: true,
-            example: {
-              my_project_custom_field_1: 'REF-1236',
-              my_project_custom_field_2: 'some other value',
-            },
-            nullable: true,
-          },
-          external_reference: {
-            type: 'string',
-            description: 'The external ID associated with this course',
-            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
-            nullable: true,
-          },
-          title: {
-            type: 'string',
-            description: 'The title of the course',
-            example: 'Software Engineer Lv 1',
-            nullable: true,
-          },
-          description: {
-            type: 'string',
-            description: 'The description of the course',
-            example: 'This course acts as learning content for software engineers.',
-            nullable: true,
-          },
-          languages: {
-            description: 'The languages associated with this course',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/LanguageEnum',
-            },
-          },
-          cover_url: {
-            type: 'string',
-            description: 'The URL of the thumbnail image associated with the course.',
-            example: 'https://www.googledrive.com/?v=16873',
-            nullable: true,
-          },
-          url: {
-            type: 'string',
-            description: 'The redirect URL of the course.',
-            example: 'https://www.linkedinlearning.com/?v=16873',
-            nullable: true,
-          },
-          active: {
-            type: 'boolean',
-            description: 'Whether the course is active and available for users.',
-            example: true,
-            nullable: true,
-          },
-          duration: {
-            type: 'string',
-            description:
-              'The duration of the course following the ISO8601 standard. If duration_unit is applicable we will derive this from the smallest unit given in the duration string',
-            example: 'P3Y6M4DT12H30M5S',
-            format: 'string',
-            nullable: true,
-          },
-          categories: {
-            description: 'The categories associated with this content',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateCategoriesApiModel',
-            },
-          },
-          skills: {
-            description: 'The skills associated with this content',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateSkillsApiModel',
-            },
-          },
-          content: {
-            description: 'The content associated with this course',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateContentApiModel',
-            },
-          },
-          localizations: {
-            description: 'The localization data for this course',
-            example: [
-              {
-                title: 'Software Engineer Lv 1',
-                description: 'This course acts as learning resource for software engineers.',
-                languages: {
-                  value: 'en-GB',
-                  source_value: 'string',
-                },
-              },
-              {
-                title: 'Software Engineer: A comprehensive guide',
-                description: 'This course acts as learning resource for software engineers.',
-                languages: {
-                  value: 'en-US',
-                  source_value: 'string',
-                },
-              },
-            ],
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/LocalizationModel',
             },
           },
         },
@@ -9095,9 +8227,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'The user active status',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           created_at: {
@@ -9424,9 +8564,17 @@ export const lmsSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the skill is active and therefore available for use',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           hierarchy: {

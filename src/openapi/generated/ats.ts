@@ -2385,6 +2385,289 @@ export const atsSpec = {
         },
       },
     },
+    '/unified/ats/applications/{id}/changes': {
+      get: {
+        operationId: 'ats_list_application_changes',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example:
+                'event_id,remote_event_id,created_at,effective_at,change_type,actor,new_values',
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description:
+              'Filter parameters for application changes (supports created_after and change_type)',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                created_after: {
+                  description:
+                    'Use a string with a date to only select results created after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                change_type: {
+                  description: 'Filter by the type of change that occurred to the application',
+                  enum: [
+                    'application_status',
+                    'interview_stage',
+                    'rejected_reasons',
+                    'unmapped_value',
+                  ],
+                  type: 'string',
+                  nullable: true,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The changes related to the application with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ApplicationChangesPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Application Changes',
+        tags: ['Applications', 'Application Changes'],
+        'x-speakeasy-group': 'ats',
+        'x-speakeasy-name-override': 'list_application_changes',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
     '/unified/ats/applications/{id}/notes': {
       get: {
         operationId: 'ats_list_application_notes',
@@ -5098,7 +5381,7 @@ export const atsSpec = {
           },
         },
         responses: {
-          '200': {
+          '201': {
             description: 'The candidate was successfully created.',
             content: {
               'application/json': {
@@ -13443,7 +13726,7 @@ export const atsSpec = {
           },
         },
         responses: {
-          '200': {
+          '201': {
             description: 'The offer was created successfully.',
             content: {
               'application/json': {
@@ -14476,219 +14759,6 @@ export const atsSpec = {
         tags: ['Assessments', 'Orders'],
         'x-speakeasy-group': 'ats',
         'x-speakeasy-name-override': 'order_assessments_request',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/ats/assessments/orders/{id}': {
-      get: {
-        operationId: 'ats_get_assessments_request',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,package,application,job,candidate,requester,results_update_url',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The assessments order with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/AssessmentOrderResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get Assessments Requests',
-        tags: ['Assessments', 'Orders'],
-        'x-speakeasy-group': 'ats',
-        'x-speakeasy-name-override': 'get_assessments_request',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -16128,286 +16198,6 @@ export const atsSpec = {
       },
     },
     '/unified/ats/background_checks/orders': {
-      get: {
-        operationId: 'ats_list_background_check_request',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,package,application,job,candidate,requester,results_update_url',
-              type: 'string',
-            },
-          },
-          {
-            name: 'filter',
-            required: false,
-            in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
-            schema: {
-              properties: {
-                updated_after: {
-                  description:
-                    'Use a string with a date to only select results updated after that given date',
-                  example: '2020-01-01T00:00:00.000Z',
-                  type: 'string',
-                  nullable: true,
-                  additionalProperties: false,
-                },
-              },
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'page_size',
-            required: false,
-            in: 'query',
-            description: 'The number of results per page (default value is 25)',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'next',
-            required: false,
-            in: 'query',
-            description: 'The unified cursor',
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
-            name: 'updated_after',
-            required: false,
-            in: 'query',
-            description:
-              'Use a string with a date to only select results updated after that given date',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              example: '2020-01-01T00:00:00.000Z',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The list of background check requests was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BackgroundCheckOrderPaginated',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'List Background Check Request',
-        tags: ['Background Checks', 'Orders'],
-        'x-speakeasy-group': 'ats',
-        'x-speakeasy-name-override': 'list_background_check_request',
-        'x-speakeasy-pagination': {
-          type: 'cursor',
-          inputs: [
-            {
-              name: 'next',
-              in: 'parameters',
-              type: 'cursor',
-            },
-          ],
-          outputs: {
-            nextCursor: '$.next',
-          },
-        },
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
       post: {
         operationId: 'ats_order_background_check_request',
         parameters: [
@@ -16580,219 +16370,6 @@ export const atsSpec = {
         tags: ['Background Checks', 'Orders'],
         'x-speakeasy-group': 'ats',
         'x-speakeasy-name-override': 'order_background_check_request',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
-    },
-    '/unified/ats/background_checks/orders/{id}': {
-      get: {
-        operationId: 'ats_get_background_check_request',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'raw',
-            required: false,
-            in: 'query',
-            description:
-              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
-            schema: {
-              nullable: true,
-              type: 'boolean',
-            },
-          },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            description:
-              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            schema: {
-              additionalProperties: true,
-              nullable: true,
-              type: 'object',
-            },
-          },
-          {
-            name: 'fields',
-            required: false,
-            in: 'query',
-            description:
-              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
-            schema: {
-              nullable: true,
-              example:
-                'id,remote_id,package,application,job,candidate,requester,results_update_url',
-              type: 'string',
-            },
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'The background check order with the given identifier was retrieved.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BackgroundCheckOrderResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Get Background Check Request',
-        tags: ['Background Checks', 'Orders'],
-        'x-speakeasy-group': 'ats',
-        'x-speakeasy-name-override': 'get_background_check_request',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -17201,6 +16778,506 @@ export const atsSpec = {
         },
       },
     },
+    '/unified/ats/documents/application_categories': {
+      get: {
+        operationId: 'ats_list_application_document_categories',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,active',
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Filter parameters that allow greater customisation of the list response',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'The list of application document categories were retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ReferencePaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Application Document Categories',
+        tags: ['Documents'],
+        'x-speakeasy-group': 'ats',
+        'x-speakeasy-name-override': 'list_application_document_categories',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/ats/documents/application_categories/{id}': {
+      get: {
+        operationId: 'ats_get_application_document_category',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              example: 'id,remote_id,name,active',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The application document category with the given identifier was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ReferenceResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Application Document Category',
+        tags: ['Documents'],
+        'x-speakeasy-group': 'ats',
+        'x-speakeasy-name-override': 'get_application_document_category',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
   },
   info: {
     title: 'ATS',
@@ -17210,96 +17287,101 @@ export const atsSpec = {
   },
   tags: [
     {
+      name: 'Application Changes',
+      description:
+        'Chronological record of changes made to the application (this will only track changes for specific properties of the Application model).',
+    },
+    {
       name: 'Application Notes',
-      description: '',
+      description: 'Notes or comments on applications.',
     },
     {
       name: 'Applications',
-      description: '',
+      description: 'Job applications submitted by candidates.',
     },
     {
       name: 'Assessments',
-      description: '',
+      description: 'Candidate assessments or tests.',
     },
     {
       name: 'Background Checks',
-      description: '',
+      description: 'Background screening checks.',
     },
     {
       name: 'Candidates',
-      description: '',
+      description: 'People applying for jobs.',
     },
     {
       name: 'Custom Field Definitions',
-      description: '',
+      description: 'Definitions for custom fields on ATS resources.',
     },
     {
       name: 'Departments',
-      description: '',
+      description: 'Departments within an organization.',
     },
     {
       name: 'Documents',
-      description: '',
+      description: 'Files and documents related to candidates or jobs.',
     },
     {
       name: 'Interview Stages',
-      description: '',
+      description: 'Stages in the interview process.',
     },
     {
       name: 'Interviews',
-      description: '',
+      description: 'Scheduled interviews with candidates.',
     },
     {
       name: 'Job Postings',
-      description: '',
+      description: 'Public job advertisements.',
     },
     {
       name: 'Jobs',
-      description: '',
+      description: 'Open job positions.',
     },
     {
       name: 'Lists',
-      description: '',
+      description: 'Lists for organizing candidates or jobs.',
     },
     {
       name: 'Locations',
-      description: '',
+      description: 'Job or office locations.',
     },
     {
       name: 'Notes',
-      description: '',
+      description: 'General notes or comments.',
     },
     {
       name: 'Offers',
-      description: '',
+      description: 'Job offers extended to candidates.',
     },
     {
       name: 'Orders',
-      description: '',
+      description: 'Orders for background checks or assessments.',
     },
     {
       name: 'Packages',
-      description: '',
+      description: 'Assessment or offer packages.',
     },
     {
       name: 'Rejected Reasons',
-      description: '',
+      description: 'Reasons for candidate rejection.',
     },
     {
       name: 'Results',
-      description: '',
+      description: 'Results of assessments or background checks.',
     },
     {
       name: 'Scheduled Interviews',
-      description: '',
+      description: 'Planned interview sessions.',
     },
     {
       name: 'Scorecards',
-      description: '',
+      description: 'Evaluation scorecards for candidates.',
     },
     {
       name: 'Users',
-      description: '',
+      description: 'System users with access to the ATS.',
     },
   ],
   servers: [
@@ -17720,6 +17802,157 @@ export const atsSpec = {
           },
         },
       },
+      ApplicationChanges: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          created_at: {
+            type: 'string',
+            description: 'Timestamp when the change was created',
+            example: '2024-01-15T10:30:00Z',
+            format: 'date-time',
+          },
+          effective_at: {
+            type: 'string',
+            description: 'Timestamp when the change became effective',
+            example: '2024-01-15T10:30:00Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          actor: {
+            description: 'The actor who made the change',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ChangesActor',
+              },
+            ],
+          },
+          change_type: {
+            description: 'The type of change that occurred to the application',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ApplicationChangeTypeEnum',
+              },
+            ],
+          },
+          new_values: {
+            description:
+              'The new values for changed application properties. Only includes fields that commonly change over the application lifecycle.',
+            allOf: [
+              {
+                $ref: '#/components/schemas/ApplicationChangesDataModel',
+              },
+            ],
+          },
+        },
+        required: ['created_at', 'new_values'],
+      },
+      ApplicationChangesDataModel: {
+        type: 'object',
+        properties: {
+          interview_stage_id: {
+            type: 'string',
+            description: 'Unique identifier of the interview stage',
+            example: '18bcbb1b-3cbc-4198-a999-460861d19480',
+            nullable: true,
+          },
+          rejected_reason_ids: {
+            description: 'Unique identifiers of the rejection reasons',
+            example: ['f223d7f6-908b-48f0-9237-b201c307f609'],
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          application_status: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ApplicationStatusEnum',
+              },
+            ],
+          },
+        },
+      },
+      ApplicationChangesPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ApplicationChanges',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+      },
+      ApplicationChangeTypeEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: [
+              'application_status',
+              'interview_stage',
+              'rejected_reasons',
+              'unmapped_value',
+              null,
+            ],
+            description: 'The type of change that occurred to the application',
+            example: 'application_status',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            description: 'The source value of the change type',
+            example: 'StatusChange',
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
       ApplicationResult: {
         type: 'object',
         properties: {
@@ -17821,85 +18054,6 @@ export const atsSpec = {
             nullable: true,
           },
         },
-      },
-      AssessmentOrder: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            description: 'Unique identifier',
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          remote_id: {
-            type: 'string',
-            description: "Provider's unique identifier",
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          package: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderPackageApiModel',
-              },
-            ],
-          },
-          application: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderApplicationApiModel',
-              },
-            ],
-          },
-          job: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderJobApiModel',
-              },
-            ],
-          },
-          candidate: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderCandidateApiModel',
-              },
-            ],
-          },
-          requester: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderJobHiringTeamApiModel',
-              },
-            ],
-          },
-          results_update_url: {
-            type: 'string',
-            description: 'Results update url',
-            example: 'https://exmaple.com/integrations/results/update',
-            nullable: true,
-          },
-        },
-      },
-      AssessmentOrderResult: {
-        type: 'object',
-        properties: {
-          data: {
-            $ref: '#/components/schemas/AssessmentOrder',
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-        required: ['data'],
       },
       AssessmentPackage: {
         type: 'object',
@@ -19533,113 +19687,6 @@ export const atsSpec = {
           },
         },
       },
-      BackgroundCheckOrder: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            description: 'Unique identifier',
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          remote_id: {
-            type: 'string',
-            description: "Provider's unique identifier",
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          application: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderApplicationApiModel',
-              },
-            ],
-          },
-          job: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderJobApiModel',
-              },
-            ],
-          },
-          candidate: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderCandidateApiModel',
-              },
-            ],
-          },
-          requester: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderJobHiringTeamApiModel',
-              },
-            ],
-          },
-          results_update_url: {
-            type: 'string',
-            description: 'Results update url',
-            example: 'https://exmaple.com/integrations/results/update',
-            nullable: true,
-          },
-          package: {
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/OrderBackgroundCheckPackageApiModel',
-              },
-            ],
-          },
-        },
-      },
-      BackgroundCheckOrderPaginated: {
-        type: 'object',
-        properties: {
-          next_page: {
-            type: 'string',
-            deprecated: true,
-            nullable: true,
-          },
-          next: {
-            type: 'string',
-            nullable: true,
-          },
-          data: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/BackgroundCheckOrder',
-            },
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-        required: ['data'],
-      },
-      BackgroundCheckOrderResult: {
-        type: 'object',
-        properties: {
-          data: {
-            $ref: '#/components/schemas/BackgroundCheckOrder',
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-        required: ['data'],
-      },
       BackgroundCheckPackage: {
         type: 'object',
         properties: {
@@ -20086,6 +20133,23 @@ export const atsSpec = {
           },
         },
         required: ['data'],
+      },
+      ChangesActor: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+        },
       },
       CompensationTypeEnum: {
         type: 'object',
@@ -20558,28 +20622,24 @@ export const atsSpec = {
           },
           options: {
             description: 'An array of possible options for the custom field.',
-            example: ['Not Started', 'In Progress', 'Completed', 'Overdue'],
+            example: [
+              {
+                id: 'option_1',
+                value: 'Not Started',
+              },
+              {
+                id: 'option_2',
+                value: 'In Progress',
+              },
+              {
+                id: 'option_3',
+                value: 'Completed',
+              },
+            ],
             nullable: true,
             type: 'array',
             items: {
-              oneOf: [
-                {
-                  type: 'string',
-                },
-                {
-                  type: 'number',
-                },
-                {
-                  type: 'boolean',
-                },
-                {
-                  type: 'object',
-                },
-                {
-                  type: 'array',
-                  items: {},
-                },
-              ],
+              $ref: '#/components/schemas/CustomFieldOption',
             },
           },
         },
@@ -20627,6 +20687,23 @@ export const atsSpec = {
           },
         },
         required: ['data'],
+      },
+      CustomFieldOption: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description:
+              'The unique identifier for the option to be used when updating the custom field',
+            example: 'option_123',
+          },
+          value: {
+            type: 'string',
+            description: 'The human readable value of the option',
+            example: 'Not Started',
+          },
+        },
+        required: ['id', 'value'],
       },
       CustomFields: {
         type: 'object',
@@ -25003,6 +25080,87 @@ export const atsSpec = {
           },
         },
         required: ['method', 'url'],
+      },
+      Reference: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The reference id',
+            example: '1687-3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The reference name',
+            example: '1687-4',
+            nullable: true,
+          },
+          active: {
+            description: 'The reference status',
+            example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
+      ReferencePaginated: {
+        type: 'object',
+        properties: {
+          next_page: {
+            type: 'string',
+            deprecated: true,
+            nullable: true,
+          },
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Reference',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      ReferenceResult: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/Reference',
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
       },
       RejectApplicationResult: {
         type: 'object',
