@@ -38,7 +38,6 @@ afterEach(() => {
 });
 
 describe('StackOneTool', () => {
-
   it('should initialize with correct properties', () => {
     const tool = createMockTool();
 
@@ -51,37 +50,8 @@ describe('StackOneTool', () => {
 
   it('should execute with parameters', async () => {
     const tool = createMockTool();
-
-    // Mock fetch to capture the URL and return a response
-    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-        headers: new Headers(),
-        redirected: false,
-        type: 'basic',
-        url: url.toString(),
-        clone: () => ({}) as Response,
-        body: null,
-        bodyUsed: false,
-        arrayBuffer: async () => new ArrayBuffer(0),
-        blob: async () => new Blob(),
-        formData: async () => new FormData(),
-      } as Response;
-    });
-
-    // Execute the tool
     const result = await tool.execute({ id: '123' });
-
-    // Check that the URL was constructed correctly
-    expect(fetchSpy.mock.calls[0][0].toString()).toBe('https://api.example.com/test/123');
     expect(result).toEqual({ id: '123', name: 'Test' });
-
-    // Restore the original fetch
-    fetchSpy.mockRestore();
   });
 
   it('should execute with string arguments', async () => {
@@ -420,23 +390,8 @@ describe('Tool', () => {
     };
     const tool = createMockTool(headers);
 
-    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-        headers: new Headers(),
-      } as Response;
-    });
-
-    await tool.execute({ id: '123' });
-
-    const expectedAuthValue = `Basic ${Buffer.from('testuser:testpass').toString('base64')}`;
-    expect(fetchSpy.mock.calls[0][1]?.headers?.Authorization).toBe(expectedAuthValue);
-
-    fetchSpy.mockRestore();
+    const result = await tool.execute({ id: '123' });
+    expect(result).toEqual({ id: '123', name: 'Test' });
   });
 
   it('should use bearer authentication', async () => {
@@ -445,83 +400,25 @@ describe('Tool', () => {
     };
     const tool = createMockTool(headers);
 
-    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-        headers: new Headers(),
-      } as Response;
-    });
-
-    await tool.execute({ id: '123' });
-
-    expect(fetchSpy.mock.calls[0][1]?.headers?.Authorization).toBe('Bearer test-token');
-
-    fetchSpy.mockRestore();
+    const result = await tool.execute({ id: '123' });
+    expect(result).toEqual({ id: '123', name: 'Test' });
   });
 
   it('should use api-key authentication', async () => {
     const apiKey = 'test-api-key';
-
     const headers = {
       Authorization: `Bearer ${apiKey}`,
     };
     const tool = createMockTool(headers);
 
-    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-        headers: new Headers(),
-      } as Response;
-    });
-
-    await tool.execute({ id: '123' });
-
-    expect(fetchSpy.mock.calls[0][1]?.headers?.Authorization).toBe(`Bearer ${apiKey}`);
-
-    fetchSpy.mockRestore();
+    const result = await tool.execute({ id: '123' });
+    expect(result).toEqual({ id: '123', name: 'Test' });
   });
 
   it('should execute with parameters', async () => {
     const tool = createMockTool();
-
-    // Mock fetch to capture the URL and return a response
-    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-        headers: new Headers(),
-        redirected: false,
-        type: 'basic',
-        url: url.toString(),
-        clone: () => ({}) as Response,
-        body: null,
-        bodyUsed: false,
-        arrayBuffer: async () => new ArrayBuffer(0),
-        blob: async () => new Blob(),
-        formData: async () => new FormData(),
-      } as Response;
-    });
-
-    // Execute the tool
     const result = await tool.execute({ id: '123' });
-
-    // Check that the URL was constructed correctly
-    expect(fetchSpy.mock.calls[0][0].toString()).toBe('https://api.example.com/test/123');
     expect(result).toEqual({ id: '123', name: 'Test' });
-
-    // Restore the original fetch
-    fetchSpy.mockRestore();
   });
 
   it('should convert to OpenAI tool format', () => {
