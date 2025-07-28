@@ -10,7 +10,7 @@ export default defineConfig({
   treeshake: true,
   dts: {
     tsgo: true,
-    resolve: [/^@types\//],
+    resolve: [/^@types\//, 'type-fest'],
   },
   publint: true,
   unused: true,
