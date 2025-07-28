@@ -19,6 +19,7 @@
     "outDir": "dist",
     "sourceMap": true,
     "declaration": true,
+    "erasableSyntaxOnly": true,
 
     /* Other */
     "forceConsistentCasingInFileNames": true,
