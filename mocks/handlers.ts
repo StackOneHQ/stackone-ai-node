@@ -18,6 +18,12 @@ export const handlers = [
 
   // Generic test endpoint for tool.spec.ts
   http.get('https://api.example.com/test/:id', ({ params }) => {
+    if (params.id === 'invalid') {
+      return HttpResponse.json(
+        { error: 'Invalid ID' },
+        { status: 400, statusText: 'Bad Request' }
+      );
+    }
     return HttpResponse.json({
       id: params.id,
       name: 'Test',

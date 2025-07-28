@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:te
 import { BaseTool, StackOneTool, Tools } from '../tool';
 import { type ExecuteConfig, ParameterLocation, type ToolParameters } from '../types';
 import { StackOneAPIError } from '../utils/errors';
-import { type FetchMockResult, mockFetch } from './utils/fetch-mock';
 
 // Create a mock tool for testing
 const createMockTool = (headers?: Record<string, string>): BaseTool => {
@@ -39,23 +38,6 @@ afterEach(() => {
 });
 
 describe('StackOneTool', () => {
-  // Test-specific fetch mock
-  let fetchMock: FetchMockResult;
-
-  beforeEach(() => {
-    // Set up a default fetch mock for each test
-    fetchMock = mockFetch({
-      defaultResponse: {
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-      },
-    });
-  });
-
-  afterEach(() => {
-    // Clean up the fetch mock
-    fetchMock.restore();
-  });
 
   it('should initialize with correct properties', () => {
     const tool = createMockTool();
@@ -107,22 +89,9 @@ describe('StackOneTool', () => {
     const result = await tool.execute('{"id":"123"}');
 
     expect(result).toEqual({ id: '123', name: 'Test' });
-    expect(fetchMock.requestUrl).toContain('https://api.example.com/test/123');
   });
 
   it('should handle API errors', async () => {
-    // Override the default fetch mock with an error response
-    fetchMock.restore();
-    fetchMock = mockFetch({
-      defaultResponse: {
-        ok: false,
-        status: 400,
-        statusText: 'Bad Request',
-        json: async () => ({ error: 'Invalid ID' }),
-        text: async () => JSON.stringify({ error: 'Invalid ID' }),
-      },
-    });
-
     const tool = createMockTool();
 
     try {
@@ -228,18 +197,9 @@ describe('StackOneTool', () => {
   });
 
   it('should execute AI SDK tool with parameters', async () => {
-    // Mock fetch with a custom response
-    const fetchMock = mockFetch({
-      defaultResponse: {
-        json: async () => ({ id: '123', name: 'Test' }),
-        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
-      },
-    });
-
     const tool = createMockTool();
     const aiSdkTool = tool.toAISDK();
 
-    // Execute the AI SDK tool
     if (!aiSdkTool.test_tool.execute) {
       throw new Error('test_tool.execute is undefined');
     }
@@ -249,8 +209,6 @@ describe('StackOneTool', () => {
       { toolCallId: 'test-tool-call-id', messages: [] }
     );
     expect(result).toEqual({ id: '123', name: 'Test' });
-
-    fetchMock.restore();
   });
 
   it('should return error message as string when AI SDK tool execution fails', async () => {
@@ -457,67 +415,78 @@ describe('Tool', () => {
   });
 
   it('should use basic authentication', async () => {
-    // Create tool with authentication header already set
     const headers = {
       Authorization: `Basic ${Buffer.from('testuser:testpass').toString('base64')}`,
     };
     const tool = createMockTool(headers);
 
-    // Mock fetch to capture the headers
-    const fetchMock = mockFetch();
+    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ id: '123', name: 'Test' }),
+        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
+        headers: new Headers(),
+      } as Response;
+    });
 
-    // Execute the tool
     await tool.execute({ id: '123' });
 
-    // Check that the Authorization header was set correctly
     const expectedAuthValue = `Basic ${Buffer.from('testuser:testpass').toString('base64')}`;
-    expect(fetchMock.requestHeaders.Authorization).toBe(expectedAuthValue);
+    expect(fetchSpy.mock.calls[0][1]?.headers?.Authorization).toBe(expectedAuthValue);
 
-    // Restore the original fetch
-    fetchMock.restore();
+    fetchSpy.mockRestore();
   });
 
   it('should use bearer authentication', async () => {
-    // Create tool with authentication header already set
     const headers = {
       Authorization: 'Bearer test-token',
     };
     const tool = createMockTool(headers);
 
-    // Mock fetch to capture the headers
-    const fetchMock = mockFetch();
+    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ id: '123', name: 'Test' }),
+        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
+        headers: new Headers(),
+      } as Response;
+    });
 
-    // Execute the tool
     await tool.execute({ id: '123' });
 
-    // Check that the Authorization header was set correctly
-    expect(fetchMock.requestHeaders.Authorization).toBe('Bearer test-token');
+    expect(fetchSpy.mock.calls[0][1]?.headers?.Authorization).toBe('Bearer test-token');
 
-    // Restore the original fetch
-    fetchMock.restore();
+    fetchSpy.mockRestore();
   });
 
-  it('should use api-key authentication', () => {
+  it('should use api-key authentication', async () => {
     const apiKey = 'test-api-key';
 
-    // Create tool with authentication header already set
     const headers = {
       Authorization: `Bearer ${apiKey}`,
     };
     const tool = createMockTool(headers);
 
-    // Execute the tool to trigger authentication header generation
-    // Mock fetch to capture the headers
-    const fetchMock = mockFetch();
+    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: async () => ({ id: '123', name: 'Test' }),
+        text: async () => JSON.stringify({ id: '123', name: 'Test' }),
+        headers: new Headers(),
+      } as Response;
+    });
 
-    // Execute the tool to trigger header generation
-    tool.execute();
+    await tool.execute({ id: '123' });
 
-    // Check that the Authorization header was set correctly
-    expect(fetchMock.requestHeaders.Authorization).toBe(`Bearer ${apiKey}`);
+    expect(fetchSpy.mock.calls[0][1]?.headers?.Authorization).toBe(`Bearer ${apiKey}`);
 
-    // Restore the original fetch
-    fetchMock.restore();
+    fetchSpy.mockRestore();
   });
 
   it('should execute with parameters', async () => {
