@@ -36,12 +36,6 @@ describe('fetch-specs script', () => {
   });
 
   it('should fetch and save OpenAPI specs', async () => {
-    const hrisApiSpec = {
-      openapi: '3.0.0',
-      info: { title: 'HRIS API', version: '1.0.0' },
-      paths: { '/employees': {} },
-    };
-
     // Create test implementations of the functions
     const fetchSpec = async (category: string): Promise<Record<string, unknown>> => {
       const response = await fetch(`https://api.stackone.com/api/v1/${category}/openapi.json`, {
@@ -66,7 +60,11 @@ describe('fetch-specs script', () => {
 
     // Test fetchSpec function
     const hrisSpec = await fetchSpec('hris');
-    expect(hrisSpec).toEqual(hrisApiSpec);
+    expect(hrisSpec).toEqual({
+      openapi: '3.0.0',
+      info: { title: 'HRIS API', version: '1.0.0' },
+      paths: { '/employees': {} },
+    });
 
     // Test saveSpec function
     await saveSpec('hris', hrisSpec);
@@ -75,6 +73,10 @@ describe('fetch-specs script', () => {
     expect(writeFileSyncSpy).toHaveBeenCalled();
     const writeFileCall = writeFileSyncSpy.mock.calls[0];
     expect(writeFileCall[0]).toContain('hris.json');
-    expect(JSON.parse(writeFileCall[1] as string)).toEqual(hrisApiSpec);
+    expect(JSON.parse(writeFileCall[1] as string)).toEqual({
+      openapi: '3.0.0',
+      info: { title: 'HRIS API', version: '1.0.0' },
+      paths: { '/employees': {} },
+    });
   });
 });
