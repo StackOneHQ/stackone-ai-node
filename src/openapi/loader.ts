@@ -35,72 +35,67 @@ export const loadStackOneSpecs = (
 };
 
 /**
- * Functions for loading OpenAPI specs from various sources
+ * Load OpenAPI spec from a file
+ * @param filePath Path to the OpenAPI spec file
+ * @param baseUrl Optional base URL to use for all operations
+ * @param removedParams Optional array of parameter names to remove from all tools
+ * @returns Tool definitions parsed from the spec
+ * @throws ToolSetLoadError If there is an error loading the spec
  */
-export namespace OpenAPILoader {
-  /**
-   * Load OpenAPI spec from a file
-   * @param filePath Path to the OpenAPI spec file
-   * @param baseUrl Optional base URL to use for all operations
-   * @param removedParams Optional array of parameter names to remove from all tools
-   * @returns Tool definitions parsed from the spec
-   * @throws ToolSetLoadError If there is an error loading the spec
-   */
-  export const loadFromFile = (
-    filePath: string,
-    baseUrl?: string,
-    removedParams: string[] = []
-  ): Record<string, ToolDefinition> => {
-    try {
-      const spec = readJsonFile<OpenAPIDocument>(filePath);
-      const parser = new OpenAPIParser(spec, baseUrl, removedParams);
+export const loadFromFile = (
+  filePath: string,
+  baseUrl?: string,
+  removedParams: string[] = []
+): Record<string, ToolDefinition> => {
+  try {
+    const spec = readJsonFile<OpenAPIDocument>(filePath);
+    const parser = new OpenAPIParser(spec, baseUrl, removedParams);
 
-      return parser.parseTools();
-    } catch (error) {
-      if (error instanceof ToolSetLoadError) {
-        throw error;
-      }
+    return parser.parseTools();
+  } catch (error) {
+    if (error instanceof ToolSetLoadError) {
+      throw error;
+    }
+    throw new ToolSetLoadError(
+      `Error loading spec from file: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+};
+
+/**
+ * Load OpenAPI spec from a URL
+ * @param url URL of the OpenAPI spec
+ * @param baseUrl Optional base URL to use for all operations
+ * @param removedParams Optional array of parameter names to remove from all tools
+ * @returns Promise resolving to tool definitions parsed from the spec
+ * @throws ToolSetLoadError If there is an error loading the spec
+ */
+export const loadFromUrl = async (
+  url: string,
+  baseUrl?: string,
+  removedParams: string[] = []
+): Promise<Record<string, ToolDefinition>> => {
+  try {
+    // Fetch the spec from the URL using native fetch
+    const response = await fetch(url);
+    if (!response.ok) {
       throw new ToolSetLoadError(
-        `Error loading spec from file: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to fetch OpenAPI spec from URL: ${url}, status: ${response.status}`
       );
     }
-  };
 
-  /**
-   * Load OpenAPI spec from a URL
-   * @param url URL of the OpenAPI spec
-   * @param baseUrl Optional base URL to use for all operations
-   * @param removedParams Optional array of parameter names to remove from all tools
-   * @returns Promise resolving to tool definitions parsed from the spec
-   * @throws ToolSetLoadError If there is an error loading the spec
-   */
-  export const loadFromUrl = async (
-    url: string,
-    baseUrl?: string,
-    removedParams: string[] = []
-  ): Promise<Record<string, ToolDefinition>> => {
-    try {
-      // Fetch the spec from the URL using native fetch
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new ToolSetLoadError(
-          `Failed to fetch OpenAPI spec from URL: ${url}, status: ${response.status}`
-        );
-      }
+    // Parse the spec
+    const specContent = await response.text();
+    const spec = JSON.parse(specContent) as OpenAPIDocument;
+    const parser = new OpenAPIParser(spec, baseUrl, removedParams);
 
-      // Parse the spec
-      const specContent = await response.text();
-      const spec = JSON.parse(specContent) as OpenAPIDocument;
-      const parser = new OpenAPIParser(spec, baseUrl, removedParams);
-
-      return parser.parseTools();
-    } catch (error) {
-      if (error instanceof ToolSetLoadError) {
-        throw error;
-      }
-      throw new ToolSetLoadError(
-        `Error loading spec from URL: ${error instanceof Error ? error.message : String(error)}`
-      );
+    return parser.parseTools();
+  } catch (error) {
+    if (error instanceof ToolSetLoadError) {
+      throw error;
     }
-  };
-}
+    throw new ToolSetLoadError(
+      `Error loading spec from URL: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+};

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import path from 'node:path';
-import { OpenAPILoader } from '../../openapi/loader';
+import * as OpenAPILoader from '../../openapi/loader';
 import { mockFetch } from '../../tests/utils/fetch-mock';
 import { ParameterLocation } from '../../types';
 import type { AuthenticationConfig } from '../base';
