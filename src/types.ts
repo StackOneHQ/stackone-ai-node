@@ -3,6 +3,7 @@
  */
 
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
+import type { ValueOf } from 'type-fest';
 
 /**
  * Generic dictionary type for JSON-compatible objects
@@ -43,12 +44,14 @@ export type Experimental_PreExecuteFunction = (params: JsonDict) => Promise<Json
 /**
  * Valid locations for parameters in requests
  */
-export enum ParameterLocation {
-  HEADER = 'header',
-  QUERY = 'query',
-  PATH = 'path',
-  BODY = 'body',
-}
+export const ParameterLocation = {
+  HEADER: 'header',
+  QUERY: 'query',
+  PATH: 'path',
+  BODY: 'body',
+} as const satisfies Record<string, string>;
+
+export type ParameterLocation = ValueOf<typeof ParameterLocation>;
 
 /**
  * Configuration for executing a tool against an API endpoint
