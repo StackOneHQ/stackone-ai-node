@@ -1,4 +1,5 @@
 import { toArray } from '@antfu/utils';
+import type { Arrayable } from 'type-fest';
 import { type BaseTool, Tools } from '../tool';
 import type { Experimental_ToolCreationOptions } from '../types';
 
@@ -112,7 +113,7 @@ export abstract class ToolSet {
    * @param filterPattern Filter pattern or array of patterns
    * @returns True if the tool name matches the filter pattern
    */
-  protected _matchesFilter(toolName: string, filterPattern: string | string[]): boolean {
+  protected _matchesFilter(toolName: string, filterPattern: Arrayable<string>): boolean {
     // Convert to array to handle both single string and array patterns
     const patterns = toArray(filterPattern);
 
