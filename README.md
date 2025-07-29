@@ -134,7 +134,7 @@ import path from "node:path";
 
 // Create the toolset
 const toolset = new OpenAPIToolSet({
-  filePath: path.join(__dirname, "path/to/openapi-spec.json");
+  filePath: path.join(import.meta.dirname, "path/to/openapi-spec.json");
 });
 
 // Get all tools
