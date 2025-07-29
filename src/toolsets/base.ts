@@ -1,3 +1,4 @@
+import { toArray } from '@antfu/utils';
 import { type BaseTool, Tools } from '../tool';
 import type { Experimental_ToolCreationOptions } from '../types';
 
@@ -112,26 +113,21 @@ export abstract class ToolSet {
    * @returns True if the tool name matches the filter pattern
    */
   protected _matchesFilter(toolName: string, filterPattern: string | string[]): boolean {
-    // If filterPattern is an array, check if any pattern matches
-    if (Array.isArray(filterPattern)) {
-      // Split into positive and negative patterns
-      const positivePatterns = filterPattern.filter((p) => !p.startsWith('!'));
-      const negativePatterns = filterPattern
-        .filter((p) => p.startsWith('!'))
-        .map((p) => p.substring(1));
+    // Convert to array to handle both single string and array patterns
+    const patterns = toArray(filterPattern);
 
-      // If no positive patterns, treat as match all
-      const matchesPositive =
-        positivePatterns.length === 0 || positivePatterns.some((p) => this._matchGlob(toolName, p));
+    // Split into positive and negative patterns
+    const positivePatterns = patterns.filter((p) => !p.startsWith('!'));
+    const negativePatterns = patterns.filter((p) => p.startsWith('!')).map((p) => p.substring(1));
 
-      // If any negative pattern matches, exclude the tool
-      const matchesNegative = negativePatterns.some((p) => this._matchGlob(toolName, p));
+    // If no positive patterns, treat as match all
+    const matchesPositive =
+      positivePatterns.length === 0 || positivePatterns.some((p) => this._matchGlob(toolName, p));
 
-      return matchesPositive && !matchesNegative;
-    }
+    // If any negative pattern matches, exclude the tool
+    const matchesNegative = negativePatterns.some((p) => this._matchGlob(toolName, p));
 
-    // Otherwise, check if the single pattern matches
-    return this._matchGlob(toolName, filterPattern);
+    return matchesPositive && !matchesNegative;
   }
 
   /**
