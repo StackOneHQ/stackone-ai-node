@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`StackOneToolSet Snapshot Tests should parse the all the oas files correctly 1`] = `
 Tools {
@@ -687,7 +687,7 @@ Tools {
       },
     },
     StackOneTool {
-      "description": "Creates an employee",
+      "description": "Create Employee",
       "executeConfig": {
         "bodyType": "json",
         "method": "POST",
@@ -3205,7 +3205,7 @@ Tools {
       },
     },
     StackOneTool {
-      "description": "Updates an employee",
+      "description": "Update Employee",
       "executeConfig": {
         "bodyType": "json",
         "method": "PATCH",
@@ -5714,7 +5714,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
             "type": "string",
           },
           "filter": {
@@ -5877,6 +5877,11 @@ Tools {
           },
           {
             "location": "body",
+            "name": "comment",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "passthrough",
             "type": "object",
           },
@@ -5890,6 +5895,11 @@ Tools {
           "approver_id": {
             "description": "The approver ID",
             "example": "1687-4",
+            "type": "string",
+          },
+          "comment": {
+            "description": "Allows users to provide additional context or notes for their time off request",
+            "example": "Taking a day off for personal reasons",
             "type": "string",
           },
           "end_date": {
@@ -6055,6 +6065,11 @@ Tools {
           },
           {
             "location": "body",
+            "name": "comment",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "passthrough",
             "type": "object",
           },
@@ -6117,7 +6132,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
             "type": "string",
           },
           "id": {
@@ -6320,6 +6335,11 @@ Tools {
           },
           {
             "location": "body",
+            "name": "comment",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "passthrough",
             "type": "object",
           },
@@ -6333,6 +6353,11 @@ Tools {
           "approver_id": {
             "description": "The approver ID",
             "example": "1687-4",
+            "type": "string",
+          },
+          "comment": {
+            "description": "Allows users to provide additional context or notes for their time off request",
+            "example": "Taking a day off for personal reasons",
             "type": "string",
           },
           "end_date": {
@@ -6504,6 +6529,11 @@ Tools {
             "location": "body",
             "name": "reason",
             "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "comment",
+            "type": "string",
           },
           {
             "location": "body",
@@ -15174,1215 +15204,6 @@ Tools {
       },
     },
     StackOneTool {
-      "description": "List Work Locations",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/locations",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_list_locations",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
-            "type": "string",
-          },
-          "filter": {
-            "description": "Filter parameters that allow greater customisation of the list response",
-            "properties": {
-              "updated_after": {
-                "additionalProperties": false,
-                "description": "Use a string with a date to only select results updated after that given date",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "next": {
-            "description": "The unified cursor",
-            "type": "string",
-          },
-          "page_size": {
-            "description": "The number of results per page (default value is 25)",
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": undefined,
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/locations",
-      },
-    },
-    StackOneTool {
-      "description": "Get Work Location",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/locations/{id}",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_get_location",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
-            "type": "string",
-          },
-          "id": {
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": [
-          "id",
-        ],
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/locations/{id}",
-      },
-    },
-    StackOneTool {
-      "description": "List time off requests",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "expand",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_list_time_off_requests",
-      "parameters": {
-        "properties": {
-          "expand": {
-            "description": "The comma separated list of fields that will be expanded in the response",
-            "example": "policy",
-            "type": "string",
-          },
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
-            "type": "string",
-          },
-          "filter": {
-            "description": "HRIS Time Off filters",
-            "properties": {
-              "type_ids": {
-                "description": "List of time off type ids to filter by.",
-                "items": {
-                  "type": "string",
-                },
-                "type": "array",
-              },
-              "updated_after": {
-                "additionalProperties": false,
-                "description": "Use a string with a date to only select results updated after that given date",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "next": {
-            "description": "The unified cursor",
-            "type": "string",
-          },
-          "page_size": {
-            "description": "The number of results per page (default value is 25)",
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": undefined,
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "expand",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off",
-      },
-    },
-    StackOneTool {
-      "description": "Get time off request",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "expand",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off/{id}",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_get_time_off_request",
-      "parameters": {
-        "properties": {
-          "expand": {
-            "description": "The comma separated list of fields that will be expanded in the response",
-            "example": "policy",
-            "type": "string",
-          },
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
-            "type": "string",
-          },
-          "id": {
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": [
-          "id",
-        ],
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "expand",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off/{id}",
-      },
-    },
-    StackOneTool {
-      "description": "List time off types",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off_types",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_list_time_off_types",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,active",
-            "type": "string",
-          },
-          "filter": {
-            "description": "Filter parameters that allow greater customisation of the list response",
-            "properties": {
-              "updated_after": {
-                "additionalProperties": false,
-                "description": "Use a string with a date to only select results updated after that given date",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "next": {
-            "description": "The unified cursor",
-            "type": "string",
-          },
-          "page_size": {
-            "description": "The number of results per page (default value is 25)",
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": undefined,
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off_types",
-      },
-    },
-    StackOneTool {
-      "description": "Get time off type",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off_types/{id}",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_get_time_off_type",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,active",
-            "type": "string",
-          },
-          "id": {
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": [
-          "id",
-        ],
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_off_types/{id}",
-      },
-    },
-    StackOneTool {
-      "description": "List Time Entries",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_entries",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_list_time_entries",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
-            "type": "string",
-          },
-          "filter": {
-            "description": "HRIS Time Entries filters",
-            "properties": {
-              "employee_id": {
-                "additionalProperties": false,
-                "description": "Filter to select time entries by employee_id",
-                "type": "string",
-              },
-              "end_time": {
-                "additionalProperties": false,
-                "description": "Filter to select time entries before a given time",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-              "start_time": {
-                "additionalProperties": false,
-                "description": "Filter to select time entries after a given time",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-              "updated_after": {
-                "additionalProperties": false,
-                "description": "Use a string with a date to only select results updated after that given date",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "next": {
-            "description": "The unified cursor",
-            "type": "string",
-          },
-          "page_size": {
-            "description": "The number of results per page (default value is 25)",
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": undefined,
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_entries",
-      },
-    },
-    StackOneTool {
-      "description": "Get Time Entry",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_entries/{id}",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_get_time_entries",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
-            "type": "string",
-          },
-          "id": {
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": [
-          "id",
-        ],
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/time_entries/{id}",
-      },
-    },
-    StackOneTool {
-      "description": "List benefits",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/benefits",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_list_benefits",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
-            "type": "string",
-          },
-          "filter": {
-            "description": "Filter parameters that allow greater customisation of the list response",
-            "properties": {
-              "updated_after": {
-                "additionalProperties": false,
-                "description": "Use a string with a date to only select results updated after that given date",
-                "example": "2020-01-01T00:00:00.000Z",
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "next": {
-            "description": "The unified cursor",
-            "type": "string",
-          },
-          "page_size": {
-            "description": "The number of results per page (default value is 25)",
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": undefined,
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "filter",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "page_size",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "next",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/benefits",
-      },
-    },
-    StackOneTool {
-      "description": "Get Benefit",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/benefits/{id}",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_get_benefit",
-      "parameters": {
-        "properties": {
-          "fields": {
-            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
-            "type": "string",
-          },
-          "id": {
-            "type": "string",
-          },
-          "proxy": {
-            "additionalProperties": true,
-            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
-            "type": "object",
-          },
-          "raw": {
-            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
-            "type": "boolean",
-          },
-          "x-account-id": undefined,
-        },
-        "required": [
-          "id",
-        ],
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "GET",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "query",
-            "name": "raw",
-            "type": "boolean",
-          },
-          {
-            "location": "query",
-            "name": "proxy",
-            "type": "object",
-          },
-          {
-            "location": "query",
-            "name": "fields",
-            "type": "string",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/benefits/{id}",
-      },
-    },
-    StackOneTool {
       "description": "List Groups",
       "executeConfig": {
         "bodyType": "json",
@@ -16565,7 +15386,7 @@ Tools {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
             "type": "string",
           },
           "filter": {
@@ -16915,6 +15736,272 @@ Tools {
       },
     },
     StackOneTool {
+      "description": "List Division Groups",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/divisions",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_division_groups",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/divisions",
+      },
+    },
+    StackOneTool {
+      "description": "List Companies Groups",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/companies",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_companies_groups",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/companies",
+      },
+    },
+    StackOneTool {
       "description": "Get Group",
       "executeConfig": {
         "bodyType": "json",
@@ -17052,7 +16139,7 @@ Tools {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
             "type": "string",
           },
           "id": {
@@ -17307,6 +16394,202 @@ Tools {
       },
     },
     StackOneTool {
+      "description": "Get Division Group",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/divisions/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_division_group",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/divisions/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "Get Company Group",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/companies/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_company_group",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/groups/companies/{id}",
+      },
+    },
+    StackOneTool {
       "description": "List Jobs",
       "executeConfig": {
         "bodyType": "json",
@@ -17538,7 +16821,7 @@ Tools {
       },
     },
     StackOneTool {
-      "description": "List Employee Skills",
+      "description": "List Work Locations",
       "executeConfig": {
         "bodyType": "json",
         "method": "GET",
@@ -17546,11 +16829,6 @@ Tools {
           {
             "location": "header",
             "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
             "type": "string",
           },
           {
@@ -17584,15 +16862,15 @@ Tools {
             "type": "string",
           },
         ],
-        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
+        "url": "https://api.stackone.com/unified/hris/locations",
       },
       "experimental_preExecute": undefined,
-      "name": "hris_list_employee_skills",
+      "name": "hris_list_locations",
       "parameters": {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+            "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
             "type": "string",
           },
           "filter": {
@@ -17606,9 +16884,6 @@ Tools {
               },
             },
             "type": "object",
-          },
-          "id": {
-            "type": "string",
           },
           "next": {
             "description": "The unified cursor",
@@ -17629,9 +16904,7 @@ Tools {
           },
           "x-account-id": undefined,
         },
-        "required": [
-          "id",
-        ],
+        "required": undefined,
         "type": "object",
       },
       "requestBuilder": RequestBuilder {
@@ -17644,11 +16917,6 @@ Tools {
           {
             "location": "header",
             "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "id",
             "type": "string",
           },
           {
@@ -17682,168 +16950,11 @@ Tools {
             "type": "string",
           },
         ],
-        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
+        "url": "https://api.stackone.com/unified/hris/locations",
       },
     },
     StackOneTool {
-      "description": "Create Employee Skill",
-      "executeConfig": {
-        "bodyType": "json",
-        "method": "POST",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "body",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "body",
-            "name": "name",
-            "type": "string",
-          },
-          {
-            "location": "body",
-            "name": "maximum_proficiency",
-            "type": "object",
-          },
-          {
-            "location": "body",
-            "name": "minimum_proficiency",
-            "type": "object",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
-      },
-      "experimental_preExecute": undefined,
-      "name": "hris_create_employee_skill",
-      "parameters": {
-        "properties": {
-          "id": {
-            "description": "The ID associated with this skill",
-            "example": "16873-IT345",
-            "type": "string",
-          },
-          "maximum_proficiency": {
-            "description": "The proficiency level of the skill",
-            "properties": {
-              "id": {
-                "description": "Unique identifier",
-                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "type": "string",
-              },
-              "name": {
-                "description": "The name associated with this proficiency",
-                "example": "Expert",
-                "type": "string",
-              },
-              "remote_id": {
-                "description": "Provider's unique identifier",
-                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "type": "string",
-              },
-              "value": {
-                "enum": [
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "unmapped_value",
-                  null,
-                ],
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "minimum_proficiency": {
-            "description": "The proficiency level of the skill",
-            "properties": {
-              "id": {
-                "description": "Unique identifier",
-                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "type": "string",
-              },
-              "name": {
-                "description": "The name associated with this proficiency",
-                "example": "Expert",
-                "type": "string",
-              },
-              "remote_id": {
-                "description": "Provider's unique identifier",
-                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
-                "type": "string",
-              },
-              "value": {
-                "enum": [
-                  "1",
-                  "2",
-                  "3",
-                  "4",
-                  "5",
-                  "unmapped_value",
-                  null,
-                ],
-                "type": "string",
-              },
-            },
-            "type": "object",
-          },
-          "name": {
-            "description": "The name associated with this skill",
-            "example": "Information-Technology",
-            "type": "string",
-          },
-          "x-account-id": undefined,
-        },
-        "required": [
-          "id",
-        ],
-        "type": "object",
-      },
-      "requestBuilder": RequestBuilder {
-        "bodyType": "json",
-        "headers": {
-          "Authorization": "Basic dGVzdF9rZXk6",
-        },
-        "method": "POST",
-        "params": [
-          {
-            "location": "header",
-            "name": "x-account-id",
-            "type": "string",
-          },
-          {
-            "location": "body",
-            "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "body",
-            "name": "name",
-            "type": "string",
-          },
-          {
-            "location": "body",
-            "name": "maximum_proficiency",
-            "type": "object",
-          },
-          {
-            "location": "body",
-            "name": "minimum_proficiency",
-            "type": "object",
-          },
-        ],
-        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
-      },
-    },
-    StackOneTool {
-      "description": "Get Employee Skill",
+      "description": "Get Work Location",
       "executeConfig": {
         "bodyType": "json",
         "method": "GET",
@@ -17856,11 +16967,6 @@ Tools {
           {
             "location": "path",
             "name": "id",
-            "type": "string",
-          },
-          {
-            "location": "path",
-            "name": "subResourceId",
             "type": "string",
           },
           {
@@ -17879,15 +16985,15 @@ Tools {
             "type": "string",
           },
         ],
-        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills/{subResourceId}",
+        "url": "https://api.stackone.com/unified/hris/locations/{id}",
       },
       "experimental_preExecute": undefined,
-      "name": "hris_get_employee_skill",
+      "name": "hris_get_location",
       "parameters": {
         "properties": {
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+            "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
             "type": "string",
           },
           "id": {
@@ -17902,14 +17008,10 @@ Tools {
             "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
             "type": "boolean",
           },
-          "subResourceId": {
-            "type": "string",
-          },
           "x-account-id": undefined,
         },
         "required": [
           "id",
-          "subResourceId",
         ],
         "type": "object",
       },
@@ -17931,8 +17033,192 @@ Tools {
             "type": "string",
           },
           {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/locations/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List Positions",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "status",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/positions",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_positions",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "status": {
+            "description": "Filter positions by status",
+            "enum": [
+              "open",
+              "closed",
+              "paused",
+              "unmapped_value",
+              null,
+            ],
+            "example": "open",
+            "type": "string",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "status",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/positions",
+      },
+    },
+    StackOneTool {
+      "description": "Get Position",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
             "location": "path",
-            "name": "subResourceId",
+            "name": "id",
             "type": "string",
           },
           {
@@ -17951,7 +17237,1070 @@ Tools {
             "type": "string",
           },
         ],
-        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills/{subResourceId}",
+        "url": "https://api.stackone.com/unified/hris/positions/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_position",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/positions/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List Time Entries",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_entries",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_time_entries",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
+            "type": "string",
+          },
+          "filter": {
+            "description": "HRIS Time Entries filters",
+            "properties": {
+              "employee_id": {
+                "additionalProperties": false,
+                "description": "Filter to select time entries by employee_id",
+                "type": "string",
+              },
+              "end_time": {
+                "additionalProperties": false,
+                "description": "Filter to select time entries before a given time",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+              "start_time": {
+                "additionalProperties": false,
+                "description": "Filter to select time entries after a given time",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_entries",
+      },
+    },
+    StackOneTool {
+      "description": "Get Time Entry",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_entries/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_time_entries",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_entries/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List time off requests",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_time_off_requests",
+      "parameters": {
+        "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
+            "type": "string",
+          },
+          "filter": {
+            "description": "HRIS Time Off filters",
+            "properties": {
+              "type_ids": {
+                "description": "List of time off type ids to filter by.",
+                "items": {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off",
+      },
+    },
+    StackOneTool {
+      "description": "Get time off request",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_time_off_request",
+      "parameters": {
+        "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "policy",
+            "type": "string",
+          },
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List Shifts",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/shifts",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_shifts",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+            "type": "string",
+          },
+          "filter": {
+            "description": "HRIS Shifts filters",
+            "properties": {
+              "employee_id": {
+                "description": "Filter to select shifts by employee ID",
+                "type": "string",
+              },
+              "ends_before": {
+                "description": "Filter shifts that end before this date",
+                "format": "date-time",
+                "type": "string",
+              },
+              "starts_after": {
+                "description": "Filter shifts that start after this date",
+                "format": "date-time",
+                "type": "string",
+              },
+              "status": {
+                "description": "Filter to select shifts by status",
+                "enum": [
+                  "draft",
+                  "published",
+                  "confirmed",
+                  "cancelled",
+                  "unmapped_value",
+                ],
+                "type": "string",
+              },
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/shifts",
+      },
+    },
+    StackOneTool {
+      "description": "Get Shift",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/shifts/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_shift",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/shifts/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List time off types",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off_types",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_time_off_types",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,active",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off_types",
+      },
+    },
+    StackOneTool {
+      "description": "Get time off type",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off_types/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_time_off_type",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,active",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/time_off_types/{id}",
       },
     },
     StackOneTool {
@@ -18392,6 +18741,654 @@ Tools {
       },
     },
     StackOneTool {
+      "description": "List benefits",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/benefits",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_benefits",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/benefits",
+      },
+    },
+    StackOneTool {
+      "description": "Get Benefit",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/benefits/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_benefit",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/benefits/{id}",
+      },
+    },
+    StackOneTool {
+      "description": "List Employee Skills",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_employee_skills",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "id": {
+            "type": "string",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
+      },
+    },
+    StackOneTool {
+      "description": "Create Employee Skill",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "POST",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "name",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "maximum_proficiency",
+            "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "minimum_proficiency",
+            "type": "object",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_create_employee_skill",
+      "parameters": {
+        "properties": {
+          "id": {
+            "description": "The ID associated with this skill",
+            "example": "16873-IT345",
+            "type": "string",
+          },
+          "maximum_proficiency": {
+            "description": "The proficiency level of the skill",
+            "properties": {
+              "id": {
+                "description": "Unique identifier",
+                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                "type": "string",
+              },
+              "name": {
+                "description": "The name associated with this proficiency",
+                "example": "Expert",
+                "type": "string",
+              },
+              "remote_id": {
+                "description": "Provider's unique identifier",
+                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                "type": "string",
+              },
+              "value": {
+                "enum": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "unmapped_value",
+                  null,
+                ],
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "minimum_proficiency": {
+            "description": "The proficiency level of the skill",
+            "properties": {
+              "id": {
+                "description": "Unique identifier",
+                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                "type": "string",
+              },
+              "name": {
+                "description": "The name associated with this proficiency",
+                "example": "Expert",
+                "type": "string",
+              },
+              "remote_id": {
+                "description": "Provider's unique identifier",
+                "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                "type": "string",
+              },
+              "value": {
+                "enum": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "unmapped_value",
+                  null,
+                ],
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "name": {
+            "description": "The name associated with this skill",
+            "example": "Information-Technology",
+            "type": "string",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "POST",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "name",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "maximum_proficiency",
+            "type": "object",
+          },
+          {
+            "location": "body",
+            "name": "minimum_proficiency",
+            "type": "object",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills",
+      },
+    },
+    StackOneTool {
+      "description": "Get Employee Skill",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "subResourceId",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills/{subResourceId}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_employee_skill",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "subResourceId": {
+            "type": "string",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+          "subResourceId",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "subResourceId",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/skills/{subResourceId}",
+      },
+    },
+    StackOneTool {
       "description": "List Employee Tasks",
       "executeConfig": {
         "bodyType": "json",
@@ -18773,6 +19770,267 @@ Tools {
           },
         ],
         "url": "https://api.stackone.com/unified/hris/employees/{id}/tasks/{subResourceId}",
+      },
+    },
+    StackOneTool {
+      "description": "List Tasks",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/tasks",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_tasks",
+      "parameters": {
+        "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "attachments",
+            "type": "string",
+          },
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+            "type": "string",
+          },
+          "filter": {
+            "description": "Filter parameters that allow greater customisation of the list response",
+            "properties": {
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": undefined,
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/tasks",
+      },
+    },
+    StackOneTool {
+      "description": "Get Task",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/tasks/{id}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_task",
+      "parameters": {
+        "properties": {
+          "expand": {
+            "description": "The comma separated list of fields that will be expanded in the response",
+            "example": "attachments",
+            "type": "string",
+          },
+          "fields": {
+            "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+            "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "expand",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/tasks/{id}",
       },
     },
   ],

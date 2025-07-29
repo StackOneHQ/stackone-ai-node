@@ -467,7 +467,7 @@ export const crmSpec = {
             basic: [],
           },
         ],
-        summary: 'Creates a new Contact',
+        summary: 'Create Contact',
         tags: ['Contacts'],
         'x-speakeasy-group': 'crm',
         'x-speakeasy-name-override': 'create_contact',

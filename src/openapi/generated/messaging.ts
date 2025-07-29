@@ -2991,9 +2991,17 @@ export const messagingSpec = {
             nullable: true,
           },
           private: {
-            type: 'boolean',
             description: 'Whether the conversation is private',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           created_at: {
@@ -3074,9 +3082,17 @@ export const messagingSpec = {
             nullable: true,
           },
           private: {
-            type: 'boolean',
             description: 'Whether the conversation is private',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
         },
@@ -3277,15 +3293,31 @@ export const messagingSpec = {
             nullable: true,
           },
           bot: {
-            type: 'boolean',
             description: 'Whether the user is a bot',
             example: false,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the user is active',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
         },

@@ -6515,9 +6515,17 @@ export const ticketingSpec = {
             nullable: true,
           },
           internal: {
-            type: 'boolean',
             description: 'Whether the comment is internal',
             example: false,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           content: {
@@ -7466,9 +7474,17 @@ export const ticketingSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'If the user is active',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           first_name: {
