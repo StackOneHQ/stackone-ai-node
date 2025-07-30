@@ -1175,7 +1175,7 @@ export const stackoneSpec = {
             basic: [],
           },
         ],
-        summary: 'Get meta information of the account',
+        summary: 'Get Account Meta Information',
         tags: ['Accounts'],
         'x-speakeasy-name-override': 'get_account_meta_info',
         'x-speakeasy-retries': {
@@ -1649,7 +1649,7 @@ export const stackoneSpec = {
             basic: [],
           },
         ],
-        summary: 'Get a Log',
+        summary: 'Get Log',
         tags: ['Request Logs'],
         'x-speakeasy-name-override': 'get_log',
         'x-speakeasy-retries': {
@@ -2480,7 +2480,7 @@ export const stackoneSpec = {
             basic: [],
           },
         ],
-        summary: 'List Connectors Meta Information for all providers',
+        summary: 'List Connector Meta Information',
         tags: ['Connectors'],
         'x-speakeasy-name-override': 'list_connectors_meta',
         'x-speakeasy-retries': {
@@ -2648,7 +2648,7 @@ export const stackoneSpec = {
             basic: [],
           },
         ],
-        summary: 'Get Connector Meta information for the given provider key',
+        summary: 'Get Connector Meta Information',
         tags: ['Connectors'],
         'x-speakeasy-name-override': 'get_connector_meta',
         'x-speakeasy-retries': {
