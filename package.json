@@ -38,7 +38,6 @@
   },
   "devDependencies": {
     "@ai-sdk/openai": "^1.1.14",
-    "@antfu/utils": "^9.2.0",
     "@biomejs/biome": "^1.5.3",
     "@types/bun": "^1.2.4",
     "@types/json-schema": "^7.0.15",

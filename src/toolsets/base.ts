@@ -1,7 +1,7 @@
-import { toArray } from '@antfu/utils';
 import type { Arrayable } from 'type-fest';
 import { type BaseTool, Tools } from '../tool';
 import type { Experimental_ToolCreationOptions } from '../types';
+import { toArray } from '../utils/array';
 
 /**
  * Base exception for toolset errors
