@@ -11,7 +11,6 @@ import {
 } from 'bun:test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { type FetchMockResult, mockFetch } from './utils/fetch-mock';
 
 // Mock environment variables
 beforeAll(() => {
@@ -19,14 +18,10 @@ beforeAll(() => {
 });
 
 describe('fetch-specs script', () => {
-  // Mocks for fetch and fs
-  let fetchMock: FetchMockResult;
+  // Mocks for fs
   let writeFileSyncSpy: Mock<typeof fs.writeFileSync>;
 
   beforeEach(() => {
-    // Set up fetch mock with different responses based on URL
-    fetchMock = mockFetch();
-
     // Mock fs.writeFileSync
     writeFileSyncSpy = spyOn(fs, 'writeFileSync').mockImplementation(() => {
       // Do nothing, just track that it was called
@@ -36,37 +31,11 @@ describe('fetch-specs script', () => {
 
   afterEach(() => {
     // Clean up mocks
-    fetchMock.restore();
     writeFileSyncSpy.mockRestore();
     mock.restore();
   });
 
   it('should fetch and save OpenAPI specs', async () => {
-    // Define the expected response for HRIS API
-    const hrisApiSpec = {
-      openapi: '3.0.0',
-      info: { title: 'HRIS API', version: '1.0.0' },
-      paths: { '/employees': {} },
-    };
-
-    // Mock the fetch implementation for this specific test
-    fetchMock.fetchSpy.mockImplementation(async (url) => {
-      if (url.includes('hris')) {
-        return {
-          ok: true,
-          json: async () => hrisApiSpec,
-          status: 200,
-          statusText: 'OK',
-        } as Response;
-      }
-      return {
-        ok: false,
-        json: async () => ({ error: 'Not found' }),
-        status: 404,
-        statusText: 'Not Found',
-      } as Response;
-    });
-
     // Create test implementations of the functions
     const fetchSpec = async (category: string): Promise<Record<string, unknown>> => {
       const response = await fetch(`https://api.stackone.com/api/v1/${category}/openapi.json`, {
@@ -91,7 +60,11 @@ describe('fetch-specs script', () => {
 
     // Test fetchSpec function
     const hrisSpec = await fetchSpec('hris');
-    expect(hrisSpec).toEqual(hrisApiSpec);
+    expect(hrisSpec).toEqual({
+      openapi: '3.0.0',
+      info: { title: 'HRIS API', version: '1.0.0' },
+      paths: { '/employees': {} },
+    });
 
     // Test saveSpec function
     await saveSpec('hris', hrisSpec);
@@ -100,6 +73,10 @@ describe('fetch-specs script', () => {
     expect(writeFileSyncSpy).toHaveBeenCalled();
     const writeFileCall = writeFileSyncSpy.mock.calls[0];
     expect(writeFileCall[0]).toContain('hris.json');
-    expect(JSON.parse(writeFileCall[1] as string)).toEqual(hrisApiSpec);
+    expect(JSON.parse(writeFileCall[1] as string)).toEqual({
+      openapi: '3.0.0',
+      info: { title: 'HRIS API', version: '1.0.0' },
+      paths: { '/employees': {} },
+    });
   });
 });

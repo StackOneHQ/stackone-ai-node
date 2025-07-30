@@ -7,25 +7,12 @@ import type { AuthenticationConfig } from '../base';
 import { OpenAPIToolSet, type OpenAPIToolSetConfigFromUrl } from '../openapi';
 
 describe('OpenAPIToolSet', () => {
-  // Path to test fixtures
   const fixturesPath = path.join(import.meta.dir, 'fixtures');
   const petstoreJsonPath = path.join(fixturesPath, 'petstore.json');
 
-  // Mock variables
-  let fetchMock: ReturnType<typeof mockFetch>;
   let loadFromFileSpy: ReturnType<typeof spyOn>;
 
-  // Set up and tear down mocks
   beforeEach(() => {
-    // Set up fetch mock
-    fetchMock = mockFetch({
-      defaultResponse: {
-        ok: true,
-        json: async () => ({}),
-      },
-    });
-
-    // Mock the OpenAPILoader.loadFromFile method with a default implementation
     loadFromFileSpy = spyOn(OpenAPILoader, 'loadFromFile').mockImplementation(() => ({
       pet_findById: {
         name: 'pet_findById',
@@ -57,8 +44,6 @@ describe('OpenAPIToolSet', () => {
   });
 
   afterEach(() => {
-    // Clean up all mocks
-    fetchMock.restore();
     mock.restore();
   });
 
