@@ -119,7 +119,7 @@ const toolset = new StackOneToolSet({ accountId: "your-account-id" });
 const tools = toolset.getTools("hris_*", "override-account-id");
 
 // Method 3: Set directly on a tool instance
-tool.setAccountId("direct-account-id");
+tools.setAccountId("direct-account-id");
 const currentAccountId = tool.getAccountId(); // Get the current account ID
 ```
 
