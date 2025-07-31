@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.2.0...v0.3.0) (2025-07-31)
+
+
+### Features
+
+* add pkg.pr.new ci ([#58](https://github.com/StackOneHQ/stackone-ai-node/issues/58)) ([4757773](https://github.com/StackOneHQ/stackone-ai-node/commit/4757773d238ea18427c520e83000813f9b376d62))
+* update schema ([#60](https://github.com/StackOneHQ/stackone-ai-node/issues/60)) ([03c9283](https://github.com/StackOneHQ/stackone-ai-node/commit/03c9283ab2169d29f24b0fd1f2c03700ce4500d3))
+
+
+### Bug Fixes
+
+* hook ([#57](https://github.com/StackOneHQ/stackone-ai-node/issues/57)) ([ae92968](https://github.com/StackOneHQ/stackone-ai-node/commit/ae9296898738413ca129cbdc7d415cf58604e1f2))
+* **tooling:** typecheck ([#54](https://github.com/StackOneHQ/stackone-ai-node/issues/54)) ([025ae5c](https://github.com/StackOneHQ/stackone-ai-node/commit/025ae5c2f503e3132fd2bcb5946a38128b701316))
+
 ## [0.2.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.1.0...v0.2.0) (2025-06-17)
 
 
