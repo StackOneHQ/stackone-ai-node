@@ -30,3 +30,15 @@ export type {
   ParameterLocation,
   ToolDefinition,
 } from './types';
+
+// Meta tools (beta)
+export {
+  ExecuteToolChain,
+  GetRelevantTools,
+  type ToolChainConfig,
+  type ToolChainResult,
+  type ToolChainStep,
+  type ToolChainStepResult,
+  type ToolSearchConfig,
+  type ToolSearchResult,
+} from './meta-tools';

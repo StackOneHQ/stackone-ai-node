@@ -16,6 +16,76 @@ These toolsets provide functionality to filter, transform, and execute tools and
 
 Under the hood the StackOneToolSet uses the same OpenAPIParser as the OpenAPIToolSet, but provides some convenience methods for using StackOne API keys and account IDs.
 
+### Meta Tools (Beta)
+
+> [!WARNING]
+> Meta tools are currently in beta and their API may change in future versions.
+
+StackOne AI SDK includes two powerful meta tools that enable AI agents to discover and orchestrate tool usage intelligently:
+
+#### GetRelevantTools
+
+Discover relevant tools based on natural language queries:
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet();
+const tools = toolset.getStackOneTools();
+
+// Get the meta tool
+const relevantToolsFinder = tools.getTool("get_relevant_tools");
+
+// Find tools for specific tasks
+const result = await relevantToolsFinder.execute({
+  query: "read jira ticket",
+  limit: 5,
+  minScore: 0.5
+});
+
+// Returns tools ranked by relevance with scores and match reasons
+```
+
+#### ExecuteToolChain
+
+Orchestrate multiple tool executions with parameter passing:
+
+```typescript
+const toolChain = tools.getTool("execute_tool_chain");
+
+// Execute a complex workflow
+const result = await toolChain.execute({
+  steps: [
+    {
+      toolName: "hris_list_employees",
+      parameters: { page_size: "10" },
+      stepName: "Get recent employees"
+    },
+    {
+      toolName: "hris_get_employee",
+      parameters: {
+        id: "{{step0.result.items[0].id}}" // Reference previous results
+      },
+      condition: "{{step0.result.items.length}} > 0", // Conditional execution
+      stepName: "Get employee details"
+    }
+  ],
+  accountId: "your-account-id"
+});
+```
+
+Meta tools are included by default but can be disabled:
+
+```typescript
+// Disable meta tools
+const toolset = new StackOneToolSet({ includeMetaTools: false });
+
+// Filter meta tools
+const tools = toolset.getStackOneTools(["*", "!get_relevant_tools", "!execute_tool_chain"]);
+```
+
+[View full examples](examples/meta-tools.ts)
+
 ### Workflow Planning
 
 While building agents you may find that your workflow is too complex for a general purpose agent.
