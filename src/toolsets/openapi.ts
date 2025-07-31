@@ -1,4 +1,4 @@
-import { OpenAPILoader } from '../openapi/loader';
+import * as OpenAPILoader from '../openapi/loader';
 import { BaseTool } from '../tool';
 import type { ToolDefinition } from '../types';
 import { type BaseToolSetConfig, ToolSet, ToolSetConfigError, ToolSetLoadError } from './base';

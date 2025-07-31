@@ -92,6 +92,7 @@ export class RequestBuilder {
           bodyParams[key] = value;
           break;
         default:
+          paramLocation satisfies undefined; // exhaustive check
           // Default to body parameters
           bodyParams[key] = value;
           break;

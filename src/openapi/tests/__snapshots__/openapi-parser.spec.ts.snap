@@ -1,4 +1,4 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
 
 exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1`] = `
 {
@@ -1509,7 +1509,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     },
   },
   "hris_create_employee": {
-    "description": "Creates an employee",
+    "description": "Create Employee",
     "execute": {
       "bodyType": "json",
       "method": "POST",
@@ -4567,6 +4567,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "comment",
+          "type": "string",
+        },
+        {
+          "location": "body",
           "name": "passthrough",
           "type": "object",
         },
@@ -4578,6 +4583,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "approver_id": {
           "description": "The approver ID",
           "example": "1687-4",
+          "type": "string",
+        },
+        "comment": {
+          "description": "Allows users to provide additional context or notes for their time off request",
+          "example": "Taking a day off for personal reasons",
           "type": "string",
         },
         "end_date": {
@@ -6646,6 +6656,70 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "type": "object",
     },
   },
+  "hris_get_company_group": {
+    "description": "Get Company Group",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/groups/companies/{id}",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+      ],
+      "type": "object",
+    },
+  },
   "hris_get_cost_center_group": {
     "description": "Get Cost Center Group",
     "execute": {
@@ -6748,7 +6822,71 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+      ],
+      "type": "object",
+    },
+  },
+  "hris_get_division_group": {
+    "description": "Get Division Group",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/groups/divisions/{id}",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
           "type": "string",
         },
         "id": {
@@ -7469,7 +7607,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
           "type": "string",
         },
         "id": {
@@ -7838,6 +7976,206 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "type": "object",
     },
   },
+  "hris_get_position": {
+    "description": "Get Position",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/positions/{id}",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+      ],
+      "type": "object",
+    },
+  },
+  "hris_get_shift": {
+    "description": "Get Shift",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/shifts/{id}",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+      ],
+      "type": "object",
+    },
+  },
+  "hris_get_task": {
+    "description": "Get Task",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "expand",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/tasks/{id}",
+    },
+    "parameters": {
+      "properties": {
+        "expand": {
+          "description": "The comma separated list of fields that will be expanded in the response",
+          "example": "attachments",
+          "type": "string",
+        },
+        "fields": {
+          "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+      ],
+      "type": "object",
+    },
+  },
   "hris_get_team_group": {
     "description": "Get Team Group",
     "execute": {
@@ -8078,7 +8416,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
           "type": "string",
         },
         "id": {
@@ -8394,6 +8732,95 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "type": "object",
     },
   },
+  "hris_list_companies_groups": {
+    "description": "List Companies Groups",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "filter",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "page_size",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "next",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/groups/companies",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+          "type": "string",
+        },
+        "filter": {
+          "description": "Filter parameters that allow greater customisation of the list response",
+          "properties": {
+            "updated_after": {
+              "additionalProperties": false,
+              "description": "Use a string with a date to only select results updated after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "next": {
+          "description": "The unified cursor",
+          "type": "string",
+        },
+        "page_size": {
+          "description": "The number of results per page (default value is 25)",
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": undefined,
+      "type": "object",
+    },
+  },
   "hris_list_cost_center_groups": {
     "description": "List Cost Center Groups",
     "execute": {
@@ -8531,7 +8958,96 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "type": "string",
+        },
+        "filter": {
+          "description": "Filter parameters that allow greater customisation of the list response",
+          "properties": {
+            "updated_after": {
+              "additionalProperties": false,
+              "description": "Use a string with a date to only select results updated after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "next": {
+          "description": "The unified cursor",
+          "type": "string",
+        },
+        "page_size": {
+          "description": "The number of results per page (default value is 25)",
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": undefined,
+      "type": "object",
+    },
+  },
+  "hris_list_division_groups": {
+    "description": "List Division Groups",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "filter",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "page_size",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "next",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/groups/divisions",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
           "type": "string",
         },
         "filter": {
@@ -9474,7 +9990,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
           "type": "string",
         },
         "filter": {
@@ -10109,6 +10625,323 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "type": "object",
     },
   },
+  "hris_list_positions": {
+    "description": "List Positions",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "filter",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "page_size",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "next",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "status",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/positions",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+          "type": "string",
+        },
+        "filter": {
+          "description": "Filter parameters that allow greater customisation of the list response",
+          "properties": {
+            "updated_after": {
+              "additionalProperties": false,
+              "description": "Use a string with a date to only select results updated after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "next": {
+          "description": "The unified cursor",
+          "type": "string",
+        },
+        "page_size": {
+          "description": "The number of results per page (default value is 25)",
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "status": {
+          "description": "Filter positions by status",
+          "enum": [
+            "open",
+            "closed",
+            "paused",
+            "unmapped_value",
+            null,
+          ],
+          "example": "open",
+          "type": "string",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": undefined,
+      "type": "object",
+    },
+  },
+  "hris_list_shifts": {
+    "description": "List Shifts",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "filter",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "page_size",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "next",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/shifts",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+          "type": "string",
+        },
+        "filter": {
+          "description": "HRIS Shifts filters",
+          "properties": {
+            "employee_id": {
+              "description": "Filter to select shifts by employee ID",
+              "type": "string",
+            },
+            "ends_before": {
+              "description": "Filter shifts that end before this date",
+              "format": "date-time",
+              "type": "string",
+            },
+            "starts_after": {
+              "description": "Filter shifts that start after this date",
+              "format": "date-time",
+              "type": "string",
+            },
+            "status": {
+              "description": "Filter to select shifts by status",
+              "enum": [
+                "draft",
+                "published",
+                "confirmed",
+                "cancelled",
+                "unmapped_value",
+              ],
+              "type": "string",
+            },
+            "updated_after": {
+              "additionalProperties": false,
+              "description": "Use a string with a date to only select results updated after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "next": {
+          "description": "The unified cursor",
+          "type": "string",
+        },
+        "page_size": {
+          "description": "The number of results per page (default value is 25)",
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": undefined,
+      "type": "object",
+    },
+  },
+  "hris_list_tasks": {
+    "description": "List Tasks",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "filter",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "page_size",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "next",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "expand",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/tasks",
+    },
+    "parameters": {
+      "properties": {
+        "expand": {
+          "description": "The comma separated list of fields that will be expanded in the response",
+          "example": "attachments",
+          "type": "string",
+        },
+        "fields": {
+          "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+          "type": "string",
+        },
+        "filter": {
+          "description": "Filter parameters that allow greater customisation of the list response",
+          "properties": {
+            "updated_after": {
+              "additionalProperties": false,
+              "description": "Use a string with a date to only select results updated after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "next": {
+          "description": "The unified cursor",
+          "type": "string",
+        },
+        "page_size": {
+          "description": "The number of results per page (default value is 25)",
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": undefined,
+      "type": "object",
+    },
+  },
   "hris_list_team_groups": {
     "description": "List Team Groups",
     "execute": {
@@ -10480,7 +11313,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
           "type": "string",
         },
         "filter": {
@@ -10618,7 +11451,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     },
   },
   "hris_update_employee": {
-    "description": "Updates an employee",
+    "description": "Update Employee",
     "execute": {
       "bodyType": "json",
       "method": "PATCH",
@@ -13500,6 +14333,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "comment",
+          "type": "string",
+        },
+        {
+          "location": "body",
           "name": "passthrough",
           "type": "object",
         },
@@ -13511,6 +14349,11 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "approver_id": {
           "description": "The approver ID",
           "example": "1687-4",
+          "type": "string",
+        },
+        "comment": {
+          "description": "Allows users to provide additional context or notes for their time off request",
+          "example": "Taking a day off for personal reasons",
           "type": "string",
         },
         "end_date": {

@@ -1556,7 +1556,7 @@ export const hrisSpec = {
             basic: [],
           },
         ],
-        summary: 'Creates an employee',
+        summary: 'Create Employee',
         tags: ['Employees'],
         'x-speakeasy-group': 'hris',
         'x-speakeasy-name-override': 'create_employee',
@@ -1978,7 +1978,7 @@ export const hrisSpec = {
             basic: [],
           },
         ],
-        summary: 'Updates an employee',
+        summary: 'Update Employee',
         tags: ['Employees'],
         'x-speakeasy-group': 'hris',
         'x-speakeasy-name-override': 'update_employee',
@@ -19842,9 +19842,17 @@ export const hrisSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'The employment active status',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           department: {
@@ -20225,9 +20233,17 @@ export const hrisSpec = {
             nullable: true,
           },
           active: {
-            type: 'boolean',
             description: 'Whether the skill is active and therefore available for use',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           language: {
@@ -26177,9 +26193,17 @@ export const hrisSpec = {
             nullable: true,
           },
           is_paid: {
-            type: 'boolean',
             description: 'Whether the break is paid',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           created_at: {

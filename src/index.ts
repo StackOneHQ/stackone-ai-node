@@ -2,7 +2,7 @@
  * StackOne AI Node.js SDK
  */
 
-export { OpenAPILoader } from './openapi/loader';
+export * as OpenAPILoader from './openapi/loader';
 export { OpenAPIParser } from './openapi/parser';
 export { BaseTool, StackOneTool, Tools } from './tool';
 export { StackOneAPIError, StackOneError } from './utils/errors';
