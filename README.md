@@ -120,7 +120,7 @@ const tools = toolset.getTools("hris_*", "override-account-id");
 
 // Method 3: Set directly on a tool instance
 tools.setAccountId("direct-account-id");
-const currentAccountId = tool.getAccountId(); // Get the current account ID
+const currentAccountId = tools.getAccountId(); // Get the current account ID
 ```
 
 [View full example](examples/account-id-usage.ts)
