@@ -67,6 +67,7 @@ export const messagingSpec = {
                     'Use a string with a date to only select results updated after that given date',
                   example: '2020-01-01T00:00:00.000Z',
                   type: 'string',
+                  format: 'date-time',
                   nullable: true,
                   additionalProperties: false,
                 },
@@ -114,6 +115,7 @@ export const messagingSpec = {
               'Use a string with a date to only select results updated after that given date',
             deprecated: true,
             schema: {
+              format: 'date-time',
               nullable: true,
               example: '2020-01-01T00:00:00.000Z',
               type: 'string',
@@ -959,6 +961,7 @@ export const messagingSpec = {
                     'Use a string with a date to only select results updated after that given date',
                   example: '2020-01-01T00:00:00.000Z',
                   type: 'string',
+                  format: 'date-time',
                   nullable: true,
                   additionalProperties: false,
                 },
@@ -1006,6 +1009,7 @@ export const messagingSpec = {
               'Use a string with a date to only select results updated after that given date',
             deprecated: true,
             schema: {
+              format: 'date-time',
               nullable: true,
               example: '2020-01-01T00:00:00.000Z',
               type: 'string',
@@ -1466,6 +1470,7 @@ export const messagingSpec = {
                     'Use a string with a date to only select results updated after that given date',
                   example: '2020-01-01T00:00:00.000Z',
                   type: 'string',
+                  format: 'date-time',
                   nullable: true,
                   additionalProperties: false,
                 },
@@ -1513,6 +1518,7 @@ export const messagingSpec = {
               'Use a string with a date to only select results updated after that given date',
             deprecated: true,
             schema: {
+              format: 'date-time',
               nullable: true,
               example: '2020-01-01T00:00:00.000Z',
               type: 'string',
@@ -1974,6 +1980,7 @@ export const messagingSpec = {
                     'Use a string with a date to only select results updated after that given date',
                   example: '2020-01-01T00:00:00.000Z',
                   type: 'string',
+                  format: 'date-time',
                   nullable: true,
                   additionalProperties: false,
                 },
@@ -2021,6 +2028,7 @@ export const messagingSpec = {
               'Use a string with a date to only select results updated after that given date',
             deprecated: true,
             schema: {
+              format: 'date-time',
               nullable: true,
               example: '2020-01-01T00:00:00.000Z',
               type: 'string',
