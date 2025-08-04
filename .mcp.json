@@ -4,10 +4,6 @@
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
     },
-    "cloudflare-docs": {
-      "type": "sse",
-      "url": "https://docs.mcp.cloudflare.com/sse"
-    },
     "grep": {
       "type": "http",
       "url": "https://mcp.grep.app"
