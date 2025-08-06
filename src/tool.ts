@@ -436,7 +436,7 @@ export function metaFilterRelevantTools(oramaDb: OramaDb, allTools: BaseTool[]):
       } as Parameters<typeof orama.search>[1]);
 
       // filter results by minimum score
-      const minScore = params.minScore || 0.3;
+      const minScore = params.minScore ?? 0.3;
       const filteredResults = results.hits.filter((hit) => hit.score >= minScore);
 
       // Map the results to include tool configurations
