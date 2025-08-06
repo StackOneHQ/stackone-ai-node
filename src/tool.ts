@@ -1,6 +1,5 @@
 import { type ToolSet, jsonSchema } from 'ai';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
-import { metaExecuteTool, metaFilterRelevantTools } from './meta';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
   ExecuteConfig,
@@ -276,7 +275,7 @@ export class Tools implements Iterable<BaseTool> {
    * return two tools
    */
   metaRelevantTools(): Tools {
-    const baseTools = [metaFilterRelevantTools(), metaExecuteTool()];
+    const baseTools = [metaFilterRelevantTools(this), metaExecuteTool(this)];
     const tools = new Tools(baseTools);
     return tools;
   }
@@ -318,4 +317,77 @@ export class Tools implements Iterable<BaseTool> {
   forEach(callback: (tool: BaseTool) => void): void {
     this.tools.forEach(callback);
   }
+}
+
+export function metaFilterRelevantTools(tools: Tools): BaseTool {
+  const name = 'meta_filter_relevant_tools' as const;
+  const description =
+    'find relevant tools. LLm should call this tool before meta_execution' as const;
+  const parameters = {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description: 'Natural language query describing what tools you need',
+      },
+      limit: {
+        type: 'number',
+        description: 'Maximum number of tools to return (default: 5)',
+        default: 5,
+      },
+      minScore: {
+        type: 'number',
+        description: 'Minimum relevance score (0-1) for results (default: 0.3)',
+        default: 0.3,
+      },
+      filterPatterns: {
+        oneOf: [
+          { type: 'string' },
+          {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        ],
+        description: 'Optional glob patterns to filter results (e.g., "hris_*", "!*_delete_*")',
+      },
+    },
+    required: ['query'],
+  } as const satisfies ToolParameters;
+
+  const executeConfig = {
+    method: 'LOCAL',
+    url: 'local://get-relevant-tools',
+    bodyType: 'json',
+    params: [],
+  } as const satisfies ExecuteConfig;
+
+  return new BaseTool(name, description, parameters, executeConfig);
+}
+
+export function metaExecuteTool(tools: Tools): BaseTool {
+  const name = 'meta_execute_tools' as const;
+  const description = 'Execute a tool based on the provided parameters' as const;
+  const parameters = {
+    type: 'object',
+    properties: {
+      toolName: {
+        type: 'string',
+        description: 'Name of the tool to execute',
+      },
+      params: {
+        type: 'object',
+        description: 'Parameters to pass to the tool',
+      },
+    },
+    required: ['toolName', 'params'],
+  } as const satisfies ToolParameters;
+
+  const executeConfig = {
+    method: 'LOCAL',
+    url: 'local://execute-tool',
+    bodyType: 'json',
+    params: [],
+  } as const satisfies ExecuteConfig;
+
+  return new BaseTool(name, description, parameters, executeConfig);
 }
