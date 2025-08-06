@@ -39,6 +39,39 @@ export const handlers = [
     });
   }),
 
+  // Meta tools test endpoints
+  http.post('https://api.example.com/hris/employees', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json(body);
+  }),
+  
+  http.get('https://api.example.com/hris/employees', ({ request }) => {
+    const url = new URL(request.url);
+    const limit = url.searchParams.get('limit');
+    return HttpResponse.json({ limit: limit ? Number(limit) : undefined });
+  }),
+  
+  http.post('https://api.example.com/hris/time-off', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json(body);
+  }),
+  
+  http.post('https://api.example.com/ats/candidates', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json(body);
+  }),
+  
+  http.get('https://api.example.com/ats/candidates', ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    return HttpResponse.json({ status });
+  }),
+  
+  http.post('https://api.example.com/crm/contacts', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json(body);
+  }),
+
   // Default handler for unmatched requests
   http.get('*', () => {
     return HttpResponse.json({ message: 'Mock endpoint' });

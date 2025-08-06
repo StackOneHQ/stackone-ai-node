@@ -332,17 +332,18 @@ export interface MetaToolSearchResult {
   score: number;
 }
 
-type OramaDb = Awaited<ReturnType<typeof orama.create>>;
+type OramaDb = ReturnType<typeof orama.create>;
 
 /**
  * Initialize Orama database with BM25 algorithm for tool search
  * Using Orama's BM25 scoring algorithm for relevance ranking
+ * @see https://docs.orama.com/open-source/usage/create
  * @see https://docs.orama.com/open-source/usage/search/bm25-algorithm/
  */
 async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
   // Create Orama database schema with BM25 scoring algorithm
   // BM25 provides better relevance ranking for natural language queries
-  const oramaDb = await orama.create({
+  const oramaDb = orama.create({
     schema: {
       name: 'string' as const,
       description: 'string' as const,
@@ -366,7 +367,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
     const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
     const actions = parts.filter((p) => actionTypes.includes(p));
 
-    await orama.insert(oramaDb, {
+    orama.insert(oramaDb, {
       name: tool.name,
       description: tool.description,
       category: category,
@@ -428,10 +429,11 @@ export function metaFilterRelevantTools(oramaDb: OramaDb, allTools: BaseTool[]):
       const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
 
       // Perform search using Orama
+      // Type assertion needed due to TypeScript deep instantiation issue with Orama types
       const results = await orama.search(oramaDb, {
         term: params.query || '',
         limit: params.limit || 5,
-      } as any);
+      } as Parameters<typeof orama.search>[1]);
 
       // filter results by minimum score
       const minScore = params.minScore || 0.3;
@@ -440,7 +442,8 @@ export function metaFilterRelevantTools(oramaDb: OramaDb, allTools: BaseTool[]):
       // Map the results to include tool configurations
       const toolConfigs = filteredResults
         .map((hit) => {
-          const tool = allTools.find((t) => t.name === hit.document.name);
+          const doc = hit.document as { name: string };
+          const tool = allTools.find((t) => t.name === doc.name);
           if (!tool) return null;
 
           const result: MetaToolSearchResult = {
