@@ -1,5 +1,6 @@
 import { type ToolSet, jsonSchema } from 'ai';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
+import { metaExecuteTool, metaFilterRelevantTools } from './meta';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
   ExecuteConfig,
@@ -269,6 +270,15 @@ export class Tools implements Iterable<BaseTool> {
    */
   filter(predicate: (tool: BaseTool) => boolean): Tools {
     return new Tools(this.tools.filter(predicate));
+  }
+
+  /**
+   * return two tools
+   */
+  metaRelevantTools(): Tools {
+    const baseTools = [metaFilterRelevantTools(), metaExecuteTool()];
+    const tools = new Tools(baseTools);
+    return tools;
   }
 
   /**
