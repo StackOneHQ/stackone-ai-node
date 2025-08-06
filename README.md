@@ -224,6 +224,77 @@ const toolsetWithHeaders = new OpenAPIToolSet({
 
 These are some of the features which you can use with the OpenAPIToolSet and StackOneToolSet.
 
+### Meta Tools (Beta)
+
+Meta tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
+
+> ⚠️ **Beta Feature**: Meta tools are currently in beta and the API may change in future versions.
+
+#### How Meta Tools Work
+
+Meta tools provide two core capabilities:
+1. **Tool Discovery** (`meta_filter_relevant_tools`): Search for tools using natural language queries
+2. **Tool Execution** (`meta_execute_tool`): Execute discovered tools dynamically
+
+The tool discovery uses Orama's BM25 algorithm for relevance ranking, providing high-quality search results based on tool names, descriptions, and categories.
+
+#### Basic Usage
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet();
+const tools = toolset.getStackOneTools("*", "account-id");
+
+// Get meta tools for dynamic discovery
+const metaTools = await tools.metaTools();
+
+// Use with OpenAI
+const openAITools = metaTools.toOpenAI();
+
+// Use with AI SDK
+const aiSdkTools = metaTools.toAISDK();
+```
+
+#### Example: Dynamic Tool Discovery with AI SDK
+
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+
+const { text } = await generateText({
+  model: openai("gpt-4o-mini"),
+  tools: aiSdkTools,
+  prompt: "Find tools for managing employees and create a time off request",
+  maxSteps: 3, // Allow multiple tool calls
+});
+```
+
+#### Direct Usage Without AI
+
+```typescript
+// Step 1: Discover relevant tools
+const filterTool = metaTools.getTool("meta_filter_relevant_tools");
+const searchResult = await filterTool.execute({
+  query: "employee time off vacation",
+  limit: 5,
+  minScore: 0.3, // Minimum relevance score (0-1)
+});
+
+// Step 2: Execute a discovered tool
+const executeTool = metaTools.getTool("meta_execute_tool");
+const result = await executeTool.execute({
+  toolName: "hris_create_time_off",
+  params: {
+    employeeId: "emp_123",
+    startDate: "2024-01-15",
+    endDate: "2024-01-19",
+  },
+});
+```
+
+[View full example](examples/meta-tools.ts)
+
 ### Custom Base URL
 
 ```typescript
