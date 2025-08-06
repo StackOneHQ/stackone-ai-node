@@ -7,6 +7,18 @@
     "grep": {
       "type": "http",
       "url": "https://mcp.grep.app"
+    },
+    "oramaDocs": {
+      "type": "stdio",
+      "command": "bun",
+      "args": [
+        "x",
+        "sitemcp",
+        "https://docs.orama.com/",
+        "--concurrency",
+        "10"
+      ],
+      "env": {}
     }
   }
 }
