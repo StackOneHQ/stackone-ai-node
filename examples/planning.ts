@@ -29,7 +29,7 @@ export const planningModule = async (): Promise<void> => {
    * or use as part of a larger agent (using AI SDK by Vercel)
    */
   await generateText({
-    model: openai('gpt-4o'),
+    model: openai('gpt-5'),
     prompt: 'You are a workplace agent, onboard the latest hires to our systems',
     tools: onboardWorkflow.toAISDK(),
     maxSteps: 3,

@@ -44,7 +44,7 @@ const toolset = new StackOneToolSet();
 const tools = toolset.getTools("hris_*", "<stackone-account-id>").toOpenAI();
 
 await openai.chat.completions.create({
-  model: "gpt-4o",
+  model: "gpt-5",
   messages: [
     {
       role: "system",
@@ -72,7 +72,7 @@ const toolset = new StackOneToolSet();
 
 const aiSdkTools = toolset.getTools("hris_*").toAISDK();
 await generateText({
-  model: openai("gpt-4o"),
+  model: openai("gpt-5"),
   tools: aiSdkTools,
   maxSteps: 3,
 });
