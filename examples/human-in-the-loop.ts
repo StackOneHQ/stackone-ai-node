@@ -39,7 +39,7 @@ const humanInTheLoopExample = async (): Promise<void> => {
 
   // Use the metadata for AI planning/generation
   const { toolCalls } = await generateText({
-    model: openai('gpt-4o'),
+    model: openai('gpt-5'),
     tools: tool,
     prompt:
       'Create a new employee in Workday, params: Full name: John Doe, personal email: john.doe@example.com, department: Engineering, start date: 2025-01-01, hire date: 2025-01-01',

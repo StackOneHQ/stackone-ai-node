@@ -21,7 +21,7 @@ const aiSdkIntegration = async (): Promise<void> => {
 
   // Use max steps to automatically call the tool if it's needed
   const { text } = await generateText({
-    model: openai('gpt-4.1-mini'),
+    model: openai('gpt-5'),
     tools: aiSdkTools,
     prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
     maxSteps: 3,
