@@ -125,6 +125,6 @@ const main = (): void => {
 };
 
 // Run the script
-if (require.main === module) {
+if (import.meta.main) {
   main();
 }
