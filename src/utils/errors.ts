@@ -128,3 +128,7 @@ export class StackOneAPIError extends StackOneError {
     return match ? match[1] : null;
   }
 }
+
+export function unimplemtentedError(methodName: string): never {
+  throw new StackOneError(`Method ${methodName} is not implemented yet`);
+}
