@@ -147,7 +147,7 @@ const createMockTools = (): BaseTool[] => {
   return tools;
 };
 
-describe('Meta Tools', () => {
+describe('Meta Search Tools', () => {
   let tools: Tools;
   let metaTools: Tools;
 
@@ -162,7 +162,7 @@ describe('Meta Tools', () => {
   });
 
   describe('metaTools()', () => {
-    it('should return two meta tools', () => {
+    it('should return two meta search tools', () => {
       expect(metaTools.length).toBe(2);
     });
 
@@ -353,11 +353,11 @@ describe('Meta Tools', () => {
     });
   });
 
-  describe('Integration: meta tools workflow', () => {
+  describe('Integration: meta search tools workflow', () => {
     it('should discover and execute tools in sequence', async () => {
       const filterTool = metaTools.getTool('meta_search_tools_filter_relevant_tools');
       const executeTool = metaTools.getTool('meta_search_tools_execute_tool');
-      if (!filterTool || !executeTool) throw new Error('Meta tools not found');
+      if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
 
       // Step 1: Discover relevant tools
       const searchResult = await filterTool.execute({
@@ -389,7 +389,7 @@ describe('Meta Tools', () => {
   });
 
   describe('OpenAI format', () => {
-    it('should convert meta tools to OpenAI format', () => {
+    it('should convert meta search tools to OpenAI format', () => {
       const openAITools = metaTools.toOpenAI();
 
       expect(openAITools).toHaveLength(2);
@@ -412,7 +412,7 @@ describe('Meta Tools', () => {
   });
 
   describe('AI SDK format', () => {
-    it('should convert meta tools to AI SDK format', () => {
+    it('should convert meta search tools to AI SDK format', () => {
       const aiSdkTools = metaTools.toAISDK();
 
       expect(aiSdkTools).toHaveProperty('meta_search_tools_filter_relevant_tools');

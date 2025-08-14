@@ -1,9 +1,9 @@
 /**
- * This example demonstrates how to use meta tools for dynamic tool discovery and execution.
- * Meta tools allow AI agents to search for relevant tools based on natural language queries
+ * This example demonstrates how to use meta search tools for dynamic tool discovery and execution.
+ * Meta search tools allow AI agents to search for relevant tools based on natural language queries
  * and execute them dynamically without hardcoding tool names.
  *
- * @beta Meta tools are in beta and may change in future versions
+ * @beta Meta search tools are in beta and may change in future versions
  */
 
 import process from 'node:process';
@@ -13,7 +13,7 @@ import { StackOneToolSet } from '../src';
 import { ACCOUNT_IDS } from './constants';
 
 /**
- * Example 1: Using meta tools with AI SDK for dynamic tool discovery
+ * Example 1: Using meta search tools with AI SDK for dynamic tool discovery
  */
 const metaToolsWithAISDK = async (): Promise<void> => {
   console.log('🔍 Example 1: Dynamic tool discovery with AI SDK\n');
@@ -25,11 +25,11 @@ const metaToolsWithAISDK = async (): Promise<void> => {
   // Get all available tools for the account
   const allTools = toolset.getStackOneTools('*', accountId);
 
-  // Get meta tools for dynamic discovery and execution
+  // Get meta search tools for dynamic discovery and execution
   const metaTools = await allTools.metaTools();
   const aiSdkMetaTools = metaTools.toAISDK();
 
-  // Use meta tools to dynamically find and execute relevant tools
+  // Use meta search tools to dynamically find and execute relevant tools
   const { text, toolCalls } = await generateText({
     model: openai('gpt-4o-mini'),
     tools: aiSdkMetaTools,
@@ -44,7 +44,7 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 };
 
 /**
- * Example 2: Using meta tools with OpenAI for HR assistant
+ * Example 2: Using meta search tools with OpenAI for HR assistant
  */
 const metaToolsWithOpenAI = async (): Promise<void> => {
   console.log('\n🤖 Example 2: HR Assistant with OpenAI\n');
@@ -61,7 +61,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
   // Get all HRIS tools
   const hrisTools = toolset.getStackOneTools('hris_*', accountId);
 
-  // Get meta tools
+  // Get meta search tools
   const metaTools = await hrisTools.metaTools();
   const openAIMetaTools = metaTools.toOpenAI();
 
@@ -97,10 +97,10 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 };
 
 /**
- * Example 3: Direct usage of meta tools without AI
+ * Example 3: Direct usage of meta search tools without AI
  */
 const directMetaToolUsage = async (): Promise<void> => {
-  console.log('\n🛠️  Example 3: Direct meta tool usage\n');
+  console.log('\n🛠️  Example 3: Direct meta search tool usage\n');
 
   // Initialize toolset
   const toolset = new StackOneToolSet();
@@ -110,7 +110,7 @@ const directMetaToolUsage = async (): Promise<void> => {
   const allTools = toolset.getStackOneTools('*', accountId);
   console.log(`Total available tools: ${allTools.length}`);
 
-  // Get meta tools
+  // Get meta search tools
   const metaTools = await allTools.metaTools();
 
   // Step 1: Search for relevant tools
@@ -184,14 +184,14 @@ const dynamicToolRouter = async (): Promise<void> => {
     ...atsTools.toArray(),
   ]);
 
-  // Get meta tools for the combined set
+  // Get meta search tools for the combined set
   const metaTools = await combinedTools.metaTools();
 
   // Create a router function that finds and executes tools based on intent
   const routeAndExecute = async (intent: string, params: Record<string, unknown> = {}) => {
     const filterTool = metaTools.getTool('meta_search_tools_filter_relevant_tools');
     const executeTool = metaTools.getTool('meta_search_tools_execute_tool');
-    if (!filterTool || !executeTool) throw new Error('Meta tools not found');
+    if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
 
     // Find relevant tools
     const searchResult = await filterTool.execute({

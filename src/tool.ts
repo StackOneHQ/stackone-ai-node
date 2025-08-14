@@ -273,7 +273,7 @@ export class Tools implements Iterable<BaseTool> {
   }
 
   /**
-   * Return meta tools for tool discovery and execution
+   * Return meta search tools for tool discovery and execution
    * @beta This feature is in beta and may change in future versions
    */
   async metaTools(): Promise<Tools> {
