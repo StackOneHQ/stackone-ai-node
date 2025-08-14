@@ -147,7 +147,7 @@ const createMockTools = (): BaseTool[] => {
   return tools;
 };
 
-describe('Meta Tools', () => {
+describe('Meta Search Tools', () => {
   let tools: Tools;
   let metaTools: Tools;
 
@@ -166,10 +166,10 @@ describe('Meta Tools', () => {
       expect(metaTools.length).toBe(2);
     });
 
-    it('should include meta_filter_relevant_tools', () => {
-      const filterTool = metaTools.getTool('meta_filter_relevant_tools');
+    it('should include meta_search_tools', () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       expect(filterTool).toBeDefined();
-      expect(filterTool?.name).toBe('meta_filter_relevant_tools');
+      expect(filterTool?.name).toBe('meta_search_tools');
     });
 
     it('should include meta_execute_tool', () => {
@@ -179,12 +179,12 @@ describe('Meta Tools', () => {
     });
   });
 
-  describe('meta_filter_relevant_tools', () => {
+  describe('meta_search_tools', () => {
     let filterTool: BaseTool;
 
     beforeEach(() => {
-      const tool = metaTools.getTool('meta_filter_relevant_tools');
-      if (!tool) throw new Error('meta_filter_relevant_tools not found');
+      const tool = metaTools.getTool('meta_search_tools');
+      if (!tool) throw new Error('meta_search_tools not found');
       filterTool = tool;
     });
 
@@ -355,9 +355,9 @@ describe('Meta Tools', () => {
 
   describe('Integration: meta tools workflow', () => {
     it('should discover and execute tools in sequence', async () => {
-      const filterTool = metaTools.getTool('meta_filter_relevant_tools');
+      const filterTool = metaTools.getTool('meta_search_tools');
       const executeTool = metaTools.getTool('meta_execute_tool');
-      if (!filterTool || !executeTool) throw new Error('Meta tools not found');
+      if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
 
       // Step 1: Discover relevant tools
       const searchResult = await filterTool.execute({
@@ -394,7 +394,7 @@ describe('Meta Tools', () => {
 
       expect(openAITools).toHaveLength(2);
 
-      const filterTool = openAITools.find((t) => t.function.name === 'meta_filter_relevant_tools');
+      const filterTool = openAITools.find((t) => t.function.name === 'meta_search_tools');
       expect(filterTool).toBeDefined();
       expect(filterTool?.function.parameters?.properties).toHaveProperty('query');
       expect(filterTool?.function.parameters?.properties).toHaveProperty('limit');
@@ -411,17 +411,17 @@ describe('Meta Tools', () => {
     it('should convert meta tools to AI SDK format', () => {
       const aiSdkTools = metaTools.toAISDK();
 
-      expect(aiSdkTools).toHaveProperty('meta_filter_relevant_tools');
+      expect(aiSdkTools).toHaveProperty('meta_search_tools');
       expect(aiSdkTools).toHaveProperty('meta_execute_tool');
 
-      expect(typeof aiSdkTools.meta_filter_relevant_tools.execute).toBe('function');
+      expect(typeof aiSdkTools.meta_search_tools.execute).toBe('function');
       expect(typeof aiSdkTools.meta_execute_tool.execute).toBe('function');
     });
 
     it('should execute through AI SDK format', async () => {
       const aiSdkTools = metaTools.toAISDK();
 
-      const result = await aiSdkTools.meta_filter_relevant_tools.execute?.(
+      const result = await aiSdkTools.meta_search_tools.execute?.(
         { query: 'ATS candidates', limit: 2 },
         { toolCallId: 'test-call-1', messages: [] }
       );

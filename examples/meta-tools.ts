@@ -1,9 +1,9 @@
 /**
- * This example demonstrates how to use meta tools for dynamic tool discovery and execution.
- * Meta tools allow AI agents to search for relevant tools based on natural language queries
+ * This example demonstrates how to use meta search tools for dynamic tool discovery and execution.
+ * Meta search tools allow AI agents to search for relevant tools based on natural language queries
  * and execute them dynamically without hardcoding tool names.
  *
- * @beta Meta tools are in beta and may change in future versions
+ * @beta Meta search tools are in beta and may change in future versions
  */
 
 import process from 'node:process';
@@ -13,7 +13,7 @@ import { StackOneToolSet } from '../src';
 import { ACCOUNT_IDS } from './constants';
 
 /**
- * Example 1: Using meta tools with AI SDK for dynamic tool discovery
+ * Example 1: Using meta search tools with AI SDK for dynamic tool discovery
  */
 const metaToolsWithAISDK = async (): Promise<void> => {
   console.log('🔍 Example 1: Dynamic tool discovery with AI SDK\n');
@@ -44,7 +44,7 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 };
 
 /**
- * Example 2: Using meta tools with OpenAI for HR assistant
+ * Example 2: Using meta search tools with OpenAI for HR assistant
  */
 const metaToolsWithOpenAI = async (): Promise<void> => {
   console.log('\n🤖 Example 2: HR Assistant with OpenAI\n');
@@ -72,7 +72,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
       {
         role: 'system',
         content: `You are an HR assistant with access to various HR tools. 
-        Use the meta_filter_relevant_tools to find appropriate tools for user requests,
+        Use the meta_search_tools to find appropriate tools for user requests,
         then use meta_execute_tool to execute them.`,
       },
       {
@@ -97,7 +97,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 };
 
 /**
- * Example 3: Direct usage of meta tools without AI
+ * Example 3: Direct usage of meta search tools without AI
  */
 const directMetaToolUsage = async (): Promise<void> => {
   console.log('\n🛠️  Example 3: Direct meta tool usage\n');
@@ -114,8 +114,8 @@ const directMetaToolUsage = async (): Promise<void> => {
   const metaTools = await allTools.metaTools();
 
   // Step 1: Search for relevant tools
-  const filterTool = metaTools.getTool('meta_filter_relevant_tools');
-  if (!filterTool) throw new Error('meta_filter_relevant_tools not found');
+  const filterTool = metaTools.getTool('meta_search_tools');
+  if (!filterTool) throw new Error('meta_search_tools not found');
   const searchResult = await filterTool.execute({
     query: 'employee management create update list',
     limit: 5,
@@ -189,9 +189,9 @@ const dynamicToolRouter = async (): Promise<void> => {
 
   // Create a router function that finds and executes tools based on intent
   const routeAndExecute = async (intent: string, params: Record<string, unknown> = {}) => {
-    const filterTool = metaTools.getTool('meta_filter_relevant_tools');
+    const filterTool = metaTools.getTool('meta_search_tools');
     const executeTool = metaTools.getTool('meta_execute_tool');
-    if (!filterTool || !executeTool) throw new Error('Meta tools not found');
+    if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
 
     // Find relevant tools
     const searchResult = await filterTool.execute({

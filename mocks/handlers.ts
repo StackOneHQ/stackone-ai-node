@@ -39,7 +39,7 @@ export const handlers = [
     });
   }),
 
-  // Meta tools test endpoints
+  // Meta search tools test endpoints
   http.post('https://api.example.com/hris/employees', async ({ request }) => {
     const body = await request.json();
     return HttpResponse.json(body);
