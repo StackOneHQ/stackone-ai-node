@@ -233,8 +233,8 @@ Meta tools enable dynamic tool discovery and execution, allowing AI agents to se
 #### How Meta Tools Work
 
 Meta tools provide two core capabilities:
-1. **Tool Discovery** (`meta_filter_relevant_tools`): Search for tools using natural language queries
-2. **Tool Execution** (`meta_execute_tool`): Execute discovered tools dynamically
+1. **Tool Discovery** (`meta_search_tools_filter_relevant_tools`): Search for tools using natural language queries
+2. **Tool Execution** (`meta_search_tools_execute_tool`): Execute discovered tools dynamically
 
 The tool discovery uses Orama's BM25 algorithm for relevance ranking, providing high-quality search results based on tool names, descriptions, and categories.
 
@@ -274,7 +274,7 @@ const { text } = await generateText({
 
 ```typescript
 // Step 1: Discover relevant tools
-const filterTool = metaTools.getTool("meta_filter_relevant_tools");
+const filterTool = metaTools.getTool("meta_search_tools_filter_relevant_tools");
 const searchResult = await filterTool.execute({
   query: "employee time off vacation",
   limit: 5,
@@ -282,7 +282,7 @@ const searchResult = await filterTool.execute({
 });
 
 // Step 2: Execute a discovered tool
-const executeTool = metaTools.getTool("meta_execute_tool");
+const executeTool = metaTools.getTool("meta_search_tools_execute_tool");
 const result = await executeTool.execute({
   toolName: "hris_create_time_off",
   params: {

@@ -379,7 +379,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 }
 
 export function metaFilterRelevantTools(oramaDb: OramaDb, allTools: BaseTool[]): BaseTool {
-  const name = 'meta_filter_relevant_tools' as const;
+  const name = 'meta_search_tools_filter_relevant_tools' as const;
   const description =
     'Searches for relevant tools based on a natural language query. This tool should be called first to discover available tools before executing them.' as const;
   const parameters = {
@@ -470,9 +470,9 @@ export function metaFilterRelevantTools(oramaDb: OramaDb, allTools: BaseTool[]):
 }
 
 export function metaExecuteTool(tools: Tools): BaseTool {
-  const name = 'meta_execute_tool' as const;
+  const name = 'meta_search_tools_execute_tool' as const;
   const description =
-    'Executes a specific tool by name with the provided parameters. Use this after discovering tools with meta_filter_relevant_tools.' as const;
+    'Executes a specific tool by name with the provided parameters. Use this after discovering tools with meta_search_tools_filter_relevant_tools.' as const;
   const parameters = {
     type: 'object',
     properties: {

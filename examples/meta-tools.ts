@@ -72,8 +72,8 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
       {
         role: 'system',
         content: `You are an HR assistant with access to various HR tools. 
-        Use the meta_filter_relevant_tools to find appropriate tools for user requests,
-        then use meta_execute_tool to execute them.`,
+        Use the meta_search_tools_filter_relevant_tools to find appropriate tools for user requests,
+        then use meta_search_tools_execute_tool to execute them.`,
       },
       {
         role: 'user',
@@ -114,8 +114,8 @@ const directMetaToolUsage = async (): Promise<void> => {
   const metaTools = await allTools.metaTools();
 
   // Step 1: Search for relevant tools
-  const filterTool = metaTools.getTool('meta_filter_relevant_tools');
-  if (!filterTool) throw new Error('meta_filter_relevant_tools not found');
+  const filterTool = metaTools.getTool('meta_search_tools_filter_relevant_tools');
+  if (!filterTool) throw new Error('meta_search_tools_filter_relevant_tools not found');
   const searchResult = await filterTool.execute({
     query: 'employee management create update list',
     limit: 5,
@@ -134,8 +134,8 @@ const directMetaToolUsage = async (): Promise<void> => {
 
   // Step 2: Execute one of the found tools
   if (foundTools.length > 0) {
-    const executeTool = metaTools.getTool('meta_execute_tool');
-    if (!executeTool) throw new Error('meta_execute_tool not found');
+    const executeTool = metaTools.getTool('meta_search_tools_execute_tool');
+    if (!executeTool) throw new Error('meta_search_tools_execute_tool not found');
     const firstTool = foundTools[0];
 
     console.log(`\nExecuting ${firstTool.name}...`);
@@ -189,8 +189,8 @@ const dynamicToolRouter = async (): Promise<void> => {
 
   // Create a router function that finds and executes tools based on intent
   const routeAndExecute = async (intent: string, params: Record<string, unknown> = {}) => {
-    const filterTool = metaTools.getTool('meta_filter_relevant_tools');
-    const executeTool = metaTools.getTool('meta_execute_tool');
+    const filterTool = metaTools.getTool('meta_search_tools_filter_relevant_tools');
+    const executeTool = metaTools.getTool('meta_search_tools_execute_tool');
     if (!filterTool || !executeTool) throw new Error('Meta tools not found');
 
     // Find relevant tools
