@@ -25,11 +25,11 @@ const metaToolsWithAISDK = async (): Promise<void> => {
   // Get all available tools for the account
   const allTools = toolset.getStackOneTools('*', accountId);
 
-  // Get meta search tools for dynamic discovery and execution
+  // Get meta tools for dynamic discovery and execution
   const metaTools = await allTools.metaTools();
   const aiSdkMetaTools = metaTools.toAISDK();
 
-  // Use meta search tools to dynamically find and execute relevant tools
+  // Use meta tools to dynamically find and execute relevant tools
   const { text, toolCalls } = await generateText({
     model: openai('gpt-4o-mini'),
     tools: aiSdkMetaTools,
@@ -61,7 +61,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
   // Get all HRIS tools
   const hrisTools = toolset.getStackOneTools('hris_*', accountId);
 
-  // Get meta search tools
+  // Get meta tools
   const metaTools = await hrisTools.metaTools();
   const openAIMetaTools = metaTools.toOpenAI();
 
@@ -72,8 +72,8 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
       {
         role: 'system',
         content: `You are an HR assistant with access to various HR tools. 
-        Use the meta_search_tools_filter_relevant_tools to find appropriate tools for user requests,
-        then use meta_search_tools_execute_tool to execute them.`,
+        Use the meta_search_tools to find appropriate tools for user requests,
+        then use meta_execute_tool to execute them.`,
       },
       {
         role: 'user',
@@ -100,7 +100,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
  * Example 3: Direct usage of meta search tools without AI
  */
 const directMetaToolUsage = async (): Promise<void> => {
-  console.log('\n🛠️  Example 3: Direct meta search tool usage\n');
+  console.log('\n🛠️  Example 3: Direct meta tool usage\n');
 
   // Initialize toolset
   const toolset = new StackOneToolSet();
@@ -110,12 +110,12 @@ const directMetaToolUsage = async (): Promise<void> => {
   const allTools = toolset.getStackOneTools('*', accountId);
   console.log(`Total available tools: ${allTools.length}`);
 
-  // Get meta search tools
+  // Get meta tools
   const metaTools = await allTools.metaTools();
 
   // Step 1: Search for relevant tools
-  const filterTool = metaTools.getTool('meta_search_tools_filter_relevant_tools');
-  if (!filterTool) throw new Error('meta_search_tools_filter_relevant_tools not found');
+  const filterTool = metaTools.getTool('meta_search_tools');
+  if (!filterTool) throw new Error('meta_search_tools not found');
   const searchResult = await filterTool.execute({
     query: 'employee management create update list',
     limit: 5,
@@ -134,8 +134,8 @@ const directMetaToolUsage = async (): Promise<void> => {
 
   // Step 2: Execute one of the found tools
   if (foundTools.length > 0) {
-    const executeTool = metaTools.getTool('meta_search_tools_execute_tool');
-    if (!executeTool) throw new Error('meta_search_tools_execute_tool not found');
+    const executeTool = metaTools.getTool('meta_execute_tool');
+    if (!executeTool) throw new Error('meta_execute_tool not found');
     const firstTool = foundTools[0];
 
     console.log(`\nExecuting ${firstTool.name}...`);
@@ -184,13 +184,13 @@ const dynamicToolRouter = async (): Promise<void> => {
     ...atsTools.toArray(),
   ]);
 
-  // Get meta search tools for the combined set
+  // Get meta tools for the combined set
   const metaTools = await combinedTools.metaTools();
 
   // Create a router function that finds and executes tools based on intent
   const routeAndExecute = async (intent: string, params: Record<string, unknown> = {}) => {
-    const filterTool = metaTools.getTool('meta_search_tools_filter_relevant_tools');
-    const executeTool = metaTools.getTool('meta_search_tools_execute_tool');
+    const filterTool = metaTools.getTool('meta_search_tools');
+    const executeTool = metaTools.getTool('meta_execute_tool');
     if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
 
     // Find relevant tools
