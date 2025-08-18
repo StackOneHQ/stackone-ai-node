@@ -230,7 +230,7 @@ Meta tools enable dynamic tool discovery and execution, allowing AI agents to se
 
 > ⚠️ **Beta Feature**: Meta tools are currently in beta and the API may change in future versions.
 
-#### How Meta Search Tools Work
+#### How Meta Tools Work
 
 Meta search tools provide two core capabilities:
 1. **Tool Discovery** (`meta_search_tools`): Search for tools using natural language queries
