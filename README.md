@@ -228,7 +228,7 @@ These are some of the features which you can use with the OpenAPIToolSet and Sta
 
 Meta tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
 
-> ⚠️ **Beta Feature**: Meta search tools are currently in beta and the API may change in future versions.
+> ⚠️ **Beta Feature**: Meta tools are currently in beta and the API may change in future versions.
 
 #### How Meta Search Tools Work
 
