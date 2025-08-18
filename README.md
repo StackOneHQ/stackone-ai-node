@@ -224,7 +224,7 @@ const toolsetWithHeaders = new OpenAPIToolSet({
 
 These are some of the features which you can use with the OpenAPIToolSet and StackOneToolSet.
 
-### Meta Search Tools (Beta)
+### Meta Tools (Beta)
 
 Meta search tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
 
