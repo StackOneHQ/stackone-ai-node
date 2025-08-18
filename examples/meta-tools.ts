@@ -1,9 +1,9 @@
 /**
- * This example demonstrates how to use meta search tools for dynamic tool discovery and execution.
- * Meta search tools allow AI agents to search for relevant tools based on natural language queries
+ * This example demonstrates how to use meta tools for dynamic tool discovery and execution.
+ * Meta tools allow AI agents to search for relevant tools based on natural language queries
  * and execute them dynamically without hardcoding tool names.
  *
- * @beta Meta search tools are in beta and may change in future versions
+ * @beta Meta tools are in beta and may change in future versions
  */
 
 import process from 'node:process';
@@ -13,7 +13,7 @@ import { StackOneToolSet } from '../src';
 import { ACCOUNT_IDS } from './constants';
 
 /**
- * Example 1: Using meta search tools with AI SDK for dynamic tool discovery
+ * Example 1: Using meta tools with AI SDK for dynamic tool discovery
  */
 const metaToolsWithAISDK = async (): Promise<void> => {
   console.log('🔍 Example 1: Dynamic tool discovery with AI SDK\n');
@@ -44,7 +44,7 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 };
 
 /**
- * Example 2: Using meta search tools with OpenAI for HR assistant
+ * Example 2: Using meta tools with OpenAI for HR assistant
  */
 const metaToolsWithOpenAI = async (): Promise<void> => {
   console.log('\n🤖 Example 2: HR Assistant with OpenAI\n');
@@ -97,7 +97,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 };
 
 /**
- * Example 3: Direct usage of meta search tools without AI
+ * Example 3: Direct usage of meta tools without AI
  */
 const directMetaToolUsage = async (): Promise<void> => {
   console.log('\n🛠️  Example 3: Direct meta tool usage\n');
@@ -191,7 +191,7 @@ const dynamicToolRouter = async (): Promise<void> => {
   const routeAndExecute = async (intent: string, params: Record<string, unknown> = {}) => {
     const filterTool = metaTools.getTool('meta_search_tools');
     const executeTool = metaTools.getTool('meta_execute_tool');
-    if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
+    if (!filterTool || !executeTool) throw new Error('Meta tools not found');
 
     // Find relevant tools
     const searchResult = await filterTool.execute({
