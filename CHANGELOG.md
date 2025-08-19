@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.3.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.2.0...v0.3.0) (2025-08-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* metaRelevantTools() renamed to metaTools() and now returns Promise<Tools>
+
+### Features
+
+* add meta tools for dynamic tool discovery and execution ([#84](https://github.com/StackOneHQ/stackone-ai-node/issues/84)) ([e1da427](https://github.com/StackOneHQ/stackone-ai-node/commit/e1da4276a5b00028fdfa6341a4c4d0898d187f88))
+* add pkg.pr.new ci ([#58](https://github.com/StackOneHQ/stackone-ai-node/issues/58)) ([4757773](https://github.com/StackOneHQ/stackone-ai-node/commit/4757773d238ea18427c520e83000813f9b376d62))
+* update schema ([#60](https://github.com/StackOneHQ/stackone-ai-node/issues/60)) ([03c9283](https://github.com/StackOneHQ/stackone-ai-node/commit/03c9283ab2169d29f24b0fd1f2c03700ce4500d3))
+
+
+### Bug Fixes
+
+* hook ([#57](https://github.com/StackOneHQ/stackone-ai-node/issues/57)) ([ae92968](https://github.com/StackOneHQ/stackone-ai-node/commit/ae9296898738413ca129cbdc7d415cf58604e1f2))
+* resolve linting errors in generated OpenAPI files and tests ([#80](https://github.com/StackOneHQ/stackone-ai-node/issues/80)) ([7fd5eea](https://github.com/StackOneHQ/stackone-ai-node/commit/7fd5eea4b5ff19c4c3b119590a52c95175da4fc7))
+* **tooling:** typecheck ([#54](https://github.com/StackOneHQ/stackone-ai-node/issues/54)) ([025ae5c](https://github.com/StackOneHQ/stackone-ai-node/commit/025ae5c2f503e3132fd2bcb5946a38128b701316))
+
+
+### Miscellaneous Chores
+
+* release 0.3.0 ([#88](https://github.com/StackOneHQ/stackone-ai-node/issues/88)) ([bd7c10c](https://github.com/StackOneHQ/stackone-ai-node/commit/bd7c10c11cf0b871e85533315c7543633fa56b1f))
+
 ## [0.2.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.1.0...v0.2.0) (2025-06-17)
 
 
