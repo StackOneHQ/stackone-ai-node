@@ -367,6 +367,19 @@ export const stackoneSpec = {
             },
           },
           {
+            name: 'origin_owner_ids',
+            required: false,
+            in: 'query',
+            description:
+              'The origin owner identifiers of the results to fetch (supports multiple IDs)',
+            schema: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+          {
             name: 'providers',
             required: false,
             in: 'query',
@@ -2692,6 +2705,15 @@ export const stackoneSpec = {
           '200': {
             description: 'The proxy request was successful.',
           },
+          '201': {
+            description: 'Resource was successfully created by the target service.',
+          },
+          '202': {
+            description: 'Request accepted by the target service.',
+          },
+          '204': {
+            description: 'Request succeeded with no content.',
+          },
           '400': {
             description: 'Invalid request.',
             content: {
@@ -4102,8 +4124,8 @@ export const stackoneSpec = {
             description: 'The method of the request',
             enum: ['get', 'post', 'put', 'delete', 'patch', null],
             default: 'get',
-            'x-speakeasy-unknown-values': 'allow',
             nullable: true,
+            'x-speakeasy-unknown-values': 'allow',
           },
           path: {
             type: 'string',

@@ -31,7 +31,13 @@
     "docs:deploy": "bun run build:docs && mkdocs gh-deploy --force",
     "lint": "biome check .",
     "typecheck": "tsgo --noEmit",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "extract:endpoints": "bun run scripts/extract-endpoints.ts",
+    "generate:queries": "bun run scripts/generate-queries-with-ai-sdk.ts",
+    "dataset:build": "bun run scripts/build-benchmark-dataset.ts",
+    "benchmark:evaluate": "bun run benchmarks/evaluate-selection.ts",
+    "benchmark:compare": "bun run benchmarks/run-comparison.ts",
+    "benchmark:report": "bun run benchmarks/generate-report.ts"
   },
   "dependencies": {
     "@orama/orama": "^3.1.11",
@@ -50,6 +56,7 @@
     "lint-staged": "^15.2.0",
     "mkdocs": "^0.0.1",
     "msw": "^2.10.4",
+    "ollama-ai-provider": "^1.2.0",
     "openai": "^5.7.0",
     "openapi-types": "^12.1.3",
     "publint": "^0.3.12",

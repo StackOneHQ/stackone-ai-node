@@ -77,6 +77,20 @@ export const lmsSpec = {
                   type: 'string',
                   nullable: true,
                 },
+                active: {
+                  description: 'Filter to allow filtering of only active courses',
+                  oneOf: [
+                    {
+                      type: 'boolean',
+                      const: true,
+                    },
+                    {
+                      type: 'string',
+                      const: 'true',
+                    },
+                  ],
+                  nullable: true,
+                },
               },
               nullable: true,
               type: 'object',
@@ -562,7 +576,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference',
+                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at',
               type: 'string',
             },
           },
@@ -1470,7 +1484,7 @@ export const lmsSpec = {
             name: 'filter',
             required: false,
             in: 'query',
-            description: 'Filter parameters that allow greater customisation of the list response',
+            description: 'LMS Courses Filter',
             explode: true,
             style: 'deepObject',
             schema: {
@@ -1483,6 +1497,20 @@ export const lmsSpec = {
                   format: 'date-time',
                   nullable: true,
                   additionalProperties: false,
+                },
+                active: {
+                  description: 'Filter to allow filtering of only active content',
+                  oneOf: [
+                    {
+                      type: 'boolean',
+                      const: true,
+                    },
+                    {
+                      type: 'string',
+                      const: 'true',
+                    },
+                  ],
+                  nullable: true,
                 },
               },
               nullable: true,
@@ -2331,7 +2359,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent',
+                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url',
               type: 'string',
             },
           },
@@ -3210,7 +3238,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent',
+                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url',
               type: 'string',
             },
           },
@@ -5212,7 +5240,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference',
+                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at',
               type: 'string',
             },
           },
@@ -5890,6 +5918,28 @@ export const lmsSpec = {
             example: 'e3cb75bf-aa84-466e-a6c1-b8322b257a48',
             nullable: true,
           },
+          certificate_url: {
+            type: 'string',
+            description: 'The certification URL associated with this assignment',
+            example: 'https://example.com/certificate/12345',
+            nullable: true,
+          },
+          result: {
+            description: 'The result of the assignment',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ResultStatusEnum',
+              },
+            ],
+          },
+          completed_at: {
+            type: 'string',
+            description: 'The date the content was completed',
+            example: '2021-07-21T14:00:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
           course_id: {
             type: 'string',
             description: 'The course ID associated with this assignment',
@@ -6346,6 +6396,12 @@ export const lmsSpec = {
             format: 'string',
             nullable: true,
           },
+          certificate_url: {
+            type: 'string',
+            description: 'The certification URL associated with this completion',
+            example: 'https://example.com/certificate/12345',
+            nullable: true,
+          },
           external_id: {
             type: 'string',
             description: 'The external ID associated with this completion',
@@ -6700,6 +6756,10 @@ export const lmsSpec = {
             type: 'string',
             nullable: true,
           },
+          total: {
+            type: 'number',
+            nullable: true,
+          },
           data: {
             type: 'array',
             items: {
@@ -6946,6 +7006,10 @@ export const lmsSpec = {
           },
           next: {
             type: 'string',
+            nullable: true,
+          },
+          total: {
+            type: 'number',
             nullable: true,
           },
           data: {

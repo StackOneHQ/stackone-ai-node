@@ -1,0 +1,106 @@
+{
+  "generation_info": {
+    "model": "gemma3:270m",
+    "generated_at": "2025-08-21T16:32:37.921Z",
+    "total_functions": 2,
+    "successful_generations": 2,
+    "failed_generations": 0,
+    "limit_filter": 2
+  },
+  "results": [
+    {
+      "function_name": "stackone_create_connect_session",
+      "queries": [
+        {
+          "query": "what is the name of the stackone_create_connect_session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "how can i create a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the purpose of a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what are the options for creating a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "how do I create a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the best way to create a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the format of a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the best way to create a connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:32:35.902Z",
+      "model": "gemma3:270m"
+    },
+    {
+      "function_name": "stackone_authenticate_connect_session",
+      "queries": [
+        {
+          "query": "how to authenticate connect session",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the authentication method?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "how do I authenticate connect session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the authentication process?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "how to connect to the session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the authentication process for a session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "how do I connect to the session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        },
+        {
+          "query": "what is the authentication process for a session?",
+          "type": "formal|casual|business|ambiguous|complex",
+          "difficulty": "easy|medium|hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:32:37.921Z",
+      "model": "gemma3:270m"
+    }
+  ]
+}

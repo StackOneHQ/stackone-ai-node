@@ -1,0 +1,94 @@
+{
+  "generation_info": {
+    "model": "gemini-2.0-flash-exp",
+    "generated_at": "2025-08-21T16:25:41.639Z",
+    "total_functions": 1,
+    "successful_generations": 1,
+    "failed_generations": 0,
+    "limit_filter": 1
+  },
+  "results": [
+    {
+      "function_name": "stackone_create_connect_session",
+      "queries": [
+        {
+          "query": "create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "create a new session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to create session",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I create session?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Need to create session",
+          "type": "casual",
+          "difficulty": "medium"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone create session",
+          "type": "formal",
+          "difficulty": "easy"
+        }
+      ],
+      "generation_time": "2025-08-21T16:25:41.639Z",
+      "model": "gemini-2.0-flash-exp"
+    }
+  ]
+}

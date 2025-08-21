@@ -1120,7 +1120,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
               type: 'string',
             },
           },
@@ -1629,7 +1629,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
               type: 'string',
             },
           },
@@ -3731,7 +3731,229 @@ export const hrisSpec = {
             description:
               'The document related to the employee with the given identifiers was retrieved.',
             content: {
+              'application/pdf': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/msword': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.ms-excel': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.ms-powerpoint': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/rtf': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'text/plain': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/jpeg': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/png': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/gif': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/tiff': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/bmp': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/heic': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/zip': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/gzip': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/json': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/xml': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'text/csv': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.oasis.opendocument.text': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.oasis.opendocument.spreadsheet': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'audio/mpeg': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'video/mp4': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'video/webm': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'text/rtf': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/x-rar-compressed': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/x-7z-compressed': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'message/rfc822': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.ms-outlook': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
               'application/octet-stream': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'text/html': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'image/webp': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'application/vnd.oasis.opendocument.presentation': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'audio/wav': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'audio/mp4': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'video/avi': {
+                schema: {
+                  type: 'string',
+                  format: 'binary',
+                },
+              },
+              'video/quicktime': {
                 schema: {
                   type: 'string',
                   format: 'binary',
@@ -17014,7 +17236,7 @@ export const hrisSpec = {
         },
       },
       patch: {
-        operationId: 'hris_complete_employee_task',
+        operationId: 'hris_update_employee_task',
         parameters: [
           {
             name: 'x-account-id',
@@ -17055,18 +17277,18 @@ export const hrisSpec = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/CompleteTaskRequestDto',
+                $ref: '#/components/schemas/UpdateTaskRequestDto',
               },
             },
           },
         },
         responses: {
           '200': {
-            description: 'The task has been successfully completed',
+            description: 'The task has been successfully updated.',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/TaskResult',
+                  $ref: '#/components/schemas/UpdateResult',
                 },
               },
             },
@@ -17205,10 +17427,10 @@ export const hrisSpec = {
             basic: [],
           },
         ],
-        summary: 'Complete Employee Task',
+        summary: 'Update Employee Task',
         tags: ['Employees', 'Tasks'],
         'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'complete_employee_task',
+        'x-speakeasy-name-override': 'update_employee_task',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -17817,6 +18039,14 @@ export const hrisSpec = {
       description: 'Rules and policies for employee leave.',
     },
     {
+      name: 'Training',
+      description: 'Training records for employees.',
+    },
+    {
+      name: 'Training Content',
+      description: 'Training content for employees.',
+    },
+    {
       name: 'Work Eligibility',
       description: 'Eligibility status for employment.',
     },
@@ -18070,17 +18300,6 @@ export const hrisSpec = {
           },
         },
         required: ['data'],
-      },
-      CompleteTaskRequestDto: {
-        type: 'object',
-        properties: {
-          comment: {
-            type: 'string',
-            description: 'Comment or note about the task completion',
-            example: 'All required documents have been submitted',
-            nullable: true,
-          },
-        },
       },
       ConfidentialEnumApiModel: {
         type: 'object',
@@ -19441,6 +19660,7 @@ export const hrisSpec = {
             type: 'string',
             description: "Provider's unique identifier of the manager",
             example: 'e3cb75bf-aa84-466e-a6c1-b8322b257a48',
+            deprecated: true,
             nullable: true,
           },
           gender: {
@@ -26481,10 +26701,11 @@ export const hrisSpec = {
         properties: {
           data: {
             nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/Task',
-            },
+            allOf: [
+              {
+                $ref: '#/components/schemas/Task',
+              },
+            ],
           },
           raw: {
             nullable: true,
@@ -27667,6 +27888,28 @@ export const hrisSpec = {
           },
         },
         required: ['statusCode', 'message', 'timestamp'],
+      },
+      UpdateTaskRequestDto: {
+        type: 'object',
+        properties: {
+          comment: {
+            type: 'string',
+            description: 'Comment or note about the task update',
+            example: 'All required documents have been submitted',
+            nullable: true,
+          },
+          status: {
+            default: 'completed',
+            description: 'The status to apply to this Task',
+            example: 'blocked',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TaskStatusEnum',
+              },
+            ],
+          },
+        },
       },
       WorkEligibility: {
         type: 'object',

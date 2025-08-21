@@ -1,0 +1,176 @@
+{
+  "generation_info": {
+    "model": "gpt-4o-mini",
+    "generated_at": "2025-08-21T16:28:04.188Z",
+    "total_functions": 2,
+    "successful_generations": 2,
+    "failed_generations": 0,
+    "limit_filter": 2
+  },
+  "results": [
+    {
+      "function_name": "stackone_create_connect_session",
+      "queries": [
+        {
+          "query": "stackone_create_connect_session API function",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How to create a connect session in stackone?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "POST method for creating a connect session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can I create a connect session with stackone?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What's the way to start a connect session in stackone?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I set up a connect session using stackone?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What steps are needed to create a connect session with the stackone API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can stackone API help in creating a session for data connection?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do businesses use the stackone_create_connect_session function?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Is there a way to initiate a session in stackone?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Create connect session function in stackone API?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Need info on stackone API session creation",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I need to create multiple connect sessions in stackone?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "How to handle errors when creating a connect session in stackone?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I create a connect session without parameters in stackone API?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:27:55.215Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "stackone_authenticate_connect_session",
+      "queries": [
+        {
+          "query": "How to authenticate a connect session with stackone?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the stackone_authenticate_connect_session function?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you explain the stackone connect session authentication?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I authenticate a session in stackone?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What's the easiest way to connect a session with stackone?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you help me with stackone session authentication?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What function do I use for session authentication in stackone?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can stackone's API authenticate a session effectively?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Is there a method for authenticating connect sessions in stackone?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I need to authenticate without parameters in stackone?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I perform a stackone session auth?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can I authenticate a connect session through stackone API?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What are the steps to use stackone_authenticate_connect_session effectively?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "In what scenarios would I need to call the stackone_authenticate_connect_session?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Is it possible to authenticate a connect session without parameters in stackone?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:28:04.187Z",
+      "model": "gpt-4o-mini"
+    }
+  ]
+}

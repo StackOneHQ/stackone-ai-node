@@ -4144,7 +4144,7 @@ export const atsSpec = {
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/UnifiedUploadRequestDto',
+                $ref: '#/components/schemas/AtsDocumentsUploadRequestDto',
               },
             },
           },
@@ -17654,6 +17654,7 @@ export const atsSpec = {
             type: 'string',
             description: "Provider's unique identifier of the location",
             example: 'dd8d41d1-5eb8-4408-9c87-9ba44604eae4',
+            deprecated: true,
             nullable: true,
           },
           location_ids: {
@@ -19031,6 +19032,105 @@ export const atsSpec = {
           },
         },
         required: ['data'],
+      },
+      AtsDocumentsUploadCategoryEnumApiModel: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            description: 'The category name to associate with the file',
+            enum: [
+              'resume',
+              'avatar',
+              'cover_letter',
+              'profile_picture',
+              'policy',
+              'passport',
+              'assessment',
+              'interview_attachment',
+              'take_home_test',
+              'offer_letter',
+              'signed_offer_letter',
+              'national_id',
+              'offer_packet',
+              'other',
+              'unmapped_value',
+              null,
+            ],
+            example: 'resume',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            type: 'string',
+            description:
+              'The provider specific category for associating uploaded files, if provided, the value will be ignored.',
+            example: '550e8400-e29b-41d4-a716-446655440000',
+            nullable: true,
+          },
+        },
+      },
+      AtsDocumentsUploadRequestDto: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+            description: 'The filename of the file to upload',
+            example: 'weather-forecast',
+            nullable: true,
+          },
+          file_format: {
+            description: 'The file format of the file',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/FileFormatEnum',
+              },
+            ],
+          },
+          content: {
+            type: 'string',
+            description: 'The base64 encoded content of the file to upload',
+            example:
+              'VGhpcyBpc24ndCByZWFsbHkgYSBzYW1wbGUgZmlsZSwgYnV0IG5vIG9uZSB3aWxsIGV2ZXIga25vdyE',
+            nullable: true,
+          },
+          category_id: {
+            type: 'string',
+            description: 'The categoryId of the documents',
+            example: '6530',
+            nullable: true,
+          },
+          path: {
+            type: 'string',
+            description: 'The path for the file to be uploaded to',
+            example: '/path/to/file',
+            nullable: true,
+          },
+          confidential: {
+            description: 'The confidentiality level of the file to be uploaded',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ConfidentialEnumApiModel',
+              },
+            ],
+          },
+          category: {
+            description:
+              'The category to be associated with the file to be uploaded. Id will take precedence over name.',
+            example: {
+              name: 'resume',
+              id: '550e8400-e29b-41d4-a716-446655440000',
+            },
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/AtsDocumentsUploadCategoryEnumApiModel',
+              },
+            ],
+          },
+        },
       },
       AtsDocumentTypeEnum: {
         type: 'object',
@@ -25429,7 +25529,17 @@ export const atsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['cancelled', 'completed', 'expired', 'failed', 'passed', 'unmapped_value', null],
+            enum: [
+              'initiated',
+              'in_progress',
+              'cancelled',
+              'completed',
+              'expired',
+              'failed',
+              'passed',
+              'unmapped_value',
+              null,
+            ],
             description: 'The result of the test.',
             example: 'passed',
             'x-speakeasy-unknown-values': 'allow',

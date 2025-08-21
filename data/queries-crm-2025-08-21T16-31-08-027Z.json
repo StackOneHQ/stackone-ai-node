@@ -1,0 +1,833 @@
+{
+  "generation_info": {
+    "model": "gpt-4o-mini",
+    "generated_at": "2025-08-21T16:31:08.027Z",
+    "total_functions": 10,
+    "successful_generations": 10,
+    "failed_generations": 0,
+    "category_filter": "crm",
+    "limit_filter": null
+  },
+  "results": [
+    {
+      "function_name": "crm_list_contacts",
+      "queries": [
+        {
+          "query": "How can I list contacts using the crm_list_contacts API?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the method to get a list of contacts in CRM?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Show me how to retrieve contacts with the crm_list_contacts function.",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you help me find contacts in CRM?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to see my CRM contacts. How do I do that?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What’s the easiest way to list all my contacts?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I need to fetch contacts for a sales report. What API method should I use?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I get a list of customer contacts from the CRM system?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can you provide me with the API details for listing contacts in CRM?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What API can I use to retrieve contacts?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Show me the function to list contacts, if it exists.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can I list contacts with specific fields from the CRM?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "I need to list contacts that were updated after a certain date using the API. How can I do that?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I filter the contacts retrieved by the crm_list_contacts function based on certain criteria?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What parameters do I need to pass to get paginated results when listing contacts?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:29:20.839Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_create_contact",
+      "queries": [
+        {
+          "query": "How to create a contact using crm_create_contact?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the API function for creating a contact in CRM?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you show me the method to create a contact via API?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I need to make a new contact. How can I do that?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What's the easiest way to add a contact in CRM?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I create a new contact in CRM using the API?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "In our CRM system, what API do we use to create new contacts?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What are the necessary parameters to create a contact in our CRM API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can you explain how to use the crm_create_contact function in our integration?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "I want to add a contact, but I'm not sure of the API endpoint.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What function do I need to use if I want to create a new contact?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Where can I find the details for creating a contact with the CRM API?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can I create multiple contacts at once using this API?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What happens if I try to create a contact without the required parameters?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Is there a way to handle errors when creating a contact using crm_create_contact?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:29:35.275Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_get_contact",
+      "queries": [
+        {
+          "query": "How do I get a contact using the crm_get_contact function?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the method to retrieve a contact?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you show me how to use the crm_get_contact API?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How can I fetch a contact info from the CRM?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What do I need to pull up a contact in the system?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Is there an easy way to get contact details?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "We need to retrieve contact details for a client, what are the steps?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can you explain how to access a contact in the CRM system?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What API call should I use to get a specific contact's information?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I retrieve a contact? I know the ID but not much else.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "I want to get a contact but I don't remember the parameters needed.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I want to fetch a contact but I'm unsure about the account ID?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "If I have an account ID and contact ID, how do I retrieve the contact data considering optional parameters?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I get raw contact details using the crm_get_contact API while specifying certain fields?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What are the use cases for the crm_get_contact function in a high-load environment?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:29:46.490Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_update_contact",
+      "queries": [
+        {
+          "query": "How do I update a contact in the CRM?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the API function for updating contacts?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Please provide details on the contact update method.",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How can I change a contact's details using the API?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Is there a way to update a contact in my CRM system?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can I patch a contact's info through the API?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What are the steps to update a contact in our CRM platform?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I programmatically update a contact's information?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What parameters are needed to update a contact in CRM?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can you tell me how to update a contact using the CRM API?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What API function do I use to update contacts?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "I'm looking for a way to modify contact details in the CRM API.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I need to update a contact but don’t have the full ID?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I perform a patch request to update multiple contacts at once?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What happens if I send an invalid x-account-id when updating a contact?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:29:58.268Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_list_accounts",
+      "queries": [
+        {
+          "query": "What is the function to list accounts in the CRM?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I get a list of accounts from the CRM?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you show me the API endpoint for listing accounts?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I need to list some accounts. What’s the API call?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How can I pull up a list of accounts?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What’s the easiest way to see all accounts?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "In a CRM context, how do I retrieve account data?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What API method can I use to list accounts in our CRM system?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Looking for the CRM API to generate a list of accounts for reporting.",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What's the API call for accounts? I forgot the name.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "I need the function to get account lists, but I don’t remember the details.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can someone point me to the right API for accounts? I'm not sure.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can I list accounts that were updated after a certain date using the API?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What’s the process to filter accounts based on certain criteria in the CRM API?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "If I want to paginate through account listings in the API, how do I do that?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:30:08.918Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_get_account",
+      "queries": [
+        {
+          "query": "How can I get account information using crm_get_account?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the method to retrieve account details?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you provide the API for fetching account data?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I need to get account info; how do I do that?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What's the easiest way to fetch an account from CRM?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I grab account details from the CRM API?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What API call should I use to retrieve customer account info?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Is there a specific endpoint for accessing account details in CRM?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can I access account data for client management?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What do I need to fetch account data from the API?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can I get account details without all parameters?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I only have an account ID, can I still retrieve the account?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I handle proxy settings while getting account info?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What happens if I pass invalid fields when calling crm_get_account?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I retrieve account data with just the raw parameter set to true?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:30:21.340Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_list_lists",
+      "queries": [
+        {
+          "query": "How can I retrieve all lists using the crm API?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the method to get all lists in the CRM?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "List all CRM lists with the required parameters.",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can I get all the lists from the CRM?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I pull up all lists in my CRM?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Show me how to list out all CRM lists.",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What API call do I need to make to access all lists in CRM for my account?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can I integrate the crm_list_lists function into our workflow to manage CRM lists?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Is there a way to filter the lists I get from the CRM API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I get lists from the CRM without specifying all parameters?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What parameters do I need to get lists using the CRM API?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can you provide a way to retrieve lists in CRM if I don't have the account ID?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What are the possible ways to retrieve all lists from the CRM API with pagination?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "How do I handle errors when trying to get all lists through the CRM API?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I use the crm_list_lists function to get only updated lists after a certain date?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:30:34.138Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_get_list",
+      "queries": [
+        {
+          "query": "What is the crm_get_list API function?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I use the crm_get_list function?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you provide details about the crm_get_list method?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What does the crm_get_list do?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Hey, how can I get a list using crm_get_list?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can I find out what the crm_get_list function does?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How can I retrieve a list from the CRM using crm_get_list?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What parameters do I need for the crm_get_list API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Is it possible to get a list of entities with crm_get_list?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "I need to know more about an API for getting lists.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Where can I find the documentation for crm_get_list?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What are the endpoint details for getting lists in the CRM?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can crm_get_list handle multiple account IDs at once?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "What happens if I don't provide the required parameters for crm_get_list?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I customize the fields returned by crm_get_list?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:30:47.961Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_list_contact_custom_field_definitions",
+      "queries": [
+        {
+          "query": "How can I list contact custom field definitions?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the API call to get custom field definitions for contacts?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Show me the contact custom field definitions via the API.",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Hey, how do I get a list of contact custom fields?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What's the way to fetch contact custom fields using the API?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you tell me how to retrieve contact custom field definitions?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What API methods are available for listing contact custom field definitions in CRM?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can our team access contact custom field definitions through the API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "In what scenarios would I need to list contact custom field definitions using the API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "List custom field definitions for contacts.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "API for contact fields listing?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Get definitions for custom fields related to contacts.",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I want to filter the contact custom field definitions by an account ID?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Is there a way to handle pagination when listing contact custom field definitions?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can I specify which fields to return when fetching contact custom field definitions?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:30:56.504Z",
+      "model": "gpt-4o-mini"
+    },
+    {
+      "function_name": "crm_get_contact_custom_field_definition",
+      "queries": [
+        {
+          "query": "How can I get contact custom field definitions?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What is the method to retrieve contact custom field definition?",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Show me how to use crm_get_contact_custom_field_definition.",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Can you tell me how to fetch a contact’s custom field definition?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I get a custom field definition for contacts?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "What's the way to pull up custom fields for contacts?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "In our CRM, how do we access custom field definitions for contacts?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What API call do I need to make to get contact custom fields?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How can our team retrieve definitions for contact custom fields using the API?",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "How do I get custom field definition by ID?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What is the endpoint to retrieve contact fields?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Can I fetch custom fields without specifying account ID?",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "What if I want to get contact custom field definitions after a certain date?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "How to handle pagination while retrieving contact custom field definitions?",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "Can the raw parameter affect the response when getting custom field definitions?",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-21T16:31:08.027Z",
+      "model": "gpt-4o-mini"
+    }
+  ]
+}
