@@ -10,9 +10,9 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { generateText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-// Note: Add these imports when the packages are installed
+import { ollama } from 'ollama-ai-provider';
+// Note: Add this import when the package is installed
 // import { google } from '@ai-sdk/google';
-// import { ollama } from 'ollama-ai-provider';
 
 const DATA_DIR = join(process.cwd(), 'data');
 const CATALOG_PATH = join(DATA_DIR, 'functions-catalog.json');
@@ -80,9 +80,8 @@ const getModelProvider = (modelName: string) => {
   } else if (modelName.startsWith('gemini-')) {
     // return google(modelName); // Uncomment when @ai-sdk/google is installed
     throw new Error('Google Gemini support requires @ai-sdk/google package. Install with: bun add @ai-sdk/google');
-  } else if (modelName.startsWith('llama') || modelName.includes('ollama')) {
-    // return ollama(modelName); // Uncomment when ollama-ai-provider is installed  
-    throw new Error('Ollama support requires ollama-ai-provider package. Install with: bun add ollama-ai-provider');
+  } else if (modelName.startsWith('llama') || modelName.includes('ollama') || modelName.startsWith('gemma')) {
+    return ollama(modelName);
   } else {
     // Default to OpenAI
     return openai(modelName);
