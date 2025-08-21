@@ -1,0 +1,2837 @@
+[
+  {
+    "id": "tc_000001",
+    "query": "create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000002",
+    "query": "create a new session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000003",
+    "query": "I want to create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000004",
+    "query": "How do I create session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000005",
+    "query": "Need to create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "medium",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000006",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000007",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000008",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000009",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000010",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000011",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000012",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000013",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000014",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000015",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:24:32.271Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000016",
+    "query": "Create a Connect Session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000017",
+    "query": "Initiate a Connect Session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000018",
+    "query": "Generate a new Connect Session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000019",
+    "query": "I need to start a Connect Session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000020",
+    "query": "Let's make a Connect Session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000021",
+    "query": "Create a session in StackOne",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000022",
+    "query": "We need to establish a Connect Session for the team",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000023",
+    "query": "How do I start a new Connect Session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000024",
+    "query": "I want to build a Connect Session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000025",
+    "query": "Can I create a Connect Session quickly?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000026",
+    "query": "Need to establish a session with user X",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000027",
+    "query": "StackOne session creation API",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000028",
+    "query": "How to trigger a Connect Session based on event Y?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000029",
+    "query": "Create Connect Session with specific timeout value",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000030",
+    "query": "API call to generate a session, ensuring idempotency and retry logic is implemented",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000031",
+    "query": "Implement a Connect Session creation workflow, handling potential network errors and session expiry gracefully",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gemma3:4b",
+    "generation_time": "2025-08-21T16:33:09.317Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000032",
+    "query": "How can I list contacts using the crm_list_contacts API?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000033",
+    "query": "What is the method to get a list of contacts in CRM?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000034",
+    "query": "Show me how to retrieve contacts with the crm_list_contacts function.",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000035",
+    "query": "Can you help me find contacts in CRM?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000036",
+    "query": "I want to see my CRM contacts. How do I do that?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000037",
+    "query": "What’s the easiest way to list all my contacts?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000038",
+    "query": "I need to fetch contacts for a sales report. What API method should I use?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000039",
+    "query": "How do I get a list of customer contacts from the CRM system?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000040",
+    "query": "Can you provide me with the API details for listing contacts in CRM?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000041",
+    "query": "What API can I use to retrieve contacts?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000042",
+    "query": "Show me the function to list contacts, if it exists.",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000043",
+    "query": "How can I list contacts with specific fields from the CRM?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000044",
+    "query": "I need to list contacts that were updated after a certain date using the API. How can I do that?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000045",
+    "query": "Can I filter the contacts retrieved by the crm_list_contacts function based on certain criteria?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000046",
+    "query": "What parameters do I need to pass to get paginated results when listing contacts?",
+    "expected_function": "crm_list_contacts",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:20.839Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "contacts",
+      "function_complexity": 15
+    }
+  },
+  {
+    "id": "tc_000047",
+    "query": "How to create a contact using crm_create_contact?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000048",
+    "query": "What is the API function for creating a contact in CRM?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000049",
+    "query": "Can you show me the method to create a contact via API?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000050",
+    "query": "I need to make a new contact. How can I do that?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000051",
+    "query": "What's the easiest way to add a contact in CRM?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000052",
+    "query": "How do I create a new contact in CRM using the API?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000053",
+    "query": "In our CRM system, what API do we use to create new contacts?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000054",
+    "query": "What are the necessary parameters to create a contact in our CRM API?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000055",
+    "query": "Can you explain how to use the crm_create_contact function in our integration?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000056",
+    "query": "I want to add a contact, but I'm not sure of the API endpoint.",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000057",
+    "query": "What function do I need to use if I want to create a new contact?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000058",
+    "query": "Where can I find the details for creating a contact with the CRM API?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000059",
+    "query": "How can I create multiple contacts at once using this API?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000060",
+    "query": "What happens if I try to create a contact without the required parameters?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000061",
+    "query": "Is there a way to handle errors when creating a contact using crm_create_contact?",
+    "expected_function": "crm_create_contact",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:35.275Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "contact",
+      "function_complexity": 2
+    }
+  },
+  {
+    "id": "tc_000062",
+    "query": "How do I get a contact using the crm_get_contact function?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000063",
+    "query": "What is the method to retrieve a contact?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000064",
+    "query": "Can you show me how to use the crm_get_contact API?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000065",
+    "query": "How can I fetch a contact info from the CRM?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000066",
+    "query": "What do I need to pull up a contact in the system?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000067",
+    "query": "Is there an easy way to get contact details?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000068",
+    "query": "We need to retrieve contact details for a client, what are the steps?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000069",
+    "query": "Can you explain how to access a contact in the CRM system?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000070",
+    "query": "What API call should I use to get a specific contact's information?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000071",
+    "query": "How do I retrieve a contact? I know the ID but not much else.",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000072",
+    "query": "I want to get a contact but I don't remember the parameters needed.",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000073",
+    "query": "What if I want to fetch a contact but I'm unsure about the account ID?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000074",
+    "query": "If I have an account ID and contact ID, how do I retrieve the contact data considering optional parameters?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000075",
+    "query": "Can I get raw contact details using the crm_get_contact API while specifying certain fields?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000076",
+    "query": "What are the use cases for the crm_get_contact function in a high-load environment?",
+    "expected_function": "crm_get_contact",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:29:46.490Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "contact",
+      "function_complexity": 10
+    }
+  },
+  {
+    "id": "tc_000092",
+    "query": "What is the function to list accounts in the CRM?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000093",
+    "query": "How do I get a list of accounts from the CRM?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000094",
+    "query": "Can you show me the API endpoint for listing accounts?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000095",
+    "query": "I need to list some accounts. What’s the API call?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000096",
+    "query": "How can I pull up a list of accounts?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000097",
+    "query": "What’s the easiest way to see all accounts?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000098",
+    "query": "In a CRM context, how do I retrieve account data?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000099",
+    "query": "What API method can I use to list accounts in our CRM system?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000100",
+    "query": "Looking for the CRM API to generate a list of accounts for reporting.",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000101",
+    "query": "What's the API call for accounts? I forgot the name.",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000102",
+    "query": "I need the function to get account lists, but I don’t remember the details.",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000103",
+    "query": "Can someone point me to the right API for accounts? I'm not sure.",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000104",
+    "query": "How can I list accounts that were updated after a certain date using the API?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000105",
+    "query": "What’s the process to filter accounts based on certain criteria in the CRM API?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000106",
+    "query": "If I want to paginate through account listings in the API, how do I do that?",
+    "expected_function": "crm_list_accounts",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:08.918Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "accounts",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000122",
+    "query": "How can I retrieve all lists using the crm API?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000123",
+    "query": "What is the method to get all lists in the CRM?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000124",
+    "query": "List all CRM lists with the required parameters.",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000125",
+    "query": "Can I get all the lists from the CRM?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000126",
+    "query": "How do I pull up all lists in my CRM?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000127",
+    "query": "Show me how to list out all CRM lists.",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000128",
+    "query": "What API call do I need to make to access all lists in CRM for my account?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000129",
+    "query": "How can I integrate the crm_list_lists function into our workflow to manage CRM lists?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000130",
+    "query": "Is there a way to filter the lists I get from the CRM API?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000131",
+    "query": "How do I get lists from the CRM without specifying all parameters?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000132",
+    "query": "What parameters do I need to get lists using the CRM API?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000133",
+    "query": "Can you provide a way to retrieve lists in CRM if I don't have the account ID?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000134",
+    "query": "What are the possible ways to retrieve all lists from the CRM API with pagination?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000135",
+    "query": "How do I handle errors when trying to get all lists through the CRM API?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000136",
+    "query": "Can I use the crm_list_lists function to get only updated lists after a certain date?",
+    "expected_function": "crm_list_lists",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:34.138Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "lists",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000152",
+    "query": "How can I list contact custom field definitions?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000153",
+    "query": "What is the API call to get custom field definitions for contacts?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000154",
+    "query": "Show me the contact custom field definitions via the API.",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000155",
+    "query": "Hey, how do I get a list of contact custom fields?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000156",
+    "query": "What's the way to fetch contact custom fields using the API?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000157",
+    "query": "Can you tell me how to retrieve contact custom field definitions?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000158",
+    "query": "What API methods are available for listing contact custom field definitions in CRM?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000159",
+    "query": "How can our team access contact custom field definitions through the API?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000160",
+    "query": "In what scenarios would I need to list contact custom field definitions using the API?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000161",
+    "query": "List custom field definitions for contacts.",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000162",
+    "query": "API for contact fields listing?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000163",
+    "query": "Get definitions for custom fields related to contacts.",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000164",
+    "query": "What if I want to filter the contact custom field definitions by an account ID?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000165",
+    "query": "Is there a way to handle pagination when listing contact custom field definitions?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000166",
+    "query": "Can I specify which fields to return when fetching contact custom field definitions?",
+    "expected_function": "crm_list_contact_custom_field_definitions",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:56.504Z",
+    "metadata": {
+      "function_action": "list",
+      "function_entity": "definitions",
+      "function_complexity": 14
+    }
+  },
+  {
+    "id": "tc_000167",
+    "query": "How can I get contact custom field definitions?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000168",
+    "query": "What is the method to retrieve contact custom field definition?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000169",
+    "query": "Show me how to use crm_get_contact_custom_field_definition.",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000170",
+    "query": "Can you tell me how to fetch a contact’s custom field definition?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000171",
+    "query": "How do I get a custom field definition for contacts?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000172",
+    "query": "What's the way to pull up custom fields for contacts?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000173",
+    "query": "In our CRM, how do we access custom field definitions for contacts?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000174",
+    "query": "What API call do I need to make to get contact custom fields?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000175",
+    "query": "How can our team retrieve definitions for contact custom fields using the API?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000176",
+    "query": "How do I get custom field definition by ID?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000177",
+    "query": "What is the endpoint to retrieve contact fields?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000178",
+    "query": "Can I fetch custom fields without specifying account ID?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000179",
+    "query": "What if I want to get contact custom field definitions after a certain date?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000180",
+    "query": "How to handle pagination while retrieving contact custom field definitions?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000181",
+    "query": "Can the raw parameter affect the response when getting custom field definitions?",
+    "expected_function": "crm_get_contact_custom_field_definition",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:31:08.027Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "definition",
+      "function_complexity": 16
+    }
+  },
+  {
+    "id": "tc_000182",
+    "query": "create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000183",
+    "query": "create a new session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000184",
+    "query": "I want to create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000185",
+    "query": "How do I create session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000186",
+    "query": "Need to create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "medium",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000187",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000188",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000189",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000190",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000191",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000192",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000193",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000194",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000195",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000196",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:58.570Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000197",
+    "query": "stackone_create_connect_session API function",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000198",
+    "query": "How to create a connect session in stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000199",
+    "query": "POST method for creating a connect session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000200",
+    "query": "Can I create a connect session with stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000201",
+    "query": "What's the way to start a connect session in stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000202",
+    "query": "How do I set up a connect session using stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000203",
+    "query": "What steps are needed to create a connect session with the stackone API?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000204",
+    "query": "Can stackone API help in creating a session for data connection?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000205",
+    "query": "How do businesses use the stackone_create_connect_session function?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000206",
+    "query": "Is there a way to initiate a session in stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000207",
+    "query": "Create connect session function in stackone API?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000208",
+    "query": "Need info on stackone API session creation",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000209",
+    "query": "What if I need to create multiple connect sessions in stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000210",
+    "query": "How to handle errors when creating a connect session in stackone?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000211",
+    "query": "Can I create a connect session without parameters in stackone API?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:27:55.215Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000227",
+    "query": "what is the name of the stackone_create_connect_session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000228",
+    "query": "how can i create a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000229",
+    "query": "what is the purpose of a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000230",
+    "query": "what are the options for creating a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000231",
+    "query": "how do I create a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000232",
+    "query": "what is the best way to create a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000233",
+    "query": "what is the format of a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000234",
+    "query": "what is the best way to create a connect session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:35.902Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000243",
+    "query": "create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000244",
+    "query": "create a new session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000245",
+    "query": "I want to create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000246",
+    "query": "How do I create session?",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000247",
+    "query": "Need to create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "medium",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000248",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000249",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000250",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000251",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000252",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000253",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000254",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000255",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000256",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000257",
+    "query": "stackone create session",
+    "expected_function": "stackone_create_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gemini-2.0-flash-exp",
+    "generation_time": "2025-08-21T16:25:41.639Z",
+    "metadata": {
+      "function_action": "create",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  }
+]

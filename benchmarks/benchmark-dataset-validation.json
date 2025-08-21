@@ -1,0 +1,572 @@
+[
+  {
+    "id": "tc_000137",
+    "query": "What is the crm_get_list API function?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000138",
+    "query": "How do I use the crm_get_list function?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000139",
+    "query": "Can you provide details about the crm_get_list method?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000140",
+    "query": "What does the crm_get_list do?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000141",
+    "query": "Hey, how can I get a list using crm_get_list?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000142",
+    "query": "Can I find out what the crm_get_list function does?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000143",
+    "query": "How can I retrieve a list from the CRM using crm_get_list?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000144",
+    "query": "What parameters do I need for the crm_get_list API?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000145",
+    "query": "Is it possible to get a list of entities with crm_get_list?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000146",
+    "query": "I need to know more about an API for getting lists.",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000147",
+    "query": "Where can I find the documentation for crm_get_list?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000148",
+    "query": "What are the endpoint details for getting lists in the CRM?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000149",
+    "query": "Can crm_get_list handle multiple account IDs at once?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000150",
+    "query": "What happens if I don't provide the required parameters for crm_get_list?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000151",
+    "query": "Can I customize the fields returned by crm_get_list?",
+    "expected_function": "crm_get_list",
+    "function_category": "crm",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:30:47.961Z",
+    "metadata": {
+      "function_action": "get",
+      "function_entity": "unknown",
+      "function_complexity": 9
+    }
+  },
+  {
+    "id": "tc_000212",
+    "query": "How to authenticate a connect session with stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000213",
+    "query": "What is the stackone_authenticate_connect_session function?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000214",
+    "query": "Can you explain the stackone connect session authentication?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000215",
+    "query": "How do I authenticate a session in stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000216",
+    "query": "What's the easiest way to connect a session with stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000217",
+    "query": "Can you help me with stackone session authentication?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "casual",
+    "difficulty": "easy",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000218",
+    "query": "What function do I use for session authentication in stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000219",
+    "query": "How can stackone's API authenticate a session effectively?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000220",
+    "query": "Is there a method for authenticating connect sessions in stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "business",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000221",
+    "query": "What if I need to authenticate without parameters in stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000222",
+    "query": "How do I perform a stackone session auth?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000223",
+    "query": "Can I authenticate a connect session through stackone API?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "ambiguous",
+    "difficulty": "medium",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000224",
+    "query": "What are the steps to use stackone_authenticate_connect_session effectively?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000225",
+    "query": "In what scenarios would I need to call the stackone_authenticate_connect_session?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000226",
+    "query": "Is it possible to authenticate a connect session without parameters in stackone?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "complex",
+    "difficulty": "hard",
+    "generated_by": "gpt-4o-mini",
+    "generation_time": "2025-08-21T16:28:04.187Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000235",
+    "query": "how to authenticate connect session",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000236",
+    "query": "what is the authentication method?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000237",
+    "query": "how do I authenticate connect session?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000238",
+    "query": "what is the authentication process?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000239",
+    "query": "how to connect to the session?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000240",
+    "query": "what is the authentication process for a session?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000241",
+    "query": "how do I connect to the session?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  },
+  {
+    "id": "tc_000242",
+    "query": "what is the authentication process for a session?",
+    "expected_function": "stackone_authenticate_connect_session",
+    "function_category": "stackone",
+    "query_type": "formal|casual|business|ambiguous|complex",
+    "difficulty": "easy|medium|hard",
+    "generated_by": "gemma3:270m",
+    "generation_time": "2025-08-21T16:32:37.921Z",
+    "metadata": {
+      "function_action": "unknown",
+      "function_entity": "session",
+      "function_complexity": 0
+    }
+  }
+]

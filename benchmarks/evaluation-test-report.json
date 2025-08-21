@@ -1,0 +1,536 @@
+{
+  "evaluation_info": {
+    "dataset_version": "1.0.0",
+    "evaluated_at": "2025-08-21T16:37:10.805Z",
+    "split_used": "test",
+    "total_test_cases": 30,
+    "strategy": "meta-tools-orama-bm25"
+  },
+  "metrics": {
+    "total_cases": 30,
+    "successful_predictions": 30,
+    "failed_predictions": 0,
+    "accuracy": 0.26666666666666666,
+    "top_3_accuracy": 0.9666666666666667,
+    "top_5_accuracy": 1,
+    "mrr": 0.7523809523809524,
+    "ndcg_at_5": 0.26666666666666666,
+    "avg_execution_time_ms": 0.2,
+    "by_category": {
+      "crm": {
+        "total": 30,
+        "correct": 8,
+        "accuracy": 0.26666666666666666
+      }
+    },
+    "by_difficulty": {
+      "easy": {
+        "total": 12,
+        "correct": 4,
+        "accuracy": 0.3333333333333333
+      },
+      "medium": {
+        "total": 12,
+        "correct": 4,
+        "accuracy": 0.3333333333333333
+      },
+      "hard": {
+        "total": 6,
+        "correct": 0,
+        "accuracy": 0
+      }
+    },
+    "by_query_type": {
+      "formal": {
+        "total": 6,
+        "correct": 3,
+        "accuracy": 0.5
+      },
+      "casual": {
+        "total": 6,
+        "correct": 1,
+        "accuracy": 0.16666666666666666
+      },
+      "business": {
+        "total": 6,
+        "correct": 2,
+        "accuracy": 0.3333333333333333
+      },
+      "ambiguous": {
+        "total": 6,
+        "correct": 2,
+        "accuracy": 0.3333333333333333
+      },
+      "complex": {
+        "total": 6,
+        "correct": 0,
+        "accuracy": 0
+      }
+    },
+    "by_model": {
+      "gpt-4o-mini": {
+        "total": 30,
+        "correct": 8,
+        "accuracy": 0.26666666666666666
+      }
+    }
+  },
+  "results": [
+    {
+      "test_case_id": "tc_000077",
+      "query": "How do I update a contact in the CRM?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 21.974036992351653,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 2
+    },
+    {
+      "test_case_id": "tc_000078",
+      "query": "What is the API function for updating contacts?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 7.266153617510602,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000079",
+      "query": "Please provide details on the contact update method.",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 7.266153617510602,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000080",
+      "query": "How can I change a contact's details using the API?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "ats_list_application_changes",
+      "predicted_score": 17.554832015444852,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000081",
+      "query": "Is there a way to update a contact in my CRM system?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 21.974036992351653,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000082",
+      "query": "Can I patch a contact's info through the API?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "ats_list_applications_scheduled_interviews",
+      "predicted_score": 14.586011858082209,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 1
+    },
+    {
+      "test_case_id": "tc_000083",
+      "query": "What are the steps to update a contact in our CRM platform?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 21.974036992351653,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000084",
+      "query": "How do I programmatically update a contact's information?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "ats_download_application_document",
+      "predicted_score": 21.499614696072605,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000085",
+      "query": "What parameters are needed to update a contact in CRM?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 21.974036992351653,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000086",
+      "query": "Can you tell me how to update a contact using the CRM API?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 21.974036992351653,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000087",
+      "query": "What API function do I use to update contacts?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "iam_update_user",
+      "predicted_score": 20.627825524611413,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000088",
+      "query": "I'm looking for a way to modify contact details in the CRM API.",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "crm_update_contact",
+      "predicted_score": 18.40572914443266,
+      "predicted_rank": 1,
+      "is_correct": true,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000089",
+      "query": "What if I need to update a contact but don’t have the full ID?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "ticketing_update_ticket",
+      "predicted_score": 19.278984079155986,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 1
+    },
+    {
+      "test_case_id": "tc_000090",
+      "query": "Can I perform a patch request to update multiple contacts at once?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "ats_order_assessments_request",
+      "predicted_score": 27.895124650623465,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000091",
+      "query": "What happens if I send an invalid x-account-id when updating a contact?",
+      "expected_function": "crm_update_contact",
+      "predicted_function": "ats_update_assessments_result",
+      "predicted_score": 17.248258109302544,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 1
+    },
+    {
+      "test_case_id": "tc_000107",
+      "query": "How can I get account information using crm_get_account?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_get_user",
+      "predicted_score": 17.266591710542293,
+      "predicted_rank": 5,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000108",
+      "query": "What is the method to retrieve account details?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "crm_list_accounts",
+      "predicted_score": 5.484254870976242,
+      "predicted_rank": 2,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000109",
+      "query": "Can you provide the API for fetching account data?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "crm_list_accounts",
+      "predicted_score": 5.484254870976242,
+      "predicted_rank": 2,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000110",
+      "query": "I need to get account info; how do I do that?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "documents_download_file",
+      "predicted_score": 17.660730032671758,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000111",
+      "query": "What's the easiest way to fetch an account from CRM?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "crm_list_accounts",
+      "predicted_score": 17.20599164972934,
+      "predicted_rank": 2,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000112",
+      "query": "How do I grab account details from the CRM API?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "documents_download_file",
+      "predicted_score": 17.660730032671758,
+      "predicted_rank": 3,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000113",
+      "query": "What API call should I use to retrieve customer account info?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_list_users",
+      "predicted_score": 15.745173960374736,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000114",
+      "query": "Is there a specific endpoint for accessing account details in CRM?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "crm_list_accounts",
+      "predicted_score": 22.690246520705582,
+      "predicted_rank": 2,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000115",
+      "query": "How can I access account data for client management?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_list_users",
+      "predicted_score": 11.721736778753101,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000116",
+      "query": "What do I need to fetch account data from the API?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "documents_download_file",
+      "predicted_score": 17.660730032671758,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000117",
+      "query": "Can I get account details without all parameters?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_get_user",
+      "predicted_score": 13.243154528920657,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000118",
+      "query": "What if I only have an account ID, can I still retrieve the account?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_list_users",
+      "predicted_score": 11.721736778753101,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 1
+    },
+    {
+      "test_case_id": "tc_000119",
+      "query": "How do I handle proxy settings while getting account info?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "documents_download_file",
+      "predicted_score": 17.660730032671758,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000120",
+      "query": "What happens if I pass invalid fields when calling crm_get_account?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_list_users",
+      "predicted_score": 11.721736778753101,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    },
+    {
+      "test_case_id": "tc_000121",
+      "query": "Can I retrieve account data with just the raw parameter set to true?",
+      "expected_function": "crm_get_account",
+      "predicted_function": "iam_list_users",
+      "predicted_score": 11.721736778753101,
+      "predicted_rank": -1,
+      "is_correct": false,
+      "execution_time_ms": 0
+    }
+  ],
+  "failure_analysis": [
+    {
+      "query": "How can I change a contact's details using the API?",
+      "expected": "crm_update_contact",
+      "predicted": "ats_list_application_changes",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "Can I patch a contact's info through the API?",
+      "expected": "crm_update_contact",
+      "predicted": "ats_list_applications_scheduled_interviews",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "How do I programmatically update a contact's information?",
+      "expected": "crm_update_contact",
+      "predicted": "ats_download_application_document",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "What API function do I use to update contacts?",
+      "expected": "crm_update_contact",
+      "predicted": "iam_update_user",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "What if I need to update a contact but don’t have the full ID?",
+      "expected": "crm_update_contact",
+      "predicted": "ticketing_update_ticket",
+      "category": "crm",
+      "difficulty": "hard"
+    },
+    {
+      "query": "Can I perform a patch request to update multiple contacts at once?",
+      "expected": "crm_update_contact",
+      "predicted": "ats_order_assessments_request",
+      "category": "crm",
+      "difficulty": "hard"
+    },
+    {
+      "query": "What happens if I send an invalid x-account-id when updating a contact?",
+      "expected": "crm_update_contact",
+      "predicted": "ats_update_assessments_result",
+      "category": "crm",
+      "difficulty": "hard"
+    },
+    {
+      "query": "How can I get account information using crm_get_account?",
+      "expected": "crm_get_account",
+      "predicted": "iam_get_user",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "What is the method to retrieve account details?",
+      "expected": "crm_get_account",
+      "predicted": "crm_list_accounts",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "Can you provide the API for fetching account data?",
+      "expected": "crm_get_account",
+      "predicted": "crm_list_accounts",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "I need to get account info; how do I do that?",
+      "expected": "crm_get_account",
+      "predicted": "documents_download_file",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "What's the easiest way to fetch an account from CRM?",
+      "expected": "crm_get_account",
+      "predicted": "crm_list_accounts",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "How do I grab account details from the CRM API?",
+      "expected": "crm_get_account",
+      "predicted": "documents_download_file",
+      "category": "crm",
+      "difficulty": "easy"
+    },
+    {
+      "query": "What API call should I use to retrieve customer account info?",
+      "expected": "crm_get_account",
+      "predicted": "iam_list_users",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "Is there a specific endpoint for accessing account details in CRM?",
+      "expected": "crm_get_account",
+      "predicted": "crm_list_accounts",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "How can I access account data for client management?",
+      "expected": "crm_get_account",
+      "predicted": "iam_list_users",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "What do I need to fetch account data from the API?",
+      "expected": "crm_get_account",
+      "predicted": "documents_download_file",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "Can I get account details without all parameters?",
+      "expected": "crm_get_account",
+      "predicted": "iam_get_user",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "What if I only have an account ID, can I still retrieve the account?",
+      "expected": "crm_get_account",
+      "predicted": "iam_list_users",
+      "category": "crm",
+      "difficulty": "medium"
+    },
+    {
+      "query": "How do I handle proxy settings while getting account info?",
+      "expected": "crm_get_account",
+      "predicted": "documents_download_file",
+      "category": "crm",
+      "difficulty": "hard"
+    },
+    {
+      "query": "What happens if I pass invalid fields when calling crm_get_account?",
+      "expected": "crm_get_account",
+      "predicted": "iam_list_users",
+      "category": "crm",
+      "difficulty": "hard"
+    },
+    {
+      "query": "Can I retrieve account data with just the raw parameter set to true?",
+      "expected": "crm_get_account",
+      "predicted": "iam_list_users",
+      "category": "crm",
+      "difficulty": "hard"
+    }
+  ]
+}
