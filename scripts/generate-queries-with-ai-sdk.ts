@@ -93,7 +93,7 @@ const getModelProvider = (modelName: string) => {
  */
 const generateQueriesForFunction = async (
   func: ExtractedFunction,
-  model: string = 'gpt-4o-mini'
+  model: string = 'gpt-5-mini'
 ): Promise<GeneratedQuery[]> => {
   const paramInfo = func.parameters.length > 0 
     ? func.parameters.map(p => `${p.name} (${p.type}${p.required ? ', required' : ', optional'})`).join(', ')
@@ -131,11 +131,13 @@ Important: Respond only with valid JSON, no other text.`;
   try {
     console.log(`Generating queries for ${func.name}...`);
     
-    const result = await generateText({
-      model: getModelProvider(model),
-      prompt,
-      temperature: 0.8, // Add some creativity
-    });
+    // gpt-5-* 系は temperature の明示指定が未対応なため条件分岐
+    const isGpt5 = model.startsWith('gpt-5-');
+    const genArgs = isGpt5
+      ? { model: getModelProvider(model), prompt }
+      : { model: getModelProvider(model), prompt, temperature: 0.8 as const };
+
+    const result = await generateText(genArgs as any);
     
     // Parse the JSON response
     const cleanResult = result.text.trim();
@@ -219,7 +221,7 @@ const generateFallbackQueries = (func: ExtractedFunction): GeneratedQuery[] => {
  */
 const generateQueriesForFunctions = async (
   functions: ExtractedFunction[],
-  model: string = 'gpt-4o-mini',
+  model: string = 'gpt-5-mini',
   delay: number = 1000 // Delay between requests to avoid rate limiting
 ): Promise<QueryGenerationResult[]> => {
   const results: QueryGenerationResult[] = [];
@@ -257,7 +259,7 @@ const generateQueriesForFunctions = async (
  */
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);
-  const model = args.find(arg => arg.startsWith('--model='))?.split('=')[1] || 'gpt-4o-mini';
+  const model = args.find(arg => arg.startsWith('--model='))?.split('=')[1] || 'gpt-5-mini';
   const limit = args.find(arg => arg.startsWith('--limit='))?.split('=')[1];
   const category = args.find(arg => arg.startsWith('--category='))?.split('=')[1];
   const delay = parseInt(args.find(arg => arg.startsWith('--delay='))?.split('=')[1] || '1000');

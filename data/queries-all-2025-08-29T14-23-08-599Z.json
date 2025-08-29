@@ -1,0 +1,422 @@
+{
+  "generation_info": {
+    "model": "gpt-5-mini",
+    "generated_at": "2025-08-29T14:23:08.599Z",
+    "total_functions": 5,
+    "successful_generations": 5,
+    "failed_generations": 0,
+    "limit_filter": 5
+  },
+  "results": [
+    {
+      "function_name": "stackone_create_connect_session",
+      "queries": [
+        {
+          "query": "create session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "create a new session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "POST stackone session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to create session",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I create session?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Need to create session",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone system: create session",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "In stackone, create a new session",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Manage session in stackone",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "session management",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "work with session",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "stackone session",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "bulk create sessions",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "create session with validation",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "stackone API: create session",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-29T14:23:03.162Z",
+      "model": "gpt-5-mini"
+    },
+    {
+      "function_name": "stackone_authenticate_connect_session",
+      "queries": [
+        {
+          "query": "unknown session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "unknown a new session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "POST stackone session",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to unknown session",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I unknown session?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Need to unknown session",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone system: unknown session",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "In stackone, unknown a new session",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Manage session in stackone",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "session management",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "work with session",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "stackone session",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "bulk unknown sessions",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "unknown session with validation",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "stackone API: unknown session",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-29T14:23:04.086Z",
+      "model": "gpt-5-mini"
+    },
+    {
+      "function_name": "stackone_list_linked_accounts",
+      "queries": [
+        {
+          "query": "list accounts",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "list a new accounts",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "GET stackone accounts",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to list accounts",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I list accounts?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Need to list accounts",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone system: list accounts",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "In stackone, list a new accounts",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Manage accounts in stackone",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "accounts management",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "work with accounts",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "stackone accounts",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "bulk list accountss",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "list accounts with validation",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "stackone API: list accounts",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-29T14:23:05.817Z",
+      "model": "gpt-5-mini"
+    },
+    {
+      "function_name": "stackone_get_account",
+      "queries": [
+        {
+          "query": "get account",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "get a new account",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "GET stackone account",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to get account",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I get account?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Need to get account",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone system: get account",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "In stackone, get a new account",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Manage account in stackone",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "account management",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "work with account",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "stackone account",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "bulk get accounts",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "get account with validation",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "stackone API: get account",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-29T14:23:06.796Z",
+      "model": "gpt-5-mini"
+    },
+    {
+      "function_name": "stackone_delete_account",
+      "queries": [
+        {
+          "query": "delete account",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "delete a new account",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "DELETE stackone account",
+          "type": "formal",
+          "difficulty": "easy"
+        },
+        {
+          "query": "I want to delete account",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "How do I delete account?",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "Need to delete account",
+          "type": "casual",
+          "difficulty": "easy"
+        },
+        {
+          "query": "stackone system: delete account",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "In stackone, delete a new account",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "Manage account in stackone",
+          "type": "business",
+          "difficulty": "medium"
+        },
+        {
+          "query": "account management",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "work with account",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "stackone account",
+          "type": "ambiguous",
+          "difficulty": "medium"
+        },
+        {
+          "query": "bulk delete accounts",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "delete account with validation",
+          "type": "complex",
+          "difficulty": "hard"
+        },
+        {
+          "query": "stackone API: delete account",
+          "type": "complex",
+          "difficulty": "hard"
+        }
+      ],
+      "generation_time": "2025-08-29T14:23:08.599Z",
+      "model": "gpt-5-mini"
+    }
+  ]
+}
