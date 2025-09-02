@@ -2,6 +2,13 @@ import { describe, expect, it } from 'bun:test';
 import { $ } from 'bun';
 import { directoryExists, joinPaths, listFilesInDirectory } from '../src/utils/file';
 
+// Examples that require real LLM calls and should be skipped in CI/sandboxed runs
+const LLM_EXAMPLES = new Set([
+  'openai-integration.ts',
+  'ai-sdk-integration.ts',
+  'human-in-the-loop.ts',
+]);
+
 describe('Examples', () => {
   it(
     'should run all example files without errors',
@@ -12,10 +19,16 @@ describe('Examples', () => {
         throw new Error('Examples directory not found');
       }
 
-      const exampleFiles = listFilesInDirectory(
+      // Gather example files
+      let exampleFiles = listFilesInDirectory(
         examplesDir,
         (fileName) => fileName.endsWith('.ts') && !fileName.includes('.spec.')
       );
+
+      // Optionally skip LLM-heavy examples when requested (default enabled via bun.test.setup.ts)
+      if (process.env.SKIP_LLM_EXAMPLES === '1') {
+        exampleFiles = exampleFiles.filter((f) => !LLM_EXAMPLES.has(f));
+      }
 
       expect(exampleFiles.length).toBeGreaterThan(0);
 
@@ -24,7 +37,10 @@ describe('Examples', () => {
           const filePath = joinPaths(examplesDir, file);
 
           try {
-            const result = await $`bun run ${filePath}`.quiet();
+            // Run each example in a separate Bun process but preload test setup
+            // to activate MSW and load env vars. Also load .env explicitly.
+            const result =
+              await $`bun --preload ./bun.test.setup.ts --env-file .env run ${filePath}`.quiet();
             return {
               file,
               success: result.exitCode === 0,

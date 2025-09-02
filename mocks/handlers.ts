@@ -1,6 +1,30 @@
 import { http, HttpResponse } from 'msw';
 
 export const handlers = [
+  // StackOne Unified HRIS endpoints used by examples
+  http.get('https://api.stackone.com/unified/hris/employees', () => {
+    return HttpResponse.json({
+      data: [
+        {
+          id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+          name: 'Michael Scott',
+          phone_number: '+1-555-0100',
+        },
+      ],
+    });
+  }),
+
+  http.get(
+    'https://api.stackone.com/unified/hris/employees/:id',
+    ({ params }) => {
+      return HttpResponse.json({
+        id: params.id,
+        name: 'Michael Scott',
+        phone_numbers: ['+1-555-0100'],
+      });
+    }
+  ),
+
   // StackOne API spec endpoints
   http.get('https://api.stackone.com/api/v1/:category/openapi.json', ({ params }) => {
     const { category } = params;
