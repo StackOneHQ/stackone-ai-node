@@ -172,7 +172,7 @@ export class RequestBuilder {
     if (typeof value === 'function') {
       throw new ParameterSerializationError('Functions cannot be serialized as parameters');
     }
-    if (value === null || value === undefined) {
+    if (value == null) {
       return '';
     }
     return String(value);
@@ -201,7 +201,7 @@ export class RequestBuilder {
       );
     }
 
-    if (obj === null || obj === undefined) {
+    if (obj == null) {
       return params;
     }
 
@@ -219,7 +219,7 @@ export class RequestBuilder {
           }
 
           const nestedKey = `${prefix}[${key}]`;
-          if (value !== null && value !== undefined) {
+          if (value != null) {
             if (this.shouldUseDeepObjectSerialization(key, value)) {
               // Recursively handle nested objects
               params.push(
