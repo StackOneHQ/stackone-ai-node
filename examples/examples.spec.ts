@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import process from 'node:process';
 import { $ } from 'bun';
 import { directoryExists, joinPaths, listFilesInDirectory } from '../src/utils/file';
 
@@ -22,18 +23,18 @@ describe('Examples', () => {
       // Gather example files
       let exampleFiles = listFilesInDirectory(
         examplesDir,
-        (fileName) => fileName.endsWith('.ts') && !fileName.includes('.spec.')
+        (fileName: string) => fileName.endsWith('.ts') && !fileName.includes('.spec.')
       );
 
       // Optionally skip LLM-heavy examples when requested (default enabled via bun.test.setup.ts)
       if (process.env.SKIP_LLM_EXAMPLES === '1') {
-        exampleFiles = exampleFiles.filter((f) => !LLM_EXAMPLES.has(f));
+        exampleFiles = exampleFiles.filter((f: string) => !LLM_EXAMPLES.has(f));
       }
 
       expect(exampleFiles.length).toBeGreaterThan(0);
 
       const results = await Promise.all(
-        exampleFiles.map(async (file) => {
+        exampleFiles.map(async (file: string) => {
           const filePath = joinPaths(examplesDir, file);
 
           try {
