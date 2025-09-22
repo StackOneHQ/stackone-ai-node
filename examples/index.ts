@@ -23,10 +23,6 @@
  * or load from a .env file:
  */
 
-// Load environment variables from .env file
-import * as dotenv from 'dotenv';
-dotenv.config();
-
 /**
  * # Account IDs
  *
