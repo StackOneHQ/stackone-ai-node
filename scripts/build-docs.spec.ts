@@ -21,8 +21,8 @@ describe('convertFileToMarkdown', () => {
  */
 
 // Load environment variables from .env file
-import * as dotenv from 'dotenv';
-dotenv.config();`;
+node --env-file=.env example.ts
+`;
 
     // Adjust the expected output to match our new format with extra spacing between sections
     const expected = `# StackOne AI SDK
@@ -44,8 +44,7 @@ export STACKONE_API_KEY=<your-api-key>
 
 \`\`\`typescript
 // Load environment variables from .env file
-import * as dotenv from 'dotenv';
-dotenv.config();
+node --env-file=.env example.ts
 \`\`\``;
 
     const result = convertFileToMarkdown(input);
