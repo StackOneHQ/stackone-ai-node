@@ -1448,66 +1448,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "type": "object",
     },
   },
-  "hris_complete_employee_task": {
-    "description": "Complete Employee Task",
-    "execute": {
-      "bodyType": "json",
-      "method": "PATCH",
-      "params": [
-        {
-          "location": "header",
-          "name": "x-account-id",
-          "type": "string",
-        },
-        {
-          "location": "path",
-          "name": "id",
-          "type": "string",
-        },
-        {
-          "location": "path",
-          "name": "subResourceId",
-          "type": "string",
-        },
-        {
-          "location": "query",
-          "name": "proxy",
-          "type": "string",
-        },
-        {
-          "location": "body",
-          "name": "comment",
-          "type": "string",
-        },
-      ],
-      "url": "https://api.stackone.com/unified/hris/employees/{id}/tasks/{subResourceId}",
-    },
-    "parameters": {
-      "properties": {
-        "comment": {
-          "description": "Comment or note about the task completion",
-          "example": "All required documents have been submitted",
-          "type": "string",
-        },
-        "id": {
-          "type": "string",
-        },
-        "proxy": {},
-        "subResourceId": {
-          "type": "string",
-        },
-        "x-account-id": {
-          "description": "The account identifier",
-          "type": "string",
-        },
-      },
-      "required": [
-        "id",
-        "subResourceId",
-      ],
-      "type": "object",
-    },
-  },
   "hris_create_employee": {
     "description": "Create Employee",
     "execute": {
@@ -2165,6 +2105,10 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "items": {},
                     "type": "array",
                   },
+                  {
+                    "format": "date-time",
+                    "type": "string",
+                  },
                 ],
               },
               "value_id": {
@@ -2206,6 +2150,64 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "employment": {
           "description": "The employee employment",
           "properties": {
+            "contract_type": {
+              "description": "The employment work schedule type",
+              "properties": {
+                "contract_type": {
+                  "description": "The employment work schedule type (e.g., full-time, part-time)",
+                  "example": "full_time",
+                  "properties": {
+                    "source_value": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "number",
+                        },
+                        {
+                          "type": "boolean",
+                        },
+                        {
+                          "type": "object",
+                        },
+                        {
+                          "items": {},
+                          "type": "array",
+                        },
+                      ],
+                    },
+                    "value": {
+                      "enum": [
+                        "full_time",
+                        "shifts",
+                        "part_time",
+                        "unmapped_value",
+                        null,
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                },
+                "id": {
+                  "description": "Unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+                "label": {
+                  "description": "The label of the employment type",
+                  "example": "Full-Time",
+                  "type": "string",
+                },
+                "remote_id": {
+                  "description": "Provider's unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
             "end_date": {
               "description": "The end date of employment",
               "example": "2021-01-01T01:01:01.000Z",
@@ -2356,6 +2358,77 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "description": "The payroll code of the employee",
               "example": "PC1",
               "type": "string",
+            },
+            "type": {
+              "description": "The type of employment",
+              "properties": {
+                "id": {
+                  "description": "Unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+                "label": {
+                  "description": "The label of the employment type",
+                  "example": "Permanent",
+                  "type": "string",
+                },
+                "remote_id": {
+                  "description": "Provider's unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+                "type": {
+                  "description": "The type of employment (e.g., contractor, permanent)",
+                  "example": "permanent",
+                  "properties": {
+                    "source_value": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "number",
+                        },
+                        {
+                          "type": "boolean",
+                        },
+                        {
+                          "type": "object",
+                        },
+                        {
+                          "items": {},
+                          "type": "array",
+                        },
+                      ],
+                    },
+                    "value": {
+                      "enum": [
+                        "contractor",
+                        "intern",
+                        "permanent",
+                        "apprentice",
+                        "freelance",
+                        "terminated",
+                        "temporary",
+                        "seasonal",
+                        "volunteer",
+                        "probation",
+                        "internal",
+                        "external",
+                        "expatriate",
+                        "employer_of_record",
+                        "casual",
+                        "Programme",
+                        "unmapped_value",
+                        null,
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                },
+              },
+              "type": "object",
             },
             "unified_custom_fields": {
               "additionalProperties": true,
@@ -4087,6 +4160,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "type",
+          "type": "object",
+        },
+        {
+          "location": "body",
+          "name": "contract_type",
+          "type": "object",
+        },
+        {
+          "location": "body",
           "name": "work_time",
           "type": "object",
         },
@@ -4110,6 +4193,64 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     },
     "parameters": {
       "properties": {
+        "contract_type": {
+          "description": "The employment work schedule type",
+          "properties": {
+            "contract_type": {
+              "description": "The employment work schedule type (e.g., full-time, part-time)",
+              "example": "full_time",
+              "properties": {
+                "source_value": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "number",
+                    },
+                    {
+                      "type": "boolean",
+                    },
+                    {
+                      "type": "object",
+                    },
+                    {
+                      "items": {},
+                      "type": "array",
+                    },
+                  ],
+                },
+                "value": {
+                  "enum": [
+                    "full_time",
+                    "shifts",
+                    "part_time",
+                    "unmapped_value",
+                    null,
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+            "label": {
+              "description": "The label of the employment type",
+              "example": "Full-Time",
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
         "effective_date": {
           "description": "The effective date of the employment contract",
           "example": "2021-01-01T01:01:01.000Z",
@@ -4274,6 +4415,77 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "The payroll code of the employee",
           "example": "PC1",
           "type": "string",
+        },
+        "type": {
+          "description": "The type of employment",
+          "properties": {
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+            "label": {
+              "description": "The label of the employment type",
+              "example": "Permanent",
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+            "type": {
+              "description": "The type of employment (e.g., contractor, permanent)",
+              "example": "permanent",
+              "properties": {
+                "source_value": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "number",
+                    },
+                    {
+                      "type": "boolean",
+                    },
+                    {
+                      "type": "object",
+                    },
+                    {
+                      "items": {},
+                      "type": "array",
+                    },
+                  ],
+                },
+                "value": {
+                  "enum": [
+                    "contractor",
+                    "intern",
+                    "permanent",
+                    "apprentice",
+                    "freelance",
+                    "terminated",
+                    "temporary",
+                    "seasonal",
+                    "volunteer",
+                    "probation",
+                    "internal",
+                    "external",
+                    "expatriate",
+                    "employer_of_record",
+                    "casual",
+                    "Programme",
+                    "unmapped_value",
+                    null,
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          },
+          "type": "object",
         },
         "unified_custom_fields": {
           "additionalProperties": true,
@@ -6079,11 +6291,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "example": "My Document",
               "type": "string",
             },
-            "path": {
-              "description": "The path where the file is stored",
-              "example": "/path/to/file",
-              "type": "string",
-            },
             "remote_id": {
               "description": "Provider's unique identifier",
               "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
@@ -6965,7 +7172,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
+          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
           "type": "string",
         },
         "id": {
@@ -7139,7 +7346,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,path,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
+          "example": "id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
           "type": "string",
         },
         "id": {
@@ -7286,7 +7493,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
           "type": "string",
         },
         "id": {
@@ -7759,7 +7966,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
           "type": "string",
         },
         "id": {
@@ -7887,7 +8094,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,code,title,description,status,created_at,updated_at",
           "type": "string",
         },
         "id": {
@@ -9328,7 +9535,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,path,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
+          "example": "id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
           "type": "string",
         },
         "filter": {
@@ -9438,7 +9645,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
           "type": "string",
         },
         "filter": {
@@ -10011,8 +10218,8 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "filter": {
           "description": "HRIS Time Off filters",
           "properties": {
-            "type_ids": {
-              "description": "List of time off type ids to filter by.",
+            "policy_ids": {
+              "description": "List of time off policy ids to filter by.",
               "items": {
                 "type": "string",
               },
@@ -10222,7 +10429,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
+          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
           "type": "string",
         },
         "filter": {
@@ -10335,7 +10542,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
           "type": "string",
         },
         "filter": {
@@ -10515,7 +10722,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,code,title,description,status,created_at,updated_at",
           "type": "string",
         },
         "filter": {
@@ -11347,8 +11554,8 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "filter": {
           "description": "HRIS Time Off filters",
           "properties": {
-            "type_ids": {
-              "description": "List of time off type ids to filter by.",
+            "policy_ids": {
+              "description": "List of time off policy ids to filter by.",
               "items": {
                 "type": "string",
               },
@@ -12115,6 +12322,10 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                     "items": {},
                     "type": "array",
                   },
+                  {
+                    "format": "date-time",
+                    "type": "string",
+                  },
                 ],
               },
               "value_id": {
@@ -12156,6 +12367,64 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "employment": {
           "description": "The employee employment",
           "properties": {
+            "contract_type": {
+              "description": "The employment work schedule type",
+              "properties": {
+                "contract_type": {
+                  "description": "The employment work schedule type (e.g., full-time, part-time)",
+                  "example": "full_time",
+                  "properties": {
+                    "source_value": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "number",
+                        },
+                        {
+                          "type": "boolean",
+                        },
+                        {
+                          "type": "object",
+                        },
+                        {
+                          "items": {},
+                          "type": "array",
+                        },
+                      ],
+                    },
+                    "value": {
+                      "enum": [
+                        "full_time",
+                        "shifts",
+                        "part_time",
+                        "unmapped_value",
+                        null,
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                },
+                "id": {
+                  "description": "Unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+                "label": {
+                  "description": "The label of the employment type",
+                  "example": "Full-Time",
+                  "type": "string",
+                },
+                "remote_id": {
+                  "description": "Provider's unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
             "end_date": {
               "description": "The end date of employment",
               "example": "2021-01-01T01:01:01.000Z",
@@ -12306,6 +12575,77 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "description": "The payroll code of the employee",
               "example": "PC1",
               "type": "string",
+            },
+            "type": {
+              "description": "The type of employment",
+              "properties": {
+                "id": {
+                  "description": "Unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+                "label": {
+                  "description": "The label of the employment type",
+                  "example": "Permanent",
+                  "type": "string",
+                },
+                "remote_id": {
+                  "description": "Provider's unique identifier",
+                  "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+                  "type": "string",
+                },
+                "type": {
+                  "description": "The type of employment (e.g., contractor, permanent)",
+                  "example": "permanent",
+                  "properties": {
+                    "source_value": {
+                      "oneOf": [
+                        {
+                          "type": "string",
+                        },
+                        {
+                          "type": "number",
+                        },
+                        {
+                          "type": "boolean",
+                        },
+                        {
+                          "type": "object",
+                        },
+                        {
+                          "items": {},
+                          "type": "array",
+                        },
+                      ],
+                    },
+                    "value": {
+                      "enum": [
+                        "contractor",
+                        "intern",
+                        "permanent",
+                        "apprentice",
+                        "freelance",
+                        "terminated",
+                        "temporary",
+                        "seasonal",
+                        "volunteer",
+                        "probation",
+                        "internal",
+                        "external",
+                        "expatriate",
+                        "employer_of_record",
+                        "casual",
+                        "Programme",
+                        "unmapped_value",
+                        null,
+                      ],
+                      "type": "string",
+                    },
+                  },
+                  "type": "object",
+                },
+              },
+              "type": "object",
             },
             "unified_custom_fields": {
               "additionalProperties": true,
@@ -14047,6 +14387,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         {
           "location": "body",
+          "name": "type",
+          "type": "object",
+        },
+        {
+          "location": "body",
+          "name": "contract_type",
+          "type": "object",
+        },
+        {
+          "location": "body",
           "name": "work_time",
           "type": "object",
         },
@@ -14065,6 +14415,64 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     },
     "parameters": {
       "properties": {
+        "contract_type": {
+          "description": "The employment work schedule type",
+          "properties": {
+            "contract_type": {
+              "description": "The employment work schedule type (e.g., full-time, part-time)",
+              "example": "full_time",
+              "properties": {
+                "source_value": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "number",
+                    },
+                    {
+                      "type": "boolean",
+                    },
+                    {
+                      "type": "object",
+                    },
+                    {
+                      "items": {},
+                      "type": "array",
+                    },
+                  ],
+                },
+                "value": {
+                  "enum": [
+                    "full_time",
+                    "shifts",
+                    "part_time",
+                    "unmapped_value",
+                    null,
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+            "label": {
+              "description": "The label of the employment type",
+              "example": "Full-Time",
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
         "effective_date": {
           "description": "The effective date of the employment contract",
           "example": "2021-01-01T01:01:01.000Z",
@@ -14228,6 +14636,77 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "subResourceId": {
           "type": "string",
         },
+        "type": {
+          "description": "The type of employment",
+          "properties": {
+            "id": {
+              "description": "Unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+            "label": {
+              "description": "The label of the employment type",
+              "example": "Permanent",
+              "type": "string",
+            },
+            "remote_id": {
+              "description": "Provider's unique identifier",
+              "example": "8187e5da-dc77-475e-9949-af0f1fa4e4e3",
+              "type": "string",
+            },
+            "type": {
+              "description": "The type of employment (e.g., contractor, permanent)",
+              "example": "permanent",
+              "properties": {
+                "source_value": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                    },
+                    {
+                      "type": "number",
+                    },
+                    {
+                      "type": "boolean",
+                    },
+                    {
+                      "type": "object",
+                    },
+                    {
+                      "items": {},
+                      "type": "array",
+                    },
+                  ],
+                },
+                "value": {
+                  "enum": [
+                    "contractor",
+                    "intern",
+                    "permanent",
+                    "apprentice",
+                    "freelance",
+                    "terminated",
+                    "temporary",
+                    "seasonal",
+                    "volunteer",
+                    "probation",
+                    "internal",
+                    "external",
+                    "expatriate",
+                    "employer_of_record",
+                    "casual",
+                    "Programme",
+                    "unmapped_value",
+                    null,
+                  ],
+                  "type": "string",
+                },
+              },
+              "type": "object",
+            },
+          },
+          "type": "object",
+        },
         "unified_custom_fields": {
           "additionalProperties": true,
           "description": "Custom Unified Fields configured in your StackOne project",
@@ -14287,6 +14766,107 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             },
           },
           "type": "object",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+        "subResourceId",
+      ],
+      "type": "object",
+    },
+  },
+  "hris_update_employee_task": {
+    "description": "Update Employee Task",
+    "execute": {
+      "bodyType": "json",
+      "method": "PATCH",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "subResourceId",
+          "type": "string",
+        },
+        {
+          "location": "body",
+          "name": "comment",
+          "type": "string",
+        },
+        {
+          "location": "body",
+          "name": "status",
+          "type": "object",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/employees/{id}/tasks/{subResourceId}",
+    },
+    "parameters": {
+      "properties": {
+        "comment": {
+          "description": "Comment or note about the task update",
+          "example": "All required documents have been submitted",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "status": {
+          "default": "completed",
+          "description": "The status to apply to this Task",
+          "example": "blocked",
+          "properties": {
+            "source_value": {
+              "oneOf": [
+                {
+                  "type": "string",
+                },
+                {
+                  "type": "number",
+                },
+                {
+                  "type": "boolean",
+                },
+                {
+                  "type": "object",
+                },
+                {
+                  "items": {},
+                  "type": "array",
+                },
+              ],
+            },
+            "value": {
+              "description": "The unified value for the status of the task. If the provider does not specify this status, the value will be set to UnmappedValue",
+              "enum": [
+                "open",
+                "in_progress",
+                "blocked",
+                "completed",
+                "cancelled",
+                "unmapped_value",
+                null,
+              ],
+              "example": "open",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "subResourceId": {
+          "type": "string",
         },
         "x-account-id": {
           "description": "The account identifier",
@@ -15882,11 +16462,6 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
             "name": {
               "description": "The name of the file",
               "example": "My Document",
-              "type": "string",
-            },
-            "path": {
-              "description": "The path where the file is stored",
-              "example": "/path/to/file",
               "type": "string",
             },
             "remote_id": {

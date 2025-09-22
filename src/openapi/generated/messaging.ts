@@ -739,8 +739,7 @@ export const messagingSpec = {
             content: {
               '*/*': {
                 schema: {
-                  type: 'string',
-                  format: 'binary',
+                  $ref: '#/components/schemas/DownloadApiModel',
                 },
               },
             },
@@ -2767,6 +2766,66 @@ export const messagingSpec = {
           },
         },
       },
+      DownloadApiModel: {
+        type: 'object',
+        properties: {
+          headers: {
+            description: 'Headers related to the download',
+            allOf: [
+              {
+                $ref: '#/components/schemas/DownloadHeadersApiModel',
+              },
+            ],
+          },
+          data: {
+            type: 'string',
+            description: 'The file data in binary format',
+            format: 'binary',
+          },
+        },
+        required: ['headers', 'data'],
+      },
+      DownloadHeadersApiModel: {
+        type: 'object',
+        properties: {
+          'content-disposition': {
+            type: 'string',
+            description: 'Value of the Content-Disposition header',
+            example: 'attachment; filename="example.pdf"',
+            nullable: true,
+          },
+          'content-type': {
+            type: 'string',
+            description: 'MIME type of the file',
+            example: 'application/pdf',
+            nullable: true,
+          },
+          'content-length': {
+            type: 'number',
+            description: 'Size of the content in bytes',
+            example: 1024,
+            nullable: true,
+          },
+          'content-range': {
+            type: 'string',
+            description: 'Range of the content being sent',
+            example: 'bytes 0-1023/2048',
+            nullable: true,
+          },
+          'content-encoding': {
+            type: 'string',
+            description: 'Encoding of the content',
+            example: 'gzip',
+            nullable: true,
+          },
+          'transfer-encoding': {
+            type: 'string',
+            description: 'Transfer encoding type',
+            example: 'chunked',
+            nullable: true,
+          },
+        },
+      },
       ForbiddenResponse: {
         type: 'object',
         properties: {
@@ -3144,7 +3203,7 @@ export const messagingSpec = {
             nullable: true,
             type: 'array',
             items: {
-              type: 'string',
+              $ref: '#/components/schemas/MessagingAttachment',
             },
           },
           author: {

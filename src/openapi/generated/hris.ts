@@ -1120,7 +1120,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
               type: 'string',
             },
           },
@@ -1629,7 +1629,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,documents,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
               type: 'string',
             },
           },
@@ -2260,8 +2260,8 @@ export const hrisSpec = {
                   nullable: true,
                   additionalProperties: false,
                 },
-                type_ids: {
-                  description: 'List of time off type ids to filter by.',
+                policy_ids: {
+                  description: 'List of time off policy ids to filter by.',
                   nullable: true,
                   type: 'array',
                   items: {
@@ -3731,10 +3731,194 @@ export const hrisSpec = {
             description:
               'The document related to the employee with the given identifiers was retrieved.',
             content: {
+              'application/pdf': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/msword': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.ms-excel': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.ms-powerpoint': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/rtf': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'text/plain': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/jpeg': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/png': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/gif': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/tiff': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/bmp': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/heic': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/zip': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/gzip': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/xml': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'text/csv': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.oasis.opendocument.text': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.oasis.opendocument.spreadsheet': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'audio/mpeg': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'video/mp4': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'video/webm': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'text/rtf': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/x-rar-compressed': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/x-7z-compressed': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'message/rfc822': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.ms-outlook': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
               'application/octet-stream': {
                 schema: {
-                  type: 'string',
-                  format: 'binary',
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'text/html': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'image/webp': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'application/vnd.oasis.opendocument.presentation': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'audio/wav': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'audio/mp4': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'video/avi': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
+                },
+              },
+              'video/quicktime': {
+                schema: {
+                  $ref: '#/components/schemas/DownloadApiModel',
                 },
               },
             },
@@ -3938,7 +4122,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,path,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
+                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
               type: 'string',
             },
           },
@@ -4243,7 +4427,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,path,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
+                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
               type: 'string',
             },
           },
@@ -6395,7 +6579,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
               type: 'string',
             },
           },
@@ -6702,7 +6886,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
               type: 'string',
             },
           },
@@ -6928,7 +7112,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
               type: 'string',
             },
           },
@@ -7428,7 +7612,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,type,contract_type,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
               type: 'string',
             },
           },
@@ -10854,8 +11038,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+              example: 'id,remote_id,code,title,description,status,created_at,updated_at',
               type: 'string',
             },
           },
@@ -10934,7 +11117,7 @@ export const hrisSpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/JobsPaginated',
+                  $ref: '#/components/schemas/HrisJobsPaginated',
                 },
               },
             },
@@ -11150,8 +11333,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+              example: 'id,remote_id,code,title,description,status,created_at,updated_at',
               type: 'string',
             },
           },
@@ -11162,7 +11344,7 @@ export const hrisSpec = {
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/JobResult',
+                  $ref: '#/components/schemas/HrisJobResult',
                 },
               },
             },
@@ -12918,8 +13100,8 @@ export const hrisSpec = {
                   nullable: true,
                   additionalProperties: false,
                 },
-                type_ids: {
-                  description: 'List of time off type ids to filter by.',
+                policy_ids: {
+                  description: 'List of time off policy ids to filter by.',
                   nullable: true,
                   type: 'array',
                   items: {
@@ -17014,7 +17196,7 @@ export const hrisSpec = {
         },
       },
       patch: {
-        operationId: 'hris_complete_employee_task',
+        operationId: 'hris_update_employee_task',
         parameters: [
           {
             name: 'x-account-id',
@@ -17041,32 +17223,24 @@ export const hrisSpec = {
               type: 'string',
             },
           },
-          {
-            name: 'proxy',
-            required: false,
-            in: 'query',
-            style: 'deepObject',
-            explode: true,
-            schema: {},
-          },
         ],
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/CompleteTaskRequestDto',
+                $ref: '#/components/schemas/UpdateTaskRequestDto',
               },
             },
           },
         },
         responses: {
           '200': {
-            description: 'The task has been successfully completed',
+            description: 'The task has been successfully updated.',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/TaskResult',
+                  $ref: '#/components/schemas/UpdateResult',
                 },
               },
             },
@@ -17205,10 +17379,10 @@ export const hrisSpec = {
             basic: [],
           },
         ],
-        summary: 'Complete Employee Task',
+        summary: 'Update Employee Task',
         tags: ['Employees', 'Tasks'],
         'x-speakeasy-group': 'hris',
-        'x-speakeasy-name-override': 'complete_employee_task',
+        'x-speakeasy-name-override': 'update_employee_task',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
@@ -17817,6 +17991,14 @@ export const hrisSpec = {
       description: 'Rules and policies for employee leave.',
     },
     {
+      name: 'Training',
+      description: 'Training records for employees.',
+    },
+    {
+      name: 'Training Content',
+      description: 'Training content for employees.',
+    },
+    {
       name: 'Work Eligibility',
       description: 'Eligibility status for employment.',
     },
@@ -18070,17 +18252,6 @@ export const hrisSpec = {
           },
         },
         required: ['data'],
-      },
-      CompleteTaskRequestDto: {
-        type: 'object',
-        properties: {
-          comment: {
-            type: 'string',
-            description: 'Comment or note about the task completion',
-            example: 'All required documents have been submitted',
-            nullable: true,
-          },
-        },
       },
       ConfidentialEnumApiModel: {
         type: 'object',
@@ -18653,6 +18824,24 @@ export const hrisSpec = {
               },
             ],
           },
+          type: {
+            description: 'The type of employment',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TypeApiModel',
+              },
+            ],
+          },
+          contract_type: {
+            description: 'The employment work schedule type',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ContractTypeApiModel',
+              },
+            ],
+          },
           work_time: {
             nullable: true,
             allOf: [
@@ -18854,6 +19043,24 @@ export const hrisSpec = {
             allOf: [
               {
                 $ref: '#/components/schemas/EmploymentScheduleTypeEnum',
+              },
+            ],
+          },
+          type: {
+            description: 'The type of employment',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TypeApiModel',
+              },
+            ],
+          },
+          contract_type: {
+            description: 'The employment work schedule type',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ContractTypeApiModel',
               },
             ],
           },
@@ -19081,9 +19288,26 @@ export const hrisSpec = {
             example: 'option_123',
           },
           value: {
-            type: 'string',
             description: 'The human readable value of the option',
             example: 'Not Started',
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
           },
         },
         required: ['id', 'value'],
@@ -19128,6 +19352,10 @@ export const hrisSpec = {
               {
                 type: 'array',
                 items: {},
+              },
+              {
+                type: 'string',
+                format: 'date-time',
               },
             ],
             nullable: true,
@@ -19296,6 +19524,66 @@ export const hrisSpec = {
           },
         },
       },
+      DownloadApiModel: {
+        type: 'object',
+        properties: {
+          headers: {
+            description: 'Headers related to the download',
+            allOf: [
+              {
+                $ref: '#/components/schemas/DownloadHeadersApiModel',
+              },
+            ],
+          },
+          data: {
+            type: 'string',
+            description: 'The file data in binary format',
+            format: 'binary',
+          },
+        },
+        required: ['headers', 'data'],
+      },
+      DownloadHeadersApiModel: {
+        type: 'object',
+        properties: {
+          'content-disposition': {
+            type: 'string',
+            description: 'Value of the Content-Disposition header',
+            example: 'attachment; filename="example.pdf"',
+            nullable: true,
+          },
+          'content-type': {
+            type: 'string',
+            description: 'MIME type of the file',
+            example: 'application/pdf',
+            nullable: true,
+          },
+          'content-length': {
+            type: 'number',
+            description: 'Size of the content in bytes',
+            example: 1024,
+            nullable: true,
+          },
+          'content-range': {
+            type: 'string',
+            description: 'Range of the content being sent',
+            example: 'bytes 0-1023/2048',
+            nullable: true,
+          },
+          'content-encoding': {
+            type: 'string',
+            description: 'Encoding of the content',
+            example: 'gzip',
+            nullable: true,
+          },
+          'transfer-encoding': {
+            type: 'string',
+            description: 'Transfer encoding type',
+            example: 'chunked',
+            nullable: true,
+          },
+        },
+      },
       Employee: {
         type: 'object',
         properties: {
@@ -19441,6 +19729,7 @@ export const hrisSpec = {
             type: 'string',
             description: "Provider's unique identifier of the manager",
             example: 'e3cb75bf-aa84-466e-a6c1-b8322b257a48',
+            deprecated: true,
             nullable: true,
           },
           gender: {
@@ -19846,6 +20135,24 @@ export const hrisSpec = {
               },
             ],
           },
+          type: {
+            description: 'The type of employment',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TypeApiModel',
+              },
+            ],
+          },
+          contract_type: {
+            description: 'The employment work schedule type',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ContractTypeApiModel',
+              },
+            ],
+          },
           work_time: {
             nullable: true,
             allOf: [
@@ -19957,24 +20264,6 @@ export const hrisSpec = {
             allOf: [
               {
                 $ref: '#/components/schemas/EmploymentJobApiModel',
-              },
-            ],
-          },
-          type: {
-            description: 'The type of employment',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/TypeApiModel',
-              },
-            ],
-          },
-          contract_type: {
-            description: 'The employment work schedule type',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/ContractTypeApiModel',
               },
             ],
           },
@@ -20456,12 +20745,6 @@ export const hrisSpec = {
             type: 'string',
             description: 'The name of the file',
             example: 'My Document',
-            nullable: true,
-          },
-          path: {
-            type: 'string',
-            description: 'The path where the file is stored',
-            example: '/path/to/file',
             nullable: true,
           },
           category: {
@@ -22585,6 +22868,24 @@ export const hrisSpec = {
               },
             ],
           },
+          type: {
+            description: 'The type of employment',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TypeApiModel',
+              },
+            ],
+          },
+          contract_type: {
+            description: 'The employment work schedule type',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ContractTypeApiModel',
+              },
+            ],
+          },
           work_time: {
             nullable: true,
             allOf: [
@@ -23074,12 +23375,6 @@ export const hrisSpec = {
             example: 'My Document',
             nullable: true,
           },
-          path: {
-            type: 'string',
-            description: 'The path where the file is stored',
-            example: '/path/to/file',
-            nullable: true,
-          },
           category: {
             description: 'The category of the the document',
             example: 'templates, forms, backups, etc.',
@@ -23514,6 +23809,152 @@ export const hrisSpec = {
               other_known_names: 'John Doe',
             },
             additionalProperties: true,
+            nullable: true,
+          },
+        },
+      },
+      HrisJob: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Unique identifier',
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          remote_id: {
+            type: 'string',
+            description: "Provider's unique identifier",
+            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          code: {
+            type: 'string',
+            description: 'Code of the job',
+            example: '184919',
+            nullable: true,
+          },
+          title: {
+            type: 'string',
+            description: 'Title of the job',
+            example: 'Software Engineer',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'Description of the job',
+            example: 'Responsible for identifying business requirements',
+            nullable: true,
+          },
+          status: {
+            description: 'Status of the job',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/HrisJobStatusEnum',
+              },
+            ],
+          },
+          created_at: {
+            type: 'string',
+            description: 'Date of creation',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+          updated_at: {
+            type: 'string',
+            description: 'Date of last update',
+            example: '2021-01-01T01:01:01.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
+        },
+      },
+      HrisJobResult: {
+        type: 'object',
+        properties: {
+          data: {
+            $ref: '#/components/schemas/HrisJob',
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      HrisJobsPaginated: {
+        type: 'object',
+        properties: {
+          next_page: {
+            type: 'string',
+            deprecated: true,
+            nullable: true,
+          },
+          next: {
+            type: 'string',
+            nullable: true,
+          },
+          data: {
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/HrisJob',
+            },
+          },
+          raw: {
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/RawResponse',
+            },
+          },
+        },
+        required: ['data'],
+      },
+      HrisJobStatusEnum: {
+        type: 'object',
+        properties: {
+          value: {
+            type: 'string',
+            enum: [
+              'draft',
+              'pending',
+              'archived',
+              'closed',
+              'open',
+              'deleted',
+              'unmapped_value',
+              null,
+            ],
+            description: 'The status of the job.',
+            example: 'open',
+            'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          source_value: {
+            description: 'The source value of the job status.',
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
             nullable: true,
           },
         },
@@ -24356,6 +24797,24 @@ export const hrisSpec = {
               },
             ],
           },
+          type: {
+            description: 'The type of employment',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TypeApiModel',
+              },
+            ],
+          },
+          contract_type: {
+            description: 'The employment work schedule type',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ContractTypeApiModel',
+              },
+            ],
+          },
           work_time: {
             nullable: true,
             allOf: [
@@ -24469,158 +24928,12 @@ export const hrisSpec = {
           },
         },
       },
-      Job: {
-        type: 'object',
-        properties: {
-          id: {
-            type: 'string',
-            description: 'Unique identifier',
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          remote_id: {
-            type: 'string',
-            description: "Provider's unique identifier",
-            example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
-            nullable: true,
-          },
-          code: {
-            type: 'string',
-            description: 'Code of the job',
-            example: '184919',
-            nullable: true,
-          },
-          title: {
-            type: 'string',
-            description: 'Title of the job',
-            example: 'Software Engineer',
-            nullable: true,
-          },
-          description: {
-            type: 'string',
-            description: 'Description of the job',
-            example: 'Responsible for identifying business requirements',
-            nullable: true,
-          },
-          status: {
-            description: 'Status of the job',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/JobStatusEnum',
-              },
-            ],
-          },
-          created_at: {
-            type: 'string',
-            description: 'Date of creation',
-            example: '2021-01-01T01:01:01.000Z',
-            format: 'date-time',
-            nullable: true,
-          },
-          updated_at: {
-            type: 'string',
-            description: 'Date of last update',
-            example: '2021-01-01T01:01:01.000Z',
-            format: 'date-time',
-            nullable: true,
-          },
-        },
-      },
       JobDescriptionApiModel: {
         type: 'object',
         properties: {
           text: {
             type: 'string',
             example: 'Testing the laws of motion',
-            nullable: true,
-          },
-        },
-      },
-      JobResult: {
-        type: 'object',
-        properties: {
-          data: {
-            $ref: '#/components/schemas/Job',
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-        required: ['data'],
-      },
-      JobsPaginated: {
-        type: 'object',
-        properties: {
-          next_page: {
-            type: 'string',
-            deprecated: true,
-            nullable: true,
-          },
-          next: {
-            type: 'string',
-            nullable: true,
-          },
-          data: {
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/Job',
-            },
-          },
-          raw: {
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/RawResponse',
-            },
-          },
-        },
-        required: ['data'],
-      },
-      JobStatusEnum: {
-        type: 'object',
-        properties: {
-          value: {
-            type: 'string',
-            enum: [
-              'draft',
-              'pending',
-              'archived',
-              'closed',
-              'open',
-              'deleted',
-              'unmapped_value',
-              null,
-            ],
-            description: 'The status of the job.',
-            example: 'active',
-            'x-speakeasy-unknown-values': 'allow',
-            nullable: true,
-          },
-          source_value: {
-            description: 'The source value of the job status.',
-            oneOf: [
-              {
-                type: 'string',
-              },
-              {
-                type: 'number',
-              },
-              {
-                type: 'boolean',
-              },
-              {
-                type: 'object',
-              },
-              {
-                type: 'array',
-                items: {},
-              },
-            ],
             nullable: true,
           },
         },
@@ -26481,10 +26794,11 @@ export const hrisSpec = {
         properties: {
           data: {
             nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/Task',
-            },
+            allOf: [
+              {
+                $ref: '#/components/schemas/Task',
+              },
+            ],
           },
           raw: {
             nullable: true,
@@ -26943,16 +27257,16 @@ export const hrisSpec = {
               },
             ],
           },
-          created_date: {
+          created_at: {
             type: 'string',
-            description: 'The created date of the time off request',
+            description: 'Timestamp when the time off request was created',
             example: '2021-01-01T01:01:01.000Z',
             format: 'date-time',
             nullable: true,
           },
-          updated_date: {
+          updated_at: {
             type: 'string',
-            description: 'The updated date of the time off request',
+            description: 'Timestamp when the time off request was last updated',
             example: '2021-01-01T01:01:01.000Z',
             format: 'date-time',
             nullable: true,
@@ -27667,6 +27981,28 @@ export const hrisSpec = {
           },
         },
         required: ['statusCode', 'message', 'timestamp'],
+      },
+      UpdateTaskRequestDto: {
+        type: 'object',
+        properties: {
+          comment: {
+            type: 'string',
+            description: 'Comment or note about the task update',
+            example: 'All required documents have been submitted',
+            nullable: true,
+          },
+          status: {
+            default: 'completed',
+            description: 'The status to apply to this Task',
+            example: 'blocked',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/TaskStatusEnum',
+              },
+            ],
+          },
+        },
       },
       WorkEligibility: {
         type: 'object',
