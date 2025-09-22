@@ -64,7 +64,10 @@ jobs:
         id: create-pr
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update OAS specifications"
+          committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           title: "chore: update OAS specifications"
           body: |
             This PR updates the OpenAPI specifications to the latest version.
