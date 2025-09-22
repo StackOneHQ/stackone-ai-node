@@ -367,6 +367,19 @@ export const stackoneSpec = {
             },
           },
           {
+            name: 'origin_owner_ids',
+            required: false,
+            in: 'query',
+            description:
+              'The origin owner identifiers of the results to fetch (supports multiple IDs)',
+            schema: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          },
+          {
             name: 'providers',
             required: false,
             in: 'query',
@@ -2692,6 +2705,15 @@ export const stackoneSpec = {
           '200': {
             description: 'The proxy request was successful.',
           },
+          '201': {
+            description: 'Resource was successfully created by the target service.',
+          },
+          '202': {
+            description: 'Request accepted by the target service.',
+          },
+          '204': {
+            description: 'Request succeeded with no content.',
+          },
           '400': {
             description: 'Invalid request.',
             content: {
@@ -2835,6 +2857,958 @@ export const stackoneSpec = {
         },
       },
     },
+    '/mcp': {
+      post: {
+        description: 'Send JSON-RPC request to the MCP server over HTTP streaming transport',
+        operationId: 'stackone_mcp_post',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'Account secure id for the target provider account',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'mcp-session-id',
+            in: 'header',
+            description: 'Session id; omit for initialize, include for subsequent calls',
+            required: false,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          description: 'JSON-RPC 2.0 message',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/JsonRpcMessageDto',
+              },
+              examples: {
+                initialize: {
+                  summary: 'Initialize session',
+                  value: {
+                    jsonrpc: '2.0',
+                    method: 'initialize',
+                    params: {
+                      clientInfo: {
+                        name: 'my-client',
+                        version: '1.0.0',
+                      },
+                      protocolVersion: '2025-03-26',
+                      capabilities: {},
+                    },
+                    id: 'init-1',
+                  },
+                },
+                toolsList: {
+                  summary: 'List tools',
+                  value: {
+                    jsonrpc: '2.0',
+                    method: 'tools/list',
+                    params: {},
+                    id: 'tools-1',
+                  },
+                },
+                toolsCall: {
+                  summary: 'Call a tool',
+                  value: {
+                    jsonrpc: '2.0',
+                    method: 'tools/call',
+                    params: {
+                      name: 'unified_hris_list_employees',
+                      arguments: {},
+                    },
+                    id: 'call-1',
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Processed successfully',
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+          {
+            ApiKey: [],
+          },
+        ],
+        summary: 'Send MCP JSON-RPC message',
+        tags: ['MCP'],
+        'x-speakeasy-name-override': 'mcp_post',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+      get: {
+        description: 'Open a dedicated Server-Sent Events stream for MCP notifications',
+        operationId: 'stackone_mcp_get',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'Account secure id for the target provider account',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'Accept',
+            in: 'header',
+            description: 'Must be text/event-stream',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'mcp-session-id',
+            in: 'header',
+            description: 'Session id',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'SSE stream opened',
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+          {
+            ApiKey: [],
+          },
+        ],
+        summary: 'Open MCP SSE stream',
+        tags: ['MCP'],
+        'x-speakeasy-name-override': 'mcp_get',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+      delete: {
+        description: 'Close an existing MCP session for the provided session id',
+        operationId: 'stackone_mcp_delete',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'Account secure id for the target provider account',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'mcp-session-id',
+            in: 'header',
+            description: 'Session id',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Session closed',
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+          {
+            ApiKey: [],
+          },
+        ],
+        summary: 'Delete MCP session',
+        tags: ['MCP'],
+        'x-speakeasy-name-override': 'mcp_delete',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/actions': {
+      get: {
+        description: 'Retrieves a list of all actions metadata',
+        operationId: 'stackone_list_actions_meta',
+        parameters: [
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'group_by',
+            required: false,
+            in: 'query',
+            description: 'The relation to group the results by',
+            schema: {
+              nullable: true,
+              default: 'connector',
+              example: ['connector'],
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'Actions Metadata filters',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                connectors: {
+                  description: 'A comma-separated list of connectors to filter the results by.',
+                  example: 'connector1,connector2',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                account_ids: {
+                  description: 'A comma-separated list of account IDs to filter the results by.',
+                  example: 'account1,account2',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                action_key: {
+                  description: 'The action key to filter the results by',
+                  example: 'action1',
+                  type: 'string',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'include',
+            required: false,
+            in: 'query',
+            description: 'Additional data to include in the response',
+            schema: {
+              nullable: true,
+              example: ['operation_details'],
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['operation_details'],
+              },
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'List of actions metadata',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ActionsMetaPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        summary: 'List all actions metadata',
+        tags: ['Actions'],
+        'x-speakeasy-name-override': 'list_actions_meta',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/actions/rpc': {
+      post: {
+        description: 'Makes a remote procedure call to the specified action',
+        operationId: 'stackone_rpc_action',
+        parameters: [],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/ActionsRpcRequestDto',
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Action response',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ActionsRpcResponse',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        summary: 'Make an RPC call to an action',
+        tags: ['Actions'],
+        'x-speakeasy-name-override': 'rpc_action',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
   },
   info: {
     title: 'StackOne',
@@ -2848,6 +3822,10 @@ export const stackoneSpec = {
       description: 'View and manage linked accounts.',
     },
     {
+      name: 'Actions',
+      description: 'Retrieve Actions metadata and definitions.',
+    },
+    {
       name: 'AI',
       description: 'AI-powered features.',
     },
@@ -2859,6 +3837,10 @@ export const stackoneSpec = {
     {
       name: 'Connectors',
       description: 'Retrieve metadata for connectors.',
+    },
+    {
+      name: 'MCP',
+      description: 'Model Context Protocol endpoint.',
     },
     {
       name: 'Proxy',
@@ -2886,6 +3868,198 @@ export const stackoneSpec = {
       },
     },
     schemas: {
+      ActionMetaItem: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'The action ID',
+            nullable: true,
+          },
+          label: {
+            type: 'string',
+            description: 'The action label',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'The action description',
+            nullable: true,
+          },
+          schema_type: {
+            type: 'string',
+            description: 'The schema type for the action',
+            nullable: true,
+          },
+          tags: {
+            description: 'The tags associated with this action',
+            nullable: true,
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          authentication: {
+            description: 'The authentication methods supported by this action',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/AuthenticationMetaItem',
+            },
+          },
+          operation_details: {
+            type: 'object',
+            description: 'The operation details for the action',
+            additionalProperties: true,
+            nullable: true,
+          },
+        },
+      },
+      ActionsMeta: {
+        type: 'object',
+        properties: {
+          version: {
+            type: 'string',
+            description: 'The version of the actions metadata',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The name of the provider',
+            nullable: true,
+          },
+          key: {
+            type: 'string',
+            description: 'The unique key for the provider',
+            nullable: true,
+          },
+          icon: {
+            type: 'string',
+            description: 'The icon URL for the provider',
+            nullable: true,
+          },
+          description: {
+            type: 'string',
+            description: 'The description of the provider',
+            nullable: true,
+          },
+          authentication: {
+            description: 'The authentication methods supported by the provider',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/AuthenticationMetaItem',
+            },
+          },
+          actions: {
+            description: 'The list of actions available for this provider',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ActionMetaItem',
+            },
+          },
+        },
+      },
+      ActionsMetaPaginated: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            description: 'Cursor for fetching the next page of results',
+            nullable: true,
+          },
+          data: {
+            description: 'The list of actions metadata',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ActionsMeta',
+            },
+          },
+        },
+      },
+      ActionsRpcInputDto: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'object',
+            description: 'Query parameters for the action',
+            example: {
+              param1: 'value1',
+              param2: 'value2',
+            },
+            nullable: true,
+            additionalProperties: true,
+          },
+          headers: {
+            type: 'object',
+            description: 'Headers for the action',
+            example: {
+              'Content-Type': 'application/json',
+            },
+            nullable: true,
+            additionalProperties: true,
+          },
+          body: {
+            type: 'object',
+            description: 'Request body for the action',
+            example: {
+              data: 'example',
+            },
+            nullable: true,
+            additionalProperties: true,
+          },
+        },
+      },
+      ActionsRpcRequestDto: {
+        type: 'object',
+        properties: {
+          action: {
+            type: 'string',
+            description: 'The action to execute',
+            example: 'create_employee',
+          },
+          input: {
+            description: 'Input parameters for the action',
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ActionsRpcInputDto',
+              },
+            ],
+          },
+        },
+        required: ['action'],
+      },
+      ActionsRpcResponse: {
+        type: 'object',
+        properties: {
+          next: {
+            type: 'string',
+            description: 'Cursor for fetching the next page of results',
+            nullable: true,
+          },
+          data: {
+            description: 'The response data from the action RPC call',
+            oneOf: [
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'object',
+                },
+              },
+              {
+                type: 'null',
+              },
+            ],
+            nullable: true,
+          },
+        },
+      },
       AdvancedLogRequestData: {
         type: 'object',
         properties: {
@@ -3045,6 +4219,26 @@ export const stackoneSpec = {
             items: {
               $ref: '#/components/schemas/ProviderError',
             },
+          },
+        },
+      },
+      AuthenticationMetaItem: {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            description: 'The authentication type',
+            nullable: true,
+          },
+          label: {
+            type: 'string',
+            description: 'The authentication label',
+            nullable: true,
+          },
+          key: {
+            type: 'string',
+            description: 'The authentication key',
+            nullable: true,
           },
         },
       },
@@ -3670,6 +4864,30 @@ export const stackoneSpec = {
         },
         required: ['statusCode', 'message', 'timestamp'],
       },
+      JsonRpcMessageDto: {
+        type: 'object',
+        properties: {
+          jsonrpc: {
+            type: 'string',
+            example: '2.0',
+            description: 'JSON-RPC protocol version',
+          },
+          method: {
+            type: 'string',
+            example: 'initialize',
+            description: 'JSON-RPC method name',
+          },
+          params: {
+            type: 'object',
+            description: 'Method parameters (arbitrary JSON)',
+          },
+          id: {
+            type: 'object',
+            description: 'Request id (arbitrary JSON scalar)',
+          },
+        },
+        required: ['jsonrpc', 'method'],
+      },
       LinkedAccount: {
         type: 'object',
         properties: {
@@ -4102,12 +5320,12 @@ export const stackoneSpec = {
             description: 'The method of the request',
             enum: ['get', 'post', 'put', 'delete', 'patch', null],
             default: 'get',
-            'x-speakeasy-unknown-values': 'allow',
             nullable: true,
+            'x-speakeasy-unknown-values': 'allow',
           },
           path: {
             type: 'string',
-            description: 'The path of the request including any query paramters',
+            description: 'The path of the request including any query parameters',
             example: '/employees/directory',
             nullable: true,
           },

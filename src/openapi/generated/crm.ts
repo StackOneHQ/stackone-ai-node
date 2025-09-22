@@ -3412,9 +3412,26 @@ export const crmSpec = {
             example: 'option_123',
           },
           value: {
-            type: 'string',
             description: 'The human readable value of the option',
             example: 'Not Started',
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'object',
+              },
+              {
+                type: 'array',
+                items: {},
+              },
+            ],
           },
         },
         required: ['id', 'value'],
@@ -3459,6 +3476,10 @@ export const crmSpec = {
               {
                 type: 'array',
                 items: {},
+              },
+              {
+                type: 'string',
+                format: 'date-time',
               },
             ],
             nullable: true,

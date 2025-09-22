@@ -2658,12 +2658,6 @@ export const iamSpec = {
             example: 'My Document',
             nullable: true,
           },
-          path: {
-            type: 'string',
-            description: 'The path where the file is stored',
-            example: '/path/to/file',
-            nullable: true,
-          },
           category: {
             description: 'The category of the file',
             example: 'templates, forms, backups, etc.',
