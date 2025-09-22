@@ -1,2 +1,6 @@
 [test]
 preload = ["./bun.test.setup.ts"]
+
+[install]
+linker = "isolated"
+
