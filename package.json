@@ -19,7 +19,7 @@
     "prepare": "husky && bun run fetch:specs",
     "build": "bun -b tsdown",
     "rebuild": "bun run fetch:specs && bun run build",
-    "prepublishOnly": "bun run rebuild",
+    "prepack": "bun run rebuild",
     "test:unit": "bun test src",
     "test:examples": "bun test examples",
     "test:scripts": "bun test scripts",
