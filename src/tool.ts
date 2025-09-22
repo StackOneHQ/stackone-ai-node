@@ -278,7 +278,7 @@ export class Tools implements Iterable<BaseTool> {
    */
   async metaTools(): Promise<Tools> {
     const oramaDb = await initializeOramaDb(this.tools);
-    const baseTools = [metaSearchRelevantTools(oramaDb, this.tools), metaExecuteTool(this)];
+    const baseTools = [metaSearchTools(oramaDb, this.tools), metaExecuteTool(this)];
     const tools = new Tools(baseTools);
     return tools;
   }
@@ -378,7 +378,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
   return oramaDb;
 }
 
-export function metaSearchRelevantTools(oramaDb: OramaDb, allTools: BaseTool[]): BaseTool {
+export function metaSearchTools(oramaDb: OramaDb, allTools: BaseTool[]): BaseTool {
   const name = 'meta_search_tools' as const;
   const description =
     'Searches for relevant tools based on a natural language query. This tool should be called first to discover available tools before executing them.' as const;
