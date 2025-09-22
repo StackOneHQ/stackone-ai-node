@@ -1,9 +1,5 @@
 import { beforeAll, afterEach, afterAll } from 'bun:test'
 import { server } from './mocks/node.ts'
-import * as dotenv from 'dotenv'
-
-// Load environment variables for examples that rely on them
-dotenv.config()
 
 // Provide safe fallbacks in CI/sandbox (only if null/undefined)
 process.env.OPENAI_API_KEY ??= 'test-openai-key'
