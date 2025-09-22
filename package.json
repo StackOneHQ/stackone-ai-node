@@ -16,6 +16,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "preinstall": "bun x only-allow bun",
     "prepare": "bun prepare:git && bun run fetch:specs",
     "prepare:git": "git config --local core.hooksPath .githooks",
     "build": "bun -b tsdown",
