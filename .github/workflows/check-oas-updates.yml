@@ -25,7 +25,7 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install
+        run: bun ci
 
       - name: Fetch latest OAS specs
         run: bun run fetch:specs
