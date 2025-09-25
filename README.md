@@ -80,6 +80,60 @@ await generateText({
 
 [View full example](examples/ai-sdk-integration.ts)
 
+## Implicit Feedback with LangSmith
+
+The SDK can automatically capture implicit feedback for every tool call and persist structured analytics in LangSmith. Enable the collector by providing LangSmith credentials (either via environment variables or programmatically) and the instrumentation will observe tool retries, task switching, and workflow progression without prompting end users.
+
+- Set `LANGSMITH_API_KEY` (and optionally `LANGSMITH_PROJECT`, `LANGSMITH_API_URL`) to activate implicit feedback logging automatically.
+- Alternatively, configure it in code for finer control:
+
+```typescript
+import { configureImplicitFeedback } from "@stackone/ai";
+
+configureImplicitFeedback({
+  enabled: true,
+  langsmith: {
+    projectName: "stackone-implicit-feedback",
+  },
+});
+```
+
+Once enabled, every `tool.execute` call emits a unified `feedback` object containing:
+
+- Tool call quality signals (intent vs. result alignment, follow-up behaviour, utilization).
+- Workflow health insights (quick refinements, task switching, abandonment) plus simple heuristics such as `fastRetry`, `fastCompletion`, and `longCall`.
+- Privacy-preserving summaries (sanitized payload samples, redacted headers, compact previews).
+
+Example payload stored on a LangSmith run:
+
+```json
+{
+  "feedback": {
+    "success": true,
+    "summary": {
+      "itemCount": 25,
+      "digest": "Fetched 25 items (more available)"
+    },
+    "toolFeedback": {
+      "suitability": "proceeded",
+      "engagement": "medium",
+      "workflow": { "expected": ["hris_get_employment"], "actual": "hris_list_employments" },
+      "heuristics": { "fastRetry": false, "fastCompletion": false, "longCall": false }
+    }
+  }
+}
+```
+
+The instrumentation is provided by the internal `@stackone/tool-feedback` package. While working in this repo you can link it locally with `bun add file:../tool-feedback-node`. Once the package is published, replace the file reference with the released version.
+
+Use the optional `feedbackSessionId` on `ExecuteOptions` to correlate tool calls that belong to the same conversation:
+
+```typescript
+await tool.execute(params, { feedbackSessionId: conversationId });
+```
+
+Run `bun run scripts/run-tool.ts` to see a fully wired execution with explanatory logs, redacted dry-run headers, and the emitted feedback snapshots.
+
 ## StackOneToolSet
 
 The StackOneToolSet is an extension of the OpenAPIToolSet that adds some convenience methods for using StackOne API keys and account IDs and some other features.

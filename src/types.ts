@@ -94,6 +94,10 @@ export interface ExecuteOptions {
    * Useful for debugging and testing transformed parameters
    */
   dryRun?: boolean;
+  /**
+   * Optional session identifier used by the implicit feedback system to correlate tool calls
+   */
+  feedbackSessionId?: string;
 }
 
 /**

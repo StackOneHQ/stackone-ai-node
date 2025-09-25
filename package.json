@@ -37,7 +37,9 @@
   },
   "dependencies": {
     "@orama/orama": "^3.1.11",
-    "json-schema": "^0.4.0"
+    "json-schema": "^0.4.0",
+    "langsmith": "^0.3.69",
+    "/tool-feedback": "file:../tool-feedback-node"
   },
   "devDependencies": {
     "@ai-sdk/openai": "^1.1.14",
