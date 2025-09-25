@@ -1,10 +1,20 @@
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { http, HttpResponse } from 'msw';
+import { server } from '../../../mocks/node.ts';
 import { ParameterLocation } from '../../types';
 import { StackOneAPIError } from '../../utils/errors';
 import { RequestBuilder } from '../requestBuilder';
 
 describe('RequestBuilder', () => {
   let builder: RequestBuilder;
+  const recordRequests = () => {
+    const recordedRequests: Request[] = [];
+    const listener = ({ request }: { request: Request }) => {
+      recordedRequests.push(request);
+    };
+    server.events.on('request:start', listener);
+    return recordedRequests;
+  };
   const mockConfig = {
     method: 'GET',
     url: 'https://api.example.com/test/{pathParam}',
@@ -30,12 +40,26 @@ describe('RequestBuilder', () => {
 
   beforeEach(() => {
     builder = new RequestBuilder(mockConfig, { 'Initial-Header': 'test' });
-    global.fetch = mock(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ success: true }),
-      } as Response)
+    server.use(
+      http.get('https://api.example.com/test/:pathParam', ({ params, request }) => {
+        const url = new URL(request.url);
+        const queryParam = url.searchParams.get('queryParam');
+
+        if (params.pathParam === 'invalid') {
+          return HttpResponse.json({ error: 'Not found' }, { status: 404 });
+        }
+
+        return HttpResponse.json({
+          success: true,
+          pathParam: params.pathParam,
+          queryParam,
+        });
+      })
     );
+  });
+
+  afterEach(() => {
+    server.events.removeAllListeners('request:start');
   });
 
   it('should initialize with correct properties', () => {
@@ -125,18 +149,22 @@ describe('RequestBuilder', () => {
       queryParam: 'query-value',
     };
 
+    const recordedRequests = recordRequests();
+
     const result = await builder.execute(params);
 
-    expect(result).toEqual({ success: true });
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(
-      'https://api.example.com/test/path-value?queryParam=query-value',
-      expect.any(Object)
+    expect(result).toEqual({ success: true, pathParam: 'path-value', queryParam: 'query-value' });
+    expect(recordedRequests).toHaveLength(1);
+    expect(recordedRequests[0]?.url).toBe(
+      'https://api.example.com/test/path-value?queryParam=query-value'
     );
   });
 
   it('should return request details on dry run', async () => {
     const params = { pathParam: 'path-value' };
+
+    const recordedRequests = recordRequests();
+
     const result = await builder.execute(params, { dryRun: true });
 
     expect(result).toEqual({
@@ -149,22 +177,16 @@ describe('RequestBuilder', () => {
       body: undefined,
       mappedParams: params,
     });
-    expect(fetch).not.toHaveBeenCalled();
+    expect(recordedRequests).toHaveLength(0);
   });
 
   it('should throw StackOneAPIError when API request fails', async () => {
-    global.fetch = mock(() =>
-      Promise.resolve({
-        ok: false,
-        status: 404,
-        json: () => Promise.resolve({ error: 'Not found' }),
-      } as Response)
-    );
-
     const params = { pathParam: 'invalid' };
+    const recordedRequests = recordRequests();
 
     await expect(builder.execute(params)).rejects.toThrow(StackOneAPIError);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(recordedRequests).toHaveLength(1);
+    expect(recordedRequests[0]?.url).toBe('https://api.example.com/test/invalid');
   });
 
   it('should serialize deep object query parameters correctly', async () => {
