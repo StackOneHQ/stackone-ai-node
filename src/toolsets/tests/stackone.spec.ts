@@ -5,6 +5,7 @@ import { StackOneToolSet } from '../stackone';
 
 // Mock environment variables
 env.STACKONE_API_KEY = 'test_key';
+env.STACKONE_ACCOUNT_ID = undefined;
 
 describe('StackOneToolSet', () => {
   // Snapshot tests

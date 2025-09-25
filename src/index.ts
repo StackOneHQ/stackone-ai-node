@@ -8,6 +8,20 @@ export { BaseTool, StackOneTool, Tools } from './tool';
 export { StackOneAPIError, StackOneError } from './utils/errors';
 
 export {
+  ImplicitFeedbackManager,
+  configureImplicitFeedback,
+  getImplicitFeedbackManager,
+} from './feedback';
+
+export type {
+  ImplicitFeedbackConfig,
+  LangSmithConfig,
+  ResultSummary,
+  ToolCallRecord,
+  ToolExecutionSnapshot,
+} from './feedback';
+
+export {
   OpenAPIToolSet,
   StackOneToolSet,
   ToolSetConfigError,

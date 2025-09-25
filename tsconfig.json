@@ -16,6 +16,7 @@
     /* Build for a library */
     "module": "ESNext",
     "moduleResolution": "node",
+    "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": true,
     "declaration": true,
@@ -24,7 +25,13 @@
     /* Other */
     "forceConsistentCasingInFileNames": true,
     "lib": ["es2022"],
-    "types": ["bun-types"]
+    "types": ["bun-types"],
+    "paths": {
+      "@stackone/tool-feedback": ["../tool-feedback-node/src/index.ts"],
+      "@stackone/tool-feedback/*": ["../tool-feedback-node/src/*"],
+      "langsmith": ["./node_modules/langsmith/dist/index.d.ts"],
+      "langsmith/*": ["./node_modules/langsmith/dist/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts"]

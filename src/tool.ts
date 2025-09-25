@@ -1,6 +1,9 @@
 import * as orama from '@orama/orama';
 import { type ToolSet, jsonSchema } from 'ai';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
+import { getImplicitFeedbackManager } from './feedback';
+import type { ImplicitFeedbackManager, ToolExecutionSnapshot } from './feedback';
+import { buildErrorSummary, buildResultInsights, extractQuery } from './feedback';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
   ExecuteConfig,
@@ -59,6 +62,11 @@ export class BaseTool {
    * Execute the tool with the provided parameters
    */
   async execute(inputParams?: JsonDict | string, options?: ExecuteOptions): Promise<JsonDict> {
+    const feedbackManager = getImplicitFeedbackManager();
+    const startedAt = new Date();
+    let params: JsonDict = {};
+    let processedParams: JsonDict | undefined;
+
     try {
       // Validate params is either undefined, string, or object
       if (
@@ -72,25 +80,91 @@ export class BaseTool {
       }
 
       // Convert string params to object
-      const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
+      params =
+        typeof inputParams === 'string' ? JSON.parse(inputParams) : (inputParams as JsonDict) || {};
 
       // Apply experimental preExecute function (either from tool creation or execution options)
-      let processedParams = params;
+      processedParams = params;
 
       if (this.experimental_preExecute) {
         processedParams = await this.experimental_preExecute(params);
       }
 
-      // Execute the request directly with processed parameters
-      return await this.requestBuilder.execute(processedParams, options);
+      const result = await this.requestBuilder.execute(processedParams, options);
+
+      const completedAt = new Date();
+      const { summary: resultSummary, metadata: resultMetadata } = buildResultInsights(
+        result,
+        options
+      );
+      const provider =
+        typeof processedParams.provider === 'string' ? processedParams.provider : undefined;
+      const callContext = {
+        query: extractQuery(processedParams),
+        provider,
+        ...(resultMetadata ? { metadata: resultMetadata } : {}),
+      };
+
+      this.recordImplicitFeedback(feedbackManager, {
+        toolName: this.name,
+        description: this.description,
+        parameters: processedParams,
+        options,
+        callContext,
+        resultSummary,
+        rawResult: result,
+        success: true,
+        startedAt,
+        completedAt,
+        executionTime: completedAt.getTime() - startedAt.getTime(),
+      });
+
+      return result;
     } catch (error) {
+      const completedAt = new Date();
+      const message = error instanceof Error ? error.message : String(error);
+      const errorSummary = buildErrorSummary(error);
+      const provider =
+        typeof (processedParams ?? params).provider === 'string'
+          ? ((processedParams ?? params).provider as string)
+          : undefined;
+      const callContext = {
+        query: extractQuery(processedParams ?? params),
+        provider,
+        metadata: { error: message },
+      };
+
+      this.recordImplicitFeedback(feedbackManager, {
+        toolName: this.name,
+        description: this.description,
+        parameters: processedParams ?? params,
+        options,
+        callContext,
+        resultSummary: errorSummary,
+        success: false,
+        error: message,
+        startedAt,
+        completedAt,
+        executionTime: completedAt.getTime() - startedAt.getTime(),
+      });
+
       if (error instanceof StackOneError) {
         throw error;
       }
-      throw new StackOneError(
-        `Error executing tool: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new StackOneError(`Error executing tool: ${message}`);
     }
+  }
+
+  private recordImplicitFeedback(
+    manager: ImplicitFeedbackManager | undefined,
+    snapshot: ToolExecutionSnapshot
+  ): void {
+    if (!manager?.isEnabled()) {
+      return;
+    }
+    void manager.recordToolCall(snapshot).catch((error: unknown) => {
+      console.warn('[implicit-feedback] Failed to record tool call', error);
+    });
   }
 
   /**
