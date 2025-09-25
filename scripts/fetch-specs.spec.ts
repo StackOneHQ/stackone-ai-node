@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'bun:test';
 import { createFixture } from 'fs-fixture';
-import { saveSpec } from '../../scripts/fetch-specs';
+import { saveSpec } from './fetch-specs';
 
 // Mock environment variables
 beforeAll(() => {
