@@ -1,5 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import path from 'node:path';
+import { http, HttpResponse } from 'msw';
+import { server } from '../../../mocks/node.ts';
 import * as OpenAPILoader from '../../openapi/loader';
 import { ParameterLocation } from '../../types';
 import type { AuthenticationConfig } from '../base';
@@ -10,6 +12,14 @@ describe('OpenAPIToolSet', () => {
   const petstoreJsonPath = path.join(fixturesPath, 'petstore.json');
 
   let loadFromFileSpy: ReturnType<typeof spyOn>;
+  const recordRequests = () => {
+    const recordedRequests: Request[] = [];
+    const listener = ({ request }: { request: Request }) => {
+      recordedRequests.push(request);
+    };
+    server.events.on('request:start', listener);
+    return recordedRequests;
+  };
 
   beforeEach(() => {
     loadFromFileSpy = spyOn(OpenAPILoader, 'loadFromFile').mockImplementation(() => ({
@@ -43,7 +53,8 @@ describe('OpenAPIToolSet', () => {
   });
 
   afterEach(() => {
-    mock.restore();
+    loadFromFileSpy.mockRestore();
+    server.events.removeAllListeners('request:start');
   });
 
   it('should initialize with a file path', () => {
@@ -74,28 +85,25 @@ describe('OpenAPIToolSet', () => {
   });
 
   it('should create an instance from a URL', async () => {
-    // Mock fetch for loading the spec
-    const mockResponse = new Response(JSON.stringify({}), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    server.use(
+      http.get('https://example.com/openapi.json', () =>
+        HttpResponse.json({
+          paths: {},
+        })
+      )
+    );
+
+    const recordedRequests = recordRequests();
+
+    // Create an instance from a URL
+    const toolset = await OpenAPIToolSet.fromUrl({
+      url: 'https://example.com/openapi.json',
     });
 
-    // Mock the global fetch function for this test only
-    const originalFetch = global.fetch;
-    global.fetch = mock(() => Promise.resolve(mockResponse));
-
-    try {
-      // Create an instance from a URL
-      const toolset = await OpenAPIToolSet.fromUrl({
-        url: 'https://example.com/openapi.json',
-      });
-
-      // Verify the toolset was initialized
-      expect(toolset).toBeDefined();
-    } finally {
-      // Restore the original fetch function
-      global.fetch = originalFetch;
-    }
+    // Verify the toolset was initialized
+    expect(toolset).toBeDefined();
+    expect(recordedRequests).toHaveLength(1);
+    expect(recordedRequests[0]?.url).toBe('https://example.com/openapi.json');
   });
 
   it('should throw error if URL is not provided to fromUrl', async () => {
