@@ -24,11 +24,18 @@ describe('fetch-specs script', () => {
 
     // Test fetchSpec function
     const hrisSpec = await response.json();
-    expect(hrisSpec).toEqual({
-      openapi: '3.0.0',
-      info: { title: 'HRIS API', version: '1.0.0' },
-      paths: { '/employees': {} },
-    });
+    expect(hrisSpec).toMatchInlineSnapshot(`
+      {
+        "info": {
+          "title": "HRIS API",
+          "version": "1.0.0",
+        },
+        "openapi": "3.0.0",
+        "paths": {
+          "/employees": {},
+        },
+      }
+    `);
 
     // Test saveSpec function
     await saveSpec('hris', hrisSpec, fixture.path);
