@@ -1,16 +1,7 @@
-import {
-  type Mock,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  mock,
-  spyOn,
-} from 'bun:test';
+import { beforeAll, describe, expect, it } from 'bun:test';
 import fs from 'node:fs';
 import path from 'node:path';
+import { createFixture } from 'fs-fixture';
 
 // Mock environment variables
 beforeAll(() => {
@@ -18,24 +9,9 @@ beforeAll(() => {
 });
 
 describe('fetch-specs script', () => {
-  // Mocks for fs
-  let writeFileSyncSpy: Mock<typeof fs.writeFileSync>;
-
-  beforeEach(() => {
-    // Mock fs.writeFileSync
-    writeFileSyncSpy = spyOn(fs, 'writeFileSync').mockImplementation(() => {
-      // Do nothing, just track that it was called
-      return undefined;
-    });
-  });
-
-  afterEach(() => {
-    // Clean up mocks
-    writeFileSyncSpy.mockRestore();
-    mock.restore();
-  });
-
   it('should fetch and save OpenAPI specs', async () => {
+    await using fixture = await createFixture();
+
     // Create test implementations of the functions
     const fetchSpec = async (category: string): Promise<Record<string, unknown>> => {
       const response = await fetch(`https://api.stackone.com/api/v1/${category}/openapi.json`, {
@@ -53,8 +29,7 @@ describe('fetch-specs script', () => {
     };
 
     const saveSpec = async (category: string, spec: Record<string, unknown>): Promise<void> => {
-      // Use a mock path that doesn't need to be created
-      const outputPath = path.join('/mock/path', `${category}.json`);
+      const outputPath = path.join(fixture.path, `${category}.json`);
       fs.writeFileSync(outputPath, JSON.stringify(spec, null, 2));
     };
 
@@ -69,11 +44,9 @@ describe('fetch-specs script', () => {
     // Test saveSpec function
     await saveSpec('hris', hrisSpec);
 
-    // Verify writeFileSync was called with the correct arguments
-    expect(writeFileSyncSpy).toHaveBeenCalled();
-    const writeFileCall = writeFileSyncSpy.mock.calls[0];
-    expect(writeFileCall[0]).toContain('hris.json');
-    expect(JSON.parse(writeFileCall[1] as string)).toEqual({
+    const savedSpecPath = path.join(fixture.path, 'hris.json');
+    expect(fs.existsSync(savedSpecPath)).toBe(true);
+    expect(JSON.parse(fs.readFileSync(savedSpecPath, 'utf-8'))).toEqual({
       openapi: '3.0.0',
       info: { title: 'HRIS API', version: '1.0.0' },
       paths: { '/employees': {} },
