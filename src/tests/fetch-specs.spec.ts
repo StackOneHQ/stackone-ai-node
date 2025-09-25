@@ -9,8 +9,6 @@ beforeAll(() => {
 
 describe('fetch-specs script', () => {
   it('should fetch and save OpenAPI specs', async () => {
-    await using fixture = await createFixture();
-
     const category = 'hris';
 
     const response = await fetch(`https://api.stackone.com/api/v1/${category}/openapi.json`, {
@@ -36,9 +34,12 @@ describe('fetch-specs script', () => {
         },
       }
     `);
+  });
+  it('should save OpenAPI specs to file', async () => {
+    await using fixture = await createFixture();
 
     // Test saveSpec function
-    await saveSpec('hris', hrisSpec, fixture.path);
+    await saveSpec('hris', {}, fixture.path);
 
     expect(await fixture.exists('hris.ts')).toBe(true);
   });
