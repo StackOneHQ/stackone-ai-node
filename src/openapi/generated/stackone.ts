@@ -3979,9 +3979,23 @@ export const stackoneSpec = {
           },
         },
       },
-      ActionsRpcInputDto: {
+      ActionsRpcRequestDto: {
         type: 'object',
         properties: {
+          action: {
+            type: 'string',
+            description: 'The action to execute',
+            example: 'create_employee',
+          },
+          path: {
+            type: 'object',
+            description: 'Path parameters for the action',
+            example: {
+              id: '123',
+            },
+            nullable: true,
+            additionalProperties: true,
+          },
           query: {
             type: 'object',
             description: 'Query parameters for the action',
@@ -4009,25 +4023,6 @@ export const stackoneSpec = {
             },
             nullable: true,
             additionalProperties: true,
-          },
-        },
-      },
-      ActionsRpcRequestDto: {
-        type: 'object',
-        properties: {
-          action: {
-            type: 'string',
-            description: 'The action to execute',
-            example: 'create_employee',
-          },
-          input: {
-            description: 'Input parameters for the action',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/ActionsRpcInputDto',
-              },
-            ],
           },
         },
         required: ['action'],

@@ -7493,7 +7493,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
           "type": "string",
         },
         "id": {
@@ -7966,7 +7966,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
           "type": "string",
         },
         "id": {
@@ -9645,7 +9645,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
           "type": "string",
         },
         "filter": {
@@ -10218,12 +10218,27 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "filter": {
           "description": "HRIS Time Off filters",
           "properties": {
+            "end_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that end on or before this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
             "policy_ids": {
+              "additionalProperties": false,
               "description": "List of time off policy ids to filter by.",
               "items": {
                 "type": "string",
               },
               "type": "array",
+            },
+            "start_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that start on or after this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
             },
             "updated_after": {
               "additionalProperties": false,
@@ -10542,7 +10557,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
           "type": "string",
         },
         "filter": {
@@ -11554,12 +11569,27 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "filter": {
           "description": "HRIS Time Off filters",
           "properties": {
+            "end_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that end on or before this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
             "policy_ids": {
+              "additionalProperties": false,
               "description": "List of time off policy ids to filter by.",
               "items": {
                 "type": "string",
               },
               "type": "array",
+            },
+            "start_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that start on or after this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
             },
             "updated_after": {
               "additionalProperties": false,
