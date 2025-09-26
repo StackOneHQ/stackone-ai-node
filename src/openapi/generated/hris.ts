@@ -2267,6 +2267,25 @@ export const hrisSpec = {
                   items: {
                     type: 'string',
                   },
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description:
+                    'Filter to include time off requests that start on or after this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description:
+                    'Filter to include time off requests that end on or before this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
                 },
               },
               nullable: true,
@@ -6579,7 +6598,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups',
               type: 'string',
             },
           },
@@ -6886,7 +6905,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups',
               type: 'string',
             },
           },
@@ -7112,7 +7131,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups',
               type: 'string',
             },
           },
@@ -7612,7 +7631,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups',
               type: 'string',
             },
           },
@@ -13107,6 +13126,25 @@ export const hrisSpec = {
                   items: {
                     type: 'string',
                   },
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description:
+                    'Filter to include time off requests that start on or after this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description:
+                    'Filter to include time off requests that end on or before this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
                 },
               },
               nullable: true,
@@ -19808,7 +19846,6 @@ export const hrisSpec = {
             description: 'The employee start date',
             example: '2021-01-01T00:00:00.000Z',
             format: 'date-time',
-            deprecated: true,
             nullable: true,
           },
           tenure: {
