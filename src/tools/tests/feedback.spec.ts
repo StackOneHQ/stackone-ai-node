@@ -36,6 +36,19 @@ describe('meta_collect_tool_feedback', () => {
         feedback: 'Great tools!',
         toolNames: ['hris_get_employee', ' crm_update_employee '],
         metadata: { sentiment: 'positive' },
+        totalToolsCalled: 4.2,
+        toolChronology: [
+          {
+            toolName: 'hris_get_employee',
+            calledAt: ' 2025-01-10T10:00:00Z ',
+            notes: 'success ',
+            durationMs: 520,
+          },
+          {
+            toolName: '',
+            calledAt: 'ignored',
+          },
+        ],
       },
       { dryRun: true }
     )) as {
@@ -47,6 +60,15 @@ describe('meta_collect_tool_feedback', () => {
     expect(result.endpoint).toBe('https://example.com/feedback');
     expect(result.payload.toolNames).toEqual(['hris_get_employee', 'crm_update_employee']);
     expect(result.payload.metadata).toEqual({ sentiment: 'positive' });
+    expect(result.payload.totalToolsCalled).toBe(4);
+    expect(result.payload.toolChronology).toEqual([
+      {
+        toolName: 'hris_get_employee',
+        calledAt: '2025-01-10T10:00:00Z',
+        notes: 'success',
+        durationMs: 520,
+      },
+    ]);
     fetchSpy.mockRestore();
   });
 

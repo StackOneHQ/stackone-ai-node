@@ -13,7 +13,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool {
   const name = 'meta_collect_tool_feedback' as const;
   const description =
-    'Collects user feedback on StackOne tool performance. Before calling this tool, ask the user if they are comfortable sending feedback to StackOne and explain that the LLM will handle the full process. Only invoke this tool after they explicitly consent.';
+    'Collects user feedback on StackOne tool performance. First ask the user, “Are you ok with sending feedback to StackOne?” and mention that the LLM will take care of sending it. Call this tool only when the user explicitly answers yes.';
   const parameters = {
     type: 'object',
     properties: {
@@ -33,6 +33,30 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         },
         description: 'Optional list of tool names or workflows the feedback references.',
       },
+      toolChronology: {
+        type: 'array',
+        description:
+          'Optional chronological trace of tools used in this session, each entry describing one invocation.',
+        items: {
+          type: 'object',
+          properties: {
+            toolName: {
+              type: 'string',
+              description: 'Name of the tool that was invoked.',
+            },
+            calledAt: {
+              type: 'string',
+              description: 'Timestamp (ISO 8601 recommended) for when the tool ran.',
+            },
+            notes: {
+              type: 'string',
+              description: 'Optional notes about the tool execution outcome.',
+            },
+          },
+          required: ['toolName'],
+          additionalProperties: true,
+        },
+      },
       contactOk: {
         type: 'boolean',
         description: 'Whether StackOne may follow up with the user about their feedback.',
@@ -41,6 +65,10 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         type: 'object',
         description: 'Optional additional context about the feedback, provided as key-value pairs.',
         additionalProperties: true,
+      },
+      totalToolsCalled: {
+        type: 'number',
+        description: 'Optional count of tool invocations during the feedback session.',
       },
       feedbackEndpoint: {
         type: 'string',
@@ -126,6 +154,49 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
 
       if (isRecord(params.metadata)) {
         submission.metadata = params.metadata;
+      }
+
+      if (Array.isArray(params.toolChronology)) {
+        const chronology = params.toolChronology.reduce<Record<string, unknown>[]>((acc, entry) => {
+          if (!isRecord(entry)) return acc;
+          const toolName = typeof entry.toolName === 'string' ? entry.toolName.trim() : '';
+          if (!toolName) return acc;
+
+          const sanitized: Record<string, unknown> = { toolName };
+
+          if (typeof entry.calledAt === 'string') {
+            const calledAt = entry.calledAt.trim();
+            if (calledAt) {
+              sanitized.calledAt = calledAt;
+            }
+          }
+
+          if (typeof entry.notes === 'string') {
+            const notes = entry.notes.trim();
+            if (notes) {
+              sanitized.notes = notes;
+            }
+          }
+
+          // Preserve any additional properties as-is
+          for (const [key, value] of Object.entries(entry)) {
+            if (key === 'toolName' || key === 'calledAt' || key === 'notes') continue;
+            sanitized[key] = value;
+          }
+
+          acc.push(sanitized);
+          return acc;
+        }, []);
+
+        if (chronology.length > 0) {
+          submission.toolChronology = chronology;
+        }
+      }
+
+      if (typeof params.totalToolsCalled === 'number') {
+        if (Number.isFinite(params.totalToolsCalled) && params.totalToolsCalled >= 0) {
+          submission.totalToolsCalled = Math.trunc(params.totalToolsCalled);
+        }
       }
 
       const headers = {
