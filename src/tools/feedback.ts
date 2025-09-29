@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { BaseTool } from '../tool';
 import type { ExecuteConfig, ExecuteOptions, JsonDict, ToolParameters } from '../types';
 import { StackOneError } from '../utils/errors';
@@ -6,9 +7,41 @@ interface FeedbackToolOptions {
   defaultEndpoint?: string;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+const createNonEmptyTrimmedStringSchema = (fieldName: string) =>
+  z
+    .string()
+    .transform((value) => value.trim())
+    .refine((value) => value.length > 0, {
+      message: `${fieldName} must be a non-empty string.`,
+    });
+
+const createOptionalTrimmedStringSchema = () =>
+  z
+    .string()
+    .optional()
+    .transform((value) => {
+      if (typeof value !== 'string') {
+        return undefined;
+      }
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : undefined;
+    });
+
+const feedbackInputSchema = z.object({
+  feedback: createNonEmptyTrimmedStringSchema('Feedback'),
+  accountId: createNonEmptyTrimmedStringSchema('accountId'),
+  feedbackEndpoint: createOptionalTrimmedStringSchema(),
+  toolNames: z
+    .array(z.string())
+    .optional()
+    .transform((value) => {
+      if (!value) {
+        return undefined;
+      }
+      const sanitized = value.map((item) => item.trim()).filter((item) => item.length > 0);
+      return sanitized.length > 0 ? sanitized : undefined;
+    }),
+});
 
 export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool {
   const name = 'meta_collect_tool_feedback' as const;
@@ -17,11 +50,6 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
   const parameters = {
     type: 'object',
     properties: {
-      consentGranted: {
-        type: 'boolean',
-        description:
-          'Set to true only if the user explicitly agreed to share their feedback with StackOne.',
-      },
       accountId: {
         type: 'string',
         description: 'Identifier for the StackOne account associated with this feedback.',
@@ -37,58 +65,13 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         },
         description: 'Optional list of tool names or workflows the feedback references.',
       },
-      toolChronology: {
-        type: 'array',
-        description:
-          'Optional chronological trace of tools used in this session, each entry describing one invocation.',
-        items: {
-          type: 'object',
-          properties: {
-            toolName: {
-              type: 'string',
-              description: 'Name of the tool that was invoked.',
-            },
-            calledAt: {
-              type: 'string',
-              description: 'Timestamp (ISO 8601 recommended) for when the tool ran.',
-            },
-            notes: {
-              type: 'string',
-              description: 'Optional notes about the tool execution outcome.',
-            },
-            durationMs: {
-              type: 'number',
-              description: 'Optional execution duration for the tool invocation in milliseconds.',
-            },
-            provider: {
-              type: 'string',
-              description: 'Optional provider identifier associated with the tool invocation.',
-            },
-          },
-          required: ['toolName'],
-          additionalProperties: true,
-        },
-      },
-      contactOk: {
-        type: 'boolean',
-        description: 'Whether StackOne may follow up with the user about their feedback.',
-      },
-      metadata: {
-        type: 'object',
-        description: 'Optional additional context about the feedback, provided as key-value pairs.',
-        additionalProperties: true,
-      },
-      totalToolsCalled: {
-        type: 'number',
-        description: 'Optional count of tool invocations during the feedback session.',
-      },
       feedbackEndpoint: {
         type: 'string',
         description:
           'Override the default feedback collection URL for this submission. Defaults to the configured StackOne feedback endpoint.',
       },
     },
-    required: ['consentGranted', 'feedback', 'accountId'],
+    required: ['feedback', 'accountId'],
   } as const satisfies ToolParameters;
 
   const executeConfig = {
@@ -107,38 +90,12 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
     options?: ExecuteOptions
   ): Promise<JsonDict> {
     try {
-      if (
-        inputParams !== undefined &&
-        typeof inputParams !== 'string' &&
-        typeof inputParams !== 'object'
-      ) {
-        throw new StackOneError(
-          `Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`
-        );
-      }
-
-      const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-      const consentGranted = params.consentGranted === true;
-      if (!consentGranted) {
-        throw new StackOneError(
-          'User consent not granted. Ask the user for permission before calling this tool and set consentGranted to true.'
-        );
-      }
-
-      const feedback = typeof params.feedback === 'string' ? params.feedback.trim() : '';
-      if (!feedback) {
-        throw new StackOneError('Feedback must be a non-empty string.');
-      }
-
-      const accountId = typeof params.accountId === 'string' ? params.accountId.trim() : '';
-      if (!accountId) {
-        throw new StackOneError('accountId must be provided as a non-empty string.');
-      }
+      const rawParams =
+        typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
+      const parsedParams = feedbackInputSchema.parse(rawParams);
 
       const endpointCandidate =
-        (typeof params.feedbackEndpoint === 'string' && params.feedbackEndpoint.trim()) ||
-        defaultEndpoint ||
-        process.env.STACKONE_FEEDBACK_URL;
+        parsedParams.feedbackEndpoint || defaultEndpoint || process.env.STACKONE_FEEDBACK_URL;
 
       if (!endpointCandidate) {
         throw new StackOneError(
@@ -147,96 +104,14 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
       }
 
       const submission: Record<string, unknown> = {
-        consentGranted: true,
-        feedback,
-        accountId,
+        feedback: parsedParams.feedback,
+        accountId: parsedParams.accountId,
         submittedAt: new Date().toISOString(),
         source: 'stackone-ai-node',
       };
 
-      if (Array.isArray(params.toolNames)) {
-        const normalized: string[] = [];
-
-        for (const value of params.toolNames as unknown[]) {
-          if (typeof value !== 'string') continue;
-          const trimmed = value.trim();
-          if (!trimmed) continue;
-          normalized.push(trimmed);
-        }
-
-        if (normalized.length > 0) {
-          submission.toolNames = normalized;
-        }
-      }
-
-      if (params.contactOk !== undefined) {
-        submission.contactOk = Boolean(params.contactOk);
-      }
-
-      if (isRecord(params.metadata)) {
-        submission.metadata = params.metadata;
-      }
-
-      if (Array.isArray(params.toolChronology)) {
-        const chronology: Record<string, unknown>[] = [];
-
-        for (const entry of params.toolChronology as unknown[]) {
-          if (!isRecord(entry)) continue;
-          const toolName = typeof entry.toolName === 'string' ? entry.toolName.trim() : '';
-          if (!toolName) continue;
-
-          const sanitized: Record<string, unknown> = { toolName };
-
-          if (typeof entry.calledAt === 'string') {
-            const calledAt = entry.calledAt.trim();
-            if (calledAt) {
-              sanitized.calledAt = calledAt;
-            }
-          }
-
-          if (typeof entry.notes === 'string') {
-            const notes = entry.notes.trim();
-            if (notes) {
-              sanitized.notes = notes;
-            }
-          }
-
-          if (typeof entry.durationMs === 'number' && Number.isFinite(entry.durationMs)) {
-            sanitized.durationMs = Math.trunc(entry.durationMs);
-          }
-
-          if (typeof entry.provider === 'string') {
-            const provider = entry.provider.trim();
-            if (provider) {
-              sanitized.provider = provider;
-            }
-          }
-
-          for (const [key, value] of Object.entries(entry)) {
-            if (
-              key === 'toolName' ||
-              key === 'calledAt' ||
-              key === 'notes' ||
-              key === 'durationMs' ||
-              key === 'provider'
-            ) {
-              continue;
-            }
-            sanitized[key] = value;
-          }
-
-          chronology.push(sanitized);
-        }
-
-        if (chronology.length > 0) {
-          submission.toolChronology = chronology;
-        }
-      }
-
-      if (typeof params.totalToolsCalled === 'number') {
-        if (Number.isFinite(params.totalToolsCalled) && params.totalToolsCalled >= 0) {
-          submission.totalToolsCalled = Math.trunc(params.totalToolsCalled);
-        }
+      if (parsedParams.toolNames) {
+        submission.toolNames = parsedParams.toolNames;
       }
 
       const headers = {

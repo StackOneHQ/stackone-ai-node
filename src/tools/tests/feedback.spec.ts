@@ -9,29 +9,19 @@ beforeEach(() => {
 });
 
 describe('meta_collect_tool_feedback', () => {
-  it('throws when consent is not granted', async () => {
-    const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
-
-    await expect(
-      tool.execute({ consentGranted: false, feedback: 'Great tools!', accountId: 'acct-123' })
-    ).rejects.toBeInstanceOf(StackOneError);
-  });
-
   it('throws when feedback endpoint is missing', async () => {
     process.env.STACKONE_FEEDBACK_URL = '';
     const tool = createFeedbackTool();
 
     await expect(
-      tool.execute({ consentGranted: true, feedback: 'Great tools!', accountId: 'acct-123' })
+      tool.execute({ feedback: 'Great tools!', accountId: 'acct-123' })
     ).rejects.toBeInstanceOf(StackOneError);
   });
 
   it('throws when accountId is missing', async () => {
     const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
 
-    await expect(
-      tool.execute({ consentGranted: true, feedback: 'Great tools!' })
-    ).rejects.toBeInstanceOf(StackOneError);
+    await expect(tool.execute({ feedback: 'Great tools!' })).rejects.toBeInstanceOf(StackOneError);
   });
 
   it('returns dryRun payload without calling fetch', async () => {
@@ -40,24 +30,8 @@ describe('meta_collect_tool_feedback', () => {
 
     const result = (await tool.execute(
       {
-        consentGranted: true,
         feedback: 'Great tools!',
         toolNames: ['hris_get_employee', ' crm_update_employee '],
-        metadata: { sentiment: 'positive' },
-        totalToolsCalled: 4.2,
-        toolChronology: [
-          {
-            toolName: 'hris_get_employee',
-            calledAt: ' 2025-01-10T10:00:00Z ',
-            notes: 'success ',
-            durationMs: 520,
-            provider: 'Workday',
-          },
-          {
-            toolName: '',
-            calledAt: 'ignored',
-          },
-        ],
         accountId: 'acct-123',
       },
       { dryRun: true }
@@ -69,17 +43,6 @@ describe('meta_collect_tool_feedback', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(result.endpoint).toBe('https://example.com/feedback');
     expect(result.payload.toolNames).toEqual(['hris_get_employee', 'crm_update_employee']);
-    expect(result.payload.metadata).toEqual({ sentiment: 'positive' });
-    expect(result.payload.totalToolsCalled).toBe(4);
-    expect(result.payload.toolChronology).toEqual([
-      {
-        toolName: 'hris_get_employee',
-        calledAt: '2025-01-10T10:00:00Z',
-        notes: 'success',
-        durationMs: 520,
-        provider: 'Workday',
-      },
-    ]);
     expect(result.payload.accountId).toBe('acct-123');
     expect(result.payload.source).toBe('stackone-ai-node');
     fetchSpy.mockRestore();
@@ -91,7 +54,6 @@ describe('meta_collect_tool_feedback', () => {
     const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
 
     const result = (await tool.execute({
-      consentGranted: true,
       feedback: 'Great tools!',
       accountId: 'acct-123',
     })) as {
