@@ -154,13 +154,15 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
       };
 
       if (Array.isArray(params.toolNames)) {
-        const normalized = params.toolNames.reduce<string[]>((acc, value) => {
-          if (typeof value !== 'string') return acc;
+        const normalized: string[] = [];
+
+        for (const value of params.toolNames as unknown[]) {
+          if (typeof value !== 'string') continue;
           const trimmed = value.trim();
-          if (!trimmed) return acc;
-          acc.push(trimmed);
-          return acc;
-        }, []);
+          if (!trimmed) continue;
+          normalized.push(trimmed);
+        }
+
         if (normalized.length > 0) {
           submission.toolNames = normalized;
         }
