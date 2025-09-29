@@ -43,6 +43,7 @@ describe('meta_collect_tool_feedback', () => {
             calledAt: ' 2025-01-10T10:00:00Z ',
             notes: 'success ',
             durationMs: 520,
+            provider: 'Workday',
           },
           {
             toolName: '',
@@ -67,6 +68,7 @@ describe('meta_collect_tool_feedback', () => {
         calledAt: '2025-01-10T10:00:00Z',
         notes: 'success',
         durationMs: 520,
+        provider: 'Workday',
       },
     ]);
     fetchSpy.mockRestore();

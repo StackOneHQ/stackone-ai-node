@@ -52,6 +52,14 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
               type: 'string',
               description: 'Optional notes about the tool execution outcome.',
             },
+            durationMs: {
+              type: 'number',
+              description: 'Optional execution duration for the tool invocation in milliseconds.',
+            },
+            provider: {
+              type: 'string',
+              description: 'Optional provider identifier associated with the tool invocation.',
+            },
           },
           required: ['toolName'],
           additionalProperties: true,
