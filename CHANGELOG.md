@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.3.0...v0.3.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* remove dotenv ([#101](https://github.com/StackOneHQ/stackone-ai-node/issues/101)) ([f1e6997](https://github.com/StackOneHQ/stackone-ai-node/commit/f1e6997dc84716d7b96be6415156fa4067315879))
+* rename metaSearchTool ([#94](https://github.com/StackOneHQ/stackone-ai-node/issues/94)) ([e5a7279](https://github.com/StackOneHQ/stackone-ai-node/commit/e5a7279b7a46ad522e65f1e75dcbde58c010e312))
+* **test:** stabilise examples ([#90](https://github.com/StackOneHQ/stackone-ai-node/issues/90)) ([015660d](https://github.com/StackOneHQ/stackone-ai-node/commit/015660d430724756da4d106bab1c10dba5d186d4))
+
 ## [0.3.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.2.0...v0.3.0) (2025-08-19)
 
 
