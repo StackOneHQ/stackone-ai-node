@@ -13,13 +13,21 @@ describe('meta_collect_tool_feedback', () => {
     const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
 
     await expect(
-      tool.execute({ consentGranted: false, feedback: 'Great tools!' })
+      tool.execute({ consentGranted: false, feedback: 'Great tools!', accountId: 'acct-123' })
     ).rejects.toBeInstanceOf(StackOneError);
   });
 
   it('throws when feedback endpoint is missing', async () => {
     process.env.STACKONE_FEEDBACK_URL = '';
     const tool = createFeedbackTool();
+
+    await expect(
+      tool.execute({ consentGranted: true, feedback: 'Great tools!', accountId: 'acct-123' })
+    ).rejects.toBeInstanceOf(StackOneError);
+  });
+
+  it('throws when accountId is missing', async () => {
+    const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
 
     await expect(
       tool.execute({ consentGranted: true, feedback: 'Great tools!' })
@@ -50,6 +58,7 @@ describe('meta_collect_tool_feedback', () => {
             calledAt: 'ignored',
           },
         ],
+        accountId: 'acct-123',
       },
       { dryRun: true }
     )) as {
@@ -71,6 +80,7 @@ describe('meta_collect_tool_feedback', () => {
         provider: 'Workday',
       },
     ]);
+    expect(result.payload.accountId).toBe('acct-123');
     fetchSpy.mockRestore();
   });
 
@@ -82,6 +92,7 @@ describe('meta_collect_tool_feedback', () => {
     const result = (await tool.execute({
       consentGranted: true,
       feedback: 'Great tools!',
+      accountId: 'acct-123',
     })) as {
       status: string;
       endpoint: string;

@@ -22,6 +22,10 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         description:
           'Set to true only if the user explicitly agreed to share their feedback with StackOne.',
       },
+      accountId: {
+        type: 'string',
+        description: 'Identifier for the StackOne account associated with this feedback.',
+      },
       feedback: {
         type: 'string',
         description: 'Verbatim feedback from the user about their experience with StackOne tools.',
@@ -84,7 +88,7 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
           'Override the default feedback collection URL for this submission. Defaults to the configured StackOne feedback endpoint.',
       },
     },
-    required: ['consentGranted', 'feedback'],
+    required: ['consentGranted', 'feedback', 'accountId'],
   } as const satisfies ToolParameters;
 
   const executeConfig = {
@@ -126,6 +130,11 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         throw new StackOneError('Feedback must be a non-empty string.');
       }
 
+      const accountId = typeof params.accountId === 'string' ? params.accountId.trim() : '';
+      if (!accountId) {
+        throw new StackOneError('accountId must be provided as a non-empty string.');
+      }
+
       const endpointCandidate =
         (typeof params.feedbackEndpoint === 'string' && params.feedbackEndpoint.trim()) ||
         defaultEndpoint ||
@@ -140,6 +149,7 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
       const submission: Record<string, unknown> = {
         consentGranted: true,
         feedback,
+        accountId,
         submittedAt: new Date().toISOString(),
       };
 
@@ -165,10 +175,12 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
       }
 
       if (Array.isArray(params.toolChronology)) {
-        const chronology = params.toolChronology.reduce<Record<string, unknown>[]>((acc, entry) => {
-          if (!isRecord(entry)) return acc;
+        const chronology: Record<string, unknown>[] = [];
+
+        for (const entry of params.toolChronology as unknown[]) {
+          if (!isRecord(entry)) continue;
           const toolName = typeof entry.toolName === 'string' ? entry.toolName.trim() : '';
-          if (!toolName) return acc;
+          if (!toolName) continue;
 
           const sanitized: Record<string, unknown> = { toolName };
 
@@ -186,15 +198,32 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
             }
           }
 
-          // Preserve any additional properties as-is
+          if (typeof entry.durationMs === 'number' && Number.isFinite(entry.durationMs)) {
+            sanitized.durationMs = Math.trunc(entry.durationMs);
+          }
+
+          if (typeof entry.provider === 'string') {
+            const provider = entry.provider.trim();
+            if (provider) {
+              sanitized.provider = provider;
+            }
+          }
+
           for (const [key, value] of Object.entries(entry)) {
-            if (key === 'toolName' || key === 'calledAt' || key === 'notes') continue;
+            if (
+              key === 'toolName' ||
+              key === 'calledAt' ||
+              key === 'notes' ||
+              key === 'durationMs' ||
+              key === 'provider'
+            ) {
+              continue;
+            }
             sanitized[key] = value;
           }
 
-          acc.push(sanitized);
-          return acc;
-        }, []);
+          chronology.push(sanitized);
+        }
 
         if (chronology.length > 0) {
           submission.toolChronology = chronology;
