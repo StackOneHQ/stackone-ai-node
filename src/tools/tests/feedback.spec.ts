@@ -81,6 +81,7 @@ describe('meta_collect_tool_feedback', () => {
       },
     ]);
     expect(result.payload.accountId).toBe('acct-123');
+    expect(result.payload.source).toBe('stackone-ai-node');
     fetchSpy.mockRestore();
   });
 

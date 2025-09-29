@@ -151,6 +151,7 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         feedback,
         accountId,
         submittedAt: new Date().toISOString(),
+        source: 'stackone-ai-node',
       };
 
       if (Array.isArray(params.toolNames)) {
