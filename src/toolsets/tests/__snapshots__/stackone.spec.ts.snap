@@ -5840,6 +5840,288 @@ Tools {
       },
     },
     StackOneTool {
+      "description": "List Employee Shifts",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/shifts",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_list_employee_shifts",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+            "type": "string",
+          },
+          "filter": {
+            "description": "HRIS Shifts filters",
+            "properties": {
+              "ends_before": {
+                "description": "Filter shifts that end before this date",
+                "example": "2024-01-15T17:00",
+                "format": "datetime-local",
+                "type": "string",
+              },
+              "starts_after": {
+                "description": "Filter shifts that start after this date",
+                "example": "2024-01-15T09:00",
+                "format": "datetime-local",
+                "type": "string",
+              },
+              "status": {
+                "description": "Filter to select shifts by status",
+                "enum": [
+                  "draft",
+                  "published",
+                  "confirmed",
+                  "cancelled",
+                  "unmapped_value",
+                ],
+                "type": "string",
+              },
+              "updated_after": {
+                "additionalProperties": false,
+                "description": "Use a string with a date to only select results updated after that given date",
+                "example": "2020-01-01T00:00:00.000Z",
+                "format": "date-time",
+                "type": "string",
+              },
+            },
+            "type": "object",
+          },
+          "id": {
+            "type": "string",
+          },
+          "next": {
+            "description": "The unified cursor",
+            "type": "string",
+          },
+          "page_size": {
+            "description": "The number of results per page (default value is 25)",
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "filter",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "page_size",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "next",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/shifts",
+      },
+    },
+    StackOneTool {
+      "description": "Get Employee Shift",
+      "executeConfig": {
+        "bodyType": "json",
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "subResourceId",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/shifts/{subResourceId}",
+      },
+      "experimental_preExecute": undefined,
+      "name": "hris_get_employee_shift",
+      "parameters": {
+        "properties": {
+          "fields": {
+            "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+            "type": "string",
+          },
+          "id": {
+            "type": "string",
+          },
+          "proxy": {
+            "additionalProperties": true,
+            "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            "type": "object",
+          },
+          "raw": {
+            "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+            "type": "boolean",
+          },
+          "subResourceId": {
+            "type": "string",
+          },
+          "x-account-id": undefined,
+        },
+        "required": [
+          "id",
+          "subResourceId",
+        ],
+        "type": "object",
+      },
+      "requestBuilder": RequestBuilder {
+        "bodyType": "json",
+        "headers": {
+          "Authorization": "Basic dGVzdF9rZXk6",
+        },
+        "method": "GET",
+        "params": [
+          {
+            "location": "header",
+            "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "path",
+            "name": "subResourceId",
+            "type": "string",
+          },
+          {
+            "location": "query",
+            "name": "raw",
+            "type": "boolean",
+          },
+          {
+            "location": "query",
+            "name": "proxy",
+            "type": "object",
+          },
+          {
+            "location": "query",
+            "name": "fields",
+            "type": "string",
+          },
+        ],
+        "url": "https://api.stackone.com/unified/hris/employees/{id}/shifts/{subResourceId}",
+      },
+    },
+    StackOneTool {
       "description": "List Employee Time Off Requests",
       "executeConfig": {
         "bodyType": "json",
@@ -5910,12 +6192,27 @@ Tools {
           "filter": {
             "description": "HRIS Time Off filters",
             "properties": {
+              "end_date": {
+                "additionalProperties": false,
+                "description": "Filter to include time off requests that end on or before this date.",
+                "example": "2020-01-01T00:00:00.000Z",
+                "format": "date-time",
+                "type": "string",
+              },
               "policy_ids": {
+                "additionalProperties": false,
                 "description": "List of time off policy ids to filter by.",
                 "items": {
                   "type": "string",
                 },
                 "type": "array",
+              },
+              "start_date": {
+                "additionalProperties": false,
+                "description": "Filter to include time off requests that start on or after this date.",
+                "example": "2020-01-01T00:00:00.000Z",
+                "format": "date-time",
+                "type": "string",
               },
               "updated_after": {
                 "additionalProperties": false,
@@ -14206,7 +14503,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
             "type": "string",
           },
           "filter": {
@@ -14345,7 +14642,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
             "type": "string",
           },
           "id": {
@@ -14473,7 +14770,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
             "type": "string",
           },
           "filter": {
@@ -15082,7 +15379,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+            "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups",
             "type": "string",
           },
           "id": {
@@ -18031,12 +18328,27 @@ Tools {
           "filter": {
             "description": "HRIS Time Off filters",
             "properties": {
+              "end_date": {
+                "additionalProperties": false,
+                "description": "Filter to include time off requests that end on or before this date.",
+                "example": "2020-01-01T00:00:00.000Z",
+                "format": "date-time",
+                "type": "string",
+              },
               "policy_ids": {
+                "additionalProperties": false,
                 "description": "List of time off policy ids to filter by.",
                 "items": {
                   "type": "string",
                 },
                 "type": "array",
+              },
+              "start_date": {
+                "additionalProperties": false,
+                "description": "Filter to include time off requests that start on or after this date.",
+                "example": "2020-01-01T00:00:00.000Z",
+                "format": "date-time",
+                "type": "string",
               },
               "updated_after": {
                 "additionalProperties": false,
@@ -18289,18 +18601,16 @@ Tools {
           "filter": {
             "description": "HRIS Shifts filters",
             "properties": {
-              "employee_id": {
-                "description": "Filter to select shifts by employee ID",
-                "type": "string",
-              },
               "ends_before": {
                 "description": "Filter shifts that end before this date",
-                "format": "date-time",
+                "example": "2024-01-15T17:00",
+                "format": "datetime-local",
                 "type": "string",
               },
               "starts_after": {
                 "description": "Filter shifts that start after this date",
-                "format": "date-time",
+                "example": "2024-01-15T09:00",
+                "format": "datetime-local",
                 "type": "string",
               },
               "status": {
@@ -18802,6 +19112,7 @@ Tools {
                   "personal",
                   "in_lieu",
                   "bereavement",
+                  "other",
                   null,
                 ],
                 "type": "string",
@@ -19068,6 +19379,7 @@ Tools {
                   "personal",
                   "in_lieu",
                   "bereavement",
+                  "other",
                   null,
                 ],
                 "type": "string",
