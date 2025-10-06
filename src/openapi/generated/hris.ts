@@ -49,7 +49,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,full_name,display_name,created_at,updated_at',
+              example:
+                'id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -344,7 +345,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,full_name,display_name,created_at,updated_at',
+              example:
+                'id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -550,7 +552,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -845,7 +847,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1120,7 +1122,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1629,7 +1631,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills',
+                'id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2183,6 +2185,541 @@ export const hrisSpec = {
         },
       },
     },
+    '/unified/hris/employees/{id}/shifts': {
+      get: {
+        operationId: 'hris_list_employee_shifts',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'filter',
+            required: false,
+            in: 'query',
+            description: 'HRIS Shifts filters',
+            explode: true,
+            style: 'deepObject',
+            schema: {
+              properties: {
+                updated_after: {
+                  description:
+                    'Use a string with a date to only select results updated after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  format: 'date-time',
+                  nullable: true,
+                  additionalProperties: false,
+                },
+                status: {
+                  description: 'Filter to select shifts by status',
+                  type: 'string',
+                  nullable: true,
+                  enum: ['draft', 'published', 'confirmed', 'cancelled', 'unmapped_value'],
+                },
+                starts_after: {
+                  description: 'Filter shifts that start after this date',
+                  type: 'string',
+                  format: 'datetime-local',
+                  example: '2024-01-15T09:00',
+                },
+                ends_before: {
+                  description: 'Filter shifts that end before this date',
+                  type: 'string',
+                  format: 'datetime-local',
+                  example: '2024-01-15T17:00',
+                },
+              },
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'page',
+            required: false,
+            in: 'query',
+            description: 'The page number of the results to fetch',
+            deprecated: true,
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'page_size',
+            required: false,
+            in: 'query',
+            description: 'The number of results per page (default value is 25)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'next',
+            required: false,
+            in: 'query',
+            description: 'The unified cursor',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+          {
+            name: 'updated_after',
+            required: false,
+            in: 'query',
+            description:
+              'Use a string with a date to only select results updated after that given date',
+            deprecated: true,
+            schema: {
+              format: 'date-time',
+              nullable: true,
+              example: '2020-01-01T00:00:00.000Z',
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The shifts related to the employee with the given identifier were retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HrisShiftsPaginated',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'List Employee Shifts',
+        tags: ['Employees', 'Shifts'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'list_employee_shifts',
+        'x-speakeasy-pagination': {
+          type: 'cursor',
+          inputs: [
+            {
+              name: 'next',
+              in: 'parameters',
+              type: 'cursor',
+            },
+          ],
+          outputs: {
+            nextCursor: '$.next',
+          },
+        },
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
+    '/unified/hris/employees/{id}/shifts/{subResourceId}': {
+      get: {
+        operationId: 'hris_get_employee_shift',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'subResourceId',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            name: 'raw',
+            required: false,
+            in: 'query',
+            description:
+              'Indicates that the raw request result should be returned in addition to the mapped result (default value is false)',
+            schema: {
+              nullable: true,
+              type: 'boolean',
+            },
+          },
+          {
+            name: 'proxy',
+            required: false,
+            in: 'query',
+            description:
+              "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+            style: 'deepObject',
+            explode: true,
+            schema: {
+              additionalProperties: true,
+              nullable: true,
+              type: 'object',
+            },
+          },
+          {
+            name: 'fields',
+            required: false,
+            in: 'query',
+            description:
+              'The comma separated list of fields to return in the response (if empty, all fields are returned)',
+            schema: {
+              nullable: true,
+              type: 'string',
+            },
+          },
+        ],
+        responses: {
+          '200': {
+            description:
+              'The shift with the given identifier for the specified employee was retrieved.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/HrisShiftResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Get Employee Shift',
+        tags: ['Employees', 'Shifts'],
+        'x-speakeasy-group': 'hris',
+        'x-speakeasy-name-override': 'get_employee_shift',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
+    },
     '/unified/hris/employees/{id}/time_off': {
       get: {
         operationId: 'hris_list_employee_time_off_requests',
@@ -2238,7 +2775,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2267,6 +2804,25 @@ export const hrisSpec = {
                   items: {
                     type: 'string',
                   },
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description:
+                    'Filter to include time off requests that start on or after this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description:
+                    'Filter to include time off requests that end on or before this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
                 },
               },
               nullable: true,
@@ -2747,7 +3303,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4122,7 +4678,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
+                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4427,7 +4983,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
+                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4634,7 +5190,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active',
+              example: 'id,remote_id,name,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4929,7 +5485,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active',
+              example: 'id,remote_id,name,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5134,7 +5690,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number',
+              example:
+                'id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5623,7 +6180,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number',
+              example:
+                'id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6034,7 +6592,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6360,7 +6918,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6579,7 +7137,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6886,7 +7444,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields',
               type: 'string',
             },
           },
@@ -7112,7 +7670,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields',
               type: 'string',
             },
           },
@@ -7612,7 +8170,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager',
+                'id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8023,7 +8581,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8311,7 +8869,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8599,7 +9157,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8887,7 +9445,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9175,7 +9733,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9462,7 +10020,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,full_name,display_name,created_at,updated_at',
+              example:
+                'id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9758,7 +10317,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9973,7 +10532,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10188,7 +10747,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10403,7 +10962,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10618,7 +11177,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id',
+                'id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10832,7 +11391,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,full_name,display_name,created_at,updated_at',
+              example:
+                'id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11038,7 +11598,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,code,title,description,status,created_at,updated_at',
+              example:
+                'id,remote_id,code,title,description,status,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11333,7 +11894,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,code,title,description,status,created_at,updated_at',
+              example:
+                'id,remote_id,code,title,description,status,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11540,7 +12102,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11836,7 +12398,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -12555,7 +13117,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -12871,7 +13433,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13078,7 +13640,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13107,6 +13669,25 @@ export const hrisSpec = {
                   items: {
                     type: 'string',
                   },
+                  additionalProperties: false,
+                },
+                start_date: {
+                  description:
+                    'Filter to include time off requests that start on or after this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
+                },
+                end_date: {
+                  description:
+                    'Filter to include time off requests that end on or before this date.',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  nullable: true,
+                  format: 'date-time',
+                  additionalProperties: false,
                 },
               },
               nullable: true,
@@ -13393,7 +13974,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy',
+                'id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13631,11 +14212,6 @@ export const hrisSpec = {
                   nullable: true,
                   additionalProperties: false,
                 },
-                employee_id: {
-                  description: 'Filter to select shifts by employee ID',
-                  type: 'string',
-                  nullable: true,
-                },
                 status: {
                   description: 'Filter to select shifts by status',
                   type: 'string',
@@ -13645,14 +14221,14 @@ export const hrisSpec = {
                 starts_after: {
                   description: 'Filter shifts that start after this date',
                   type: 'string',
-                  nullable: true,
-                  format: 'date-time',
+                  format: 'datetime-local',
+                  example: '2024-01-15T09:00',
                 },
                 ends_before: {
                   description: 'Filter shifts that end before this date',
                   type: 'string',
-                  nullable: true,
-                  format: 'date-time',
+                  format: 'datetime-local',
+                  example: '2024-01-15T17:00',
                 },
               },
               nullable: true,
@@ -14133,7 +14709,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active',
+              example: 'id,remote_id,name,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14429,7 +15005,7 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active',
+              example: 'id,remote_id,name,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14636,7 +15212,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at',
+                'id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14683,6 +15259,7 @@ export const hrisSpec = {
                     'personal',
                     'in_lieu',
                     'bereavement',
+                    'other',
                     null,
                   ],
                   nullable: true,
@@ -14962,7 +15539,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at',
+                'id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -15177,7 +15754,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at',
+                'id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -15224,6 +15801,7 @@ export const hrisSpec = {
                     'personal',
                     'in_lieu',
                     'bereavement',
+                    'other',
                     null,
                   ],
                   nullable: true,
@@ -15495,7 +16073,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,benefit_type,provider,description,created_at,updated_at',
+              example:
+                'id,remote_id,name,benefit_type,provider,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -15790,7 +16369,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,benefit_type,provider,description,created_at,updated_at',
+              example:
+                'id,remote_id,name,benefit_type,provider,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -16004,7 +16584,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency',
+              example:
+                'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency,unified_custom_fields',
               type: 'string',
             },
           },
@@ -16493,7 +17074,8 @@ export const hrisSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency',
+              example:
+                'id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency,unified_custom_fields',
               type: 'string',
             },
           },
@@ -16709,7 +17291,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -17025,7 +17607,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -17436,7 +18018,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -17743,7 +18325,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at',
+                'id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -19808,7 +20390,6 @@ export const hrisSpec = {
             description: 'The employee start date',
             example: '2021-01-01T00:00:00.000Z',
             format: 'date-time',
-            deprecated: true,
             nullable: true,
           },
           tenure: {
@@ -24152,16 +24733,16 @@ export const hrisSpec = {
           },
           start_time: {
             type: 'string',
-            description: 'The start time of the shift',
-            example: '2024-03-20T09:00:00Z',
-            format: 'date-time',
+            description: 'The start time of the shift (ISO8601 date-time without timezone)',
+            example: '2024-03-20T09:00:00.000',
+            format: 'datetime-local',
             nullable: true,
           },
           end_time: {
             type: 'string',
-            description: 'The end time of the shift',
-            example: '2024-03-20T17:00:00Z',
-            format: 'date-time',
+            description: 'The end time of the shift (ISO8601 date-time without timezone)',
+            example: '2024-03-20T17:00:00.000',
+            format: 'datetime-local',
             nullable: true,
           },
           break_duration: {
@@ -27633,6 +28214,7 @@ export const hrisSpec = {
               'personal',
               'in_lieu',
               'bereavement',
+              'other',
               null,
             ],
             description:
@@ -27749,6 +28331,7 @@ export const hrisSpec = {
               'personal',
               'in_lieu',
               'bereavement',
+              'other',
               null,
             ],
             'x-speakeasy-unknown-values': 'allow',

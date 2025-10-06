@@ -50,7 +50,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations,authors',
+                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations,authors,unified_custom_fields',
               type: 'string',
             },
           },
@@ -363,7 +363,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations,authors',
+                'id,remote_id,external_reference,content_ids,remote_content_ids,title,description,languages,cover_url,url,active,duration,categories,skills,updated_at,created_at,content,provider,localizations,authors,unified_custom_fields',
               type: 'string',
             },
           },
@@ -576,7 +576,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at',
+                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1476,7 +1476,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags,authors',
+                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags,authors,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1961,7 +1961,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags,authors',
+                'id,remote_id,external_reference,course_ids,remote_course_ids,title,description,additional_data,languages,content_url,mobile_launch_content_url,content_type,cover_url,active,duration,order,categories,skills,updated_at,created_at,provider,localizations,tags,authors,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2359,7 +2359,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url',
+                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3238,7 +3238,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url',
+                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3742,7 +3742,7 @@ export const lmsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,hierarchy,level,language',
+              example: 'id,remote_id,name,active,hierarchy,level,language,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3948,7 +3948,7 @@ export const lmsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,hierarchy,level,language',
+              example: 'id,remote_id,name,active,hierarchy,level,language,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4234,7 +4234,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,active,email,phone_number,created_at,updated_at,name',
+                'id,remote_id,external_reference,active,email,phone_number,created_at,updated_at,name,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4538,7 +4538,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,active,email,phone_number,created_at,updated_at,name',
+                'id,remote_id,external_reference,active,email,phone_number,created_at,updated_at,name,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4750,7 +4750,7 @@ export const lmsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,hierarchy,language',
+              example: 'id,remote_id,name,active,hierarchy,language,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4956,7 +4956,7 @@ export const lmsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active,hierarchy,language',
+              example: 'id,remote_id,name,active,hierarchy,language,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5240,7 +5240,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at',
+                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at,unified_custom_fields',
               type: 'string',
             },
           },

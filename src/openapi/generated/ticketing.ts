@@ -51,7 +51,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,projects,components,organization,created_at,updated_at',
+                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,projects,components,organization,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -526,7 +526,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,projects,components,organization,created_at,updated_at',
+                'id,remote_id,type,ticket_number,title,creator_id,remote_creator_id,reporters,assignees,content,parent_id,remote_parent_id,closed_at,ticket_url,status,priority,tags,projects,components,organization,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -920,7 +920,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,type,name,primary_email,primary_phone,username,active,first_name,last_name,customer_account_reference,created_at,updated_at',
+                'id,remote_id,type,name,primary_email,primary_phone,username,active,first_name,last_name,customer_account_reference,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1217,7 +1217,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,type,name,primary_email,primary_phone,username,active,first_name,last_name,customer_account_reference,created_at,updated_at',
+                'id,remote_id,type,name,primary_email,primary_phone,username,active,first_name,last_name,customer_account_reference,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1433,7 +1433,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,ticket_id,remote_ticket_id,content,user_id,remote_user_id,internal,created_at,updated_at',
+                'id,remote_id,ticket_id,remote_ticket_id,content,user_id,remote_user_id,internal,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1738,7 +1738,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,ticket_id,remote_ticket_id,content,user_id,remote_user_id,internal,created_at,updated_at',
+                'id,remote_id,ticket_id,remote_ticket_id,content,user_id,remote_user_id,internal,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2163,7 +2163,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,ticket_id,remote_ticket_id,user_id,remote_user_id,file_name,file_format,file_url,size,created_at,updated_at',
+                'id,remote_id,ticket_id,remote_ticket_id,user_id,remote_user_id,file_name,file_format,file_url,size,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2468,7 +2468,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,ticket_id,remote_ticket_id,user_id,remote_user_id,file_name,file_format,file_url,size,created_at,updated_at',
+                'id,remote_id,ticket_id,remote_ticket_id,user_id,remote_user_id,file_name,file_format,file_url,size,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2675,7 +2675,7 @@ export const ticketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,project_id,remote_project_id',
+              example: 'id,remote_id,name,project_id,remote_project_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2971,7 +2971,7 @@ export const ticketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,project_id,remote_project_id',
+              example: 'id,remote_id,name,project_id,remote_project_id,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3179,7 +3179,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,organization_id,remote_organization_id,name,description,created_at,updated_at',
+                'id,remote_id,organization_id,remote_organization_id,name,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3476,7 +3476,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,organization_id,remote_organization_id,name,description,created_at,updated_at',
+                'id,remote_id,organization_id,remote_organization_id,name,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3692,7 +3692,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,organization_id,remote_organization_id,project_id,remote_project_id,name,description,created_at,updated_at',
+                'id,remote_id,organization_id,remote_organization_id,project_id,remote_project_id,name,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3997,7 +3997,7 @@ export const ticketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,organization_id,remote_organization_id,project_id,remote_project_id,name,description,created_at,updated_at',
+                'id,remote_id,organization_id,remote_organization_id,project_id,remote_project_id,name,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4212,7 +4212,7 @@ export const ticketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,project_id,remote_project_id',
+              example: 'id,remote_id,name,project_id,remote_project_id,unified_custom_fields',
               type: 'string',
             },
           },

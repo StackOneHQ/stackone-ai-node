@@ -6773,7 +6773,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
+          "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -6837,7 +6837,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -6901,7 +6901,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -6965,7 +6965,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7029,7 +7029,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7093,7 +7093,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7172,7 +7172,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
+          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7256,7 +7256,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,options",
+          "example": "id,remote_id,name,description,type,options,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -7346,7 +7346,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
+          "example": "id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7414,7 +7414,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,active",
+          "example": "id,remote_id,name,active,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7493,7 +7493,79 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields",
+          "type": "string",
+        },
+        "id": {
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "subResourceId": {
+          "type": "string",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+        "subResourceId",
+      ],
+      "type": "object",
+    },
+  },
+  "hris_get_employee_shift": {
+    "description": "Get Employee Shift",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "subResourceId",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/employees/{id}/shifts/{subResourceId}",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
           "type": "string",
         },
         "id": {
@@ -7566,7 +7638,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+          "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7649,7 +7721,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7732,7 +7804,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7815,7 +7887,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7888,7 +7960,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number",
+          "example": "id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -7966,7 +8038,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8030,7 +8102,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8094,7 +8166,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,code,title,description,status,created_at,updated_at",
+          "example": "id,remote_id,code,title,description,status,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8158,7 +8230,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8358,7 +8430,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8422,7 +8494,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8486,7 +8558,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8550,7 +8622,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
+          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8624,7 +8696,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8688,7 +8760,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,active",
+          "example": "id,remote_id,name,active,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -8810,7 +8882,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at",
+          "example": "id,remote_id,name,benefit_type,provider,description,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -8900,7 +8972,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -8990,7 +9062,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at",
+          "example": "id,remote_id,name,full_name,display_name,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9080,7 +9152,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,distribution_percentage,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9170,7 +9242,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9260,7 +9332,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9350,7 +9422,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,active",
+          "example": "id,remote_id,name,active,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9440,7 +9512,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,options",
+          "example": "id,remote_id,name,description,type,options,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9535,7 +9607,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format",
+          "example": "id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9645,12 +9717,134 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields",
           "type": "string",
         },
         "filter": {
           "description": "Filter parameters that allow greater customisation of the list response",
           "properties": {
+            "updated_after": {
+              "additionalProperties": false,
+              "description": "Use a string with a date to only select results updated after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
+          },
+          "type": "object",
+        },
+        "id": {
+          "type": "string",
+        },
+        "next": {
+          "description": "The unified cursor",
+          "type": "string",
+        },
+        "page_size": {
+          "description": "The number of results per page (default value is 25)",
+          "type": "string",
+        },
+        "proxy": {
+          "additionalProperties": true,
+          "description": "Query parameters that can be used to pass through parameters to the underlying provider request by surrounding them with 'proxy' key",
+          "type": "object",
+        },
+        "raw": {
+          "description": "Indicates that the raw request result should be returned in addition to the mapped result (default value is false)",
+          "type": "boolean",
+        },
+        "x-account-id": {
+          "description": "The account identifier",
+          "type": "string",
+        },
+      },
+      "required": [
+        "id",
+      ],
+      "type": "object",
+    },
+  },
+  "hris_list_employee_shifts": {
+    "description": "List Employee Shifts",
+    "execute": {
+      "bodyType": "json",
+      "method": "GET",
+      "params": [
+        {
+          "location": "header",
+          "name": "x-account-id",
+          "type": "string",
+        },
+        {
+          "location": "path",
+          "name": "id",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "raw",
+          "type": "boolean",
+        },
+        {
+          "location": "query",
+          "name": "proxy",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "fields",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "filter",
+          "type": "object",
+        },
+        {
+          "location": "query",
+          "name": "page_size",
+          "type": "string",
+        },
+        {
+          "location": "query",
+          "name": "next",
+          "type": "string",
+        },
+      ],
+      "url": "https://api.stackone.com/unified/hris/employees/{id}/shifts",
+    },
+    "parameters": {
+      "properties": {
+        "fields": {
+          "description": "The comma separated list of fields to return in the response (if empty, all fields are returned)",
+          "type": "string",
+        },
+        "filter": {
+          "description": "HRIS Shifts filters",
+          "properties": {
+            "ends_before": {
+              "description": "Filter shifts that end before this date",
+              "example": "2024-01-15T17:00",
+              "format": "datetime-local",
+              "type": "string",
+            },
+            "starts_after": {
+              "description": "Filter shifts that start after this date",
+              "example": "2024-01-15T09:00",
+              "format": "datetime-local",
+              "type": "string",
+            },
+            "status": {
+              "description": "Filter to select shifts by status",
+              "enum": [
+                "draft",
+                "published",
+                "confirmed",
+                "cancelled",
+                "unmapped_value",
+              ],
+              "type": "string",
+            },
             "updated_after": {
               "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
@@ -9745,7 +9939,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency",
+          "example": "id,remote_id,name,active,language,maximum_proficiency,minimum_proficiency,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9855,7 +10049,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -9965,7 +10159,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10073,7 +10267,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
+          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10104,6 +10298,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "personal",
                 "in_lieu",
                 "bereavement",
+                "other",
                 null,
               ],
               "type": "string",
@@ -10212,18 +10407,33 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields",
           "type": "string",
         },
         "filter": {
           "description": "HRIS Time Off filters",
           "properties": {
+            "end_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that end on or before this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
             "policy_ids": {
+              "additionalProperties": false,
               "description": "List of time off policy ids to filter by.",
               "items": {
                 "type": "string",
               },
               "type": "array",
+            },
+            "start_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that start on or after this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
             },
             "updated_after": {
               "additionalProperties": false,
@@ -10319,7 +10529,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number",
+          "example": "id,remote_id,type,sub_type,document,valid_from,valid_to,issued_by,number,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10429,7 +10639,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills",
+          "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10542,7 +10752,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager",
+          "example": "id,remote_id,employee_id,remote_employee_id,job_title,pay_rate,pay_period,pay_frequency,pay_currency,effective_date,end_date,employment_type,employment_contract_type,type,contract_type,change_reason,grade,work_time,payroll_code,fte,created_at,updated_at,start_date,active,department,team,cost_center,cost_centers,division,job,manager,groups,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10632,7 +10842,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,company_id,remote_company_id,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10722,7 +10932,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,code,title,description,status,created_at,updated_at",
+          "example": "id,remote_id,code,title,description,status,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -10812,7 +11022,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,phone_number,street_1,street_2,city,state,zip_code,country,location_type,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -11013,18 +11223,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         "filter": {
           "description": "HRIS Shifts filters",
           "properties": {
-            "employee_id": {
-              "description": "Filter to select shifts by employee ID",
-              "type": "string",
-            },
             "ends_before": {
               "description": "Filter shifts that end before this date",
-              "format": "date-time",
+              "example": "2024-01-15T17:00",
+              "format": "datetime-local",
               "type": "string",
             },
             "starts_after": {
               "description": "Filter shifts that start after this date",
-              "format": "date-time",
+              "example": "2024-01-15T09:00",
+              "format": "datetime-local",
               "type": "string",
             },
             "status": {
@@ -11132,7 +11340,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,name,description,type,status,due_date,completion_date,assigned_by_employee_id,remote_assigned_by_employee_id,assigned_by_employee_name,link_to_task,extracted_links,next_task_id,remote_next_task_id,parent_process_name,comments,attachments,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -11222,7 +11430,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids",
+          "example": "id,remote_id,name,type,parent_ids,remote_parent_ids,owner_ids,remote_owner_ids,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -11312,7 +11520,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at",
+          "example": "id,remote_id,employee_id,remote_employee_id,start_time,end_time,hours_worked,break_duration,labor_type,location,status,created_at,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -11419,7 +11627,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at",
+          "example": "id,remote_id,name,description,type,duration_unit,reasons,updated_at,created_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
@@ -11450,6 +11658,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                 "personal",
                 "in_lieu",
                 "bereavement",
+                "other",
                 null,
               ],
               "type": "string",
@@ -11548,18 +11757,33 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy",
+          "example": "id,remote_id,employee_id,remote_employee_id,approver_id,remote_approver_id,status,type,start_date,end_date,start_half_day,end_half_day,time_off_policy_id,remote_time_off_policy_id,reason,comment,duration,created_at,updated_at,policy,unified_custom_fields",
           "type": "string",
         },
         "filter": {
           "description": "HRIS Time Off filters",
           "properties": {
+            "end_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that end on or before this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
             "policy_ids": {
+              "additionalProperties": false,
               "description": "List of time off policy ids to filter by.",
               "items": {
                 "type": "string",
               },
               "type": "array",
+            },
+            "start_date": {
+              "additionalProperties": false,
+              "description": "Filter to include time off requests that start on or after this date.",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
             },
             "updated_after": {
               "additionalProperties": false,
@@ -11645,7 +11869,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
       "properties": {
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,name,active",
+          "example": "id,remote_id,name,active,unified_custom_fields",
           "type": "string",
         },
         "filter": {

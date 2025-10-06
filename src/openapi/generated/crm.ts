@@ -50,7 +50,7 @@ export const crmSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,company_name,emails,phone_numbers,deal_ids,remote_deal_ids,account_ids,remote_account_ids,custom_fields,created_at,updated_at',
+                'id,remote_id,first_name,last_name,company_name,emails,phone_numbers,deal_ids,remote_deal_ids,account_ids,remote_account_ids,custom_fields,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -534,7 +534,7 @@ export const crmSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,company_name,emails,phone_numbers,deal_ids,remote_deal_ids,account_ids,remote_account_ids,custom_fields,created_at,updated_at',
+                'id,remote_id,first_name,last_name,company_name,emails,phone_numbers,deal_ids,remote_deal_ids,account_ids,remote_account_ids,custom_fields,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -937,7 +937,7 @@ export const crmSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,owner_id,remote_owner_id,name,description,industries,annual_revenue,website,addresses,phone_numbers,created_at,updated_at',
+                'id,remote_id,owner_id,remote_owner_id,name,description,industries,annual_revenue,website,addresses,phone_numbers,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1233,7 +1233,7 @@ export const crmSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,owner_id,remote_owner_id,name,description,industries,annual_revenue,website,addresses,phone_numbers,created_at,updated_at',
+                'id,remote_id,owner_id,remote_owner_id,name,description,industries,annual_revenue,website,addresses,phone_numbers,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1439,7 +1439,7 @@ export const crmSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,created_at,updated_at,items,type',
+              example: 'id,remote_id,name,created_at,updated_at,items,type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1734,7 +1734,7 @@ export const crmSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,created_at,updated_at,items,type',
+              example: 'id,remote_id,name,created_at,updated_at,items,type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1940,7 +1940,7 @@ export const crmSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2235,7 +2235,7 @@ export const crmSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },

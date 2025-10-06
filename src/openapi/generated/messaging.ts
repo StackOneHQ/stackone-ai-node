@@ -49,7 +49,8 @@ export const messagingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,participants,name,private,created_at,last_message_at',
+              example:
+                'id,remote_id,participants,name,private,created_at,last_message_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -521,7 +522,8 @@ export const messagingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,participants,name,private,created_at,last_message_at',
+              example:
+                'id,remote_id,participants,name,private,created_at,last_message_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -942,7 +944,7 @@ export const messagingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,file_name,file_size,file_type',
+              example: 'id,remote_id,file_name,file_size,file_type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1245,7 +1247,7 @@ export const messagingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,file_name,file_size,file_type',
+              example: 'id,remote_id,file_name,file_size,file_type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1451,7 +1453,8 @@ export const messagingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,email,username,name,first_name,last_name,bot,active',
+              example:
+                'id,remote_id,email,username,name,first_name,last_name,bot,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1746,7 +1749,8 @@ export const messagingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,email,username,name,first_name,last_name,bot,active',
+              example:
+                'id,remote_id,email,username,name,first_name,last_name,bot,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1961,7 +1965,7 @@ export const messagingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,content,parent_message_id,remote_parent_message_id,attachments,author,created_at,updated_at',
+                'id,remote_id,content,parent_message_id,remote_parent_message_id,attachments,author,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2257,7 +2261,7 @@ export const messagingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,content,parent_message_id,remote_parent_message_id,attachments,author,created_at,updated_at',
+                'id,remote_id,content,parent_message_id,remote_parent_message_id,attachments,author,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },

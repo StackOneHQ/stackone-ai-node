@@ -50,7 +50,7 @@ export const iamSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,primary_email_address,username,roles,groups,status,avatar,is_bot_user,last_active_at,last_login_at,created_at,updated_at,multi_factor_enabled',
+                'id,remote_id,first_name,last_name,name,primary_email_address,username,roles,groups,status,avatar,is_bot_user,last_active_at,last_login_at,created_at,updated_at,multi_factor_enabled,unified_custom_fields',
               type: 'string',
             },
           },
@@ -357,7 +357,7 @@ export const iamSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,first_name,last_name,name,primary_email_address,username,roles,groups,status,avatar,is_bot_user,last_active_at,last_login_at,created_at,updated_at,multi_factor_enabled',
+                'id,remote_id,first_name,last_name,name,primary_email_address,username,roles,groups,status,avatar,is_bot_user,last_active_at,last_login_at,created_at,updated_at,multi_factor_enabled,unified_custom_fields',
               type: 'string',
             },
           },
@@ -937,7 +937,8 @@ export const iamSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,type,policies,description,created_at,updated_at',
+              example:
+                'id,remote_id,name,type,policies,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1243,7 +1244,8 @@ export const iamSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,type,policies,description,created_at,updated_at',
+              example:
+                'id,remote_id,name,type,policies,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1461,7 +1463,7 @@ export const iamSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,parent_id,remote_parent_id,name,description,roles,type,created_at,updated_at',
+                'id,remote_id,parent_id,remote_parent_id,name,description,roles,type,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1768,7 +1770,7 @@ export const iamSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,parent_id,remote_parent_id,name,description,roles,type,created_at,updated_at',
+                'id,remote_id,parent_id,remote_parent_id,name,description,roles,type,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1985,7 +1987,8 @@ export const iamSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,permissions,description,created_at,updated_at',
+              example:
+                'id,remote_id,name,permissions,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2291,7 +2294,8 @@ export const iamSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,permissions,description,created_at,updated_at',
+              example:
+                'id,remote_id,name,permissions,description,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },

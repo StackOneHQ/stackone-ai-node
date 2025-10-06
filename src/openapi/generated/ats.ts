@@ -50,7 +50,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate',
+                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
               type: 'string',
             },
           },
@@ -587,7 +587,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate',
+                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1009,7 +1009,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history',
+                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1699,7 +1699,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history',
+                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1915,7 +1915,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,sections,label,candidate_id,remote_candidate_id,application_id,remote_application_id,interview_id,remote_interview_id,author_id,remote_author_id,overall_recommendation,created_at,updated_at',
+                'id,remote_id,sections,label,candidate_id,remote_candidate_id,application_id,remote_application_id,interview_id,remote_interview_id,author_id,remote_author_id,overall_recommendation,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2231,7 +2231,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,sections,label,candidate_id,remote_candidate_id,application_id,remote_application_id,interview_id,remote_interview_id,author_id,remote_author_id,overall_recommendation,created_at,updated_at',
+                'id,remote_id,sections,label,candidate_id,remote_candidate_id,application_id,remote_application_id,interview_id,remote_interview_id,author_id,remote_author_id,overall_recommendation,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2447,7 +2447,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'event_id,remote_event_id,created_at,effective_at,change_type,actor,new_values',
+                'event_id,remote_event_id,created_at,effective_at,change_type,actor,new_values,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2731,7 +2731,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at',
+                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3232,7 +3232,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at',
+                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3641,7 +3641,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,interview_stage_id,remote_interview_stage_id,interview_stage,status,interview_status,interviewer_ids,remote_interviewer_ids,interview_parts,interviewers,start_at,end_at,meeting_url,created_at,updated_at',
+                'id,remote_id,application_id,remote_application_id,interview_stage_id,remote_interview_stage_id,interview_stage,status,interview_status,interviewer_ids,remote_interviewer_ids,interview_parts,interviewers,start_at,end_at,meeting_url,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3956,7 +3956,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate',
+                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4753,7 +4753,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
+                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5074,7 +5074,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format',
+                'id,remote_id,name,type,category,category_id,remote_category_id,contents,created_at,updated_at,remote_url,file_format,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5282,7 +5282,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at',
+                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5791,7 +5791,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at',
+                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6202,7 +6202,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at',
+                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6703,7 +6703,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at',
+                'id,remote_id,content,author_id,remote_author_id,visibility,created_at,updated_at,deleted_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6910,7 +6910,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -7205,7 +7205,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -7479,7 +7479,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -7774,7 +7774,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8048,7 +8048,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8343,7 +8343,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,type,options',
+              example: 'id,remote_id,name,description,type,options,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8617,7 +8617,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name',
+              example: 'id,remote_id,name,unified_custom_fields',
               type: 'string',
             },
           },
@@ -8923,7 +8923,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name',
+              example: 'id,remote_id,name,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9130,7 +9130,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,order,created_at,updated_at',
+              example: 'id,remote_id,name,order,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9437,7 +9437,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,order,created_at,updated_at',
+              example: 'id,remote_id,name,order,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9643,7 +9643,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,order,created_at,updated_at',
+              example: 'id,remote_id,name,order,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -9949,7 +9949,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,order,created_at,updated_at',
+              example: 'id,remote_id,name,order,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10156,7 +10156,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,interview_stage_id,remote_interview_stage_id,interview_stage,status,interview_status,interviewer_ids,remote_interviewer_ids,interview_parts,interviewers,start_at,end_at,meeting_url,created_at,updated_at',
+                'id,remote_id,application_id,remote_application_id,interview_stage_id,remote_interview_stage_id,interview_stage,status,interview_status,interviewer_ids,remote_interviewer_ids,interview_parts,interviewers,start_at,end_at,meeting_url,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10472,7 +10472,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,interview_stage_id,remote_interview_stage_id,interview_stage,status,interview_status,interviewer_ids,remote_interviewer_ids,interview_parts,interviewers,start_at,end_at,meeting_url,created_at,updated_at',
+                'id,remote_id,application_id,remote_application_id,interview_stage_id,remote_interview_stage_id,interview_stage,status,interview_status,interviewer_ids,remote_interviewer_ids,interview_parts,interviewers,start_at,end_at,meeting_url,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -10679,7 +10679,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,code,title,description,status,job_status,department_ids,remote_department_ids,location_ids,remote_location_ids,hiring_team,interview_stages,confidential,custom_fields,created_at,updated_at',
+                'id,remote_id,code,title,description,status,job_status,department_ids,remote_department_ids,location_ids,remote_location_ids,hiring_team,interview_stages,confidential,custom_fields,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11206,7 +11206,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,order,created_at,updated_at',
+              example: 'id,remote_id,name,order,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11514,7 +11514,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,code,title,description,status,job_status,department_ids,remote_department_ids,location_ids,remote_location_ids,hiring_team,interview_stages,confidential,custom_fields,created_at,updated_at',
+                'id,remote_id,code,title,description,status,job_status,department_ids,remote_department_ids,location_ids,remote_location_ids,hiring_team,interview_stages,confidential,custom_fields,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -11943,7 +11943,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,order,created_at,updated_at',
+              example: 'id,remote_id,name,order,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -12149,7 +12149,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,created_at,updated_at,items,type',
+              example: 'id,remote_id,name,created_at,updated_at,items,type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -12444,7 +12444,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,created_at,updated_at,items,type',
+              example: 'id,remote_id,name,created_at,updated_at,items,type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -12650,7 +12650,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name',
+              example: 'id,remote_id,name,unified_custom_fields',
               type: 'string',
             },
           },
@@ -12956,7 +12956,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name',
+              example: 'id,remote_id,name,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13162,7 +13162,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,label,type,rejected_reason_type',
+              example: 'id,remote_id,label,type,rejected_reason_type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13468,7 +13468,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,label,type,rejected_reason_type',
+              example: 'id,remote_id,label,type,rejected_reason_type,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13674,7 +13674,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,first_name,last_name,name,email,phone',
+              example: 'id,remote_id,first_name,last_name,name,email,phone,unified_custom_fields',
               type: 'string',
             },
           },
@@ -13980,7 +13980,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,first_name,last_name,name,email,phone',
+              example: 'id,remote_id,first_name,last_name,name,email,phone,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14187,7 +14187,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,title,locations,internal,status,job_id,remote_job_id,content,compensation,employment_type,employment_contract_type,external_url,external_apply_url,questionnaires,start_date,updated_at,created_at',
+                'id,remote_id,title,locations,internal,status,job_id,remote_job_id,content,compensation,employment_type,employment_contract_type,external_url,external_apply_url,questionnaires,start_date,updated_at,created_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14514,7 +14514,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,title,locations,internal,status,job_id,remote_job_id,content,compensation,employment_type,employment_contract_type,external_url,external_apply_url,questionnaires,start_date,updated_at,created_at',
+                'id,remote_id,title,locations,internal,status,job_id,remote_job_id,content,compensation,employment_type,employment_contract_type,external_url,external_apply_url,questionnaires,start_date,updated_at,created_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14732,7 +14732,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history',
+                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -15216,7 +15216,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history',
+                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -16279,7 +16279,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,tests',
+              example: 'id,remote_id,name,description,tests,unified_custom_fields',
               type: 'string',
             },
           },
@@ -16747,7 +16747,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description,tests',
+              example: 'id,remote_id,name,description,tests,unified_custom_fields',
               type: 'string',
             },
           },
@@ -17679,7 +17679,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active',
+              example: 'id,remote_id,name,active,unified_custom_fields',
               type: 'string',
             },
           },
@@ -17974,7 +17974,7 @@ export const atsSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,active',
+              example: 'id,remote_id,name,active,unified_custom_fields',
               type: 'string',
             },
           },

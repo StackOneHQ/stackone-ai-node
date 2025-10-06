@@ -49,7 +49,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -521,7 +522,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -912,7 +914,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1384,7 +1387,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1775,7 +1779,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2247,7 +2252,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -2639,7 +2645,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3113,7 +3120,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3505,7 +3513,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3977,7 +3986,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,messages,created_at,updated_at,tags',
+              example:
+                'id,remote_id,name,messages,created_at,updated_at,tags,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4369,7 +4379,7 @@ export const marketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,created_at,updated_at,description,schedule_type,status,channels,first_sent_at,last_sent_at,tags,messages',
+                'id,remote_id,name,created_at,updated_at,description,schedule_type,status,channels,first_sent_at,last_sent_at,tags,messages,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4665,7 +4675,7 @@ export const marketingSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,created_at,updated_at,description,schedule_type,status,channels,first_sent_at,last_sent_at,tags,messages',
+                'id,remote_id,name,created_at,updated_at,description,schedule_type,status,channels,first_sent_at,last_sent_at,tags,messages,unified_custom_fields',
               type: 'string',
             },
           },
@@ -4871,7 +4881,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,type,content,status,tags,created_at,updated_at',
+              example:
+                'id,remote_id,name,type,content,status,tags,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5343,7 +5354,8 @@ export const marketingSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,type,content,status,tags,created_at,updated_at',
+              example:
+                'id,remote_id,name,type,content,status,tags,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
