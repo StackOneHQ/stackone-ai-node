@@ -1,6 +1,11 @@
 import type { Arrayable } from 'type-fest';
-import { type BaseTool, Tools } from '../tool';
-import type { Experimental_ToolCreationOptions } from '../types';
+import { createMCPClient } from '../mcp';
+import { BaseTool, Tools } from '../tool';
+import type {
+  ExecuteConfig,
+  Experimental_ToolCreationOptions,
+  JsonSchemaProperties,
+} from '../types';
 import { toArray } from '../utils/array';
 
 /**
@@ -229,5 +234,32 @@ export abstract class ToolSet {
       tool.setHeaders(mergedHeaders);
     }
     return tool;
+  }
+
+  /**
+   * Fetch tool definitions from MCP (if applicable)
+   */
+  async fetchTools(): Promise<Tools> {
+    await using clients = await createMCPClient({
+      baseUrl: `${this.baseUrl}/mcp`,
+    });
+    const listToolsResult = await clients.client.listTools();
+
+    const tools = listToolsResult.tools.map(({ name, description, inputSchema }) => {
+      return new BaseTool(
+        name,
+        description ?? '',
+        {
+          ...inputSchema,
+
+          // properties are not well typed in MCP spec
+          properties: inputSchema?.properties as JsonSchemaProperties,
+        },
+
+        // TODO: Implement mcp client method
+        {} as ExecuteConfig
+      );
+    });
+    return new Tools(tools);
   }
 }
