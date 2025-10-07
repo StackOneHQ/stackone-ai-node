@@ -193,47 +193,49 @@ export class BaseTool {
     };
 
     /** AI SDK is optional dependency, import only when needed */
+    let jsonSchema: typeof import('ai').jsonSchema;
     try {
-      const { jsonSchema } = await import('ai');
-
-      const schemaObject = jsonSchema(schema);
-      const toolDefinition: Record<string, unknown> = {
-        inputSchema: schemaObject, // v5
-        parameters: schemaObject, // v4 (backward compatibility)
-        description: this.description,
-      };
-
-      const executionOption =
-        options.execution !== undefined
-          ? options.execution
-          : this.#exposeExecutionMetadata
-            ? this.createExecutionMetadata()
-            : false;
-
-      if (executionOption !== false) {
-        toolDefinition.execution = executionOption;
-      }
-
-      if (options.executable ?? true) {
-        toolDefinition.execute = async (args: Record<string, unknown>) => {
-          try {
-            return await this.execute(args as JsonDict);
-          } catch (error) {
-            return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
-          }
-        };
-      }
-
-      return {
-        [this.name]: {
-          ...toolDefinition,
-        },
-      };
+      const ai = await import('ai');
+      jsonSchema = ai.jsonSchema;
     } catch {
       throw new StackOneError(
         'AI SDK is not installed. Please install it with: npm install ai@4.x|5.x or bun add ai@4.x|5.x'
       );
     }
+
+    const schemaObject = jsonSchema(schema);
+    const toolDefinition: Record<string, unknown> = {
+      inputSchema: schemaObject, // v5
+      parameters: schemaObject, // v4 (backward compatibility)
+      description: this.description,
+    };
+
+    const executionOption =
+      options.execution !== undefined
+        ? options.execution
+        : this.#exposeExecutionMetadata
+          ? this.createExecutionMetadata()
+          : false;
+
+    if (executionOption !== false) {
+      toolDefinition.execution = executionOption;
+    }
+
+    if (options.executable ?? true) {
+      toolDefinition.execute = async (args: Record<string, unknown>) => {
+        try {
+          return await this.execute(args as JsonDict);
+        } catch (error) {
+          return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      };
+    }
+
+    return {
+      [this.name]: {
+        ...toolDefinition,
+      },
+    };
   }
 }
 
