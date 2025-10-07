@@ -29,6 +29,21 @@ yarn add @stackone/ai
 bun add @stackone/ai
 ```
 
+### Optional: AI SDK Integration
+
+If you plan to use the AI SDK integration (Vercel AI SDK), install it separately:
+
+```bash
+# Using npm
+npm install ai
+
+# Using yarn
+yarn add ai
+
+# Using bun
+bun add ai
+```
+
 ## Integrations
 
 The OpenAPIToolSet and StackOneToolSet make it super easy to use these APIs as tools in your AI applications.
