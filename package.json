@@ -64,8 +64,10 @@
     "zod": "^3.23.8"
   },
   "peerDependencies": {
-    "ai": "4.x|5.x",
     "openai": "5.x|6.x"
+  },
+  "peerDependenciesOptional": {
+    "ai": "4.x|5.x"
   },
   "repository": {
     "type": "git",

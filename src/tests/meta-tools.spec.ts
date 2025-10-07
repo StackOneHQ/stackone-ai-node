@@ -414,8 +414,8 @@ describe('Meta Search Tools', () => {
   });
 
   describe('AI SDK format', () => {
-    it('should convert meta tools to AI SDK format', () => {
-      const aiSdkTools = metaTools.toAISDK();
+    it('should convert meta tools to AI SDK format', async () => {
+      const aiSdkTools = await metaTools.toAISDK();
 
       expect(aiSdkTools).toHaveProperty('meta_search_tools');
       expect(aiSdkTools).toHaveProperty('meta_execute_tool');
@@ -425,7 +425,7 @@ describe('Meta Search Tools', () => {
     });
 
     it('should execute through AI SDK format', async () => {
-      const aiSdkTools = metaTools.toAISDK();
+      const aiSdkTools = await metaTools.toAISDK();
 
       const result = await aiSdkTools.meta_search_tools.execute?.(
         { query: 'ATS candidates', limit: 2 },

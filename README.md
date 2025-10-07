@@ -70,7 +70,7 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet();
 
-const aiSdkTools = toolset.getTools("hris_*").toAISDK();
+const aiSdkTools = await toolset.getTools("hris_*").toAISDK();
 await generateText({
   model: openai("gpt-5"),
   tools: aiSdkTools,
@@ -274,7 +274,7 @@ const metaTools = await tools.metaTools();
 const openAITools = metaTools.toOpenAI();
 
 // Use with AI SDK
-const aiSdkTools = metaTools.toAISDK();
+const aiSdkTools = await metaTools.toAISDK();
 ```
 
 #### Example: Dynamic Tool Discovery with AI SDK

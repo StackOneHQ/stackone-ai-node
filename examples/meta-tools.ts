@@ -27,7 +27,7 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 
   // Get meta tools for dynamic discovery and execution
   const metaTools = await allTools.metaTools();
-  const aiSdkMetaTools = metaTools.toAISDK();
+  const aiSdkMetaTools = await metaTools.toAISDK();
 
   // Use meta tools to dynamically find and execute relevant tools
   const { text, toolCalls } = await generateText({

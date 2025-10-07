@@ -1,5 +1,4 @@
 import * as orama from '@orama/orama';
-import { jsonSchema } from 'ai';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
@@ -181,7 +180,7 @@ export class BaseTool {
   /**
    * Convert the tool to AI SDK format
    */
-  toAISDK(
+  async toAISDK(
     options: { executable?: boolean; execution?: ToolExecution | false } = {
       executable: true,
     }
@@ -193,39 +192,48 @@ export class BaseTool {
       additionalProperties: false,
     };
 
-    const schemaObject = jsonSchema(schema);
-    const toolDefinition: Record<string, unknown> = {
-      inputSchema: schemaObject, // v5
-      parameters: schemaObject, // v4 (backward compatibility)
-      description: this.description,
-    };
+    /** AI SDK is optional dependency, import only when needed */
+    try {
+      const { jsonSchema } = await import('ai');
 
-    const executionOption =
-      options.execution !== undefined
-        ? options.execution
-        : this.#exposeExecutionMetadata
-          ? this.createExecutionMetadata()
-          : false;
-
-    if (executionOption !== false) {
-      toolDefinition.execution = executionOption;
-    }
-
-    if (options.executable ?? true) {
-      toolDefinition.execute = async (args: Record<string, unknown>) => {
-        try {
-          return await this.execute(args as JsonDict);
-        } catch (error) {
-          return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
-        }
+      const schemaObject = jsonSchema(schema);
+      const toolDefinition: Record<string, unknown> = {
+        inputSchema: schemaObject, // v5
+        parameters: schemaObject, // v4 (backward compatibility)
+        description: this.description,
       };
-    }
 
-    return {
-      [this.name]: {
-        ...toolDefinition,
-      },
-    };
+      const executionOption =
+        options.execution !== undefined
+          ? options.execution
+          : this.#exposeExecutionMetadata
+            ? this.createExecutionMetadata()
+            : false;
+
+      if (executionOption !== false) {
+        toolDefinition.execution = executionOption;
+      }
+
+      if (options.executable ?? true) {
+        toolDefinition.execute = async (args: Record<string, unknown>) => {
+          try {
+            return await this.execute(args as JsonDict);
+          } catch (error) {
+            return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+          }
+        };
+      }
+
+      return {
+        [this.name]: {
+          ...toolDefinition,
+        },
+      };
+    } catch {
+      throw new StackOneError(
+        'AI SDK is not installed. Please install it with: npm install ai@4.x|5.x or bun add ai@4.x|5.x'
+      );
+    }
   }
 }
 
@@ -346,14 +354,14 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Convert all tools to AI SDK format
    */
-  toAISDK(
+  async toAISDK(
     options: { executable?: boolean; execution?: ToolExecution | false } = {
       executable: true,
     }
   ) {
     const result: Record<string, unknown> = {};
     for (const tool of this.tools) {
-      Object.assign(result, tool.toAISDK(options));
+      Object.assign(result, await tool.toAISDK(options));
     }
     return result;
   }

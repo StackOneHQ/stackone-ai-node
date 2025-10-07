@@ -248,9 +248,9 @@ describe('Schema Validation', () => {
   });
 
   describe('AI SDK Integration', () => {
-    it('should convert to AI SDK tool format', () => {
+    it('should convert to AI SDK tool format', async () => {
       const tool = createArrayTestTool();
-      const aiSdkTool = tool.toAISDK();
+      const aiSdkTool = await tool.toAISDK();
 
       expect(aiSdkTool).toBeDefined();
       // The AI SDK tool is an object with the tool name as the key
@@ -278,7 +278,7 @@ describe('Schema Validation', () => {
       expect(arrayWithItems.items.type).toBe('string');
     });
 
-    it('should handle the problematic nested array case', () => {
+    it('should handle the problematic nested array case', async () => {
       const tool = createNestedArrayTestTool();
       const openAIFormat = tool.toOpenAI();
       const parameters = openAIFormat.function.parameters;
@@ -305,7 +305,7 @@ describe('Schema Validation', () => {
       expect(aiSchema).toBeDefined();
 
       // Generate the SDK tool and verify its structure
-      const aiSdkTool = tool.toAISDK();
+      const aiSdkTool = await tool.toAISDK();
       expect(aiSdkTool).toBeDefined();
 
       const toolObj = aiSdkTool[tool.name];
