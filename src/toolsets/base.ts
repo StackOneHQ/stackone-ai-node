@@ -242,6 +242,7 @@ export abstract class ToolSet {
   async fetchTools(): Promise<Tools> {
     await using clients = await createMCPClient({
       baseUrl: `${this.baseUrl}/mcp`,
+      headers: this.headers,
     });
     const listToolsResult = await clients.client.listTools();
 
