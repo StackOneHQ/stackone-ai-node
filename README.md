@@ -125,6 +125,27 @@ const currentAccountId = tools.getAccountId(); // Get the current account ID
 
 [View full example](examples/account-id-usage.ts)
 
+### Loading the Latest Tool Catalog
+
+Call `fetchTools()` when you want the SDK to pull the current tool definitions directly from StackOne without maintaining local specs:
+
+```typescript
+const toolset = new StackOneToolSet({
+  baseUrl: 'https://api.stackone.com',
+});
+
+const tools = await toolset.fetchTools();
+const employeeTool = tools.getTool('hris_list_employees');
+
+const result = await employeeTool?.execute({
+  query: { limit: 5 },
+});
+```
+
+`fetchTools()` reuses the credentials you already configured (for example via `STACKONE_API_KEY`) and binds the returned tool objects to StackOne's actions client.
+
+[View full example](examples/fetch-tools.ts)
+
 ### File Upload
 
 The `StackOneToolSet` comes with built-in transformations for file uploads:

@@ -129,6 +129,14 @@ Shows how to use custom base URLs for development or self-hosted instances.
 - **API Calls**: No (dry run)
 - **Key Features**: Custom API endpoints, development setup
 
+#### [`fetch-tools.ts`](./fetch-tools.ts) - Live Catalog Loading
+
+Illustrates how to pull the latest tool catalog from StackOne and execute a tool with the fetched definitions.
+
+- **Account ID**: HRIS
+- **API Calls**: Yes (requires valid credentials)
+- **Key Features**: Catalog refresh, zero local specs, production-style execution
+
 ### Advanced Features
 
 #### [`experimental-document-handling.ts`](./experimental-document-handling.ts) - Document Processing
