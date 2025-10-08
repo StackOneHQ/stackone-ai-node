@@ -90,7 +90,9 @@ export interface LocalExecuteConfig {
   description?: string;
 }
 
-// Discriminated union lets call sites branch on execution style without relying on nullable fields.
+/**
+ * Discriminated union lets call sites branch on execution style without relying on nullable fields.
+ */
 export type ExecuteConfig = HttpExecuteConfig | RpcExecuteConfig | LocalExecuteConfig;
 
 /**
