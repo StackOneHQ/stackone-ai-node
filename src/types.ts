@@ -97,6 +97,20 @@ export interface ExecuteOptions {
 }
 
 /**
+ * Execution metadata that can be surfaced to AI SDK tools.
+ */
+export interface ToolExecution {
+  /**
+   * The raw execution configuration generated from the OpenAPI specification.
+   */
+  config: ExecuteConfig;
+  /**
+   * The headers that will be sent when executing the tool.
+   */
+  headers: Headers;
+}
+
+/**
  * Schema definition for tool parameters
  */
 export interface ToolParameters {

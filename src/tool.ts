@@ -8,6 +8,7 @@ import type {
   Experimental_PreExecuteFunction,
   Experimental_ToolCreationOptions,
   JsonDict,
+  ToolExecution,
   ToolParameters,
 } from './types';
 import { StackOneError } from './utils/errors';
@@ -23,6 +24,18 @@ export class BaseTool {
   executeConfig: ExecuteConfig;
   protected requestBuilder: RequestBuilder;
   protected experimental_preExecute?: Experimental_PreExecuteFunction;
+
+  private createExecutionMetadata(): ToolExecution {
+    return {
+      config: {
+        method: this.executeConfig.method,
+        url: this.executeConfig.url,
+        bodyType: this.executeConfig.bodyType,
+        params: this.executeConfig.params.map((param) => ({ ...param })),
+      },
+      headers: this.getHeaders(),
+    };
+  }
 
   constructor(
     name: string,
@@ -114,7 +127,11 @@ export class BaseTool {
   /**
    * Convert the tool to AI SDK format
    */
-  toAISDK(options: { executable?: boolean } = { executable: true }): ToolSet {
+  toAISDK(
+    options: { executable?: boolean; execution?: ToolExecution | false } = {
+      executable: true,
+    }
+  ): ToolSet {
     const schema = {
       type: 'object' as const,
       properties: this.parameters.properties || {},
@@ -122,19 +139,30 @@ export class BaseTool {
       additionalProperties: false,
     };
 
+    const toolDefinition: Record<string, unknown> = {
+      parameters: jsonSchema(schema),
+      description: this.description,
+    };
+
+    const executionOption = options.execution ?? this.createExecutionMetadata();
+
+    if (executionOption !== false) {
+      toolDefinition.execution = executionOption;
+    }
+
+    if (options.executable ?? true) {
+      toolDefinition.execute = async (args: Record<string, unknown>) => {
+        try {
+          return await this.execute(args as JsonDict);
+        } catch (error) {
+          return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      };
+    }
+
     return {
       [this.name]: {
-        parameters: jsonSchema(schema),
-        description: this.description,
-        ...(options.executable && {
-          execute: async (args: Record<string, unknown>) => {
-            try {
-              return await this.execute(args as JsonDict);
-            } catch (error) {
-              return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
-            }
-          },
-        }),
+        ...toolDefinition,
       },
     } as ToolSet;
   }
@@ -257,10 +285,14 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Convert all tools to AI SDK format
    */
-  toAISDK(): ToolSet {
+  toAISDK(
+    options: { executable?: boolean; execution?: ToolExecution | false } = {
+      executable: true,
+    }
+  ): ToolSet {
     const result: ToolSet = {};
     for (const tool of this.tools) {
-      Object.assign(result, tool.toAISDK());
+      Object.assign(result, tool.toAISDK(options));
     }
     return result;
   }
