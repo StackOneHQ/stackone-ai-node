@@ -115,9 +115,7 @@ export class RequestBuilder {
 
     // Handle different body types
     if (Object.keys(bodyParams).length > 0) {
-      const bodyType = this.bodyType;
-
-      switch (bodyType) {
+      switch (this.bodyType) {
         case 'json':
           fetchOptions.headers = {
             ...fetchOptions.headers,
@@ -148,8 +146,8 @@ export class RequestBuilder {
           break;
         }
         default: {
-          const _exhaustiveCheck: never = bodyType;
-          throw new Error(`Unsupported HTTP body type: ${String(_exhaustiveCheck)}`);
+          this.bodyType satisfies never;
+          throw new Error(`Unsupported HTTP body type: ${String(this.bodyType)}`);
         }
       }
     }
