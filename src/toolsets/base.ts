@@ -282,27 +282,32 @@ export abstract class ToolSet {
       return this.stackOneClient;
     }
 
-    if (this.authentication?.type === 'basic') {
-      const { username, password } = this.authentication.credentials ?? {};
-      if (!username) {
-        throw new ToolSetConfigError(
-          'StackOne API key is required to create an actions client. Provide stackOneClient or configure basic authentication credentials.'
-        );
-      }
+    const credentials = this.authentication?.credentials ?? {};
+    const apiKeyFromAuth =
+      this.authentication?.type === 'basic'
+        ? credentials.username
+        : this.authentication?.type === 'bearer'
+          ? credentials.token
+          : credentials.username;
 
-      this.stackOneClient = new StackOne({
-        serverURL: this.baseUrl,
-        security: {
-          username,
-          password: password ?? '',
-        },
-      });
-      return this.stackOneClient;
+    const apiKey = apiKeyFromAuth || process.env.STACKONE_API_KEY;
+    const password = this.authentication?.type === 'basic' ? (credentials.password ?? '') : '';
+
+    if (!apiKey) {
+      throw new ToolSetConfigError(
+        'StackOne API key is required to create an actions client. Provide stackOneClient, configure authentication credentials, or set the STACKONE_API_KEY environment variable.'
+      );
     }
 
-    throw new ToolSetConfigError(
-      'StackOne client not configured. Provide stackOneClient or basic authentication credentials.'
-    );
+    this.stackOneClient = new StackOne({
+      serverURL: this.baseUrl,
+      security: {
+        username: apiKey,
+        password,
+      },
+    });
+
+    return this.stackOneClient;
   }
 
   private createRpcBackedTool({
