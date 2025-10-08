@@ -87,13 +87,8 @@ jobs:
           labels: |
             automated
             dependencies
-
-      - name: Request review from AI team
-        if: steps.create-pr.outputs.pull-request-number
-        run: |
-          gh pr edit ${{ steps.create-pr.outputs.pull-request-number }} --add-reviewer StackOneHQ/ai
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          team-reviewers: |
+            StackOneHQ/ai
 
       - name: PR Summary
         if: steps.create-pr.outputs.pull-request-number
