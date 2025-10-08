@@ -105,6 +105,8 @@ export STACKONE_API_KEY=<your-api-key>
 
 or load from a .env file using your preferred environment variable library.
 
+This API key is required for both statically generated tools and the MCP-backed dynamic tools described below. If it is missing, RPC execution will fail with a configuration error.
+
 ### Account IDs
 
 StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels:
@@ -124,6 +126,52 @@ const currentAccountId = tools.getAccountId(); // Get the current account ID
 ```
 
 [View full example](examples/account-id-usage.ts)
+
+### Dynamic Tool Fetching (MCP)
+
+StackOne hosts a Model Context Protocol (MCP) service that exposes your account's actions catalog. You can fetch those tools on demand and wire them up to the StackOne RPC endpoint without maintaining OpenAPI specs locally:
+
+```typescript
+class MyToolSet extends StackOneToolSet {}
+
+const toolset = new MyToolSet({ baseUrl: "https://api.stackone.com" });
+const tools = await toolset.fetchTools(); // Pulls the live catalog from /mcp and binds RPC execution
+
+const onboardingTool = tools.getTool("hris_create_employee");
+const result = await onboardingTool.execute({
+  body: {
+    name: "Jane Doe",
+    email: "jane@example.com",
+  },
+});
+```
+
+When calling `fetchTools`, the SDK automatically:
+
+- Connects to your project's MCP endpoint (`<baseUrl>/mcp`)
+- Reuses the current authentication headers (including `STACKONE_API_KEY`)
+- Creates `BaseTool` instances backed by the `actions.rpcAction` client
+
+[View full example](examples/meta-tools.ts)
+
+### Meta Tools for Discovery (Beta)
+
+Every `Tools` collection can produce *meta tools* that make it easier for AI agents to search the catalog and invoke tools dynamically:
+
+- `meta_search_tools` lets you run natural-language queries (powered by Orama's BM25 ranking) to find relevant tools.
+- `meta_execute_tool` takes a tool name plus parameters and runs it, so agents do not need to hardcode tool identifiers.
+
+```typescript
+const toolset = new StackOneToolSet();
+const tools = toolset.getStackOneTools("hris_*", "your-account-id");
+
+const metaTools = await tools.metaTools();
+const searchResult = await metaTools.getTool("meta_search_tools")?.execute({
+  query: "create a time off request",
+});
+```
+
+[View full example](examples/meta-tools.ts)
 
 ### File Upload
 

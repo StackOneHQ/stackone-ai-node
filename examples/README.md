@@ -155,6 +155,14 @@ Shows how to implement human-in-the-loop workflows for validation.
 - **API Calls**: Conditional
 - **Key Features**: Manual approval workflows, UI integration patterns
 
+#### [`meta-tools.ts`](./meta-tools.ts) - Dynamic Tool Discovery (Beta)
+
+Demonstrates MCP-backed tool discovery and meta tools that allow agents to search for and execute tools dynamically.
+
+- **Account ID**: HRIS
+- **API Calls**: Yes (RPC via MCP actions)
+- **Key Features**: MCP-powered catalog fetching, Orama BM25 search, AI agent integration
+
 ### OpenAPI Toolset Examples
 
 #### [`openapi-toolset.ts`](./openapi-toolset.ts) - OpenAPI Integration
