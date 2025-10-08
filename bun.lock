@@ -6,6 +6,7 @@
       "dependencies": {
         "@modelcontextprotocol/sdk": "^1.19.1",
         "@orama/orama": "^3.1.11",
+        "@stackone/stackone-client-ts": "^4.28.0",
         "json-schema": "^0.4.0",
       },
       "devDependencies": {
@@ -153,6 +154,8 @@
     "@rolldown/binding-win32-x64-msvc": ["@rolldown/binding-win32-x64-msvc@1.0.0-beta.41", "", { "os": "win32", "cpu": "x64" }, "sha512-UlpxKmFdik0Y2VjZrgUCgoYArZJiZllXgIipdBRV1hw6uK45UbQabSTW6Kp6enuOu7vouYWftwhuxfpE8J2JAg=="],
 
     "@rolldown/pluginutils": ["@rolldown/pluginutils@1.0.0-beta.41", "", {}, "sha512-ycMEPrS3StOIeb87BT3/+bu+blEtyvwQ4zmo2IcJQy0Rd1DAAhKksA0iUZ3MYSpJtjlPhg0Eo6mvVS6ggPhRbw=="],
+
+    "@stackone/stackone-client-ts": ["@stackone/stackone-client-ts@4.28.0", "", { "dependencies": { "zod": "^3.20.0" } }, "sha512-tQQllPevyl8Ondbmy2VBbBwbR/N8CUMK4w+sTVcentsGfVyrX8upH8cF+LNyyYyYuClk/r8RZ68lroyjmRL9FA=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
