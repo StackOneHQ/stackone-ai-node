@@ -10,6 +10,7 @@ import type {
   HttpExecuteConfig,
   JsonDict,
   LocalExecuteConfig,
+  RpcExecuteConfig,
   ToolExecution,
   ToolParameters,
 } from './types';
@@ -30,30 +31,34 @@ export class BaseTool {
   #headers: Record<string, string>;
 
   private createExecutionMetadata(): ToolExecution {
-    let config: ExecuteConfig;
-
-    if (this.executeConfig.kind === 'http') {
-      config = {
-        kind: 'http',
-        method: this.executeConfig.method,
-        url: this.executeConfig.url,
-        bodyType: this.executeConfig.bodyType,
-        params: this.executeConfig.params.map((param) => ({ ...param })),
-      } satisfies HttpExecuteConfig;
-    } else if (this.executeConfig.kind === 'rpc') {
-      config = {
-        kind: 'rpc',
-        method: this.executeConfig.method,
-        url: this.executeConfig.url,
-        payloadKeys: { ...this.executeConfig.payloadKeys },
-      };
-    } else {
-      config = {
-        kind: 'local',
-        identifier: this.executeConfig.identifier,
-        description: this.executeConfig.description,
-      };
-    }
+    const config = (() => {
+      switch (this.executeConfig.kind) {
+        case 'http':
+          return {
+            kind: 'http',
+            method: this.executeConfig.method,
+            url: this.executeConfig.url,
+            bodyType: this.executeConfig.bodyType,
+            params: this.executeConfig.params.map((param) => ({ ...param })),
+          } satisfies HttpExecuteConfig;
+        case 'rpc':
+          return {
+            kind: 'rpc',
+            method: this.executeConfig.method,
+            url: this.executeConfig.url,
+            payloadKeys: { ...this.executeConfig.payloadKeys },
+          } satisfies RpcExecuteConfig;
+        case 'local':
+          return {
+            kind: 'local',
+            identifier: this.executeConfig.identifier,
+            description: this.executeConfig.description,
+          } satisfies LocalExecuteConfig;
+        default:
+          this.executeConfig satisfies never;
+          throw new StackOneError('Unsupported executeConfig kind');
+      }
+    })();
 
     return {
       config,
