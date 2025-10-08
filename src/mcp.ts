@@ -18,11 +18,6 @@ interface MCPClient {
   [Symbol.asyncDispose](): Promise<void>;
 }
 
-const DEFAULT_MCP_CLIENT_OPTIONS = {
-  baseUrl: 'https://api.modelcontextprotocol.org',
-  headers: {},
-} as const satisfies MCPClientOptions;
-
 /**
  * Create a Model Context Protocol (MCP) client.
  *
@@ -38,10 +33,7 @@ const DEFAULT_MCP_CLIENT_OPTIONS = {
  * });
  * ```
  */
-export async function createMCPClient({
-  baseUrl,
-  headers,
-}: MCPClientOptions = DEFAULT_MCP_CLIENT_OPTIONS): Promise<MCPClient> {
+export async function createMCPClient({ baseUrl, headers }: MCPClientOptions): Promise<MCPClient> {
   const transport = new StreamableHTTPClientTransport(new URL(baseUrl), {
     requestInit: {
       headers,
