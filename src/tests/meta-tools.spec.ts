@@ -20,6 +20,7 @@ const createMockTools = (): BaseTool[] => {
         required: ['name', 'email'],
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/hris/employees',
         bodyType: 'json',
@@ -39,6 +40,7 @@ const createMockTools = (): BaseTool[] => {
         },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/hris/employees',
         bodyType: 'json',
@@ -67,6 +69,7 @@ const createMockTools = (): BaseTool[] => {
         required: ['employeeId', 'startDate', 'endDate'],
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/hris/time-off',
         bodyType: 'json',
@@ -89,6 +92,7 @@ const createMockTools = (): BaseTool[] => {
         required: ['name', 'email'],
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/ats/candidates',
         bodyType: 'json',
@@ -108,6 +112,7 @@ const createMockTools = (): BaseTool[] => {
         },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/ats/candidates',
         bodyType: 'json',
@@ -136,6 +141,7 @@ const createMockTools = (): BaseTool[] => {
         required: ['name'],
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/crm/contacts',
         bodyType: 'json',

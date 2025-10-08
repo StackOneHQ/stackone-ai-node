@@ -86,6 +86,7 @@ const createArrayTestTool = (): StackOneTool => {
       },
     },
     {
+      kind: 'http',
       method: 'GET',
       url: 'https://example.com/test',
       bodyType: 'json',
@@ -127,6 +128,7 @@ const createNestedArrayTestTool = (): StackOneTool => {
       },
     },
     {
+      kind: 'http',
       method: 'GET',
       url: 'https://example.com/test',
       bodyType: 'json',

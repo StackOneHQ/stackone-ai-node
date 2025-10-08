@@ -37,6 +37,7 @@ describe('OpenAPIToolSet', () => {
           required: ['id'],
         },
         execute: {
+          kind: 'http',
           method: 'GET',
           url: 'https://petstore.swagger.io/v2/pet/{id}',
           bodyType: 'json',

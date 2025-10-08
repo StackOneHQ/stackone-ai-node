@@ -16,6 +16,7 @@ describe('RequestBuilder', () => {
     return recordedRequests;
   };
   const mockConfig = {
+    kind: 'http' as const,
     method: 'GET',
     url: 'https://api.example.com/test/{pathParam}',
     bodyType: 'json' as const,

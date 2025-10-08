@@ -56,17 +56,41 @@ export type ParameterLocation = ValueOf<typeof ParameterLocation>;
 /**
  * Configuration for executing a tool against an API endpoint
  */
-export interface ExecuteConfig {
+export interface HttpExecuteParameter {
+  name: string;
+  location: ParameterLocation;
+  type: JsonSchemaType;
+  derivedFrom?: string; // this is the name of the param that this one is derived from.
+}
+
+export interface HttpExecuteConfig {
+  kind: 'http';
   method: string;
   url: string;
   bodyType: 'json' | 'multipart-form' | 'form';
-  params: {
-    name: string;
-    location: ParameterLocation;
-    type: JsonSchemaType;
-    derivedFrom?: string; // this is the name of the param that this one is derived from.
-  }[]; // this params are the full list of params used to execute. This should come straight from the OpenAPI spec.
+  params: HttpExecuteParameter[]; // full list of params used to execute. Comes straight from the OpenAPI spec.
 }
+
+export interface RpcExecuteConfig {
+  kind: 'rpc';
+  method: string;
+  url: string;
+  payloadKeys: {
+    action: string;
+    body?: string;
+    headers?: string;
+    path?: string;
+    query?: string;
+  };
+}
+
+export interface LocalExecuteConfig {
+  kind: 'local';
+  identifier?: string;
+  description?: string;
+}
+
+export type ExecuteConfig = HttpExecuteConfig | RpcExecuteConfig | LocalExecuteConfig;
 
 /**
  * EXPERIMENTAL: Options for creating tools with schema overrides and preExecute functions

@@ -3,15 +3,19 @@ import type { Arrayable } from 'type-fest';
 import { createMCPClient } from '../mcp';
 import { BaseTool, Tools } from '../tool';
 import type {
-  ExecuteConfig,
   ExecuteOptions,
   Experimental_ToolCreationOptions,
   JsonDict,
   JsonSchemaProperties,
+  RpcExecuteConfig,
+  ToolParameters,
 } from '../types';
-import { ParameterLocation } from '../types';
 import { toArray } from '../utils/array';
 import { StackOneError } from '../utils/errors';
+
+type ToolInputSchema = Awaited<
+  ReturnType<Awaited<ReturnType<typeof createMCPClient>>['client']['listTools']>
+>['tools'][number]['inputSchema'];
 
 /**
  * Base exception for toolset errors
@@ -261,132 +265,14 @@ export abstract class ToolSet {
     const listToolsResult = await clients.client.listTools();
     const actionsClient = this.getActionsClient();
 
-    const tools = listToolsResult.tools.map(({ name, description, inputSchema }) => {
-      const executeConfig: ExecuteConfig = {
-        method: 'POST',
-        url: `${this.baseUrl}/actions/rpc`,
-        bodyType: 'json',
-        params: [
-          {
-            name: 'action',
-            location: ParameterLocation.BODY,
-            type: 'string',
-          },
-          {
-            name: 'body',
-            location: ParameterLocation.BODY,
-            type: 'object',
-          },
-          {
-            name: 'headers',
-            location: ParameterLocation.BODY,
-            type: 'object',
-          },
-          {
-            name: 'path',
-            location: ParameterLocation.BODY,
-            type: 'object',
-          },
-          {
-            name: 'query',
-            location: ParameterLocation.BODY,
-            type: 'object',
-          },
-        ],
-      };
-
-      const tool = new BaseTool(
+    const tools = listToolsResult.tools.map(({ name, description, inputSchema }) =>
+      this.createRpcBackedTool({
+        actionsClient,
         name,
-        description ?? '',
-        {
-          ...inputSchema,
-
-          // properties are not well typed in MCP spec
-          properties: inputSchema?.properties as JsonSchemaProperties,
-        },
-        executeConfig,
-        this.headers
-      );
-
-      tool.execute = async (
-        inputParams?: JsonDict | string,
-        options?: ExecuteOptions
-      ): Promise<JsonDict> => {
-        try {
-          if (
-            inputParams !== undefined &&
-            typeof inputParams !== 'object' &&
-            typeof inputParams !== 'string'
-          ) {
-            throw new StackOneError(
-              `Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`
-            );
-          }
-
-          const parsedParams =
-            typeof inputParams === 'string' ? JSON.parse(inputParams) : (inputParams ?? {});
-
-          const currentHeaders = tool.getHeaders();
-          const actionHeaders = this.buildActionHeaders(currentHeaders);
-
-          const pathParams = this.extractRecord(parsedParams, 'path');
-          const queryParams = this.extractRecord(parsedParams, 'query');
-          const additionalHeaders = this.extractRecord(parsedParams, 'headers');
-          if (additionalHeaders) {
-            for (const [key, value] of Object.entries(additionalHeaders)) {
-              if (value === undefined || value === null) continue;
-              actionHeaders[key] = String(value);
-            }
-          }
-
-          const bodyPayload = this.extractRecord(parsedParams, 'body');
-          const rpcBody: JsonDict = bodyPayload ? { ...bodyPayload } : {};
-          for (const [key, value] of Object.entries(parsedParams)) {
-            if (key === 'body' || key === 'headers' || key === 'path' || key === 'query') {
-              continue;
-            }
-            rpcBody[key] = value as unknown;
-          }
-
-          if (options?.dryRun) {
-            const requestPayload = {
-              action: name,
-              body: rpcBody,
-              headers: actionHeaders,
-              path: pathParams ?? undefined,
-              query: queryParams ?? undefined,
-            };
-
-            return {
-              url: executeConfig.url,
-              method: executeConfig.method,
-              headers: actionHeaders,
-              body: JSON.stringify(requestPayload),
-              mappedParams: parsedParams,
-            } satisfies JsonDict;
-          }
-
-          const response = await actionsClient.actions.rpcAction({
-            action: name,
-            body: rpcBody,
-            headers: actionHeaders,
-            path: pathParams ?? undefined,
-            query: queryParams ?? undefined,
-          });
-
-          return (response.actionsRpcResponse ?? {}) as JsonDict;
-        } catch (error) {
-          if (error instanceof StackOneError) {
-            throw error;
-          }
-          throw new StackOneError(
-            `Error executing RPC action ${name}: ${error instanceof Error ? error.message : String(error)}`
-          );
-        }
-      };
-
-      return tool;
-    });
+        description,
+        inputSchema,
+      })
+    );
 
     return new Tools(tools);
   }
@@ -417,6 +303,125 @@ export abstract class ToolSet {
     throw new ToolSetConfigError(
       'StackOne client not configured. Provide stackOneClient or basic authentication credentials.'
     );
+  }
+
+  private createRpcBackedTool({
+    actionsClient,
+    name,
+    description,
+    inputSchema,
+  }: {
+    actionsClient: StackOne;
+    name: string;
+    description?: string;
+    inputSchema: ToolInputSchema;
+  }): BaseTool {
+    const executeConfig = {
+      kind: 'rpc',
+      method: 'POST',
+      url: `${this.baseUrl}/actions/rpc`,
+      payloadKeys: {
+        action: 'action',
+        body: 'body',
+        headers: 'headers',
+        path: 'path',
+        query: 'query',
+      },
+    } as const satisfies RpcExecuteConfig;
+
+    const toolParameters = {
+      ...inputSchema,
+
+      // properties are not well typed in MCP spec
+      properties: inputSchema?.properties as JsonSchemaProperties,
+    } satisfies ToolParameters;
+
+    const tool = new BaseTool(
+      name,
+      description ?? '',
+      toolParameters,
+      executeConfig,
+      this.headers
+    ).setExposeExecutionMetadata(false);
+
+    tool.execute = async (
+      inputParams?: JsonDict | string,
+      options?: ExecuteOptions
+    ): Promise<JsonDict> => {
+      try {
+        if (
+          inputParams !== undefined &&
+          typeof inputParams !== 'object' &&
+          typeof inputParams !== 'string'
+        ) {
+          throw new StackOneError(
+            `Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`
+          );
+        }
+
+        const parsedParams =
+          typeof inputParams === 'string' ? JSON.parse(inputParams) : (inputParams ?? {});
+
+        const currentHeaders = tool.getHeaders();
+        const actionHeaders = this.buildActionHeaders(currentHeaders);
+
+        const pathParams = this.extractRecord(parsedParams, 'path');
+        const queryParams = this.extractRecord(parsedParams, 'query');
+        const additionalHeaders = this.extractRecord(parsedParams, 'headers');
+        if (additionalHeaders) {
+          for (const [key, value] of Object.entries(additionalHeaders)) {
+            if (value === undefined || value === null) continue;
+            actionHeaders[key] = String(value);
+          }
+        }
+
+        const bodyPayload = this.extractRecord(parsedParams, 'body');
+        const rpcBody: JsonDict = bodyPayload ? { ...bodyPayload } : {};
+        for (const [key, value] of Object.entries(parsedParams)) {
+          if (key === 'body' || key === 'headers' || key === 'path' || key === 'query') {
+            continue;
+          }
+          rpcBody[key] = value as unknown;
+        }
+
+        if (options?.dryRun) {
+          const requestPayload = {
+            action: name,
+            body: rpcBody,
+            headers: actionHeaders,
+            path: pathParams ?? undefined,
+            query: queryParams ?? undefined,
+          };
+
+          return {
+            url: executeConfig.url,
+            method: executeConfig.method,
+            headers: actionHeaders,
+            body: JSON.stringify(requestPayload),
+            mappedParams: parsedParams,
+          } satisfies JsonDict;
+        }
+
+        const response = await actionsClient.actions.rpcAction({
+          action: name,
+          body: rpcBody,
+          headers: actionHeaders,
+          path: pathParams ?? undefined,
+          query: queryParams ?? undefined,
+        });
+
+        return (response.actionsRpcResponse ?? {}) as JsonDict;
+      } catch (error) {
+        if (error instanceof StackOneError) {
+          throw error;
+        }
+        throw new StackOneError(
+          `Error executing RPC action ${name}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    };
+
+    return tool;
   }
 
   private buildActionHeaders(headers: Record<string, string>): Record<string, string> {

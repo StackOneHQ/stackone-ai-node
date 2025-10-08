@@ -1,6 +1,6 @@
 import {
-  type ExecuteConfig,
   type ExecuteOptions,
+  type HttpExecuteConfig,
   type JsonDict,
   ParameterLocation,
 } from '../types';
@@ -25,10 +25,10 @@ export class RequestBuilder {
   private method: string;
   private url: string;
   private bodyType: 'json' | 'multipart-form' | 'form';
-  private params: ExecuteConfig['params'];
+  private params: HttpExecuteConfig['params'];
   private headers: Record<string, string>;
 
-  constructor(config: ExecuteConfig, headers: Record<string, string> = {}) {
+  constructor(config: HttpExecuteConfig, headers: Record<string, string> = {}) {
     this.method = config.method;
     this.url = config.url;
     this.bodyType = config.bodyType;

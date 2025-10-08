@@ -7,7 +7,9 @@ import type {
   ExecuteOptions,
   Experimental_PreExecuteFunction,
   Experimental_ToolCreationOptions,
+  HttpExecuteConfig,
   JsonDict,
+  LocalExecuteConfig,
   ToolExecution,
   ToolParameters,
 } from './types';
@@ -22,17 +24,39 @@ export class BaseTool {
   description: string;
   parameters: ToolParameters;
   executeConfig: ExecuteConfig;
-  protected requestBuilder: RequestBuilder;
+  protected requestBuilder?: RequestBuilder;
   protected experimental_preExecute?: Experimental_PreExecuteFunction;
+  #exposeExecutionMetadata = true;
+  #headers: Record<string, string>;
 
   private createExecutionMetadata(): ToolExecution {
-    return {
-      config: {
+    let config: ExecuteConfig;
+
+    if (this.executeConfig.kind === 'http') {
+      config = {
+        kind: 'http',
         method: this.executeConfig.method,
         url: this.executeConfig.url,
         bodyType: this.executeConfig.bodyType,
         params: this.executeConfig.params.map((param) => ({ ...param })),
-      },
+      } satisfies HttpExecuteConfig;
+    } else if (this.executeConfig.kind === 'rpc') {
+      config = {
+        kind: 'rpc',
+        method: this.executeConfig.method,
+        url: this.executeConfig.url,
+        payloadKeys: { ...this.executeConfig.payloadKeys },
+      };
+    } else {
+      config = {
+        kind: 'local',
+        identifier: this.executeConfig.identifier,
+        description: this.executeConfig.description,
+      };
+    }
+
+    return {
+      config,
       headers: this.getHeaders(),
     };
   }
@@ -49,7 +73,10 @@ export class BaseTool {
     this.description = description;
     this.parameters = parameters;
     this.executeConfig = executeConfig;
-    this.requestBuilder = new RequestBuilder(executeConfig, headers);
+    this.#headers = { ...(headers ?? {}) };
+    if (executeConfig.kind === 'http') {
+      this.requestBuilder = new RequestBuilder(executeConfig, this.#headers);
+    }
     this.experimental_preExecute = experimental_preExecute;
   }
 
@@ -57,7 +84,10 @@ export class BaseTool {
    * Set headers for this tool
    */
   setHeaders(headers: Record<string, string>): BaseTool {
-    this.requestBuilder.setHeaders(headers);
+    this.#headers = { ...this.#headers, ...headers };
+    if (this.requestBuilder) {
+      this.requestBuilder.setHeaders(headers);
+    }
     return this;
   }
 
@@ -65,7 +95,20 @@ export class BaseTool {
    * Get the current headers
    */
   getHeaders(): Record<string, string> {
-    return this.requestBuilder.getHeaders();
+    if (this.requestBuilder) {
+      const currentHeaders = this.requestBuilder.getHeaders();
+      this.#headers = { ...currentHeaders };
+      return currentHeaders;
+    }
+    return { ...this.#headers };
+  }
+
+  /**
+   * Control whether execution metadata should be exposed in AI SDK conversions.
+   */
+  setExposeExecutionMetadata(expose: boolean): this {
+    this.#exposeExecutionMetadata = expose;
+    return this;
   }
 
   /**
@@ -73,6 +116,11 @@ export class BaseTool {
    */
   async execute(inputParams?: JsonDict | string, options?: ExecuteOptions): Promise<JsonDict> {
     try {
+      if (!this.requestBuilder || this.executeConfig.kind !== 'http') {
+        throw new StackOneError(
+          'BaseTool.execute is only available for HTTP-backed tools. Provide a custom execute implementation for non-HTTP tools.'
+        );
+      }
       // Validate params is either undefined, string, or object
       if (
         inputParams !== undefined &&
@@ -144,7 +192,12 @@ export class BaseTool {
       description: this.description,
     };
 
-    const executionOption = options.execution ?? this.createExecutionMetadata();
+    const executionOption =
+      options.execution !== undefined
+        ? options.execution
+        : this.#exposeExecutionMetadata
+          ? this.createExecutionMetadata()
+          : false;
 
     if (executionOption !== false) {
       toolDefinition.execution = executionOption;
@@ -437,11 +490,10 @@ export function metaSearchTools(oramaDb: OramaDb, allTools: BaseTool[]): BaseToo
   } as const satisfies ToolParameters;
 
   const executeConfig = {
-    method: 'LOCAL',
-    url: 'local://get-relevant-tools',
-    bodyType: 'json',
-    params: [],
-  } as const satisfies ExecuteConfig;
+    kind: 'local',
+    identifier: name,
+    description: 'local://get-relevant-tools',
+  } as const satisfies LocalExecuteConfig;
 
   const tool = new BaseTool(name, description, parameters, executeConfig);
   tool.execute = async (inputParams?: JsonDict | string): Promise<JsonDict> => {
@@ -521,11 +573,10 @@ export function metaExecuteTool(tools: Tools): BaseTool {
   } as const satisfies ToolParameters;
 
   const executeConfig = {
-    method: 'LOCAL',
-    url: 'local://execute-tool',
-    bodyType: 'json',
-    params: [],
-  } as const satisfies ExecuteConfig;
+    kind: 'local',
+    identifier: name,
+    description: 'local://execute-tool',
+  } as const satisfies LocalExecuteConfig;
 
   // Create the tool instance
   const tool = new BaseTool(name, description, parameters, executeConfig);
