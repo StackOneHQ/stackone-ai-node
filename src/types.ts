@@ -63,11 +63,13 @@ export interface HttpExecuteParameter {
   derivedFrom?: string; // this is the name of the param that this one is derived from.
 }
 
+export type HttpBodyType = 'json' | 'multipart-form' | 'form';
+
 export interface HttpExecuteConfig {
   kind: 'http';
   method: string;
   url: string;
-  bodyType: 'json' | 'multipart-form' | 'form';
+  bodyType: HttpBodyType;
   params: HttpExecuteParameter[]; // full list of params used to execute. Comes straight from the OpenAPI spec.
 }
 
