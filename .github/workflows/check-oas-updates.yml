@@ -87,8 +87,6 @@ jobs:
           labels: |
             automated
             dependencies
-          team-reviewers: |
-            StackOneHQ/ai
 
       - name: PR Summary
         if: steps.create-pr.outputs.pull-request-number
