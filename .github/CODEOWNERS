@@ -1,6 +1,5 @@
 # CODEOWNERS file for StackOne AI Node SDK
 # This file defines which teams should review specific parts of the codebase
 
-# OpenAPI specifications and generated types require AI team review
-/src/openapi/generated/ @StackOneHQ/ai
-/specs/ @StackOneHQ/ai
+# All changes require AI team review
+* @StackOneHQ/ai
