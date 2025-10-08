@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "preinstall": "bun x only-allow bun",
-    "prepare": "bun prepare:git && bun run fetch:specs",
+    "prepare": "bun prepare:git",
     "prepare:git": "git config --local core.hooksPath .githooks",
     "build": "bun -b tsdown",
     "rebuild": "bun run fetch:specs && bun run build",
