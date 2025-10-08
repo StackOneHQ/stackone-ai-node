@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="generator" content="mkdocs-1.6.1, mkdocs-terminal-4.7.0">
+     
+     
+    
+    <link rel="canonical" href="https://stackonehq.github.io/stackone-ai-node§/fetch-tools/"><link rel="icon" type="image/png" sizes="192x192" href="../img/android-chrome-192x192.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="../img/android-chrome-512x512.png" />
+<link rel="apple-touch-icon" sizes="180x180" href="../img/apple-touch-icon.png" />
+<link rel="shortcut icon" type="image/png" sizes="48x48" href="../img/favicon.ico" />
+<link rel="icon" type="image/png" sizes="16x16" href="../img/favicon-16x16.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="../img/favicon-32x32.png" />
+
+
+    
+ 
+<title>Fetch Tools - StackOne AI SDK</title>
+
+
+<link href="../css/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+<link href="../css/fontawesome/css/solid.min.css" rel="stylesheet">
+<link href="../css/normalize.css" rel="stylesheet">
+<link href="../css/terminal.css" rel="stylesheet">
+<link href="../css/theme.css" rel="stylesheet">
+<link href="../css/theme.tile_grid.css" rel="stylesheet">
+<link href="../css/theme.footer.css" rel="stylesheet">
+<!-- default color palette -->
+<link href="../css/palettes/default.css" rel="stylesheet">
+
+<!-- page layout -->
+<style>
+/* initially set page layout to a one column grid */
+.terminal-mkdocs-main-grid {
+    display: grid;
+    grid-column-gap: 1.4em;
+    grid-template-columns: auto;
+    grid-template-rows: auto;
+}
+
+/*  
+*   when side navigation is not hidden, use a two column grid.  
+*   if the screen is too narrow, fall back to the initial one column grid layout.
+*   in this case the main content will be placed under the navigation panel. 
+*/
+@media only screen and (min-width: 70em) {
+    .terminal-mkdocs-main-grid {
+        grid-template-columns: 4fr 9fr;
+    }
+}</style>
+
+<!-- link underline override -->
+<style>
+#terminal-mkdocs-main-content a:not(.headerlink){
+    text-decoration: none;
+}
+</style>
+
+     
+    
+    
+
+    
+    <!-- search css support -->
+<link href="../css/search/bootstrap-modal.css" rel="stylesheet">
+<!-- search scripts -->
+<script>
+    var base_url = "..",
+    shortcuts = "{}";
+</script>
+<script src="../js/jquery/jquery-1.10.1.min.js" defer></script>
+<script src="../js/bootstrap/bootstrap.min.js" defer></script>
+<script src="../js/mkdocs/base.js" defer></script>
+    
+    
+    
+    
+    <script src="../search/main.js"></script>
+    
+
+    
+</head>
+
+<body class="terminal"><div class="container">
+    <div class="terminal-nav">
+        <header class="terminal-logo">
+            <div id="mkdocs-terminal-site-name" class="logo terminal-prompt"><a href="https://stackonehq.github.io/stackone-ai-node§/" class="no-style">StackOne AI SDK</a></div>
+        </header>
+        
+        <nav class="terminal-menu">
+            
+            <ul vocab="https://schema.org/" typeof="BreadcrumbList">
+                
+                
+                <li property="itemListElement" typeof="ListItem">
+                    <a href=".." class="menu-item " property="item" typeof="WebPage">
+                        <span property="name">Home</span>
+                    </a>
+                    <meta property="position" content="0">
+                </li>
+                
+                
+                
+                
+                
+                
+                
+                    
+                    
+
+
+<li property="itemListElement" typeof="ListItem">
+    <a href="#" class="menu-item" data-toggle="modal" data-target="#mkdocs_search_modal" property="item" typeof="SearchAction">
+        <i aria-hidden="true" class="fa fa-search"></i> <span property="name">Search</span>
+    </a>
+    <meta property="position" content="1">
+</li>
+                    
+            </ul>
+            
+        </nav>
+    </div>
+</div>
+        
+    <div class="container">
+        <div class="terminal-mkdocs-main-grid"><aside id="terminal-mkdocs-side-panel"><nav>
+  
+    <ul class="terminal-mkdocs-side-nav-items">
+        
+          
+
+
+
+<li class="terminal-mkdocs-side-nav-li">
+    
+    
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="..">Home</a>
+        
+    
+    
+    
+  </li>
+        
+          
+
+
+
+<li class="terminal-mkdocs-side-nav-li">
+    
+    
+        
+        
+            
+                
+        
+
+        
+            
+    
+        
+        
+            
+            
+            <span class="
+        
+            
+        
+    
+
+    terminal-mkdocs-side-nav-item terminal-mkdocs-side-nav-section-no-index">StackOne Usage</span>
+        
+    
+    
+        
+      
+        
+            <ul class="terminal-mkdocs-side-nav-li-ul">
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="..">Home</a>
+        
+    
+    </li>
+            
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../account-id-usage/">Account IDs</a>
+        
+    
+    </li>
+            
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../error-handling/">Error Handling</a>
+        
+    
+    </li>
+            
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../file-uploads.md">File Uploads</a>
+        
+    
+    </li>
+            
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../custom-base-url/">Custom Base URL</a>
+        
+    
+    </li>
+            
+            
+    </ul>
+        
+    
+  </li>
+        
+          
+
+
+
+<li class="terminal-mkdocs-side-nav-li">
+    
+    
+        
+        
+            
+                
+        
+
+        
+            
+    
+        
+        
+            
+            
+            <span class="
+        
+            
+        
+    
+
+    terminal-mkdocs-side-nav-item terminal-mkdocs-side-nav-section-no-index">Integrations</span>
+        
+    
+    
+        
+      
+        
+            <ul class="terminal-mkdocs-side-nav-li-ul">
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../openai-integration/">OpenAI</a>
+        
+    
+    </li>
+            
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../ai-sdk-integration/">AI SDK</a>
+        
+    
+    </li>
+            
+            
+    </ul>
+        
+    
+  </li>
+        
+          
+
+
+
+<li class="terminal-mkdocs-side-nav-li">
+    
+    
+        
+        
+            
+                
+        
+
+        
+            
+    
+        
+        
+            
+            
+            <span class="
+        
+            
+        
+    
+
+    terminal-mkdocs-side-nav-item terminal-mkdocs-side-nav-section-no-index">OpenAPI Usage</span>
+        
+    
+    
+        
+      
+        
+            <ul class="terminal-mkdocs-side-nav-li-ul">
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../openapi-toolset/">Getting Started</a>
+        
+    
+    </li>
+            
+        
+            
+            
+                
+                
+            
+
+             
+                <li class="terminal-mkdocs-side-nav-li-ul-li">
+    
+        
+        
+            <a class="
+
+    terminal-mkdocs-side-nav-item" href="../openapi-transformations.md">Custom Transformations</a>
+        
+    
+    </li>
+            
+            
+    </ul>
+        
+    
+  </li>
+        
+    </ul>
+  
+</nav>
+</aside>
+            <main id="terminal-mkdocs-main-content">
+<section id="mkdocs-terminal-content">
+    <h1 id="fetch-tools">Fetch Tools<a class="headerlink" href="#fetch-tools" title="Anchor link to this section for reference">#</a></h1>
+<p>Example: fetch the latest StackOne tool catalog and execute a tool.</p>
+<p>Set <code>STACKONE_API_KEY</code> (and optionally <code>STACKONE_BASE_URL</code>) before running.
+By default the script exits early in test environments where a real key is
+not available.</p>
+<div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #2838B0">import</span><span style="color: #A89028"> </span>process<span style="color: #A89028"> </span><span style="color: #2838B0">from</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;node:process&#39;</span><span style="color: #888">;</span>
+<span style="color: #2838B0">import</span><span style="color: #A89028"> </span><span style="color: #888">{</span><span style="color: #A89028"> </span>StackOneToolSet<span style="color: #A89028"> </span><span style="color: #888">}</span><span style="color: #A89028"> </span><span style="color: #2838B0">from</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;../src&#39;</span><span style="color: #888">;</span>
+
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>apiKey<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span>process<span style="color: #888">.</span>env<span style="color: #888">.</span>STACKONE_API_KEY<span style="color: #888">;</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>isPlaceholderKey<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #666">!</span>apiKey<span style="color: #A89028"> </span><span style="color: #666">||</span><span style="color: #A89028"> </span>apiKey<span style="color: #A89028"> </span><span style="color: #666">===</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;test-stackone-key&#39;</span><span style="color: #888">;</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>shouldSkip<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span>process<span style="color: #888">.</span>env<span style="color: #888">.</span>SKIP_FETCH_TOOLS_EXAMPLE<span style="color: #A89028"> </span><span style="color: #666">!==</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;0&#39;</span><span style="color: #A89028"> </span><span style="color: #666">&amp;&amp;</span><span style="color: #A89028"> </span>isPlaceholderKey<span style="color: #888">;</span>
+
+<span style="color: #2838B0">if</span><span style="color: #A89028"> </span><span style="color: #888">(</span>shouldSkip<span style="color: #888">)</span><span style="color: #A89028"> </span><span style="color: #888">{</span>
+<span style="color: #A89028">  </span>console<span style="color: #888">.</span>log<span style="color: #888">(</span>
+<span style="color: #A89028">    </span><span style="color: #B83838">&#39;Skipping fetch-tools example. Provide STACKONE_API_KEY and set SKIP_FETCH_TOOLS_EXAMPLE=0 to run.&#39;</span>
+<span style="color: #A89028">  </span><span style="color: #888">);</span>
+<span style="color: #A89028">  </span>process<span style="color: #888">.</span>exit<span style="color: #888">(</span><span style="color: #444">0</span><span style="color: #888">);</span>
+<span style="color: #888">}</span>
+
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolset<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #A848A8">new</span><span style="color: #A89028"> </span>StackOneToolSet<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>baseUrl<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">process.env.STACKONE_BASE_URL</span><span style="color: #A89028"> </span><span style="color: #666">??</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;https://api.stackone.com&#39;</span><span style="color: #888">,</span>
+<span style="color: #888">});</span>
+
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>tools<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">();</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>tools<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools`</span><span style="color: #888">);</span>
+
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>tool<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span>tools<span style="color: #888">.</span>getTool<span style="color: #888">(</span><span style="color: #B83838">&#39;hris_list_employees&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0">if</span><span style="color: #A89028"> </span><span style="color: #888">(</span><span style="color: #666">!</span>tool<span style="color: #888">)</span><span style="color: #A89028"> </span><span style="color: #888">{</span>
+<span style="color: #A89028">  </span><span style="color: #2838B0">throw</span><span style="color: #A89028"> </span><span style="color: #A848A8">new</span><span style="color: #A89028"> </span><span style="color: #908828">Error</span><span style="color: #888">(</span><span style="color: #B83838">&#39;Tool hris_list_employees not found in the catalog&#39;</span><span style="color: #888">);</span>
+<span style="color: #888">}</span>
+
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>result<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>tool<span style="color: #888">.</span>execute<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>query<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">{</span><span style="color: #A89028"> </span>limit<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">5</span><span style="color: #A89028"> </span><span style="color: #888">},</span>
+<span style="color: #888">});</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;Sample execution result:&#39;</span><span style="color: #888">,</span><span style="color: #A89028"> </span><span style="color: #388038">JSON</span><span style="color: #888">.</span>stringify<span style="color: #888">(</span>result<span style="color: #888">,</span><span style="color: #A89028"> </span><span style="color: #444; font-style: italic">null</span><span style="color: #888">,</span><span style="color: #A89028"> </span><span style="color: #444">2</span><span style="color: #888">));</span>
+</code></pre></div>
+</section>
+
+            </main>
+        </div>
+        <hr><footer>
+    <div class="terminal-mkdocs-footer-grid">
+        <div id="terminal-mkdocs-footer-copyright-info">
+             Site built with <a href="http://www.mkdocs.org">MkDocs</a> and <a href="https://github.com/ntno/mkdocs-terminal">Terminal for MkDocs</a>.
+        </div>
+    </div>
+</footer>
+    </div>
+
+    
+    <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="alertdialog" aria-modal="true" aria-labelledby="searchModalLabel">
+    <div class="modal-dialog modal-lg" role="search">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="searchModalLabel">Search</h5>
+                <button type="button" class="close btn btn-default btn-ghost" data-dismiss="modal"><span aria-hidden="true">x</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="searchInputLabel">Type to start searching</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" aria-labelledby="searchInputLabel" placeholder="" id="mkdocs-search-query" title="Please enter search terms here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No document matches found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
+</body>
+
+</html>
