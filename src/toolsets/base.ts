@@ -327,7 +327,7 @@ export abstract class ToolSet {
         path: 'path',
         query: 'query',
       },
-    } as const satisfies RpcExecuteConfig;
+    } as const satisfies RpcExecuteConfig; // Mirrors StackOne RPC payload layout so metadata/debug stays in sync.
 
     const toolParameters = {
       ...inputSchema,

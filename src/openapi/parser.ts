@@ -68,6 +68,7 @@ export class OpenAPIParser {
   }
 
   private normalizeBodyType(bodyType: string | null): HttpExecuteConfig['bodyType'] {
+    // Map OpenAPI content types into the narrower set supported by ExecuteConfig.
     if (!bodyType) {
       return 'json';
     }

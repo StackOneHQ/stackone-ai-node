@@ -19,7 +19,7 @@ class ParameterSerializationError extends Error {
 }
 
 /**
- * Builds and executes HTTP requests
+ * Builds and executes HTTP requests for tools declared with kind:'http'.
  */
 export class RequestBuilder {
   private method: string;
