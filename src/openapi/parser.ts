@@ -1,6 +1,6 @@
 import type { JSONSchema7 as JsonSchema } from 'json-schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { ParameterLocation, type ToolDefinition } from '../types';
+import { type HttpExecuteConfig, ParameterLocation, type ToolDefinition } from '../types';
 // Define a type for OpenAPI document
 type OpenAPIDocument = OpenAPIV3.Document | OpenAPIV3_1.Document;
 
@@ -65,6 +65,23 @@ export class OpenAPIParser {
     // Extract base URL from servers if available
     const servers = this._spec.servers || [];
     return servers.length > 0 ? servers[0].url : 'https://api.stackone.com';
+  }
+
+  private normalizeBodyType(bodyType: string | null): HttpExecuteConfig['bodyType'] {
+    // Map OpenAPI content types into the narrower set supported by ExecuteConfig.
+    if (!bodyType) {
+      return 'json';
+    }
+
+    if (bodyType === 'form-data' || bodyType === 'multipart-form') {
+      return 'multipart-form';
+    }
+
+    if (bodyType === 'form' || bodyType === 'application/x-www-form-urlencoded') {
+      return 'form';
+    }
+
+    return 'json';
   }
 
   /**
@@ -552,6 +569,22 @@ export class OpenAPIParser {
             );
 
             // Create tool definition with deep copies to prevent shared state
+            const executeConfig = {
+              kind: 'http',
+              method: method.toUpperCase(),
+              url: `${this._baseUrl}${path}`,
+              bodyType: this.normalizeBodyType(bodyType),
+              params: Object.entries(parameterLocations)
+                .filter(([name]) => !this.isRemovedParam(name))
+                .map(([name, location]) => {
+                  return {
+                    name,
+                    location,
+                    type: (filteredProperties[name]?.type as JsonSchema['type']) || 'string',
+                  };
+                }),
+            } satisfies HttpExecuteConfig;
+
             tools[name] = {
               description: operation.summary || '',
               parameters: {
@@ -559,20 +592,7 @@ export class OpenAPIParser {
                 properties: filteredProperties,
                 required: filteredRequired,
               },
-              execute: {
-                method: method.toUpperCase(),
-                url: `${this._baseUrl}${path}`,
-                bodyType: (bodyType as 'json' | 'multipart-form') || 'json',
-                params: Object.entries(parameterLocations)
-                  .filter(([name]) => !this.isRemovedParam(name))
-                  .map(([name, location]) => {
-                    return {
-                      name,
-                      location,
-                      type: (filteredProperties[name]?.type as JsonSchema['type']) || 'string',
-                    };
-                  }),
-              },
+              execute: executeConfig,
             };
           } catch (operationError) {
             console.error(`Error processing operation ${name}: ${operationError}`);

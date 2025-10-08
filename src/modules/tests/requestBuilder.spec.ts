@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { http, HttpResponse } from 'msw';
 import { server } from '../../../mocks/node.ts';
-import { ParameterLocation } from '../../types';
+import { type HttpExecuteConfig, ParameterLocation } from '../../types';
 import { StackOneAPIError } from '../../utils/errors';
 import { RequestBuilder } from '../requestBuilder';
 
@@ -16,27 +16,28 @@ describe('RequestBuilder', () => {
     return recordedRequests;
   };
   const mockConfig = {
+    kind: 'http',
     method: 'GET',
     url: 'https://api.example.com/test/{pathParam}',
-    bodyType: 'json' as const,
+    bodyType: 'json',
     params: [
-      { name: 'pathParam', location: ParameterLocation.PATH, type: 'string' as const },
-      { name: 'queryParam', location: ParameterLocation.QUERY, type: 'string' as const },
-      { name: 'headerParam', location: ParameterLocation.HEADER, type: 'string' as const },
-      { name: 'bodyParam', location: ParameterLocation.BODY, type: 'string' as const },
-      { name: 'defaultParam', location: ParameterLocation.BODY, type: 'string' as const },
-      { name: 'filter', location: ParameterLocation.QUERY, type: 'object' as const },
-      { name: 'proxy', location: ParameterLocation.QUERY, type: 'object' as const },
-      { name: 'regularObject', location: ParameterLocation.QUERY, type: 'object' as const },
-      { name: 'simple', location: ParameterLocation.QUERY, type: 'string' as const },
-      { name: 'simpleString', location: ParameterLocation.QUERY, type: 'string' as const },
-      { name: 'simpleNumber', location: ParameterLocation.QUERY, type: 'number' as const },
-      { name: 'simpleBoolean', location: ParameterLocation.QUERY, type: 'boolean' as const },
-      { name: 'complexObject', location: ParameterLocation.QUERY, type: 'object' as const },
-      { name: 'deepFilter', location: ParameterLocation.QUERY, type: 'object' as const },
-      { name: 'emptyFilter', location: ParameterLocation.QUERY, type: 'object' as const },
+      { name: 'pathParam', location: ParameterLocation.PATH, type: 'string' },
+      { name: 'queryParam', location: ParameterLocation.QUERY, type: 'string' },
+      { name: 'headerParam', location: ParameterLocation.HEADER, type: 'string' },
+      { name: 'bodyParam', location: ParameterLocation.BODY, type: 'string' },
+      { name: 'defaultParam', location: ParameterLocation.BODY, type: 'string' },
+      { name: 'filter', location: ParameterLocation.QUERY, type: 'object' },
+      { name: 'proxy', location: ParameterLocation.QUERY, type: 'object' },
+      { name: 'regularObject', location: ParameterLocation.QUERY, type: 'object' },
+      { name: 'simple', location: ParameterLocation.QUERY, type: 'string' },
+      { name: 'simpleString', location: ParameterLocation.QUERY, type: 'string' },
+      { name: 'simpleNumber', location: ParameterLocation.QUERY, type: 'number' },
+      { name: 'simpleBoolean', location: ParameterLocation.QUERY, type: 'boolean' },
+      { name: 'complexObject', location: ParameterLocation.QUERY, type: 'object' },
+      { name: 'deepFilter', location: ParameterLocation.QUERY, type: 'object' },
+      { name: 'emptyFilter', location: ParameterLocation.QUERY, type: 'object' },
     ],
-  };
+  } satisfies HttpExecuteConfig;
 
   beforeEach(() => {
     builder = new RequestBuilder(mockConfig, { 'Initial-Header': 'test' });

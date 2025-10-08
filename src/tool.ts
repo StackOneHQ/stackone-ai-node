@@ -7,7 +7,11 @@ import type {
   ExecuteOptions,
   Experimental_PreExecuteFunction,
   Experimental_ToolCreationOptions,
+  HttpExecuteConfig,
   JsonDict,
+  LocalExecuteConfig,
+  RpcExecuteConfig,
+  ToolExecution,
   ToolParameters,
 } from './types';
 import { StackOneError } from './utils/errors';
@@ -21,8 +25,46 @@ export class BaseTool {
   description: string;
   parameters: ToolParameters;
   executeConfig: ExecuteConfig;
-  protected requestBuilder: RequestBuilder;
+  protected requestBuilder?: RequestBuilder;
   protected experimental_preExecute?: Experimental_PreExecuteFunction;
+  #exposeExecutionMetadata = true;
+  #headers: Record<string, string>;
+
+  private createExecutionMetadata(): ToolExecution {
+    const config = (() => {
+      switch (this.executeConfig.kind) {
+        case 'http':
+          return {
+            kind: 'http',
+            method: this.executeConfig.method,
+            url: this.executeConfig.url,
+            bodyType: this.executeConfig.bodyType,
+            params: this.executeConfig.params.map((param) => ({ ...param })),
+          } satisfies HttpExecuteConfig;
+        case 'rpc':
+          return {
+            kind: 'rpc',
+            method: this.executeConfig.method,
+            url: this.executeConfig.url,
+            payloadKeys: { ...this.executeConfig.payloadKeys },
+          } satisfies RpcExecuteConfig;
+        case 'local':
+          return {
+            kind: 'local',
+            identifier: this.executeConfig.identifier,
+            description: this.executeConfig.description,
+          } satisfies LocalExecuteConfig;
+        default:
+          this.executeConfig satisfies never;
+          throw new StackOneError('Unsupported executeConfig kind');
+      }
+    })();
+
+    return {
+      config,
+      headers: this.getHeaders(),
+    };
+  }
 
   constructor(
     name: string,
@@ -36,7 +78,10 @@ export class BaseTool {
     this.description = description;
     this.parameters = parameters;
     this.executeConfig = executeConfig;
-    this.requestBuilder = new RequestBuilder(executeConfig, headers);
+    this.#headers = { ...(headers ?? {}) };
+    if (executeConfig.kind === 'http') {
+      this.requestBuilder = new RequestBuilder(executeConfig, this.#headers);
+    }
     this.experimental_preExecute = experimental_preExecute;
   }
 
@@ -44,7 +89,10 @@ export class BaseTool {
    * Set headers for this tool
    */
   setHeaders(headers: Record<string, string>): BaseTool {
-    this.requestBuilder.setHeaders(headers);
+    this.#headers = { ...this.#headers, ...headers };
+    if (this.requestBuilder) {
+      this.requestBuilder.setHeaders(headers);
+    }
     return this;
   }
 
@@ -52,7 +100,20 @@ export class BaseTool {
    * Get the current headers
    */
   getHeaders(): Record<string, string> {
-    return this.requestBuilder.getHeaders();
+    if (this.requestBuilder) {
+      const currentHeaders = this.requestBuilder.getHeaders();
+      this.#headers = { ...currentHeaders };
+      return currentHeaders;
+    }
+    return { ...this.#headers };
+  }
+
+  /**
+   * Control whether execution metadata should be exposed in AI SDK conversions.
+   */
+  setExposeExecutionMetadata(expose: boolean): this {
+    this.#exposeExecutionMetadata = expose;
+    return this;
   }
 
   /**
@@ -60,6 +121,12 @@ export class BaseTool {
    */
   async execute(inputParams?: JsonDict | string, options?: ExecuteOptions): Promise<JsonDict> {
     try {
+      if (!this.requestBuilder || this.executeConfig.kind !== 'http') {
+        // Non-HTTP tools provide their own execute override (e.g. RPC, local meta tools).
+        throw new StackOneError(
+          'BaseTool.execute is only available for HTTP-backed tools. Provide a custom execute implementation for non-HTTP tools.'
+        );
+      }
       // Validate params is either undefined, string, or object
       if (
         inputParams !== undefined &&
@@ -114,7 +181,11 @@ export class BaseTool {
   /**
    * Convert the tool to AI SDK format
    */
-  toAISDK(options: { executable?: boolean } = { executable: true }): ToolSet {
+  toAISDK(
+    options: { executable?: boolean; execution?: ToolExecution | false } = {
+      executable: true,
+    }
+  ): ToolSet {
     const schema = {
       type: 'object' as const,
       properties: this.parameters.properties || {},
@@ -122,19 +193,35 @@ export class BaseTool {
       additionalProperties: false,
     };
 
+    const toolDefinition: Record<string, unknown> = {
+      parameters: jsonSchema(schema),
+      description: this.description,
+    };
+
+    const executionOption =
+      options.execution !== undefined
+        ? options.execution
+        : this.#exposeExecutionMetadata
+          ? this.createExecutionMetadata()
+          : false;
+
+    if (executionOption !== false) {
+      toolDefinition.execution = executionOption;
+    }
+
+    if (options.executable ?? true) {
+      toolDefinition.execute = async (args: Record<string, unknown>) => {
+        try {
+          return await this.execute(args as JsonDict);
+        } catch (error) {
+          return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+        }
+      };
+    }
+
     return {
       [this.name]: {
-        parameters: jsonSchema(schema),
-        description: this.description,
-        ...(options.executable && {
-          execute: async (args: Record<string, unknown>) => {
-            try {
-              return await this.execute(args as JsonDict);
-            } catch (error) {
-              return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
-            }
-          },
-        }),
+        ...toolDefinition,
       },
     } as ToolSet;
   }
@@ -257,10 +344,14 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Convert all tools to AI SDK format
    */
-  toAISDK(): ToolSet {
+  toAISDK(
+    options: { executable?: boolean; execution?: ToolExecution | false } = {
+      executable: true,
+    }
+  ): ToolSet {
     const result: ToolSet = {};
     for (const tool of this.tools) {
-      Object.assign(result, tool.toAISDK());
+      Object.assign(result, tool.toAISDK(options));
     }
     return result;
   }
@@ -405,11 +496,10 @@ export function metaSearchTools(oramaDb: OramaDb, allTools: BaseTool[]): BaseToo
   } as const satisfies ToolParameters;
 
   const executeConfig = {
-    method: 'LOCAL',
-    url: 'local://get-relevant-tools',
-    bodyType: 'json',
-    params: [],
-  } as const satisfies ExecuteConfig;
+    kind: 'local',
+    identifier: name,
+    description: 'local://get-relevant-tools',
+  } as const satisfies LocalExecuteConfig;
 
   const tool = new BaseTool(name, description, parameters, executeConfig);
   tool.execute = async (inputParams?: JsonDict | string): Promise<JsonDict> => {
@@ -489,11 +579,10 @@ export function metaExecuteTool(tools: Tools): BaseTool {
   } as const satisfies ToolParameters;
 
   const executeConfig = {
-    method: 'LOCAL',
-    url: 'local://execute-tool',
-    bodyType: 'json',
-    params: [],
-  } as const satisfies ExecuteConfig;
+    kind: 'local',
+    identifier: name,
+    description: 'local://execute-tool',
+  } as const satisfies LocalExecuteConfig;
 
   // Create the tool instance
   const tool = new BaseTool(name, description, parameters, executeConfig);

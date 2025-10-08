@@ -12,6 +12,7 @@ const createMockTool = (headers?: Record<string, string>): BaseTool => {
     properties: { id: { type: 'string', description: 'ID parameter' } },
   };
   const executeConfig: ExecuteConfig = {
+    kind: 'http',
     method: 'GET',
     url: 'https://api.example.com/test/{id}',
     bodyType: 'json',
@@ -113,6 +114,26 @@ describe('StackOneTool', () => {
     expect(schema.properties.id.type).toBe('string');
   });
 
+  it('should include execution metadata by default in AI SDK conversion', () => {
+    const tool = createMockTool();
+
+    const aiSdkTool = tool.toAISDK();
+    const execution = aiSdkTool.test_tool.execution;
+
+    expect(execution).toBeDefined();
+    expect(execution?.config.method).toBe('GET');
+    expect(execution?.config.url).toBe('https://api.example.com/test/{id}');
+    expect(execution?.headers).toEqual({});
+  });
+
+  it('should allow disabling execution metadata exposure for AI SDK conversion', () => {
+    const tool = createMockTool().setExposeExecutionMetadata(false);
+
+    const aiSdkTool = tool.toAISDK();
+
+    expect(aiSdkTool.test_tool.execution).toBeUndefined();
+  });
+
   it('should convert complex parameter types to zod schema', () => {
     const complexTool = new BaseTool(
       'complex_tool',
@@ -136,6 +157,7 @@ describe('StackOneTool', () => {
         },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://example.com/complex',
         bodyType: 'json',
@@ -229,6 +251,7 @@ describe('Tools', () => {
         properties: { id: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/test/{id}',
         bodyType: 'json',
@@ -250,6 +273,7 @@ describe('Tools', () => {
         properties: { id: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/test/{id}',
         bodyType: 'json',
@@ -286,6 +310,7 @@ describe('Tools', () => {
         properties: { name: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/test',
         bodyType: 'json',
@@ -323,6 +348,7 @@ describe('Tools', () => {
         properties: { name: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/test',
         bodyType: 'json',

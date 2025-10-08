@@ -54,6 +54,30 @@ This is the StackOne AI Node SDK - a TypeScript library that transforms OpenAPI 
 - **Lazy Loading**: Tools are created on-demand to minimize memory usage
 - **Extensibility**: Hooks for parameter transformation and pre-execution logic
 
+### TypeScript Exhaustiveness Checks
+
+When branching on string unions, prefer the `satisfies never` pattern to guarantee compile-time exhaustiveness without introducing temporary variables. Example from `RequestBuilder.buildFetchOptions`:
+
+```ts
+switch (bodyType) {
+  case 'json':
+    // ...
+    break;
+  case 'form':
+    // ...
+    break;
+  case 'multipart-form':
+    // ...
+    break;
+  default: {
+    bodyType satisfies never; // raises a type error if a new variant is added
+    throw new Error(`Unsupported HTTP body type: ${String(bodyType)}`);
+  }
+}
+```
+
+Use this approach to keep the union definition (`type HttpBodyType = 'json' | 'multipart-form' | 'form'`) and the switch statement in sync. Adding a new union member will cause TypeScript to report the missing case at compile time.
+
 ### Testing Strategy
 
 Tests use Bun's built-in test runner with a Jest-compatible API. Key patterns:

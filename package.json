@@ -36,18 +36,22 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.19.1",
     "@orama/orama": "^3.1.11",
+    "@stackone/stackone-client-ts": "^4.28.0",
     "json-schema": "^0.4.0"
   },
   "devDependencies": {
     "@ai-sdk/openai": "^1.1.14",
     "@biomejs/biome": "^1.5.3",
+    "@hono/mcp": "^0.1.4",
     "@types/bun": "^1.2.4",
     "@types/json-schema": "^7.0.15",
     "@types/node": "^22.13.5",
     "@typescript/native-preview": "^7.0.0-dev.20250623.1",
     "ai": "^4.1.46",
     "fs-fixture": "^2.8.1",
+    "hono": "^4.9.10",
     "lint-staged": "^15.2.0",
     "mkdocs": "^0.0.1",
     "msw": "^2.10.4",
@@ -56,7 +60,8 @@
     "publint": "^0.3.12",
     "tsdown": "^0.15.6",
     "type-fest": "^4.41.0",
-    "unplugin-unused": "^0.5.1"
+    "unplugin-unused": "^0.5.1",
+    "zod": "^3.23.8"
   },
   "peerDependencies": {
     "ai": "4.x",
