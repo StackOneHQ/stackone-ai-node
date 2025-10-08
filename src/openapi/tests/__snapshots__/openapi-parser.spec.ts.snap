@@ -6,6 +6,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Batch Upload Employee Document",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -1408,6 +1409,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Cancel Employee Time Off Request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "DELETE",
       "params": [
         {
@@ -1452,6 +1454,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Create Employee",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -4101,6 +4104,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Create Employee Employment",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -4562,6 +4566,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Create Employee Skill",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -4725,6 +4730,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Create Employee Time Off Request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -4934,6 +4940,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Create Employee Work Eligibility Request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -6675,6 +6682,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Download Employee Document",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -6739,6 +6747,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Benefit",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -6803,6 +6812,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Company",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -6867,6 +6877,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Company Group",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -6931,6 +6942,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Cost Center Group",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -6995,6 +7007,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Department Group",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7059,6 +7072,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Division Group",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7123,6 +7137,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7207,6 +7222,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get employee Custom Field Definition",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7307,6 +7323,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Document",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7380,6 +7397,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Document Category",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7444,6 +7462,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Employment",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7527,6 +7546,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Shift",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7599,6 +7619,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Skill",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7672,6 +7693,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Task",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7755,6 +7777,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employee Time Off Balance",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7838,6 +7861,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employees Time Off Request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7921,6 +7945,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employees Work Eligibility",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -7994,6 +8019,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Employment",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8068,6 +8094,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Group",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8132,6 +8159,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Job",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8196,6 +8224,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Work Location",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8260,6 +8289,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Position",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8323,6 +8353,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Shift",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8386,6 +8417,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Task",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8460,6 +8492,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Team Group",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8524,6 +8557,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Time Entry",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8588,6 +8622,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get Time Off Policy",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8652,6 +8687,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get time off request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8726,6 +8762,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Get time off type",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8790,6 +8827,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Invite Employee",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {
@@ -8838,6 +8876,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List benefits",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -8928,6 +8967,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Companies",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9018,6 +9058,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Companies Groups",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9108,6 +9149,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Cost Center Groups",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9198,6 +9240,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Department Groups",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9288,6 +9331,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Division Groups",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9378,6 +9422,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Document Categories",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9468,6 +9513,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List employee Custom Field Definitions",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9558,6 +9604,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Documents",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9658,6 +9705,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Employments",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9768,6 +9816,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Shifts",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9890,6 +9939,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Skills",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -9990,6 +10040,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Tasks",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10100,6 +10151,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Time Off Balances",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10218,6 +10270,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Assigned Time Off Policies",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10348,6 +10401,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Time Off Requests",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10480,6 +10534,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employee Work Eligibility",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10580,6 +10635,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employees",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10698,6 +10754,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Employments",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10798,6 +10855,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Groups",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10888,6 +10946,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Jobs",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -10978,6 +11037,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Work Locations",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11068,6 +11128,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Positions",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11174,6 +11235,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Shifts",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11286,6 +11348,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Tasks",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11386,6 +11449,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Team Groups",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11476,6 +11540,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Time Entries",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11583,6 +11648,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List Time Off Policies",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11703,6 +11769,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List time off requests",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11825,6 +11892,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "List time off types",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "GET",
       "params": [
         {
@@ -11915,6 +11983,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Update Employee",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "PATCH",
       "params": [
         {
@@ -14547,6 +14616,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Update Employee Employment",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "PATCH",
       "params": [
         {
@@ -15007,6 +15077,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Update Employee Task",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "PATCH",
       "params": [
         {
@@ -15108,6 +15179,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Update Employee Time Off Request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "PATCH",
       "params": [
         {
@@ -15326,6 +15398,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Update Employee Work Eligibility Request",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "PATCH",
       "params": [
         {
@@ -17076,6 +17149,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
     "description": "Upload Employee Document",
     "execute": {
       "bodyType": "json",
+      "kind": "http",
       "method": "POST",
       "params": [
         {

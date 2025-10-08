@@ -7,6 +7,7 @@ Tools {
       "description": "List Companies",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -141,6 +142,7 @@ Tools {
       "description": "Get Company",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -239,6 +241,7 @@ Tools {
       "description": "List employee Custom Field Definitions",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -373,6 +376,7 @@ Tools {
       "description": "Get employee Custom Field Definition",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -522,6 +526,7 @@ Tools {
       "description": "List Employees",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -694,6 +699,7 @@ Tools {
       "description": "Create Employee",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -3177,6 +3183,7 @@ Tools {
       "description": "Get Employee",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -3305,6 +3312,7 @@ Tools {
       "description": "Update Employee",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "PATCH",
         "params": [
           {
@@ -5771,6 +5779,7 @@ Tools {
       "description": "Invite Employee",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -5843,6 +5852,7 @@ Tools {
       "description": "List Employee Shifts",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -6014,6 +6024,7 @@ Tools {
       "description": "Get Employee Shift",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -6125,6 +6136,7 @@ Tools {
       "description": "List Employee Time Off Requests",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -6311,6 +6323,7 @@ Tools {
       "description": "Create Employee Time Off Request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -6569,6 +6582,7 @@ Tools {
       "description": "Get Employees Time Off Request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -6696,6 +6710,7 @@ Tools {
       "description": "Cancel Employee Time Off Request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "DELETE",
         "params": [
           {
@@ -6764,6 +6779,7 @@ Tools {
       "description": "Update Employee Time Off Request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "PATCH",
         "params": [
           {
@@ -7036,6 +7052,7 @@ Tools {
       "description": "Batch Upload Employee Document",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -8415,6 +8432,7 @@ Tools {
       "description": "Upload Employee Document",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -9844,6 +9862,7 @@ Tools {
       "description": "Download Employee Document",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -9942,6 +9961,7 @@ Tools {
       "description": "List Employee Documents",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -10091,6 +10111,7 @@ Tools {
       "description": "Get Employee Document",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -10203,6 +10224,7 @@ Tools {
       "description": "List Employee Document Categories",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -10337,6 +10359,7 @@ Tools {
       "description": "Get Employee Document Category",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -10435,6 +10458,7 @@ Tools {
       "description": "List Employee Work Eligibility",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -10584,6 +10608,7 @@ Tools {
       "description": "Create Employee Work Eligibility Request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -12303,6 +12328,7 @@ Tools {
       "description": "Get Employees Work Eligibility",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -12415,6 +12441,7 @@ Tools {
       "description": "Update Employee Work Eligibility Request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "PATCH",
         "params": [
           {
@@ -14148,6 +14175,7 @@ Tools {
       "description": "List Employee Time Off Balances",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -14320,6 +14348,7 @@ Tools {
       "description": "Get Employee Time Off Balance",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -14447,6 +14476,7 @@ Tools {
       "description": "List Employments",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -14596,6 +14626,7 @@ Tools {
       "description": "Get Employment",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -14709,6 +14740,7 @@ Tools {
       "description": "List Employee Employments",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -14873,6 +14905,7 @@ Tools {
       "description": "Create Employee Employment",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -15328,6 +15361,7 @@ Tools {
       "description": "Get Employee Employment",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -15455,6 +15489,7 @@ Tools {
       "description": "Update Employee Employment",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "PATCH",
         "params": [
           {
@@ -15909,6 +15944,7 @@ Tools {
       "description": "List Groups",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16043,6 +16079,7 @@ Tools {
       "description": "List Department Groups",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16177,6 +16214,7 @@ Tools {
       "description": "List Cost Center Groups",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16311,6 +16349,7 @@ Tools {
       "description": "List Team Groups",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16445,6 +16484,7 @@ Tools {
       "description": "List Division Groups",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16579,6 +16619,7 @@ Tools {
       "description": "List Companies Groups",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16713,6 +16754,7 @@ Tools {
       "description": "Get Group",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16811,6 +16853,7 @@ Tools {
       "description": "Get Department Group",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -16909,6 +16952,7 @@ Tools {
       "description": "Get Cost Center Group",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17007,6 +17051,7 @@ Tools {
       "description": "Get Team Group",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17105,6 +17150,7 @@ Tools {
       "description": "Get Division Group",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17203,6 +17249,7 @@ Tools {
       "description": "Get Company Group",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17301,6 +17348,7 @@ Tools {
       "description": "List Jobs",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17435,6 +17483,7 @@ Tools {
       "description": "Get Job",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17533,6 +17582,7 @@ Tools {
       "description": "List Work Locations",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17667,6 +17717,7 @@ Tools {
       "description": "Get Work Location",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17765,6 +17816,7 @@ Tools {
       "description": "List Positions",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -17920,6 +17972,7 @@ Tools {
       "description": "Get Position",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18017,6 +18070,7 @@ Tools {
       "description": "List Time Entries",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18168,6 +18222,7 @@ Tools {
       "description": "Get Time Entry",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18266,6 +18321,7 @@ Tools {
       "description": "List time off requests",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18437,6 +18493,7 @@ Tools {
       "description": "Get time off request",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18550,6 +18607,7 @@ Tools {
       "description": "List Shifts",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18706,6 +18764,7 @@ Tools {
       "description": "Get Shift",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18803,6 +18862,7 @@ Tools {
       "description": "List time off types",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -18937,6 +18997,7 @@ Tools {
       "description": "Get time off type",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19035,6 +19096,7 @@ Tools {
       "description": "List Time Off Policies",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19199,6 +19261,7 @@ Tools {
       "description": "Get Time Off Policy",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19297,6 +19360,7 @@ Tools {
       "description": "List Assigned Time Off Policies",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19476,6 +19540,7 @@ Tools {
       "description": "List benefits",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19610,6 +19675,7 @@ Tools {
       "description": "Get Benefit",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19708,6 +19774,7 @@ Tools {
       "description": "List Employee Skills",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -19857,6 +19924,7 @@ Tools {
       "description": "Create Employee Skill",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "POST",
         "params": [
           {
@@ -20014,6 +20082,7 @@ Tools {
       "description": "Get Employee Skill",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -20126,6 +20195,7 @@ Tools {
       "description": "List Employee Tasks",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -20290,6 +20360,7 @@ Tools {
       "description": "Get Employee Task",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -20417,6 +20488,7 @@ Tools {
       "description": "Update Employee Task",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "PATCH",
         "params": [
           {
@@ -20532,6 +20604,7 @@ Tools {
       "description": "List Tasks",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
@@ -20681,6 +20754,7 @@ Tools {
       "description": "Get Task",
       "executeConfig": {
         "bodyType": "json",
+        "kind": "http",
         "method": "GET",
         "params": [
           {
