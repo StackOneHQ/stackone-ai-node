@@ -256,6 +256,9 @@ export abstract class ToolSet {
       throw new ToolSetConfigError('baseUrl is required to fetch MCP tools');
     }
 
+    // TODO(ENG-????): allow passing account/provider/action filters when fetching tools
+    // e.g. fetchTools({ accountIDs: ['123'], actions: ['*_list_employees'] })
+    // and eventually expose helpers like stackone.setAccounts([...]) for meta usage.
     await using clients = await createMCPClient({
       baseUrl: `${this.baseUrl}/mcp`,
       headers: this.headers,
