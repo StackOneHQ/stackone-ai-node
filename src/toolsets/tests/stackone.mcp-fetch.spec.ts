@@ -76,7 +76,7 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     restoreMsw?.();
   });
 
-  it('creates tools from MCP catalog with RPC execution metadata', async () => {
+  it('creates tools from MCP catalog and wires RPC execution', async () => {
     const stackOneClient = {
       actions: {
         rpcAction: mock(async () => ({ actionsRpcResponse: { data: null } })),
@@ -102,13 +102,18 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     expect(aiToolDefinition).toBeDefined();
     expect(aiToolDefinition.description).toBe('Dummy tool');
     expect(aiToolDefinition.parameters.jsonSchema.properties.foo.type).toBe('string');
+    expect(aiToolDefinition.execution).toBeUndefined();
 
-    const execution = aiToolDefinition.execution as {
-      config: { url: string };
-      headers: Record<string, string>;
-    };
+    const executableTool = tool.toAISDK().dummy_action;
+    const result = await executableTool.execute({ foo: 'bar' });
 
-    expect(execution.config.url).toBe(`${origin}/actions/rpc`);
-    expect(execution.headers['x-account-id']).toBe('test-account');
+    expect(stackOneClient.actions.rpcAction).toHaveBeenCalledWith({
+      action: 'dummy_action',
+      body: { foo: 'bar' },
+      headers: { 'x-account-id': 'test-account' },
+      path: undefined,
+      query: undefined,
+    });
+    expect(result).toEqual({ data: null });
   });
 });
