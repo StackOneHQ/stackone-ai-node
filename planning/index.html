@@ -474,7 +474,7 @@ or use as part of a larger agent (using AI SDK by Vercel)</p>
 <div class="highlight" style="background: #ffffff"><pre style="line-height: 125%;"><span></span><code><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>generateText<span style="color: #888">({</span>
 <span style="color: #A89028">    </span>model<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">openai</span><span style="color: #888">(</span><span style="color: #B83838">&#39;gpt-5&#39;</span><span style="color: #888">),</span>
 <span style="color: #A89028">    </span>prompt<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;You are a workplace agent, onboard the latest hires to our systems&#39;</span><span style="color: #888">,</span>
-<span style="color: #A89028">    </span>tools<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">onboardWorkflow.toAISDK</span><span style="color: #888">(),</span>
+<span style="color: #A89028">    </span>tools<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">await</span><span style="color: #A89028"> </span>onboardWorkflow<span style="color: #888">.</span>toAISDK<span style="color: #888">(),</span>
 <span style="color: #A89028">    </span>maxSteps<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">3</span><span style="color: #888">,</span>
 <span style="color: #A89028">  </span><span style="color: #888">});</span>
 <span style="color: #888">};</span>
