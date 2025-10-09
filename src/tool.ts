@@ -1,5 +1,5 @@
 import * as orama from '@orama/orama';
-import { type ToolSet, jsonSchema } from 'ai';
+import { jsonSchema } from 'ai';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
@@ -185,7 +185,7 @@ export class BaseTool {
     options: { executable?: boolean; execution?: ToolExecution | false } = {
       executable: true,
     }
-  ): ToolSet {
+  ) {
     const schema = {
       type: 'object' as const,
       properties: this.parameters.properties || {},
@@ -193,8 +193,10 @@ export class BaseTool {
       additionalProperties: false,
     };
 
+    const schemaObject = jsonSchema(schema);
     const toolDefinition: Record<string, unknown> = {
-      parameters: jsonSchema(schema),
+      inputSchema: schemaObject, // v5
+      parameters: schemaObject, // v4 (backward compatibility)
       description: this.description,
     };
 
@@ -348,8 +350,8 @@ export class Tools implements Iterable<BaseTool> {
     options: { executable?: boolean; execution?: ToolExecution | false } = {
       executable: true,
     }
-  ): ToolSet {
-    const result: ToolSet = {};
+  ) {
+    const result: Record<string, unknown> = {};
     for (const tool of this.tools) {
       Object.assign(result, tool.toAISDK(options));
     }

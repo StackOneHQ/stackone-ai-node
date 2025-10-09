@@ -111,7 +111,7 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     const aiToolDefinition = aiTools.dummy_action;
     expect(aiToolDefinition).toBeDefined();
     expect(aiToolDefinition.description).toBe('Dummy tool');
-    expect(aiToolDefinition.parameters.jsonSchema.properties.foo.type).toBe('string');
+    expect(aiToolDefinition.inputSchema.jsonSchema.properties.foo.type).toBe('string');
     expect(aiToolDefinition.execution).toBeUndefined();
 
     const executableTool = tool.toAISDK().dummy_action;

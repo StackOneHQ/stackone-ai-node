@@ -104,10 +104,10 @@ describe('StackOneTool', () => {
     expect(aiSdkTool.test_tool).toBeDefined();
     expect(typeof aiSdkTool.test_tool.execute).toBe('function');
     expect(aiSdkTool.test_tool.description).toBe('Test tool');
-    expect(aiSdkTool.test_tool.parameters).toBeDefined();
+    expect(aiSdkTool.test_tool.inputSchema).toBeDefined();
 
-    // The actual schema is in parameters.jsonSchema
-    const schema = aiSdkTool.test_tool.parameters.jsonSchema;
+    // The actual schema is in inputSchema.jsonSchema
+    const schema = aiSdkTool.test_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');
     expect(schema.properties.id).toBeDefined();
@@ -171,11 +171,11 @@ describe('StackOneTool', () => {
     expect(aiSdkTool).toBeDefined();
     expect(aiSdkTool.complex_tool).toBeDefined();
 
-    // Check that parameters are defined
-    expect(aiSdkTool.complex_tool.parameters).toBeDefined();
+    // Check that inputSchema is defined
+    expect(aiSdkTool.complex_tool.inputSchema).toBeDefined();
 
-    // The actual schema is in parameters.jsonSchema
-    const schema = aiSdkTool.complex_tool.parameters.jsonSchema;
+    // The actual schema is in inputSchema.jsonSchema
+    const schema = aiSdkTool.complex_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');
 

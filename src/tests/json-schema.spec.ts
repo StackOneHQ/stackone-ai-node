@@ -258,20 +258,20 @@ describe('Schema Validation', () => {
       expect(toolObj).toBeDefined();
       expect(typeof toolObj.execute).toBe('function');
 
-      // Check that parameters and jsonSchema are properly structured
-      expect(toolObj.parameters).toBeDefined();
-      expect(toolObj.parameters.jsonSchema).toBeDefined();
-      expect(toolObj.parameters.jsonSchema.type).toBe('object');
-      expect(toolObj.parameters.jsonSchema.properties).toBeDefined();
+      // Check that inputSchema and jsonSchema are properly structured
+      expect(toolObj.inputSchema).toBeDefined();
+      expect(toolObj.inputSchema.jsonSchema).toBeDefined();
+      expect(toolObj.inputSchema.jsonSchema.type).toBe('object');
+      expect(toolObj.inputSchema.jsonSchema.properties).toBeDefined();
 
       // Check array item properties specifically
       // Using simpleArray which is defined in createArrayTestTool
-      const simpleArray = toolObj.parameters.jsonSchema.properties.simpleArray;
+      const simpleArray = toolObj.inputSchema.jsonSchema.properties.simpleArray;
       expect(simpleArray).toBeDefined();
       expect(simpleArray.type).toBe('array');
 
       // Check that array with items is properly structured
-      const arrayWithItems = toolObj.parameters.jsonSchema.properties.arrayWithItems;
+      const arrayWithItems = toolObj.inputSchema.jsonSchema.properties.arrayWithItems;
       expect(arrayWithItems).toBeDefined();
       expect(arrayWithItems.type).toBe('array');
       expect(arrayWithItems.items).toBeDefined();
@@ -310,11 +310,11 @@ describe('Schema Validation', () => {
 
       const toolObj = aiSdkTool[tool.name];
       expect(toolObj).toBeDefined();
-      expect(toolObj.parameters).toBeDefined();
-      expect(toolObj.parameters.jsonSchema).toBeDefined();
+      expect(toolObj.inputSchema).toBeDefined();
+      expect(toolObj.inputSchema.jsonSchema).toBeDefined();
 
       // Specifically check the nested schema structure
-      const filterProp = toolObj.parameters.jsonSchema.properties.filter;
+      const filterProp = toolObj.inputSchema.jsonSchema.properties.filter;
       expect(filterProp).toBeDefined();
       expect(filterProp.type).toBe('object');
       expect(filterProp.properties).toBeDefined();
