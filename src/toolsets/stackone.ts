@@ -1,5 +1,5 @@
 import { loadStackOneSpecs } from '../openapi/loader';
-import { StackOneTool, type Tools } from '../tool';
+import { StackOneTool, Tools } from '../tool';
 import type { ToolDefinition } from '../types';
 import { removeJsonSchemaProperty } from '../utils/schema';
 import { type BaseToolSetConfig, ToolSet, ToolSetConfigError } from './base';
@@ -12,6 +12,17 @@ export interface StackOneToolSetConfig extends BaseToolSetConfig {
   accountId?: string;
   strict?: boolean;
   removedParams?: string[]; // List of parameters to remove from all tools
+}
+
+/**
+ * Options for filtering tools when fetching from MCP
+ */
+export interface FetchToolsOptions {
+  /**
+   * Filter tools by account IDs
+   * Only tools available on these accounts will be returned
+   */
+  accountIds?: string[];
 }
 
 /**
@@ -34,6 +45,7 @@ export class StackOneToolSet extends ToolSet {
    * Account ID for StackOne API
    */
   private accountId?: string;
+  private accountIds: string[] = [];
   private readonly _removedParams: string[];
 
   /**
@@ -101,6 +113,59 @@ export class StackOneToolSet extends ToolSet {
 
     // Get tools with headers
     return this.getTools(filterPattern, headers);
+  }
+
+  /**
+   * Set account IDs for filtering tools
+   * @param accountIds Array of account IDs to filter tools by
+   * @returns This toolset instance for chaining
+   */
+  setAccounts(accountIds: string[]): this {
+    this.accountIds = accountIds;
+    return this;
+  }
+
+  /**
+   * Fetch tools from MCP with optional account ID filtering
+   * @param options Optional filtering options for account IDs
+   * @returns Collection of tools matching the filter criteria
+   *
+   * TODO: Add support for filtering by providers and actions
+   * - providers: Filter tools by provider names (e.g., ['hibob', 'bamboohr'])
+   * - actions: Filter tools by action patterns with glob support (e.g., ['*_list_employees'])
+   */
+  async fetchTools(options?: FetchToolsOptions): Promise<Tools> {
+    // Use account IDs from options, or fall back to instance state
+    const effectiveAccountIds = options?.accountIds || this.accountIds;
+
+    // If account IDs are specified, fetch tools for each account and merge
+    if (effectiveAccountIds.length > 0) {
+      const toolsPromises = effectiveAccountIds.map(async (accountId) => {
+        const headers = { 'x-account-id': accountId };
+        const mergedHeaders = { ...this.headers, ...headers };
+
+        // Create a temporary toolset instance with the account-specific headers
+        const tempHeaders = mergedHeaders;
+        const originalHeaders = this.headers;
+        this.headers = tempHeaders;
+
+        try {
+          const tools = await super.fetchTools();
+          return tools.toArray();
+        } finally {
+          // Restore original headers
+          this.headers = originalHeaders;
+        }
+      });
+
+      const toolArrays = await Promise.all(toolsPromises);
+      const allTools = toolArrays.flat();
+
+      return new Tools(allTools);
+    }
+
+    // No account filtering - fetch all tools
+    return await super.fetchTools();
   }
 
   /**
