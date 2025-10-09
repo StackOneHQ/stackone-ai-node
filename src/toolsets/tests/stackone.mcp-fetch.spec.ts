@@ -107,14 +107,14 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     const tool = tools.toArray()[0];
     expect(tool.name).toBe('dummy_action');
 
-    const aiTools = tool.toAISDK({ executable: false });
+    const aiTools = await tool.toAISDK({ executable: false });
     const aiToolDefinition = aiTools.dummy_action;
     expect(aiToolDefinition).toBeDefined();
     expect(aiToolDefinition.description).toBe('Dummy tool');
     expect(aiToolDefinition.inputSchema.jsonSchema.properties.foo.type).toBe('string');
     expect(aiToolDefinition.execution).toBeUndefined();
 
-    const executableTool = tool.toAISDK().dummy_action;
+    const executableTool = (await tool.toAISDK()).dummy_action;
     const result = await executableTool.execute({ foo: 'bar' });
 
     expect(stackOneClient.actions.rpcAction).toHaveBeenCalledWith({
