@@ -442,7 +442,7 @@ describe('Meta Search Tools', () => {
   });
 });
 
-describe('Meta Search Tools - Search Strategies', () => {
+describe('Meta Search Tools - Hybrid Strategy', () => {
   let tools: Tools;
 
   beforeEach(() => {
@@ -454,42 +454,9 @@ describe('Meta Search Tools - Search Strategies', () => {
     mock.restore();
   });
 
-  describe('TF-IDF strategy', () => {
-    it('should search using TF-IDF strategy', async () => {
-      const metaTools = await tools.metaTools('tfidf');
-      const searchTool = metaTools.getTool('meta_search_tools');
-      expect(searchTool).toBeDefined();
-
-      const result = await searchTool?.execute({
-        query: 'create employee',
-        limit: 5,
-      });
-
-      expect(result.tools).toBeDefined();
-      expect(Array.isArray(result.tools)).toBe(true);
-      const toolResults = result.tools as MetaToolSearchResult[];
-      const toolNames = toolResults.map((t) => t.name);
-      expect(toolNames).toContain('hris_create_employee');
-    });
-
-    it('should find relevant tools with TF-IDF', async () => {
-      const metaTools = await tools.metaTools('tfidf');
-      const searchTool = metaTools.getTool('meta_search_tools');
-
-      const result = await searchTool?.execute({
-        query: 'time off vacation',
-        limit: 3,
-      });
-
-      const toolResults = result.tools as MetaToolSearchResult[];
-      const toolNames = toolResults.map((t) => t.name);
-      expect(toolNames).toContain('hris_create_time_off');
-    });
-  });
-
-  describe('Hybrid strategy', () => {
+  describe('Hybrid BM25 + TF-IDF search', () => {
     it('should search using hybrid strategy with default alpha', async () => {
-      const metaTools = await tools.metaTools('hybrid');
+      const metaTools = await tools.metaTools();
       const searchTool = metaTools.getTool('meta_search_tools');
       expect(searchTool).toBeDefined();
 
@@ -505,7 +472,7 @@ describe('Meta Search Tools - Search Strategies', () => {
     });
 
     it('should search using hybrid strategy with custom alpha', async () => {
-      const metaTools = await tools.metaTools('hybrid', 0.7);
+      const metaTools = await tools.metaTools(0.7);
       const searchTool = metaTools.getTool('meta_search_tools');
 
       const result = await searchTool?.execute({
@@ -519,7 +486,7 @@ describe('Meta Search Tools - Search Strategies', () => {
     });
 
     it('should combine BM25 and TF-IDF scores', async () => {
-      const metaTools = await tools.metaTools('hybrid', 0.5);
+      const metaTools = await tools.metaTools(0.5);
       const searchTool = metaTools.getTool('meta_search_tools');
 
       const result = await searchTool?.execute({
@@ -536,42 +503,19 @@ describe('Meta Search Tools - Search Strategies', () => {
         expect(tool.score).toBeLessThanOrEqual(1);
       }
     });
-  });
 
-  describe('Strategy comparison', () => {
-    it('should return results with all strategies', async () => {
-      const bm25MetaTools = await tools.metaTools('bm25');
-      const tfidfMetaTools = await tools.metaTools('tfidf');
-      const hybridMetaTools = await tools.metaTools('hybrid');
+    it('should find relevant tools', async () => {
+      const metaTools = await tools.metaTools();
+      const searchTool = metaTools.getTool('meta_search_tools');
 
-      const query = 'create employee';
-      const limit = 3;
-
-      const bm25Result = await bm25MetaTools.getTool('meta_search_tools')?.execute({
-        query,
-        limit,
-      });
-      const tfidfResult = await tfidfMetaTools.getTool('meta_search_tools')?.execute({
-        query,
-        limit,
-      });
-      const hybridResult = await hybridMetaTools.getTool('meta_search_tools')?.execute({
-        query,
-        limit,
+      const result = await searchTool?.execute({
+        query: 'time off vacation',
+        limit: 3,
       });
 
-      const bm25Tools = bm25Result.tools as MetaToolSearchResult[];
-      const tfidfTools = tfidfResult.tools as MetaToolSearchResult[];
-      const hybridTools = hybridResult.tools as MetaToolSearchResult[];
-
-      expect(bm25Tools.length).toBeGreaterThan(0);
-      expect(tfidfTools.length).toBeGreaterThan(0);
-      expect(hybridTools.length).toBeGreaterThan(0);
-
-      // All should find the create_employee tool
-      expect(bm25Tools.some((t) => t.name === 'hris_create_employee')).toBe(true);
-      expect(tfidfTools.some((t) => t.name === 'hris_create_employee')).toBe(true);
-      expect(hybridTools.some((t) => t.name === 'hris_create_employee')).toBe(true);
+      const toolResults = result.tools as MetaToolSearchResult[];
+      const toolNames = toolResults.map((t) => t.name);
+      expect(toolNames).toContain('hris_create_time_off');
     });
   });
 });

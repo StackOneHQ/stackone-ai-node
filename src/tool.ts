@@ -379,17 +379,13 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Return meta tools for tool discovery and execution
    * @beta This feature is in beta and may change in future versions
-   * @param strategy - Search strategy to use: 'bm25' (default), 'tfidf', or 'hybrid'
-   * @param hybridAlpha - Weight for BM25 in hybrid mode (0-1, default 0.5). Only used when strategy is 'hybrid'
+   * @param hybridAlpha - Weight for BM25 in hybrid search (0-1, default 0.5). 0.5 gives equal weight to BM25 and TF-IDF.
    */
-  async metaTools(
-    strategy: 'bm25' | 'tfidf' | 'hybrid' = 'bm25',
-    hybridAlpha = 0.5
-  ): Promise<Tools> {
+  async metaTools(hybridAlpha = 0.5): Promise<Tools> {
     const oramaDb = await initializeOramaDb(this.tools);
     const tfidfIndex = initializeTfidfIndex(this.tools);
     const baseTools = [
-      metaSearchTools(oramaDb, tfidfIndex, this.tools, strategy, hybridAlpha),
+      metaSearchTools(oramaDb, tfidfIndex, this.tools, hybridAlpha),
       metaExecuteTool(this),
     ];
     const tools = new Tools(baseTools);
@@ -524,18 +520,11 @@ export function metaSearchTools(
   oramaDb: OramaDb,
   tfidfIndex: TfidfIndex,
   allTools: BaseTool[],
-  strategy: 'bm25' | 'tfidf' | 'hybrid' = 'bm25',
   hybridAlpha = 0.5
 ): BaseTool {
   const name = 'meta_search_tools' as const;
-  const strategyDesc =
-    strategy === 'hybrid'
-      ? `hybrid BM25 + TF-IDF (alpha=${hybridAlpha})`
-      : strategy === 'tfidf'
-        ? 'TF-IDF'
-        : 'BM25';
   const description =
-    `Searches for relevant tools based on a natural language query using ${strategyDesc}. This tool should be called first to discover available tools before executing them.` as const;
+    `Searches for relevant tools based on a natural language query using hybrid BM25 + TF-IDF search (alpha=${hybridAlpha}). This tool should be called first to discover available tools before executing them.` as const;
   const parameters = {
     type: 'object',
     properties: {
@@ -584,112 +573,63 @@ export function metaSearchTools(
       const minScore = params.minScore ?? 0.3;
       const query = params.query || '';
 
-      let toolConfigs: MetaToolSearchResult[];
+      // Hybrid: BM25 + TF-IDF fusion
+      const alpha = Math.max(0, Math.min(1, hybridAlpha));
 
-      if (strategy === 'bm25') {
-        // Pure BM25 (Orama) search
-        const results = await orama.search(oramaDb, {
+      // Get results from both algorithms
+      const [bm25Results, tfidfResults] = await Promise.all([
+        orama.search(oramaDb, {
           term: query,
           limit: Math.max(50, limit),
-        } as Parameters<typeof orama.search>[1]);
+        } as Parameters<typeof orama.search>[1]),
+        Promise.resolve(tfidfIndex.search(query, Math.max(50, limit))),
+      ]);
 
-        const filteredResults = results.hits.filter((hit) => hit.score >= minScore);
+      // Build score map
+      const scoreMap = new Map<string, { bm25?: number; tfidf?: number }>();
 
-        toolConfigs = filteredResults
-          .map((hit) => {
-            const doc = hit.document as { name: string };
-            const tool = allTools.find((t) => t.name === doc.name);
-            if (!tool) return null;
-
-            const result: MetaToolSearchResult = {
-              name: tool.name,
-              description: tool.description,
-              parameters: tool.parameters,
-              score: hit.score,
-            };
-            return result;
-          })
-          .filter((t): t is MetaToolSearchResult => t !== null)
-          .slice(0, limit);
-      } else if (strategy === 'tfidf') {
-        // Pure TF-IDF search
-        const results = tfidfIndex.search(query, Math.max(50, limit));
-
-        toolConfigs = results
-          .filter((r) => r.score >= minScore)
-          .map((r) => {
-            const tool = allTools.find((t) => t.name === r.id);
-            if (!tool) return null;
-
-            const result: MetaToolSearchResult = {
-              name: tool.name,
-              description: tool.description,
-              parameters: tool.parameters,
-              score: r.score,
-            };
-            return result;
-          })
-          .filter((t): t is MetaToolSearchResult => t !== null)
-          .slice(0, limit);
-      } else {
-        // Hybrid: BM25 + TF-IDF fusion
-        const alpha = Math.max(0, Math.min(1, hybridAlpha));
-
-        // Get results from both
-        const [bm25Results, tfidfResults] = await Promise.all([
-          orama.search(oramaDb, {
-            term: query,
-            limit: Math.max(50, limit),
-          } as Parameters<typeof orama.search>[1]),
-          Promise.resolve(tfidfIndex.search(query, Math.max(50, limit))),
-        ]);
-
-        // Build score map
-        const scoreMap = new Map<string, { bm25?: number; tfidf?: number }>();
-
-        for (const hit of bm25Results.hits) {
-          const doc = hit.document as { name: string };
-          scoreMap.set(doc.name, {
-            ...(scoreMap.get(doc.name) || {}),
-            bm25: clamp01(hit.score),
-          });
-        }
-
-        for (const r of tfidfResults) {
-          scoreMap.set(r.id, {
-            ...(scoreMap.get(r.id) || {}),
-            tfidf: clamp01(r.score),
-          });
-        }
-
-        // Fuse scores
-        const fused: Array<{ name: string; score: number }> = [];
-        for (const [name, scores] of scoreMap) {
-          const bm25 = scores.bm25 ?? 0;
-          const tfidf = scores.tfidf ?? 0;
-          const score = alpha * bm25 + (1 - alpha) * tfidf;
-          fused.push({ name, score });
-        }
-
-        fused.sort((a, b) => b.score - a.score);
-
-        toolConfigs = fused
-          .filter((r) => r.score >= minScore)
-          .map((r) => {
-            const tool = allTools.find((t) => t.name === r.name);
-            if (!tool) return null;
-
-            const result: MetaToolSearchResult = {
-              name: tool.name,
-              description: tool.description,
-              parameters: tool.parameters,
-              score: r.score,
-            };
-            return result;
-          })
-          .filter((t): t is MetaToolSearchResult => t !== null)
-          .slice(0, limit);
+      for (const hit of bm25Results.hits) {
+        const doc = hit.document as { name: string };
+        scoreMap.set(doc.name, {
+          ...(scoreMap.get(doc.name) || {}),
+          bm25: clamp01(hit.score),
+        });
       }
+
+      for (const r of tfidfResults) {
+        scoreMap.set(r.id, {
+          ...(scoreMap.get(r.id) || {}),
+          tfidf: clamp01(r.score),
+        });
+      }
+
+      // Fuse scores
+      const fused: Array<{ name: string; score: number }> = [];
+      for (const [name, scores] of scoreMap) {
+        const bm25 = scores.bm25 ?? 0;
+        const tfidf = scores.tfidf ?? 0;
+        const score = alpha * bm25 + (1 - alpha) * tfidf;
+        fused.push({ name, score });
+      }
+
+      fused.sort((a, b) => b.score - a.score);
+
+      const toolConfigs = fused
+        .filter((r) => r.score >= minScore)
+        .map((r) => {
+          const tool = allTools.find((t) => t.name === r.name);
+          if (!tool) return null;
+
+          const result: MetaToolSearchResult = {
+            name: tool.name,
+            description: tool.description,
+            parameters: tool.parameters,
+            score: r.score,
+          };
+          return result;
+        })
+        .filter((t): t is MetaToolSearchResult => t !== null)
+        .slice(0, limit);
 
       return { tools: toolConfigs } satisfies JsonDict;
     } catch (error) {
