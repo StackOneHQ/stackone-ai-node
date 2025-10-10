@@ -2450,8 +2450,8 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   "format": "duration",
                   "type": "string",
                 },
-                "duration_unit": {
-                  "description": "The duration unit of the work time",
+                "period": {
+                  "description": "The period of the work time",
                   "example": "month",
                   "properties": {
                     "source_value": {
@@ -4508,8 +4508,8 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "format": "duration",
               "type": "string",
             },
-            "duration_unit": {
-              "description": "The duration unit of the work time",
+            "period": {
+              "description": "The period of the work time",
               "example": "month",
               "properties": {
                 "source_value": {
@@ -12957,8 +12957,8 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
                   "format": "duration",
                   "type": "string",
                 },
-                "duration_unit": {
-                  "description": "The duration unit of the work time",
+                "period": {
+                  "description": "The period of the work time",
                   "example": "month",
                   "properties": {
                     "source_value": {
@@ -15018,8 +15018,8 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "format": "duration",
               "type": "string",
             },
-            "duration_unit": {
-              "description": "The duration unit of the work time",
+            "period": {
+              "description": "The period of the work time",
               "example": "month",
               "properties": {
                 "source_value": {
