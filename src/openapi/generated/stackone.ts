@@ -5089,7 +5089,6 @@ export const stackoneSpec = {
             description: 'The account type',
             enum: ['production', 'test', null],
             example: ['PRODUCTION', 'TEST'],
-            default: 'production',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },

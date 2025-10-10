@@ -1577,8 +1577,8 @@ Tools {
                     "format": "duration",
                     "type": "string",
                   },
-                  "duration_unit": {
-                    "description": "The duration unit of the work time",
+                  "period": {
+                    "description": "The period of the work time",
                     "example": "month",
                     "properties": {
                       "value": {
@@ -4168,8 +4168,8 @@ Tools {
                     "format": "duration",
                     "type": "string",
                   },
-                  "duration_unit": {
-                    "description": "The duration unit of the work time",
+                  "period": {
+                    "description": "The period of the work time",
                     "example": "month",
                     "properties": {
                       "value": {
@@ -15231,8 +15231,8 @@ Tools {
                 "format": "duration",
                 "type": "string",
               },
-              "duration_unit": {
-                "description": "The duration unit of the work time",
+              "period": {
+                "description": "The period of the work time",
                 "example": "month",
                 "properties": {
                   "value": {
@@ -15813,8 +15813,8 @@ Tools {
                 "format": "duration",
                 "type": "string",
               },
-              "duration_unit": {
-                "description": "The duration unit of the work time",
+              "period": {
+                "description": "The period of the work time",
                 "example": "month",
                 "properties": {
                   "value": {

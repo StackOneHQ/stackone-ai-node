@@ -6002,6 +6002,7 @@ export const lmsSpec = {
             type: 'string',
             enum: ['pending', 'in_progress', 'completed', 'unmapped_value', null],
             example: 'in_progress',
+            description: 'The StackOne unified assignment status.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -6024,6 +6025,7 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description: 'The original status value from the provider before normalization.',
             nullable: true,
           },
         },
@@ -6242,6 +6244,8 @@ export const lmsSpec = {
           value: {
             type: 'string',
             enum: ['primary', 'secondary', 'tertiary', 'unmapped_value', null],
+            description:
+              'The unified category level. For write operations: provide one of the listed enum values, or omit/set to "unmapped_value" to use source_value instead.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -6264,6 +6268,8 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description:
+              'For read operations: the original category level from the provider. For write operations: fallback value used when value is omitted or "unmapped_value". You must ensure this matches the provider\'s format.',
             nullable: true,
           },
         },
@@ -6798,6 +6804,7 @@ export const lmsSpec = {
           value: {
             type: 'string',
             enum: ['video', 'quiz', 'document', 'audio', 'article', 'unmapped_value', null],
+            description: 'The StackOne unified content type.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -6820,6 +6827,7 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description: 'The original value from the provider before normalization.',
             nullable: true,
           },
         },
@@ -7665,7 +7673,8 @@ export const lmsSpec = {
               'unmapped_value',
               null,
             ],
-            description: 'The Locale Code of the language',
+            description:
+              'The unified locale code. For write operations: provide one of the listed enum values, or omit/set to "unmapped_value" to use source_value instead.',
             example: 'en_GB',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -7689,6 +7698,8 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description:
+              'For read operations: the original language code from the provider. For write operations: fallback value used when value is omitted or "unmapped_value". You must ensure this matches the provider\'s format.',
             nullable: true,
           },
         },
@@ -7699,6 +7710,7 @@ export const lmsSpec = {
           value: {
             type: 'string',
             enum: ['content', 'course', 'collection', 'unmapped_value', null],
+            description: 'The StackOne unified learning object type.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -7721,6 +7733,8 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description:
+              'The original learning object type from the provider before normalization.',
             nullable: true,
           },
         },
@@ -8561,6 +8575,7 @@ export const lmsSpec = {
           value: {
             type: 'string',
             enum: ['Pass', 'Fail', 'unmapped_value', null],
+            description: 'The StackOne unified result status.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -8583,6 +8598,7 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description: 'The original result status from the provider before normalization.',
             nullable: true,
           },
         },
@@ -8593,6 +8609,8 @@ export const lmsSpec = {
           value: {
             type: 'string',
             enum: ['primary', 'secondary', 'tertiary', 'unmapped_value', null],
+            description:
+              'The unified skill level. For write operations: provide one of the listed enum values, or omit/set to "unmapped_value" to use source_value instead.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -8615,6 +8633,8 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description:
+              'For read operations: the original skill level from the provider. For write operations: fallback value used when value is omitted or "unmapped_value". You must ensure this matches the provider\'s format.',
             nullable: true,
           },
         },
@@ -8937,6 +8957,8 @@ export const lmsSpec = {
               'unmapped_value',
               null,
             ],
+            description:
+              'The content type for write operations. Provide one of the listed enum values. If omitted or set to "unmapped_value", the source_value will be sent to the provider instead.',
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
@@ -8959,6 +8981,8 @@ export const lmsSpec = {
                 items: {},
               },
             ],
+            description:
+              'The provider-specific value to use when value is omitted or set to "unmapped_value". You are responsible for ensuring this matches the provider\'s expected format.',
             nullable: true,
           },
         },

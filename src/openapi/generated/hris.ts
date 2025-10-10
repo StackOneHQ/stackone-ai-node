@@ -28746,8 +28746,8 @@ export const hrisSpec = {
             format: 'duration',
             nullable: true,
           },
-          duration_unit: {
-            description: 'The duration unit of the work time',
+          period: {
+            description: 'The period of the work time',
             example: 'month',
             nullable: true,
             allOf: [
