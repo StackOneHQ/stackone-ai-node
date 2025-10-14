@@ -23,6 +23,20 @@ export interface FetchToolsOptions {
    * Only tools available on these accounts will be returned
    */
   accountIds?: string[];
+
+  /**
+   * Filter tools by provider names
+   * Only tools from these providers will be returned
+   * @example ['hibob', 'bamboohr']
+   */
+  providers?: string[];
+
+  /**
+   * Filter tools by action patterns with glob support
+   * Only tools matching these patterns will be returned
+   * @example ['*_list_employees', 'hibob_create_employees']
+   */
+  actions?: string[];
 }
 
 /**
@@ -126,19 +140,16 @@ export class StackOneToolSet extends ToolSet {
   }
 
   /**
-   * Fetch tools from MCP with optional account ID filtering
-   * @param options Optional filtering options for account IDs
+   * Fetch tools from MCP with optional filtering
+   * @param options Optional filtering options for account IDs, providers, and actions
    * @returns Collection of tools matching the filter criteria
-   *
-   * TODO: Add support for filtering by providers and actions
-   * - providers: Filter tools by provider names (e.g., ['hibob', 'bamboohr'])
-   * - actions: Filter tools by action patterns with glob support (e.g., ['*_list_employees'])
    */
   async fetchTools(options?: FetchToolsOptions): Promise<Tools> {
     // Use account IDs from options, or fall back to instance state
     const effectiveAccountIds = options?.accountIds || this.accountIds;
 
-    // If account IDs are specified, fetch tools for each account and merge
+    // Fetch tools (with account filtering if needed)
+    let tools: Tools;
     if (effectiveAccountIds.length > 0) {
       const toolsPromises = effectiveAccountIds.map(async (accountId) => {
         const headers = { 'x-account-id': accountId };
@@ -160,12 +171,43 @@ export class StackOneToolSet extends ToolSet {
 
       const toolArrays = await Promise.all(toolsPromises);
       const allTools = toolArrays.flat();
-
-      return new Tools(allTools);
+      tools = new Tools(allTools);
+    } else {
+      // No account filtering - fetch all tools
+      tools = await super.fetchTools();
     }
 
-    // No account filtering - fetch all tools
-    return await super.fetchTools();
+    // Apply provider and action filters
+    return this.filterTools(tools, options);
+  }
+
+  /**
+   * Filter tools by providers and actions
+   * @param tools Tools collection to filter
+   * @param options Filtering options
+   * @returns Filtered tools collection
+   */
+  private filterTools(tools: Tools, options?: FetchToolsOptions): Tools {
+    let filteredTools = tools.toArray();
+
+    // Filter by providers if specified
+    if (options?.providers && options.providers.length > 0) {
+      const providerSet = new Set(options.providers.map((p) => p.toLowerCase()));
+      filteredTools = filteredTools.filter((tool) => {
+        // Extract provider from tool name (assuming format: provider_action)
+        const provider = tool.name.split('_')[0]?.toLowerCase();
+        return provider && providerSet.has(provider);
+      });
+    }
+
+    // Filter by actions if specified (with glob support)
+    if (options?.actions && options.actions.length > 0) {
+      filteredTools = filteredTools.filter((tool) =>
+        options.actions?.some((pattern) => this._matchGlob(tool.name, pattern))
+      );
+    }
+
+    return new Tools(filteredTools);
   }
 
   /**

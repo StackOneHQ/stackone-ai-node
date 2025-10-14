@@ -159,6 +159,41 @@ const result = await employeeTool?.execute({
 
 `fetchTools()` reuses the credentials you already configured (for example via `STACKONE_API_KEY`) and binds the returned tool objects to StackOne's actions client.
 
+#### Filtering Tools with fetchTools()
+
+You can filter tools by account IDs, providers, and action patterns:
+
+```typescript
+// Filter by account IDs
+toolset.setAccounts(['account-123', 'account-456']);
+const tools = await toolset.fetchTools();
+// OR
+const tools = await toolset.fetchTools({ accountIds: ['account-123', 'account-456'] });
+
+// Filter by providers
+const tools = await toolset.fetchTools({ providers: ['hibob', 'bamboohr'] });
+
+// Filter by actions with exact match
+const tools = await toolset.fetchTools({
+  actions: ['hibob_list_employees', 'hibob_create_employees']
+});
+
+// Filter by actions with glob patterns
+const tools = await toolset.fetchTools({ actions: ['*_list_employees'] });
+
+// Combine multiple filters
+const tools = await toolset.fetchTools({
+  accountIds: ['account-123'],
+  providers: ['hibob'],
+  actions: ['*_list_*']
+});
+```
+
+This is especially useful when you want to:
+- Limit tools to specific linked accounts
+- Focus on specific HR/CRM/ATS providers
+- Get only certain types of operations (e.g., all "list" operations)
+
 [View full example](examples/fetch-tools.ts)
 
 ### File Upload
