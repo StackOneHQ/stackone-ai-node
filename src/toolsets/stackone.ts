@@ -13,7 +13,6 @@ export interface StackOneToolSetConfig extends BaseToolSetConfig {
   accountId?: string;
   strict?: boolean;
   removedParams?: string[]; // List of parameters to remove from all tools
-  feedbackUrl?: string;
 }
 
 /**
@@ -37,7 +36,6 @@ export class StackOneToolSet extends ToolSet {
    */
   private accountId?: string;
   private readonly _removedParams: string[];
-  private readonly feedbackUrl?: string;
 
   /**
    * Initialize StackOne toolset with API key and optional account ID
@@ -82,7 +80,6 @@ export class StackOneToolSet extends ToolSet {
 
     this.accountId = accountId;
     this._removedParams = ['source_value'];
-    this.feedbackUrl = config?.feedbackUrl || process.env.STACKONE_FEEDBACK_URL;
 
     // Load tools
     this.loadTools();
@@ -146,7 +143,7 @@ export class StackOneToolSet extends ToolSet {
     }
 
     // Add feedback collection meta tool
-    this.tools.push(createFeedbackTool({ defaultEndpoint: this.feedbackUrl }));
+    this.tools.push(createFeedbackTool({ baseUrl: this.baseUrl }));
   }
 
   /**

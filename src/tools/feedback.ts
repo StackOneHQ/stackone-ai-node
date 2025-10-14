@@ -4,7 +4,7 @@ import type { ExecuteConfig, ExecuteOptions, JsonDict, ToolParameters } from '..
 import { StackOneError } from '../utils/errors';
 
 interface FeedbackToolOptions {
-  defaultEndpoint?: string;
+  baseUrl?: string;
 }
 
 const createNonEmptyTrimmedStringSchema = (fieldName: string) =>
@@ -15,44 +15,25 @@ const createNonEmptyTrimmedStringSchema = (fieldName: string) =>
       message: `${fieldName} must be a non-empty string.`,
     });
 
-const createOptionalTrimmedStringSchema = () =>
-  z
-    .string()
-    .optional()
-    .transform((value) => {
-      if (typeof value !== 'string') {
-        return undefined;
-      }
-      const trimmed = value.trim();
-      return trimmed.length > 0 ? trimmed : undefined;
-    });
-
 const feedbackInputSchema = z.object({
   feedback: createNonEmptyTrimmedStringSchema('Feedback'),
-  accountId: createNonEmptyTrimmedStringSchema('accountId'),
-  feedbackEndpoint: createOptionalTrimmedStringSchema(),
+  account_id: createNonEmptyTrimmedStringSchema('Account ID'),
   toolNames: z
     .array(z.string())
-    .optional()
-    .transform((value) => {
-      if (!value) {
-        return undefined;
-      }
-      const sanitized = value.map((item) => item.trim()).filter((item) => item.length > 0);
-      return sanitized.length > 0 ? sanitized : undefined;
-    }),
+    .min(1, 'At least one tool name is required')
+    .transform((value) => value.map((item) => item.trim()).filter((item) => item.length > 0)),
 });
 
 export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool {
   const name = 'meta_collect_tool_feedback' as const;
   const description =
-    'Collects user feedback on StackOne tool performance. First ask the user, “Are you ok with sending feedback to StackOne?” and mention that the LLM will take care of sending it. Call this tool only when the user explicitly answers yes.';
+    'Collects user feedback on StackOne tool performance. First ask the user, "Are you ok with sending feedback to StackOne?" and mention that the LLM will take care of sending it. Call this tool only when the user explicitly answers yes.';
   const parameters = {
     type: 'object',
     properties: {
-      accountId: {
+      account_id: {
         type: 'string',
-        description: 'Identifier for the StackOne account associated with this feedback.',
+        description: 'Account identifier (e.g., "acc_123456")',
       },
       feedback: {
         type: 'string',
@@ -63,56 +44,37 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         items: {
           type: 'string',
         },
-        description: 'Optional list of tool names or workflows the feedback references.',
-      },
-      feedbackEndpoint: {
-        type: 'string',
-        description:
-          'Override the default feedback collection URL for this submission. Defaults to the configured StackOne feedback endpoint.',
+        description: 'Array of tool names being reviewed',
       },
     },
-    required: ['feedback', 'accountId'],
+    required: ['feedback', 'account_id', 'toolNames'],
   } as const satisfies ToolParameters;
 
   const executeConfig = {
-    method: 'LOCAL',
-    url: 'local://collect-feedback',
+    method: 'POST',
+    url: '/ai/tool-feedback',
     bodyType: 'json',
     params: [],
   } as const satisfies ExecuteConfig;
 
   const tool = new BaseTool(name, description, parameters, executeConfig);
-  const defaultEndpoint = options.defaultEndpoint;
+  const baseUrl = options.baseUrl || 'https://api.stackone.com';
 
   tool.execute = async function (
     this: BaseTool,
     inputParams?: JsonDict | string,
-    options?: ExecuteOptions
+    executeOptions?: ExecuteOptions
   ): Promise<JsonDict> {
     try {
       const rawParams =
         typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
       const parsedParams = feedbackInputSchema.parse(rawParams);
 
-      const endpointCandidate =
-        parsedParams.feedbackEndpoint || defaultEndpoint || process.env.STACKONE_FEEDBACK_URL;
-
-      if (!endpointCandidate) {
-        throw new StackOneError(
-          'No feedback endpoint configured. Set STACKONE_FEEDBACK_URL in the environment, configure feedbackUrl on the StackOneToolSet, or provide feedbackEndpoint in the tool call.'
-        );
-      }
-
-      const submission: Record<string, unknown> = {
+      const requestBody = {
         feedback: parsedParams.feedback,
-        accountId: parsedParams.accountId,
-        submittedAt: new Date().toISOString(),
-        source: 'stackone-ai-node',
+        account_id: parsedParams.account_id,
+        tool_names: parsedParams.toolNames,
       };
-
-      if (parsedParams.toolNames) {
-        submission.toolNames = parsedParams.toolNames;
-      }
 
       const headers = {
         Accept: 'application/json',
@@ -120,17 +82,23 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         ...this.getHeaders(),
       };
 
-      if (options?.dryRun) {
+      if (executeOptions?.dryRun) {
         return {
-          endpoint: endpointCandidate,
-          payload: submission,
+          url: `${baseUrl}${executeConfig.url}`,
+          method: executeConfig.method,
+          headers,
+          body: {
+            feedback: parsedParams.feedback,
+            account_id: parsedParams.account_id,
+            tool_names: parsedParams.toolNames,
+          },
         } satisfies JsonDict;
       }
 
-      const response = await fetch(endpointCandidate, {
-        method: 'POST',
+      const response = await fetch(`${baseUrl}${executeConfig.url}`, {
+        method: executeConfig.method,
         headers,
-        body: JSON.stringify(submission),
+        body: JSON.stringify(requestBody),
       });
 
       const text = await response.text();
@@ -147,11 +115,7 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         );
       }
 
-      return {
-        status: 'submitted',
-        endpoint: endpointCandidate,
-        response: parsed,
-      } satisfies JsonDict;
+      return parsed as JsonDict;
     } catch (error) {
       if (error instanceof StackOneError) {
         throw error;

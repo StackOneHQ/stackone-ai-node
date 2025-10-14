@@ -2,76 +2,127 @@ import { afterAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import { StackOneError } from '../../utils/errors';
 import { createFeedbackTool } from '../feedback';
 
-const originalEnv = process.env.STACKONE_FEEDBACK_URL;
-
 beforeEach(() => {
-  process.env.STACKONE_FEEDBACK_URL = originalEnv;
+  // Clear any mocks before each test
 });
 
 describe('meta_collect_tool_feedback', () => {
-  it('throws when feedback endpoint is missing', async () => {
-    process.env.STACKONE_FEEDBACK_URL = '';
+  it('throws when account_id is missing', async () => {
     const tool = createFeedbackTool();
 
     await expect(
-      tool.execute({ feedback: 'Great tools!', accountId: 'acct-123' })
+      tool.execute({ feedback: 'Great tools!', toolNames: ['test_tool'] })
     ).rejects.toBeInstanceOf(StackOneError);
   });
 
-  it('throws when accountId is missing', async () => {
-    const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
+  it('throws when toolNames is missing', async () => {
+    const tool = createFeedbackTool();
 
-    await expect(tool.execute({ feedback: 'Great tools!' })).rejects.toBeInstanceOf(StackOneError);
+    await expect(
+      tool.execute({ feedback: 'Great tools!', account_id: 'acc_123456' })
+    ).rejects.toBeInstanceOf(StackOneError);
   });
 
   it('returns dryRun payload without calling fetch', async () => {
-    const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
+    const tool = createFeedbackTool();
     const fetchSpy = spyOn(globalThis, 'fetch');
 
     const result = (await tool.execute(
       {
         feedback: 'Great tools!',
         toolNames: ['hris_get_employee', ' crm_update_employee '],
-        accountId: 'acct-123',
+        account_id: 'acc_123456',
       },
       { dryRun: true }
     )) as {
-      endpoint: string;
-      payload: Record<string, unknown>;
+      url: string;
+      method: string;
+      headers: Record<string, string>;
+      body: Record<string, unknown>;
     };
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(result.endpoint).toBe('https://example.com/feedback');
-    expect(result.payload.toolNames).toEqual(['hris_get_employee', 'crm_update_employee']);
-    expect(result.payload.accountId).toBe('acct-123');
-    expect(result.payload.source).toBe('stackone-ai-node');
+    expect(result.url).toBe('https://api.stackone.com/ai/tool-feedback');
+    expect(result.method).toBe('POST');
+    expect(result.body.account_id).toBe('acc_123456');
+    expect(result.body.tool_names).toEqual(['hris_get_employee', 'crm_update_employee']);
+    expect(result.body.feedback).toBe('Great tools!');
     fetchSpy.mockRestore();
   });
 
-  it('submits feedback to the configured endpoint', async () => {
-    const tool = createFeedbackTool({ defaultEndpoint: 'https://example.com/feedback' });
-    const response = new Response(JSON.stringify({ received: true }), { status: 200 });
+  it('submits feedback to the StackOne API endpoint', async () => {
+    const tool = createFeedbackTool();
+    const apiResponse = {
+      message: 'Feedback successfully stored',
+      key: '2025-10-08T11-44-16.123Z-a3f7b2c1d4e5f6a7b8c9d0e1f2a3b4c5.json',
+      submitted_at: '2025-10-08T11:44:16.123Z',
+      trace_id: '30d37876-cb1a-4138-9225-197355e0b6c9',
+    };
+    const response = new Response(JSON.stringify(apiResponse), { status: 200 });
     const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
 
     const result = (await tool.execute({
       feedback: 'Great tools!',
-      accountId: 'acct-123',
+      account_id: 'acc_123456',
+      toolNames: ['data_export', 'analytics'],
     })) as {
-      status: string;
-      endpoint: string;
-      response: unknown;
+      message: string;
+      key: string;
+      submitted_at: string;
+      trace_id: string;
     };
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [calledUrl, options] = fetchSpy.mock.calls[0];
-    expect(calledUrl).toBe('https://example.com/feedback');
+    expect(calledUrl).toBe('https://api.stackone.com/ai/tool-feedback');
     expect(options).toMatchObject({ method: 'POST' });
-    expect(result.status).toBe('submitted');
-    expect(result.response).toEqual({ received: true });
+    expect(result.message).toBe('Feedback successfully stored');
+    expect(result.key).toBe('2025-10-08T11-44-16.123Z-a3f7b2c1d4e5f6a7b8c9d0e1f2a3b4c5.json');
+    expect(result.submitted_at).toBe('2025-10-08T11:44:16.123Z');
+    expect(result.trace_id).toBe('30d37876-cb1a-4138-9225-197355e0b6c9');
+    fetchSpy.mockRestore();
+  });
+
+  it('handles API errors', async () => {
+    const tool = createFeedbackTool();
+    const errorResponse = new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(errorResponse);
+
+    await expect(
+      tool.execute({
+        feedback: 'Great tools!',
+        account_id: 'acc_123456',
+        toolNames: ['test_tool'],
+      })
+    ).rejects.toBeInstanceOf(StackOneError);
+
+    fetchSpy.mockRestore();
+  });
+
+  it('uses custom baseUrl when provided', async () => {
+    const tool = createFeedbackTool({ baseUrl: 'https://custom.api.com' });
+    const apiResponse = {
+      message: 'Feedback successfully stored',
+      key: 'test-key.json',
+      submitted_at: '2025-10-08T11:44:16.123Z',
+      trace_id: 'test-trace-id',
+    };
+    const response = new Response(JSON.stringify(apiResponse), { status: 200 });
+    const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
+
+    await tool.execute({
+      feedback: 'Great tools!',
+      account_id: 'acc_123456',
+      toolNames: ['test_tool'],
+    });
+
+    const [calledUrl] = fetchSpy.mock.calls[0];
+    expect(calledUrl).toBe('https://custom.api.com/ai/tool-feedback');
+
     fetchSpy.mockRestore();
   });
 });
 
 afterAll(() => {
-  process.env.STACKONE_FEEDBACK_URL = originalEnv;
+  // Cleanup
 });
