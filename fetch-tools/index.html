@@ -448,7 +448,7 @@
             <main id="terminal-mkdocs-main-content">
 <section id="mkdocs-terminal-content">
     <h1 id="fetch-tools">Fetch Tools<a class="headerlink" href="#fetch-tools" title="Anchor link to this section for reference">#</a></h1>
-<p>Example: fetch the latest StackOne tool catalog and execute a tool.</p>
+<p>Example: fetch the latest StackOne tool catalog with filtering options.</p>
 <p>Set <code>STACKONE_API_KEY</code> (and optionally <code>STACKONE_BASE_URL</code>) before running.
 By default the script exits early in test environments where a real key is
 not available.</p>
@@ -470,10 +470,59 @@ not available.</p>
 <span style="color: #A89028">  </span>baseUrl<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #2838B0; font-style: italic">process.env.STACKONE_BASE_URL</span><span style="color: #A89028"> </span><span style="color: #666">??</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;https://api.stackone.com&#39;</span><span style="color: #888">,</span>
 <span style="color: #888">});</span>
 
-<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>tools<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">();</span>
-console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>tools<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools`</span><span style="color: #888">);</span>
+<span style="color: #888; font-style: italic">// Example 1: Fetch all tools</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 1: Fetch all tools ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>allTools<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">();</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>allTools<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools`</span><span style="color: #888">);</span>
 
-<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>tool<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span>tools<span style="color: #888">.</span>getTool<span style="color: #888">(</span><span style="color: #B83838">&#39;hris_list_employees&#39;</span><span style="color: #888">);</span>
+<span style="color: #888; font-style: italic">// Example 2: Filter by account IDs using setAccounts()</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 2: Filter by account IDs (using setAccounts) ===&#39;</span><span style="color: #888">);</span>
+toolset<span style="color: #888">.</span>setAccounts<span style="color: #888">([</span><span style="color: #B83838">&#39;account-123&#39;</span><span style="color: #888">,</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;account-456&#39;</span><span style="color: #888">]);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolsByAccounts<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">();</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>toolsByAccounts<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools for specified accounts`</span><span style="color: #888">);</span>
+
+<span style="color: #888; font-style: italic">// Example 3: Filter by account IDs using options</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 3: Filter by account IDs (using options) ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolsByAccountsOption<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>accountIds<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;account-789&#39;</span><span style="color: #888">],</span>
+<span style="color: #888">});</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>toolsByAccountsOption<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools for account-789`</span><span style="color: #888">);</span>
+
+<span style="color: #888; font-style: italic">// Example 4: Filter by providers</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 4: Filter by providers ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolsByProviders<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>providers<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;hibob&#39;</span><span style="color: #888">,</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;bamboohr&#39;</span><span style="color: #888">],</span>
+<span style="color: #888">});</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>toolsByProviders<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools for HiBob and BambooHR`</span><span style="color: #888">);</span>
+
+<span style="color: #888; font-style: italic">// Example 5: Filter by actions with exact match</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 5: Filter by actions (exact match) ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolsByActions<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>actions<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;hris_list_employees&#39;</span><span style="color: #888">,</span><span style="color: #A89028"> </span><span style="color: #B83838">&#39;hris_create_employee&#39;</span><span style="color: #888">],</span>
+<span style="color: #888">});</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>toolsByActions<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools matching exact action names`</span><span style="color: #888">);</span>
+
+<span style="color: #888; font-style: italic">// Example 6: Filter by actions with glob pattern</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 6: Filter by actions (glob pattern) ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolsByGlobPattern<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>actions<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;*_list_employees&#39;</span><span style="color: #888">],</span>
+<span style="color: #888">});</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>toolsByGlobPattern<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools matching *_list_employees pattern`</span><span style="color: #888">);</span>
+
+<span style="color: #888; font-style: italic">// Example 7: Combine multiple filters</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Example 7: Combine multiple filters ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>toolsCombined<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span><span style="color: #2838B0">await</span><span style="color: #A89028"> </span>toolset<span style="color: #888">.</span>fetchTools<span style="color: #888">({</span>
+<span style="color: #A89028">  </span>accountIds<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;account-123&#39;</span><span style="color: #888">],</span>
+<span style="color: #A89028">  </span>providers<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;hibob&#39;</span><span style="color: #888">],</span>
+<span style="color: #A89028">  </span>actions<span style="color: #666">:</span><span style="color: #A89028"> </span><span style="color: #888">[</span><span style="color: #B83838">&#39;*_list_*&#39;</span><span style="color: #888">],</span>
+<span style="color: #888">});</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span>
+<span style="color: #A89028">  </span><span style="color: #B83838">`Loaded </span><span style="color: #B83838; text-decoration: underline">${</span>toolsCombined<span style="color: #888">.</span>length<span style="color: #B83838; text-decoration: underline">}</span><span style="color: #B83838"> tools for account-123, provider hibob, matching *_list_* pattern`</span>
+<span style="color: #888">);</span>
+
+<span style="color: #888; font-style: italic">// Execute a tool</span>
+console<span style="color: #888">.</span>log<span style="color: #888">(</span><span style="color: #B83838">&#39;\n=== Executing a tool ===&#39;</span><span style="color: #888">);</span>
+<span style="color: #2838B0; font-style: italic">const</span><span style="color: #A89028"> </span>tool<span style="color: #A89028"> </span><span style="color: #666">=</span><span style="color: #A89028"> </span>allTools<span style="color: #888">.</span>getTool<span style="color: #888">(</span><span style="color: #B83838">&#39;hris_list_employees&#39;</span><span style="color: #888">);</span>
 <span style="color: #2838B0">if</span><span style="color: #A89028"> </span><span style="color: #888">(</span><span style="color: #666">!</span>tool<span style="color: #888">)</span><span style="color: #A89028"> </span><span style="color: #888">{</span>
 <span style="color: #A89028">  </span><span style="color: #2838B0">throw</span><span style="color: #A89028"> </span><span style="color: #A848A8">new</span><span style="color: #A89028"> </span><span style="color: #908828">Error</span><span style="color: #888">(</span><span style="color: #B83838">&#39;Tool hris_list_employees not found in the catalog&#39;</span><span style="color: #888">);</span>
 <span style="color: #888">}</span>
