@@ -6592,7 +6592,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields',
+                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,is_unlimited,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -6918,7 +6918,7 @@ export const hrisSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields',
+                'id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,is_unlimited,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -27972,6 +27972,20 @@ export const hrisSpec = {
             description: 'The date of when the current balance expires',
             example: '2021-01-01T01:01:01.000Z',
             format: 'date-time',
+            nullable: true,
+          },
+          is_unlimited: {
+            description: 'Indicates if this time off balance represents unlimited leave',
+            example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           updated_at: {

@@ -7827,7 +7827,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields",
+          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,is_unlimited,updated_at,unified_custom_fields",
           "type": "string",
         },
         "id": {
@@ -10211,7 +10211,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
         },
         "fields": {
           "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,updated_at,unified_custom_fields",
+          "example": "id,remote_id,employee_id,remote_employee_id,policy_id,remote_policy_id,policy,current_balance,initial_balance,balance_unit,balance_start_date,balance_expiry_date,is_unlimited,updated_at,unified_custom_fields",
           "type": "string",
         },
         "filter": {
