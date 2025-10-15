@@ -47,7 +47,7 @@ export const screeningSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description',
+              example: 'id,remote_id,name,description,unified_custom_fields',
               type: 'string',
             },
           },
@@ -338,7 +338,7 @@ export const screeningSpec = {
               'The comma separated list of fields that will be returned in the response (if empty, all fields are returned)',
             schema: {
               nullable: true,
-              example: 'id,remote_id,name,description',
+              example: 'id,remote_id,name,description,unified_custom_fields',
               type: 'string',
             },
           },
