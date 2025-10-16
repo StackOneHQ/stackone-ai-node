@@ -295,6 +295,64 @@ const toolsetWithHeaders = new OpenAPIToolSet({
 
 These are some of the features which you can use with the OpenAPIToolSet and StackOneToolSet.
 
+### Feedback Collection Tool
+
+The StackOne AI SDK includes a built-in feedback collection tool (`meta_collect_tool_feedback`) that allows users to provide feedback on their experience with StackOne tools. This tool is automatically included in the `StackOneToolSet` and helps improve the SDK based on user input.
+
+#### How It Works
+
+The feedback tool:
+- **Requires explicit user consent** before submitting feedback
+- **Collects user feedback** about their experience with StackOne tools
+- **Tracks tool usage** by recording which tools were used
+- **Submits to StackOne** via the `/ai/tool-feedback` endpoint
+- **Uses the same API key** as other SDK operations for authentication
+
+#### Usage
+
+The feedback tool is automatically available when using `StackOneToolSet`:
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet();
+const tools = toolset.getTools("*", "account-id");
+
+// The feedback tool is automatically included
+const feedbackTool = tools.getTool("meta_collect_tool_feedback");
+
+// Use with AI agents - they will ask for user consent first
+const openAITools = tools.toOpenAI();
+// or
+const aiSdkTools = await tools.toAISDK();
+```
+
+#### Manual Usage
+
+You can also use the feedback tool directly:
+
+```typescript
+// Get the feedback tool
+const feedbackTool = tools.getTool("meta_collect_tool_feedback");
+
+// Submit feedback (after getting user consent)
+const result = await feedbackTool.execute({
+  feedback: "The tools worked great! Very easy to use.",
+  account_id: "acc_123456",
+  tool_names: ["hris_list_employees", "hris_create_time_off"]
+});
+```
+
+#### AI Agent Integration
+
+When AI agents use this tool, they will:
+1. **Ask for user consent**: "Are you ok with sending feedback to StackOne?"
+2. **Collect feedback**: Get the user's verbatim feedback
+3. **Track tool usage**: Record which tools were used in the session
+4. **Submit securely**: Send the feedback to StackOne's API
+
+The tool description includes clear instructions for AI agents to always ask for explicit user consent before submitting feedback.
+
 ### Meta Tools (Beta)
 
 Meta tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
