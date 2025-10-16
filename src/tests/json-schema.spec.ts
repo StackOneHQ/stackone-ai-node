@@ -86,6 +86,7 @@ const createArrayTestTool = (): StackOneTool => {
       },
     },
     {
+      kind: 'http',
       method: 'GET',
       url: 'https://example.com/test',
       bodyType: 'json',
@@ -127,6 +128,7 @@ const createNestedArrayTestTool = (): StackOneTool => {
       },
     },
     {
+      kind: 'http',
       method: 'GET',
       url: 'https://example.com/test',
       bodyType: 'json',
@@ -246,9 +248,9 @@ describe('Schema Validation', () => {
   });
 
   describe('AI SDK Integration', () => {
-    it('should convert to AI SDK tool format', () => {
+    it('should convert to AI SDK tool format', async () => {
       const tool = createArrayTestTool();
-      const aiSdkTool = tool.toAISDK();
+      const aiSdkTool = await tool.toAISDK();
 
       expect(aiSdkTool).toBeDefined();
       // The AI SDK tool is an object with the tool name as the key
@@ -256,27 +258,27 @@ describe('Schema Validation', () => {
       expect(toolObj).toBeDefined();
       expect(typeof toolObj.execute).toBe('function');
 
-      // Check that parameters and jsonSchema are properly structured
-      expect(toolObj.parameters).toBeDefined();
-      expect(toolObj.parameters.jsonSchema).toBeDefined();
-      expect(toolObj.parameters.jsonSchema.type).toBe('object');
-      expect(toolObj.parameters.jsonSchema.properties).toBeDefined();
+      // Check that inputSchema and jsonSchema are properly structured
+      expect(toolObj.inputSchema).toBeDefined();
+      expect(toolObj.inputSchema.jsonSchema).toBeDefined();
+      expect(toolObj.inputSchema.jsonSchema.type).toBe('object');
+      expect(toolObj.inputSchema.jsonSchema.properties).toBeDefined();
 
       // Check array item properties specifically
       // Using simpleArray which is defined in createArrayTestTool
-      const simpleArray = toolObj.parameters.jsonSchema.properties.simpleArray;
+      const simpleArray = toolObj.inputSchema.jsonSchema.properties.simpleArray;
       expect(simpleArray).toBeDefined();
       expect(simpleArray.type).toBe('array');
 
       // Check that array with items is properly structured
-      const arrayWithItems = toolObj.parameters.jsonSchema.properties.arrayWithItems;
+      const arrayWithItems = toolObj.inputSchema.jsonSchema.properties.arrayWithItems;
       expect(arrayWithItems).toBeDefined();
       expect(arrayWithItems.type).toBe('array');
       expect(arrayWithItems.items).toBeDefined();
       expect(arrayWithItems.items.type).toBe('string');
     });
 
-    it('should handle the problematic nested array case', () => {
+    it('should handle the problematic nested array case', async () => {
       const tool = createNestedArrayTestTool();
       const openAIFormat = tool.toOpenAI();
       const parameters = openAIFormat.function.parameters;
@@ -303,16 +305,16 @@ describe('Schema Validation', () => {
       expect(aiSchema).toBeDefined();
 
       // Generate the SDK tool and verify its structure
-      const aiSdkTool = tool.toAISDK();
+      const aiSdkTool = await tool.toAISDK();
       expect(aiSdkTool).toBeDefined();
 
       const toolObj = aiSdkTool[tool.name];
       expect(toolObj).toBeDefined();
-      expect(toolObj.parameters).toBeDefined();
-      expect(toolObj.parameters.jsonSchema).toBeDefined();
+      expect(toolObj.inputSchema).toBeDefined();
+      expect(toolObj.inputSchema.jsonSchema).toBeDefined();
 
       // Specifically check the nested schema structure
-      const filterProp = toolObj.parameters.jsonSchema.properties.filter;
+      const filterProp = toolObj.inputSchema.jsonSchema.properties.filter;
       expect(filterProp).toBeDefined();
       expect(filterProp.type).toBe('object');
       expect(filterProp.properties).toBeDefined();

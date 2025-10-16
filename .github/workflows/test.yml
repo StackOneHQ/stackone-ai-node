@@ -17,6 +17,5 @@ jobs:
       - name: Install dependencies
         run: bun ci
 
-      # TODO change this to bun test
       - name: Run tests
-        run: bun test:unit -u
+        run: bun test

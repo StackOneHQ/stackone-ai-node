@@ -1,6 +1,7 @@
 import {
-  type ExecuteConfig,
   type ExecuteOptions,
+  type HttpBodyType,
+  type HttpExecuteConfig,
   type JsonDict,
   ParameterLocation,
 } from '../types';
@@ -19,16 +20,16 @@ class ParameterSerializationError extends Error {
 }
 
 /**
- * Builds and executes HTTP requests
+ * Builds and executes HTTP requests for tools declared with kind:'http'.
  */
 export class RequestBuilder {
   private method: string;
   private url: string;
-  private bodyType: 'json' | 'multipart-form' | 'form';
-  private params: ExecuteConfig['params'];
+  private bodyType: HttpBodyType;
+  private params: HttpExecuteConfig['params'];
   private headers: Record<string, string>;
 
-  constructor(config: ExecuteConfig, headers: Record<string, string> = {}) {
+  constructor(config: HttpExecuteConfig, headers: Record<string, string> = {}) {
     this.method = config.method;
     this.url = config.url;
     this.bodyType = config.bodyType;
@@ -143,6 +144,10 @@ export class RequestBuilder {
           fetchOptions.body = formData;
           // Don't set Content-Type for FormData, it will be set automatically with the boundary
           break;
+        }
+        default: {
+          this.bodyType satisfies never;
+          throw new Error(`Unsupported HTTP body type: ${String(this.bodyType)}`);
         }
       }
     }

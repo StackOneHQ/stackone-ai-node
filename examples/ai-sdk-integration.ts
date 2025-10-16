@@ -17,7 +17,7 @@ const aiSdkIntegration = async (): Promise<void> => {
   const tools = toolset.getStackOneTools('hris_get_*', accountId);
 
   // Convert to AI SDK tools
-  const aiSdkTools = tools.toAISDK();
+  const aiSdkTools = await tools.toAISDK();
 
   // Use max steps to automatically call the tool if it's needed
   const { text } = await generateText({

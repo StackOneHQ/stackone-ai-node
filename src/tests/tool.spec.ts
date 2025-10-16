@@ -12,6 +12,7 @@ const createMockTool = (headers?: Record<string, string>): BaseTool => {
     properties: { id: { type: 'string', description: 'ID parameter' } },
   };
   const executeConfig: ExecuteConfig = {
+    kind: 'http',
     method: 'GET',
     url: 'https://api.example.com/test/{id}',
     bodyType: 'json',
@@ -93,27 +94,47 @@ describe('StackOneTool', () => {
     ).toBe('string');
   });
 
-  it('should convert to AI SDK tool format', () => {
+  it('should convert to AI SDK tool format', async () => {
     const tool = createMockTool();
 
-    const aiSdkTool = tool.toAISDK();
+    const aiSdkTool = await tool.toAISDK();
 
     // Test the basic structure
     expect(aiSdkTool).toBeDefined();
     expect(aiSdkTool.test_tool).toBeDefined();
     expect(typeof aiSdkTool.test_tool.execute).toBe('function');
     expect(aiSdkTool.test_tool.description).toBe('Test tool');
-    expect(aiSdkTool.test_tool.parameters).toBeDefined();
+    expect(aiSdkTool.test_tool.inputSchema).toBeDefined();
 
-    // The actual schema is in parameters.jsonSchema
-    const schema = aiSdkTool.test_tool.parameters.jsonSchema;
+    // The actual schema is in inputSchema.jsonSchema
+    const schema = aiSdkTool.test_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');
     expect(schema.properties.id).toBeDefined();
     expect(schema.properties.id.type).toBe('string');
   });
 
-  it('should convert complex parameter types to zod schema', () => {
+  it('should include execution metadata by default in AI SDK conversion', async () => {
+    const tool = createMockTool();
+
+    const aiSdkTool = await tool.toAISDK();
+    const execution = aiSdkTool.test_tool.execution;
+
+    expect(execution).toBeDefined();
+    expect(execution?.config.method).toBe('GET');
+    expect(execution?.config.url).toBe('https://api.example.com/test/{id}');
+    expect(execution?.headers).toEqual({});
+  });
+
+  it('should allow disabling execution metadata exposure for AI SDK conversion', async () => {
+    const tool = createMockTool().setExposeExecutionMetadata(false);
+
+    const aiSdkTool = await tool.toAISDK();
+
+    expect(aiSdkTool.test_tool.execution).toBeUndefined();
+  });
+
+  it('should convert complex parameter types to zod schema', async () => {
     const complexTool = new BaseTool(
       'complex_tool',
       'Complex tool',
@@ -136,6 +157,7 @@ describe('StackOneTool', () => {
         },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://example.com/complex',
         bodyType: 'json',
@@ -143,17 +165,17 @@ describe('StackOneTool', () => {
       }
     );
 
-    const aiSdkTool = complexTool.toAISDK();
+    const aiSdkTool = await complexTool.toAISDK();
 
     // Check that the tool is defined
     expect(aiSdkTool).toBeDefined();
     expect(aiSdkTool.complex_tool).toBeDefined();
 
-    // Check that parameters are defined
-    expect(aiSdkTool.complex_tool.parameters).toBeDefined();
+    // Check that inputSchema is defined
+    expect(aiSdkTool.complex_tool.inputSchema).toBeDefined();
 
-    // The actual schema is in parameters.jsonSchema
-    const schema = aiSdkTool.complex_tool.parameters.jsonSchema;
+    // The actual schema is in inputSchema.jsonSchema
+    const schema = aiSdkTool.complex_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');
 
@@ -168,7 +190,7 @@ describe('StackOneTool', () => {
 
   it('should execute AI SDK tool with parameters', async () => {
     const tool = createMockTool();
-    const aiSdkTool = tool.toAISDK();
+    const aiSdkTool = await tool.toAISDK();
 
     if (!aiSdkTool.test_tool.execute) {
       throw new Error('test_tool.execute is undefined');
@@ -190,7 +212,7 @@ describe('StackOneTool', () => {
       throw mockError;
     });
 
-    const aiSdkTool = tool.toAISDK();
+    const aiSdkTool = await tool.toAISDK();
 
     if (!aiSdkTool.test_tool.execute) {
       throw new Error('test_tool.execute is undefined');
@@ -229,6 +251,7 @@ describe('Tools', () => {
         properties: { id: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/test/{id}',
         bodyType: 'json',
@@ -250,6 +273,7 @@ describe('Tools', () => {
         properties: { id: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/test/{id}',
         bodyType: 'json',
@@ -276,7 +300,7 @@ describe('Tools', () => {
     expect(openAITools[1].function.name).toBe('tool2');
   });
 
-  it('should convert all tools to AI SDK tools', () => {
+  it('should convert all tools to AI SDK tools', async () => {
     const tool1 = createMockTool();
     const tool2 = new StackOneTool(
       'another_tool',
@@ -286,6 +310,7 @@ describe('Tools', () => {
         properties: { name: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/test',
         bodyType: 'json',
@@ -304,7 +329,7 @@ describe('Tools', () => {
 
     const tools = new Tools([tool1, tool2]);
 
-    const aiSdkTools = tools.toAISDK();
+    const aiSdkTools = await tools.toAISDK();
 
     expect(Object.keys(aiSdkTools).length).toBe(2);
     expect(aiSdkTools.test_tool).toBeDefined();
@@ -323,6 +348,7 @@ describe('Tools', () => {
         properties: { name: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'POST',
         url: 'https://api.example.com/test',
         bodyType: 'json',

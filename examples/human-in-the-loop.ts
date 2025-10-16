@@ -33,7 +33,7 @@ const humanInTheLoopExample = async (): Promise<void> => {
   }
 
   // Get the AI SDK version of the tool without the execute function
-  const tool = createEmployeeTool.toAISDK({
+  const tool = await createEmployeeTool.toAISDK({
     executable: false,
   });
 

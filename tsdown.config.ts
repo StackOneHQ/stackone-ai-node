@@ -15,7 +15,9 @@ export default defineConfig({
   publint: true,
   unused: true,
   unbundle: true,
-  exports: true,
+  exports: {
+    devExports: true,
+  },
   hooks: {
     'build:done': async () => {
       // sourcemap files for generated code are not needed

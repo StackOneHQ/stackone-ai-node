@@ -78,6 +78,7 @@ describe('ToolSet', () => {
         properties: { id: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/hris/employees/{id}',
         bodyType: 'json',
@@ -99,6 +100,7 @@ describe('ToolSet', () => {
         properties: { id: { type: 'string' } },
       },
       {
+        kind: 'http',
         method: 'GET',
         url: 'https://api.example.com/crm/contacts/{id}',
         bodyType: 'json',

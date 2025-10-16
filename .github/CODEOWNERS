@@ -1,0 +1,6 @@
+# CODEOWNERS file for StackOne AI Node SDK
+# This file defines which teams should review specific parts of the codebase
+
+# All changes require AI team review
+* @StackOneHQ/ai
+* @StackOneHQ/altair

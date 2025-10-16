@@ -31,7 +31,7 @@ export const planningModule = async (): Promise<void> => {
   await generateText({
     model: openai('gpt-5'),
     prompt: 'You are a workplace agent, onboard the latest hires to our systems',
-    tools: onboardWorkflow.toAISDK(),
+    tools: await onboardWorkflow.toAISDK(),
     maxSteps: 3,
   });
 };

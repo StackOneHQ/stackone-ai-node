@@ -41,11 +41,15 @@ jobs:
             echo "::notice::No OAS changes detected"
           fi
 
+      - name: Update test snapshots
+        if: steps.check-oas-changes.outputs.changes == 'true'
+        run: bun test -u
+
       - name: Verify changes work with the codebase
         if: steps.check-oas-changes.outputs.changes == 'true'
         run: |
           # Run tests to ensure the updated OAS files don't break anything
-          bun test -u
+          bun test
 
           # Run linter to ensure code quality
           bun run lint
@@ -65,16 +69,17 @@ jobs:
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update OAS specifications"
+          commit-message: "chore: update OAS specifications and test snapshots"
           committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
           author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-          title: "chore: update OAS specifications"
+          title: "chore: update OAS specifications and test snapshots"
           body: |
-            This PR updates the OpenAPI specifications to the latest version.
+            This PR updates the OpenAPI specifications to the latest version and regenerates test snapshots.
 
             Changes were automatically detected and committed by the GitHub Actions workflow.
 
             - [x] OAS files updated
+            - [x] Test snapshots updated
             - [x] Verified changes work with the codebase (tests, lint, build)
           branch: auto-update-oas
           base: main

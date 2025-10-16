@@ -6,7 +6,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": "./src/index.ts",
     "./package.json": "./package.json"
   },
   "type": "module",
@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "preinstall": "bun x only-allow bun",
-    "prepare": "bun prepare:git && bun run fetch:specs",
+    "prepare": "bun prepare:git",
     "prepare:git": "git config --local core.hooksPath .githooks",
     "build": "bun -b tsdown",
     "rebuild": "bun run fetch:specs && bun run build",
@@ -36,33 +36,44 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.19.1",
     "@orama/orama": "^3.1.11",
+    "@stackone/stackone-client-ts": "^4.28.0",
     "json-schema": "^0.4.0"
   },
   "devDependencies": {
-    "@ai-sdk/openai": "^1.1.14",
+    "@ai-sdk/openai": "^2.0.46",
     "@biomejs/biome": "^1.5.3",
+    "@hono/mcp": "^0.1.4",
     "@types/bun": "^1.2.4",
     "@types/json-schema": "^7.0.15",
     "@types/node": "^22.13.5",
     "@typescript/native-preview": "^7.0.0-dev.20250623.1",
-    "ai": "^4.1.46",
+    "ai": "^5.0.63",
     "fs-fixture": "^2.8.1",
+    "hono": "^4.9.10",
     "lint-staged": "^15.2.0",
     "mkdocs": "^0.0.1",
     "msw": "^2.10.4",
-    "openai": "^5.7.0",
+    "openai": "^6.2.0",
     "openapi-types": "^12.1.3",
     "publint": "^0.3.12",
-    "tsdown": "^0.12.8",
+    "tsdown": "^0.15.6",
     "type-fest": "^4.41.0",
     "unplugin-unused": "^0.5.1",
-    "zod": "^4.0.0"
+    "zod": "^3.23.8"
   },
   "peerDependencies": {
-    "ai": "4.x",
-    "openai": "4.x|5.x",
-    "zod": "^4.0.0"
+    "ai": "4.x|5.x",
+    "openai": "5.x|6.x"
+  },
+  "peerDependenciesMeta": {
+    "ai": {
+      "optional": true
+    },
+    "openai": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",
@@ -86,5 +97,11 @@
     "*": [
       "biome check --write --no-errors-on-unmatched"
     ]
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./package.json": "./package.json"
+    }
   }
 }
