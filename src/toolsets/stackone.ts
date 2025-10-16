@@ -1,5 +1,5 @@
 import { loadStackOneSpecs } from '../openapi/loader';
-import { StackOneTool, type Tools } from '../tool';
+import { StackOneTool, Tools } from '../tool';
 import { createFeedbackTool } from '../tools/feedback';
 import type { ToolDefinition } from '../types';
 import { removeJsonSchemaProperty } from '../utils/schema';
@@ -250,7 +250,7 @@ export class StackOneToolSet extends ToolSet {
     }
 
     // Add feedback collection meta tool
-    this.tools.push(createFeedbackTool({ baseUrl: this.baseUrl }));
+    this.tools.push(createFeedbackTool(undefined, this.accountId, this.baseUrl));
   }
 
   /**

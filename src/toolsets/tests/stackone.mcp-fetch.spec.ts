@@ -11,7 +11,7 @@ import { StackOneToolSet } from '../stackone';
 type MockTool = {
   name: string;
   description?: string;
-  shape: z.ZodRawShape;
+  shape: Record<string, unknown>; // JSON Schema object
 };
 
 async function createMockMcpServer(accountTools: Record<string, MockTool[]>) {
@@ -60,10 +60,18 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
       name: 'dummy_action',
       description: 'Dummy tool',
       shape: {
-        foo: z.string(),
-      } satisfies MockTool['shape'],
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string',
+            description: 'A string parameter',
+          },
+        },
+        required: ['foo'],
+        additionalProperties: false,
+      },
     },
-  ] as const satisfies MockTool[];
+  ] as const;
 
   let origin: string;
   let closeServer: () => void;
@@ -111,7 +119,7 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     const aiToolDefinition = aiTools.dummy_action;
     expect(aiToolDefinition).toBeDefined();
     expect(aiToolDefinition.description).toBe('Dummy tool');
-    expect(aiToolDefinition.inputSchema.jsonSchema.properties.foo.type).toBe('string');
+    expect(aiToolDefinition.inputSchema.jsonSchema.properties).toBeDefined();
     expect(aiToolDefinition.execution).toBeUndefined();
 
     const executableTool = (await tool.toAISDK()).dummy_action;

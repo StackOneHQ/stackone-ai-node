@@ -5,6 +5,8 @@ import { StackOneError } from '../utils/errors';
 
 interface FeedbackToolOptions {
   baseUrl?: string;
+  apiKey?: string;
+  accountId?: string;
 }
 
 const createNonEmptyTrimmedStringSchema = (fieldName: string) =>
@@ -18,13 +20,22 @@ const createNonEmptyTrimmedStringSchema = (fieldName: string) =>
 const feedbackInputSchema = z.object({
   feedback: createNonEmptyTrimmedStringSchema('Feedback'),
   account_id: createNonEmptyTrimmedStringSchema('Account ID'),
-  toolNames: z
+  tool_names: z
     .array(z.string())
     .min(1, 'At least one tool name is required')
     .transform((value) => value.map((item) => item.trim()).filter((item) => item.length > 0)),
 });
 
-export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool {
+export function createFeedbackTool(
+  apiKey?: string,
+  accountId?: string,
+  baseUrl = 'https://api.stackone.com'
+): BaseTool {
+  const options: FeedbackToolOptions = {
+    apiKey,
+    accountId,
+    baseUrl,
+  };
   const name = 'meta_collect_tool_feedback' as const;
   const description =
     'Collects user feedback on StackOne tool performance. First ask the user, "Are you ok with sending feedback to StackOne?" and mention that the LLM will take care of sending it. Call this tool only when the user explicitly answers yes.';
@@ -39,7 +50,7 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         type: 'string',
         description: 'Verbatim feedback from the user about their experience with StackOne tools.',
       },
-      toolNames: {
+      tool_names: {
         type: 'array',
         items: {
           type: 'string',
@@ -47,18 +58,29 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
         description: 'Array of tool names being reviewed',
       },
     },
-    required: ['feedback', 'account_id', 'toolNames'],
+    required: ['feedback', 'account_id', 'tool_names'],
   } as const satisfies ToolParameters;
 
   const executeConfig = {
+    kind: 'http',
     method: 'POST',
     url: '/ai/tool-feedback',
     bodyType: 'json',
     params: [],
   } as const satisfies ExecuteConfig;
 
-  const tool = new BaseTool(name, description, parameters, executeConfig);
-  const baseUrl = options.baseUrl || 'https://api.stackone.com';
+  // Get API key from environment or options
+  const resolvedApiKey = options.apiKey || process.env.STACKONE_API_KEY;
+
+  // Create authentication headers
+  const authHeaders: Record<string, string> = {};
+  if (resolvedApiKey) {
+    const authString = Buffer.from(`${resolvedApiKey}:`).toString('base64');
+    authHeaders.Authorization = `Basic ${authString}`;
+  }
+
+  const tool = new BaseTool(name, description, parameters, executeConfig, authHeaders);
+  const resolvedBaseUrl = options.baseUrl || 'https://api.stackone.com';
 
   tool.execute = async function (
     this: BaseTool,
@@ -73,7 +95,7 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
       const requestBody = {
         feedback: parsedParams.feedback,
         account_id: parsedParams.account_id,
-        tool_names: parsedParams.toolNames,
+        tool_names: parsedParams.tool_names,
       };
 
       const headers = {
@@ -84,18 +106,18 @@ export function createFeedbackTool(options: FeedbackToolOptions = {}): BaseTool 
 
       if (executeOptions?.dryRun) {
         return {
-          url: `${baseUrl}${executeConfig.url}`,
+          url: `${resolvedBaseUrl}${executeConfig.url}`,
           method: executeConfig.method,
           headers,
           body: {
             feedback: parsedParams.feedback,
             account_id: parsedParams.account_id,
-            tool_names: parsedParams.toolNames,
+            tool_names: parsedParams.tool_names,
           },
         } satisfies JsonDict;
       }
 
-      const response = await fetch(`${baseUrl}${executeConfig.url}`, {
+      const response = await fetch(`${resolvedBaseUrl}${executeConfig.url}`, {
         method: executeConfig.method,
         headers,
         body: JSON.stringify(requestBody),

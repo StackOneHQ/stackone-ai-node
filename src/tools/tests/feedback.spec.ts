@@ -11,11 +11,11 @@ describe('meta_collect_tool_feedback', () => {
     const tool = createFeedbackTool();
 
     await expect(
-      tool.execute({ feedback: 'Great tools!', toolNames: ['test_tool'] })
+      tool.execute({ feedback: 'Great tools!', tool_names: ['test_tool'] })
     ).rejects.toBeInstanceOf(StackOneError);
   });
 
-  it('throws when toolNames is missing', async () => {
+  it('throws when tool_names is missing', async () => {
     const tool = createFeedbackTool();
 
     await expect(
@@ -30,7 +30,7 @@ describe('meta_collect_tool_feedback', () => {
     const result = (await tool.execute(
       {
         feedback: 'Great tools!',
-        toolNames: ['hris_get_employee', ' crm_update_employee '],
+        tool_names: ['hris_get_employee', ' crm_update_employee '],
         account_id: 'acc_123456',
       },
       { dryRun: true }
@@ -64,7 +64,7 @@ describe('meta_collect_tool_feedback', () => {
     const result = (await tool.execute({
       feedback: 'Great tools!',
       account_id: 'acc_123456',
-      toolNames: ['data_export', 'analytics'],
+      tool_names: ['data_export', 'analytics'],
     })) as {
       message: string;
       key: string;
@@ -92,7 +92,7 @@ describe('meta_collect_tool_feedback', () => {
       tool.execute({
         feedback: 'Great tools!',
         account_id: 'acc_123456',
-        toolNames: ['test_tool'],
+        tool_names: ['test_tool'],
       })
     ).rejects.toBeInstanceOf(StackOneError);
 
@@ -100,7 +100,7 @@ describe('meta_collect_tool_feedback', () => {
   });
 
   it('uses custom baseUrl when provided', async () => {
-    const tool = createFeedbackTool({ baseUrl: 'https://custom.api.com' });
+    const tool = createFeedbackTool(undefined, undefined, 'https://custom.api.com');
     const apiResponse = {
       message: 'Feedback successfully stored',
       key: 'test-key.json',
@@ -113,7 +113,7 @@ describe('meta_collect_tool_feedback', () => {
     await tool.execute({
       feedback: 'Great tools!',
       account_id: 'acc_123456',
-      toolNames: ['test_tool'],
+      tool_names: ['test_tool'],
     });
 
     const [calledUrl] = fetchSpy.mock.calls[0];
