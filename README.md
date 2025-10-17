@@ -383,7 +383,7 @@ await feedbackTool.execute({
       result: { message: "Feedback successfully stored", ... }
     },
     {
-      account_id: "acc_789012", 
+      account_id: "acc_789012",
       status: "success",
       result: { message: "Feedback successfully stored", ... }
     }

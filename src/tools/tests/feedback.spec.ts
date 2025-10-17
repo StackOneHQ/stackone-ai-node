@@ -222,8 +222,12 @@ describe('meta_collect_tool_feedback', () => {
       });
 
       expect(result.results).toHaveLength(2);
-      const successResult = result.results.find((r: any) => r.account_id === 'acc_123456');
-      const errorResult = result.results.find((r: any) => r.account_id === 'acc_789012');
+      const successResult = result.results.find(
+        (r: { account_id: string }) => r.account_id === 'acc_123456'
+      );
+      const errorResult = result.results.find(
+        (r: { account_id: string }) => r.account_id === 'acc_789012'
+      );
 
       expect(successResult).toMatchObject({
         account_id: 'acc_123456',
