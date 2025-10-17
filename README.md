@@ -348,6 +348,48 @@ const result = await feedbackTool.execute({
 });
 ```
 
+#### Multiple Account Support
+
+The feedback tool supports both single and multiple account IDs. When you provide an array of account IDs, the feedback will be sent to each account individually:
+
+```typescript
+// Single account ID (string)
+await feedbackTool.execute({
+  feedback: "The tools worked great! Very easy to use.",
+  account_id: "acc_123456",
+  tool_names: ["hris_list_employees", "hris_create_time_off"],
+});
+
+// Multiple account IDs (array)
+await feedbackTool.execute({
+  feedback: "The tools worked great! Very easy to use.",
+  account_id: ["acc_123456", "acc_789012"],
+  tool_names: ["hris_list_employees", "hris_create_time_off"],
+});
+```
+
+**Response Format**: When using multiple account IDs, the tool returns a summary of all submissions:
+
+```typescript
+{
+  total_accounts: 2,
+  successful_submissions: 2,
+  failed_submissions: 0,
+  successful_results: [
+    {
+      account_id: "acc_123456",
+      status: 200,
+      response: { message: "Feedback successfully stored", ... }
+    },
+    {
+      account_id: "acc_789012", 
+      status: 200,
+      response: { message: "Feedback successfully stored", ... }
+    }
+  ]
+}
+```
+
 #### AI Agent Integration
 
 When AI agents use this tool, they will:
@@ -355,7 +397,8 @@ When AI agents use this tool, they will:
 1. **Ask for user consent**: "Are you ok with sending feedback to StackOne?"
 2. **Collect feedback**: Get the user's verbatim feedback
 3. **Track tool usage**: Record which tools were used in the session
-4. **Submit securely**: Send the feedback to StackOne's API
+4. **Submit to all accounts**: Send the same feedback to each account ID provided
+5. **Report results**: Show which accounts received the feedback successfully
 
 The tool description includes clear instructions for AI agents to always ask for explicit user consent before submitting feedback.
 

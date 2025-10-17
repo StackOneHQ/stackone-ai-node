@@ -35,18 +35,26 @@ describe('meta_collect_tool_feedback', () => {
       },
       { dryRun: true }
     )) as {
-      url: string;
-      method: string;
-      headers: Record<string, string>;
-      body: Record<string, unknown>;
+      multiple_requests: Array<{
+        url: string;
+        method: string;
+        headers: Record<string, string>;
+        body: Record<string, unknown>;
+      }>;
+      total_accounts: number;
     };
 
     expect(fetchSpy).not.toHaveBeenCalled();
-    expect(result.url).toBe('https://api.stackone.com/ai/tool-feedback');
-    expect(result.method).toBe('POST');
-    expect(result.body.account_id).toBe('acc_123456');
-    expect(result.body.tool_names).toEqual(['hris_get_employee', 'crm_update_employee']);
-    expect(result.body.feedback).toBe('Great tools!');
+    expect(result.total_accounts).toBe(1);
+    expect(result.multiple_requests).toHaveLength(1);
+    expect(result.multiple_requests[0].url).toBe('https://api.stackone.com/ai/tool-feedback');
+    expect(result.multiple_requests[0].method).toBe('POST');
+    expect(result.multiple_requests[0].body.account_id).toBe('acc_123456');
+    expect(result.multiple_requests[0].body.tool_names).toEqual([
+      'hris_get_employee',
+      'crm_update_employee',
+    ]);
+    expect(result.multiple_requests[0].body.feedback).toBe('Great tools!');
     fetchSpy.mockRestore();
   });
 
@@ -61,25 +69,22 @@ describe('meta_collect_tool_feedback', () => {
     const response = new Response(JSON.stringify(apiResponse), { status: 200 });
     const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
 
-    const result = (await tool.execute({
+    const result = await tool.execute({
       feedback: 'Great tools!',
       account_id: 'acc_123456',
       tool_names: ['data_export', 'analytics'],
-    })) as {
-      message: string;
-      key: string;
-      submitted_at: string;
-      trace_id: string;
-    };
+    });
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [calledUrl, options] = fetchSpy.mock.calls[0];
     expect(calledUrl).toBe('https://api.stackone.com/ai/tool-feedback');
     expect(options).toMatchObject({ method: 'POST' });
-    expect(result.message).toBe('Feedback successfully stored');
-    expect(result.key).toBe('2025-10-08T11-44-16.123Z-a3f7b2c1d4e5f6a7b8c9d0e1f2a3b4c5.json');
-    expect(result.submitted_at).toBe('2025-10-08T11:44:16.123Z');
-    expect(result.trace_id).toBe('30d37876-cb1a-4138-9225-197355e0b6c9');
+    expect(result).toMatchObject({
+      total_accounts: 1,
+      successful_submissions: 1,
+      failed_submissions: 0,
+    });
+    expect(result.successful_results[0].response).toMatchObject(apiResponse);
     fetchSpy.mockRestore();
   });
 
@@ -120,6 +125,179 @@ describe('meta_collect_tool_feedback', () => {
     expect(calledUrl).toBe('https://custom.api.com/ai/tool-feedback');
 
     fetchSpy.mockRestore();
+  });
+
+  describe('multiple account IDs', () => {
+    it('accepts single account ID as string', async () => {
+      const tool = createFeedbackTool();
+      const apiResponse = {
+        message: 'Feedback successfully stored',
+        key: 'test-key.json',
+        submitted_at: '2025-10-08T11:44:16.123Z',
+        trace_id: 'test-trace-id',
+      };
+      const response = new Response(JSON.stringify(apiResponse), { status: 200 });
+      const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
+
+      const result = await tool.execute({
+        feedback: 'Great tools!',
+        account_id: 'acc_123456',
+        tool_names: ['test_tool'],
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({
+        total_accounts: 1,
+        successful_submissions: 1,
+        failed_submissions: 0,
+      });
+
+      fetchSpy.mockRestore();
+    });
+
+    it('accepts multiple account IDs as array', async () => {
+      const tool = createFeedbackTool();
+      const apiResponse = {
+        message: 'Feedback successfully stored',
+        key: 'test-key.json',
+        submitted_at: '2025-10-08T11:44:16.123Z',
+        trace_id: 'test-trace-id',
+      };
+
+      const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify(apiResponse), { status: 200 }))
+      );
+
+      const result = await tool.execute({
+        feedback: 'Great tools!',
+        account_id: ['acc_123456', 'acc_789012'],
+        tool_names: ['test_tool'],
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(result).toMatchObject({
+        total_accounts: 2,
+        successful_submissions: 2,
+        failed_submissions: 0,
+      });
+
+      // Verify each account received the feedback
+      const calls = fetchSpy.mock.calls;
+      expect(calls[0][1]?.body).toContain('"account_id":"acc_123456"');
+      expect(calls[1][1]?.body).toContain('"account_id":"acc_789012"');
+
+      fetchSpy.mockRestore();
+    });
+
+    it('handles mixed success and failure for multiple accounts', async () => {
+      const tool = createFeedbackTool();
+
+      const fetchSpy = spyOn(globalThis, 'fetch')
+        .mockImplementationOnce(() =>
+          Promise.resolve(new Response(JSON.stringify({ message: 'Success' }), { status: 200 }))
+        )
+        .mockImplementationOnce(() =>
+          Promise.resolve(new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }))
+        );
+
+      const result = await tool.execute({
+        feedback: 'Great tools!',
+        account_id: ['acc_123456', 'acc_789012'],
+        tool_names: ['test_tool'],
+      });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(result).toMatchObject({
+        total_accounts: 2,
+        successful_submissions: 1,
+        failed_submissions: 1,
+      });
+
+      expect(result.successful_results).toHaveLength(1);
+      expect(result.errors).toHaveLength(1);
+      expect(result.successful_results[0].account_id).toBe('acc_123456');
+      expect(result.errors[0].account_id).toBe('acc_789012');
+
+      fetchSpy.mockRestore();
+    });
+
+    it('throws error when all submissions fail', async () => {
+      const tool = createFeedbackTool();
+      const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(() =>
+        Promise.resolve(new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }))
+      );
+
+      await expect(
+        tool.execute({
+          feedback: 'Great tools!',
+          account_id: ['acc_123456', 'acc_789012'],
+          tool_names: ['test_tool'],
+        })
+      ).rejects.toBeInstanceOf(StackOneError);
+
+      fetchSpy.mockRestore();
+    });
+
+    it('shows dry run for multiple accounts', async () => {
+      const tool = createFeedbackTool();
+      const fetchSpy = spyOn(globalThis, 'fetch');
+
+      const result = await tool.execute(
+        {
+          feedback: 'Great tools!',
+          account_id: ['acc_123456', 'acc_789012'],
+          tool_names: ['test_tool'],
+        },
+        { dryRun: true }
+      );
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(result).toMatchObject({
+        multiple_requests: [
+          {
+            url: 'https://api.stackone.com/ai/tool-feedback',
+            method: 'POST',
+            body: {
+              feedback: 'Great tools!',
+              account_id: 'acc_123456',
+              tool_names: ['test_tool'],
+            },
+          },
+          {
+            url: 'https://api.stackone.com/ai/tool-feedback',
+            method: 'POST',
+            body: {
+              feedback: 'Great tools!',
+              account_id: 'acc_789012',
+              tool_names: ['test_tool'],
+            },
+          },
+        ],
+        total_accounts: 2,
+      });
+
+      fetchSpy.mockRestore();
+    });
+
+    it('validates that at least one account ID is provided', async () => {
+      const tool = createFeedbackTool();
+
+      await expect(
+        tool.execute({
+          feedback: 'Great tools!',
+          account_id: [],
+          tool_names: ['test_tool'],
+        })
+      ).rejects.toBeInstanceOf(StackOneError);
+
+      await expect(
+        tool.execute({
+          feedback: 'Great tools!',
+          account_id: [''],
+          tool_names: ['test_tool'],
+        })
+      ).rejects.toBeInstanceOf(StackOneError);
+    });
   });
 });
 

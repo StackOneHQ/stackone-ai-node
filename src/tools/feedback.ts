@@ -19,7 +19,14 @@ const createNonEmptyTrimmedStringSchema = (fieldName: string) =>
 
 const feedbackInputSchema = z.object({
   feedback: createNonEmptyTrimmedStringSchema('Feedback'),
-  account_id: createNonEmptyTrimmedStringSchema('Account ID'),
+  account_id: z
+    .union([
+      createNonEmptyTrimmedStringSchema('Account ID'),
+      z
+        .array(createNonEmptyTrimmedStringSchema('Account ID'))
+        .min(1, 'At least one account ID is required'),
+    ])
+    .transform((value) => (Array.isArray(value) ? value : [value])),
   tool_names: z
     .array(z.string())
     .min(1, 'At least one tool name is required')
@@ -43,8 +50,20 @@ export function createFeedbackTool(
     type: 'object',
     properties: {
       account_id: {
-        type: 'string',
-        description: 'Account identifier (e.g., "acc_123456")',
+        oneOf: [
+          {
+            type: 'string',
+            description: 'Single account identifier (e.g., "acc_123456")',
+          },
+          {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+            description: 'Array of account identifiers (e.g., ["acc_123456", "acc_789012"])',
+          },
+        ],
+        description: 'Account identifier(s) - can be a single string or array of strings',
       },
       feedback: {
         type: 'string',
@@ -92,52 +111,101 @@ export function createFeedbackTool(
         typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
       const parsedParams = feedbackInputSchema.parse(rawParams);
 
-      const requestBody = {
-        feedback: parsedParams.feedback,
-        account_id: parsedParams.account_id,
-        tool_names: parsedParams.tool_names,
-      };
-
       const headers = {
         Accept: 'application/json',
         'Content-Type': 'application/json',
         ...this.getHeaders(),
       };
 
+      // Handle dry run - show what would be sent to each account
       if (executeOptions?.dryRun) {
-        return {
+        const dryRunResults = parsedParams.account_id.map((accountId: string) => ({
           url: `${resolvedBaseUrl}${executeConfig.url}`,
           method: executeConfig.method,
           headers,
           body: {
             feedback: parsedParams.feedback,
-            account_id: parsedParams.account_id,
+            account_id: accountId,
             tool_names: parsedParams.tool_names,
           },
+        }));
+
+        return {
+          multiple_requests: dryRunResults,
+          total_accounts: parsedParams.account_id.length,
         } satisfies JsonDict;
       }
 
-      const response = await fetch(`${resolvedBaseUrl}${executeConfig.url}`, {
-        method: executeConfig.method,
-        headers,
-        body: JSON.stringify(requestBody),
-      });
+      // Send feedback to each account individually
+      const results = [];
+      const errors = [];
 
-      const text = await response.text();
-      let parsed: unknown;
-      try {
-        parsed = text ? JSON.parse(text) : {};
-      } catch (_error) {
-        parsed = { raw: text };
+      for (const accountId of parsedParams.account_id) {
+        try {
+          const requestBody = {
+            feedback: parsedParams.feedback,
+            account_id: accountId,
+            tool_names: parsedParams.tool_names,
+          };
+
+          const response = await fetch(`${resolvedBaseUrl}${executeConfig.url}`, {
+            method: executeConfig.method,
+            headers,
+            body: JSON.stringify(requestBody),
+          });
+
+          const text = await response.text();
+          let parsed: unknown;
+          try {
+            parsed = text ? JSON.parse(text) : {};
+          } catch (_error) {
+            parsed = { raw: text };
+          }
+
+          if (!response.ok) {
+            errors.push({
+              account_id: accountId,
+              status: response.status,
+              error: parsed,
+            });
+          } else {
+            results.push({
+              account_id: accountId,
+              status: response.status,
+              response: parsed,
+            });
+          }
+        } catch (error) {
+          errors.push({
+            account_id: accountId,
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
 
-      if (!response.ok) {
+      // Return summary of all submissions
+      const response: JsonDict = {
+        total_accounts: parsedParams.account_id.length,
+        successful_submissions: results.length,
+        failed_submissions: errors.length,
+      };
+
+      if (results.length > 0) {
+        response.successful_results = results;
+      }
+
+      if (errors.length > 0) {
+        response.errors = errors;
+      }
+
+      // If all submissions failed, throw an error
+      if (errors.length > 0 && results.length === 0) {
         throw new StackOneError(
-          `Failed to submit feedback. Status: ${response.status}. Response: ${JSON.stringify(parsed)}`
+          `Failed to submit feedback to any account. Errors: ${JSON.stringify(errors)}`
         );
       }
 
-      return parsed as JsonDict;
+      return response;
     } catch (error) {
       if (error instanceof StackOneError) {
         throw error;
