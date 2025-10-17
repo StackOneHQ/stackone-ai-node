@@ -80,11 +80,16 @@ describe('meta_collect_tool_feedback', () => {
     expect(calledUrl).toBe('https://api.stackone.com/ai/tool-feedback');
     expect(options).toMatchObject({ method: 'POST' });
     expect(result).toMatchObject({
+      message: 'Feedback sent to 1 account(s)',
       total_accounts: 1,
-      successful_submissions: 1,
-      failed_submissions: 0,
+      successful: 1,
+      failed: 0,
     });
-    expect(result.successful_results[0].response).toMatchObject(apiResponse);
+    expect(result.results[0]).toMatchObject({
+      account_id: 'acc_123456',
+      status: 'success',
+      result: apiResponse,
+    });
     fetchSpy.mockRestore();
   });
 
@@ -147,9 +152,10 @@ describe('meta_collect_tool_feedback', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(result).toMatchObject({
+        message: 'Feedback sent to 1 account(s)',
         total_accounts: 1,
-        successful_submissions: 1,
-        failed_submissions: 0,
+        successful: 1,
+        failed: 0,
       });
 
       fetchSpy.mockRestore();
@@ -176,9 +182,10 @@ describe('meta_collect_tool_feedback', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(2);
       expect(result).toMatchObject({
+        message: 'Feedback sent to 2 account(s)',
         total_accounts: 2,
-        successful_submissions: 2,
-        failed_submissions: 0,
+        successful: 2,
+        failed: 0,
       });
 
       // Verify each account received the feedback
@@ -208,15 +215,26 @@ describe('meta_collect_tool_feedback', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(2);
       expect(result).toMatchObject({
+        message: 'Feedback sent to 2 account(s)',
         total_accounts: 2,
-        successful_submissions: 1,
-        failed_submissions: 1,
+        successful: 1,
+        failed: 1,
       });
 
-      expect(result.successful_results).toHaveLength(1);
-      expect(result.errors).toHaveLength(1);
-      expect(result.successful_results[0].account_id).toBe('acc_123456');
-      expect(result.errors[0].account_id).toBe('acc_789012');
+      expect(result.results).toHaveLength(2);
+      const successResult = result.results.find((r: any) => r.account_id === 'acc_123456');
+      const errorResult = result.results.find((r: any) => r.account_id === 'acc_789012');
+
+      expect(successResult).toMatchObject({
+        account_id: 'acc_123456',
+        status: 'success',
+        result: { message: 'Success' },
+      });
+      expect(errorResult).toMatchObject({
+        account_id: 'acc_789012',
+        status: 'error',
+        error: '{"error":"Unauthorized"}',
+      });
 
       fetchSpy.mockRestore();
     });

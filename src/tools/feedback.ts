@@ -166,7 +166,10 @@ export function createFeedbackTool(
             errors.push({
               account_id: accountId,
               status: response.status,
-              error: parsed,
+              error:
+                typeof parsed === 'object' && parsed !== null
+                  ? JSON.stringify(parsed)
+                  : String(parsed),
             });
           } else {
             results.push({
@@ -183,20 +186,25 @@ export function createFeedbackTool(
         }
       }
 
-      // Return summary of all submissions
+      // Return summary of all submissions in Python SDK format
       const response: JsonDict = {
+        message: `Feedback sent to ${parsedParams.account_id.length} account(s)`,
         total_accounts: parsedParams.account_id.length,
-        successful_submissions: results.length,
-        failed_submissions: errors.length,
+        successful: results.length,
+        failed: errors.length,
+        results: [
+          ...results.map((r) => ({
+            account_id: r.account_id,
+            status: 'success',
+            result: r.response,
+          })),
+          ...errors.map((e) => ({
+            account_id: e.account_id,
+            status: 'error',
+            error: e.error,
+          })),
+        ],
       };
-
-      if (results.length > 0) {
-        response.successful_results = results;
-      }
-
-      if (errors.length > 0) {
-        response.errors = errors;
-      }
 
       // If all submissions failed, throw an error
       if (errors.length > 0 && results.length === 0) {

@@ -372,19 +372,20 @@ await feedbackTool.execute({
 
 ```typescript
 {
+  message: "Feedback sent to 2 account(s)",
   total_accounts: 2,
-  successful_submissions: 2,
-  failed_submissions: 0,
-  successful_results: [
+  successful: 2,
+  failed: 0,
+  results: [
     {
       account_id: "acc_123456",
-      status: 200,
-      response: { message: "Feedback successfully stored", ... }
+      status: "success",
+      result: { message: "Feedback successfully stored", ... }
     },
     {
       account_id: "acc_789012", 
-      status: 200,
-      response: { message: "Feedback successfully stored", ... }
+      status: "success",
+      result: { message: "Feedback successfully stored", ... }
     }
   ]
 }
