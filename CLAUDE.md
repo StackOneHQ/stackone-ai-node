@@ -154,6 +154,89 @@ it('makes the expected request', async () => {
 - MSW handlers are reset after each test automatically
 - For tests that need to run their own servers (e.g., MCP servers), you may need to temporarily close and restart MSW
 
+#### Testing File System Operations
+
+For tests that need to work with the file system, use [`fs-fixture`](https://github.com/privatenumber/fs-fixture) to create temporary test directories that are automatically cleaned up.
+
+**Basic Usage:**
+
+```typescript
+import { createFixture } from 'fs-fixture';
+
+it('should save file to disk', async () => {
+  // Using the 'await using' syntax ensures automatic cleanup
+  await using fixture = await createFixture();
+
+  // Write files using fixture methods
+  await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
+
+  // Verify the file exists
+  expect(await fixture.exists('data.json')).toBe(true);
+
+  // Read the file back
+  const content = await fixture.readFile('data.json', 'utf8');
+  expect(JSON.parse(content)).toEqual({ test: 'data' });
+
+  // fixture is automatically cleaned up when the test completes
+});
+```
+
+**Creating Pre-populated Fixtures:**
+
+```typescript
+it('should read existing files', async () => {
+  await using fixture = await createFixture({
+    'config.json': JSON.stringify({ setting: 'value' }),
+    'data/file.txt': 'content',
+    'src/index.ts': 'export const test = "hello";',
+  });
+
+  // Files are already created at fixture.path
+  const result = await processConfig(fixture.path);
+  expect(result).toBeDefined();
+});
+```
+
+**Type-Safe JSON Operations:**
+
+```typescript
+it('should handle JSON with type safety', async () => {
+  await using fixture = await createFixture();
+
+  interface Config {
+    name: string;
+    version: string;
+  }
+
+  // Write JSON with formatting
+  await fixture.writeJson('config.json', { name: 'test', version: '1.0.0' }, 2);
+
+  // Read JSON with type inference
+  const config = await fixture.readJson<Config>('config.json');
+  expect(config.name).toBe('test');
+});
+```
+
+**Available Methods:**
+- `fixture.path` - Absolute path to fixture directory
+- `fixture.getPath(...paths)` - Build paths relative to fixture root
+- `fixture.exists(path)` - Check if file/directory exists
+- `fixture.readFile(path, encoding?)` - Read file as string or Buffer
+- `fixture.writeFile(path, content)` - Write file content
+- `fixture.readJson<T>(path)` - Parse JSON with type safety
+- `fixture.writeJson(path, data, space?)` - Write formatted JSON
+- `fixture.mkdir(path)` - Create nested directories
+- `fixture.readdir(path, options?)` - List directory contents
+- `fixture.cp(source, dest?)` - Copy files into fixture
+- `fixture.rm(path?)` - Delete file/directory (or entire fixture)
+
+**Benefits:**
+- Automatic cleanup with TypeScript 5.2+ `using` declarations
+- Isolated test environment - each test gets its own temporary directory
+- Zero dependencies, lightweight (1.1 kB gzipped)
+- Type-safe JSON operations with generics
+- Works seamlessly with Bun's test runner
+
 ### Development Workflow
 
 1. OpenAPI specs are fetched from remote sources and stored in `specs/`

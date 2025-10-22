@@ -79,6 +79,72 @@ it('makes the expected request', async () => {
 - MSW handlers are reset after each test automatically
 - For tests that need to run their own servers (e.g., MCP servers), you may need to temporarily close and restart MSW
 
+## File System Testing
+
+### Use fs-fixture for File System Operations
+
+For tests that need to work with the file system, use [fs-fixture](https://github.com/privatenumber/fs-fixture) to create temporary test directories with automatic cleanup.
+
+**Basic Usage:**
+
+```typescript
+import { createFixture } from 'fs-fixture';
+
+it('should save file to disk', async () => {
+  // Using 'await using' ensures automatic cleanup
+  await using fixture = await createFixture();
+
+  // Write files using fixture methods
+  await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
+
+  // Verify and read
+  expect(await fixture.exists('data.json')).toBe(true);
+  const content = await fixture.readFile('data.json', 'utf8');
+  expect(JSON.parse(content)).toEqual({ test: 'data' });
+});
+```
+
+**Pre-populated Fixtures:**
+
+```typescript
+it('should read existing files', async () => {
+  await using fixture = await createFixture({
+    'config.json': JSON.stringify({ setting: 'value' }),
+    'data/file.txt': 'content',
+  });
+
+  // Files are already created at fixture.path
+  const result = await processConfig(fixture.path);
+  expect(result).toBeDefined();
+});
+```
+
+**Type-Safe JSON:**
+
+```typescript
+interface Config { name: string; version: string; }
+
+await using fixture = await createFixture();
+await fixture.writeJson('config.json', { name: 'test', version: '1.0.0' }, 2);
+const config = await fixture.readJson<Config>('config.json');
+```
+
+**Key Methods:**
+- `fixture.path` - Absolute path to fixture directory
+- `fixture.exists(path)` - Check if file/directory exists
+- `fixture.readFile(path, encoding?)` - Read file
+- `fixture.writeFile(path, content)` - Write file
+- `fixture.readJson<T>(path)` - Parse JSON with types
+- `fixture.writeJson(path, data, space?)` - Write formatted JSON
+- `fixture.mkdir(path)` - Create directories
+- `fixture.rm(path?)` - Delete file/directory
+
+**Benefits:**
+- Automatic cleanup with TypeScript's `using` declarations
+- Zero dependencies, lightweight (1.1 kB)
+- Type-safe JSON operations
+- Isolated test environments
+
 ## Mocking Best Practices
 
 ### Use Proper Mocking Functions
