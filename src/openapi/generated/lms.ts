@@ -6315,6 +6315,13 @@ export const lmsSpec = {
             },
             nullable: true,
           },
+          learning_object_external_reference: {
+            type: 'string',
+            description:
+              'The external reference of the learning object associated with this completion, this is the main identifier for creating completions.',
+            example: 'learning-content-123',
+            nullable: true,
+          },
           external_reference: {
             type: 'string',
             description: 'The external reference associated with this completion',
@@ -6373,13 +6380,6 @@ export const lmsSpec = {
             description:
               "Provider's unique identifier of the learning object related to the completion",
             example: 'e3cb55bf-aa84-466e-a6c1-b8302b257a49',
-            nullable: true,
-          },
-          learning_object_external_reference: {
-            type: 'string',
-            description:
-              'The external reference of the learning object associated with this completion, this is the main identifier for creating completions.',
-            example: 'learning-content-123',
             nullable: true,
           },
           user_id: {
@@ -7779,13 +7779,6 @@ export const lmsSpec = {
             example: 'e3gd34-23tr21-er234-345er56',
             nullable: true,
           },
-          learning_object_external_reference: {
-            type: 'string',
-            description:
-              'The external reference of the learning object associated with this assignment, this is the main identifier for creating assignments.',
-            example: 'learning-content-123',
-            nullable: true,
-          },
           progress: {
             type: 'number',
             description: 'The progress associated with this assigment',
@@ -7815,7 +7808,14 @@ export const lmsSpec = {
               },
             ],
           },
+          learning_object_external_reference: {
+            type: 'string',
+            description:
+              'The external reference of the learning object associated with this assignment, this is the main identifier for creating assignments.',
+            example: 'learning-content-123',
+          },
         },
+        required: ['learning_object_external_reference'],
       },
       LmsCreateCompletionRequestDto: {
         type: 'object',
@@ -7852,13 +7852,6 @@ export const lmsSpec = {
             example: 'e3gd34-23tr21-er234-345er56',
             nullable: true,
           },
-          learning_object_external_reference: {
-            type: 'string',
-            description:
-              'The external reference of the learning object associated with this completion, this is the main identifier for creating completions.',
-            example: 'learning-content-123',
-            nullable: true,
-          },
           time_spent: {
             type: 'string',
             description:
@@ -7881,7 +7874,14 @@ export const lmsSpec = {
             deprecated: true,
             nullable: true,
           },
+          learning_object_external_reference: {
+            type: 'string',
+            description:
+              'The external reference of the learning object associated with this completion, this is the main identifier for creating completions.',
+            example: 'learning-content-123',
+          },
         },
+        required: ['learning_object_external_reference'],
       },
       LmsCreateContentRequestDto: {
         type: 'object',
@@ -7894,12 +7894,6 @@ export const lmsSpec = {
               my_project_custom_field_1: 'REF-1236',
               my_project_custom_field_2: 'some other value',
             },
-            nullable: true,
-          },
-          external_reference: {
-            type: 'string',
-            description: 'The external ID associated with this content',
-            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
             nullable: true,
           },
           title: {
@@ -7939,7 +7933,7 @@ export const lmsSpec = {
             nullable: true,
             allOf: [
               {
-                $ref: '#/components/schemas/ContentTypeEnum',
+                $ref: '#/components/schemas/WriteContentTypeEnum',
               },
             ],
           },
@@ -8063,6 +8057,11 @@ export const lmsSpec = {
             format: 'date-time',
             nullable: true,
           },
+          external_reference: {
+            type: 'string',
+            description: 'The external ID associated with this content',
+            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
+          },
           categories: {
             description: 'The categories associated with this content',
             example: [
@@ -8085,6 +8084,7 @@ export const lmsSpec = {
             },
           },
         },
+        required: ['external_reference'],
       },
       LmsUpsertContentRequestDto: {
         type: 'object',
@@ -8097,12 +8097,6 @@ export const lmsSpec = {
               my_project_custom_field_1: 'REF-1236',
               my_project_custom_field_2: 'some other value',
             },
-            nullable: true,
-          },
-          external_reference: {
-            type: 'string',
-            description: 'The external ID associated with this content',
-            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
             nullable: true,
           },
           title: {
@@ -8257,6 +8251,11 @@ export const lmsSpec = {
             format: 'date-time',
             nullable: true,
           },
+          external_reference: {
+            type: 'string',
+            description: 'The external ID associated with this content',
+            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
+          },
           categories: {
             description: 'The categories associated with this content',
             nullable: true,
@@ -8283,6 +8282,7 @@ export const lmsSpec = {
             ],
           },
         },
+        required: ['external_reference'],
       },
       LmsUser: {
         type: 'object',
