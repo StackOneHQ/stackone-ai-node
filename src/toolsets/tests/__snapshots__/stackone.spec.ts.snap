@@ -588,7 +588,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills,unified_custom_fields",
+            "example": "id,remote_id,title,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,bank_details,skills,unified_custom_fields",
             "type": "string",
           },
           "filter": {
@@ -614,7 +614,7 @@ Tools {
           },
           "include": {
             "description": "The comma separated list of fields that will be included in the response",
-            "example": "avatar_url,avatar,custom_fields,job_description,benefits",
+            "example": "avatar_url,avatar,custom_fields,job_description,benefits,bank_details",
             "type": "string",
           },
           "next": {
@@ -705,6 +705,11 @@ Tools {
           {
             "location": "header",
             "name": "x-account-id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "title",
             "type": "string",
           },
           {
@@ -2645,6 +2650,11 @@ Tools {
             "format": "date-time",
             "type": "string",
           },
+          "title": {
+            "description": "The prefix of the employee's name (e.g., Mr, Ms, Dr)",
+            "example": "Mr",
+            "type": "string",
+          },
           "work_email": {
             "description": "The employee work email",
             "example": "newton@example.com",
@@ -2997,6 +3007,11 @@ Tools {
           },
           {
             "location": "body",
+            "name": "title",
+            "type": "string",
+          },
+          {
+            "location": "body",
             "name": "first_name",
             "type": "string",
           },
@@ -3235,7 +3250,7 @@ Tools {
           },
           "fields": {
             "description": "The comma separated list of fields that will be returned in the response (if empty, all fields are returned)",
-            "example": "id,remote_id,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,skills,unified_custom_fields",
+            "example": "id,remote_id,title,first_name,last_name,name,display_name,gender,ethnicity,date_of_birth,birthday,marital_status,avatar_url,avatar,personal_email,personal_phone_number,work_email,work_phone_number,job_id,remote_job_id,job_title,job_description,department_id,remote_department_id,department,cost_centers,company,manager_id,remote_manager_id,hire_date,start_date,tenure,work_anniversary,employment_type,employment_contract_type,employment_status,termination_date,company_name,company_id,remote_company_id,preferred_language,citizenships,home_location,work_location,employments,custom_fields,created_at,updated_at,benefits,employee_number,national_identity_number,national_identity_numbers,bank_details,skills,unified_custom_fields",
             "type": "string",
           },
           "id": {
@@ -3243,7 +3258,7 @@ Tools {
           },
           "include": {
             "description": "The comma separated list of fields that will be included in the response",
-            "example": "avatar_url,avatar,custom_fields,job_description,benefits",
+            "example": "avatar_url,avatar,custom_fields,job_description,benefits,bank_details",
             "type": "string",
           },
           "proxy": {
@@ -3323,6 +3338,11 @@ Tools {
           {
             "location": "path",
             "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "title",
             "type": "string",
           },
           {
@@ -5239,6 +5259,11 @@ Tools {
             "format": "date-time",
             "type": "string",
           },
+          "title": {
+            "description": "The prefix of the employee's name (e.g., Mr, Ms, Dr)",
+            "example": "Mr",
+            "type": "string",
+          },
           "work_email": {
             "description": "The employee work email",
             "example": "newton@example.com",
@@ -5594,6 +5619,11 @@ Tools {
           {
             "location": "path",
             "name": "id",
+            "type": "string",
+          },
+          {
+            "location": "body",
+            "name": "title",
             "type": "string",
           },
           {
