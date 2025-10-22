@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.3.0...v1.0.0) (2025-10-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **desp:** update openai sdk to v6 and deprecate v4 ([#120](https://github.com/StackOneHQ/stackone-ai-node/issues/120))
+
+### Features
+
+* add provider and action filtering to fetchTools() ([#124](https://github.com/StackOneHQ/stackone-ai-node/issues/124)) ([71fe4a4](https://github.com/StackOneHQ/stackone-ai-node/commit/71fe4a476e9e07e1348381b9926bacdbb986549f))
+* feedback tool  ([#125](https://github.com/StackOneHQ/stackone-ai-node/issues/125)) ([d943e60](https://github.com/StackOneHQ/stackone-ai-node/commit/d943e603db194646828243a5c7615beaa7c1b5c2))
+* introduce MCP-backed dynamic tools ([#114](https://github.com/StackOneHQ/stackone-ai-node/issues/114)) ([ef5efc1](https://github.com/StackOneHQ/stackone-ai-node/commit/ef5efc172a863f692ab7da4573723ba77c9c1c19))
+* make AI SDK and OpenAI SDK optional peer dependencies ([#112](https://github.com/StackOneHQ/stackone-ai-node/issues/112)) ([e745640](https://github.com/StackOneHQ/stackone-ai-node/commit/e7456400c585f3dd4c39fa1d9977ecfd1bce225c))
+* **toolsets:** add multi-account support for fetchTools ([#118](https://github.com/StackOneHQ/stackone-ai-node/issues/118)) ([926e625](https://github.com/StackOneHQ/stackone-ai-node/commit/926e6256174fe9aee1bdc54469f1cd545c9d706c))
+
+
+### Bug Fixes
+
+* remove dotenv ([#101](https://github.com/StackOneHQ/stackone-ai-node/issues/101)) ([f1e6997](https://github.com/StackOneHQ/stackone-ai-node/commit/f1e6997dc84716d7b96be6415156fa4067315879))
+* remove unecessary type assertion ([#111](https://github.com/StackOneHQ/stackone-ai-node/issues/111)) ([5d1502d](https://github.com/StackOneHQ/stackone-ai-node/commit/5d1502d977a5049cfe86704e66a7e4467102e6a7))
+* rename metaSearchTool ([#94](https://github.com/StackOneHQ/stackone-ai-node/issues/94)) ([e5a7279](https://github.com/StackOneHQ/stackone-ai-node/commit/e5a7279b7a46ad522e65f1e75dcbde58c010e312))
+* **test:** stabilise examples ([#90](https://github.com/StackOneHQ/stackone-ai-node/issues/90)) ([015660d](https://github.com/StackOneHQ/stackone-ai-node/commit/015660d430724756da4d106bab1c10dba5d186d4))
+* validate tool_names after whitespace filtering ([#130](https://github.com/StackOneHQ/stackone-ai-node/issues/130)) ([5ea1c04](https://github.com/StackOneHQ/stackone-ai-node/commit/5ea1c04b217b6eed9ef4ac26e7c55e57fd35ca65))
+
+
+### Miscellaneous Chores
+
+* **desp:** update openai sdk to v6 and deprecate v4 ([#120](https://github.com/StackOneHQ/stackone-ai-node/issues/120)) ([417ffc5](https://github.com/StackOneHQ/stackone-ai-node/commit/417ffc553725dc005d55f324439117e67c22701e))
+
 ## [0.3.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.2.0...v0.3.0) (2025-08-19)
 
 
