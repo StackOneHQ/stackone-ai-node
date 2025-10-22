@@ -5287,7 +5287,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at,unified_custom_fields',
+                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,tags,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5796,7 +5796,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at,unified_custom_fields',
+                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,tags,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -21217,6 +21217,14 @@ export const atsSpec = {
               $ref: '#/components/schemas/CustomFields',
             },
           },
+          tags: {
+            description: 'List of candidate tags indicating metadata associated with the candidate',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Tag',
+            },
+          },
           created_at: {
             type: 'string',
             description: 'Candidate created date',
@@ -26773,6 +26781,23 @@ export const atsSpec = {
             type: 'string',
             description: 'The source of the application',
             example: 'LinkedIn',
+            nullable: true,
+          },
+        },
+      },
+      Tag: {
+        type: 'object',
+        properties: {
+          remote_id: {
+            type: 'string',
+            description: 'Remote ID of the tag',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'Name of the tag',
+            example: 'Gold Medalist',
             nullable: true,
           },
         },
