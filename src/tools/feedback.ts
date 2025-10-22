@@ -30,7 +30,10 @@ const feedbackInputSchema = z.object({
   tool_names: z
     .array(z.string())
     .min(1, 'At least one tool name is required')
-    .transform((value) => value.map((item) => item.trim()).filter((item) => item.length > 0)),
+    .transform((value) => value.map((item) => item.trim()).filter((item) => item.length > 0))
+    .refine((value) => value.length > 0, {
+      message: 'Tool names must contain at least one non-empty string',
+    }),
 });
 
 export function createFeedbackTool(
