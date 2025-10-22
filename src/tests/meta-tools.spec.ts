@@ -160,7 +160,7 @@ describe('Meta Search Tools', () => {
   beforeEach(async () => {
     const mockTools = createMockTools();
     tools = new Tools(mockTools);
-    metaTools = await tools.metaTools();
+    metaTools = await tools.metaTools(); // default BM25 strategy
   });
 
   afterEach(() => {
@@ -438,6 +438,84 @@ describe('Meta Search Tools', () => {
 
       const toolNames = toolResults.map((t) => t.name);
       expect(toolNames).toContain('ats_create_candidate');
+    });
+  });
+});
+
+describe('Meta Search Tools - Hybrid Strategy', () => {
+  let tools: Tools;
+
+  beforeEach(() => {
+    const mockTools = createMockTools();
+    tools = new Tools(mockTools);
+  });
+
+  afterEach(() => {
+    mock.restore();
+  });
+
+  describe('Hybrid BM25 + TF-IDF search', () => {
+    it('should search using hybrid strategy with default alpha', async () => {
+      const metaTools = await tools.metaTools();
+      const searchTool = metaTools.getTool('meta_search_tools');
+      expect(searchTool).toBeDefined();
+
+      const result = await searchTool?.execute({
+        query: 'manage employees',
+        limit: 5,
+      });
+
+      expect(result.tools).toBeDefined();
+      expect(Array.isArray(result.tools)).toBe(true);
+      const toolResults = result.tools as MetaToolSearchResult[];
+      expect(toolResults.length).toBeGreaterThan(0);
+    });
+
+    it('should search using hybrid strategy with custom alpha', async () => {
+      const metaTools = await tools.metaTools(0.7);
+      const searchTool = metaTools.getTool('meta_search_tools');
+
+      const result = await searchTool?.execute({
+        query: 'create candidate',
+        limit: 3,
+      });
+
+      const toolResults = result.tools as MetaToolSearchResult[];
+      const toolNames = toolResults.map((t) => t.name);
+      expect(toolNames).toContain('ats_create_candidate');
+    });
+
+    it('should combine BM25 and TF-IDF scores', async () => {
+      const metaTools = await tools.metaTools(0.5);
+      const searchTool = metaTools.getTool('meta_search_tools');
+
+      const result = await searchTool?.execute({
+        query: 'employee',
+        limit: 10,
+      });
+
+      const toolResults = result.tools as MetaToolSearchResult[];
+      expect(toolResults.length).toBeGreaterThan(0);
+
+      // Check that scores are within expected range
+      for (const tool of toolResults) {
+        expect(tool.score).toBeGreaterThanOrEqual(0);
+        expect(tool.score).toBeLessThanOrEqual(1);
+      }
+    });
+
+    it('should find relevant tools', async () => {
+      const metaTools = await tools.metaTools();
+      const searchTool = metaTools.getTool('meta_search_tools');
+
+      const result = await searchTool?.execute({
+        query: 'time off vacation',
+        limit: 3,
+      });
+
+      const toolResults = result.tools as MetaToolSearchResult[];
+      const toolNames = toolResults.map((t) => t.name);
+      expect(toolNames).toContain('hris_create_time_off');
     });
   });
 });
