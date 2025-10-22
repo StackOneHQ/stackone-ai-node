@@ -158,6 +158,8 @@ it('makes the expected request', async () => {
 
 For tests that need to work with the file system, use [`fs-fixture`](https://github.com/privatenumber/fs-fixture) to create temporary test directories that are automatically cleaned up.
 
+**IMPORTANT: Always use `await using` syntax with fs-fixture to ensure automatic cleanup. Do NOT manually manage fixture lifecycle with `.rm()`.**
+
 **Basic Usage:**
 
 ```typescript
@@ -228,14 +230,16 @@ it('should handle JSON with type safety', async () => {
 - `fixture.mkdir(path)` - Create nested directories
 - `fixture.readdir(path, options?)` - List directory contents
 - `fixture.cp(source, dest?)` - Copy files into fixture
-- `fixture.rm(path?)` - Delete file/directory (or entire fixture)
 
 **Benefits:**
-- Automatic cleanup with TypeScript 5.2+ `using` declarations
+- Automatic cleanup with TypeScript 5.2+ `await using` declarations - no manual cleanup needed
 - Isolated test environment - each test gets its own temporary directory
 - Zero dependencies, lightweight (1.1 kB gzipped)
 - Type-safe JSON operations with generics
 - Works seamlessly with Bun's test runner
+
+**Learn More:**
+- [fs-fixture Documentation](https://github.com/privatenumber/fs-fixture) - Official documentation with advanced usage patterns and API reference
 
 ### Development Workflow
 
