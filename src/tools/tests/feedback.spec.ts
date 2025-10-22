@@ -1,10 +1,8 @@
-import { afterAll, beforeEach, describe, expect, it, spyOn } from 'bun:test';
+import { describe, expect, it } from 'bun:test';
+import { http, HttpResponse } from 'msw';
+import { server } from '../../../mocks/node';
 import { StackOneError } from '../../utils/errors';
 import { createFeedbackTool } from '../feedback';
-
-beforeEach(() => {
-  // Clear any mocks before each test
-});
 
 describe('meta_collect_tool_feedback', () => {
   describe('validation tests', () => {
@@ -84,9 +82,11 @@ describe('meta_collect_tool_feedback', () => {
 
     it('test_json_string_input', async () => {
       const tool = createFeedbackTool();
-      const apiResponse = { message: 'Success' };
-      const response = new Response(JSON.stringify(apiResponse), { status: 200 });
-      const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
+      const recordedRequests: Request[] = [];
+      const listener = ({ request }: { request: Request }) => {
+        recordedRequests.push(request);
+      };
+      server.events.on('request:start', listener);
 
       // Test JSON string input
       const jsonInput = JSON.stringify({
@@ -97,28 +97,25 @@ describe('meta_collect_tool_feedback', () => {
 
       const result = await tool.execute(jsonInput);
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(recordedRequests).toHaveLength(1);
       expect(result).toMatchObject({
         message: 'Feedback sent to 1 account(s)',
         total_accounts: 1,
         successful: 1,
         failed: 0,
       });
-      fetchSpy.mockRestore();
+      server.events.removeListener('request:start', listener);
     });
   });
 
   describe('execution tests', () => {
     it('test_single_account_execution', async () => {
       const tool = createFeedbackTool();
-      const apiResponse = {
-        message: 'Feedback successfully stored',
-        key: 'test-key.json',
-        submitted_at: '2025-10-08T11:44:16.123Z',
-        trace_id: 'test-trace-id',
+      const recordedRequests: Request[] = [];
+      const listener = ({ request }: { request: Request }) => {
+        recordedRequests.push(request);
       };
-      const response = new Response(JSON.stringify(apiResponse), { status: 200 });
-      const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
+      server.events.on('request:start', listener);
 
       const result = await tool.execute({
         feedback: 'Great tools!',
@@ -126,10 +123,9 @@ describe('meta_collect_tool_feedback', () => {
         tool_names: ['data_export', 'analytics'],
       });
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      const [calledUrl, options] = fetchSpy.mock.calls[0];
-      expect(calledUrl).toBe('https://api.stackone.com/ai/tool-feedback');
-      expect(options).toMatchObject({ method: 'POST' });
+      expect(recordedRequests).toHaveLength(1);
+      expect(recordedRequests[0]?.url).toBe('https://api.stackone.com/ai/tool-feedback');
+      expect(recordedRequests[0]?.method).toBe('POST');
       expect(result).toMatchObject({
         message: 'Feedback sent to 1 account(s)',
         total_accounts: 1,
@@ -139,16 +135,18 @@ describe('meta_collect_tool_feedback', () => {
       expect(result.results[0]).toMatchObject({
         account_id: 'acc_123456',
         status: 'success',
-        result: apiResponse,
       });
-      fetchSpy.mockRestore();
+      expect(result.results[0].result).toHaveProperty('message', 'Feedback successfully stored');
+      server.events.removeListener('request:start', listener);
     });
 
     it('test_call_method_interface', async () => {
       const tool = createFeedbackTool();
-      const apiResponse = { message: 'Success' };
-      const response = new Response(JSON.stringify(apiResponse), { status: 200 });
-      const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(response);
+      const recordedRequests: Request[] = [];
+      const listener = ({ request }: { request: Request }) => {
+        recordedRequests.push(request);
+      };
+      server.events.on('request:start', listener);
 
       // Test using the tool directly (equivalent to .call() in Python)
       const result = await tool.execute({
@@ -157,22 +155,25 @@ describe('meta_collect_tool_feedback', () => {
         tool_names: ['test_tool'],
       });
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(recordedRequests).toHaveLength(1);
       expect(result).toMatchObject({
         message: 'Feedback sent to 1 account(s)',
         total_accounts: 1,
         successful: 1,
         failed: 0,
       });
-      fetchSpy.mockRestore();
+      server.events.removeListener('request:start', listener);
     });
 
     it('test_api_error_handling', async () => {
       const tool = createFeedbackTool();
-      const errorResponse = new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-      });
-      const fetchSpy = spyOn(globalThis, 'fetch').mockResolvedValue(errorResponse);
+
+      // Override the default handler to return an error
+      server.use(
+        http.post('https://api.stackone.com/ai/tool-feedback', () => {
+          return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        })
+      );
 
       await expect(
         tool.execute({
@@ -181,18 +182,17 @@ describe('meta_collect_tool_feedback', () => {
           tool_names: ['test_tool'],
         })
       ).rejects.toBeInstanceOf(StackOneError);
-
-      fetchSpy.mockRestore();
     });
 
     it('test_multiple_account_ids_execution', async () => {
       const tool = createFeedbackTool();
 
       // Test all accounts succeed
-      const successResponse = { message: 'Success' };
-      const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(() =>
-        Promise.resolve(new Response(JSON.stringify(successResponse), { status: 200 }))
-      );
+      const recordedRequests: Request[] = [];
+      const listener = ({ request }: { request: Request }) => {
+        recordedRequests.push(request);
+      };
+      server.events.on('request:start', listener);
 
       const result = await tool.execute({
         feedback: 'Great tools!',
@@ -200,23 +200,26 @@ describe('meta_collect_tool_feedback', () => {
         tool_names: ['test_tool'],
       });
 
-      expect(fetchSpy).toHaveBeenCalledTimes(3);
+      expect(recordedRequests).toHaveLength(3);
       expect(result).toMatchObject({
         message: 'Feedback sent to 3 account(s)',
         total_accounts: 3,
         successful: 3,
         failed: 0,
       });
-      fetchSpy.mockRestore();
+      server.events.removeListener('request:start', listener);
 
       // Test mixed success/error scenario
-      const mixedFetchSpy = spyOn(globalThis, 'fetch')
-        .mockImplementationOnce(() =>
-          Promise.resolve(new Response(JSON.stringify({ message: 'Success' }), { status: 200 }))
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve(new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 }))
-        );
+      let callCount = 0;
+      server.use(
+        http.post('https://api.stackone.com/ai/tool-feedback', () => {
+          callCount++;
+          if (callCount === 1) {
+            return HttpResponse.json({ message: 'Success' });
+          }
+          return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        })
+      );
 
       const mixedResult = await tool.execute({
         feedback: 'Great tools!',
@@ -224,7 +227,7 @@ describe('meta_collect_tool_feedback', () => {
         tool_names: ['test_tool'],
       });
 
-      expect(mixedFetchSpy).toHaveBeenCalledTimes(2);
+      expect(callCount).toBe(2);
       expect(mixedResult).toMatchObject({
         message: 'Feedback sent to 2 account(s)',
         total_accounts: 2,
@@ -249,7 +252,6 @@ describe('meta_collect_tool_feedback', () => {
         status: 'error',
         error: '{"error":"Unauthorized"}',
       });
-      mixedFetchSpy.mockRestore();
     });
 
     it('test_tool_integration', async () => {
@@ -312,8 +314,4 @@ describe('meta_collect_tool_feedback', () => {
       }
     });
   });
-});
-
-afterAll(() => {
-  // Cleanup
 });

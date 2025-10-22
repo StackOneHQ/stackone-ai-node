@@ -81,10 +81,78 @@ Use this approach to keep the union definition (`type HttpBodyType = 'json' | 'm
 ### Testing Strategy
 
 Tests use Bun's built-in test runner with a Jest-compatible API. Key patterns:
-- Mock HTTP requests using `bun:test` mock functions
+- **MSW (Mock Service Worker)** for HTTP request mocking - preferred over `spyOn(globalThis, 'fetch')`
 - Snapshot testing for generated outputs
 - Comprehensive unit tests for parsing logic
 - Integration tests with example usage
+
+#### Testing with MSW
+
+The project uses [MSW](https://mswjs.io/) for mocking HTTP requests in tests. MSW is set up globally in `bun.test.setup.ts`, so you don't need to set up the server in individual test files.
+
+**Adding Mock Handlers:**
+
+Add your mock endpoints to `mocks/handlers.ts`:
+
+```typescript
+import { http, HttpResponse } from 'msw';
+
+export const handlers = [
+  http.get('https://api.example.com/endpoint', () => {
+    return HttpResponse.json({ data: 'mock response' });
+  }),
+  // ... other handlers
+];
+```
+
+**Overriding Handlers in Tests:**
+
+Use `server.use()` to override handlers for specific test cases:
+
+```typescript
+import { http, HttpResponse } from 'msw';
+import { server } from '../../../mocks/node';
+
+it('handles error responses', async () => {
+  server.use(
+    http.get('https://api.example.com/endpoint', () => {
+      return HttpResponse.json({ error: 'Not found' }, { status: 404 });
+    })
+  );
+
+  // Your test code here
+});
+```
+
+The global `afterEach` hook in `bun.test.setup.ts` automatically calls `server.resetHandlers()` to reset overrides.
+
+**Verifying Requests:**
+
+Use MSW's event listeners to verify that requests were made:
+
+```typescript
+it('makes the expected request', async () => {
+  const recordedRequests: Request[] = [];
+  const listener = ({ request }: { request: Request }) => {
+    recordedRequests.push(request);
+  };
+  server.events.on('request:start', listener);
+
+  // Make your request
+  await someFunction();
+
+  expect(recordedRequests).toHaveLength(1);
+  expect(recordedRequests[0]?.url).toBe('https://api.example.com/endpoint');
+
+  server.events.removeListener('request:start', listener);
+});
+```
+
+**Important Notes:**
+- Do NOT use `spyOn(globalThis, 'fetch')` - use MSW instead for consistent mocking
+- Do NOT add `beforeAll`/`afterAll`/`afterEach` for MSW setup in test files - it's already configured globally
+- MSW handlers are reset after each test automatically
+- For tests that need to run their own servers (e.g., MCP servers), you may need to temporarily close and restart MSW
 
 ### Development Workflow
 
