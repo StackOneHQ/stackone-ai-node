@@ -56,9 +56,7 @@ export const loadFromFile = (
     if (error instanceof ToolSetLoadError) {
       throw error;
     }
-    throw new ToolSetLoadError(
-      `Error loading spec from file: ${error instanceof Error ? error.message : String(error)}`
-    );
+    throw new ToolSetLoadError('Error loading spec from file', { cause: error });
   }
 };
 
@@ -94,8 +92,6 @@ export const loadFromUrl = async (
     if (error instanceof ToolSetLoadError) {
       throw error;
     }
-    throw new ToolSetLoadError(
-      `Error loading spec from URL: ${error instanceof Error ? error.message : String(error)}`
-    );
+    throw new ToolSetLoadError('Error loading spec from URL', { cause: error });
   }
 };

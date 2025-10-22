@@ -21,8 +21,8 @@ type ToolInputSchema = Awaited<
  * Base exception for toolset errors
  */
 export class ToolSetError extends Error {
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
     this.name = 'ToolSetError';
   }
 }
@@ -31,8 +31,8 @@ export class ToolSetError extends Error {
  * Raised when there is an error in the toolset configuration
  */
 export class ToolSetConfigError extends ToolSetError {
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
     this.name = 'ToolSetConfigError';
   }
 }
@@ -41,8 +41,8 @@ export class ToolSetConfigError extends ToolSetError {
  * Raised when there is an error loading tools
  */
 export class ToolSetLoadError extends ToolSetError {
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
     this.name = 'ToolSetLoadError';
   }
 }
@@ -423,9 +423,7 @@ export abstract class ToolSet {
         if (error instanceof StackOneError) {
           throw error;
         }
-        throw new StackOneError(
-          `Error executing RPC action ${name}: ${error instanceof Error ? error.message : String(error)}`
-        );
+        throw new StackOneError(`Error executing RPC action ${name}`, { cause: error });
       }
     };
 

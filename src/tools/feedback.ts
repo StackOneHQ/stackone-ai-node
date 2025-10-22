@@ -221,9 +221,7 @@ export function createFeedbackTool(
       if (error instanceof StackOneError) {
         throw error;
       }
-      throw new StackOneError(
-        `Error executing tool: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new StackOneError('Error executing tool', { cause: error });
     }
   };
 

@@ -4,8 +4,8 @@
  * Base exception for StackOne errors
  */
 export class StackOneError extends Error {
-  constructor(message: string) {
-    super(message);
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
     this.name = 'StackOneError';
   }
 }
@@ -19,7 +19,13 @@ export class StackOneAPIError extends StackOneError {
   providerErrors?: unknown[];
   requestBody?: unknown;
 
-  constructor(message: string, statusCode: number, responseBody: unknown, requestBody?: unknown) {
+  constructor(
+    message: string,
+    statusCode: number,
+    responseBody: unknown,
+    requestBody?: unknown,
+    options?: ErrorOptions
+  ) {
     // Extract the error message from responseBody if it exists
     let errorMessage = message;
     if (
@@ -32,7 +38,7 @@ export class StackOneAPIError extends StackOneError {
       errorMessage = `${message}: ${responseBody.message}`;
     }
 
-    super(errorMessage);
+    super(errorMessage, options);
     this.name = 'StackOneAPIError';
     this.statusCode = statusCode;
     this.responseBody = responseBody;
