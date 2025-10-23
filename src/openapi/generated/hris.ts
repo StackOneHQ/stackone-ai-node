@@ -18804,6 +18804,7 @@ export const hrisSpec = {
             description: 'The type of clearing code',
             enum: [
               'sort_code',
+              'building_society_reference',
               'aba_routing',
               'chips_participant_id',
               'transit_number',
