@@ -20906,7 +20906,7 @@ export const atsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['text', 'unmapped_value', null],
+            enum: ['text', 'pdf', 'video', 'other', 'unmapped_value', null],
             description: 'The content type of the attachment.',
             example: 'text',
             'x-speakeasy-unknown-values': 'allow',
