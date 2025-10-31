@@ -18804,6 +18804,7 @@ export const hrisSpec = {
             description: 'The type of clearing code',
             enum: [
               'sort_code',
+              'building_society_reference',
               'aba_routing',
               'chips_participant_id',
               'transit_number',
@@ -23121,9 +23122,17 @@ export const hrisSpec = {
             nullable: true,
           },
           is_primary: {
-            type: 'boolean',
             description: 'Whether this is the primary bank account',
             example: true,
+            oneOf: [
+              {
+                type: 'boolean',
+              },
+              {
+                type: 'string',
+                enum: ['true', 'false'],
+              },
+            ],
             nullable: true,
           },
           country_code: {

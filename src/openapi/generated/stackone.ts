@@ -4924,6 +4924,7 @@ export const stackoneSpec = {
           },
           setup_information: {
             type: 'object',
+            additionalProperties: true,
             nullable: true,
           },
           label: {
