@@ -1014,7 +1014,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
+                'id,remote_id,application_id,remote_application_id,start_date,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1704,7 +1704,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
+                'id,remote_id,application_id,remote_application_id,start_date,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -14737,7 +14737,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
+                'id,remote_id,application_id,remote_application_id,start_date,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -15221,7 +15221,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,application_id,remote_application_id,start_date,status,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
+                'id,remote_id,application_id,remote_application_id,start_date,offer_status,salary,currency,created_at,updated_at,offer_history,unified_custom_fields',
               type: 'string',
             },
           },
@@ -20906,7 +20906,7 @@ export const atsSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['text', 'unmapped_value', null],
+            enum: ['text', 'pdf', 'video', 'other', 'unmapped_value', null],
             description: 'The content type of the attachment.',
             example: 'text',
             'x-speakeasy-unknown-values': 'allow',

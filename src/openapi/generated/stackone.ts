@@ -3979,6 +3979,17 @@ export const stackoneSpec = {
           },
         },
       },
+      ActionsRpcQueryDto: {
+        type: 'object',
+        properties: {
+          debug: {
+            type: 'boolean',
+            description: 'Enable debug mode for the action execution',
+            example: false,
+            nullable: true,
+          },
+        },
+      },
       ActionsRpcRequestDto: {
         type: 'object',
         properties: {
@@ -3997,14 +4008,14 @@ export const stackoneSpec = {
             additionalProperties: true,
           },
           query: {
-            type: 'object',
             description: 'Query parameters for the action',
-            example: {
-              param1: 'value1',
-              param2: 'value2',
-            },
             nullable: true,
             additionalProperties: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ActionsRpcQueryDto',
+              },
+            ],
           },
           headers: {
             type: 'object',
@@ -4040,11 +4051,13 @@ export const stackoneSpec = {
             oneOf: [
               {
                 type: 'object',
+                additionalProperties: true,
               },
               {
                 type: 'array',
                 items: {
                   type: 'object',
+                  additionalProperties: true,
                 },
               },
               {
@@ -4924,6 +4937,7 @@ export const stackoneSpec = {
           },
           setup_information: {
             type: 'object',
+            additionalProperties: true,
             nullable: true,
           },
           label: {
