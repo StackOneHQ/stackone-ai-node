@@ -50,7 +50,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
+                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,application_stage,application_stage_id,remote_application_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
               type: 'string',
             },
           },
@@ -88,6 +88,11 @@ export const atsSpec = {
                 },
                 stage: {
                   description: 'Filter to select applications by application_stage id',
+                  type: 'string',
+                  nullable: true,
+                },
+                application_stage_id: {
+                  description: 'Filter to select applications by application_stage_id',
                   type: 'string',
                   nullable: true,
                 },
@@ -587,7 +592,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
+                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,application_stage,application_stage_id,remote_application_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3956,7 +3961,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
+                'id,remote_id,candidate_id,remote_candidate_id,job_id,remote_job_id,job_posting_id,remote_job_posting_id,interview_stage,interview_stage_id,remote_interview_stage_id,application_stage,application_stage_id,remote_application_stage_id,rejected_reason,rejected_reason_id,remote_rejected_reason_id,rejected_reason_ids,remote_rejected_reason_ids,rejected_reasons,rejected_at,location_id,remote_location_id,location_ids,remote_location_ids,status,application_status,questionnaires,attachments,result_links,source,created_at,updated_at,documents,custom_fields,candidate,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5282,7 +5287,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at,unified_custom_fields',
+                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,tags,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5791,7 +5796,7 @@ export const atsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,created_at,updated_at,unified_custom_fields',
+                'id,remote_id,name,first_name,last_name,email,emails,social_links,phone,phone_numbers,company,country,title,application_ids,remote_application_ids,hired_at,custom_fields,tags,created_at,updated_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -18389,6 +18394,7 @@ export const atsSpec = {
             nullable: true,
           },
           interview_stage: {
+            deprecated: true,
             nullable: true,
             allOf: [
               {
@@ -18396,15 +18402,37 @@ export const atsSpec = {
               },
             ],
           },
+          application_stage: {
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ApplicationStage',
+              },
+            ],
+          },
           interview_stage_id: {
             type: 'string',
             description: 'Unique identifier of the interview stage',
             example: '18bcbb1b-3cbc-4198-a999-460861d19480',
+            deprecated: true,
             nullable: true,
           },
           remote_interview_stage_id: {
             type: 'string',
             description: "Provider's unique identifier of the interview stage",
+            example: '18bcbb1b-3cbc-4198-a999-460861d19480',
+            deprecated: true,
+            nullable: true,
+          },
+          application_stage_id: {
+            type: 'string',
+            description: 'Unique identifier of the application stage',
+            example: '18bcbb1b-3cbc-4198-a999-460861d19480',
+            nullable: true,
+          },
+          remote_application_stage_id: {
+            type: 'string',
+            description: 'Unique identifier of the application stage',
             example: '18bcbb1b-3cbc-4198-a999-460861d19480',
             nullable: true,
           },
@@ -18725,6 +18753,7 @@ export const atsSpec = {
             type: 'string',
             description: 'Unique identifier of the interview stage',
             example: '18bcbb1b-3cbc-4198-a999-460861d19480',
+            deprecated: true,
             nullable: true,
           },
           rejected_reason_ids: {
@@ -21186,6 +21215,14 @@ export const atsSpec = {
             type: 'array',
             items: {
               $ref: '#/components/schemas/CustomFields',
+            },
+          },
+          tags: {
+            description: 'List of candidate tags indicating metadata associated with the candidate',
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/Tag',
             },
           },
           created_at: {
@@ -26744,6 +26781,23 @@ export const atsSpec = {
             type: 'string',
             description: 'The source of the application',
             example: 'LinkedIn',
+            nullable: true,
+          },
+        },
+      },
+      Tag: {
+        type: 'object',
+        properties: {
+          remote_id: {
+            type: 'string',
+            description: 'Remote ID of the tag',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'Name of the tag',
+            example: 'Gold Medalist',
             nullable: true,
           },
         },

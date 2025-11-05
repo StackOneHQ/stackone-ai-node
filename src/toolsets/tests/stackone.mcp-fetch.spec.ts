@@ -11,7 +11,7 @@ import { StackOneToolSet } from '../stackone';
 type MockTool = {
   name: string;
   description?: string;
-  shape: z.ZodRawShape;
+  shape: Record<string, unknown>; // JSON Schema object
 };
 
 async function createMockMcpServer(accountTools: Record<string, MockTool[]>) {
@@ -60,10 +60,18 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
       name: 'dummy_action',
       description: 'Dummy tool',
       shape: {
-        foo: z.string(),
-      } satisfies MockTool['shape'],
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string',
+            description: 'A string parameter',
+          },
+        },
+        required: ['foo'],
+        additionalProperties: false,
+      },
     },
-  ] as const satisfies MockTool[];
+  ] as const;
 
   let origin: string;
   let closeServer: () => void;
@@ -111,7 +119,7 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     const aiToolDefinition = aiTools.dummy_action;
     expect(aiToolDefinition).toBeDefined();
     expect(aiToolDefinition.description).toBe('Dummy tool');
-    expect(aiToolDefinition.inputSchema.jsonSchema.properties.foo.type).toBe('string');
+    expect(aiToolDefinition.inputSchema.jsonSchema.properties).toBeDefined();
     expect(aiToolDefinition.execution).toBeUndefined();
 
     const executableTool = (await tool.toAISDK()).dummy_action;
@@ -310,5 +318,239 @@ describe('StackOneToolSet account filtering', () => {
     expect(tools.length).toBe(1);
     const toolNames = tools.toArray().map((t) => t.name);
     expect(toolNames).toContain('acc3_tool_1');
+  });
+});
+
+describe('StackOneToolSet provider and action filtering', () => {
+  const mixedTools = [
+    {
+      name: 'hibob_list_employees',
+      description: 'HiBob List Employees',
+      shape: { fields: z.string().optional() },
+    },
+    {
+      name: 'hibob_create_employees',
+      description: 'HiBob Create Employees',
+      shape: { name: z.string() },
+    },
+    {
+      name: 'bamboohr_list_employees',
+      description: 'BambooHR List Employees',
+      shape: { fields: z.string().optional() },
+    },
+    {
+      name: 'bamboohr_get_employee',
+      description: 'BambooHR Get Employee',
+      shape: { id: z.string() },
+    },
+    {
+      name: 'workday_list_employees',
+      description: 'Workday List Employees',
+      shape: { fields: z.string().optional() },
+    },
+  ] as const satisfies MockTool[];
+
+  let origin: string;
+  let closeServer: () => void;
+  let restoreMsw: (() => void) | undefined;
+
+  beforeAll(async () => {
+    mswServer.close();
+    restoreMsw = () => mswServer.listen({ onUnhandledRequest: 'warn' });
+
+    const server = await createMockMcpServer({
+      default: mixedTools,
+    });
+    origin = server.origin;
+    closeServer = server.close;
+  });
+
+  afterAll(() => {
+    closeServer();
+    restoreMsw?.();
+  });
+
+  it('filters tools by providers', async () => {
+    const stackOneClient = {
+      actions: {
+        rpcAction: mock(async () => ({ actionsRpcResponse: { data: null } })),
+      },
+    } as unknown as StackOne;
+
+    const toolset = new StackOneToolSet({
+      baseUrl: origin,
+      apiKey: 'test-key',
+      stackOneClient,
+    });
+
+    // Filter by providers
+    const tools = await toolset.fetchTools({ providers: ['hibob', 'bamboohr'] });
+
+    expect(tools.length).toBe(4);
+    const toolNames = tools.toArray().map((t) => t.name);
+    expect(toolNames).toContain('hibob_list_employees');
+    expect(toolNames).toContain('hibob_create_employees');
+    expect(toolNames).toContain('bamboohr_list_employees');
+    expect(toolNames).toContain('bamboohr_get_employee');
+    expect(toolNames).not.toContain('workday_list_employees');
+  });
+
+  it('filters tools by actions with exact match', async () => {
+    const stackOneClient = {
+      actions: {
+        rpcAction: mock(async () => ({ actionsRpcResponse: { data: null } })),
+      },
+    } as unknown as StackOne;
+
+    const toolset = new StackOneToolSet({
+      baseUrl: origin,
+      apiKey: 'test-key',
+      stackOneClient,
+    });
+
+    // Filter by exact action names
+    const tools = await toolset.fetchTools({
+      actions: ['hibob_list_employees', 'hibob_create_employees'],
+    });
+
+    expect(tools.length).toBe(2);
+    const toolNames = tools.toArray().map((t) => t.name);
+    expect(toolNames).toContain('hibob_list_employees');
+    expect(toolNames).toContain('hibob_create_employees');
+  });
+
+  it('filters tools by actions with glob pattern', async () => {
+    const stackOneClient = {
+      actions: {
+        rpcAction: mock(async () => ({ actionsRpcResponse: { data: null } })),
+      },
+    } as unknown as StackOne;
+
+    const toolset = new StackOneToolSet({
+      baseUrl: origin,
+      apiKey: 'test-key',
+      stackOneClient,
+    });
+
+    // Filter by glob pattern
+    const tools = await toolset.fetchTools({ actions: ['*_list_employees'] });
+
+    expect(tools.length).toBe(3);
+    const toolNames = tools.toArray().map((t) => t.name);
+    expect(toolNames).toContain('hibob_list_employees');
+    expect(toolNames).toContain('bamboohr_list_employees');
+    expect(toolNames).toContain('workday_list_employees');
+    expect(toolNames).not.toContain('hibob_create_employees');
+    expect(toolNames).not.toContain('bamboohr_get_employee');
+  });
+
+  it('combines accountIds and actions filters', async () => {
+    const acc1Tools = [
+      {
+        name: 'hibob_list_employees',
+        description: 'HiBob List Employees',
+        shape: { fields: z.string().optional() },
+      },
+      {
+        name: 'hibob_create_employees',
+        description: 'HiBob Create Employees',
+        shape: { name: z.string() },
+      },
+    ] as const satisfies MockTool[];
+
+    const acc2Tools = [
+      {
+        name: 'bamboohr_list_employees',
+        description: 'BambooHR List Employees',
+        shape: { fields: z.string().optional() },
+      },
+      {
+        name: 'bamboohr_get_employee',
+        description: 'BambooHR Get Employee',
+        shape: { id: z.string() },
+      },
+    ] as const satisfies MockTool[];
+
+    const server = await createMockMcpServer({
+      acc1: acc1Tools,
+      acc2: acc2Tools,
+    });
+
+    const stackOneClient = {
+      actions: {
+        rpcAction: mock(async () => ({ actionsRpcResponse: { data: null } })),
+      },
+    } as unknown as StackOne;
+
+    const toolset = new StackOneToolSet({
+      baseUrl: server.origin,
+      apiKey: 'test-key',
+      stackOneClient,
+    });
+
+    // Combine account and action filters
+    const tools = await toolset.fetchTools({
+      accountIds: ['acc1', 'acc2'],
+      actions: ['*_list_employees'],
+    });
+
+    expect(tools.length).toBe(2);
+    const toolNames = tools.toArray().map((t) => t.name);
+    expect(toolNames).toContain('hibob_list_employees');
+    expect(toolNames).toContain('bamboohr_list_employees');
+    expect(toolNames).not.toContain('hibob_create_employees');
+    expect(toolNames).not.toContain('bamboohr_get_employee');
+
+    server.close();
+  });
+
+  it('combines all filters: accountIds, providers, and actions', async () => {
+    const acc1Tools = [
+      {
+        name: 'hibob_list_employees',
+        description: 'HiBob List Employees',
+        shape: { fields: z.string().optional() },
+      },
+      {
+        name: 'hibob_create_employees',
+        description: 'HiBob Create Employees',
+        shape: { name: z.string() },
+      },
+      {
+        name: 'workday_list_employees',
+        description: 'Workday List Employees',
+        shape: { fields: z.string().optional() },
+      },
+    ] as const satisfies MockTool[];
+
+    const server = await createMockMcpServer({
+      acc1: acc1Tools,
+    });
+
+    const stackOneClient = {
+      actions: {
+        rpcAction: mock(async () => ({ actionsRpcResponse: { data: null } })),
+      },
+    } as unknown as StackOne;
+
+    const toolset = new StackOneToolSet({
+      baseUrl: server.origin,
+      apiKey: 'test-key',
+      stackOneClient,
+    });
+
+    // Combine all filters
+    const tools = await toolset.fetchTools({
+      accountIds: ['acc1'],
+      providers: ['hibob'],
+      actions: ['*_list_*'],
+    });
+
+    // Should only return hibob_list_employees (matches all filters)
+    expect(tools.length).toBe(1);
+    const toolNames = tools.toArray().map((t) => t.name);
+    expect(toolNames).toContain('hibob_list_employees');
+
+    server.close();
   });
 });

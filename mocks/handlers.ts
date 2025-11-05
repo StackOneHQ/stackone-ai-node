@@ -96,6 +96,17 @@ export const handlers = [
     return HttpResponse.json(body);
   }),
 
+  // StackOne AI tool feedback endpoint
+  http.post('https://api.stackone.com/ai/tool-feedback', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
+      message: 'Feedback successfully stored',
+      key: 'test-key.json',
+      submitted_at: new Date().toISOString(),
+      trace_id: 'test-trace-id',
+    });
+  }),
+
   // Default handler for unmatched requests
   http.get('*', () => {
     return HttpResponse.json({ message: 'Mock endpoint' });

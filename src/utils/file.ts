@@ -112,9 +112,7 @@ export function readJsonFile<T>(filePath: string): T {
     const content = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(content) as T;
   } catch (error) {
-    throw new StackOneError(
-      `Error parsing JSON file: ${error instanceof Error ? error.message : String(error)}`
-    );
+    throw new StackOneError('Error parsing JSON file', { cause: error });
   }
 }
 

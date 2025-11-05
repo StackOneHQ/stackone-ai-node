@@ -93,9 +93,7 @@ export class OpenAPIToolSet extends ToolSet {
         this.tools.push(tool);
       }
     } catch (error) {
-      throw new ToolSetLoadError(
-        `Error loading tools from file: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new ToolSetLoadError('Error loading tools from file', { cause: error });
     }
   }
 
@@ -118,9 +116,7 @@ export class OpenAPIToolSet extends ToolSet {
         this.tools.push(tool);
       }
     } catch (error) {
-      throw new ToolSetLoadError(
-        `Error loading tools from URL: ${error instanceof Error ? error.message : String(error)}`
-      );
+      throw new ToolSetLoadError('Error loading tools from URL', { cause: error });
     }
   }
 
