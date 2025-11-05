@@ -379,9 +379,9 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Return meta tools for tool discovery and execution
    * @beta This feature is in beta and may change in future versions
-   * @param hybridAlpha - Weight for BM25 in hybrid search (0-1, default 0.5). 0.5 gives equal weight to BM25 and TF-IDF.
+   * @param hybridAlpha - Weight for BM25 in hybrid search (0-1, default 0.2). Lower values favor BM25 scoring.
    */
-  async metaTools(hybridAlpha = 0.5): Promise<Tools> {
+  async metaTools(hybridAlpha = 0.2): Promise<Tools> {
     const oramaDb = await initializeOramaDb(this.tools);
     const tfidfIndex = initializeTfidfIndex(this.tools);
     const baseTools = [
@@ -520,7 +520,7 @@ export function metaSearchTools(
   oramaDb: OramaDb,
   tfidfIndex: TfidfIndex,
   allTools: BaseTool[],
-  hybridAlpha = 0.5
+  hybridAlpha = 0.2
 ): BaseTool {
   const name = 'meta_search_tools' as const;
   const description =
