@@ -51,3 +51,14 @@ See the **file-operations** skill for file and HTTP guidance:
 - Common HTTP request patterns
 
 Refer to `.claude/skills/file-operations/SKILL.md` for complete details.
+
+## Orama Integration
+
+See the **orama-integration** skill for Orama API guidance:
+- Orama concepts (indexes, data sources, deployments)
+- Creating and configuring indexes
+- Full-text, vector, and hybrid search patterns
+- Answer engine configuration and quality checks
+- Common integration patterns and examples
+
+Refer to `.claude/skills/orama-integration/SKILL.md` for complete details.
