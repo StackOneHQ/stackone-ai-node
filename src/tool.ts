@@ -1,5 +1,6 @@
 import * as orama from '@orama/orama';
 import type { ChatCompletionTool } from 'openai/resources/chat/completions';
+import { DEFAULT_HYBRID_ALPHA } from './constants';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
   ExecuteConfig,
@@ -379,9 +380,9 @@ export class Tools implements Iterable<BaseTool> {
   /**
    * Return meta tools for tool discovery and execution
    * @beta This feature is in beta and may change in future versions
-   * @param hybridAlpha - Weight for BM25 in hybrid search (0-1, default 0.2). Lower values favor BM25 scoring.
+   * @param hybridAlpha - Weight for BM25 in hybrid search (0-1). If not provided, uses DEFAULT_HYBRID_ALPHA (0.2).
    */
-  async metaTools(hybridAlpha = 0.2): Promise<Tools> {
+  async metaTools(hybridAlpha = DEFAULT_HYBRID_ALPHA): Promise<Tools> {
     const oramaDb = await initializeOramaDb(this.tools);
     const tfidfIndex = initializeTfidfIndex(this.tools);
     const baseTools = [
@@ -520,7 +521,7 @@ export function metaSearchTools(
   oramaDb: OramaDb,
   tfidfIndex: TfidfIndex,
   allTools: BaseTool[],
-  hybridAlpha = 0.2
+  hybridAlpha = DEFAULT_HYBRID_ALPHA
 ): BaseTool {
   const name = 'meta_search_tools' as const;
   const description =
