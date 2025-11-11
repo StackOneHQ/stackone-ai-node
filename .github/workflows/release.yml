@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   release-please:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     outputs:
       release_created: ${{ steps.release-please.outputs.release_created }}
     steps:
@@ -21,7 +21,7 @@ jobs:
           release-type: node
 
   publish-package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created  }}
     env:
