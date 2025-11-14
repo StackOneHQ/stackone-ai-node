@@ -19460,12 +19460,12 @@ export const hrisSpec = {
           },
           pay_rate: {
             type: 'string',
-            description: 'The pay rate for the employee',
+            description: 'The amount of compensation for the employee',
             example: '40.00',
             nullable: true,
           },
           pay_period: {
-            description: 'The pay period',
+            description: 'The time period over which the pay rate is calculated',
             example: 'monthly',
             nullable: true,
             allOf: [
@@ -19475,7 +19475,7 @@ export const hrisSpec = {
             ],
           },
           pay_frequency: {
-            description: 'The pay frequency',
+            description: 'How often the employee is paid',
             example: 'hourly',
             nullable: true,
             allOf: [
@@ -19675,12 +19675,12 @@ export const hrisSpec = {
           },
           pay_rate: {
             type: 'string',
-            description: 'The pay rate for the employee',
+            description: 'The amount of compensation for the employee',
             example: '40.00',
             nullable: true,
           },
           pay_period: {
-            description: 'The pay period',
+            description: 'The time period over which the pay rate is calculated',
             example: 'monthly',
             nullable: true,
             allOf: [
@@ -19690,7 +19690,7 @@ export const hrisSpec = {
             ],
           },
           pay_frequency: {
-            description: 'The pay frequency',
+            description: 'How often the employee is paid',
             example: 'hourly',
             nullable: true,
             allOf: [
@@ -20972,12 +20972,12 @@ export const hrisSpec = {
           },
           pay_rate: {
             type: 'string',
-            description: 'The pay rate for the employee',
+            description: 'The amount of compensation for the employee',
             example: '40.00',
             nullable: true,
           },
           pay_period: {
-            description: 'The pay period',
+            description: 'The time period over which the pay rate is calculated',
             example: 'monthly',
             nullable: true,
             allOf: [
@@ -20987,7 +20987,7 @@ export const hrisSpec = {
             ],
           },
           pay_frequency: {
-            description: 'The pay frequency',
+            description: 'How often the employee is paid',
             example: 'hourly',
             nullable: true,
             allOf: [
@@ -23807,12 +23807,12 @@ export const hrisSpec = {
           },
           pay_rate: {
             type: 'string',
-            description: 'The pay rate for the employee',
+            description: 'The amount of compensation for the employee',
             example: '40.00',
             nullable: true,
           },
           pay_period: {
-            description: 'The pay period',
+            description: 'The time period over which the pay rate is calculated',
             example: 'monthly',
             nullable: true,
             allOf: [
@@ -23822,7 +23822,7 @@ export const hrisSpec = {
             ],
           },
           pay_frequency: {
-            description: 'The pay frequency',
+            description: 'How often the employee is paid',
             example: 'hourly',
             nullable: true,
             allOf: [
@@ -25742,12 +25742,12 @@ export const hrisSpec = {
           },
           pay_rate: {
             type: 'string',
-            description: 'The pay rate for the employee',
+            description: 'The amount of compensation for the employee',
             example: '40.00',
             nullable: true,
           },
           pay_period: {
-            description: 'The pay period',
+            description: 'The time period over which the pay rate is calculated',
             example: 'monthly',
             nullable: true,
             allOf: [
@@ -25757,7 +25757,7 @@ export const hrisSpec = {
             ],
           },
           pay_frequency: {
-            description: 'The pay frequency',
+            description: 'How often the employee is paid',
             example: 'hourly',
             nullable: true,
             allOf: [

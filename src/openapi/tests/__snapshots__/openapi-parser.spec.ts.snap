@@ -2267,7 +2267,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "type": "string",
             },
             "pay_frequency": {
-              "description": "The pay frequency",
+              "description": "How often the employee is paid",
               "example": "hourly",
               "properties": {
                 "source_value": {
@@ -2316,7 +2316,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "type": "object",
             },
             "pay_period": {
-              "description": "The pay period",
+              "description": "The time period over which the pay rate is calculated",
               "example": "monthly",
               "properties": {
                 "source_value": {
@@ -2358,7 +2358,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "type": "object",
             },
             "pay_rate": {
-              "description": "The pay rate for the employee",
+              "description": "The amount of compensation for the employee",
               "example": "40.00",
               "type": "string",
             },
@@ -4330,7 +4330,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "string",
         },
         "pay_frequency": {
-          "description": "The pay frequency",
+          "description": "How often the employee is paid",
           "example": "hourly",
           "properties": {
             "source_value": {
@@ -4379,7 +4379,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "object",
         },
         "pay_period": {
-          "description": "The pay period",
+          "description": "The time period over which the pay rate is calculated",
           "example": "monthly",
           "properties": {
             "source_value": {
@@ -4421,7 +4421,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "object",
         },
         "pay_rate": {
-          "description": "The pay rate for the employee",
+          "description": "The amount of compensation for the employee",
           "example": "40.00",
           "type": "string",
         },
@@ -12784,7 +12784,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "type": "string",
             },
             "pay_frequency": {
-              "description": "The pay frequency",
+              "description": "How often the employee is paid",
               "example": "hourly",
               "properties": {
                 "source_value": {
@@ -12833,7 +12833,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "type": "object",
             },
             "pay_period": {
-              "description": "The pay period",
+              "description": "The time period over which the pay rate is calculated",
               "example": "monthly",
               "properties": {
                 "source_value": {
@@ -12875,7 +12875,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
               "type": "object",
             },
             "pay_rate": {
-              "description": "The pay rate for the employee",
+              "description": "The amount of compensation for the employee",
               "example": "40.00",
               "type": "string",
             },
@@ -14847,7 +14847,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "string",
         },
         "pay_frequency": {
-          "description": "The pay frequency",
+          "description": "How often the employee is paid",
           "example": "hourly",
           "properties": {
             "source_value": {
@@ -14896,7 +14896,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "object",
         },
         "pay_period": {
-          "description": "The pay period",
+          "description": "The time period over which the pay rate is calculated",
           "example": "monthly",
           "properties": {
             "source_value": {
@@ -14938,7 +14938,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "object",
         },
         "pay_rate": {
-          "description": "The pay rate for the employee",
+          "description": "The amount of compensation for the employee",
           "example": "40.00",
           "type": "string",
         },

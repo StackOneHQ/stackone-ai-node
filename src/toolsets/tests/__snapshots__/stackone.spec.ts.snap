@@ -1454,7 +1454,7 @@ Tools {
                 "type": "string",
               },
               "pay_frequency": {
-                "description": "The pay frequency",
+                "description": "How often the employee is paid",
                 "example": "hourly",
                 "properties": {
                   "value": {
@@ -1483,7 +1483,7 @@ Tools {
                 "type": "object",
               },
               "pay_period": {
-                "description": "The pay period",
+                "description": "The time period over which the pay rate is calculated",
                 "example": "monthly",
                 "properties": {
                   "value": {
@@ -1505,7 +1505,7 @@ Tools {
                 "type": "object",
               },
               "pay_rate": {
-                "description": "The pay rate for the employee",
+                "description": "The amount of compensation for the employee",
                 "example": "40.00",
                 "type": "string",
               },
@@ -4060,7 +4060,7 @@ Tools {
                 "type": "string",
               },
               "pay_frequency": {
-                "description": "The pay frequency",
+                "description": "How often the employee is paid",
                 "example": "hourly",
                 "properties": {
                   "value": {
@@ -4089,7 +4089,7 @@ Tools {
                 "type": "object",
               },
               "pay_period": {
-                "description": "The pay period",
+                "description": "The time period over which the pay rate is calculated",
                 "example": "monthly",
                 "properties": {
                   "value": {
@@ -4111,7 +4111,7 @@ Tools {
                 "type": "object",
               },
               "pay_rate": {
-                "description": "The pay rate for the employee",
+                "description": "The amount of compensation for the employee",
                 "example": "40.00",
                 "type": "string",
               },
@@ -15133,7 +15133,7 @@ Tools {
             "type": "string",
           },
           "pay_frequency": {
-            "description": "The pay frequency",
+            "description": "How often the employee is paid",
             "example": "hourly",
             "properties": {
               "value": {
@@ -15162,7 +15162,7 @@ Tools {
             "type": "object",
           },
           "pay_period": {
-            "description": "The pay period",
+            "description": "The time period over which the pay rate is calculated",
             "example": "monthly",
             "properties": {
               "value": {
@@ -15184,7 +15184,7 @@ Tools {
             "type": "object",
           },
           "pay_rate": {
-            "description": "The pay rate for the employee",
+            "description": "The amount of compensation for the employee",
             "example": "40.00",
             "type": "string",
           },
@@ -15712,7 +15712,7 @@ Tools {
             "type": "string",
           },
           "pay_frequency": {
-            "description": "The pay frequency",
+            "description": "How often the employee is paid",
             "example": "hourly",
             "properties": {
               "value": {
@@ -15741,7 +15741,7 @@ Tools {
             "type": "object",
           },
           "pay_period": {
-            "description": "The pay period",
+            "description": "The time period over which the pay rate is calculated",
             "example": "monthly",
             "properties": {
               "value": {
@@ -15763,7 +15763,7 @@ Tools {
             "type": "object",
           },
           "pay_rate": {
-            "description": "The pay rate for the employee",
+            "description": "The amount of compensation for the employee",
             "example": "40.00",
             "type": "string",
           },
