@@ -5,6 +5,8 @@ export const lmsSpec = {
   paths: {
     '/unified/lms/courses': {
       get: {
+        description:
+          'Retrieve a list of course type learning objects. These are collections of content type learning objects that are grouped together for a specific learning purpose.',
         operationId: 'lms_list_courses',
         parameters: [
           {
@@ -312,6 +314,8 @@ export const lmsSpec = {
     },
     '/unified/lms/courses/{id}': {
       get: {
+        description:
+          'Retrieve a course type learning object by its identifier. These are collections of content type learning objects that are grouped together for a specific learning purpose.',
         operationId: 'lms_get_course',
         parameters: [
           {
@@ -525,6 +529,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/assignments': {
       get: {
+        description:
+          'Retrieve a list of assignment type learning records for a user. These are the records linking a user to learning objects, and they can be pending, in progress, or completed.',
         operationId: 'lms_list_user_assignments',
         parameters: [
           {
@@ -844,6 +850,8 @@ export const lmsSpec = {
         },
       },
       post: {
+        description:
+          'Create an assignment type learning record for a user. This is the record linking a user to a learning object, and can be pending, in progress.',
         operationId: 'lms_create_user_assignment',
         parameters: [
           {
@@ -1031,6 +1039,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/assignments/{subResourceId}': {
       get: {
+        description:
+          'Retrieve an assignment type learning record for a user by its identifier. This is the record linking a user to a learning object, and can be pending, in progress, or completed.',
         operationId: 'lms_get_user_assignment',
         parameters: [
           {
@@ -1252,6 +1262,8 @@ export const lmsSpec = {
     },
     '/unified/lms/content/batch': {
       post: {
+        description:
+          'Batch upsert multiple external linking learning objects that redirect users to a provider platform for consumption and progress tracking.',
         operationId: 'lms_batch_upsert_content',
         parameters: [
           {
@@ -1419,7 +1431,7 @@ export const lmsSpec = {
             basic: [],
           },
         ],
-        summary: 'Batch Upsert Content',
+        summary: 'Batch Upsert External Linking Learning Objects',
         tags: ['Content'],
         'x-speakeasy-group': 'lms',
         'x-speakeasy-name-override': 'batch_upsert_content',
@@ -1431,6 +1443,8 @@ export const lmsSpec = {
     },
     '/unified/lms/content': {
       get: {
+        description:
+          'Retrieve a list of content type learning objects. These are the most granular learning objects (e.g. video, document, podcast, etc.) on a platform. Only content objects for which the platform supports progress and completion tracking are returned.',
         operationId: 'lms_list_content',
         parameters: [
           {
@@ -1731,6 +1745,8 @@ export const lmsSpec = {
         },
       },
       put: {
+        description:
+          'Create or update an external linking learning object that redirects users to a provider platform for consumption and progress tracking.',
         operationId: 'lms_upsert_content',
         parameters: [
           {
@@ -1898,7 +1914,7 @@ export const lmsSpec = {
             basic: [],
           },
         ],
-        summary: 'Upsert Content',
+        summary: 'Upsert External Linking Learning Objects',
         tags: ['Content'],
         'x-speakeasy-group': 'lms',
         'x-speakeasy-name-override': 'upsert_content',
@@ -1910,6 +1926,8 @@ export const lmsSpec = {
     },
     '/unified/lms/content/{id}': {
       get: {
+        description:
+          'Retrieve a content type learning object by its identifier. These are the most granular learning objects (e.g. video, document, podcast, etc.) on a platform. Only content objects for which the platform supports progress and completion tracking are returned.',
         operationId: 'lms_get_content',
         parameters: [
           {
@@ -2121,6 +2139,8 @@ export const lmsSpec = {
         },
       },
       patch: {
+        description:
+          'Update an external linking learning object that redirects users to a provider platform for consumption and progress tracking.',
         operationId: 'lms_update_content',
         parameters: [
           {
@@ -2296,7 +2316,7 @@ export const lmsSpec = {
             basic: [],
           },
         ],
-        summary: 'Update Content',
+        summary: 'Update External Linking Learning Objects',
         tags: ['Content'],
         'x-speakeasy-group': 'lms',
         'x-speakeasy-name-override': 'update_content',
@@ -2308,6 +2328,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/completions': {
       get: {
+        description:
+          'Retrieve a list of completion type learning records for a user. These are the records of a user completing learning objects.',
         operationId: 'lms_list_user_completions',
         parameters: [
           {
@@ -2599,6 +2621,8 @@ export const lmsSpec = {
         },
       },
       post: {
+        description:
+          'Create a completion type learning record for a user. This is the record of a user completing a learning object.',
         operationId: 'lms_create_user_completion',
         parameters: [
           {
@@ -2786,6 +2810,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/completions/{subResourceId}': {
       get: {
+        description:
+          'Retrieve a completion type learning record for a user by its identifier. This is the record of a user completing a learning object.',
         operationId: 'lms_get_user_completion',
         parameters: [
           {
@@ -3005,6 +3031,8 @@ export const lmsSpec = {
         },
       },
       delete: {
+        description:
+          'Delete a completion type learning record for a user. This is a record of a user completing a learning object.',
         operationId: 'lms_delete_user_completion',
         parameters: [
           {
@@ -3193,6 +3221,8 @@ export const lmsSpec = {
     },
     '/unified/lms/completions': {
       get: {
+        description:
+          'Retrieve a list of completion type learning records. These are the records of a user completing learning objects.',
         operationId: 'lms_list_completions',
         parameters: [
           {
@@ -3481,6 +3511,8 @@ export const lmsSpec = {
     },
     '/unified/lms/completions/{id}': {
       get: {
+        description:
+          'Retrieve a completion type learning record by its identifier. This is the record of a user completing a learning object.',
         operationId: 'lms_get_completion',
         parameters: [
           {
@@ -5197,6 +5229,8 @@ export const lmsSpec = {
     },
     '/unified/lms/assignments': {
       get: {
+        description:
+          'Retrieve a list of assignment type learning records. These are the records linking a user to a learning object, and they can be pending, in progress, or completed.',
         operationId: 'lms_list_assignments',
         parameters: [
           {
@@ -5509,6 +5543,8 @@ export const lmsSpec = {
     },
     '/unified/lms/assignments/{id}': {
       get: {
+        description:
+          'Retrieve an assignment type learning record by its identifier. This is the record linking a user to a learning object, and it can be pending, in progress, or completed.',
         operationId: 'lms_get_assignment',
         parameters: [
           {
