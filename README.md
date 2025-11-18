@@ -416,8 +416,6 @@ Meta tools provide two core capabilities:
 1. **Tool Discovery** (`meta_search_tools`): Search for tools using natural language queries
 2. **Tool Execution** (`meta_execute_tool`): Execute discovered tools dynamically
 
-The tool discovery uses Orama's BM25 algorithm for relevance ranking, providing high-quality search results based on tool names, descriptions, and categories.
-
 #### Basic Usage
 
 ```typescript
