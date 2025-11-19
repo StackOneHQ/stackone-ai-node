@@ -5,6 +5,8 @@ export const lmsSpec = {
   paths: {
     '/unified/lms/courses': {
       get: {
+        description:
+          'Retrieve a list of course type learning objects. \n\nThese are collections of content type learning objects that are grouped together for a specific learning purpose.',
         operationId: 'lms_list_courses',
         parameters: [
           {
@@ -312,6 +314,8 @@ export const lmsSpec = {
     },
     '/unified/lms/courses/{id}': {
       get: {
+        description:
+          'Retrieve a course type learning object by its identifier. \n\nThese are collections of content type learning objects that are grouped together for a specific learning purpose.',
         operationId: 'lms_get_course',
         parameters: [
           {
@@ -525,6 +529,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/assignments': {
       get: {
+        description:
+          'Retrieve a list of assignment type learning records for a user. \n\nThese are the records linking a user to learning objects. \n\nThey can be pending, in progress, or completed.',
         operationId: 'lms_list_user_assignments',
         parameters: [
           {
@@ -844,6 +850,8 @@ export const lmsSpec = {
         },
       },
       post: {
+        description:
+          'Create an assignment type learning record for a user. \n\nThis is the record linking a user to a learning object. \n\nIt can be pending or in progress.',
         operationId: 'lms_create_user_assignment',
         parameters: [
           {
@@ -1031,6 +1039,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/assignments/{subResourceId}': {
       get: {
+        description:
+          'Retrieve an assignment type learning record for a user by its identifier. \n\nThis is the record linking a user to a learning object. \n\nIt can be pending, in progress, or completed.',
         operationId: 'lms_get_user_assignment',
         parameters: [
           {
@@ -1252,6 +1262,8 @@ export const lmsSpec = {
     },
     '/unified/lms/content/batch': {
       post: {
+        description:
+          'Batch upsert multiple external linking learning objects that redirect users to a provider platform for consumption and progress tracking. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
         operationId: 'lms_batch_upsert_content',
         parameters: [
           {
@@ -1419,8 +1431,8 @@ export const lmsSpec = {
             basic: [],
           },
         ],
-        summary: 'Batch Upsert Content',
-        tags: ['Content'],
+        summary: 'Batch Upsert External Linking Learning Objects',
+        tags: ['External Linking Learning Objects'],
         'x-speakeasy-group': 'lms',
         'x-speakeasy-name-override': 'batch_upsert_content',
         'x-speakeasy-retries': {
@@ -1430,7 +1442,188 @@ export const lmsSpec = {
       },
     },
     '/unified/lms/content': {
+      put: {
+        description:
+          'Create or update an external linking learning object that redirects users to a provider platform for consumption and progress tracking. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
+        operationId: 'lms_upsert_content',
+        parameters: [
+          {
+            name: 'x-account-id',
+            in: 'header',
+            description: 'The account identifier',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/LmsUpsertContentRequestDto',
+              },
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: 'The content was upserted successfully.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UpsertResult',
+                },
+              },
+            },
+          },
+          '400': {
+            description: 'Invalid request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadRequestResponse',
+                },
+              },
+            },
+          },
+          '401': {
+            description: 'Unauthorized access.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnauthorizedResponse',
+                },
+              },
+            },
+          },
+          '403': {
+            description: 'Forbidden.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ForbiddenResponse',
+                },
+              },
+            },
+          },
+          '404': {
+            description: 'Resource not found.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotFoundResponse',
+                },
+              },
+            },
+          },
+          '408': {
+            description: 'The request has timed out.',
+            headers: {
+              'Retry-After': {
+                description: 'A time in seconds after which the request can be retried.',
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/RequestTimedOutResponse',
+                },
+              },
+            },
+          },
+          '409': {
+            description: 'Conflict with current state.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ConflictResponse',
+                },
+              },
+            },
+          },
+          '412': {
+            description: 'Precondition failed: linked account belongs to a disabled integration.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/PreconditionFailedResponse',
+                },
+              },
+            },
+          },
+          '422': {
+            description: 'Validation error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/UnprocessableEntityResponse',
+                },
+              },
+            },
+          },
+          '429': {
+            description: 'Too many requests.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/TooManyRequestsResponse',
+                },
+              },
+            },
+          },
+          '500': {
+            description: 'Server error while executing the request.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/InternalServerErrorResponse',
+                },
+              },
+            },
+          },
+          '501': {
+            description: 'This functionality is not implemented.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NotImplementedResponse',
+                },
+              },
+            },
+          },
+          '502': {
+            description: 'Bad gateway error.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/BadGatewayResponse',
+                },
+              },
+            },
+          },
+        },
+        security: [
+          {
+            basic: [],
+          },
+        ],
+        summary: 'Upsert External Linking Learning Objects',
+        tags: ['External Linking Learning Objects'],
+        'x-speakeasy-group': 'lms',
+        'x-speakeasy-name-override': 'upsert_content',
+        'x-speakeasy-retries': {
+          statusCodes: [429, 408],
+          strategy: 'backoff',
+        },
+      },
       get: {
+        description:
+          'Retrieve a list of content type learning objects. \n\nThese are the most granular learning objects (e.g. video, document, podcast) on a platform. \n\nOnly content objects for which the platform supports progress and completion tracking are returned.',
         operationId: 'lms_list_content',
         parameters: [
           {
@@ -1730,8 +1923,12 @@ export const lmsSpec = {
           strategy: 'backoff',
         },
       },
-      put: {
-        operationId: 'lms_upsert_content',
+    },
+    '/unified/lms/content/{id}': {
+      patch: {
+        description:
+          'Update an external linking learning object that redirects users to a provider platform for consumption and progress tracking. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
+        operationId: 'lms_update_content',
         parameters: [
           {
             name: 'x-account-id',
@@ -1742,24 +1939,32 @@ export const lmsSpec = {
               type: 'string',
             },
           },
+          {
+            name: 'id',
+            required: true,
+            in: 'path',
+            schema: {
+              type: 'string',
+            },
+          },
         ],
         requestBody: {
           required: true,
           content: {
             'application/json': {
               schema: {
-                $ref: '#/components/schemas/LmsUpsertContentRequestDto',
+                $ref: '#/components/schemas/LmsCreateContentRequestDto',
               },
             },
           },
         },
         responses: {
           '201': {
-            description: 'The content was upserted successfully.',
+            description: 'The content was updated successfully.',
             content: {
               'application/json': {
                 schema: {
-                  $ref: '#/components/schemas/UpsertResult',
+                  $ref: '#/components/schemas/UpdateResult',
                 },
               },
             },
@@ -1898,18 +2103,18 @@ export const lmsSpec = {
             basic: [],
           },
         ],
-        summary: 'Upsert Content',
-        tags: ['Content'],
+        summary: 'Update External Linking Learning Objects',
+        tags: ['External Linking Learning Objects'],
         'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'upsert_content',
+        'x-speakeasy-name-override': 'update_content',
         'x-speakeasy-retries': {
           statusCodes: [429, 408],
           strategy: 'backoff',
         },
       },
-    },
-    '/unified/lms/content/{id}': {
       get: {
+        description:
+          'Retrieve a content type learning object by its identifier. \n\nThese are the most granular learning objects (e.g. video, document, podcast) on a platform. \n\nOnly content objects for which the platform supports progress and completion tracking are returned.',
         operationId: 'lms_get_content',
         parameters: [
           {
@@ -2120,194 +2325,11 @@ export const lmsSpec = {
           strategy: 'backoff',
         },
       },
-      patch: {
-        operationId: 'lms_update_content',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/LmsCreateContentRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '201': {
-            description: 'The content was updated successfully.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UpdateResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Update Content',
-        tags: ['Content'],
-        'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'update_content',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
     },
     '/unified/lms/users/{id}/completions': {
       get: {
+        description:
+          'Retrieve a list of completed learning records for a user. \n\nThese are the records of a user completing learning objects.',
         operationId: 'lms_list_user_completions',
         parameters: [
           {
@@ -2599,6 +2621,8 @@ export const lmsSpec = {
         },
       },
       post: {
+        description:
+          'Create a completed learning record for a user. \n\nThis is the record of a user completing a learning object.',
         operationId: 'lms_create_user_completion',
         parameters: [
           {
@@ -2786,6 +2810,8 @@ export const lmsSpec = {
     },
     '/unified/lms/users/{id}/completions/{subResourceId}': {
       get: {
+        description:
+          'Retrieve a completed learning record for a user by its identifier. \n\nThis is the record of a user completing a learning object.',
         operationId: 'lms_get_user_completion',
         parameters: [
           {
@@ -3005,6 +3031,8 @@ export const lmsSpec = {
         },
       },
       delete: {
+        description:
+          'Delete a completion type learning record for a user. \n\nThis is a record of a user completing a learning object.',
         operationId: 'lms_delete_user_completion',
         parameters: [
           {
@@ -3193,6 +3221,8 @@ export const lmsSpec = {
     },
     '/unified/lms/completions': {
       get: {
+        description:
+          'Retrieve a list of completed learning records. These are the records of a user completing learning objects.',
         operationId: 'lms_list_completions',
         parameters: [
           {
@@ -3481,6 +3511,8 @@ export const lmsSpec = {
     },
     '/unified/lms/completions/{id}': {
       get: {
+        description:
+          'Retrieve a completed learning record by its identifier. This is the record of a user completing a learning object.',
         operationId: 'lms_get_completion',
         parameters: [
           {
@@ -5197,6 +5229,8 @@ export const lmsSpec = {
     },
     '/unified/lms/assignments': {
       get: {
+        description:
+          'Retrieve a list of assignment type learning records. \n\nThese are the records linking a user to a learning object. \n\nThey can be pending, in progress, or completed.',
         operationId: 'lms_list_assignments',
         parameters: [
           {
@@ -5509,6 +5543,8 @@ export const lmsSpec = {
     },
     '/unified/lms/assignments/{id}': {
       get: {
+        description:
+          'Retrieve an assignment type learning record by its identifier. \n\nThis is the record linking a user to a learning object. \n\nIt can be pending, in progress, or completed.',
         operationId: 'lms_get_assignment',
         parameters: [
           {
@@ -5730,11 +5766,15 @@ export const lmsSpec = {
   tags: [
     {
       name: 'Courses',
-      description: 'Collections of learning materials or modules.',
+      description: 'Collections of learning content.',
     },
     {
       name: 'Content',
-      description: 'Learning content or materials.',
+      description: 'Granular learning content items.',
+    },
+    {
+      name: 'External Linking Learning Objects',
+      description: 'External linking learning objects.',
     },
     {
       name: 'Categories',

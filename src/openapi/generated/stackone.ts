@@ -2684,11 +2684,19 @@ export const stackoneSpec = {
           {
             name: 'x-account-id',
             in: 'header',
-            description: 'Account secure id for the target provider account',
-            required: true,
+            description:
+              'Account secure id for the target provider account (optional if x-account-id query parameter is provided)',
+            required: false,
             schema: {
               type: 'string',
             },
+          },
+          {
+            name: 'x-account-id',
+            required: false,
+            in: 'query',
+            description: 'Account secure id (alternative to x-account-id header)',
+            schema: {},
           },
           {
             name: 'mcp-session-id',
@@ -2896,11 +2904,19 @@ export const stackoneSpec = {
           {
             name: 'x-account-id',
             in: 'header',
-            description: 'Account secure id for the target provider account',
-            required: true,
+            description:
+              'Account secure id for the target provider account (optional if x-account-id query parameter is provided)',
+            required: false,
             schema: {
               type: 'string',
             },
+          },
+          {
+            name: 'x-account-id',
+            required: false,
+            in: 'query',
+            description: 'Account secure id (alternative to x-account-id header)',
+            schema: {},
           },
           {
             name: 'Accept',
@@ -3067,11 +3083,19 @@ export const stackoneSpec = {
           {
             name: 'x-account-id',
             in: 'header',
-            description: 'Account secure id for the target provider account',
-            required: true,
+            description:
+              'Account secure id for the target provider account (optional if x-account-id query parameter is provided)',
+            required: false,
             schema: {
               type: 'string',
             },
+          },
+          {
+            name: 'x-account-id',
+            required: false,
+            in: 'query',
+            description: 'Account secure id (alternative to x-account-id header)',
+            schema: {},
           },
           {
             name: 'mcp-session-id',
@@ -3251,15 +3275,43 @@ export const stackoneSpec = {
         responses: {
           '200': {
             description: 'The proxy request was successful.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ProxyResponseApiModel',
+                },
+              },
+            },
           },
           '201': {
             description: 'Resource was successfully created by the target service.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ProxyResponseApiModel',
+                },
+              },
+            },
           },
           '202': {
             description: 'Request accepted by the target service.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ProxyResponseApiModel',
+                },
+              },
+            },
           },
           '204': {
             description: 'Request succeeded with no content.',
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/ProxyResponseApiModel',
+                },
+              },
+            },
           },
           '400': {
             description: 'Invalid request.',
@@ -3494,11 +3546,11 @@ export const stackoneSpec = {
             description: 'Additional data to include in the response',
             schema: {
               nullable: true,
-              example: ['operation_details'],
+              example: ['action_details'],
               type: 'array',
               items: {
                 type: 'string',
-                enum: ['operation_details'],
+                enum: ['action_details'],
               },
             },
           },
@@ -4362,6 +4414,7 @@ export const stackoneSpec = {
               'screening',
               'messaging',
               'accounting',
+              'scheduling',
             ],
             example: 'hris',
             description: 'The provider service category',
@@ -4493,6 +4546,7 @@ export const stackoneSpec = {
               'screening',
               'messaging',
               'accounting',
+              'scheduling',
             ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -4512,6 +4566,7 @@ export const stackoneSpec = {
                 'screening',
                 'messaging',
                 'accounting',
+                'scheduling',
                 null,
               ],
             },
@@ -4602,6 +4657,7 @@ export const stackoneSpec = {
               'screening',
               'messaging',
               'accounting',
+              'scheduling',
             ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -4621,6 +4677,7 @@ export const stackoneSpec = {
                 'screening',
                 'messaging',
                 'accounting',
+                'scheduling',
                 null,
               ],
             },
@@ -4718,6 +4775,7 @@ export const stackoneSpec = {
               'screening',
               'messaging',
               'accounting',
+              'scheduling',
             ],
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
@@ -4737,6 +4795,7 @@ export const stackoneSpec = {
                 'screening',
                 'messaging',
                 'accounting',
+                'scheduling',
                 null,
               ],
             },
@@ -4888,6 +4947,7 @@ export const stackoneSpec = {
           params: {
             type: 'object',
             description: 'Method parameters (arbitrary JSON)',
+            nullable: true,
           },
           id: {
             type: 'object',
@@ -4911,7 +4971,7 @@ export const stackoneSpec = {
           },
           status: {
             type: 'string',
-            enum: ['active', 'inactive', 'error'],
+            enum: ['active', 'inactive', 'suspended', 'archived', 'expired', 'error'],
             'x-speakeasy-unknown-values': 'allow',
           },
           status_reasons: {
@@ -4993,6 +5053,7 @@ export const stackoneSpec = {
               'screening',
               'messaging',
               'accounting',
+              'scheduling',
             ],
             'x-speakeasy-unknown-values': 'allow',
           },
@@ -5314,6 +5375,35 @@ export const stackoneSpec = {
           },
         },
       },
+      ProviderErrorApiModel: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'number',
+            example: 400,
+            nullable: true,
+          },
+          url: {
+            type: 'string',
+            example: 'https://api.someprovider.com/v1/endpoint',
+            nullable: true,
+          },
+          raw: {
+            type: 'object',
+            nullable: true,
+          },
+          headers: {
+            type: 'object',
+            example: {
+              date: 'Tue, 02 Apr 2024 13:52:01 GMT',
+              'content-type': 'application/json; charset=utf-8',
+              'transfer-encoding': 'chunked',
+              connection: 'close',
+            },
+            nullable: true,
+          },
+        },
+      },
       ProxyRequestBody: {
         type: 'object',
         properties: {
@@ -5353,6 +5443,81 @@ export const stackoneSpec = {
             nullable: true,
           },
         },
+      },
+      ProxyResponseApiModel: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'number',
+            description: 'The HTTP status code returned by the provider',
+            example: 200,
+          },
+          headers: {
+            type: 'object',
+            description: 'The headers returned by the provider',
+            example: {
+              'content-type': 'application/json',
+              'x-request-id': '123e4567-e89b-12d3-a456-426614174000',
+            },
+            additionalProperties: true,
+            nullable: true,
+          },
+          data: {
+            description:
+              'The response data from the provider. Can be an object, array, or primitive value.',
+            example: {
+              id: '123',
+              name: 'John Doe',
+              email: 'john.doe@example.com',
+            },
+            oneOf: [
+              {
+                type: 'object',
+                additionalProperties: true,
+              },
+              {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  additionalProperties: true,
+                },
+              },
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+              {
+                type: 'boolean',
+              },
+            ],
+            nullable: true,
+          },
+          provider_errors: {
+            description: 'Provider-specific errors if any occurred',
+            example: [
+              {
+                status: 400,
+                url: 'https://api.someprovider.com/v1/endpoint',
+                raw: {
+                  error: 'Bad Request',
+                  message: 'The supplied data is invalid',
+                },
+                headers: {
+                  date: 'Tue, 02 Apr 2024 13:52:01 GMT',
+                  'content-type': 'application/json; charset=utf-8',
+                },
+              },
+            ],
+            nullable: true,
+            type: 'array',
+            items: {
+              $ref: '#/components/schemas/ProviderErrorApiModel',
+            },
+          },
+        },
+        required: ['status'],
       },
       RequestTimedOutResponse: {
         type: 'object',
