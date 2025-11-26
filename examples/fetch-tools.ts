@@ -1,7 +1,7 @@
 /**
  * Example: fetch the latest StackOne tool catalog and execute a tool.
  *
- * Set `STACKONE_API_KEY` (and optionally `STACKONE_BASE_URL`) before running.
+ * Set `STACKONE_API_KEY` (and optionally `STACKONE_API_URL`) before running.
  * By default the script exits early in test environments where a real key is
  * not available.
  */
@@ -21,7 +21,7 @@ if (shouldSkip) {
 }
 
 const toolset = new StackOneToolSet({
-  baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  baseUrl: process.env.STACKONE_API_URL ?? 'https://api.stackone.com',
 });
 
 const tools = await toolset.fetchTools();
