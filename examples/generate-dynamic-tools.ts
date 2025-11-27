@@ -40,11 +40,14 @@ async function main(): Promise<void> {
 
   // Generate typed client for each account
   for (const accountId of accountIds) {
+    const now = performance.now();
     await toolset.generateTypedClient({
       outputDir,
       name: accountId,
       accountIds: [accountId],
     });
+    const duration = (performance.now() - now).toFixed(2);
+    console.info(`Generated typed tools for account ${accountId} in ${duration} ms`);
   }
 }
 
