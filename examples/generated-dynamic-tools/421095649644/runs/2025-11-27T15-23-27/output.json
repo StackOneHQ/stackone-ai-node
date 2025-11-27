@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-11-27T15-23-27",
+  "query": "List 2 locations",
+  "exitCode": 0,
+  "stdout": {
+    "next": "eyJyIjp7InBuIjoyLCJwYyI6IjIiLCJwIjotMX0sInYiOjEsInRzIjoxNzY0MjU3MDEwNjUxfQ",
+    "data": [
+      {
+        "id": "c28xIQaWQ6MTgyMzU",
+        "name": "Lindon, Utah",
+        "location_type": {
+          "value": "work",
+          "source_value": null
+        },
+        "created_at": "2022-10-25T19:22:19.000Z",
+        "remote_id": "18235"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyMzg",
+        "name": "London, UK",
+        "location_type": {
+          "value": "work",
+          "source_value": null
+        },
+        "created_at": "2022-10-25T19:22:19.000Z",
+        "remote_id": "18238"
+      }
+    ]
+  }
+}

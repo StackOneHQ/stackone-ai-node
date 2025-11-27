@@ -1,0 +1,230 @@
+{
+  "timestamp": "2025-11-27T15-23-06",
+  "query": "List 3 employees",
+  "exitCode": 0,
+  "stdout": {
+    "next": "eyJyIjp7InBuIjoyLCJwYyI6IjIiLCJwIjotMX0sInYiOjEsInRzIjoxNzY0MjU2OTkxNzQyfQ",
+    "data": [
+      {
+        "id": "c28xIQaWQ6NA",
+        "first_name": "Demo",
+        "last_name": "Guy",
+        "name": "Demo Guy",
+        "display_name": "Annie R Beita Guy",
+        "gender": {
+          "value": "non_binary",
+          "source_value": "Non-binary"
+        },
+        "ethnicity": {
+          "value": "american_indian_or_alaska_native",
+          "source_value": "American Indian or Alaska Native"
+        },
+        "date_of_birth": "2024-06-18T00:00:00.000Z",
+        "birthday": "2026-06-18T00:00:00.000Z",
+        "marital_status": {
+          "value": "single",
+          "source_value": "Single"
+        },
+        "personal_email": "luka_sky1986@gmail.com",
+        "personal_phone_number": "8016246601",
+        "work_email": "luka_skywalker2@gmail.com",
+        "work_phone_number": "9284893838",
+        "job_title": "Account Executive",
+        "department": "Information Technology",
+        "manager_id": null,
+        "hire_date": "2025-09-01T00:00:00.000Z",
+        "start_date": "2025-09-01T00:00:00.000Z",
+        "tenure": 0,
+        "work_anniversary": "2026-09-01T00:00:00.000Z",
+        "employment_type": {
+          "value": "permanent",
+          "source_value": "Full-Time"
+        },
+        "employment_contract_type": {
+          "value": "full_time",
+          "source_value": "Full-Time"
+        },
+        "employment_status": {
+          "value": "active",
+          "source_value": "Active"
+        },
+        "termination_date": null,
+        "citizenships": [
+          {
+            "value": "AR",
+            "source_value": "Argentina"
+          }
+        ],
+        "updated_at": "2025-11-25T15:00:14.000Z",
+        "employee_number": "sample",
+        "national_identity_numbers": [
+          {
+            "value": "555-64-8000",
+            "type": {
+              "value": "ssn",
+              "source_value": "SSN"
+            }
+          },
+          {
+            "value": "66676556111",
+            "type": {
+              "value": "nid",
+              "source_value": "NID"
+            }
+          },
+          {
+            "value": "12 34 56 78 9",
+            "type": {
+              "value": "nin",
+              "source_value": "NIN"
+            }
+          }
+        ],
+        "remote_id": "4",
+        "remote_manager_id": null,
+        "unified_custom_fields": {
+          "emergency_phone_number": "c28xIQaWQ6NA",
+          "example_field": null
+        }
+      },
+      {
+        "id": "c28xIQaWQ6NQ",
+        "first_name": "Anna",
+        "last_name": "Skywalker",
+        "name": "Anna Skywalker",
+        "display_name": "Anna Skywalker Skywalker",
+        "gender": {
+          "value": "male",
+          "source_value": "Male"
+        },
+        "ethnicity": {
+          "value": "two_or_more_races",
+          "source_value": "Two or More Races"
+        },
+        "date_of_birth": "2025-04-16T00:00:00.000Z",
+        "birthday": "2026-04-16T00:00:00.000Z",
+        "marital_status": {
+          "value": "married",
+          "source_value": "Married"
+        },
+        "personal_email": null,
+        "personal_phone_number": "+442075556671",
+        "work_email": "aadams@efficientoffice.com",
+        "work_phone_number": "+442075554730",
+        "job_title": null,
+        "department": "Customer Success",
+        "manager_id": "c28xIQaWQ6OQ",
+        "hire_date": "2025-04-28T00:00:00.000Z",
+        "start_date": "2025-04-28T00:00:00.000Z",
+        "tenure": 0,
+        "work_anniversary": "2026-04-28T00:00:00.000Z",
+        "employment_type": {
+          "value": "contractor",
+          "source_value": "Contractor"
+        },
+        "employment_contract_type": {
+          "value": "unmapped_value",
+          "source_value": "Contractor"
+        },
+        "employment_status": {
+          "value": "active",
+          "source_value": "Active"
+        },
+        "termination_date": null,
+        "citizenships": [],
+        "updated_at": "2025-11-19T11:51:29.000Z",
+        "employee_number": "2",
+        "national_identity_numbers": [
+          {
+            "value": "545-66-7890",
+            "type": {
+              "value": "ssn",
+              "source_value": "SSN"
+            }
+          }
+        ],
+        "remote_id": "5",
+        "remote_manager_id": "9",
+        "unified_custom_fields": {
+          "emergency_phone_number": "c28xIQaWQ6NQ",
+          "example_field": null
+        }
+      },
+      {
+        "id": "c28xIQaWQ6Ng",
+        "first_name": "Anna",
+        "last_name": "Agluindawer",
+        "name": "Anna Agluindawer",
+        "display_name": "Anna Agluindawer",
+        "gender": {
+          "value": "female",
+          "source_value": "Female"
+        },
+        "ethnicity": {
+          "value": "two_or_more_races",
+          "source_value": "Two or More Races"
+        },
+        "date_of_birth": "1995-03-03T00:00:00.000Z",
+        "birthday": "2026-03-03T00:00:00.000Z",
+        "marital_status": {
+          "value": "married",
+          "source_value": "Married"
+        },
+        "personal_email": "Anna_Agluindawer989@example.com",
+        "personal_phone_number": "8017246600",
+        "work_email": "Anna_Agluindawer@efficientoffice.com",
+        "work_phone_number": "+442075554730",
+        "job_title": "Account Executive",
+        "department": "Information Technology",
+        "manager_id": "c28xIQaWQ6MzU",
+        "hire_date": "2025-10-10T00:00:00.000Z",
+        "start_date": "2025-10-10T00:00:00.000Z",
+        "tenure": 0,
+        "work_anniversary": "2026-10-10T00:00:00.000Z",
+        "employment_type": {
+          "value": "permanent",
+          "source_value": "Full-Time"
+        },
+        "employment_contract_type": {
+          "value": "full_time",
+          "source_value": "Full-Time"
+        },
+        "employment_status": {
+          "value": "active",
+          "source_value": "Active"
+        },
+        "termination_date": null,
+        "citizenships": [
+          {
+            "value": "AU",
+            "source_value": "Australia"
+          }
+        ],
+        "updated_at": "2025-11-25T15:00:14.000Z",
+        "employee_number": "03A",
+        "national_identity_numbers": [
+          {
+            "value": "BG5678888",
+            "type": {
+              "value": "nid",
+              "source_value": "NID"
+            }
+          },
+          {
+            "value": "24 66 34 56 9",
+            "type": {
+              "value": "nin",
+              "source_value": "NIN"
+            }
+          }
+        ],
+        "remote_id": "6",
+        "remote_manager_id": "35",
+        "unified_custom_fields": {
+          "emergency_phone_number": "c28xIQaWQ6Ng",
+          "example_field": null
+        }
+      }
+    ]
+  }
+}

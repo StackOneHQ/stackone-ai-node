@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-11-27T15-23-18",
+  "query": "List 2 departments",
+  "exitCode": 0,
+  "stdout": {
+    "next": "eyJyIjp7InBuIjoyLCJwYyI6IjIiLCJwIjotMX0sInYiOjEsInRzIjoxNzY0MjU3MDAxODc0fQ",
+    "data": [
+      {
+        "id": "c28xIQaWQ6MTgyNTM",
+        "name": "Customer Success",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18253"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNTk",
+        "name": "Finance",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18259"
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "timestamp": "2025-11-27T15-23-46",
+  "query": "一番最初に入社した従業員の名前と部署を取得して",
+  "exitCode": 0,
+  "stdout": {
+    "name": "Demo Guy",
+    "department": "Information Technology"
+  }
+}

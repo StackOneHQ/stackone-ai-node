@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-11-27T15-22-10",
+  "query": "Get employee with ID c28xIQaWQ6NA and show their name and department",
+  "exitCode": 0,
+  "stdout": {
+    "data": {
+      "id": "c28xIQaWQ6NA",
+      "name": "Demo Guy",
+      "department": "Information Technology",
+      "remote_id": "4",
+      "unified_custom_fields": {
+        "emergency_phone_number": "c28xIQaWQ6NA"
+      }
+    }
+  }
+}

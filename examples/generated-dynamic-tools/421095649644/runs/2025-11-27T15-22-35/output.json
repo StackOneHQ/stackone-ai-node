@@ -1,0 +1,100 @@
+{
+  "timestamp": "2025-11-27T15-22-35",
+  "query": "List all departments",
+  "exitCode": 0,
+  "stdout": {
+    "next": null,
+    "data": [
+      {
+        "id": "c28xIQaWQ6MTgyNTM",
+        "name": "Customer Success",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18253"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNTk",
+        "name": "Finance",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18259"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyMzQ",
+        "name": "Human Resources",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18234"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNTE",
+        "name": "Information Technology",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18251"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNTY",
+        "name": "Marketing",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18256"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNDI",
+        "name": "Operations",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18242"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNjQ",
+        "name": "Product",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18264"
+      },
+      {
+        "id": "c28xIQaWQ6MTg0Nzk",
+        "name": "QA Department Test",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18479"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyNDk",
+        "name": "Sales",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18249"
+      },
+      {
+        "id": "c28xIQaWQ6MTgyODc",
+        "name": "UX",
+        "type": {
+          "value": "department",
+          "source_value": null
+        },
+        "remote_id": "18287"
+      }
+    ]
+  }
+}

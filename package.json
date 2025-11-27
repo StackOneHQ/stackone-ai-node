@@ -46,6 +46,7 @@
     "untyped": "^2.0.0"
   },
   "devDependencies": {
+    "@ai-sdk/anthropic": "^2.0.50",
     "@ai-sdk/openai": "^2.0.46",
     "@biomejs/biome": "^1.5.3",
     "@hono/mcp": "^0.1.4",

@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-11-27T15-22-55",
+  "query": "Find all employees hired after 2024-01-01 and show their name, department and hire date",
+  "exitCode": 0,
+  "stdout": [
+    {
+      "name": "Demo Guy",
+      "department": "Information Technology",
+      "hire_date": "2025-09-01T00:00:00.000Z"
+    },
+    {
+      "name": "Anna Skywalker",
+      "department": "Customer Success",
+      "hire_date": "2025-04-28T00:00:00.000Z"
+    },
+    {
+      "name": "Anna Agluindawer",
+      "department": "Information Technology",
+      "hire_date": "2025-10-10T00:00:00.000Z"
+    },
+    {
+      "name": "Shannon Anderson",
+      "department": "QA Department Test",
+      "hire_date": "2025-07-03T00:00:00.000Z"
+    },
+    {
+      "name": "Cheryll Barnet",
+      "department": "Customer Success",
+      "hire_date": "2024-04-23T00:00:00.000Z"
+    },
+    {
+      "name": "Maja Andev",
+      "department": "Human Resources",
+      "hire_date": "2025-05-12T00:00:00.000Z"
+    }
+  ]
+}

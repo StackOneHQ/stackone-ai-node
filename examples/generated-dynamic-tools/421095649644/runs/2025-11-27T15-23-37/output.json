@@ -1,0 +1,89 @@
+{
+  "timestamp": "2025-11-27T15-23-37",
+  "query": "Get employee c28xIQaWQ6NA",
+  "exitCode": 0,
+  "stdout": {
+    "data": {
+      "id": "c28xIQaWQ6NA",
+      "first_name": "Demo",
+      "last_name": "Guy",
+      "name": "Demo Guy",
+      "display_name": "Annie R Beita Guy",
+      "gender": {
+        "value": "non_binary",
+        "source_value": "Non-binary"
+      },
+      "ethnicity": {
+        "value": "american_indian_or_alaska_native",
+        "source_value": "American Indian or Alaska Native"
+      },
+      "date_of_birth": "2024-06-18T00:00:00.000Z",
+      "birthday": "2026-06-18T00:00:00.000Z",
+      "marital_status": {
+        "value": "single",
+        "source_value": "Single"
+      },
+      "personal_email": "luka_sky1986@gmail.com",
+      "personal_phone_number": "8016246601",
+      "work_email": "luka_skywalker2@gmail.com",
+      "work_phone_number": "9284893838",
+      "job_title": "Account Executive",
+      "department": "Information Technology",
+      "manager_id": null,
+      "hire_date": "2025-09-01T00:00:00.000Z",
+      "start_date": "2025-09-01T00:00:00.000Z",
+      "tenure": 0,
+      "work_anniversary": "2026-09-01T00:00:00.000Z",
+      "employment_type": {
+        "value": "permanent",
+        "source_value": "Full-Time"
+      },
+      "employment_contract_type": {
+        "value": "full_time",
+        "source_value": "Full-Time"
+      },
+      "employment_status": {
+        "value": "active",
+        "source_value": "Active"
+      },
+      "termination_date": null,
+      "citizenships": [
+        {
+          "value": "AR",
+          "source_value": "Argentina"
+        }
+      ],
+      "updated_at": "2025-11-25T15:00:14.000Z",
+      "employee_number": "sample",
+      "national_identity_numbers": [
+        {
+          "value": "555-64-8000",
+          "type": {
+            "value": "ssn",
+            "source_value": "SSN"
+          }
+        },
+        {
+          "value": "66676556111",
+          "type": {
+            "value": "nid",
+            "source_value": "NID"
+          }
+        },
+        {
+          "value": "12 34 56 78 9",
+          "type": {
+            "value": "nin",
+            "source_value": "NIN"
+          }
+        }
+      ],
+      "remote_id": "4",
+      "remote_manager_id": null,
+      "unified_custom_fields": {
+        "emergency_phone_number": "c28xIQaWQ6NA",
+        "example_field": "0000-00-00"
+      }
+    }
+  }
+}
