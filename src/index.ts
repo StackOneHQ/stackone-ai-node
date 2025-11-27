@@ -31,3 +31,6 @@ export type {
   ParameterLocation,
   ToolDefinition,
 } from './types';
+
+// Auto-generated typed SDK for each StackOne API category
+export * from './generated-sdk';

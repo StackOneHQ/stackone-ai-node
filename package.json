@@ -7,6 +7,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": "./src/index.ts",
+    "./generated-sdk": "./src/generated-sdk/index.ts",
     "./package.json": "./package.json"
   },
   "type": "module",
@@ -20,12 +21,13 @@
     "prepare": "bun prepare:git",
     "prepare:git": "git config --local core.hooksPath .githooks",
     "build": "bun -b tsdown",
-    "rebuild": "bun run fetch:specs && bun run build",
+    "rebuild": "bun run fetch:specs && bun run generate:typed-sdk && bun run build",
     "prepack": "bun run rebuild",
     "test:unit": "bun test src",
     "test:examples": "bun test examples",
     "test:scripts": "bun test scripts",
     "test": "bun run test:unit && bun run test:examples && bun run test:scripts",
+    "generate:typed-sdk": "bun run ./scripts/generate-typed-sdk.ts",
     "fetch:specs": "bun run ./scripts/fetch-specs.ts && bun run format",
     "build:docs": "bun run ./scripts/build-docs.ts",
     "docs:serve": "mkdocs serve",

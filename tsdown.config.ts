@@ -2,7 +2,7 @@ import { $ } from 'bun';
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.ts', './src/generated-sdk/index.ts'],
   outDir: 'dist',
   format: 'esm',
   clean: true,

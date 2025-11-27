@@ -198,6 +198,34 @@ This is especially useful when you want to:
 - Focus on specific HR/CRM/ATS providers
 - Get only certain types of operations (e.g., all "list" operations)
 
+## Typed SDK (auto-generated functions)
+
+Every OpenAPI tool can also be used as a strongly-typed function via the generated SDK.
+
+```typescript
+import { HrisClient, type hris } from '@stackone/ai/generated-sdk';
+
+const client = new HrisClient({
+  apiKey: process.env.STACKONE_API_KEY!,
+  accountId: process.env.STACKONE_ACCOUNT_ID!,
+});
+
+// Parameters and responses are fully typed
+const employees: hris.EmployeesPaginated = await client.listEmployees({
+  pageSize: '10',
+});
+```
+
+- Clients handle authentication headers (`Authorization`, `x-account-id`) and accept an optional `baseUrl`.
+- Types are namespaced per product area (e.g., `hris.Employee`, `ats.Candidate`).
+- Full example: `examples/typed-sdk-example.ts`.
+
+### Regenerating the typed SDK
+
+- Specs are read from `src/openapi/generated`.
+- Generate the SDK after updating specs: `bun run generate:typed-sdk`
+- `bun run rebuild` now runs `fetch:specs`, regenerates the typed SDK, and builds the package.
+
 [View full example](examples/fetch-tools.ts)
 
 ### File Upload
