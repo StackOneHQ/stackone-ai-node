@@ -1,3 +1,9 @@
+import {
+  type GenerateTypedClientOptions,
+  type GeneratedTypedClientFiles,
+  generateTypedClientContent,
+  writeTypedClientFiles,
+} from '../codegen';
 import { loadStackOneSpecs } from '../openapi/loader';
 import { StackOneTool, Tools } from '../tool';
 import { createFeedbackTool } from '../tools/feedback';
@@ -218,6 +224,46 @@ export class StackOneToolSet extends ToolSet {
    */
   plan(_: WorkflowConfig): Promise<StackOneTool> {
     throw new Error('Not implemented yet');
+  }
+
+  /**
+   * Generate typed client files from fetched tools
+   *
+   * This method fetches tools from MCP and generates TypeScript files:
+   * - types.d.ts: Type definitions (interfaces, type aliases, function declarations)
+   * - index.ts: Implementation (wrapper functions)
+   *
+   * @param options Options including output directory, name, and optional fetch filters
+   * @returns The generated file contents and paths
+   *
+   * @example
+   * ```typescript
+   * const toolset = new StackOneToolSet({ apiKey: '...' });
+   * toolset.setAccounts(['account-123']);
+   *
+   * await toolset.generateTypedClient({
+   *   outputDir: './generated',
+   *   name: 'account-123',
+   * });
+   * // Creates:
+   * //   ./generated/account-123/types.d.ts
+   * //   ./generated/account-123/index.ts
+   * ```
+   */
+  async generateTypedClient(
+    options: GenerateTypedClientOptions & FetchToolsOptions
+  ): Promise<GeneratedTypedClientFiles & { dtsPath: string; tsPath: string }> {
+    const tools = await this.fetchTools(options);
+    const toolArray = tools.toArray();
+
+    const { dtsPath, tsPath } = await writeTypedClientFiles(toolArray, options);
+    const content = generateTypedClientContent(toolArray);
+
+    console.log(`Generated typed client (${toolArray.length} tools):`);
+    console.log(`  - ${dtsPath}`);
+    console.log(`  - ${tsPath}`);
+
+    return { ...content, dtsPath, tsPath };
   }
 
   /**

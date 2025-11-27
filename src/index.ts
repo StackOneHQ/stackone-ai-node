@@ -2,6 +2,8 @@
  * StackOne AI Node.js SDK
  */
 
+export { generateTypedClientContent, type GenerateTypedClientOptions } from './codegen';
+export { DynamicToolClient, type DynamicToolClientConfig } from './dynamic-client';
 export * as OpenAPILoader from './openapi/loader';
 export { OpenAPIParser } from './openapi/parser';
 export { BaseTool, StackOneTool, Tools } from './tool';
