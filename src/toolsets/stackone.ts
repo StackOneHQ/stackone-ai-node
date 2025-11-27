@@ -257,7 +257,7 @@ export class StackOneToolSet extends ToolSet {
     const toolArray = tools.toArray();
 
     const { dtsPath, tsPath } = await writeTypedClientFiles(toolArray, options);
-    const content = generateTypedClientContent(toolArray);
+    const content = await generateTypedClientContent(toolArray);
 
     console.log(`Generated typed client (${toolArray.length} tools):`);
     console.log(`  - ${dtsPath}`);

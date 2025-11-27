@@ -42,7 +42,8 @@
     "@modelcontextprotocol/sdk": "^1.19.1",
     "@orama/orama": "^3.1.11",
     "@stackone/stackone-client-ts": "^4.28.0",
-    "json-schema": "^0.4.0"
+    "json-schema": "^0.4.0",
+    "untyped": "^2.0.0"
   },
   "devDependencies": {
     "@ai-sdk/openai": "^2.0.46",
