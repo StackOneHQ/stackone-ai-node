@@ -27,6 +27,7 @@
     "test:examples": "bun test examples",
     "test:scripts": "bun test scripts",
     "test": "bun run test:unit && bun run test:examples && bun run test:scripts",
+    "generate:dynamic-tools": "bun run ./scripts/generate-dynamic-tools.ts",
     "generate:typed-sdk": "bun run ./scripts/generate-typed-sdk.ts",
     "fetch:specs": "bun run ./scripts/fetch-specs.ts && bun run format",
     "build:docs": "bun run ./scripts/build-docs.ts",

@@ -226,6 +226,21 @@ const employees: hris.EmployeesPaginated = await client.listEmployees({
 - Generate the SDK after updating specs: `bun run generate:typed-sdk`
 - `bun run rebuild` now runs `fetch:specs`, regenerates the typed SDK, and builds the package.
 
+## Dynamic tools -> typed functions (fetchTools)
+
+The StackOne MCP catalog can change dynamically. You can generate typed params + callable functions directly from the live `fetchTools()` result:
+
+```bash
+STACKONE_API_KEY=... \
+STACKONE_ACCOUNT_IDS=acc_123,acc_456 \
+STACKONE_BASE_URL=https://api.stackone.com \
+bun run generate:dynamic-tools
+```
+
+- Output: `src/generated-dynamic-tools.ts`
+- Each tool gets `PascalCaseParams` + `camelCase` executor that calls `/actions/rpc` with Basic auth and optional `x-account-id`.
+- Uses the same request shape that `fetchTools()` exposes (JSON Schema -> TS types).
+
 [View full example](examples/fetch-tools.ts)
 
 ### File Upload
