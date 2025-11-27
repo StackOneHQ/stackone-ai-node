@@ -119,20 +119,30 @@ function parseUnifiedAction(
 
 /**
  * Builds a query string from a record of parameters.
+ * Handles nested objects like filter[updated_after]=xxx
  */
 function buildQueryString(query: Record<string, unknown>): string {
   const params = new URLSearchParams();
 
-  for (const [key, value] of Object.entries(query)) {
-    if (value === undefined || value === null || value === '') continue;
+  function addParams(obj: Record<string, unknown>, prefix = ''): void {
+    for (const [key, value] of Object.entries(obj)) {
+      if (value === undefined || value === null || value === '') continue;
 
-    if (typeof value === 'object') {
-      // For filter objects, stringify them
-      params.set(key, JSON.stringify(value));
-    } else {
-      params.set(key, String(value));
+      const paramKey = prefix ? `${prefix}[${key}]` : key;
+
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        // Recursively handle nested objects (e.g., filter)
+        addParams(value as Record<string, unknown>, paramKey);
+      } else if (Array.isArray(value)) {
+        // Handle arrays
+        params.set(paramKey, value.join(','));
+      } else {
+        params.set(paramKey, String(value));
+      }
     }
   }
+
+  addParams(query);
 
   const queryString = params.toString();
   return queryString ? `?${queryString}` : '';
