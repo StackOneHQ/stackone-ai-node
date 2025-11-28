@@ -1,0 +1,181 @@
+{
+  "timestamp": "2025-11-28T16-24-08",
+  "query": "Get all department groups and all work locations in parallel, then show a summary",
+  "exitCode": 0,
+  "stdout": {
+    "departmentGroups": {
+      "total": 10,
+      "items": [
+        {
+          "id": "c28xIQaWQ6MTgyNTM",
+          "name": "Customer Success",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18253"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNTk",
+          "name": "Finance",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18259"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyMzQ",
+          "name": "Human Resources",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18234"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNTE",
+          "name": "Information Technology",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18251"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNTY",
+          "name": "Marketing",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18256"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNDI",
+          "name": "Operations",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18242"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNjQ",
+          "name": "Product",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18264"
+        },
+        {
+          "id": "c28xIQaWQ6MTg0Nzk",
+          "name": "QA Department Test",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18479"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNDk",
+          "name": "Sales",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18249"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyODc",
+          "name": "UX",
+          "type": {
+            "value": "department",
+            "source_value": null
+          },
+          "remote_id": "18287"
+        }
+      ]
+    },
+    "workLocations": {
+      "total": 7,
+      "items": [
+        {
+          "id": "c28xIQaWQ6MTgyMzU",
+          "name": "Lindon, Utah",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2022-10-25T19:22:19.000Z",
+          "remote_id": "18235"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyMzg",
+          "name": "London, UK",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2022-10-25T19:22:19.000Z",
+          "remote_id": "18238"
+        },
+        {
+          "id": "c28xIQaWQ6MTgzNTI",
+          "name": "Remote Worker",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2022-12-11T17:40:27.000Z",
+          "remote_id": "18352"
+        },
+        {
+          "id": "c28xIQaWQ6MTg0NDA",
+          "name": "Remote Worker 2",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2023-09-08T14:50:24.000Z",
+          "remote_id": "18440"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNDA",
+          "name": "Sydney, Australia",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2022-10-25T19:22:20.000Z",
+          "remote_id": "18240"
+        },
+        {
+          "id": "c28xIQaWQ6MTg0ODM",
+          "name": "test location",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2025-02-17T10:38:46.000Z",
+          "remote_id": "18483"
+        },
+        {
+          "id": "c28xIQaWQ6MTgyNDM",
+          "name": "Vancouver, Canada",
+          "location_type": {
+            "value": "work",
+            "source_value": null
+          },
+          "created_at": "2022-10-25T19:22:20.000Z",
+          "remote_id": "18243"
+        }
+      ]
+    },
+    "summary": {
+      "totalDepartmentGroups": 10,
+      "totalWorkLocations": 7
+    }
+  }
+}
