@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
+import { vi } from 'vitest';
 import { BaseTool, StackOneTool, Tools } from '../tool';
 import { type ExecuteConfig, ParameterLocation, type ToolParameters } from '../types';
 import { StackOneAPIError } from '../utils/errors';
@@ -35,7 +35,7 @@ beforeEach(() => {
 
 afterEach(() => {
   // Clean up all mocks
-  mock.restore();
+  vi.restoreAllMocks();
 });
 
 describe('StackOneTool', () => {
@@ -208,7 +208,7 @@ describe('StackOneTool', () => {
 
     // Mock the execute method to throw an error
     const mockError = new Error('Test execution error');
-    spyOn(tool, 'execute').mockImplementation(() => {
+    vi.spyOn(tool, 'execute').mockImplementation(() => {
       throw mockError;
     });
 

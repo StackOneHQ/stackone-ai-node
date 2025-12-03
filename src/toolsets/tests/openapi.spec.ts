@@ -1,17 +1,20 @@
-import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { http, HttpResponse } from 'msw';
+import { vi } from 'vitest';
 import { server } from '../../../mocks/node.ts';
 import * as OpenAPILoader from '../../openapi/loader';
 import { ParameterLocation } from '../../types';
 import type { AuthenticationConfig } from '../base';
 import { OpenAPIToolSet, type OpenAPIToolSetConfigFromUrl } from '../openapi';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 describe('OpenAPIToolSet', () => {
-  const fixturesPath = path.join(import.meta.dir, 'fixtures');
+  const fixturesPath = path.join(__dirname, 'fixtures');
   const petstoreJsonPath = path.join(fixturesPath, 'petstore.json');
 
-  let loadFromFileSpy: ReturnType<typeof spyOn>;
+  let loadFromFileSpy: ReturnType<typeof vi.spyOn>;
   const recordRequests = () => {
     const recordedRequests: Request[] = [];
     const listener = ({ request }: { request: Request }) => {
@@ -22,7 +25,7 @@ describe('OpenAPIToolSet', () => {
   };
 
   beforeEach(() => {
-    loadFromFileSpy = spyOn(OpenAPILoader, 'loadFromFile').mockImplementation(() => ({
+    loadFromFileSpy = vi.spyOn(OpenAPILoader, 'loadFromFile').mockImplementation(() => ({
       pet_findById: {
         name: 'pet_findById',
         description: 'Find pet by ID',

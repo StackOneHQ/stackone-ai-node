@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
+import { vi } from 'vitest';
 import { BaseTool, type MetaToolSearchResult, Tools } from '../tool';
 import { ParameterLocation } from '../types';
 
@@ -164,7 +164,7 @@ describe('Meta Search Tools', () => {
   });
 
   afterEach(() => {
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   describe('metaTools()', () => {
@@ -454,7 +454,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
   });
 
   afterEach(() => {
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   describe('Hybrid BM25 + TF-IDF search', () => {

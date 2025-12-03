@@ -1,13 +1,14 @@
-import { beforeAll, describe, expect, it } from 'bun:test';
 import { createFixture } from 'fs-fixture';
 import { saveSpec } from './fetch-specs';
 
-// Mock environment variables
-beforeAll(() => {
-  Bun.env.STACKONE_API_KEY = 'test_api_key';
-});
-
 describe('fetch-specs script', () => {
+  beforeEach(() => {
+    vi.stubEnv('STACKONE_API_KEY', 'test_api_key');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   it('should fetch and save OpenAPI specs', async () => {
     const category = 'hris';
 

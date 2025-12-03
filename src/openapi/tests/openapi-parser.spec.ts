@@ -1,5 +1,5 @@
-import { describe, expect, it, mock, spyOn } from 'bun:test';
 import type { OpenAPIV3 } from 'openapi-types';
+import { vi } from 'vitest';
 import { ParameterLocation } from '../../types';
 import * as specs from '../generated';
 import { OpenAPIParser } from '../parser';
@@ -192,14 +192,11 @@ describe('OpenAPIParser', () => {
       // Use the spec object directly
       const parser = new OpenAPIParser(invalidSpec);
 
-      // Use Bun's mock function instead of modifying the instance
-      const mockParseToolsFn = mock(() => {
+      // Use spyOn to temporarily replace the method
+      const spy = vi.spyOn(parser, 'parseTools');
+      spy.mockImplementation(() => {
         throw new Error('Operation ID is required for tool parsing: GET /test');
       });
-
-      // Use spyOn to temporarily replace the method
-      const spy = spyOn(parser, 'parseTools');
-      spy.mockImplementation(mockParseToolsFn);
 
       try {
         expect(() => parser.parseTools()).toThrow('Operation ID is required');

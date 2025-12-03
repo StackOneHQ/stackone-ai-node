@@ -1,6 +1,6 @@
-// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`StackOneToolSet Snapshot Tests should parse the all the oas files correctly 1`] = `
+exports[`StackOneToolSet > Snapshot Tests > should parse the all the oas files correctly 1`] = `
 Tools {
   "tools": [
     StackOneTool {

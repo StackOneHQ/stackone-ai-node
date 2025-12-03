@@ -1,6 +1,6 @@
-// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1`] = `
+exports[`OpenAPIParser > Snapshot Tests > should parse all OpenAPI specs correctly 1`] = `
 {
   "hris_batch_upload_employee_document": {
     "description": "Batch Upload Employee Document",

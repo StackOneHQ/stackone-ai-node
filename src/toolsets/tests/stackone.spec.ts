@@ -1,13 +1,14 @@
-import { describe, expect, it, spyOn } from 'bun:test';
-import { env } from 'bun';
 import { ToolSetConfigError } from '../base';
 import { StackOneToolSet } from '../stackone';
 
-// Mock environment variables
-env.STACKONE_API_KEY = 'test_key';
-env.STACKONE_ACCOUNT_ID = undefined;
-
 describe('StackOneToolSet', () => {
+  beforeEach(() => {
+    vi.stubEnv('STACKONE_API_KEY', 'test_key');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   // Snapshot tests
   describe('Snapshot Tests', () => {
     it('should parse the all the oas files correctly', () => {
@@ -47,16 +48,11 @@ describe('StackOneToolSet', () => {
     });
 
     it('should throw ToolSetConfigError if no API key is provided and strict mode is enabled', () => {
-      // Temporarily remove environment variable
-      const originalKey = env.STACKONE_API_KEY;
-      env.STACKONE_API_KEY = undefined;
+      vi.stubEnv('STACKONE_API_KEY', undefined);
 
       expect(() => {
         new StackOneToolSet({ strict: true });
       }).toThrow(ToolSetConfigError);
-
-      // Restore environment variable
-      env.STACKONE_API_KEY = originalKey;
     });
 
     it('should properly apply authentication to tools', () => {
@@ -237,7 +233,7 @@ describe('StackOneToolSet', () => {
     // The account ID should be applied when getting tools
     // We can't directly check headers here, but we can verify the account ID is used
     // when calling getTools
-    const getToolsSpy = spyOn(toolset, 'getTools');
+    const getToolsSpy = vi.spyOn(toolset, 'getTools');
     toolset.getStackOneTools();
     expect(getToolsSpy).toHaveBeenCalledWith(undefined, { 'x-account-id': 'test_account' });
   });
@@ -246,7 +242,7 @@ describe('StackOneToolSet', () => {
     const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
     // Mock the getTools method
-    const getToolsSpy = spyOn(toolset, 'getTools');
+    const getToolsSpy = vi.spyOn(toolset, 'getTools');
 
     // Call getStackOneTools with account ID
     toolset.getStackOneTools('hris_*', 'override_account');
@@ -259,7 +255,7 @@ describe('StackOneToolSet', () => {
     const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
     // Mock the getTools method
-    const getToolsSpy = spyOn(toolset, 'getTools');
+    const getToolsSpy = vi.spyOn(toolset, 'getTools');
 
     // Call getStackOneTools without account ID
     toolset.getStackOneTools('hris_*');
