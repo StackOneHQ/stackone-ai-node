@@ -443,8 +443,4 @@ export const handlers = [
     });
   }),
 
-  // Default handler for unmatched requests
-  http.get('*', () => {
-    return HttpResponse.json({ message: 'Mock endpoint' });
-  }),
 ];

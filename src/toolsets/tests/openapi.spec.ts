@@ -1,75 +1,127 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { createFixture } from 'fs-fixture';
 import { http, HttpResponse } from 'msw';
-import { vi } from 'vitest';
 import { server } from '../../../mocks/node.ts';
-import * as OpenAPILoader from '../../openapi/loader';
-import { ParameterLocation } from '../../types';
 import type { AuthenticationConfig } from '../base';
 import { OpenAPIToolSet, type OpenAPIToolSetConfigFromUrl } from '../openapi';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-describe('OpenAPIToolSet', () => {
-  const fixturesPath = path.join(__dirname, 'fixtures');
-  const petstoreJsonPath = path.join(fixturesPath, 'petstore.json');
-
-  let loadFromFileSpy: ReturnType<typeof vi.spyOn>;
-  const recordRequests = () => {
-    const recordedRequests: Request[] = [];
-    const listener = ({ request }: { request: Request }) => {
-      recordedRequests.push(request);
-    };
-    server.events.on('request:start', listener);
-    return recordedRequests;
-  };
-
-  beforeEach(() => {
-    loadFromFileSpy = vi.spyOn(OpenAPILoader, 'loadFromFile').mockImplementation(() => ({
-      pet_findById: {
-        name: 'pet_findById',
-        description: 'Find pet by ID',
-        parameters: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              description: 'ID of pet to return',
+const petstoreSpec = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Swagger Petstore',
+    description: 'This is a sample server Petstore server.',
+    version: '1.0.0',
+  },
+  servers: [{ url: 'https://petstore.swagger.io/v2' }],
+  paths: {
+    '/pet/{petId}': {
+      get: {
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        operationId: 'getPetById',
+        parameters: [
+          {
+            name: 'petId',
+            in: 'path',
+            description: 'ID of pet to return',
+            required: true,
+            schema: { type: 'integer', format: 'int64' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'successful operation',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Pet' },
+              },
             },
           },
-          required: ['id'],
-        },
-        execute: {
-          kind: 'http',
-          method: 'GET',
-          url: 'https://petstore.swagger.io/v2/pet/{id}',
-          bodyType: 'json',
-          params: [
-            {
-              name: 'id',
-              location: ParameterLocation.PATH,
-              type: 'string',
-            },
-          ],
+          '400': { description: 'Invalid ID supplied' },
+          '404': { description: 'Pet not found' },
         },
       },
-    }));
-  });
+    },
+    '/pet': {
+      post: {
+        summary: 'Add a new pet to the store',
+        description: 'Add a new pet to the store',
+        operationId: 'addPet',
+        requestBody: {
+          description: 'Pet object that needs to be added to the store',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Pet' },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          '200': {
+            description: 'successful operation',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Pet' },
+              },
+            },
+          },
+          '405': { description: 'Invalid input' },
+        },
+      },
+    },
+  },
+  components: {
+    schemas: {
+      Pet: {
+        type: 'object',
+        required: ['name', 'photoUrls'],
+        properties: {
+          id: { type: 'integer', format: 'int64', example: 10 },
+          name: { type: 'string', example: 'doggie' },
+          category: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer', format: 'int64', example: 1 },
+              name: { type: 'string', example: 'Dogs' },
+            },
+          },
+          photoUrls: { type: 'array', items: { type: 'string' } },
+          tags: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', format: 'int64' },
+                name: { type: 'string' },
+              },
+            },
+          },
+          status: {
+            type: 'string',
+            description: 'pet status in the store',
+            enum: ['available', 'pending', 'sold'],
+          },
+        },
+      },
+    },
+  },
+} as const;
 
+describe('OpenAPIToolSet', () => {
   afterEach(() => {
-    loadFromFileSpy.mockRestore();
     server.events.removeAllListeners('request:start');
   });
 
-  it('should initialize with a file path', () => {
-    // Create an instance of OpenAPIToolSet
-    const toolset = new OpenAPIToolSet({
-      filePath: petstoreJsonPath,
+  it('should initialize with a file path', async () => {
+    await using fixture = await createFixture({
+      'petstore.json': JSON.stringify(petstoreSpec),
     });
 
-    // Verify the toolset was initialized
+    const toolset = new OpenAPIToolSet({
+      filePath: fixture.getPath('petstore.json'),
+    });
+
     expect(toolset).toBeDefined();
-    expect(loadFromFileSpy).toHaveBeenCalledWith(petstoreJsonPath, undefined);
+    expect(toolset.getTool('getPetById')).toBeDefined();
   });
 
   it('should throw error if neither filePath nor url is provided', () => {
@@ -97,7 +149,10 @@ describe('OpenAPIToolSet', () => {
       )
     );
 
-    const recordedRequests = recordRequests();
+    const recordedRequests: Request[] = [];
+    server.events.on('request:start', ({ request }) => {
+      recordedRequests.push(request);
+    });
 
     // Create an instance from a URL
     const toolset = await OpenAPIToolSet.fromUrl({
@@ -115,25 +170,28 @@ describe('OpenAPIToolSet', () => {
     await expect(OpenAPIToolSet.fromUrl({} as OpenAPIToolSetConfigFromUrl)).rejects.toThrow();
   });
 
-  it('should set headers on tools', () => {
-    // Create an instance with headers
+  it('should set headers on tools', async () => {
+    await using fixture = await createFixture({
+      'petstore.json': JSON.stringify(petstoreSpec),
+    });
+
     const toolset = new OpenAPIToolSet({
-      filePath: petstoreJsonPath,
+      filePath: fixture.getPath('petstore.json'),
       headers: {
         'X-Test-Header': 'test-value',
       },
     });
 
-    // Get the tool
-    const tool = toolset.getTool('pet_findById');
-
-    // Verify the header was set
+    const tool = toolset.getTool('getPetById');
     const headers = tool.getHeaders();
     expect(headers).toHaveProperty('X-Test-Header', 'test-value');
   });
 
-  it('should use basic authentication', () => {
-    // Create an instance of OpenAPIToolSet with basic auth
+  it('should use basic authentication', async () => {
+    await using fixture = await createFixture({
+      'petstore.json': JSON.stringify(petstoreSpec),
+    });
+
     const auth: AuthenticationConfig = {
       type: 'basic',
       credentials: {
@@ -143,21 +201,22 @@ describe('OpenAPIToolSet', () => {
     };
 
     const toolset = new OpenAPIToolSet({
-      filePath: petstoreJsonPath,
+      filePath: fixture.getPath('petstore.json'),
       authentication: auth,
     });
-    // @ts-expect-error - Accessing protected property for testing
-    expect(toolset.authentication).toEqual(auth);
 
-    const tool = toolset.getTool('pet_findById');
+    const tool = toolset.getTool('getPetById');
     const headers = tool.getHeaders();
 
     const expectedAuthValue = `Basic ${Buffer.from('testuser:testpass').toString('base64')}`;
     expect(headers.Authorization).toBe(expectedAuthValue);
   });
 
-  it('should use bearer authentication', () => {
-    // Create an instance of OpenAPIToolSet with bearer auth
+  it('should use bearer authentication', async () => {
+    await using fixture = await createFixture({
+      'petstore.json': JSON.stringify(petstoreSpec),
+    });
+
     const auth: AuthenticationConfig = {
       type: 'bearer',
       credentials: {
@@ -166,14 +225,11 @@ describe('OpenAPIToolSet', () => {
     };
 
     const toolset = new OpenAPIToolSet({
-      filePath: petstoreJsonPath,
+      filePath: fixture.getPath('petstore.json'),
       authentication: auth,
     });
 
-    // @ts-expect-error - Accessing protected property for testing
-    expect(toolset.authentication).toEqual(auth);
-
-    const tool = toolset.getTool('pet_findById');
+    const tool = toolset.getTool('getPetById');
     const headers = tool.getHeaders();
 
     expect(headers.Authorization).toBe('Bearer test-token');
