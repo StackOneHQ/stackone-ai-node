@@ -2,6 +2,7 @@
   "name": "@stackone/ai",
   "version": "1.1.0",
   "description": "Tools for agents to perform actions on your SaaS",
+  "packageManager": "pnpm@10.24.0",
   "module": "./dist/index.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,56 +18,58 @@
     "LICENSE"
   ],
   "scripts": {
-    "preinstall": "bun x only-allow bun",
-    "prepare": "bun prepare:git",
+    "preinstall": "npx only-allow pnpm",
+    "prepare": "pnpm run prepare:git",
     "prepare:git": "git config --local core.hooksPath .githooks",
-    "build": "bun -b tsdown",
-    "rebuild": "bun run fetch:specs && bun run build",
-    "prepack": "bun run rebuild",
-    "test:unit": "bun test src",
-    "test:examples": "bun test examples",
-    "test:scripts": "bun test scripts",
-    "test": "bun run test:unit && bun run test:examples && bun run test:scripts",
-    "fetch:specs": "bun run ./scripts/fetch-specs.ts && bun run format",
-    "build:docs": "bun run ./scripts/build-docs.ts",
+    "build": "tsdown",
+    "rebuild": "pnpm run fetch:specs && pnpm run build",
+    "prepack": "pnpm run rebuild",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "fetch:specs": "tsx ./scripts/fetch-specs.ts && pnpm run format",
+    "build:docs": "tsx ./scripts/build-docs.ts",
     "docs:serve": "mkdocs serve",
-    "docs:build": "bun run build:docs && mkdocs build",
-    "docs:deploy": "bun run build:docs && mkdocs gh-deploy --force",
+    "docs:build": "pnpm run build:docs && mkdocs build",
+    "docs:deploy": "pnpm run build:docs && mkdocs gh-deploy --force",
     "lint": "biome check .",
     "typecheck": "tsgo --noEmit",
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.19.1",
-    "@orama/orama": "^3.1.11",
-    "@stackone/stackone-client-ts": "^4.28.0",
-    "json-schema": "^0.4.0"
+    "@modelcontextprotocol/sdk": "catalog:runtime",
+    "@orama/orama": "catalog:runtime",
+    "@stackone/stackone-client-ts": "catalog:runtime",
+    "json-schema": "catalog:runtime"
   },
   "devDependencies": {
-    "@ai-sdk/openai": "^2.0.46",
-    "@biomejs/biome": "^1.5.3",
-    "@hono/mcp": "^0.1.4",
-    "@types/bun": "^1.2.4",
-    "@types/json-schema": "^7.0.15",
-    "@types/node": "^22.13.5",
-    "@typescript/native-preview": "^7.0.0-dev.20250623.1",
-    "ai": "^5.0.63",
-    "fs-fixture": "^2.8.1",
-    "hono": "^4.9.10",
-    "lint-staged": "^15.2.0",
-    "mkdocs": "^0.0.1",
-    "msw": "^2.10.4",
-    "openai": "^6.2.0",
-    "openapi-types": "^12.1.3",
-    "publint": "^0.3.12",
-    "tsdown": "^0.15.9",
-    "type-fest": "^4.41.0",
-    "unplugin-unused": "^0.5.4",
-    "zod": "^3.23.8"
+    "@ai-sdk/openai": "catalog:ai",
+    "@biomejs/biome": "catalog:lint",
+    "@hono/mcp": "catalog:other",
+    "@types/json-schema": "catalog:types",
+    "@types/node": "catalog:types",
+    "@typescript/native-preview": "catalog:types",
+    "@vitest/coverage-v8": "catalog:testing",
+    "ai": "catalog:ai",
+    "fs-fixture": "catalog:testing",
+    "hono": "catalog:other",
+    "lint-staged": "catalog:lint",
+    "mkdocs": "catalog:other",
+    "msw": "catalog:testing",
+    "openai": "catalog:ai",
+    "openapi-types": "catalog:other",
+    "publint": "catalog:lint",
+    "tsdown": "catalog:build",
+    "tsx": "catalog:other",
+    "type-fest": "catalog:types",
+    "typescript": "catalog:types",
+    "unplugin-unused": "catalog:build",
+    "vitest": "catalog:testing",
+    "zod": "catalog:other"
   },
   "peerDependencies": {
-    "ai": "4.x|5.x",
-    "openai": "5.x|6.x"
+    "ai": ">=4.0.0",
+    "openai": ">=5.0.0"
   },
   "peerDependenciesMeta": {
     "ai": {
@@ -104,5 +107,14 @@
       ".": "./dist/index.js",
       "./package.json": "./package.json"
     }
+  },
+  "devEngines": {
+    "runtime": [
+      {
+        "name": "node",
+        "version": "^24.11.0",
+        "onFail": "download"
+      }
+    ]
   }
 }
