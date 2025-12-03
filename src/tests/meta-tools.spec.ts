@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import { BaseTool, type MetaToolSearchResult, Tools } from '../tool';
 import { ParameterLocation } from '../types';
 
@@ -163,10 +162,6 @@ describe('Meta Search Tools', () => {
     metaTools = await tools.metaTools(); // default BM25 strategy
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe('metaTools()', () => {
     it('should return two meta tools', () => {
       expect(metaTools.length).toBe(2);
@@ -186,15 +181,8 @@ describe('Meta Search Tools', () => {
   });
 
   describe('meta_search_tools', () => {
-    let filterTool: BaseTool;
-
-    beforeEach(() => {
-      const tool = metaTools.getTool('meta_search_tools');
-      if (!tool) throw new Error('meta_search_tools not found');
-      filterTool = tool;
-    });
-
     it('should find relevant HRIS tools', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute({
         query: 'manage employees in HRIS',
         limit: 5,
@@ -206,12 +194,12 @@ describe('Meta Search Tools', () => {
       const toolResults = result.tools as MetaToolSearchResult[];
       const toolNames = toolResults.map((t) => t.name);
 
-      // Should find HRIS-related tools
       expect(toolNames).toContain('hris_create_employee');
       expect(toolNames).toContain('hris_list_employees');
     });
 
     it('should find time off related tools', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute({
         query: 'time off request vacation leave',
         limit: 3,
@@ -224,6 +212,7 @@ describe('Meta Search Tools', () => {
     });
 
     it('should respect limit parameter', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute({
         query: 'create',
         limit: 2,
@@ -234,9 +223,10 @@ describe('Meta Search Tools', () => {
     });
 
     it('should filter by minimum score', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute({
         query: 'xyz123 nonexistent',
-        minScore: 0.8, // High threshold
+        minScore: 0.8,
       });
 
       const toolResults = result.tools as MetaToolSearchResult[];
@@ -244,6 +234,7 @@ describe('Meta Search Tools', () => {
     });
 
     it('should include tool configurations in results', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute({
         query: 'create employee',
         limit: 1,
@@ -261,6 +252,7 @@ describe('Meta Search Tools', () => {
     });
 
     it('should handle empty query', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute({
         query: '',
         limit: 5,
@@ -271,6 +263,7 @@ describe('Meta Search Tools', () => {
     });
 
     it('should handle string parameters', async () => {
+      const filterTool = metaTools.getTool('meta_search_tools');
       const result = await filterTool.execute(
         JSON.stringify({
           query: 'candidates',
@@ -281,7 +274,6 @@ describe('Meta Search Tools', () => {
       const toolResults = result.tools as MetaToolSearchResult[];
       const toolNames = toolResults.map((t) => t.name);
 
-      // With alpha=0.2, at least one ATS candidate tool should be found
       const hasCandidateTool = toolNames.some(
         (name) => name === 'ats_create_candidate' || name === 'ats_list_candidates'
       );
@@ -290,25 +282,18 @@ describe('Meta Search Tools', () => {
   });
 
   describe('meta_execute_tool', () => {
-    let executeTool: BaseTool;
-
-    beforeEach(() => {
-      const tool = metaTools.getTool('meta_execute_tool');
-      if (!tool) throw new Error('meta_execute_tool not found');
-      executeTool = tool;
-    });
-
     it('should execute a tool by name', async () => {
+      const executeTool = metaTools.getTool('meta_execute_tool');
       const result = await executeTool.execute({
         toolName: 'hris_list_employees',
         params: { limit: 10 },
       });
 
-      // The mock tool returns the params
       expect(result).toEqual({ limit: 10 });
     });
 
     it('should handle tools with required parameters', async () => {
+      const executeTool = metaTools.getTool('meta_execute_tool');
       const result = await executeTool.execute({
         toolName: 'hris_create_employee',
         params: {
@@ -324,18 +309,17 @@ describe('Meta Search Tools', () => {
     });
 
     it('should throw error for non-existent tool', async () => {
-      try {
-        await executeTool.execute({
+      const executeTool = metaTools.getTool('meta_execute_tool');
+      await expect(
+        executeTool.execute({
           toolName: 'nonexistent_tool',
           params: {},
-        });
-        expect(true).toBe(false); // Should not reach here
-      } catch (error) {
-        expect((error as Error).message).toContain('Tool nonexistent_tool not found');
-      }
+        })
+      ).rejects.toThrow('Tool nonexistent_tool not found');
     });
 
     it('should handle string parameters', async () => {
+      const executeTool = metaTools.getTool('meta_execute_tool');
       const result = await executeTool.execute(
         JSON.stringify({
           toolName: 'crm_create_contact',
@@ -353,6 +337,7 @@ describe('Meta Search Tools', () => {
     });
 
     it('should pass through execution options', async () => {
+      const executeTool = metaTools.getTool('meta_execute_tool');
       const result = await executeTool.execute({
         toolName: 'ats_list_candidates',
         params: { status: 'active' },
@@ -366,7 +351,6 @@ describe('Meta Search Tools', () => {
     it('should discover and execute tools in sequence', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
       const executeTool = metaTools.getTool('meta_execute_tool');
-      if (!filterTool || !executeTool) throw new Error('Meta search tools not found');
 
       // Step 1: Discover relevant tools
       const searchResult = await filterTool.execute({
@@ -430,11 +414,13 @@ describe('Meta Search Tools', () => {
     it('should execute through AI SDK format', async () => {
       const aiSdkTools = await metaTools.toAISDK();
 
-      const result = await aiSdkTools.meta_search_tools.execute?.(
+      assert(aiSdkTools.meta_search_tools.execute);
+
+      const result = await aiSdkTools.meta_search_tools.execute(
         { query: 'ATS candidates', limit: 2 },
         { toolCallId: 'test-call-1', messages: [] }
       );
-      if (!result) throw new Error('No result from execute');
+      expect(result).toBeDefined();
 
       const toolResults = (result as { tools: MetaToolSearchResult[] }).tools;
       expect(Array.isArray(toolResults)).toBe(true);
@@ -446,24 +432,13 @@ describe('Meta Search Tools', () => {
 });
 
 describe('Meta Search Tools - Hybrid Strategy', () => {
-  let tools: Tools;
-
-  beforeEach(() => {
-    const mockTools = createMockTools();
-    tools = new Tools(mockTools);
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
   describe('Hybrid BM25 + TF-IDF search', () => {
     it('should search using hybrid strategy with default alpha', async () => {
+      const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools();
       const searchTool = metaTools.getTool('meta_search_tools');
-      expect(searchTool).toBeDefined();
 
-      const result = await searchTool?.execute({
+      const result = await searchTool.execute({
         query: 'manage employees',
         limit: 5,
       });
@@ -475,10 +450,11 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
     });
 
     it('should search using hybrid strategy with custom alpha', async () => {
+      const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools(0.7);
       const searchTool = metaTools.getTool('meta_search_tools');
 
-      const result = await searchTool?.execute({
+      const result = await searchTool.execute({
         query: 'create candidate',
         limit: 3,
       });
@@ -489,10 +465,11 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
     });
 
     it('should combine BM25 and TF-IDF scores', async () => {
+      const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools(0.5);
       const searchTool = metaTools.getTool('meta_search_tools');
 
-      const result = await searchTool?.execute({
+      const result = await searchTool.execute({
         query: 'employee',
         limit: 10,
       });
@@ -500,7 +477,6 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
       const toolResults = result.tools as MetaToolSearchResult[];
       expect(toolResults.length).toBeGreaterThan(0);
 
-      // Check that scores are within expected range
       for (const tool of toolResults) {
         expect(tool.score).toBeGreaterThanOrEqual(0);
         expect(tool.score).toBeLessThanOrEqual(1);
@@ -508,10 +484,11 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
     });
 
     it('should find relevant tools', async () => {
+      const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools();
       const searchTool = metaTools.getTool('meta_search_tools');
 
-      const result = await searchTool?.execute({
+      const result = await searchTool.execute({
         query: 'time off vacation',
         limit: 3,
       });

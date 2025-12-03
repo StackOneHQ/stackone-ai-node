@@ -173,8 +173,7 @@ describe('OpenAPIParser', () => {
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
 
-    it('should throw error if operation ID is missing', () => {
-      // Create a spec with a missing operation ID
+    it('should return empty tools when operation ID is missing', () => {
       const invalidSpec = createMinimalSpec({
         paths: {
           '/test': {
@@ -189,21 +188,15 @@ describe('OpenAPIParser', () => {
         },
       });
 
-      // Use the spec object directly
       const parser = new OpenAPIParser(invalidSpec);
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      // Use spyOn to temporarily replace the method
-      const spy = vi.spyOn(parser, 'parseTools');
-      spy.mockImplementation(() => {
-        throw new Error('Operation ID is required for tool parsing: GET /test');
-      });
+      const tools = parser.parseTools();
 
-      try {
-        expect(() => parser.parseTools()).toThrow('Operation ID is required');
-      } finally {
-        // Restore the original method
-        spy.mockRestore();
-      }
+      expect(Object.keys(tools).length).toBe(0);
+      expect(consoleSpy).toHaveBeenCalledWith('Error parsing OpenAPI spec:', expect.any(Error));
+
+      consoleSpy.mockRestore();
     });
 
     it('should correctly set required fields in tool parameters', () => {
