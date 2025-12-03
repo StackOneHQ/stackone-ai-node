@@ -1,5 +1,4 @@
 import type { OpenAPIV3 } from 'openapi-types';
-import { vi } from 'vitest';
 import { ParameterLocation } from '../../types';
 import * as specs from '../generated';
 import { OpenAPIParser } from '../parser';
@@ -173,7 +172,7 @@ describe('OpenAPIParser', () => {
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
 
-    it('should return empty tools when operation ID is missing', () => {
+    it('should throw error when operation ID is missing', () => {
       const invalidSpec = createMinimalSpec({
         paths: {
           '/test': {
@@ -189,14 +188,10 @@ describe('OpenAPIParser', () => {
       });
 
       const parser = new OpenAPIParser(invalidSpec);
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      const tools = parser.parseTools();
-
-      expect(Object.keys(tools).length).toBe(0);
-      expect(consoleSpy).toHaveBeenCalledWith('Error parsing OpenAPI spec:', expect.any(Error));
-
-      consoleSpy.mockRestore();
+      expect(() => parser.parseTools()).toThrow(
+        'Operation ID is required for tool parsing: GET /test'
+      );
     });
 
     it('should correctly set required fields in tool parameters', () => {

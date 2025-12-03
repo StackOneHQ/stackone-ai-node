@@ -466,142 +466,111 @@ export class OpenAPIParser {
    * Parse OpenAPI spec into tool definitions
    */
   public parseTools(): Record<string, ToolDefinition> {
-    // Create a new empty tools object to ensure no tools from previous tests are included
     const tools: Record<string, ToolDefinition> = {};
+    const paths = this._spec.paths || {};
 
-    try {
-      const paths = this._spec.paths || {};
-
-      for (const [path, pathItem] of Object.entries(paths)) {
-        if (!pathItem) {
-          continue;
-        }
-
-        // Handle operations (get, post, put, delete, etc.)
-        const operations = this.extractOperations(pathItem);
-
-        for (const [method, operation] of operations) {
-          // Check for operationId - this is required
-          if (!operation.operationId) {
-            const errorMsg = `Operation ID is required for tool parsing: ${method.toUpperCase()} ${path}`;
-            throw new Error(errorMsg);
-          }
-
-          const name = operation.operationId;
-
-          try {
-            // Parse request body if present
-            const [requestBodySchema, bodyType] = this.parseRequestBody(operation);
-
-            // Track parameter locations and properties
-            // Create fresh objects for each operation to avoid shared state issues
-            const parameterLocations: Record<string, ParameterLocation> = {};
-            const properties: Record<string, JsonSchema> = {};
-            let requiredParams: string[] = [];
-
-            // Parse parameters
-            for (const param of operation.parameters || []) {
-              try {
-                // Resolve parameter reference if needed
-                const resolvedParam = this.resolveParameter(param);
-                if (!resolvedParam) {
-                  continue;
-                }
-
-                const paramName = resolvedParam.name;
-
-                // Skip parameters that should be removed or are deprecated
-                if (this.shouldSkipItem(paramName, resolvedParam)) {
-                  continue;
-                }
-
-                const paramLocation = resolvedParam.in; // header, query, path, cookie
-                parameterLocations[paramName] = paramLocation as ParameterLocation;
-
-                // Add to properties for tool parameters
-                const schema = { ...(resolvedParam.schema || {}) };
-                if ('description' in resolvedParam) {
-                  (schema as Record<string, unknown>).description = resolvedParam.description;
-                }
-                properties[paramName] = this.resolveSchema(schema);
-
-                // Add to required params if required
-                // Special case for x-account-id: only add to required if it's required in the spec
-                if (resolvedParam.required && !(paramName === 'x-account-id')) {
-                  requiredParams.push(paramName);
-                }
-              } catch (_paramError) {
-                // Continue with other parameters even if one fails
-              }
-            }
-
-            // Add request body properties if present
-            if (requestBodySchema && typeof requestBodySchema === 'object') {
-              const bodyProps = requestBodySchema.properties || {};
-
-              // Extract required fields from request body
-              if ('required' in requestBodySchema && Array.isArray(requestBodySchema.required)) {
-                requiredParams = [...requiredParams, ...requestBodySchema.required];
-              }
-
-              for (const [propName, propSchema] of Object.entries(bodyProps)) {
-                try {
-                  // Skip items that should be removed or are deprecated
-                  if (this.shouldSkipItem(propName, propSchema)) {
-                    continue;
-                  }
-
-                  // Create a deep copy of the propSchema to avoid shared state
-                  properties[propName] = this.resolveSchema(propSchema);
-                  parameterLocations[propName] = this.getParameterLocation(
-                    propSchema as Record<string, unknown>
-                  );
-                } catch (_propError) {
-                  // Continue with other properties even if one fails
-                }
-              }
-            }
-
-            // Filter out removed parameters from properties and required arrays
-            const [filteredProperties, filteredRequired] = this.filterRemovedParams(
-              properties,
-              requiredParams
-            );
-
-            // Create tool definition with deep copies to prevent shared state
-            const executeConfig = {
-              kind: 'http',
-              method: method.toUpperCase(),
-              url: `${this._baseUrl}${path}`,
-              bodyType: this.normalizeBodyType(bodyType),
-              params: Object.entries(parameterLocations)
-                .filter(([name]) => !this.isRemovedParam(name))
-                .map(([name, location]) => {
-                  return {
-                    name,
-                    location,
-                    type: (filteredProperties[name]?.type as JsonSchema['type']) || 'string',
-                  };
-                }),
-            } satisfies HttpExecuteConfig;
-
-            tools[name] = {
-              description: operation.summary || '',
-              parameters: {
-                type: 'object',
-                properties: filteredProperties,
-                required: filteredRequired,
-              },
-              execute: executeConfig,
-            };
-          } catch (operationError) {
-            console.error(`Error processing operation ${name}: ${operationError}`);
-            // Continue with other operations even if one fails
-          }
-        }
+    for (const [path, pathItem] of Object.entries(paths)) {
+      if (!pathItem) {
+        continue;
       }
-    } catch (error) {
-      console.error('Error parsing OpenAPI spec:', error);
+
+      const operations = this.extractOperations(pathItem);
+
+      for (const [method, operation] of operations) {
+        if (!operation.operationId) {
+          throw new Error(
+            `Operation ID is required for tool parsing: ${method.toUpperCase()} ${path}`
+          );
+        }
+
+        const name = operation.operationId;
+
+        // Parse request body if present
+        const [requestBodySchema, bodyType] = this.parseRequestBody(operation);
+
+        // Track parameter locations and properties
+        const parameterLocations: Record<string, ParameterLocation> = {};
+        const properties: Record<string, JsonSchema> = {};
+        let requiredParams: string[] = [];
+
+        // Parse parameters
+        for (const param of operation.parameters || []) {
+          const resolvedParam = this.resolveParameter(param);
+          if (!resolvedParam) {
+            continue;
+          }
+
+          const paramName = resolvedParam.name;
+
+          // Skip parameters that should be removed or are deprecated
+          if (this.shouldSkipItem(paramName, resolvedParam)) {
+            continue;
+          }
+
+          const paramLocation = resolvedParam.in;
+          parameterLocations[paramName] = paramLocation as ParameterLocation;
+
+          const schema = { ...(resolvedParam.schema || {}) };
+          if ('description' in resolvedParam) {
+            (schema as Record<string, unknown>).description = resolvedParam.description;
+          }
+          properties[paramName] = this.resolveSchema(schema);
+
+          // Add to required params if required (except x-account-id)
+          if (resolvedParam.required && paramName !== 'x-account-id') {
+            requiredParams.push(paramName);
+          }
+        }
+
+        // Add request body properties if present
+        if (requestBodySchema && typeof requestBodySchema === 'object') {
+          const bodyProps = requestBodySchema.properties || {};
+
+          if ('required' in requestBodySchema && Array.isArray(requestBodySchema.required)) {
+            requiredParams = [...requiredParams, ...requestBodySchema.required];
+          }
+
+          for (const [propName, propSchema] of Object.entries(bodyProps)) {
+            if (this.shouldSkipItem(propName, propSchema)) {
+              continue;
+            }
+
+            properties[propName] = this.resolveSchema(propSchema);
+            parameterLocations[propName] = this.getParameterLocation(
+              propSchema as Record<string, unknown>
+            );
+          }
+        }
+
+        const [filteredProperties, filteredRequired] = this.filterRemovedParams(
+          properties,
+          requiredParams
+        );
+
+        const executeConfig = {
+          kind: 'http',
+          method: method.toUpperCase(),
+          url: `${this._baseUrl}${path}`,
+          bodyType: this.normalizeBodyType(bodyType),
+          params: Object.entries(parameterLocations)
+            .filter(([name]) => !this.isRemovedParam(name))
+            .map(([name, location]) => ({
+              name,
+              location,
+              type: (filteredProperties[name]?.type as JsonSchema['type']) || 'string',
+            })),
+        } satisfies HttpExecuteConfig;
+
+        tools[name] = {
+          description: operation.summary || '',
+          parameters: {
+            type: 'object',
+            properties: filteredProperties,
+            required: filteredRequired,
+          },
+          execute: executeConfig,
+        };
+      }
     }
 
     return tools;
