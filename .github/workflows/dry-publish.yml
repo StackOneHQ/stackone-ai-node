@@ -18,3 +18,5 @@ jobs:
 
       - name: 🚀 Dry Run Publish Package
         run: bun x pkg-pr-new publish
+        env:
+          RELEASE: 1
