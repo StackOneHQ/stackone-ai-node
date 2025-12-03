@@ -2246,7 +2246,7 @@ export const hrisSpec = {
             name: 'filter',
             required: false,
             in: 'query',
-            description: 'HRIS Shifts filters',
+            description: 'HRIS Employee Shifts filters',
             explode: true,
             style: 'deepObject',
             schema: {
@@ -12685,7 +12685,7 @@ export const hrisSpec = {
               nullable: true,
               example: 'open',
               type: 'string',
-              enum: ['open', 'closed', 'paused', 'unmapped_value', null],
+              enum: ['open', 'draft', 'closed', 'paused', 'unmapped_value', null],
             },
           },
         ],
@@ -17311,9 +17311,17 @@ export const hrisSpec = {
                   type: 'string',
                   format: 'date-time',
                   nullable: true,
-                  additionalProperties: false,
+                },
+                created_after: {
+                  description:
+                    'Use a string with a date to only select results created after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  format: 'date-time',
+                  nullable: true,
                 },
               },
+              additionalProperties: false,
               nullable: true,
               type: 'object',
             },
@@ -18038,9 +18046,17 @@ export const hrisSpec = {
                   type: 'string',
                   format: 'date-time',
                   nullable: true,
-                  additionalProperties: false,
+                },
+                created_after: {
+                  description:
+                    'Use a string with a date to only select results created after that given date',
+                  example: '2020-01-01T00:00:00.000Z',
+                  type: 'string',
+                  format: 'date-time',
+                  nullable: true,
                 },
               },
+              additionalProperties: false,
               nullable: true,
               type: 'object',
             },
@@ -21275,6 +21291,18 @@ export const hrisSpec = {
             type: 'string',
             description: "Provider's unique identifier",
             example: '8187e5da-dc77-475e-9949-af0f1fa4e4e3',
+            nullable: true,
+          },
+          name: {
+            type: 'string',
+            description: 'The manager name',
+            example: 'John Doe',
+            nullable: true,
+          },
+          email: {
+            type: 'string',
+            description: 'The manager email',
+            example: 'john.doe@example.com',
             nullable: true,
           },
           role: {
@@ -26986,7 +27014,7 @@ export const hrisSpec = {
         properties: {
           value: {
             type: 'string',
-            enum: ['open', 'closed', 'paused', 'unmapped_value', null],
+            enum: ['open', 'draft', 'closed', 'paused', 'unmapped_value', null],
             description: 'The status of the position.',
             example: 'open',
             'x-speakeasy-unknown-values': 'allow',

@@ -582,7 +582,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at,unified_custom_fields',
+                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,assigned_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -1263,7 +1263,7 @@ export const lmsSpec = {
     '/unified/lms/content/batch': {
       post: {
         description:
-          'Batch upsert multiple external linking learning objects that redirect users to a provider platform for consumption and progress tracking. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
+          'Batch upsert multiple external linking learning objects that redirect users to a provider platform for consumption and progress tracking. \n\n**Note:** Partial updates are not supported. When updating content, you must provide all the same fields that are required when creating content. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
         operationId: 'lms_batch_upsert_content',
         parameters: [
           {
@@ -1444,7 +1444,7 @@ export const lmsSpec = {
     '/unified/lms/content': {
       put: {
         description:
-          'Create or update an external linking learning object that redirects users to a provider platform for consumption and progress tracking. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
+          'Create or update an external linking learning object that redirects users to a provider platform for consumption and progress tracking. \n\n**Note:** Partial updates are not supported. When updating content, you must provide all the same fields that are required when creating content. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
         operationId: 'lms_upsert_content',
         parameters: [
           {
@@ -1925,193 +1925,6 @@ export const lmsSpec = {
       },
     },
     '/unified/lms/content/{id}': {
-      patch: {
-        description:
-          'Update an external linking learning object that redirects users to a provider platform for consumption and progress tracking. \n\nSee [here](https://docs.stackone.com/integration-guides/lms/external-content-providers/introduction) for more information about external linking learning objects.',
-        operationId: 'lms_update_content',
-        parameters: [
-          {
-            name: 'x-account-id',
-            in: 'header',
-            description: 'The account identifier',
-            required: true,
-            schema: {
-              type: 'string',
-            },
-          },
-          {
-            name: 'id',
-            required: true,
-            in: 'path',
-            schema: {
-              type: 'string',
-            },
-          },
-        ],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                $ref: '#/components/schemas/LmsCreateContentRequestDto',
-              },
-            },
-          },
-        },
-        responses: {
-          '201': {
-            description: 'The content was updated successfully.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UpdateResult',
-                },
-              },
-            },
-          },
-          '400': {
-            description: 'Invalid request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadRequestResponse',
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized access.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnauthorizedResponse',
-                },
-              },
-            },
-          },
-          '403': {
-            description: 'Forbidden.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ForbiddenResponse',
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Resource not found.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotFoundResponse',
-                },
-              },
-            },
-          },
-          '408': {
-            description: 'The request has timed out.',
-            headers: {
-              'Retry-After': {
-                description: 'A time in seconds after which the request can be retried.',
-                schema: {
-                  type: 'string',
-                },
-              },
-            },
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/RequestTimedOutResponse',
-                },
-              },
-            },
-          },
-          '409': {
-            description: 'Conflict with current state.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ConflictResponse',
-                },
-              },
-            },
-          },
-          '412': {
-            description: 'Precondition failed: linked account belongs to a disabled integration.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/PreconditionFailedResponse',
-                },
-              },
-            },
-          },
-          '422': {
-            description: 'Validation error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/UnprocessableEntityResponse',
-                },
-              },
-            },
-          },
-          '429': {
-            description: 'Too many requests.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/TooManyRequestsResponse',
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Server error while executing the request.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/InternalServerErrorResponse',
-                },
-              },
-            },
-          },
-          '501': {
-            description: 'This functionality is not implemented.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/NotImplementedResponse',
-                },
-              },
-            },
-          },
-          '502': {
-            description: 'Bad gateway error.',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/BadGatewayResponse',
-                },
-              },
-            },
-          },
-        },
-        security: [
-          {
-            basic: [],
-          },
-        ],
-        summary: 'Update External Linking Learning Objects',
-        tags: ['External Linking Learning Objects'],
-        'x-speakeasy-group': 'lms',
-        'x-speakeasy-name-override': 'update_content',
-        'x-speakeasy-retries': {
-          statusCodes: [429, 408],
-          strategy: 'backoff',
-        },
-      },
       get: {
         description:
           'Retrieve a content type learning object by its identifier. \n\nThese are the most granular learning objects (e.g. video, document, podcast) on a platform. \n\nOnly content objects for which the platform supports progress and completion tracking are returned.',
@@ -2381,7 +2194,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url,unified_custom_fields',
+                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url,score,unified_custom_fields',
               type: 'string',
             },
           },
@@ -3268,7 +3081,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url,unified_custom_fields',
+                'id,remote_id,external_id,remote_external_id,external_reference,content_id,remote_content_id,course_id,remote_course_id,user_id,remote_user_id,completed_at,updated_at,created_at,result,content_external_reference,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,time_spent,certificate_url,score,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5274,7 +5087,7 @@ export const lmsSpec = {
             schema: {
               nullable: true,
               example:
-                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at,unified_custom_fields',
+                'id,remote_id,external_reference,user_id,remote_user_id,course_id,remote_course_id,updated_at,created_at,assigned_at,due_date,status,progress,learning_object_type,learning_object_id,remote_learning_object_id,learning_object_external_reference,certificate_url,result,completed_at,unified_custom_fields',
               type: 'string',
             },
           },
@@ -5921,6 +5734,13 @@ export const lmsSpec = {
             format: 'date-time',
             nullable: true,
           },
+          assigned_at: {
+            type: 'string',
+            description: 'The date the assignment was assigned',
+            example: '2021-07-21T14:00:00.000Z',
+            format: 'date-time',
+            nullable: true,
+          },
           due_date: {
             type: 'string',
             description: 'The date the assignment is due to be completed',
@@ -6498,6 +6318,19 @@ export const lmsSpec = {
             example: 'e3cb75bf-aa84-466e-a6c1-b8322b257a48',
             deprecated: true,
             nullable: true,
+          },
+          score: {
+            description: 'The score associated with this completion',
+            example: {
+              percentage: 87,
+              raw_value: '87 / 100',
+            },
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ScoreModel',
+              },
+            ],
           },
         },
       },
@@ -7825,9 +7658,9 @@ export const lmsSpec = {
             example: '40',
             nullable: true,
           },
-          created_at: {
+          assigned_at: {
             type: 'string',
-            description: 'The date the assignment was created',
+            description: 'The date the assignment was assigned',
             example: '2021-07-21T14:00:00.000Z',
             format: 'date-time',
             nullable: true,
@@ -7914,6 +7747,19 @@ export const lmsSpec = {
             deprecated: true,
             nullable: true,
           },
+          score: {
+            description: 'The score associated with this completion',
+            example: {
+              percentage: 87,
+              raw_value: '87 / 100',
+            },
+            nullable: true,
+            allOf: [
+              {
+                $ref: '#/components/schemas/ScoreModel',
+              },
+            ],
+          },
           learning_object_external_reference: {
             type: 'string',
             description:
@@ -7922,209 +7768,6 @@ export const lmsSpec = {
           },
         },
         required: ['learning_object_external_reference'],
-      },
-      LmsCreateContentRequestDto: {
-        type: 'object',
-        properties: {
-          unified_custom_fields: {
-            type: 'object',
-            description: 'Custom Unified Fields configured in your StackOne project',
-            additionalProperties: true,
-            example: {
-              my_project_custom_field_1: 'REF-1236',
-              my_project_custom_field_2: 'some other value',
-            },
-            nullable: true,
-          },
-          title: {
-            type: 'string',
-            description: 'The title of the content',
-            example: 'Software Engineer Lv 1',
-            nullable: true,
-          },
-          description: {
-            type: 'string',
-            description: 'The description of the content',
-            example: 'This video acts as learning content for software engineers.',
-            nullable: true,
-          },
-          languages: {
-            description: 'The languages associated with this content',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/LanguageEnum',
-            },
-          },
-          content_url: {
-            type: 'string',
-            description: 'The external URL of the content',
-            example: 'https://www.youtube.com/watch?v=16873',
-            nullable: true,
-          },
-          mobile_launch_content_url: {
-            type: 'string',
-            description: 'The mobile friendly URL of the content',
-            example: 'https://www.mobile.youtube.com/watch?v=16873',
-            nullable: true,
-          },
-          content_type: {
-            description: 'The type of content',
-            nullable: true,
-            allOf: [
-              {
-                $ref: '#/components/schemas/WriteContentTypeEnum',
-              },
-            ],
-          },
-          cover_url: {
-            type: 'string',
-            description: 'The URL of the thumbnail image associated with the content.',
-            example: 'https://www.googledrive.com/?v=16873',
-            nullable: true,
-          },
-          active: {
-            description: 'Whether the content is active and available for users.',
-            example: true,
-            oneOf: [
-              {
-                type: 'boolean',
-              },
-              {
-                type: 'string',
-                enum: ['true', 'false'],
-              },
-            ],
-            nullable: true,
-          },
-          duration: {
-            type: 'string',
-            description:
-              'The duration of the content following the ISO8601 standard. If duration_unit is applicable we will derive this from the smallest unit given in the duration string or the minimum unit accepted by the provider.',
-            example: 'P3Y6M4DT12H30M5S',
-            format: 'string',
-            nullable: true,
-          },
-          skills: {
-            description: 'The skills associated with this content',
-            example: [
-              {
-                id: '12345',
-                name: 'Sales Techniques',
-              },
-            ],
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateSkillsApiModel',
-            },
-          },
-          order: {
-            type: 'number',
-            description:
-              'The order of the individual content within a content grouping. This is not applicable for pushing individual content.',
-            example: 1,
-            format: 'number',
-            nullable: true,
-          },
-          short_description: {
-            type: 'string',
-            description: 'A short description or summary for the content',
-            example: 'This course is a valuable resource and acts as learning content for...',
-            deprecated: true,
-            nullable: true,
-          },
-          localizations: {
-            description: 'The localization data for this content',
-            example: [
-              {
-                title: 'Software Engineer Lv 1',
-                description: 'This course acts as learning resource for software engineers.',
-                languages: {
-                  value: 'en-GB',
-                  source_value: 'string',
-                },
-              },
-              {
-                title: 'Software Engineer Lv 1',
-                description: 'This video acts as learning content for software engineers.',
-                languages: {
-                  value: 'en-US',
-                  source_value: 'string',
-                },
-              },
-            ],
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/LocalizationModel',
-            },
-          },
-          tags: {
-            description: 'A list of tags associated with the content',
-            example: ['Sales Techniques', 'Customer Service'],
-            nullable: true,
-            type: 'array',
-            items: {
-              type: 'string',
-            },
-          },
-          authors: {
-            description: 'The authors of the content',
-            example: [
-              {
-                id: '123',
-                name: 'John Doe',
-              },
-            ],
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/AuthorModel',
-            },
-          },
-          updated_at: {
-            type: 'string',
-            description: 'The date on which the content was last updated.',
-            example: '2021-07-21T14:00:00.000Z',
-            format: 'date-time',
-            nullable: true,
-          },
-          created_at: {
-            type: 'string',
-            description: 'The date on which the content was created.',
-            example: '2021-07-21T14:00:00.000Z',
-            format: 'date-time',
-            nullable: true,
-          },
-          external_reference: {
-            type: 'string',
-            description: 'The external ID associated with this content',
-            example: 'SOFTWARE-ENG-LV1-TRAINING-VIDEO-1',
-          },
-          categories: {
-            description: 'The categories associated with this content',
-            example: [
-              {
-                name: 'Technology',
-              },
-            ],
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/CreateCategoriesApiModel',
-            },
-          },
-          additional_data: {
-            description: 'The additional_data associated with this content',
-            nullable: true,
-            type: 'array',
-            items: {
-              $ref: '#/components/schemas/AdditionalData',
-            },
-          },
-        },
-        required: ['external_reference'],
       },
       LmsUpsertContentRequestDto: {
         type: 'object',
@@ -8643,6 +8286,23 @@ export const lmsSpec = {
           },
         },
       },
+      ScoreModel: {
+        type: 'object',
+        properties: {
+          percentage: {
+            type: 'number',
+            description: 'The score percentage',
+            example: 87.5,
+            nullable: true,
+          },
+          raw_value: {
+            type: 'string',
+            description: 'The raw string score value',
+            example: 87,
+            nullable: true,
+          },
+        },
+      },
       SkillLevelEnum: {
         type: 'object',
         properties: {
@@ -8870,25 +8530,6 @@ export const lmsSpec = {
             type: 'string',
             description: 'Timestamp when the error occurred',
             example: '2023-05-30T00:00:00.000Z',
-            format: 'date-time',
-          },
-        },
-        required: ['statusCode', 'message', 'timestamp'],
-      },
-      UpdateResult: {
-        type: 'object',
-        properties: {
-          statusCode: {
-            type: 'number',
-            example: 200,
-          },
-          message: {
-            type: 'string',
-            example: 'Record updated successfully.',
-          },
-          timestamp: {
-            type: 'string',
-            example: '2021-01-01T01:01:01.000Z',
             format: 'date-time',
           },
         },

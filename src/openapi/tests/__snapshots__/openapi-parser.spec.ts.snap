@@ -9879,7 +9879,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "string",
         },
         "filter": {
-          "description": "HRIS Shifts filters",
+          "description": "HRIS Employee Shifts filters",
           "properties": {
             "ends_before": {
               "description": "Filter shifts that end before this date",
@@ -10114,10 +10114,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "string",
         },
         "filter": {
+          "additionalProperties": false,
           "description": "Filter parameters that allow greater customisation of the list response",
           "properties": {
+            "created_after": {
+              "description": "Use a string with a date to only select results created after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
             "updated_after": {
-              "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
               "format": "date-time",
@@ -11224,6 +11230,7 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "description": "Filter positions by status",
           "enum": [
             "open",
+            "draft",
             "closed",
             "paused",
             "unmapped_value",
@@ -11417,10 +11424,16 @@ exports[`OpenAPIParser Snapshot Tests should parse all OpenAPI specs correctly 1
           "type": "string",
         },
         "filter": {
+          "additionalProperties": false,
           "description": "Filter parameters that allow greater customisation of the list response",
           "properties": {
+            "created_after": {
+              "description": "Use a string with a date to only select results created after that given date",
+              "example": "2020-01-01T00:00:00.000Z",
+              "format": "date-time",
+              "type": "string",
+            },
             "updated_after": {
-              "additionalProperties": false,
               "description": "Use a string with a date to only select results updated after that given date",
               "example": "2020-01-01T00:00:00.000Z",
               "format": "date-time",

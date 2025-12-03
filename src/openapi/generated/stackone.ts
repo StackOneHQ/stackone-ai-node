@@ -4617,6 +4617,11 @@ export const stackoneSpec = {
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
+          integration_id: {
+            type: 'string',
+            description: 'The integration ID (UUID) associated with this connect session',
+            nullable: true,
+          },
         },
         required: [
           'id',
@@ -4744,6 +4749,11 @@ export const stackoneSpec = {
             'x-speakeasy-unknown-values': 'allow',
             nullable: true,
           },
+          integration_id: {
+            type: 'string',
+            description: 'The integration ID associated with this connect session',
+            nullable: true,
+          },
         },
         required: ['origin_owner_id', 'origin_owner_name'],
       },
@@ -4844,6 +4854,11 @@ export const stackoneSpec = {
             enum: ['production', 'test', 'unmapped_value', null],
             example: ['PRODUCTION', 'TEST'],
             'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          integration_id: {
+            type: 'string',
+            description: 'The integration ID (UUID) associated with this connect session',
             nullable: true,
           },
           token: {
@@ -5165,6 +5180,10 @@ export const stackoneSpec = {
             enum: ['production', 'test', null],
             example: ['PRODUCTION', 'TEST'],
             'x-speakeasy-unknown-values': 'allow',
+            nullable: true,
+          },
+          integration_id: {
+            type: 'string',
             nullable: true,
           },
         },
