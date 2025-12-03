@@ -60,11 +60,11 @@ describe('StackOneToolSet', () => {
       const tools = toolset.getStackOneTools();
 
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const headers = tool.getHeaders();
+      const headers = tool?.getHeaders();
       const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
-      expect(headers.Authorization).toBe(expectedAuthValue);
+      expect(headers?.Authorization).toBe(expectedAuthValue);
     });
 
     it('should not override custom headers with authentication', () => {
@@ -90,12 +90,12 @@ describe('StackOneToolSet', () => {
 
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const headers = tool.getHeaders();
+      const headers = tool?.getHeaders();
       const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
-      expect(headers.Authorization).toBe(expectedAuthValue);
-      expect(headers['x-account-id']).toBe('test_account');
+      expect(headers?.Authorization).toBe(expectedAuthValue);
+      expect(headers?.['x-account-id']).toBe('test_account');
     });
   });
 
@@ -104,9 +104,9 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -122,9 +122,9 @@ describe('StackOneToolSet', () => {
       });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -139,9 +139,9 @@ describe('StackOneToolSet', () => {
       });
       const tools = toolset.getStackOneTools(undefined, 'override_account');
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -162,9 +162,9 @@ describe('StackOneToolSet', () => {
 
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -180,9 +180,9 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      assert(tool);
+      expect(tool).toBeDefined();
 
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;

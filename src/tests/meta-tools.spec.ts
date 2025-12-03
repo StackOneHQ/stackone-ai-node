@@ -414,9 +414,9 @@ describe('Meta Search Tools', () => {
     it('should execute through AI SDK format', async () => {
       const aiSdkTools = await metaTools.toAISDK();
 
-      assert(aiSdkTools.meta_search_tools.execute);
+      expect(aiSdkTools.meta_search_tools.execute).toBeDefined();
 
-      const result = await aiSdkTools.meta_search_tools.execute(
+      const result = await aiSdkTools.meta_search_tools.execute?.(
         { query: 'ATS candidates', limit: 2 },
         { toolCallId: 'test-call-1', messages: [] }
       );

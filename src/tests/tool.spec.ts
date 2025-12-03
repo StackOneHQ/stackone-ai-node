@@ -178,9 +178,9 @@ describe('StackOneTool', () => {
     const tool = createMockTool();
     const aiSdkTool = await tool.toAISDK();
 
-    assert(aiSdkTool.test_tool.execute);
+    expect(aiSdkTool.test_tool.execute).toBeDefined();
 
-    const result = await aiSdkTool.test_tool.execute(
+    const result = await aiSdkTool.test_tool.execute?.(
       { id: '123' },
       { toolCallId: 'test-tool-call-id', messages: [] }
     );
@@ -198,9 +198,9 @@ describe('StackOneTool', () => {
 
     const aiSdkTool = await tool.toAISDK();
 
-    assert(aiSdkTool.test_tool.execute);
+    expect(aiSdkTool.test_tool.execute).toBeDefined();
 
-    const result = await aiSdkTool.test_tool.execute(
+    const result = await aiSdkTool.test_tool.execute?.(
       { id: '123' },
       { toolCallId: 'test-tool-call-id', messages: [] }
     );
