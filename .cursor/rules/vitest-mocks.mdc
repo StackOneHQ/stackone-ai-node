@@ -1,19 +1,19 @@
 ---
-description: bun testing mocks
+description: Vitest testing mocks
 globs: *.spec.ts
 alwaysApply: false
 ---
-# Bun Mocks
+# Vitest Mocks
 
-This document outlines the standards for writing tests using Bun's testing framework in this repository.
+This document outlines the standards for writing tests using Vitest in this repository.
 
 ## HTTP Request Mocking with MSW
 
 ### Prefer MSW Over fetch Mocking
 
-**Always use MSW (Mock Service Worker) for mocking HTTP requests** instead of `spyOn(globalThis, 'fetch')`.
+**Always use MSW (Mock Service Worker) for mocking HTTP requests** instead of `vi.spyOn(globalThis, 'fetch')`.
 
-MSW is already configured globally in `bun.test.setup.ts`, so you don't need to set up the server in individual test files.
+MSW is already configured globally in `vitest.setup.ts`, so you don't need to set up the server in individual test files.
 
 #### Adding Mock Handlers
 
@@ -49,7 +49,7 @@ it('handles error responses', async () => {
 });
 ```
 
-The global `afterEach` hook in `bun.test.setup.ts` automatically calls `server.resetHandlers()` to reset overrides.
+The global `afterEach` hook in `vitest.setup.ts` automatically calls `server.resetHandlers()` to reset overrides.
 
 #### Verifying Requests
 
@@ -74,7 +74,7 @@ it('makes the expected request', async () => {
 ```
 
 **Important:**
-- Do NOT use `spyOn(globalThis, 'fetch')` for HTTP mocking - use MSW instead
+- Do NOT use `vi.spyOn(globalThis, 'fetch')` for HTTP mocking - use MSW instead
 - Do NOT add `beforeAll`/`afterAll`/`afterEach` for MSW setup in test files - it's already configured globally
 - MSW handlers are reset after each test automatically
 - For tests that need to run their own servers (e.g., MCP servers), you may need to temporarily close and restart MSW
@@ -83,123 +83,74 @@ it('makes the expected request', async () => {
 
 ### Use fs-fixture for File System Operations
 
-For tests that need to work with the file system, use [fs-fixture](https://github.com/privatenumber/fs-fixture) to create temporary test directories with automatic cleanup.
+For tests that need to work with the file system, use `fs-fixture` to create temporary test directories with automatic cleanup.
 
 **IMPORTANT: Always use `await using` syntax - do NOT manually manage fixture lifecycle.**
-
-**Basic Usage:**
 
 ```typescript
 import { createFixture } from 'fs-fixture';
 
 it('should save file to disk', async () => {
-  // Using 'await using' ensures automatic cleanup
   await using fixture = await createFixture();
-
-  // Write files using fixture methods
   await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
-
-  // Verify and read
   expect(await fixture.exists('data.json')).toBe(true);
-  const content = await fixture.readFile('data.json', 'utf8');
-  expect(JSON.parse(content)).toEqual({ test: 'data' });
 });
 ```
 
-**Pre-populated Fixtures:**
-
-```typescript
-it('should read existing files', async () => {
-  await using fixture = await createFixture({
-    'config.json': JSON.stringify({ setting: 'value' }),
-    'data/file.txt': 'content',
-  });
-
-  // Files are already created at fixture.path
-  const result = await processConfig(fixture.path);
-  expect(result).toBeDefined();
-});
-```
-
-**Type-Safe JSON:**
-
-```typescript
-interface Config { name: string; version: string; }
-
-await using fixture = await createFixture();
-await fixture.writeJson('config.json', { name: 'test', version: '1.0.0' }, 2);
-const config = await fixture.readJson<Config>('config.json');
-```
-
-**Key Methods:**
-- `fixture.path` - Absolute path to fixture directory
-- `fixture.exists(path)` - Check if file/directory exists
-- `fixture.readFile(path, encoding?)` - Read file
-- `fixture.writeFile(path, content)` - Write file
-- `fixture.readJson<T>(path)` - Parse JSON with types
-- `fixture.writeJson(path, data, space?)` - Write formatted JSON
-- `fixture.mkdir(path)` - Create directories
-
-**Benefits:**
-- Automatic cleanup with `await using` - no manual cleanup needed
-- Zero dependencies, lightweight (1.1 kB)
-- Type-safe JSON operations
-- Isolated test environments
-
-**Reference:** See [fs-fixture documentation](https://github.com/privatenumber/fs-fixture) for advanced usage and API details
+**Reference:** See `node_modules/fs-fixture/README.md` for full API and advanced usage
 
 ## Mocking Best Practices
 
 ### Use Proper Mocking Functions
 
-For non-HTTP mocking, use the appropriate mocking functions from Bun's testing framework:
+For non-HTTP mocking, use the appropriate mocking functions from Vitest:
 
-- Use `spyOn()` to track calls to existing functions without replacing their implementation
-- Use `mock()` to create standalone mock functions
-- Use `mock.module()` for module-level mocking
+- Use `vi.spyOn()` to track calls to existing functions without replacing their implementation
+- Use `vi.fn()` to create standalone mock functions
+- Use `vi.mock()` for module-level mocking
 
 ```typescript
-// Good: Using spyOn for existing methods
-const spy = spyOn(fs, "readFileSync");
+// Good: Using vi.spyOn for existing methods
+const spy = vi.spyOn(fs, "readFileSync");
 
 // Good: Creating a standalone mock function
-const mockFn = mock(() => "mocked result");
+const mockFn = vi.fn(() => "mocked result");
 ```
 
 ### Restore Mocks After Tests
 
 Always restore mocks after tests to prevent test pollution:
 
-- Use `mock.restore()` in `afterEach` or `afterAll` hooks
+- Use `vi.restoreAllMocks()` in `afterEach` or `afterAll` hooks
 - Alternatively, use `mockFn.mockRestore()` for individual mocks
 
 ```typescript
 // Good: Restoring all mocks after each test
 afterEach(() => {
-  mock.restore();
+  vi.restoreAllMocks();
 });
 ```
 
 ### Use Test Lifecycle Hooks
 
-Organize test setup and teardown using lifecycle hooks:
+Organise test setup and teardown using lifecycle hooks:
 
 - Use `beforeEach` for setting up mocks and test data
 - Use `afterEach` for cleaning up mocks and test data
 - Use `afterAll` for final cleanup
 
 ```typescript
-describe("My Test Suite", () => {
+describe("MyClass", () => {
   let mySpy;
 
   beforeEach(() => {
     // Setup mocks
-    mySpy = spyOn(myObject, "myMethod");
+    mySpy = vi.spyOn(myObject, "myMethod");
   });
 
   afterEach(() => {
     // Clean up
-    mock.restore();
+    vi.restoreAllMocks();
   });
 
   // Tests go here
@@ -210,29 +161,29 @@ describe("My Test Suite", () => {
 
 Avoid modifying global objects or prototypes directly. Instead:
 
-- Use `spyOn` to mock methods on objects
-- Use `mock.module()` to mock entire modules
+- Use `vi.spyOn` to mock methods on objects
+- Use `vi.mock()` to mock entire modules
 - Keep mocks scoped to the tests that need them
 
 ```typescript
 // Bad: Directly modifying a global object
-fs.readFileSync = jest.fn();
+fs.readFileSync = vi.fn();
 
-// Good: Using spyOn
-const readFileSpy = spyOn(fs, "readFileSync");
+// Good: Using vi.spyOn
+const readFileSpy = vi.spyOn(fs, "readFileSync");
 ```
 
 ### Use Module Mocking Appropriately
 
 When mocking modules:
 
-- Use `mock.module()` before the module is imported when possible
-- For modules already imported, be aware that side effects have already occurred
-- Consider using `--preload` for mocks that need to be in place before any imports
+- Use `vi.mock()` at the top of the test file (hoisted automatically)
+- For dynamic mocking, use `vi.doMock()`
+- Consider using `vi.importActual()` when you need partial mocks
 
 ```typescript
 // Good: Module mocking
-mock.module("./myModule", () => {
+vi.mock("./myModule", () => {
   return {
     myFunction: () => "mocked result",
   };
@@ -249,7 +200,7 @@ Always verify that mocks were called as expected:
 
 ```typescript
 test("my function calls the dependency", () => {
-  const spy = spyOn(dependency, "method");
+  const spy = vi.spyOn(dependency, "method");
   myFunction();
   expect(spy).toHaveBeenCalled();
   expect(spy).toHaveBeenCalledWith("expected arg");
@@ -257,7 +208,7 @@ test("my function calls the dependency", () => {
 });
 ```
 
-## Test Organization
+## Test Organisation
 
 ### Group Related Tests
 
@@ -295,5 +246,5 @@ it("works correctly", () => {
 
 ## Additional Resources
 
-- [Bun Testing Documentation](mdc:https:/bun.sh/docs/cli/test)
-- [Jest API Reference](mdc:https:/jestjs.io/docs/api) (for compatible APIs)
+- [Vitest Documentation](https://vitest.dev)
+- [MSW Documentation](https://mswjs.io)

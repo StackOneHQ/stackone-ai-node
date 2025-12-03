@@ -1,0 +1,36 @@
+{
+  "name": "@stackone/ai-examples",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@stackone/ai": "workspace:*"
+  },
+  "devDependencies": {
+    "@ai-sdk/openai": "catalog:ai",
+    "@types/node": "catalog:types",
+    "ai": "catalog:ai",
+    "msw": "catalog:testing",
+    "nano-spawn": "catalog:",
+    "openai": "catalog:ai",
+    "tsx": "catalog:other",
+    "vitest": "catalog:testing"
+  },
+  "devEngines": {
+    "runtime": [
+      {
+        "name": "node",
+        "version": "^24.11.0",
+        "onFail": "download"
+      },
+      {
+        "name": "bun",
+        "version": "^1.3.2",
+        "onFail": "download"
+      }
+    ]
+  }
+}

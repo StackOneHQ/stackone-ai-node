@@ -7,8 +7,8 @@
  */
 
 import { openai } from '@ai-sdk/openai';
+import { StackOneToolSet } from '@stackone/ai';
 import { generateText } from 'ai';
-import { StackOneToolSet } from '../src';
 import { ACCOUNT_IDS } from './constants';
 
 export const planningModule = async (): Promise<void> => {

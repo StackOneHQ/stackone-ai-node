@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   release-please:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release-please.outputs.release_created }}
     steps:
@@ -21,22 +21,19 @@ jobs:
           release-type: node
 
   publish-package:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created  }}
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_CONFIG_TOKEN }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2.0.2
-        with:
-          bun-version: latest
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Setup Node.js for npm
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_CONFIG_TOKEN }}
         with:
@@ -44,9 +41,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - name: 💫 Install dependencies
-        run: bun i
+        run: pnpm install --frozen-lockfile
 
       - name: 🚀 Publish package
-        run: npm publish --access public
-        env:
-          RELEASE: 1
+        run: pnpm publish --access public --no-git-checks

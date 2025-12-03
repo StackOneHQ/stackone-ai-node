@@ -1,13 +1,14 @@
-import { describe, expect, it, spyOn } from 'bun:test';
-import { env } from 'bun';
 import { ToolSetConfigError } from '../base';
 import { StackOneToolSet } from '../stackone';
 
-// Mock environment variables
-env.STACKONE_API_KEY = 'test_key';
-env.STACKONE_ACCOUNT_ID = undefined;
-
 describe('StackOneToolSet', () => {
+  beforeEach(() => {
+    vi.stubEnv('STACKONE_API_KEY', 'test_key');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   // Snapshot tests
   describe('Snapshot Tests', () => {
     it('should parse the all the oas files correctly', () => {
@@ -47,29 +48,23 @@ describe('StackOneToolSet', () => {
     });
 
     it('should throw ToolSetConfigError if no API key is provided and strict mode is enabled', () => {
-      // Temporarily remove environment variable
-      const originalKey = env.STACKONE_API_KEY;
-      env.STACKONE_API_KEY = undefined;
+      vi.stubEnv('STACKONE_API_KEY', undefined);
 
       expect(() => {
         new StackOneToolSet({ strict: true });
       }).toThrow(ToolSetConfigError);
-
-      // Restore environment variable
-      env.STACKONE_API_KEY = originalKey;
     });
 
     it('should properly apply authentication to tools', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
 
-      // Get a tool and check its headers
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) return;
+      expect(tool).toBeDefined();
 
-      const headers = tool.getHeaders();
+      const headers = tool?.getHeaders();
       const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
-      expect(headers.Authorization).toBe(expectedAuthValue);
+      expect(headers?.Authorization).toBe(expectedAuthValue);
     });
 
     it('should not override custom headers with authentication', () => {
@@ -95,12 +90,12 @@ describe('StackOneToolSet', () => {
 
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) return;
+      expect(tool).toBeDefined();
 
-      const headers = tool.getHeaders();
+      const headers = tool?.getHeaders();
       const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
-      expect(headers.Authorization).toBe(expectedAuthValue);
-      expect(headers['x-account-id']).toBe('test_account');
+      expect(headers?.Authorization).toBe(expectedAuthValue);
+      expect(headers?.['x-account-id']).toBe('test_account');
     });
   });
 
@@ -109,10 +104,9 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      expect(tool).toBeDefined();
 
-      // Use dryRun to check the actual request headers
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -128,10 +122,9 @@ describe('StackOneToolSet', () => {
       });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      expect(tool).toBeDefined();
 
-      // Use dryRun to check the actual request headers
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -146,10 +139,9 @@ describe('StackOneToolSet', () => {
       });
       const tools = toolset.getStackOneTools(undefined, 'override_account');
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      expect(tool).toBeDefined();
 
-      // Use dryRun to check the actual request headers
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -170,10 +162,9 @@ describe('StackOneToolSet', () => {
 
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      expect(tool).toBeDefined();
 
-      // Use dryRun to check the actual request headers
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -189,10 +180,9 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      expect(tool).toBeDefined();
 
-      // Use dryRun to check the actual request headers
-      const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
+      const request = (await tool?.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
         method: string;
@@ -230,41 +220,24 @@ describe('StackOneToolSet', () => {
       accountId: 'test_account',
     });
 
-    // Verify account ID is stored in the instance
-    // @ts-expect-error - Accessing private property for testing
-    expect(toolset.accountId).toBe('test_account');
-
-    // The account ID should be applied when getting tools
-    // We can't directly check headers here, but we can verify the account ID is used
-    // when calling getTools
-    const getToolsSpy = spyOn(toolset, 'getTools');
-    toolset.getStackOneTools();
-    expect(getToolsSpy).toHaveBeenCalledWith(undefined, { 'x-account-id': 'test_account' });
+    const tools = toolset.getStackOneTools('hris_list_employees');
+    const tool = tools.getTool('hris_list_employees');
+    expect(tool.getHeaders()['x-account-id']).toBe('test_account');
   });
 
   it('should get tools with account ID override', () => {
     const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
-    // Mock the getTools method
-    const getToolsSpy = spyOn(toolset, 'getTools');
-
-    // Call getStackOneTools with account ID
-    toolset.getStackOneTools('hris_*', 'override_account');
-
-    // Verify getTools was called with the correct parameters
-    expect(getToolsSpy).toHaveBeenCalledWith('hris_*', { 'x-account-id': 'override_account' });
+    const tools = toolset.getStackOneTools('hris_list_employees', 'override_account');
+    const tool = tools.getTool('hris_list_employees');
+    expect(tool.getHeaders()['x-account-id']).toBe('override_account');
   });
 
   it('should get tools without account ID if not provided', () => {
     const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
-    // Mock the getTools method
-    const getToolsSpy = spyOn(toolset, 'getTools');
-
-    // Call getStackOneTools without account ID
-    toolset.getStackOneTools('hris_*');
-
-    // Verify getTools was called with the correct parameters
-    expect(getToolsSpy).toHaveBeenCalledWith('hris_*', {});
+    const tools = toolset.getStackOneTools('hris_list_employees');
+    const tool = tools.getTool('hris_list_employees');
+    expect(tool.getHeaders()['x-account-id']).toBeUndefined();
   });
 });

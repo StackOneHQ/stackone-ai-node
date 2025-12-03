@@ -1,10 +1,7 @@
-import { describe, expect, it, mock, spyOn } from 'bun:test';
 import type { OpenAPIV3 } from 'openapi-types';
 import { ParameterLocation } from '../../types';
 import * as specs from '../generated';
 import { OpenAPIParser } from '../parser';
-
-const mockSpec = specs.hrisSpec;
 
 // Helper function to create a minimal spec for testing
 const createMinimalSpec = (customization: Partial<OpenAPIV3.Document> = {}): OpenAPIV3.Document => {
@@ -23,7 +20,7 @@ describe('OpenAPIParser', () => {
   // Test initialization
   describe('constructor', () => {
     it('should initialize with a spec object', () => {
-      const parser = new OpenAPIParser(mockSpec as unknown as OpenAPIV3.Document);
+      const parser = new OpenAPIParser(specs.hrisSpec as unknown as OpenAPIV3.Document);
       expect(parser).toBeInstanceOf(OpenAPIParser);
     });
 
@@ -173,8 +170,7 @@ describe('OpenAPIParser', () => {
       expect(Object.keys(tools).length).toBeGreaterThan(0);
     });
 
-    it('should throw error if operation ID is missing', () => {
-      // Create a spec with a missing operation ID
+    it('should throw error when operation ID is missing', () => {
       const invalidSpec = createMinimalSpec({
         paths: {
           '/test': {
@@ -189,24 +185,11 @@ describe('OpenAPIParser', () => {
         },
       });
 
-      // Use the spec object directly
       const parser = new OpenAPIParser(invalidSpec);
 
-      // Use Bun's mock function instead of modifying the instance
-      const mockParseToolsFn = mock(() => {
-        throw new Error('Operation ID is required for tool parsing: GET /test');
-      });
-
-      // Use spyOn to temporarily replace the method
-      const spy = spyOn(parser, 'parseTools');
-      spy.mockImplementation(mockParseToolsFn);
-
-      try {
-        expect(() => parser.parseTools()).toThrow('Operation ID is required');
-      } finally {
-        // Restore the original method
-        spy.mockRestore();
-      }
+      expect(() => parser.parseTools()).toThrow(
+        'Operation ID is required for tool parsing: GET /test'
+      );
     });
 
     it('should correctly set required fields in tool parameters', () => {

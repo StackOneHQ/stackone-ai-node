@@ -8,9 +8,8 @@
 
 import { assert } from 'node:console';
 import { openai } from '@ai-sdk/openai';
+import { type JsonDict, StackOneToolSet } from '@stackone/ai';
 import { generateText } from 'ai';
-import { StackOneToolSet } from '../src';
-import type { JsonDict } from '../src/types';
 import { ACCOUNT_IDS } from './constants';
 
 interface ToolCall {

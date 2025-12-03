@@ -1,23 +1,23 @@
 ---
 name: typescript-testing
-description: Bun test runner and MSW-based testing patterns for StackOne SDK
+description: Vitest test runner and MSW-based testing patterns for StackOne SDK
 ---
 
-# TypeScript Testing with Bun and MSW
+# TypeScript Testing with Vitest and MSW
 
-This skill guides testing practices for the StackOne SDK using Bun's test runner and Mock Service Worker (MSW) for HTTP mocking.
+This skill guides testing practices for the StackOne SDK using Vitest test runner and Mock Service Worker (MSW) for HTTP mocking.
 
 ## Testing Framework
 
-The project uses **Bun's built-in test runner** with Jest-compatible API. Run tests with:
-- `bun run test` - Run all tests (unit, examples, scripts)
-- `bun run test:unit` - Run only unit tests
-- `bun test src/path/to/file.spec.ts` - Run a specific test file
-- `bun test -t "test name"` - Run tests matching a pattern
+The project uses **Vitest** as the test runner. Run tests with:
+- `pnpm test` - Run all tests (unit, examples, scripts)
+- `pnpm test:unit` - Run only unit tests
+- `pnpm vitest src/path/to/file.spec.ts` - Run a specific test file
+- `pnpm vitest -t "test name"` - Run tests matching a pattern
 
 ## MSW (Mock Service Worker)
 
-**MSW is the preferred HTTP mocking solution.** MSW is configured globally in `bun.test.setup.ts`, so no per-file setup is required.
+**MSW is the preferred HTTP mocking solution.** MSW is configured globally in `vitest.setup.ts`, so no per-file setup is required.
 
 ### Adding Mock Handlers
 
@@ -89,23 +89,12 @@ import { createFixture } from 'fs-fixture';
 
 it('should save file to disk', async () => {
   await using fixture = await createFixture();
-
   await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
   expect(await fixture.exists('data.json')).toBe(true);
-
-  const content = await fixture.readFile('data.json', 'utf8');
-  expect(JSON.parse(content)).toEqual({ test: 'data' });
 });
 ```
 
-Available methods:
-- `fixture.path` - Absolute fixture directory path
-- `fixture.exists(path)` - Check existence
-- `fixture.readFile(path, encoding?)` - Read as string or Buffer
-- `fixture.writeFile(path, content)` - Write file
-- `fixture.readJson<T>(path)` - Parse JSON with type safety
-- `fixture.writeJson(path, data, space?)` - Write formatted JSON
-- `fixture.mkdir(path)` - Create nested directories
+**Reference:** See `node_modules/fs-fixture/README.md` for full API and advanced usage
 
 ## Test Organization
 

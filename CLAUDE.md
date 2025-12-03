@@ -25,7 +25,7 @@ Refer to `.claude/skills/openapi-architecture/SKILL.md` for complete details.
 ### Testing Strategy
 
 See the **typescript-testing** skill for comprehensive testing guidance:
-- Bun test runner setup and commands
+- Vitest test runner setup and commands
 - MSW (Mock Service Worker) patterns
 - File system testing with fs-fixture
 - Test organization and best practices

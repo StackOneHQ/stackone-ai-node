@@ -1,0 +1,48 @@
+---
+description: Standards for using pnpm in this repository
+globs:
+alwaysApply: false
+---
+
+# pnpm Standards
+
+## Overview
+
+This repository uses [pnpm](https://pnpm.io) as the package manager. pnpm is a fast, disk space efficient package manager.
+
+## Package Management
+
+- Use `pnpm install` instead of `npm install` to add dependencies
+- Use `pnpm-lock.yaml` for lockfiles (automatically generated)
+- When adding new dependencies, use: `pnpm add package@x.y.z`
+
+## TypeScript Configuration
+
+- TypeScript is configured via `tsconfig.json`
+- Use `pnpm typecheck` to run type checking with tsgo
+
+## Running Scripts
+
+- Use `pnpm <script>` to execute scripts defined in package.json
+- For one-off package execution, use `pnpm exec <command>` or `pnpm dlx <package>`
+
+## Testing
+
+- Use Vitest as the test runner with `pnpm test`
+- Test files should follow the pattern `*.test.ts` or `*.spec.ts`
+
+## Environment Variables
+
+- Environment variables are loaded from `.env` files
+- Access environment variables via `process.env`
+
+## Type Compatibility
+
+- When encountering type conflicts between libraries:
+  - Use type assertions carefully
+  - Consider using `as any` only when necessary
+  - Prefer creating proper type interfaces when possible
+
+## Building
+
+- For production builds, use `pnpm build` to create optimized bundles

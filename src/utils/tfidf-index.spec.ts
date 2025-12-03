@@ -1,4 +1,3 @@
-import { describe, expect, test } from 'bun:test';
 import { TfidfIndex } from './tfidf-index';
 
 describe('TF-IDF Index - Core Functionality', () => {
