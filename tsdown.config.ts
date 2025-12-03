@@ -1,4 +1,4 @@
-import { $ } from 'bun';
+import { $, env } from 'bun';
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
@@ -16,7 +16,7 @@ export default defineConfig({
   unused: true,
   unbundle: true,
   exports: {
-    devExports: true,
+    devExports: !env.RELEASE,
   },
   hooks: {
     'build:done': async () => {
