@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v1.0.0...v1.1.0) (2025-12-03)
+
+
+### Features
+
+* **meta-tools:** add hybrid BM25 + TF-IDF search strategy ([#122](https://github.com/StackOneHQ/stackone-ai-node/issues/122)) ([46fc31a](https://github.com/StackOneHQ/stackone-ai-node/commit/46fc31acd60b03091b56fffb1486730e57d9ee72))
+
 ## [1.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v0.3.0...v1.0.0) (2025-10-22)
 
 
