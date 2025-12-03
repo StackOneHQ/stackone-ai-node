@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert';
-import { StackOneAPIError, StackOneError, StackOneToolSet, ToolSetConfigError } from '../src';
+import { StackOneAPIError, StackOneError, StackOneToolSet, ToolSetConfigError } from '@stackone/ai';
 import { ACCOUNT_IDS } from './constants';
 
 const errorHandling = async (): Promise<void> => {

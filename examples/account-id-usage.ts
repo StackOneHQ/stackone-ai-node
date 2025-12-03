@@ -15,7 +15,7 @@
  */
 
 import assert from 'node:assert';
-import { StackOneToolSet } from '../src';
+import { StackOneToolSet } from '@stackone/ai';
 import { ACCOUNT_IDS } from './constants';
 
 const accountIdUsage = async (): Promise<void> => {

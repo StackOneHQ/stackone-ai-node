@@ -14,7 +14,7 @@
  */
 
 import assert from 'node:assert';
-import { StackOneToolSet } from '../src';
+import { StackOneToolSet } from '@stackone/ai';
 
 const customBaseUrl = async (): Promise<void> => {
   /**

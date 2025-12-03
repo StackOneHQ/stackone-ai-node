@@ -17,12 +17,15 @@
 import assert from 'node:assert';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { JSONSchema7Definition } from 'json-schema';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import {
   type Experimental_PreExecuteFunction,
   type Experimental_SchemaOverride,
   StackOneToolSet,
-} from '../src';
+} from '@stackone/ai';
 import { ACCOUNT_IDS } from './constants';
 
 const accountId = ACCOUNT_IDS.HRIS;

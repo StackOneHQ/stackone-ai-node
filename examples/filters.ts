@@ -20,7 +20,7 @@
  */
 
 import assert from 'node:assert';
-import { StackOneToolSet } from '../src';
+import { StackOneToolSet } from '@stackone/ai';
 import { ACCOUNT_IDS } from './constants';
 
 type DryRunResult = { url: string };

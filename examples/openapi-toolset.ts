@@ -8,8 +8,8 @@
  */
 
 import assert from 'node:assert';
-import { OpenAPIToolSet } from '../src/toolsets/openapi';
-import { joinPaths } from '../src/utils/file';
+import path from 'node:path';
+import { OpenAPIToolSet } from '@stackone/ai';
 
 /**
  * Type for dry run result
@@ -27,7 +27,7 @@ type DryRunResult = {
 async function fromFileExample(): Promise<void> {
   // Create an OpenAPIToolSet from a local file
   const toolset = new OpenAPIToolSet({
-    filePath: joinPaths(process.cwd(), 'src', 'toolsets', 'tests', 'fixtures', 'petstore.json'),
+    filePath: path.join(process.cwd(), 'src', 'toolsets', 'tests', 'fixtures', 'petstore.json'),
   });
 
   // Get all tools

@@ -41,7 +41,7 @@ const accountId = ACCOUNT_IDS.HRIS;
  */
 
 import assert from 'node:assert';
-import { StackOneToolSet } from '../src';
+import { StackOneToolSet } from '@stackone/ai';
 
 const quickstart = async (): Promise<void> => {
   const toolset = new StackOneToolSet();

@@ -3,8 +3,8 @@
  */
 
 import assert from 'node:assert';
+import { StackOneToolSet } from '@stackone/ai';
 import OpenAI from 'openai';
-import { StackOneToolSet } from '../src';
 import { ACCOUNT_IDS } from './constants';
 
 const openaiIntegration = async (): Promise<void> => {

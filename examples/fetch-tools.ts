@@ -7,7 +7,7 @@
  */
 
 import process from 'node:process';
-import { StackOneToolSet } from '../src';
+import { StackOneToolSet } from '@stackone/ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
 const isPlaceholderKey = !apiKey || apiKey === 'test-stackone-key';
