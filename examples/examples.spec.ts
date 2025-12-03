@@ -395,40 +395,36 @@ describe('experimental-document-handling.ts - Document Handling', () => {
     const sampleFilePath = path.join(__dirname, 'sample-document.txt');
     fs.writeFileSync(sampleFilePath, 'This is an experimental document handling test file.');
 
-    try {
-      const toolset = new StackOneToolSet();
-      const accountId = ACCOUNT_IDS.HRIS;
+    const toolset = new StackOneToolSet();
+    const accountId = ACCOUNT_IDS.HRIS;
 
-      const tools = toolset.getStackOneTools('hris_*', accountId);
+    const tools = toolset.getStackOneTools('hris_*', accountId);
 
-      const localDocumentTool = tools.getTool('hris_upload_employee_document', {
-        experimental_schemaOverride: createDocumentSchemaOverride(),
-        experimental_preExecute: createDocumentPreExecute([__dirname]),
-      });
+    const localDocumentTool = tools.getTool('hris_upload_employee_document', {
+      experimental_schemaOverride: createDocumentSchemaOverride(),
+      experimental_preExecute: createDocumentPreExecute([__dirname]),
+    });
 
-      expect(localDocumentTool).toBeDefined();
+    assert(localDocumentTool);
 
-      const localFileResult = await localDocumentTool?.execute(
-        {
-          doc_id: sampleFilePath,
-          id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
-          category: { value: 'shared' },
-        },
-        {
-          dryRun: true,
-        }
-      );
-
-      const localParams = localFileResult.mappedParams as Record<string, unknown>;
-      const localDocumentParams = localParams as DocumentParams & Record<string, unknown>;
-      expect(localDocumentParams.file_format?.value).toBe('txt');
-      expect(localDocumentParams.name).toBe('sample-document.txt');
-      expect(typeof localDocumentParams.content).toBe('string');
-    } finally {
-      if (fs.existsSync(sampleFilePath)) {
-        fs.unlinkSync(sampleFilePath);
+    const localFileResult = await localDocumentTool.execute(
+      {
+        doc_id: sampleFilePath,
+        id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+        category: { value: 'shared' },
+      },
+      {
+        dryRun: true,
       }
-    }
+    );
+
+    fs.unlinkSync(sampleFilePath);
+
+    const localParams = localFileResult.mappedParams as Record<string, unknown>;
+    const localDocumentParams = localParams as DocumentParams & Record<string, unknown>;
+    expect(localDocumentParams.file_format?.value).toBe('txt');
+    expect(localDocumentParams.name).toBe('sample-document.txt');
+    expect(typeof localDocumentParams.content).toBe('string');
   });
 });
 

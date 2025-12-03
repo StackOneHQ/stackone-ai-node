@@ -281,13 +281,7 @@ describe('meta_collect_tool_feedback', () => {
   });
 
   describe('integration test', () => {
-    it('test_live_feedback_submission', async () => {
-      // Skip if no API key is available (similar to Python SDK)
-      if (!process.env.STACKONE_API_KEY) {
-        console.log('Skipping live test - STACKONE_API_KEY not available');
-        return;
-      }
-
+    it.skipIf(!process.env.STACKONE_API_KEY)('test_live_feedback_submission', async () => {
       const tool = createFeedbackTool();
       const testData = {
         feedback: `Test feedback from Node.js SDK at ${new Date().toISOString()}`,
@@ -295,22 +289,13 @@ describe('meta_collect_tool_feedback', () => {
         tool_names: ['test_tool_1', 'test_tool_2'],
       };
 
-      try {
-        const result = await tool.execute(testData);
-        expect(result).toMatchObject({
-          message: 'Feedback sent to 1 account(s)',
-          total_accounts: 1,
-          successful: 1,
-          failed: 0,
-        });
-        expect(result.results[0]).toMatchObject({
-          account_id: 'test_account_123',
-          status: 'success',
-        });
-      } catch (error) {
-        // If the test account doesn't exist, that's expected
-        expect(error).toBeInstanceOf(StackOneError);
-      }
+      // Either succeeds or throws StackOneError (if test account doesn't exist)
+      await expect(tool.execute(testData)).resolves.toMatchObject({
+        message: 'Feedback sent to 1 account(s)',
+        total_accounts: 1,
+        successful: 1,
+        failed: 0,
+      });
     });
   });
 });

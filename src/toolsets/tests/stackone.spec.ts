@@ -59,9 +59,8 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
 
-      // Get a tool and check its headers
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) return;
+      assert(tool);
 
       const headers = tool.getHeaders();
       const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
@@ -91,7 +90,7 @@ describe('StackOneToolSet', () => {
 
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) return;
+      assert(tool);
 
       const headers = tool.getHeaders();
       const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
@@ -105,9 +104,8 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      assert(tool);
 
-      // Use dryRun to check the actual request headers
       const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
@@ -124,9 +122,8 @@ describe('StackOneToolSet', () => {
       });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      assert(tool);
 
-      // Use dryRun to check the actual request headers
       const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
@@ -142,9 +139,8 @@ describe('StackOneToolSet', () => {
       });
       const tools = toolset.getStackOneTools(undefined, 'override_account');
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      assert(tool);
 
-      // Use dryRun to check the actual request headers
       const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
@@ -166,9 +162,8 @@ describe('StackOneToolSet', () => {
 
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      assert(tool);
 
-      // Use dryRun to check the actual request headers
       const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
@@ -185,9 +180,8 @@ describe('StackOneToolSet', () => {
       const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
       const tools = toolset.getStackOneTools();
       const tool = tools.getTool('hris_get_employee');
-      if (!tool) throw new Error('Tool not found');
+      assert(tool);
 
-      // Use dryRun to check the actual request headers
       const request = (await tool.execute({ id: '123' }, { dryRun: true })) as {
         headers: Record<string, string>;
         url: string;
