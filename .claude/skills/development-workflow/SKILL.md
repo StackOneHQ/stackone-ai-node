@@ -9,30 +9,30 @@ This skill provides all commands and best practices for building, developing, an
 
 ## Building and Development
 
-- `bun run build` - Build the project using tsdown
-- `bun run rebuild` - Fetch latest OpenAPI specs and rebuild everything
-- `bun run dev` - Watch mode for development (builds on file changes)
-- `bun run fetch:specs` - Update OpenAPI specifications from remote
+- `pnpm build` - Build the project using tsdown
+- `pnpm rebuild` - Fetch latest OpenAPI specs and rebuild everything
+- `pnpm dev` - Watch mode for development (builds on file changes)
+- `pnpm fetch:specs` - Update OpenAPI specifications from remote
 
 ## Testing
 
-- `bun run test` - Run all tests (unit, examples, scripts)
-- `bun run test:unit` - Run only unit tests
-- `bun test src/path/to/file.spec.ts` - Run a specific test file
-- `bun test -t "test name"` - Run tests matching a pattern
+- `pnpm test` - Run all tests (unit, examples, scripts)
+- `pnpm test:unit` - Run only unit tests
+- `pnpm vitest src/path/to/file.spec.ts` - Run a specific test file
+- `pnpm vitest -t "test name"` - Run tests matching a pattern
 
 ## Code Quality
 
-- `bun run lint` - Run Biome linter
-- `bun run format` - Format code with Biome
-- `bun run typecheck` - Type check with tsgo
-- `bun run lint:fix` - Auto-fix linting issues
+- `pnpm lint` - Run Biome linter
+- `pnpm format` - Format code with Biome
+- `pnpm typecheck` - Type check with tsgo
+- `pnpm lint:fix` - Auto-fix linting issues
 
 ## Documentation
 
-- `bun run docs:build` - Build MkDocs documentation
-- `bun run docs:serve` - Serve docs locally
-- `bun run docs:deploy` - Deploy docs to GitHub Pages
+- `pnpm docs:build` - Build MkDocs documentation
+- `pnpm docs:serve` - Serve docs locally
+- `pnpm docs:deploy` - Deploy docs to GitHub Pages
 
 ## Development Guidelines
 
@@ -51,7 +51,7 @@ Keep commits tiny but meaningful:
 
 ### When to Rebuild
 
-Always run `bun run rebuild` when:
+Always run `pnpm rebuild` when:
 - Updating OpenAPI specifications
 - After pulling spec changes
 - Before committing generated files
@@ -60,18 +60,18 @@ Always run `bun run rebuild` when:
 
 1. Create feature branch: `git checkout -b feature-name`
 2. Make changes to source files
-3. Run type checking: `bun run typecheck`
-4. Run linter: `bun run lint:fix`
-5. Run tests: `bun run test`
-6. Format code: `bun run format`
-7. Rebuild if specs changed: `bun run rebuild`
+3. Run type checking: `pnpm typecheck`
+4. Run linter: `pnpm lint:fix`
+5. Run tests: `pnpm test`
+6. Format code: `pnpm format`
+7. Rebuild if specs changed: `pnpm rebuild`
 8. Commit with detailed messages
 9. Push and create PR: `gh pr create`
 
 ## Troubleshooting
 
 ### Command Failures
-If `bunx <command>` fails, try `bun x <command>` instead.
+If `pnpm exec <command>` fails, try `pnpm dlx <command>` instead.
 
 If bash commands fail, try running with fish shell:
 ```bash
@@ -133,10 +133,10 @@ Use the TypeScript exhaustiveness pattern (`satisfies never`) when branching on 
 ## Publishing & Deployment
 
 When ready to release:
-1. Ensure all tests pass: `bun run test`
-2. Verify type checking: `bun run typecheck`
-3. Build documentation: `bun run docs:build`
+1. Ensure all tests pass: `pnpm test`
+2. Verify type checking: `pnpm typecheck`
+3. Build documentation: `pnpm docs:build`
 4. Bump version in package.json
 5. Create release commit
 6. Push to main or create release PR
-7. Deploy docs: `bun run docs:deploy`
+7. Deploy docs: `pnpm docs:deploy`
