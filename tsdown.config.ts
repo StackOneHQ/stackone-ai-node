@@ -1,4 +1,4 @@
-import { $, env } from 'bun';
+import { execSync } from 'node:child_process';
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
@@ -16,12 +16,12 @@ export default defineConfig({
   unused: true,
   unbundle: true,
   exports: {
-    devExports: !env.RELEASE,
+    devExports: !process.env.RELEASE,
   },
   hooks: {
     'build:done': async () => {
       // sourcemap files for generated code are not needed
-      await $`rm -rf ./dist/openapi/generated/*.map`;
+      execSync('rm -rf ./dist/openapi/generated/*.map');
     },
   },
 });
