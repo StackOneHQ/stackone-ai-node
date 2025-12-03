@@ -3,8 +3,6 @@ import { ParameterLocation } from '../../types';
 import * as specs from '../generated';
 import { OpenAPIParser } from '../parser';
 
-const mockSpec = specs.hrisSpec;
-
 // Helper function to create a minimal spec for testing
 const createMinimalSpec = (customization: Partial<OpenAPIV3.Document> = {}): OpenAPIV3.Document => {
   return {
@@ -22,7 +20,7 @@ describe('OpenAPIParser', () => {
   // Test initialization
   describe('constructor', () => {
     it('should initialize with a spec object', () => {
-      const parser = new OpenAPIParser(mockSpec as unknown as OpenAPIV3.Document);
+      const parser = new OpenAPIParser(specs.hrisSpec as unknown as OpenAPIV3.Document);
       expect(parser).toBeInstanceOf(OpenAPIParser);
     });
 

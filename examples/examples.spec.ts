@@ -14,11 +14,114 @@ import {
   Tools,
 } from '@stackone/ai';
 import { generateText } from 'ai';
+import { createFixture } from 'fs-fixture';
 import type { JSONSchema7Definition } from 'json-schema';
 import OpenAI from 'openai';
 import { ACCOUNT_IDS } from './constants';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const petstoreSpec = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Swagger Petstore',
+    description: 'This is a sample server Petstore server.',
+    version: '1.0.0',
+  },
+  servers: [{ url: 'https://petstore.swagger.io/v2' }],
+  paths: {
+    '/pet/{petId}': {
+      get: {
+        summary: 'Find pet by ID',
+        description: 'Returns a single pet',
+        operationId: 'getPetById',
+        parameters: [
+          {
+            name: 'petId',
+            in: 'path',
+            description: 'ID of pet to return',
+            required: true,
+            schema: { type: 'integer', format: 'int64' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'successful operation',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Pet' },
+              },
+            },
+          },
+          '400': { description: 'Invalid ID supplied' },
+          '404': { description: 'Pet not found' },
+        },
+      },
+    },
+    '/pet': {
+      post: {
+        summary: 'Add a new pet to the store',
+        description: 'Add a new pet to the store',
+        operationId: 'addPet',
+        requestBody: {
+          description: 'Pet object that needs to be added to the store',
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/Pet' },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          '200': {
+            description: 'successful operation',
+            content: {
+              'application/json': {
+                schema: { $ref: '#/components/schemas/Pet' },
+              },
+            },
+          },
+          '405': { description: 'Invalid input' },
+        },
+      },
+    },
+  },
+  components: {
+    schemas: {
+      Pet: {
+        type: 'object',
+        required: ['name', 'photoUrls'],
+        properties: {
+          id: { type: 'integer', format: 'int64', example: 10 },
+          name: { type: 'string', example: 'doggie' },
+          category: {
+            type: 'object',
+            properties: {
+              id: { type: 'integer', format: 'int64', example: 1 },
+              name: { type: 'string', example: 'Dogs' },
+            },
+          },
+          photoUrls: { type: 'array', items: { type: 'string' } },
+          tags: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'integer', format: 'int64' },
+                name: { type: 'string' },
+              },
+            },
+          },
+          status: {
+            type: 'string',
+            description: 'pet status in the store',
+            enum: ['available', 'pending', 'sold'],
+          },
+        },
+      },
+    },
+  },
+} as const;
 
 // ============================================================
 // index.ts - Quickstart example
@@ -220,16 +323,12 @@ describe('openapi-toolset.ts - OpenAPI Toolset', () => {
   };
 
   it('should load OpenAPI spec from a file', async () => {
+    await using fixture = await createFixture({
+      'petstore.json': JSON.stringify(petstoreSpec),
+    });
+
     const toolset = new OpenAPIToolSet({
-      filePath: path.join(
-        process.cwd(),
-        '..',
-        'src',
-        'toolsets',
-        'tests',
-        'fixtures',
-        'petstore.json'
-      ),
+      filePath: fixture.getPath('petstore.json'),
     });
 
     const tools = toolset.getTools('*Pet*');

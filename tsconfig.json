@@ -6,13 +6,11 @@
     "target": "es2022",
     "resolveJsonModule": true,
     "isolatedModules": true,
-
     /* Strictness */
     "strict": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "strictNullChecks": true,
-
     /* Build for a library */
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -20,12 +18,27 @@
     "sourceMap": true,
     "declaration": true,
     "erasableSyntaxOnly": true,
-
     /* Other */
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2022"],
-    "types": ["node"]
+    "lib": [
+      "es2022"
+    ],
+    "types": [
+      "node",
+      "vitest/globals",
+      "vitest/importMeta"
+    ],
   },
-  "include": ["src/**/*", "scripts/**/*", "mocks/**/*", "vitest.config.ts", "vitest.setup.ts"],
-  "exclude": ["node_modules", "dist", "examples"]
+  "include": [
+    "src/**/*",
+    "scripts/**/*",
+    "mocks/**/*",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "examples"
+  ]
 }

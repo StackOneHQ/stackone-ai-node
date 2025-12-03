@@ -189,22 +189,16 @@ describe('StackOneTool', () => {
 
   it('should return error message as string when AI SDK tool execution fails', async () => {
     const tool = createMockTool();
-
-    // Mock the execute method to throw an error
-    const mockError = new Error('Test execution error');
-    vi.spyOn(tool, 'execute').mockImplementation(() => {
-      throw mockError;
-    });
-
     const aiSdkTool = await tool.toAISDK();
 
     expect(aiSdkTool.test_tool.execute).toBeDefined();
 
+    // 'invalid' id returns 400 error via MSW handler
     const result = await aiSdkTool.test_tool.execute?.(
-      { id: '123' },
+      { id: 'invalid' },
       { toolCallId: 'test-tool-call-id', messages: [] }
     );
-    expect(result).toBe('Error executing tool: Test execution error');
+    expect(result).toMatch(/Error executing tool:/);
   });
 });
 

@@ -220,41 +220,24 @@ describe('StackOneToolSet', () => {
       accountId: 'test_account',
     });
 
-    // Verify account ID is stored in the instance
-    // @ts-expect-error - Accessing private property for testing
-    expect(toolset.accountId).toBe('test_account');
-
-    // The account ID should be applied when getting tools
-    // We can't directly check headers here, but we can verify the account ID is used
-    // when calling getTools
-    const getToolsSpy = vi.spyOn(toolset, 'getTools');
-    toolset.getStackOneTools();
-    expect(getToolsSpy).toHaveBeenCalledWith(undefined, { 'x-account-id': 'test_account' });
+    const tools = toolset.getStackOneTools('hris_list_employees');
+    const tool = tools.getTool('hris_list_employees');
+    expect(tool.getHeaders()['x-account-id']).toBe('test_account');
   });
 
   it('should get tools with account ID override', () => {
     const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
-    // Mock the getTools method
-    const getToolsSpy = vi.spyOn(toolset, 'getTools');
-
-    // Call getStackOneTools with account ID
-    toolset.getStackOneTools('hris_*', 'override_account');
-
-    // Verify getTools was called with the correct parameters
-    expect(getToolsSpy).toHaveBeenCalledWith('hris_*', { 'x-account-id': 'override_account' });
+    const tools = toolset.getStackOneTools('hris_list_employees', 'override_account');
+    const tool = tools.getTool('hris_list_employees');
+    expect(tool.getHeaders()['x-account-id']).toBe('override_account');
   });
 
   it('should get tools without account ID if not provided', () => {
     const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
-    // Mock the getTools method
-    const getToolsSpy = vi.spyOn(toolset, 'getTools');
-
-    // Call getStackOneTools without account ID
-    toolset.getStackOneTools('hris_*');
-
-    // Verify getTools was called with the correct parameters
-    expect(getToolsSpy).toHaveBeenCalledWith('hris_*', {});
+    const tools = toolset.getStackOneTools('hris_list_employees');
+    const tool = tools.getTool('hris_list_employees');
+    expect(tool.getHeaders()['x-account-id']).toBeUndefined();
   });
 });
