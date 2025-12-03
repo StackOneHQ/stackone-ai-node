@@ -89,23 +89,12 @@ import { createFixture } from 'fs-fixture';
 
 it('should save file to disk', async () => {
   await using fixture = await createFixture();
-
   await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
   expect(await fixture.exists('data.json')).toBe(true);
-
-  const content = await fixture.readFile('data.json', 'utf8');
-  expect(JSON.parse(content)).toEqual({ test: 'data' });
 });
 ```
 
-Available methods:
-- `fixture.path` - Absolute fixture directory path
-- `fixture.exists(path)` - Check existence
-- `fixture.readFile(path, encoding?)` - Read as string or Buffer
-- `fixture.writeFile(path, content)` - Write file
-- `fixture.readJson<T>(path)` - Parse JSON with type safety
-- `fixture.writeJson(path, data, space?)` - Write formatted JSON
-- `fixture.mkdir(path)` - Create nested directories
+**Reference:** See `node_modules/fs-fixture/README.md` for full API and advanced usage
 
 ## Test Organization
 
