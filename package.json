@@ -27,10 +27,6 @@
     "test:scripts": "bun test scripts",
     "test": "bun run test:unit && bun run test:examples && bun run test:scripts",
     "fetch:specs": "bun run ./scripts/fetch-specs.ts && bun run format",
-    "build:docs": "bun run ./scripts/build-docs.ts",
-    "docs:serve": "mkdocs serve",
-    "docs:build": "bun run build:docs && mkdocs build",
-    "docs:deploy": "bun run build:docs && mkdocs gh-deploy --force",
     "lint": "biome check .",
     "typecheck": "tsgo --noEmit",
     "format": "biome format --write ."
@@ -53,7 +49,6 @@
     "fs-fixture": "^2.8.1",
     "hono": "^4.9.10",
     "lint-staged": "^15.2.0",
-    "mkdocs": "^0.0.1",
     "msw": "^2.10.4",
     "openai": "^6.2.0",
     "openapi-types": "^12.1.3",

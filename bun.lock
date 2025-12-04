@@ -22,7 +22,6 @@
         "fs-fixture": "^2.8.1",
         "hono": "^4.9.10",
         "lint-staged": "^15.2.0",
-        "mkdocs": "^0.0.1",
         "msw": "^2.10.4",
         "openai": "^6.2.0",
         "openapi-types": "^12.1.3",
@@ -414,8 +413,6 @@
     "mimic-fn": ["mimic-fn@4.0.0", "", {}, "sha512-vqiC06CuhBTUdZH+RYl8sFrL096vA45Ok5ISO6sE/Mr1jRbGH4Csnhi8f3wKVl7x8mO4Au7Ir9D3Oyv1VYMFJw=="],
 
     "mimic-function": ["mimic-function@5.0.1", "", {}, "sha512-VP79XUPxV2CigYP3jWwAUFSku2aKqBH7uTAapFWCBqutsbmDo96KY5o8uh6U+/YSIn5OxJnXp73beVkpqMIGhA=="],
-
-    "mkdocs": ["mkdocs@0.0.1", "", {}, "sha512-7AtZyiwELtQQcP2Cdw0H8Q413alLa4Jl0AnDIreqP8+5GJvLFLMoh4gFQ21i6ASdKNlKGPjTHqiVDBg/lQ0dQg=="],
 
     "mri": ["mri@1.2.0", "", {}, "sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA=="],
 
