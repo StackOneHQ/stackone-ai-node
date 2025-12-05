@@ -3462,17 +3462,6 @@ export const stackoneSpec = {
         operationId: 'stackone_list_actions_meta',
         parameters: [
           {
-            name: 'page',
-            required: false,
-            in: 'query',
-            description: 'The page number of the results to fetch',
-            deprecated: true,
-            schema: {
-              nullable: true,
-              type: 'string',
-            },
-          },
-          {
             name: 'page_size',
             required: false,
             in: 'query',
@@ -3685,6 +3674,11 @@ export const stackoneSpec = {
             },
           },
         },
+        security: [
+          {
+            basic: [],
+          },
+        ],
         summary: 'List all actions metadata',
         tags: ['Actions'],
         'x-speakeasy-name-override': 'list_actions_meta',
@@ -3852,6 +3846,11 @@ export const stackoneSpec = {
             },
           },
         },
+        security: [
+          {
+            basic: [],
+          },
+        ],
         summary: 'Make an RPC call to an action',
         tags: ['Actions'],
         'x-speakeasy-name-override': 'rpc_action',
