@@ -10,10 +10,3 @@ export {
 
 // Export StackOne toolset
 export { StackOneToolSet, type StackOneToolSetConfig } from './stackone';
-
-// Export OpenAPI toolset
-export {
-  OpenAPIToolSet,
-  type OpenAPIToolSetConfigFromFilePath,
-  type OpenAPIToolSetConfigFromUrl,
-} from './openapi';

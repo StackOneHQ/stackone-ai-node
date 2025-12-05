@@ -9,8 +9,19 @@
 import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
-import { StackOneToolSet } from '../src';
+import { StackOneToolSet, Tools } from '../src';
 import { ACCOUNT_IDS } from './constants';
+
+const apiKey = process.env.STACKONE_API_KEY;
+const isPlaceholderKey = !apiKey || apiKey === 'test-stackone-key';
+const shouldSkip = process.env.SKIP_FETCH_TOOLS_EXAMPLE !== '0' && isPlaceholderKey;
+
+if (shouldSkip) {
+  console.log(
+    'Skipping meta-tools example. Provide STACKONE_API_KEY and set SKIP_FETCH_TOOLS_EXAMPLE=0 to run.'
+  );
+  process.exit(0);
+}
 
 /**
  * Example 1: Using meta tools with AI SDK for dynamic tool discovery
@@ -18,12 +29,14 @@ import { ACCOUNT_IDS } from './constants';
 const metaToolsWithAISDK = async (): Promise<void> => {
   console.log('🔍 Example 1: Dynamic tool discovery with AI SDK\n');
 
-  // Initialize StackOne toolset with all available tools
-  const toolset = new StackOneToolSet();
-  const accountId = ACCOUNT_IDS.HRIS;
+  // Initialise StackOne toolset
+  const toolset = new StackOneToolSet({
+    accountId: ACCOUNT_IDS.HRIS,
+    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  });
 
-  // Get all available tools for the account
-  const allTools = toolset.getStackOneTools('*', accountId);
+  // Fetch all available tools via MCP
+  const allTools = await toolset.fetchTools();
 
   // Get meta tools for dynamic discovery and execution
   const metaTools = await allTools.metaTools();
@@ -33,8 +46,8 @@ const metaToolsWithAISDK = async (): Promise<void> => {
   const { text, toolCalls } = await generateText({
     model: openai('gpt-4o-mini'),
     tools: aiSdkMetaTools,
-    prompt: `I need to create a time off request for an employee. 
-    First, find the right tool for this task, then use it to create a time off request 
+    prompt: `I need to create a time off request for an employee.
+    First, find the right tool for this task, then use it to create a time off request
     for employee ID "emp_123" from January 15, 2024 to January 19, 2024.`,
     maxSteps: 3, // Allow multiple tool calls
   });
@@ -54,12 +67,16 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  // Initialize StackOne toolset
-  const toolset = new StackOneToolSet();
-  const accountId = ACCOUNT_IDS.HRIS;
+  // Initialise StackOne toolset
+  const toolset = new StackOneToolSet({
+    accountId: ACCOUNT_IDS.HRIS,
+    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  });
 
-  // Get all HRIS tools
-  const hrisTools = toolset.getStackOneTools('hris_*', accountId);
+  // Fetch HRIS tools via MCP
+  const hrisTools = await toolset.fetchTools({
+    actions: ['hris_*'],
+  });
 
   // Get meta tools
   const metaTools = await hrisTools.metaTools();
@@ -71,7 +88,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
     messages: [
       {
         role: 'system',
-        content: `You are an HR assistant with access to various HR tools. 
+        content: `You are an HR assistant with access to various HR tools.
         Use the meta_search_tools to find appropriate tools for user requests,
         then use meta_execute_tool to execute them.`,
       },
@@ -102,12 +119,14 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 const directMetaToolUsage = async (): Promise<void> => {
   console.log('\n🛠️  Example 3: Direct meta tool usage\n');
 
-  // Initialize toolset
-  const toolset = new StackOneToolSet();
-  const accountId = ACCOUNT_IDS.HRIS;
+  // Initialise toolset
+  const toolset = new StackOneToolSet({
+    accountId: ACCOUNT_IDS.HRIS,
+    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  });
 
-  // Get all available tools
-  const allTools = toolset.getStackOneTools('*', accountId);
+  // Fetch all available tools via MCP
+  const allTools = await toolset.fetchTools();
   console.log(`Total available tools: ${allTools.length}`);
 
   // Get meta tools
@@ -171,18 +190,21 @@ const directMetaToolUsage = async (): Promise<void> => {
 const dynamicToolRouter = async (): Promise<void> => {
   console.log('\n🔄 Example 4: Dynamic tool router\n');
 
-  const toolset = new StackOneToolSet();
-  const accountId = ACCOUNT_IDS.HRIS;
+  const toolset = new StackOneToolSet({
+    accountId: ACCOUNT_IDS.HRIS,
+    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  });
 
-  // Get tools from multiple categories
-  const hrisTools = toolset.getStackOneTools('hris_*', accountId);
-  const atsTools = toolset.getStackOneTools('ats_*', accountId);
+  // Fetch tools from multiple categories via MCP
+  const hrisTools = await toolset.fetchTools({
+    actions: ['hris_*'],
+  });
+  const atsTools = await toolset.fetchTools({
+    actions: ['ats_*'],
+  });
 
   // Combine tools
-  const combinedTools = new (await import('../src')).Tools([
-    ...hrisTools.toArray(),
-    ...atsTools.toArray(),
-  ]);
+  const combinedTools = new Tools([...hrisTools.toArray(), ...atsTools.toArray()]);
 
   // Get meta tools for the combined set
   const metaTools = await combinedTools.metaTools();

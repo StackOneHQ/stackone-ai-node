@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'bun:test';
-import { BaseTool } from '../../tool';
-import { ParameterLocation } from '../../types';
 import { ToolSet } from '../base';
 
 // Create a concrete implementation of the abstract ToolSet class for testing
@@ -13,20 +11,15 @@ class TestToolSet extends ToolSet {
   public matchGlob(str: string, pattern: string): boolean {
     return this._matchGlob(str, pattern);
   }
-
-  // Add a tool for testing
-  public addTool(tool: BaseTool): void {
-    this.tools.push(tool);
-  }
 }
 
 describe('ToolSet', () => {
-  it('should initialize with default values', () => {
+  it('should initialise with default values', () => {
     const toolset = new TestToolSet();
     expect(toolset).toBeDefined();
   });
 
-  it('should initialize with custom values', () => {
+  it('should initialise with custom values', () => {
     const baseUrl = 'https://api.example.com';
     const headers = { 'X-Custom-Header': 'test' };
 
@@ -66,74 +59,54 @@ describe('ToolSet', () => {
     expect(toolset.matchesFilter('hris_get_employee', ['*', '!hris_*'])).toBe(false);
   });
 
-  it('should get tools with a filter pattern', () => {
-    const toolset = new TestToolSet();
-
-    // Create mock tools
-    const tool1 = new BaseTool(
-      'hris_get_employee',
-      'Get employee details',
-      {
-        type: 'object',
-        properties: { id: { type: 'string' } },
-      },
-      {
-        kind: 'http',
-        method: 'GET',
-        url: 'https://api.example.com/hris/employees/{id}',
-        bodyType: 'json',
-        params: [
-          {
-            name: 'id',
-            location: ParameterLocation.PATH,
-            type: 'string',
+  describe('Authentication', () => {
+    it('should set basic auth headers when provided', () => {
+      const toolset = new TestToolSet({
+        authentication: {
+          type: 'basic',
+          credentials: {
+            username: 'testuser',
+            password: 'testpass',
           },
-        ],
-      }
-    );
+        },
+      });
 
-    const tool2 = new BaseTool(
-      'crm_get_contact',
-      'Get contact details',
-      {
-        type: 'object',
-        properties: { id: { type: 'string' } },
-      },
-      {
-        kind: 'http',
-        method: 'GET',
-        url: 'https://api.example.com/crm/contacts/{id}',
-        bodyType: 'json',
-        params: [
-          {
-            name: 'id',
-            location: ParameterLocation.PATH,
-            type: 'string',
+      // @ts-ignore - Accessing protected properties for testing
+      const expectedAuthValue = `Basic ${Buffer.from('testuser:testpass').toString('base64')}`;
+      // @ts-ignore - Accessing protected properties for testing
+      expect(toolset.headers.Authorization).toBe(expectedAuthValue);
+    });
+
+    it('should set bearer auth headers when provided', () => {
+      const toolset = new TestToolSet({
+        authentication: {
+          type: 'bearer',
+          credentials: {
+            token: 'test-token',
           },
-        ],
-      }
-    );
+        },
+      });
 
-    // Add tools to the toolset
-    toolset.addTool(tool1);
-    toolset.addTool(tool2);
+      // @ts-ignore - Accessing protected properties for testing
+      expect(toolset.headers.Authorization).toBe('Bearer test-token');
+    });
 
-    // Test with no filter (should return all tools)
-    const allTools = toolset.getTools();
-    expect(allTools.length).toBe(2);
+    it('should not override existing Authorization header', () => {
+      const toolset = new TestToolSet({
+        headers: {
+          Authorization: 'Custom auth',
+        },
+        authentication: {
+          type: 'basic',
+          credentials: {
+            username: 'testuser',
+            password: 'testpass',
+          },
+        },
+      });
 
-    // Test with HRIS filter
-    const hrisTools = toolset.getTools('hris_*');
-    expect(hrisTools.length).toBe(1);
-    expect(hrisTools.toArray()[0].name).toBe('hris_get_employee');
-
-    // Test with CRM filter
-    const crmTools = toolset.getTools('crm_*');
-    expect(crmTools.length).toBe(1);
-    expect(crmTools.toArray()[0].name).toBe('crm_get_contact');
-
-    // Test with non-matching filter
-    const nonMatchingTools = toolset.getTools('non_existent_*');
-    expect(nonMatchingTools.length).toBe(0);
+      // @ts-ignore - Accessing protected properties for testing
+      expect(toolset.headers.Authorization).toBe('Custom auth');
+    });
   });
 });

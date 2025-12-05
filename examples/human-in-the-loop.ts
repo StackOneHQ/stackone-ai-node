@@ -7,11 +7,23 @@
  */
 
 import { assert } from 'node:console';
+import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { StackOneToolSet } from '../src';
 import type { JsonDict } from '../src/types';
 import { ACCOUNT_IDS } from './constants';
+
+const apiKey = process.env.STACKONE_API_KEY;
+const isPlaceholderKey = !apiKey || apiKey === 'test-stackone-key';
+const shouldSkip = process.env.SKIP_FETCH_TOOLS_EXAMPLE !== '0' && isPlaceholderKey;
+
+if (shouldSkip) {
+  console.log(
+    'Skipping human-in-the-loop example. Provide STACKONE_API_KEY and set SKIP_FETCH_TOOLS_EXAMPLE=0 to run.'
+  );
+  process.exit(0);
+}
 
 interface ToolCall {
   toolName: string;
@@ -20,13 +32,18 @@ interface ToolCall {
 
 const humanInTheLoopExample = async (): Promise<void> => {
   // Create a toolset
-  const toolset = new StackOneToolSet();
-  const hrisAccountId = ACCOUNT_IDS.HRIS;
+  const toolset = new StackOneToolSet({
+    accountId: ACCOUNT_IDS.HRIS,
+    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  });
+
+  // Fetch tools via MCP
+  const tools = await toolset.fetchTools({
+    actions: ['hris_create_employee'],
+  });
 
   // Get the create employee tool
-  const createEmployeeTool = toolset.getTool('hris_create_employee', {
-    'x-account-id': hrisAccountId,
-  });
+  const createEmployeeTool = tools.getTool('hris_create_employee');
 
   if (!createEmployeeTool) {
     throw new Error('Create employee tool not found');
@@ -39,7 +56,7 @@ const humanInTheLoopExample = async (): Promise<void> => {
 
   // Use the metadata for AI planning/generation
   const { toolCalls } = await generateText({
-    model: openai('gpt-5'),
+    model: openai('gpt-4o'),
     tools: tool,
     prompt:
       'Create a new employee in Workday, params: Full name: John Doe, personal email: john.doe@example.com, department: Engineering, start date: 2025-01-01, hire date: 2025-01-01',

@@ -29,9 +29,10 @@
  * StackOne uses account IDs to identify different integrations.
  * See the example in the README for more details.
  *
- * This example will use the centralized account ID:
+ * This example will use the centralised account ID:
  */
 
+import process from 'node:process';
 import { ACCOUNT_IDS } from './constants';
 
 const accountId = ACCOUNT_IDS.HRIS;
@@ -43,11 +44,27 @@ const accountId = ACCOUNT_IDS.HRIS;
 import assert from 'node:assert';
 import { StackOneToolSet } from '../src';
 
-const quickstart = async (): Promise<void> => {
-  const toolset = new StackOneToolSet();
+const apiKey = process.env.STACKONE_API_KEY;
+const isPlaceholderKey = !apiKey || apiKey === 'test-stackone-key';
+const shouldSkip = process.env.SKIP_FETCH_TOOLS_EXAMPLE !== '0' && isPlaceholderKey;
 
-  // Get all HRIS-related tools using the StackOneTool method (adds accountId to the request)
-  const tools = toolset.getStackOneTools('hris_*', accountId);
+if (shouldSkip) {
+  console.log(
+    'Skipping index example. Provide STACKONE_API_KEY and set SKIP_FETCH_TOOLS_EXAMPLE=0 to run.'
+  );
+  process.exit(0);
+}
+
+const quickstart = async (): Promise<void> => {
+  const toolset = new StackOneToolSet({
+    accountId,
+    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+  });
+
+  // Fetch HRIS-related tools via MCP
+  const tools = await toolset.fetchTools({
+    actions: ['hris_*'],
+  });
 
   // Verify we have tools
   assert(tools.length > 0, 'Expected to find HRIS tools');
@@ -72,8 +89,6 @@ quickstart();
  *
  * - [OpenAI Integration](openai-integration.md)
  * - [AI SDK Integration](ai-sdk-integration.md)
- * - [Error Handling](error-handling.md)
- * - [EXPERIMENTAL: Document Handling](experimental-document-handling.md)
- * - [Custom Base URL](custom-base-url.md)
- * - [Account ID Usage](account-id-usage.md)
+ * - [Fetch Tools](fetch-tools.md)
+ * - [Meta Tools](meta-tools.md)
  */

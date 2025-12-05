@@ -4,7 +4,6 @@ import { createMCPClient } from '../mcp';
 import { BaseTool, Tools } from '../tool';
 import type {
   ExecuteOptions,
-  Experimental_ToolCreationOptions,
   JsonDict,
   JsonSchemaProperties,
   RpcExecuteConfig,
@@ -67,7 +66,6 @@ export interface BaseToolSetConfig {
   baseUrl?: string;
   authentication?: AuthenticationConfig;
   headers?: Record<string, string>;
-  _oasUrl?: string;
   stackOneClient?: StackOne;
 }
 
@@ -79,10 +77,9 @@ export abstract class ToolSet {
   protected authentication?: AuthenticationConfig;
   protected headers: Record<string, string>;
   protected stackOneClient?: StackOne;
-  protected tools: BaseTool[] = [];
 
   /**
-   * Initialize a toolset with optional configuration
+   * Initialise a toolset with optional configuration
    * @param config Optional configuration object
    */
   constructor(config?: BaseToolSetConfig) {
@@ -166,90 +163,7 @@ export abstract class ToolSet {
   }
 
   /**
-   * Get tools matching a filter pattern
-   * @param filterPattern Optional glob pattern or array of patterns to filter tools
-   *                     (e.g. "hris_*", ["crm_*", "ats_*"])
-   * @param headers Optional account ID or headers to apply to the tools
-   * @returns Collection of tools matching the filter pattern
-   */
-  getTools(filterPattern?: string | string[], headers?: Record<string, string>): Tools {
-    if (!filterPattern) {
-      console.warn(
-        'No filter pattern provided. Loading all tools may exceed context windows in ' +
-          'AI applications.'
-      );
-    }
-
-    // Create merged headers from instance headers and provided headers
-    const mergedHeaders = { ...this.headers, ...headers };
-
-    // Filter tools based on pattern
-    const filteredTools = this.tools.filter((tool) => {
-      // If headers are provided, apply them to the tool
-      if (mergedHeaders && tool.setHeaders) {
-        tool.setHeaders(mergedHeaders);
-      }
-
-      return !filterPattern || this._matchesFilter(tool.name, filterPattern);
-    });
-
-    // Create a new Tools instance with the filtered tools
-    return new Tools(filteredTools);
-  }
-
-  /**
-   * Get a tool by name
-   * @param name Tool name
-   * @param headers Optional headers to apply to the tool
-   * @returns Tool instance
-   */
-  getTool(name: string, headers?: Record<string, string>): BaseTool;
-  getTool(name: string, options: Experimental_ToolCreationOptions): BaseTool;
-  getTool(
-    name: string,
-    headersOrOptions?: Record<string, string> | Experimental_ToolCreationOptions
-  ): BaseTool {
-    const tool = this.tools.find((tool) => tool.name === name);
-    if (!tool) {
-      throw new ToolSetError(`Tool with name ${name} not found`);
-    }
-
-    // Determine if the second parameter is headers or experimental options
-    const isExperimentalOptions =
-      headersOrOptions &&
-      ('experimental_schemaOverride' in headersOrOptions ||
-        'experimental_preExecute' in headersOrOptions);
-
-    if (isExperimentalOptions) {
-      const options = headersOrOptions as Experimental_ToolCreationOptions;
-
-      // Get the tools collection and use its getTool method with experimental options
-      const toolsCollection = new Tools([tool]);
-      const experimentalTool = toolsCollection.getTool(name, options);
-
-      if (!experimentalTool) {
-        throw new ToolSetError(`Tool with name ${name} not found`);
-      }
-
-      // Apply instance headers to the tool
-      if (this.headers && experimentalTool.setHeaders) {
-        experimentalTool.setHeaders(this.headers);
-      }
-
-      return experimentalTool;
-    }
-
-    // Traditional headers-based approach
-    const headers = headersOrOptions as Record<string, string> | undefined;
-    const mergedHeaders = { ...this.headers, ...headers };
-    if (mergedHeaders && tool.setHeaders) {
-      tool.setHeaders(mergedHeaders);
-    }
-    return tool;
-  }
-
-  /**
-   * Fetch tool definitions from MCP (if applicable)
+   * Fetch tool definitions from MCP
    */
   async fetchTools(): Promise<Tools> {
     if (!this.baseUrl) {
