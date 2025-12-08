@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
-    "typecheck": "vitest typecheck --run"
+    "typecheck": "tsgo --noEmit"
   },
   "dependencies": {
     "@stackone/ai": "workspace:*"
@@ -14,10 +13,8 @@
     "@ai-sdk/openai": "catalog:dev",
     "@types/node": "catalog:dev",
     "ai": "catalog:peer",
-    "msw": "catalog:dev",
     "nano-spawn": "catalog:dev",
-    "openai": "catalog:peer",
-    "vitest": "catalog:dev"
+    "openai": "catalog:peer"
   },
   "devEngines": {
     "runtime": [

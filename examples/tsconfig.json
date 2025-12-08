@@ -8,9 +8,17 @@
     "strict": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["es2022"],
-    "types": ["node"]
+    "lib": [
+      "es2022"
+    ],
+    "types": [
+      "node",
+    ],
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
