@@ -203,7 +203,7 @@ export class BaseTool {
       jsonSchema = ai.jsonSchema;
     } catch {
       throw new StackOneError(
-        'AI SDK is not installed. Please install it with: npm install ai@4.x|5.x or bun add ai@4.x|5.x'
+        'AI SDK is not installed. Please install it with: npm install ai@4.x|5.x or pnpm add ai@4.x|5.x'
       );
     }
 

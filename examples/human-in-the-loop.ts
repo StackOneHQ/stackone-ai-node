@@ -3,7 +3,7 @@
  * This allows for more granular control over tool execution and validation.
  *
  * Run this with:
- * bun run examples/human-in-the-loop.ts
+ * node examples/human-in-the-loop.ts
  */
 
 import { assert } from 'node:console';

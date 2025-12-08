@@ -8,8 +8,8 @@
  * # Using yarn
  * yarn add @stackone/ai
  *
- * # Using bun
- * bun add @stackone/ai
+ * # Using pnpm
+ * pnpm add @stackone/ai
  * ```
  *
  * # Authentication

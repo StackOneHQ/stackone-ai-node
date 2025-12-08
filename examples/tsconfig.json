@@ -9,7 +9,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["es2022"],
-    "types": ["bun-types"]
+    "types": ["node"]
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules"]
