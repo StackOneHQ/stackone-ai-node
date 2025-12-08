@@ -102,9 +102,9 @@ describe('Schema Validation', () => {
       expect(typeof toolObj.execute).toBe('function');
       expect(toolObj.inputSchema.jsonSchema.type).toBe('object');
 
-      const arrayWithItems = toolObj.inputSchema.jsonSchema.properties.arrayWithItems;
-      expect(arrayWithItems.type).toBe('array');
-      expect(arrayWithItems.items.type).toBe('string');
+      const arrayWithItems = toolObj.inputSchema.jsonSchema.properties?.arrayWithItems;
+      expect(arrayWithItems?.type).toBe('array');
+      expect((arrayWithItems?.items as JSONSchema7)?.type).toBe('string');
     });
 
     it('should handle nested filter object for AI SDK', async () => {
@@ -143,11 +143,13 @@ describe('Schema Validation', () => {
       expect(aiSchema).toBeDefined();
 
       const aiSdkTool = await tool.toAISDK();
-      const filterProp = aiSdkTool[tool.name].inputSchema.jsonSchema.properties.filter;
+      const filterProp = aiSdkTool[tool.name].inputSchema.jsonSchema.properties?.filter as
+        | (JSONSchema7 & { properties: Record<string, JSONSchema7> })
+        | undefined;
 
-      expect(filterProp.type).toBe('object');
-      expect(filterProp.properties.type_ids.type).toBe('array');
-      expect(filterProp.properties.type_ids.items).toBeDefined();
+      expect(filterProp?.type).toBe('object');
+      expect(filterProp?.properties.type_ids.type).toBe('array');
+      expect(filterProp?.properties.type_ids.items).toBeDefined();
     });
   });
 });
