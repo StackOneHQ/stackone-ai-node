@@ -17,6 +17,10 @@ export default defineConfig({
     deps: {
       interopDefault: true,
     },
+    typecheck: {
+      enabled: true,
+      include: ['src/**/*.spec.ts', 'src/**/*.test-d.ts'],
+    },
   },
   resolve: {
     conditions: ['import', 'module', 'default'],
