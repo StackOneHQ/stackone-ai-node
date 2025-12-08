@@ -1,3 +1,4 @@
+import { assert } from 'vitest';
 import { BaseTool, type MetaToolSearchResult, Tools } from '../tool';
 import { ParameterLocation } from '../types';
 
@@ -183,6 +184,8 @@ describe('Meta Search Tools', () => {
   describe('meta_search_tools', () => {
     it('should find relevant HRIS tools', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute({
         query: 'manage employees in HRIS',
         limit: 5,
@@ -200,6 +203,8 @@ describe('Meta Search Tools', () => {
 
     it('should find time off related tools', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute({
         query: 'time off request vacation leave',
         limit: 3,
@@ -213,6 +218,8 @@ describe('Meta Search Tools', () => {
 
     it('should respect limit parameter', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute({
         query: 'create',
         limit: 2,
@@ -224,6 +231,8 @@ describe('Meta Search Tools', () => {
 
     it('should filter by minimum score', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute({
         query: 'xyz123 nonexistent',
         minScore: 0.8,
@@ -235,6 +244,8 @@ describe('Meta Search Tools', () => {
 
     it('should include tool configurations in results', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute({
         query: 'create employee',
         limit: 1,
@@ -253,6 +264,8 @@ describe('Meta Search Tools', () => {
 
     it('should handle empty query', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute({
         query: '',
         limit: 5,
@@ -264,6 +277,8 @@ describe('Meta Search Tools', () => {
 
     it('should handle string parameters', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
+      assert(filterTool, 'filterTool should be defined');
+
       const result = await filterTool.execute(
         JSON.stringify({
           query: 'candidates',
@@ -284,6 +299,8 @@ describe('Meta Search Tools', () => {
   describe('meta_execute_tool', () => {
     it('should execute a tool by name', async () => {
       const executeTool = metaTools.getTool('meta_execute_tool');
+      assert(executeTool, 'executeTool should be defined');
+
       const result = await executeTool.execute({
         toolName: 'hris_list_employees',
         params: { limit: 10 },
@@ -294,6 +311,8 @@ describe('Meta Search Tools', () => {
 
     it('should handle tools with required parameters', async () => {
       const executeTool = metaTools.getTool('meta_execute_tool');
+      assert(executeTool, 'executeTool should be defined');
+
       const result = await executeTool.execute({
         toolName: 'hris_create_employee',
         params: {
@@ -310,6 +329,8 @@ describe('Meta Search Tools', () => {
 
     it('should throw error for non-existent tool', async () => {
       const executeTool = metaTools.getTool('meta_execute_tool');
+      assert(executeTool, 'executeTool should be defined');
+
       await expect(
         executeTool.execute({
           toolName: 'nonexistent_tool',
@@ -320,6 +341,8 @@ describe('Meta Search Tools', () => {
 
     it('should handle string parameters', async () => {
       const executeTool = metaTools.getTool('meta_execute_tool');
+      assert(executeTool, 'executeTool should be defined');
+
       const result = await executeTool.execute(
         JSON.stringify({
           toolName: 'crm_create_contact',
@@ -338,6 +361,8 @@ describe('Meta Search Tools', () => {
 
     it('should pass through execution options', async () => {
       const executeTool = metaTools.getTool('meta_execute_tool');
+      assert(executeTool, 'executeTool should be defined');
+
       const result = await executeTool.execute({
         toolName: 'ats_list_candidates',
         params: { status: 'active' },
@@ -351,6 +376,8 @@ describe('Meta Search Tools', () => {
     it('should discover and execute tools in sequence', async () => {
       const filterTool = metaTools.getTool('meta_search_tools');
       const executeTool = metaTools.getTool('meta_execute_tool');
+      assert(filterTool, 'filterTool should be defined');
+      assert(executeTool, 'executeTool should be defined');
 
       // Step 1: Discover relevant tools
       const searchResult = await filterTool.execute({
@@ -363,7 +390,7 @@ describe('Meta Search Tools', () => {
 
       // Find the create employee tool
       const createEmployeeTool = toolResults.find((t) => t.name === 'hris_create_employee');
-      expect(createEmployeeTool).toBeDefined();
+      assert(createEmployeeTool, 'createEmployeeTool should be defined');
 
       // Step 2: Execute the discovered tool
       const executeResult = await executeTool.execute({
@@ -437,6 +464,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
       const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools();
       const searchTool = metaTools.getTool('meta_search_tools');
+      assert(searchTool, 'searchTool should be defined');
 
       const result = await searchTool.execute({
         query: 'manage employees',
@@ -453,6 +481,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
       const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools(0.7);
       const searchTool = metaTools.getTool('meta_search_tools');
+      assert(searchTool, 'searchTool should be defined');
 
       const result = await searchTool.execute({
         query: 'create candidate',
@@ -468,6 +497,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
       const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools(0.5);
       const searchTool = metaTools.getTool('meta_search_tools');
+      assert(searchTool, 'searchTool should be defined');
 
       const result = await searchTool.execute({
         query: 'employee',
@@ -487,6 +517,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
       const tools = new Tools(createMockTools());
       const metaTools = await tools.metaTools();
       const searchTool = metaTools.getTool('meta_search_tools');
+      assert(searchTool, 'searchTool should be defined');
 
       const result = await searchTool.execute({
         query: 'time off vacation',
