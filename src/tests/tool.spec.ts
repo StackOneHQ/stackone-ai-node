@@ -96,8 +96,8 @@ describe('StackOneTool', () => {
     const schema = aiSdkTool.test_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');
-    expect(schema.properties.id).toBeDefined();
-    expect(schema.properties.id.type).toBe('string');
+    expect(schema.properties?.id).toBeDefined();
+    expect(schema.properties?.id.type).toBe('string');
   });
 
   it('should include execution metadata by default in AI SDK conversion', async () => {
@@ -107,8 +107,11 @@ describe('StackOneTool', () => {
     const execution = aiSdkTool.test_tool.execution;
 
     expect(execution).toBeDefined();
-    expect(execution?.config.method).toBe('GET');
-    expect(execution?.config.url).toBe('https://api.example.com/test/{id}');
+    expect(execution?.config.kind).toBe('http');
+    if (execution?.config.kind === 'http') {
+      expect(execution.config.method).toBe('GET');
+      expect(execution.config.url).toBe('https://api.example.com/test/{id}');
+    }
     expect(execution?.headers).toEqual({});
   });
 
@@ -167,11 +170,11 @@ describe('StackOneTool', () => {
 
     // Check that the properties are defined with correct types
     expect(schema.properties).toBeDefined();
-    expect(schema.properties.stringParam.type).toBe('string');
-    expect(schema.properties.numberParam.type).toBe('number');
-    expect(schema.properties.booleanParam.type).toBe('boolean');
-    expect(schema.properties.arrayParam.type).toBe('array');
-    expect(schema.properties.objectParam.type).toBe('object');
+    expect(schema.properties?.stringParam.type).toBe('string');
+    expect(schema.properties?.numberParam.type).toBe('number');
+    expect(schema.properties?.booleanParam.type).toBe('boolean');
+    expect(schema.properties?.arrayParam.type).toBe('array');
+    expect(schema.properties?.objectParam.type).toBe('object');
   });
 
   it('should execute AI SDK tool with parameters', async () => {
