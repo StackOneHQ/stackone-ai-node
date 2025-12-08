@@ -23,6 +23,9 @@ catalogs:
       specifier: ^0.5.4
       version: 0.5.6
   default:
+    '@ai-sdk/provider-utils':
+      specifier: ^3.0.18
+      version: 3.0.18
     nano-spawn:
       specifier: ^2.0.0
       version: 2.0.0
@@ -115,6 +118,9 @@ importers:
       '@ai-sdk/openai':
         specifier: catalog:ai
         version: 2.0.76(zod@3.25.76)
+      '@ai-sdk/provider-utils':
+        specifier: 'catalog:'
+        version: 3.0.18(zod@3.25.76)
       '@biomejs/biome':
         specifier: catalog:lint
         version: 1.9.4
@@ -138,7 +144,7 @@ importers:
         version: 5.0.106(zod@3.25.76)
       bun:
         specifier: runtime:^1.3.2
-        version: runtime:1.3.3
+        version: runtime:1.3.4
       fs-fixture:
         specifier: catalog:testing
         version: 2.11.0
@@ -202,7 +208,7 @@ importers:
         version: 5.0.106(zod@3.25.76)
       bun:
         specifier: runtime:^1.3.2
-        version: runtime:1.3.3
+        version: runtime:1.3.4
       msw:
         specifier: catalog:testing
         version: 2.12.3(@types/node@22.19.1)(typescript@5.9.3)
@@ -1163,37 +1169,37 @@ packages:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
 
-  bun@runtime:1.3.3:
+  bun@runtime:1.3.4:
     resolution:
       type: variations
       variants:
         - resolution:
             archive: zip
             bin: bun
-            integrity: sha256-9Q9cx2fDiCxGZ1++B+C3sd9xpzzlRKrbU3rZJhrwC7E=
+            integrity: sha256-iAN3TkxsVcilF0ZMUI8Cgh5ttX+Uyhu1zCo59NIyalE=
             prefix: bun-darwin-aarch64
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-darwin-aarch64.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-darwin-aarch64.zip
           targets:
             - cpu: arm64
               os: darwin
         - resolution:
             archive: zip
             bin: bun
-            integrity: sha256-/a9ePJHeLyqMg+gKElxREdR25fdXWydH1xvFHSySC9Q=
+            integrity: sha256-M5D55qgqnHGOGHUTscVkBdDentP2sJIiKxW01LpuME0=
             prefix: bun-darwin-x64
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-darwin-x64.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-darwin-x64.zip
           targets:
             - cpu: x64
               os: darwin
         - resolution:
             archive: zip
             bin: bun
-            integrity: sha256-AHlMqv+HztsyJPtaUt2pGOrqxlhaS8D18P7azShgL58=
+            integrity: sha256-w9rCmRKxRHiaKk7iEI5ZXmUn8PbBsPboA7sxncdC4d4=
             prefix: bun-linux-aarch64-musl
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-linux-aarch64-musl.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-linux-aarch64-musl.zip
           targets:
             - cpu: arm64
               os: linux
@@ -1201,20 +1207,20 @@ packages:
         - resolution:
             archive: zip
             bin: bun
-            integrity: sha256-Qbn08lJW24l8LBNTIOT5bDc+IK5vBtgBUYfayDWR78g=
+            integrity: sha256-xG6EH+2FNHUhkVsbOQTW0XXY4v2RXhjgHBETGCGRFaQ=
             prefix: bun-linux-aarch64
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-linux-aarch64.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-linux-aarch64.zip
           targets:
             - cpu: arm64
               os: linux
         - resolution:
             archive: zip
             bin: bun
-            integrity: sha256-n/GcKEO2mcVwgXrXrbjHQsGWLRmSBbKY9MKPdKzrVfU=
+            integrity: sha256-nx4N0siLZfkCofsQE3NwSmcGO7fvoUucdT8vvSdhAKM=
             prefix: bun-linux-x64-musl
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-linux-x64-musl.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-linux-x64-musl.zip
           targets:
             - cpu: x64
               os: linux
@@ -1222,24 +1228,24 @@ packages:
         - resolution:
             archive: zip
             bin: bun
-            integrity: sha256-9cVGc2+VUUFFneIxFntv33sBQY6L42CfLN6d/kapOj0=
+            integrity: sha256-M8aZYEno036LgVlZsUsF5bb0lhITUr8RuufQRxk8KL8=
             prefix: bun-linux-x64
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-linux-x64.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-linux-x64.zip
           targets:
             - cpu: x64
               os: linux
         - resolution:
             archive: zip
             bin: bun.exe
-            integrity: sha256-U+I5sFjBPwu3CUmyIsTUDFq31srSImiyrOIYf8/Xokc=
+            integrity: sha256-KpwKnmrXfQwx/Y+x9Za2Gvp/Ly9YC6rVl/F+eg262WA=
             prefix: bun-windows-x64
             type: binary
-            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.3/bun-windows-x64.zip
+            url: https://github.com/oven-sh/bun/releases/download/bun-v1.3.4/bun-windows-x64.zip
           targets:
             - cpu: x64
               os: win32
-    version: 1.3.3
+    version: 1.3.4
     hasBin: true
 
   bytes@3.1.2:
@@ -3137,7 +3143,7 @@ snapshots:
     dependencies:
       fill-range: 7.1.1
 
-  bun@runtime:1.3.3: {}
+  bun@runtime:1.3.4: {}
 
   bytes@3.1.2: {}
 

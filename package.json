@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@ai-sdk/openai": "catalog:ai",
+    "@ai-sdk/provider-utils": "catalog:",
     "@biomejs/biome": "catalog:lint",
     "@hono/mcp": "catalog:other",
     "@types/json-schema": "catalog:types",
