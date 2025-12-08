@@ -6,6 +6,7 @@ describe('Module Exports', () => {
     expect(StackOneAI.StackOneTool).toBeDefined();
     expect(StackOneAI.Tools).toBeDefined();
     expect(StackOneAI.StackOneToolSet).toBeDefined();
+    expect(StackOneAI.BaseTool).toBeDefined();
 
     // Check errors
     expect(StackOneAI.StackOneError).toBeDefined();
@@ -14,9 +15,7 @@ describe('Module Exports', () => {
     expect(StackOneAI.ToolSetConfigError).toBeDefined();
     expect(StackOneAI.ToolSetLoadError).toBeDefined();
 
-    // Check OpenAPI classes
-    expect(StackOneAI.OpenAPIToolSet).toBeDefined();
-    expect(StackOneAI.OpenAPILoader).toBeDefined();
-    expect(StackOneAI.OpenAPIParser).toBeDefined();
+    // Check feedback tool
+    expect(StackOneAI.createFeedbackTool).toBeDefined();
   });
 });

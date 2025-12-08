@@ -1,8 +1,5 @@
-import { loadStackOneSpecs } from '../openapi/loader';
-import { StackOneTool, Tools } from '../tool';
+import { type StackOneTool, Tools } from '../tool';
 import { createFeedbackTool } from '../tools/feedback';
-import type { ToolDefinition } from '../types';
-import { removeJsonSchemaProperty } from '../utils/schema';
 import { type BaseToolSetConfig, ToolSet, ToolSetConfigError } from './base';
 
 /**
@@ -12,7 +9,6 @@ export interface StackOneToolSetConfig extends BaseToolSetConfig {
   apiKey?: string;
   accountId?: string;
   strict?: boolean;
-  removedParams?: string[]; // List of parameters to remove from all tools
 }
 
 /**
@@ -53,7 +49,7 @@ export interface WorkflowConfig {
 }
 
 /**
- * Class for loading StackOne tools from the OAS directory
+ * Class for loading StackOne tools via MCP
  */
 export class StackOneToolSet extends ToolSet {
   /**
@@ -61,10 +57,9 @@ export class StackOneToolSet extends ToolSet {
    */
   private accountId?: string;
   private accountIds: string[] = [];
-  private readonly _removedParams: string[];
 
   /**
-   * Initialize StackOne toolset with API key and optional account ID
+   * Initialise StackOne toolset with API key and optional account ID
    * @param config Configuration object containing API key and optional account ID
    */
   constructor(config?: StackOneToolSetConfig) {
@@ -97,7 +92,7 @@ export class StackOneToolSet extends ToolSet {
       ...(accountId ? { 'x-account-id': accountId } : {}),
     };
 
-    // Initialize base class
+    // Initialise base class
     super({
       baseUrl: config?.baseUrl,
       authentication,
@@ -105,29 +100,6 @@ export class StackOneToolSet extends ToolSet {
     });
 
     this.accountId = accountId;
-    this._removedParams = ['source_value'];
-
-    // Load tools
-    this.loadTools();
-  }
-
-  /**
-   * Get StackOne tools matching a filter pattern
-   * @param filterPattern Optional glob pattern or array of patterns to filter tools
-   * @param accountId Optional account ID to use for the tools
-   * @returns Collection of tools matching the filter pattern
-   */
-  getStackOneTools(filterPattern?: string | string[], accountId?: string): Tools {
-    // Use provided account ID or fall back to the instance account ID
-    const effectiveAccountId = accountId || this.accountId;
-
-    // Create headers with account ID if provided
-    const headers: Record<string, string> = effectiveAccountId
-      ? { 'x-account-id': effectiveAccountId }
-      : {};
-
-    // Get tools with headers
-    return this.getTools(filterPattern, headers);
   }
 
   /**
@@ -179,7 +151,13 @@ export class StackOneToolSet extends ToolSet {
     }
 
     // Apply provider and action filters
-    return this.filterTools(tools, options);
+    const filteredTools = this.filterTools(tools, options);
+
+    // Add feedback tool
+    const feedbackTool = createFeedbackTool(undefined, this.accountId, this.baseUrl);
+    const toolsWithFeedback = new Tools([...filteredTools.toArray(), feedbackTool]);
+
+    return toolsWithFeedback;
   }
 
   /**
@@ -218,56 +196,5 @@ export class StackOneToolSet extends ToolSet {
    */
   plan(_: WorkflowConfig): Promise<StackOneTool> {
     throw new Error('Not implemented yet');
-  }
-
-  /**
-   * Load tools from the OAS directory
-   */
-  private loadTools(): void {
-    const specs = loadStackOneSpecs(this.baseUrl, this._removedParams);
-
-    // Process each vertical
-    for (const [_, tools] of Object.entries(specs)) {
-      // Process each tool
-      for (const [toolName, toolDef] of Object.entries(tools)) {
-        // Remove account ID parameter if not provided
-        if (!this.accountId) {
-          this.removeAccountIdParameter(toolDef);
-        }
-
-        // Create tool
-        const tool = new StackOneTool(
-          toolName,
-          toolDef.description,
-          toolDef.parameters,
-          toolDef.execute,
-          this.headers
-        );
-
-        // Add tool to the list
-        this.tools.push(tool);
-      }
-    }
-
-    // Add feedback collection meta tool
-    this.tools.push(createFeedbackTool(undefined, this.accountId, this.baseUrl));
-  }
-
-  /**
-   * Remove account ID parameter from a tool definition
-   * @param toolDef Tool definition to modify
-   */
-  private removeAccountIdParameter(toolDef: ToolDefinition): void {
-    // Remove from parameters
-    if (toolDef.parameters.properties && 'x-account-id' in toolDef.parameters.properties) {
-      removeJsonSchemaProperty(toolDef.parameters.properties, 'x-account-id');
-    }
-
-    // Remove from required parameters
-    if (toolDef.parameters.required) {
-      toolDef.parameters.required = toolDef.parameters.required.filter(
-        (param) => param !== 'x-account-id'
-      );
-    }
   }
 }

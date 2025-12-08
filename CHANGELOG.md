@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v1.1.0...v1.1.1) (2025-12-04)
+
+
+### Bug Fixes
+
+* remove an ambiguous keyword(saas) from package.json ([#145](https://github.com/StackOneHQ/stackone-ai-node/issues/145)) ([0e434e3](https://github.com/StackOneHQ/stackone-ai-node/commit/0e434e396777270c90ab7239b7f3e6b6f8832fd0))
+
 ## [1.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v1.0.0...v1.1.0) (2025-12-03)
 
 
