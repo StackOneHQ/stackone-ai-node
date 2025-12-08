@@ -54,7 +54,6 @@
     "openapi-types": "catalog:other",
     "publint": "catalog:lint",
     "tsdown": "catalog:build",
-    "tsx": "catalog:other",
     "type-fest": "catalog:types",
     "typescript": "catalog:types",
     "unplugin-unused": "catalog:build",

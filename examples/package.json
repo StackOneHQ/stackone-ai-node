@@ -16,7 +16,6 @@
     "msw": "catalog:testing",
     "nano-spawn": "catalog:",
     "openai": "catalog:ai",
-    "tsx": "catalog:other",
     "vitest": "catalog:testing"
   },
   "devEngines": {
