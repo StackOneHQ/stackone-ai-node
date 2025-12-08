@@ -54,6 +54,7 @@ const openaiIntegration = async (): Promise<void> => {
   assert(choice.message.tool_calls.length > 0, 'Expected at least one tool call');
 
   const toolCall = choice.message.tool_calls[0];
+  assert(toolCall.type === 'function', 'Expected tool call to be a function');
   assert(
     toolCall.function.name === 'hris_get_employee',
     'Expected tool call to be hris_get_employee'

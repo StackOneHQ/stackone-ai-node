@@ -10,7 +10,7 @@ import { assert } from 'node:console';
 import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { type JsonDict, StackOneToolSet } from '@stackone/ai';
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
@@ -54,12 +54,18 @@ const humanInTheLoopExample = async (): Promise<void> => {
     tools: tool,
     prompt:
       'Create a new employee in Workday, params: Full name: John Doe, personal email: john.doe@example.com, department: Engineering, start date: 2025-01-01, hire date: 2025-01-01',
-    maxSteps: 1,
+    stopWhen: stepCountIs(1),
   });
 
   // Human validation and modification step
-  const toolCall = toolCalls[0] as ToolCall;
-  const shouldExecute = await simulateHumanValidation(toolCall);
+  const toolCall = toolCalls[0];
+  if (toolCall.type !== 'tool-call') {
+    throw new Error('Expected a tool call');
+  }
+  const shouldExecute = await simulateHumanValidation({
+    toolName: toolCall.toolName,
+    args: 'args' in toolCall ? (toolCall.args as Record<string, unknown>) : {},
+  });
 
   // Map of tool names to execution functions
   const executions: Record<string, (args: Record<string, unknown>) => Promise<JsonDict>> = {

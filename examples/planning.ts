@@ -8,7 +8,7 @@
 
 import { openai } from '@ai-sdk/openai';
 import { StackOneToolSet } from '@stackone/ai';
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { ACCOUNT_IDS } from './constants';
 
 export const planningModule = async (): Promise<void> => {
@@ -32,7 +32,7 @@ export const planningModule = async (): Promise<void> => {
     model: openai('gpt-5'),
     prompt: 'You are a workplace agent, onboard the latest hires to our systems',
     tools: await onboardWorkflow.toAISDK(),
-    maxSteps: 3,
+    stopWhen: stepCountIs(3),
   });
 };
 

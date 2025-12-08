@@ -6,7 +6,7 @@ import assert from 'node:assert';
 import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { StackOneToolSet } from '@stackone/ai';
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
@@ -30,12 +30,12 @@ const aiSdkIntegration = async (): Promise<void> => {
   // Convert to AI SDK tools
   const aiSdkTools = await tools.toAISDK();
 
-  // Use max steps to automatically call the tool if it's needed
+  // The AI SDK will automatically call the tool if needed
   const { text } = await generateText({
     model: openai('gpt-4o'),
     tools: aiSdkTools,
     prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
-    maxSteps: 3,
+    stopWhen: stepCountIs(3),
   });
 
   assert(text.includes('Michael'), 'Expected employee name to be included in the response');
