@@ -3,7 +3,6 @@ packages:
   - examples
 
 catalog:
-  '@ai-sdk/provider-utils': ^3.0.18
   nano-spawn: ^2.0.0
 
 catalogMode: strict
@@ -11,6 +10,7 @@ catalogMode: strict
 catalogs:
   ai:
     '@ai-sdk/openai': ^2.0.46
+    '@ai-sdk/provider-utils': ^3.0.18
     ai: ^5.0.63
     openai: ^6.2.0
   build:

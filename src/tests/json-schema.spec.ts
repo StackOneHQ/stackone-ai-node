@@ -100,8 +100,11 @@ describe('Schema Validation', () => {
 
       expect(toolObj).toBeDefined();
       expect(typeof toolObj.execute).toBe('function');
+      // TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
+      // @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
       expect(toolObj.inputSchema.jsonSchema.type).toBe('object');
 
+      // @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
       const arrayWithItems = toolObj.inputSchema.jsonSchema.properties?.arrayWithItems;
       expect(arrayWithItems?.type).toBe('array');
       expect((arrayWithItems?.items as JSONSchema7)?.type).toBe('string');
@@ -143,6 +146,8 @@ describe('Schema Validation', () => {
       expect(aiSchema).toBeDefined();
 
       const aiSdkTool = await tool.toAISDK();
+      // TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
+      // @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
       const filterProp = aiSdkTool[tool.name].inputSchema.jsonSchema.properties?.filter as
         | (JSONSchema7 & { properties: Record<string, JSONSchema7> })
         | undefined;

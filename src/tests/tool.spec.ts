@@ -92,7 +92,8 @@ describe('StackOneTool', () => {
     expect(aiSdkTool.test_tool.description).toBe('Test tool');
     expect(aiSdkTool.test_tool.inputSchema).toBeDefined();
 
-    // The actual schema is in inputSchema.jsonSchema
+    // TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
+    // @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
     const schema = aiSdkTool.test_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');
@@ -163,7 +164,8 @@ describe('StackOneTool', () => {
     // Check that inputSchema is defined
     expect(aiSdkTool.complex_tool.inputSchema).toBeDefined();
 
-    // The actual schema is in inputSchema.jsonSchema
+    // TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
+    // @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
     const schema = aiSdkTool.complex_tool.inputSchema.jsonSchema;
     expect(schema).toBeDefined();
     expect(schema.type).toBe('object');

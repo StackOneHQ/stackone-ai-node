@@ -129,6 +129,8 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     const aiToolDefinition = aiTools.dummy_action;
     expect(aiToolDefinition).toBeDefined();
     expect(aiToolDefinition.description).toBe('Dummy tool');
+    // TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
+    // @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
     expect(aiToolDefinition.inputSchema.jsonSchema.properties).toBeDefined();
     expect(aiToolDefinition.execution).toBeUndefined();
 
