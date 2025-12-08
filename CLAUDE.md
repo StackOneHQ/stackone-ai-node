@@ -52,6 +52,10 @@ See the **file-operations** skill for file and HTTP guidance:
 
 Refer to `.claude/skills/file-operations/SKILL.md` for complete details.
 
+## File Naming Conventions
+
+- Use `.yaml` extension instead of `.yml` for all YAML files (e.g., `lefthook.yaml`, GitHub Actions workflows)
+
 ## Orama Integration
 
 See the **orama-integration** skill for Orama API guidance:
