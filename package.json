@@ -51,7 +51,6 @@
     "lint-staged": "catalog:lint",
     "msw": "catalog:testing",
     "openai": "catalog:ai",
-    "openapi-types": "catalog:other",
     "publint": "catalog:lint",
     "tsdown": "catalog:build",
     "type-fest": "catalog:types",
