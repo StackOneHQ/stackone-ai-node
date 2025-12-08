@@ -42,7 +42,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["dist/**", "node_modules/**"],
+    "ignore": ["dist/**", "node_modules/**", "/nix/store/**"],
     "include": ["src/**/*.ts", "examples/**/*.ts", "./tsdown.config.ts"]
   }
 }
