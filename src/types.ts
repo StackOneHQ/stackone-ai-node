@@ -156,3 +156,28 @@ export interface ToolDefinition {
   parameters: ToolParameters;
   execute: ExecuteConfig;
 }
+
+/**
+ * AI SDK tool definition returned by toAISDK()
+ * Compatible with Vercel AI SDK Tool type
+ */
+export interface AISDKToolDefinition {
+  description: string;
+  inputSchema: {
+    jsonSchema: JSONSchema7 & {
+      properties?: Record<string, JSONSchema7>;
+    };
+  };
+  parameters?: unknown; // v4 backward compatibility
+  execute?: (
+    args: Record<string, unknown>,
+    options: { toolCallId: string; messages: unknown[] }
+  ) => Promise<unknown>;
+  execution?: ToolExecution;
+}
+
+/**
+ * Result type for toAISDK() method
+ * Maps tool names to their AI SDK definitions
+ */
+export type AISDKToolResult<T extends string = string> = Record<T, AISDKToolDefinition>;
