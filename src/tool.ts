@@ -208,11 +208,14 @@ export class BaseTool {
     }
 
     const schemaObject = jsonSchema(schema);
-    const toolDefinition: AISDKToolDefinition = {
-      inputSchema: schemaObject as AISDKToolDefinition['inputSchema'],
+    // TODO: Remove ts-ignore once AISDKToolDefinition properly types the inputSchema and parameters
+    // We avoid defining our own types as much as possible, so we use the AI SDK Tool type
+    // but need to suppress errors for backward compatibility properties
+    const toolDefinition = {
+      inputSchema: schemaObject,
       parameters: schemaObject, // v4 (backward compatibility)
       description: this.description,
-    };
+    } as AISDKToolDefinition;
 
     const executionOption =
       options.execution !== undefined
