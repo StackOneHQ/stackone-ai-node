@@ -18,19 +18,19 @@
     "LICENSE"
   ],
   "scripts": {
-    "preinstall": "npx only-allow pnpm",
     "build": "tsdown",
-    "prepack": "pnpm run build",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "preinstall": "npx only-allow pnpm",
+    "prepack": "npm pkg delete scripts.preinstall && pnpm run build",
+    "test": "pnpm -r --no-bail --aggregate-output run '/^test(:|$)/'",
     "test:coverage": "vitest run --coverage",
     "test:examples": "pnpm --filter @stackone/ai-examples test",
-    "test:all": "pnpm run --aggregate-output '/^test(:|$)/'",
-    "lint": "biome check .",
-    "typecheck": "tsgo --noEmit",
+    "test:root": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "pnpm -r --no-bail --aggregate-output run '/^typecheck(:|$)/'",
     "typecheck:examples": "pnpm --filter @stackone/ai-examples typecheck",
-    "typecheck:all": "pnpm run --aggregate-output '/^typecheck(:|$)/'",
-    "format": "biome format --write ."
+    "typecheck:root": "tsgo --noEmit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:prod",
