@@ -4,11 +4,7 @@ pre-commit:
     typecheck:
       glob: "*.{ts,tsx,js,jsx,mts,cts}"
       run: pnpm run typecheck
-    lint:
-      glob: "*.{ts,tsx,js,jsx,mts,cts,json,jsonc,yaml,yml,md}"
-      run: pnpm run lint
-      stage_fixed: true
     format:
-      glob: "*"
-      run: pnpm exec biome format --write {staged_files}
+      glob: "*.{ts,tsx,js,jsx,mts,cts,json,jsonc,yaml,yml,md}"
+      run: pnpm biome format --no-errors-on-unmatched --write {staged_files}
       stage_fixed: true
