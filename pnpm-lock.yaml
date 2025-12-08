@@ -5,41 +5,65 @@ settings:
   excludeLinksFromLockfile: false
 
 catalogs:
-  ai:
+  default:
+    nano-spawn:
+      specifier: ^2.0.0
+      version: 2.0.0
+  dev:
     '@ai-sdk/openai':
       specifier: ^2.0.46
       version: 2.0.76
     '@ai-sdk/provider-utils':
       specifier: ^3.0.18
       version: 3.0.18
-  build:
-    tsdown:
-      specifier: ^0.15.9
-      version: 0.15.12
-    unplugin-unused:
-      specifier: ^0.5.4
-      version: 0.5.6
-  default:
-    nano-spawn:
-      specifier: ^2.0.0
-      version: 2.0.0
-  lint:
     '@biomejs/biome':
       specifier: ^1.5.3
       version: 1.9.4
-    lint-staged:
-      specifier: ^15.2.0
-      version: 15.5.2
-    publint:
-      specifier: ^0.3.12
-      version: 0.3.15
-  other:
     '@hono/mcp':
       specifier: ^0.1.4
       version: 0.1.5
+    '@types/json-schema':
+      specifier: ^7.0.15
+      version: 7.0.15
+    '@types/node':
+      specifier: ^22.13.5
+      version: 22.19.1
+    '@typescript/native-preview':
+      specifier: ^7.0.0-dev.20251202.1
+      version: 7.0.0-dev.20251202.1
+    '@vitest/coverage-v8':
+      specifier: ^3.2.4
+      version: 3.2.4
+    fs-fixture:
+      specifier: ^2.8.1
+      version: 2.11.0
     hono:
       specifier: ^4.9.10
       version: 4.10.7
+    lint-staged:
+      specifier: ^15.2.0
+      version: 15.5.2
+    msw:
+      specifier: ^2.10.4
+      version: 2.12.3
+    publint:
+      specifier: ^0.3.12
+      version: 0.3.15
+    tsdown:
+      specifier: ^0.15.9
+      version: 0.15.12
+    type-fest:
+      specifier: ^4.41.0
+      version: 4.41.0
+    typescript:
+      specifier: ^5.8.3
+      version: 5.9.3
+    unplugin-unused:
+      specifier: ^0.5.4
+      version: 0.5.6
+    vitest:
+      specifier: ^3.2.4
+      version: 3.2.4
     zod:
       specifier: ^3.23.8
       version: 3.25.76
@@ -50,7 +74,7 @@ catalogs:
     openai:
       specifier: ^6.2.0
       version: 6.9.1
-  runtime:
+  prod:
     '@modelcontextprotocol/sdk':
       specifier: ^1.19.1
       version: 1.24.2
@@ -63,76 +87,47 @@ catalogs:
     json-schema:
       specifier: ^0.4.0
       version: 0.4.0
-  testing:
-    '@vitest/coverage-v8':
-      specifier: ^3.2.4
-      version: 3.2.4
-    fs-fixture:
-      specifier: ^2.8.1
-      version: 2.11.0
-    msw:
-      specifier: ^2.10.4
-      version: 2.12.3
-    vitest:
-      specifier: ^3.2.4
-      version: 3.2.4
-  types:
-    '@types/json-schema':
-      specifier: ^7.0.15
-      version: 7.0.15
-    '@types/node':
-      specifier: ^22.13.5
-      version: 22.19.1
-    '@typescript/native-preview':
-      specifier: ^7.0.0-dev.20251202.1
-      version: 7.0.0-dev.20251202.1
-    type-fest:
-      specifier: ^4.41.0
-      version: 4.41.0
-    typescript:
-      specifier: ^5.8.3
-      version: 5.9.3
 
 importers:
 
   .:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: catalog:runtime
+        specifier: catalog:prod
         version: 1.24.2(zod@3.25.76)
       '@orama/orama':
-        specifier: catalog:runtime
+        specifier: catalog:prod
         version: 3.1.16
       '@stackone/stackone-client-ts':
-        specifier: catalog:runtime
+        specifier: catalog:prod
         version: 4.32.2
       json-schema:
-        specifier: catalog:runtime
+        specifier: catalog:prod
         version: 0.4.0
     devDependencies:
       '@ai-sdk/openai':
-        specifier: catalog:ai
+        specifier: catalog:dev
         version: 2.0.76(zod@3.25.76)
       '@ai-sdk/provider-utils':
-        specifier: catalog:ai
+        specifier: catalog:dev
         version: 3.0.18(zod@3.25.76)
       '@biomejs/biome':
-        specifier: catalog:lint
+        specifier: catalog:dev
         version: 1.9.4
       '@hono/mcp':
-        specifier: catalog:other
+        specifier: catalog:dev
         version: 0.1.5(@modelcontextprotocol/sdk@1.24.2(zod@3.25.76))(hono@4.10.7)
       '@types/json-schema':
-        specifier: catalog:types
+        specifier: catalog:dev
         version: 7.0.15
       '@types/node':
-        specifier: catalog:types
+        specifier: catalog:dev
         version: 22.19.1
       '@typescript/native-preview':
-        specifier: catalog:types
+        specifier: catalog:dev
         version: 7.0.0-dev.20251202.1
       '@vitest/coverage-v8':
-        specifier: catalog:testing
+        specifier: catalog:dev
         version: 3.2.4(vitest@3.2.4(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
       ai:
         specifier: catalog:peer
@@ -141,16 +136,16 @@ importers:
         specifier: runtime:^1.3.2
         version: runtime:1.3.4
       fs-fixture:
-        specifier: catalog:testing
+        specifier: catalog:dev
         version: 2.11.0
       hono:
-        specifier: catalog:other
+        specifier: catalog:dev
         version: 4.10.7
       lint-staged:
-        specifier: catalog:lint
+        specifier: catalog:dev
         version: 15.5.2
       msw:
-        specifier: catalog:testing
+        specifier: catalog:dev
         version: 2.12.3(@types/node@22.19.1)(typescript@5.9.3)
       node:
         specifier: runtime:^24.11.0
@@ -159,25 +154,25 @@ importers:
         specifier: catalog:peer
         version: 6.9.1(zod@3.25.76)
       publint:
-        specifier: catalog:lint
+        specifier: catalog:dev
         version: 0.3.15
       tsdown:
-        specifier: catalog:build
+        specifier: catalog:dev
         version: 0.15.12(@typescript/native-preview@7.0.0-dev.20251202.1)(publint@0.3.15)(typescript@5.9.3)(unplugin-unused@0.5.6)
       type-fest:
-        specifier: catalog:types
+        specifier: catalog:dev
         version: 4.41.0
       typescript:
-        specifier: catalog:types
+        specifier: catalog:dev
         version: 5.9.3
       unplugin-unused:
-        specifier: catalog:build
+        specifier: catalog:dev
         version: 0.5.6
       vitest:
-        specifier: catalog:testing
+        specifier: catalog:dev
         version: 3.2.4(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
       zod:
-        specifier: catalog:other
+        specifier: catalog:dev
         version: 3.25.76
 
   examples:
@@ -187,10 +182,10 @@ importers:
         version: link:..
     devDependencies:
       '@ai-sdk/openai':
-        specifier: catalog:ai
+        specifier: catalog:dev
         version: 2.0.76(zod@3.25.76)
       '@types/node':
-        specifier: catalog:types
+        specifier: catalog:dev
         version: 22.19.1
       ai:
         specifier: catalog:peer
@@ -199,7 +194,7 @@ importers:
         specifier: runtime:^1.3.2
         version: runtime:1.3.4
       msw:
-        specifier: catalog:testing
+        specifier: catalog:dev
         version: 2.12.3(@types/node@22.19.1)(typescript@5.9.3)
       nano-spawn:
         specifier: 'catalog:'
@@ -211,7 +206,7 @@ importers:
         specifier: catalog:peer
         version: 6.9.1(zod@3.25.76)
       vitest:
-        specifier: catalog:testing
+        specifier: catalog:dev
         version: 3.2.4(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
 packages:

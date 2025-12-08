@@ -10,13 +10,13 @@
     "@stackone/ai": "workspace:*"
   },
   "devDependencies": {
-    "@ai-sdk/openai": "catalog:ai",
-    "@types/node": "catalog:types",
+    "@ai-sdk/openai": "catalog:dev",
+    "@types/node": "catalog:dev",
     "ai": "catalog:peer",
-    "msw": "catalog:testing",
+    "msw": "catalog:dev",
     "nano-spawn": "catalog:",
     "openai": "catalog:peer",
-    "vitest": "catalog:testing"
+    "vitest": "catalog:dev"
   },
   "devEngines": {
     "runtime": [
