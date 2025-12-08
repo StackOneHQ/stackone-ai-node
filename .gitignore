@@ -176,3 +176,8 @@ dist
 
 .docs
 .npmrc
+
+# direnv
+.direnv
+!.envrc
+
