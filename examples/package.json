@@ -12,10 +12,10 @@
   "devDependencies": {
     "@ai-sdk/openai": "catalog:ai",
     "@types/node": "catalog:types",
-    "ai": "catalog:ai",
+    "ai": "catalog:peer",
     "msw": "catalog:testing",
     "nano-spawn": "catalog:",
-    "openai": "catalog:ai",
+    "openai": "catalog:peer",
     "vitest": "catalog:testing"
   },
   "devEngines": {

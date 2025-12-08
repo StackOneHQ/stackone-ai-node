@@ -11,8 +11,6 @@ catalogs:
   ai:
     '@ai-sdk/openai': ^2.0.46
     '@ai-sdk/provider-utils': ^3.0.18
-    ai: ^5.0.63
-    openai: ^6.2.0
   build:
     tsdown: ^0.15.9
     unplugin-unused: ^0.5.4
@@ -24,6 +22,9 @@ catalogs:
     '@hono/mcp': ^0.1.4
     hono: ^4.9.10
     zod: ^3.23.8
+  peer:
+    ai: ^5.0.63
+    openai: ^6.2.0
   runtime:
     '@modelcontextprotocol/sdk': ^1.19.1
     '@orama/orama': ^3.1.11
