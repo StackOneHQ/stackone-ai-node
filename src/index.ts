@@ -17,6 +17,8 @@ export {
 } from './toolsets';
 
 export type {
+  AISDKToolDefinition,
+  AISDKToolResult,
   ExecuteConfig,
   ExecuteOptions,
   Experimental_PreExecuteFunction,
