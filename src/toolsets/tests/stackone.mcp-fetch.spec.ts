@@ -2,11 +2,19 @@ import { StreamableHTTPTransport } from '@hono/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { StackOne } from '@stackone/stackone-client-ts';
 import { Hono } from 'hono';
-import { vi } from 'vitest';
+import { assert, vi } from 'vitest';
 import { z } from 'zod';
 import { server as mswServer } from '../../../mocks/node';
 import { ToolSet } from '../base';
 import { StackOneToolSet } from '../stackone';
+
+// Bun runtime types for test environment
+declare const Bun: {
+  serve(options: { port: number; fetch: (req: Request) => Response | Promise<Response> }): {
+    url: URL;
+    stop(): void;
+  };
+};
 
 type MockTool = {
   name: string;
@@ -14,7 +22,7 @@ type MockTool = {
   shape: Record<string, unknown>; // JSON Schema object
 };
 
-async function createMockMcpServer(accountTools: Record<string, MockTool[]>) {
+async function createMockMcpServer(accountTools: Record<string, readonly MockTool[]>) {
   const app = new Hono();
 
   app.all('/mcp', async (c) => {
@@ -31,9 +39,11 @@ async function createMockMcpServer(accountTools: Record<string, MockTool[]>) {
         tool.name,
         {
           description: tool.description,
-          inputSchema: tool.shape,
+          // TODO: Remove type assertion - MCP SDK expects Zod schema but we're using JSON Schema objects in tests
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          inputSchema: tool.shape as any,
         },
-        async ({ params }) => ({
+        async ({ params }: { params: { arguments?: Record<string, unknown> } }) => ({
           content: [],
           structuredContent: params.arguments ?? {},
           _meta: undefined,
@@ -123,7 +133,11 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
     expect(aiToolDefinition.execution).toBeUndefined();
 
     const executableTool = (await tool.toAISDK()).dummy_action;
-    const result = await executableTool.execute({ foo: 'bar' });
+    assert(executableTool.execute, 'execute should be defined');
+    const result = await executableTool.execute(
+      { foo: 'bar' },
+      { toolCallId: 'test-id', messages: [] }
+    );
 
     expect(stackOneClient.actions.rpcAction).toHaveBeenCalledWith({
       action: 'dummy_action',
