@@ -79,8 +79,8 @@ npx tsx examples/ai-sdk-integration.ts
 ### Run All Examples
 
 ```bash
-# Test all examples
-pnpm test examples/
+# Test all examples (from examples directory)
+cd examples && pnpm test
 ```
 
 ## Examples Overview
@@ -272,14 +272,14 @@ tool.setAccountId("account_123");
 The examples include a comprehensive test suite:
 
 ```bash
-# Run all example tests
-pnpm test examples/
+# Run all example tests (from examples directory)
+cd examples && pnpm test
 
 # Run with verbose output
-pnpm test examples/ --verbose
+cd examples && pnpm test --verbose
 
 # Run specific test
-pnpm test examples/examples.spec.ts
+cd examples && pnpm test examples.spec.ts
 ```
 
 ## Troubleshooting
