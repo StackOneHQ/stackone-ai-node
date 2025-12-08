@@ -19,8 +19,8 @@ npm install @stackone/ai
 # Using yarn
 yarn add @stackone/ai
 
-# Using bun
-bun add @stackone/ai
+# Using pnpm
+pnpm add @stackone/ai
 ```
 
 ### Optional: AI SDK Integration
@@ -34,8 +34,8 @@ npm install ai
 # Using yarn
 yarn add ai
 
-# Using bun
-bun add ai
+# Using pnpm
+pnpm add ai
 ```
 
 ## Development Environment
@@ -53,7 +53,7 @@ echo "use flake" > .envrc
 direnv allow
 ```
 
-The flake provides all necessary development dependencies including Node.js, Bun, and other build tools.
+The flake provides all necessary development dependencies including Node.js, pnpm, and other build tools.
 
 ## Integrations
 

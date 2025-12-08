@@ -70,7 +70,7 @@ export const ACCOUNT_IDS = {
 
 ```bash
 # Run a specific example
-bun run examples/ai-sdk-integration.ts
+pnpm run examples/ai-sdk-integration.ts
 
 # Or with Node.js
 npx tsx examples/ai-sdk-integration.ts
@@ -80,7 +80,7 @@ npx tsx examples/ai-sdk-integration.ts
 
 ```bash
 # Test all examples
-bun test examples/
+pnpm test examples/
 ```
 
 ## Examples Overview
@@ -273,13 +273,13 @@ The examples include a comprehensive test suite:
 
 ```bash
 # Run all example tests
-bun test examples/
+pnpm test examples/
 
 # Run with verbose output
-bun test examples/ --verbose
+pnpm test examples/ --verbose
 
 # Run specific test
-bun test examples/examples.spec.ts
+pnpm test examples/examples.spec.ts
 ```
 
 ## Troubleshooting
