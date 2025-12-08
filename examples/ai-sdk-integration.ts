@@ -10,14 +10,9 @@ import { generateText } from 'ai';
 import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
-const isPlaceholderKey = !apiKey || apiKey === 'test-stackone-key';
-const shouldSkip = process.env.SKIP_FETCH_TOOLS_EXAMPLE !== '0' && isPlaceholderKey;
-
-if (shouldSkip) {
-  console.log(
-    'Skipping ai-sdk-integration example. Provide STACKONE_API_KEY and set SKIP_FETCH_TOOLS_EXAMPLE=0 to run.'
-  );
-  process.exit(0);
+if (!apiKey) {
+  console.error('STACKONE_API_KEY environment variable is required');
+  process.exit(1);
 }
 
 const aiSdkIntegration = async (): Promise<void> => {

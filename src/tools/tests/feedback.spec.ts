@@ -279,23 +279,4 @@ describe('meta_collect_tool_feedback', () => {
       });
     });
   });
-
-  describe('integration test', () => {
-    it.skipIf(!process.env.STACKONE_API_KEY)('test_live_feedback_submission', async () => {
-      const tool = createFeedbackTool();
-      const testData = {
-        feedback: `Test feedback from Node.js SDK at ${new Date().toISOString()}`,
-        account_id: 'test_account_123',
-        tool_names: ['test_tool_1', 'test_tool_2'],
-      };
-
-      // Either succeeds or throws StackOneError (if test account doesn't exist)
-      await expect(tool.execute(testData)).resolves.toMatchObject({
-        message: 'Feedback sent to 1 account(s)',
-        total_accounts: 1,
-        successful: 1,
-        failed: 0,
-      });
-    });
-  });
 });

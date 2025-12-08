@@ -10,14 +10,9 @@ import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
-const isPlaceholderKey = !apiKey || apiKey === 'test-stackone-key';
-const shouldSkip = process.env.SKIP_FETCH_TOOLS_EXAMPLE !== '0' && isPlaceholderKey;
-
-if (shouldSkip) {
-  console.log(
-    'Skipping fetch-tools example. Provide STACKONE_API_KEY and set SKIP_FETCH_TOOLS_EXAMPLE=0 to run.'
-  );
-  process.exit(0);
+if (!apiKey) {
+  console.error('STACKONE_API_KEY environment variable is required');
+  process.exit(1);
 }
 
 const toolset = new StackOneToolSet({
