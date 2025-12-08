@@ -186,9 +186,6 @@ importers:
       ai:
         specifier: catalog:peer
         version: 5.0.106(zod@3.25.76)
-      msw:
-        specifier: catalog:dev
-        version: 2.12.3(@types/node@22.19.1)(typescript@5.9.3)
       nano-spawn:
         specifier: catalog:dev
         version: 2.0.0
@@ -198,9 +195,6 @@ importers:
       openai:
         specifier: catalog:peer
         version: 6.9.1(zod@3.25.76)
-      vitest:
-        specifier: catalog:dev
-        version: 3.2.4(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
 packages:
 

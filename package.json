@@ -23,13 +23,11 @@
     "lint": "biome check .",
     "preinstall": "npx only-allow pnpm",
     "prepack": "npm pkg delete scripts.preinstall && pnpm run build",
-    "test": "pnpm -r --no-bail --aggregate-output run '/^test(:|$)/'",
-    "test:coverage": "vitest run --coverage",
-    "test:examples": "pnpm --filter @stackone/ai-examples test",
-    "test:root": "vitest run",
-    "test:watch": "vitest",
-    "typecheck": "pnpm -r --no-bail --aggregate-output run '/^typecheck(:|$)/'",
-    "typecheck:examples": "pnpm --filter @stackone/ai-examples typecheck",
+    "test": "pnpm --no-bail --aggregate-output run '/^test:/'",
+    "test:submodules": "pnpm --parallel -r --no-bail --aggregate-output test",
+    "test:root": "vitest",
+    "typecheck": "pnpm --no-bail --aggregate-output run '/^typecheck:/'",
+    "typecheck:submodules": "pnpm --parallel -r --no-bail --aggregate-output typecheck",
     "typecheck:root": "tsgo --noEmit"
   },
   "dependencies": {
