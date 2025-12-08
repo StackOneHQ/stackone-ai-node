@@ -62,8 +62,8 @@
     "zod": "catalog:dev"
   },
   "peerDependencies": {
-    "ai": ">=4.0.0",
-    "openai": ">=5.0.0"
+    "ai": "catalog:peer",
+    "openai": "catalog:peer"
   },
   "peerDependenciesMeta": {
     "ai": {
