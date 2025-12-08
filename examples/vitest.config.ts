@@ -7,5 +7,9 @@ export default defineConfig({
     include: ['**/*.spec.ts'],
     setupFiles: ['./vitest.setup.ts'],
     testTimeout: 30000,
+    typecheck: {
+      enabled: true,
+      include: ['**/*.spec.ts'],
+    },
   },
 });

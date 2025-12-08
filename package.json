@@ -24,8 +24,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:examples": "pnpm --filter @stackone/ai-examples test",
+    "test:all": "pnpm run '/^test(:|$)/'",
     "lint": "biome check .",
     "typecheck": "tsgo --noEmit",
+    "typecheck:examples": "pnpm --filter @stackone/ai-examples typecheck",
+    "typecheck:all": "pnpm run '/^typecheck(:|$)/'",
     "format": "biome format --write ."
   },
   "dependencies": {

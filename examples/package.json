@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "vitest typecheck --run"
   },
   "dependencies": {
     "@stackone/ai": "workspace:*"
