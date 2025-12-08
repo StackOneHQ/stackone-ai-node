@@ -38,6 +38,23 @@ yarn add ai
 bun add ai
 ```
 
+## Development Environment
+
+### Using Nix Flake
+
+This project includes a Nix flake for reproducible development environments. If you have Nix installed with flakes enabled, you can use it to set up your development environment:
+
+```bash
+# Enter development shell
+nix develop
+
+# Or use direnv for automatic activation
+echo "use flake" > .envrc
+direnv allow
+```
+
+The flake provides all necessary development dependencies including Node.js, Bun, and other build tools.
+
 ## Integrations
 
 The StackOneToolSet makes it super easy to use StackOne APIs as tools in your AI applications.
