@@ -19,8 +19,6 @@
   ],
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "prepare": "pnpm run prepare:git",
-    "prepare:git": "git config --local core.hooksPath .githooks",
     "build": "tsdown",
     "prepack": "pnpm run build",
     "test": "vitest run",
@@ -48,7 +46,7 @@
     "ai": "catalog:peer",
     "fs-fixture": "catalog:dev",
     "hono": "catalog:dev",
-    "lint-staged": "catalog:dev",
+    "lefthook": "catalog:dev",
     "msw": "catalog:dev",
     "openai": "catalog:peer",
     "publint": "catalog:dev",
@@ -88,11 +86,6 @@
   "license": "Apache-2.0",
   "bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
   "homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
-  "lint-staged": {
-    "*": [
-      "biome check --write --no-errors-on-unmatched"
-    ]
-  },
   "publishConfig": {
     "exports": {
       ".": "./dist/index.js",
