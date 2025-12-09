@@ -1,5 +1,5 @@
-import { StackOneAPIError } from '../utils/errors';
-import { RpcClient } from './index';
+import { StackOneAPIError } from './utils/errors';
+import { RpcClient } from './rpc-client';
 
 describe('RpcClient', () => {
   describe('constructor', () => {

@@ -1,5 +1,5 @@
-import type { JsonDict } from '../types';
-import { StackOneAPIError } from '../utils/errors';
+import type { JsonDict } from './types';
+import { StackOneAPIError } from './utils/errors';
 
 /**
  * RPC action request payload

@@ -1,6 +1,6 @@
 import type { Arrayable } from 'type-fest';
-import { RpcClient } from '../client';
-import { createMCPClient } from '../mcp';
+import { createMCPClient } from '../mcp-client';
+import { RpcClient } from '../rpc-client';
 import { BaseTool, Tools } from '../tool';
 import type {
   ExecuteOptions,

@@ -4,7 +4,7 @@ import { Hono } from 'hono';
 import { assert, vi } from 'vitest';
 import { z } from 'zod';
 import { server as mswServer } from '../../../mocks/node';
-import type { RpcClient } from '../../client';
+import type { RpcClient } from '../../rpc-client';
 import { ToolSet } from '../base';
 import { StackOneToolSet } from '../stackone';
 
