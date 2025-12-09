@@ -1,19 +1,19 @@
 pre-commit:
-  parallel: false
-  commands:
-    # Lint first - fail fast on warnings
-    oxlint:
-      glob: '*.{ts,tsx,js,jsx,mts,cts}'
-      run: pnpm oxlint --max-warnings=0 --type-aware --fix {staged_files}
-      stage_fixed: true
+  parallel: true
+  jobs:
+    - name: lint-fmt
+      group:
+        piped: true
+        jobs:
+          - name: oxlint
+            glob: '*.{ts,tsx,js,jsx,mts,cts}'
+            run: bun oxlint --max-warnings=0 --type-aware --fix {staged_files}
+            stage_fixed: true
+          - name: oxfmt
+            glob: '*'
+            run: bun oxfmt --no-error-on-unmatched-pattern {staged_files}
+            stage_fixed: true
 
-    # Format after linting passes
-    oxfmt:
-      glob: '*'
-      run: pnpm oxfmt --no-error-on-unmatched-pattern {staged_files}
-      stage_fixed: true
-
-    # Type check TypeScript files
-    typecheck:
+    - name: typecheck
       glob: '*.{ts,tsx,mts,cts}'
-      run: pnpm run typecheck
+      run: bun run typecheck
