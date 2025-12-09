@@ -1,7 +1,7 @@
 ---
 name: typescript-testing
 description: Use when writing or running tests. Covers Vitest commands, MSW HTTP mocking, fs-fixture for file system tests. (project)
-globs: "*.spec.ts"
+globs: "*.test.ts"
 alwaysApply: false
 ---
 
@@ -13,8 +13,7 @@ This skill guides testing practices for the StackOne SDK using Vitest test runne
 
 The project uses **Vitest** as the test runner. Run tests with:
 - `pnpm test` - Run all tests (unit, examples, scripts)
-- `pnpm test:unit` - Run only unit tests
-- `pnpm vitest src/path/to/file.spec.ts` - Run a specific test file
+- `pnpm vitest src/path/to/file.test.ts` - Run a specific test file
 - `pnpm vitest -t "test name"` - Run tests matching a pattern
 
 ### Vitest Globals
