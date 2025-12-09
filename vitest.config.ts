@@ -4,22 +4,40 @@ export default defineConfig({
   test: {
     watch: false,
     globals: true,
-    include: ['src/**/*.spec.ts', 'scripts/**/*.spec.ts'],
-    exclude: ['node_modules', 'dist', 'examples', 'src/toolsets/tests/stackone.mcp-fetch.spec.ts'],
-    setupFiles: ['./vitest.setup.ts'],
     testTimeout: 30000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.spec.ts', 'src/**/tests/**'],
+      include: ['src/**/*.ts', 'examples/**/*.ts'],
+      exclude: ['**/*.spec.ts', '**/*.test.ts', '**/*.test-d.ts', '**/tests/**'],
     },
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'root',
+          root: '.',
+          include: ['src/**/*.spec.ts', 'scripts/**/*.spec.ts'],
+          exclude: ['node_modules', 'dist', 'examples', 'src/toolsets/tests/stackone.mcp-fetch.spec.ts'],
+          setupFiles: ['./vitest.setup.ts'],
+          typecheck: {
+            enabled: true,
+            include: ['src/**/*.spec.ts', 'src/**/*.test-d.ts'],
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: 'examples',
+          root: './examples',
+          include: ['**/*.spec.ts', '**/*.test.ts'],
+          exclude: ['node_modules', 'dist'],
+        },
+      },
+    ],
     deps: {
       interopDefault: true,
-    },
-    typecheck: {
-      enabled: true,
-      include: ['src/**/*.spec.ts', 'src/**/*.test-d.ts'],
     },
   },
   resolve: {
