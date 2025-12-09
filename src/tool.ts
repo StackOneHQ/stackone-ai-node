@@ -509,7 +509,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
 		const actions = parts.filter((p) => actionTypes.includes(p));
 
-		orama.insert(oramaDb, {
+		await orama.insert(oramaDb, {
 			name: tool.name,
 			description: tool.description,
 			category: category,
