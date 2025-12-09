@@ -1,4 +1,17 @@
 import { http, HttpResponse } from 'msw';
+import { accountMcpTools, createMcpApp, defaultMcpTools, mixedProviderTools } from './mcp-server';
+
+// Create MCP apps for testing
+const defaultMcpApp = createMcpApp({
+  accountTools: {
+    default: defaultMcpTools,
+    acc1: accountMcpTools.acc1,
+    acc2: accountMcpTools.acc2,
+    acc3: accountMcpTools.acc3,
+    'test-account': accountMcpTools['test-account'],
+    mixed: mixedProviderTools,
+  },
+});
 
 // Helper to extract text content from OpenAI responses API input
 const extractTextFromInput = (input: unknown): string => {
@@ -514,4 +527,13 @@ export const handlers = [
     });
   }),
 
+  // ============================================================
+  // MCP Protocol endpoints (delegated to Hono app)
+  // ============================================================
+  http.all('https://api.stackone.com/mcp', async ({ request }) => {
+    return defaultMcpApp.fetch(request);
+  }),
+  http.all('https://api.stackone-dev.com/mcp', async ({ request }) => {
+    return defaultMcpApp.fetch(request);
+  }),
 ];
