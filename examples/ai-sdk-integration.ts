@@ -32,7 +32,7 @@ const aiSdkIntegration = async (): Promise<void> => {
 
   // The AI SDK will automatically call the tool if needed
   const { text } = await generateText({
-    model: openai('gpt-4o'),
+    model: openai('gpt-5.1'),
     tools: aiSdkTools,
     prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
     stopWhen: stepCountIs(3),

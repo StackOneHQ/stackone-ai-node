@@ -39,7 +39,7 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 
   // Use meta tools to dynamically find and execute relevant tools
   const { text, toolCalls } = await generateText({
-    model: openai('gpt-4o-mini'),
+    model: openai('gpt-5.1'),
     tools: aiSdkMetaTools,
     prompt: `I need to create a time off request for an employee.
     First, find the right tool for this task, then use it to create a time off request
@@ -79,7 +79,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 
   // Create an HR assistant that can discover and use tools dynamically
   const response = await openaiClient.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-5.1',
     messages: [
       {
         role: 'system',
