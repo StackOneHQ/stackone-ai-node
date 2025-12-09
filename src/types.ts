@@ -3,6 +3,7 @@
  */
 
 import type { Tool } from '@ai-sdk/provider-utils';
+import type { ToolSet } from 'ai';
 import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type { ValueOf } from 'type-fest';
 
@@ -175,9 +176,13 @@ export type AISDKToolDefinition = Tool & {
 
 /**
  * Result type for toAISDK() method.
- * Maps tool names to their AI SDK tool definitions.
+ * Uses the ToolSet type from AI SDK to ensure full compatibility with
+ * generateText, streamText, and other AI SDK functions.
  *
- * NOTE: We avoid defining our own types as much as possible and use existing
- * types from dependencies. This is a simple mapped type over AISDKToolDefinition.
+ * NOTE: We extend ToolSet with our custom AISDKToolDefinition to ensure
+ * both AI SDK compatibility and access to StackOne-specific properties
+ * like `execution` metadata.
  */
-export type AISDKToolResult<T extends string = string> = Record<T, AISDKToolDefinition>;
+export type AISDKToolResult<T extends string = string> = ToolSet & {
+  [K in T]: AISDKToolDefinition;
+};
