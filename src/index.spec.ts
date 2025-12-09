@@ -1,4 +1,4 @@
-import * as StackOneAI from '../index';
+import * as StackOneAI from './index';
 
 describe('Module Exports', () => {
   it('should export main classes and utilities', () => {

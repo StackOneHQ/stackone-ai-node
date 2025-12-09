@@ -1,6 +1,6 @@
 import { jsonSchema } from 'ai';
 import type { JSONSchema7 } from 'json-schema';
-import { StackOneTool } from '../tool';
+import { StackOneTool } from './tool';
 
 describe('Schema Validation', () => {
   describe('Array Items in Schema', () => {

@@ -1,4 +1,4 @@
-import { toArray } from '../utils/array';
+import { toArray } from './array';
 
 describe('toArray', () => {
   it.each([

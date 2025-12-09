@@ -1,4 +1,4 @@
-import { ToolSet } from '../toolsets/base';
+import { ToolSet } from './base';
 
 // Create a concrete implementation of the abstract ToolSet class for testing
 class TestToolSet extends ToolSet {

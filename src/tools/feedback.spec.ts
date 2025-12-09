@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { server } from '../../mocks/node';
-import { createFeedbackTool } from '../tools/feedback';
 import { StackOneError } from '../utils/errors';
+import { createFeedbackTool } from './feedback';
 
 interface FeedbackResultItem {
   account_id: string;

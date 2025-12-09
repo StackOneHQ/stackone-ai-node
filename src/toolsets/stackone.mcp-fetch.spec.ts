@@ -7,8 +7,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { server as mswServer } from '../../mocks/node';
-import { ToolSet } from '../toolsets/base';
-import { StackOneToolSet } from '../toolsets/stackone';
+import { ToolSet } from './base';
+import { StackOneToolSet } from './stackone';
 
 // Bun runtime types for test environment
 declare const Bun: {
