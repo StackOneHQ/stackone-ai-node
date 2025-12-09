@@ -13,7 +13,8 @@
     "@ai-sdk/openai": "catalog:dev",
     "@types/node": "catalog:dev",
     "ai": "catalog:peer",
-    "openai": "catalog:peer"
+    "openai": "catalog:peer",
+    "zod": "catalog:dev"
   },
   "devEngines": {
     "runtime": [
