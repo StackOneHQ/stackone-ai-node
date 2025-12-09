@@ -96,7 +96,7 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 
 // Pre-defined tool sets for common test scenarios
 
-export const defaultMcpTools: McpToolDefinition[] = [
+export const defaultMcpTools = [
   {
     name: 'default_tool_1',
     description: 'Default Tool 1',
@@ -114,9 +114,9 @@ export const defaultMcpTools: McpToolDefinition[] = [
       required: ['id'],
     },
   },
-];
+] as const satisfies McpToolDefinition[];
 
-export const accountMcpTools: Record<string, McpToolDefinition[]> = {
+export const accountMcpTools = {
   acc1: [
     {
       name: 'acc1_tool_1',
@@ -135,7 +135,7 @@ export const accountMcpTools: Record<string, McpToolDefinition[]> = {
         required: ['id'],
       },
     },
-  ],
+  ] as const satisfies McpToolDefinition[],
   acc2: [
     {
       name: 'acc2_tool_1',
@@ -154,7 +154,7 @@ export const accountMcpTools: Record<string, McpToolDefinition[]> = {
         required: ['id'],
       },
     },
-  ],
+  ] as const satisfies McpToolDefinition[],
   acc3: [
     {
       name: 'acc3_tool_1',
@@ -164,7 +164,7 @@ export const accountMcpTools: Record<string, McpToolDefinition[]> = {
         properties: { fields: { type: 'string' } },
       },
     },
-  ],
+  ] as const satisfies McpToolDefinition[],
   'test-account': [
     {
       name: 'dummy_action',
@@ -181,8 +181,8 @@ export const accountMcpTools: Record<string, McpToolDefinition[]> = {
         additionalProperties: false,
       },
     },
-  ],
-};
+  ] as const satisfies McpToolDefinition[],
+} as const;
 
 export const mixedProviderTools = [
   {
