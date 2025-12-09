@@ -27,8 +27,8 @@ async function createMockMcpServer(accountTools: Record<string, readonly MockToo
 
   app.all('/mcp', async (c) => {
     // Get account ID from header
-    const accountId = c.req.header('x-account-id') || 'default';
-    const tools = accountTools[accountId] || [];
+    const accountId = c.req.header('x-account-id') ?? 'default';
+    const tools = accountTools[accountId] ?? [];
 
     // Create a new MCP server instance per account
     const mcp = new McpServer({ name: 'test-mcp', version: '1.0.0' });
