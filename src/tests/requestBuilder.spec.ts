@@ -302,7 +302,7 @@ describe('RequestBuilder', () => {
 
 		// Complex object should use deep object serialization
 		expect(url.searchParams.get('complexObject[nested]')).toBe('nested-value');
-		expect(url.searchParams.get('complexObject[array]')).toBe('1,2,3'); // Arrays become strings
+		expect(url.searchParams.get('complexObject[array]')).toBe('[1,2,3]'); // Arrays become JSON strings
 		expect(url.searchParams.get('complexObject[nestedObject][deep]')).toBe('deep-value');
 
 		// Original complex object should not be present
@@ -436,10 +436,10 @@ describe('RequestBuilder', () => {
 			const result = await builder.execute(params, { dryRun: true });
 			const url = new URL(result.url as string);
 
-			// Arrays should be converted to comma-separated strings
-			expect(url.searchParams.get('filter[arrayField]')).toBe('1,2,3');
-			expect(url.searchParams.get('filter[stringArray]')).toBe('a,b,c');
-			expect(url.searchParams.get('filter[mixed]')).toBe('string,42,true');
+			// Arrays should be converted to JSON strings
+			expect(url.searchParams.get('filter[arrayField]')).toBe('[1,2,3]');
+			expect(url.searchParams.get('filter[stringArray]')).toBe('["a","b","c"]');
+			expect(url.searchParams.get('filter[mixed]')).toBe('["string",42,true]');
 		});
 
 		it('should handle nested objects with special types', async () => {
