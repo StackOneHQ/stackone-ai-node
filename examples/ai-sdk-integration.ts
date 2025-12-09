@@ -11,34 +11,34 @@ import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
-  console.error('STACKONE_API_KEY environment variable is required');
-  process.exit(1);
+	console.error('STACKONE_API_KEY environment variable is required');
+	process.exit(1);
 }
 
 const aiSdkIntegration = async (): Promise<void> => {
-  // Initialise StackOne
-  const toolset = new StackOneToolSet({
-    accountId: ACCOUNT_IDS.HRIS,
-    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
-  });
+	// Initialise StackOne
+	const toolset = new StackOneToolSet({
+		accountId: ACCOUNT_IDS.HRIS,
+		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+	});
 
-  // Fetch HRIS tools via MCP
-  const tools = await toolset.fetchTools({
-    actions: ['hris_get_*'],
-  });
+	// Fetch HRIS tools via MCP
+	const tools = await toolset.fetchTools({
+		actions: ['hris_get_*'],
+	});
 
-  // Convert to AI SDK tools
-  const aiSdkTools = await tools.toAISDK();
+	// Convert to AI SDK tools
+	const aiSdkTools = await tools.toAISDK();
 
-  // The AI SDK will automatically call the tool if needed
-  const { text } = await generateText({
-    model: openai('gpt-5.1'),
-    tools: aiSdkTools,
-    prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
-    stopWhen: stepCountIs(3),
-  });
+	// The AI SDK will automatically call the tool if needed
+	const { text } = await generateText({
+		model: openai('gpt-5.1'),
+		tools: aiSdkTools,
+		prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+		stopWhen: stepCountIs(3),
+	});
 
-  assert(text.includes('Michael'), 'Expected employee name to be included in the response');
+	assert(text.includes('Michael'), 'Expected employee name to be included in the response');
 };
 
 aiSdkIntegration();

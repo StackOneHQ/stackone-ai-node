@@ -1,28 +1,28 @@
 {
-  "name": "@stackone/ai-examples",
-  "version": "0.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "typecheck": "tsgo --noEmit"
-  },
-  "dependencies": {
-    "@stackone/ai": "workspace:*"
-  },
-  "devDependencies": {
-    "@ai-sdk/openai": "catalog:dev",
-    "@types/node": "catalog:dev",
-    "ai": "catalog:peer",
-    "openai": "catalog:peer",
-    "zod": "catalog:dev"
-  },
-  "devEngines": {
-    "runtime": [
-      {
-        "name": "node",
-        "version": "^24.11.0",
-        "onFail": "download"
-      }
-    ]
-  }
+	"name": "@stackone/ai-examples",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"typecheck": "tsgo --noEmit"
+	},
+	"dependencies": {
+		"@stackone/ai": "workspace:*"
+	},
+	"devDependencies": {
+		"@ai-sdk/openai": "catalog:dev",
+		"@types/node": "catalog:dev",
+		"ai": "catalog:peer",
+		"openai": "catalog:peer",
+		"zod": "catalog:dev"
+	},
+	"devEngines": {
+		"runtime": [
+			{
+				"name": "node",
+				"version": "^24.11.0",
+				"onFail": "download"
+			}
+		]
+	}
 }

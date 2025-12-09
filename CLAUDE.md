@@ -8,10 +8,10 @@ Claude skills (`.claude/skills/`) are the source of truth. Cursor rules (`.curso
 
 ## Available Skills
 
-| Skill | When to Use |
-|-------|-------------|
-| **development-workflow** | Build commands, testing, linting, git workflow, commit conventions |
-| **typescript-patterns** | Writing/reviewing TypeScript - type safety, exhaustiveness, clean code |
-| **typescript-testing** | Writing tests - Vitest, MSW mocking, fs-fixture |
-| **file-operations** | Making HTTP requests - native fetch patterns |
-| **orama-integration** | Integrating with Orama search/indexing |
+| Skill                    | When to Use                                                            |
+| ------------------------ | ---------------------------------------------------------------------- |
+| **development-workflow** | Build commands, testing, linting, git workflow, commit conventions     |
+| **typescript-patterns**  | Writing/reviewing TypeScript - type safety, exhaustiveness, clean code |
+| **typescript-testing**   | Writing tests - Vitest, MSW mocking, fs-fixture                        |
+| **file-operations**      | Making HTTP requests - native fetch patterns                           |
+| **orama-integration**    | Integrating with Orama search/indexing                                 |

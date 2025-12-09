@@ -47,10 +47,10 @@ export type Experimental_PreExecuteFunction = (params: JsonDict) => Promise<Json
  * Valid locations for parameters in requests
  */
 export const ParameterLocation = {
-  HEADER: 'header',
-  QUERY: 'query',
-  PATH: 'path',
-  BODY: 'body',
+	HEADER: 'header',
+	QUERY: 'query',
+	PATH: 'path',
+	BODY: 'body',
 } as const satisfies Record<string, string>;
 
 export type ParameterLocation = ValueOf<typeof ParameterLocation>;
@@ -59,39 +59,39 @@ export type ParameterLocation = ValueOf<typeof ParameterLocation>;
  * Configuration for executing a tool against an API endpoint
  */
 interface HttpExecuteParameter {
-  name: string;
-  location: ParameterLocation;
-  type: JsonSchemaType;
-  derivedFrom?: string; // this is the name of the param that this one is derived from.
+	name: string;
+	location: ParameterLocation;
+	type: JsonSchemaType;
+	derivedFrom?: string; // this is the name of the param that this one is derived from.
 }
 
 export type HttpBodyType = 'json' | 'multipart-form' | 'form';
 
 export interface HttpExecuteConfig {
-  kind: 'http';
-  method: string;
-  url: string;
-  bodyType: HttpBodyType;
-  params: HttpExecuteParameter[]; // full list of params used to execute. Comes straight from the OpenAPI spec.
+	kind: 'http';
+	method: string;
+	url: string;
+	bodyType: HttpBodyType;
+	params: HttpExecuteParameter[]; // full list of params used to execute. Comes straight from the OpenAPI spec.
 }
 
 export interface RpcExecuteConfig {
-  kind: 'rpc';
-  method: string;
-  url: string;
-  payloadKeys: {
-    action: string;
-    body?: string;
-    headers?: string;
-    path?: string;
-    query?: string;
-  };
+	kind: 'rpc';
+	method: string;
+	url: string;
+	payloadKeys: {
+		action: string;
+		body?: string;
+		headers?: string;
+		path?: string;
+		query?: string;
+	};
 }
 
 export interface LocalExecuteConfig {
-  kind: 'local';
-  identifier?: string;
-  description?: string;
+	kind: 'local';
+	identifier?: string;
+	description?: string;
 }
 
 /**
@@ -103,60 +103,60 @@ export type ExecuteConfig = HttpExecuteConfig | RpcExecuteConfig | LocalExecuteC
  * EXPERIMENTAL: Options for creating tools with schema overrides and preExecute functions
  */
 export interface Experimental_ToolCreationOptions {
-  /**
-   * EXPERIMENTAL: Function to override the tool schema at creation time
-   * Takes the original schema and returns a new schema for the tool
-   */
-  experimental_schemaOverride?: Experimental_SchemaOverride;
+	/**
+	 * EXPERIMENTAL: Function to override the tool schema at creation time
+	 * Takes the original schema and returns a new schema for the tool
+	 */
+	experimental_schemaOverride?: Experimental_SchemaOverride;
 
-  /**
-   * EXPERIMENTAL: Function to preprocess parameters before execution
-   * Transforms parameters from override schema format back to original API format
-   */
-  experimental_preExecute?: Experimental_PreExecuteFunction;
+	/**
+	 * EXPERIMENTAL: Function to preprocess parameters before execution
+	 * Transforms parameters from override schema format back to original API format
+	 */
+	experimental_preExecute?: Experimental_PreExecuteFunction;
 }
 
 /**
  * Options for executing a tool
  */
 export interface ExecuteOptions {
-  /**
-   * If true, returns the request details instead of making the actual API call
-   * Useful for debugging and testing transformed parameters
-   */
-  dryRun?: boolean;
+	/**
+	 * If true, returns the request details instead of making the actual API call
+	 * Useful for debugging and testing transformed parameters
+	 */
+	dryRun?: boolean;
 }
 
 /**
  * Execution metadata that can be surfaced to AI SDK tools.
  */
 export interface ToolExecution {
-  /**
-   * The raw execution configuration generated from the OpenAPI specification.
-   */
-  config: ExecuteConfig;
-  /**
-   * The headers that will be sent when executing the tool.
-   */
-  headers: Headers;
+	/**
+	 * The raw execution configuration generated from the OpenAPI specification.
+	 */
+	config: ExecuteConfig;
+	/**
+	 * The headers that will be sent when executing the tool.
+	 */
+	headers: Headers;
 }
 
 /**
  * Schema definition for tool parameters
  */
 export interface ToolParameters {
-  type: string;
-  properties: JsonSchemaProperties; // these are the params we will expose to the user/agent in the tool. These might be higher level params.
-  required?: string[]; // list of required parameter names
+	type: string;
+	properties: JsonSchemaProperties; // these are the params we will expose to the user/agent in the tool. These might be higher level params.
+	required?: string[]; // list of required parameter names
 }
 
 /**
  * Complete definition of a tool including its schema and execution config
  */
 export interface ToolDefinition {
-  description: string;
-  parameters: ToolParameters;
-  execute: ExecuteConfig;
+	description: string;
+	parameters: ToolParameters;
+	execute: ExecuteConfig;
 }
 
 /**
@@ -168,10 +168,10 @@ export interface ToolDefinition {
  * StackOne-specific metadata that doesn't exist in the original type.
  */
 export type AISDKToolDefinition = Tool & {
-  /**
-   * StackOne-specific execution metadata for debugging and introspection.
-   */
-  execution?: ToolExecution;
+	/**
+	 * StackOne-specific execution metadata for debugging and introspection.
+	 */
+	execution?: ToolExecution;
 };
 
 /**
@@ -184,5 +184,5 @@ export type AISDKToolDefinition = Tool & {
  * like `execution` metadata.
  */
 export type AISDKToolResult<T extends string = string> = ToolSet & {
-  [K in T]: AISDKToolDefinition;
+	[K in T]: AISDKToolDefinition;
 };

@@ -46,32 +46,32 @@ import { StackOneToolSet } from '@stackone/ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
-  console.error('STACKONE_API_KEY environment variable is required');
-  process.exit(1);
+	console.error('STACKONE_API_KEY environment variable is required');
+	process.exit(1);
 }
 
 const quickstart = async (): Promise<void> => {
-  const toolset = new StackOneToolSet({
-    accountId,
-    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
-  });
+	const toolset = new StackOneToolSet({
+		accountId,
+		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+	});
 
-  // Fetch HRIS-related tools via MCP
-  const tools = await toolset.fetchTools({
-    actions: ['hris_*'],
-  });
+	// Fetch HRIS-related tools via MCP
+	const tools = await toolset.fetchTools({
+		actions: ['hris_*'],
+	});
 
-  // Verify we have tools
-  assert(tools.length > 0, 'Expected to find HRIS tools');
+	// Verify we have tools
+	assert(tools.length > 0, 'Expected to find HRIS tools');
 
-  // Use a specific tool
-  const employeeTool = tools.getTool('hris_list_employees');
-  assert(employeeTool !== undefined, 'Expected to find hris_list_employees tool');
+	// Use a specific tool
+	const employeeTool = tools.getTool('hris_list_employees');
+	assert(employeeTool !== undefined, 'Expected to find hris_list_employees tool');
 
-  // Execute the tool and verify the response
-  const result = await employeeTool.execute();
-  assert(Array.isArray(result.data), 'Expected employees to be an array');
-  assert(result.data.length > 0, 'Expected to find at least one employee');
+	// Execute the tool and verify the response
+	const result = await employeeTool.execute();
+	assert(Array.isArray(result.data), 'Expected employees to be an array');
+	assert(result.data.length > 0, 'Expected to find at least one employee');
 };
 
 // Run the example

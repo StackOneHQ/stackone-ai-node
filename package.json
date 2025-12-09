@@ -1,114 +1,114 @@
 {
-  "name": "@stackone/ai",
-  "version": "1.1.1",
-  "description": "Tools for agents to perform actions on your SaaS",
-  "packageManager": "pnpm@10.24.0",
-  "module": "./dist/index.js",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": "./src/index.ts",
-    "./package.json": "./package.json"
-  },
-  "type": "module",
-  "files": [
-    "src",
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "build": "tsdown",
-    "format": "pnpm --no-bail --aggregate-output run '/^format:/'",
-    "format:oxfmt": "oxfmt --no-error-on-unmatched-pattern .",
-    "format:oxlint": "oxlint --max-warnings=0 --type-aware --fix",
-    "format:knip": "knip --fix --no-exit-code",
-    "lint": "pnpm --no-bail --aggregate-output run '/^lint:/'",
-    "lint:oxfmt": "oxfmt --no-error-on-unmatched-pattern --check .",
-    "lint:oxlint": "oxlint --max-warnings=0 --type-aware",
-    "lint:knip": "knip",
-    "preinstall": "npx only-allow pnpm",
-    "prepack": "npm pkg delete scripts.preinstall && pnpm run build",
-    "test": "vitest",
-    "coverage": "vitest run --coverage",
-    "typecheck": "pnpm --aggregate-output run '/^typecheck:/'",
-    "typecheck:submodules": "pnpm --parallel -r --aggregate-output typecheck",
-    "typecheck:root": "tsgo --noEmit"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "catalog:prod",
-    "@orama/orama": "catalog:prod",
-    "json-schema": "catalog:prod",
-    "zod": "catalog:dev"
-  },
-  "devDependencies": {
-    "@ai-sdk/provider-utils": "catalog:dev",
-    "@hono/mcp": "catalog:dev",
-    "@types/json-schema": "catalog:dev",
-    "@types/node": "catalog:dev",
-    "@typescript/native-preview": "catalog:dev",
-    "@vitest/coverage-v8": "catalog:dev",
-    "ai": "catalog:peer",
-    "hono": "catalog:dev",
-    "knip": "catalog:dev",
-    "lefthook": "catalog:dev",
-    "msw": "catalog:dev",
-    "openai": "catalog:peer",
-    "oxfmt": "catalog:dev",
-    "oxlint": "catalog:dev",
-    "oxlint-tsgolint": "catalog:dev",
-    "publint": "catalog:dev",
-    "tsdown": "catalog:dev",
-    "type-fest": "catalog:dev",
-    "typescript": "catalog:dev",
-    "unplugin-unused": "catalog:dev",
-    "vitest": "catalog:dev"
-  },
-  "peerDependencies": {
-    "ai": "catalog:peer",
-    "openai": "catalog:peer"
-  },
-  "peerDependenciesMeta": {
-    "ai": {
-      "optional": true
-    },
-    "openai": {
-      "optional": true
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
-  },
-  "keywords": [
-    "stackone",
-    "ai",
-    "tools",
-    "agents",
-    "ai sdk",
-    "mcp",
-    "model context protocol"
-  ],
-  "author": "StackOne",
-  "license": "Apache-2.0",
-  "bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
-  "homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
-  "publishConfig": {
-    "exports": {
-      ".": "./dist/index.js",
-      "./package.json": "./package.json"
-    }
-  },
-  "engines": {
-    "node": ">=20.19.6"
-  },
-  "devEngines": {
-    "runtime": [
-      {
-        "name": "node",
-        "version": "^24.11.0",
-        "onFail": "download"
-      }
-    ]
-  }
+	"name": "@stackone/ai",
+	"version": "1.1.1",
+	"description": "Tools for agents to perform actions on your SaaS",
+	"packageManager": "pnpm@10.24.0",
+	"module": "./dist/index.js",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./package.json": "./package.json"
+	},
+	"type": "module",
+	"files": [
+		"src",
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"scripts": {
+		"build": "tsdown",
+		"format": "pnpm --no-bail --aggregate-output run '/^format:/'",
+		"format:oxfmt": "oxfmt --no-error-on-unmatched-pattern .",
+		"format:oxlint": "oxlint --max-warnings=0 --type-aware --fix",
+		"format:knip": "knip --fix --no-exit-code",
+		"lint": "pnpm --no-bail --aggregate-output run '/^lint:/'",
+		"lint:oxfmt": "oxfmt --no-error-on-unmatched-pattern --check .",
+		"lint:oxlint": "oxlint --max-warnings=0 --type-aware",
+		"lint:knip": "knip",
+		"preinstall": "npx only-allow pnpm",
+		"prepack": "npm pkg delete scripts.preinstall && pnpm run build",
+		"test": "vitest",
+		"coverage": "vitest run --coverage",
+		"typecheck": "pnpm --aggregate-output run '/^typecheck:/'",
+		"typecheck:submodules": "pnpm --parallel -r --aggregate-output typecheck",
+		"typecheck:root": "tsgo --noEmit"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "catalog:prod",
+		"@orama/orama": "catalog:prod",
+		"json-schema": "catalog:prod",
+		"zod": "catalog:dev"
+	},
+	"devDependencies": {
+		"@ai-sdk/provider-utils": "catalog:dev",
+		"@hono/mcp": "catalog:dev",
+		"@types/json-schema": "catalog:dev",
+		"@types/node": "catalog:dev",
+		"@typescript/native-preview": "catalog:dev",
+		"@vitest/coverage-v8": "catalog:dev",
+		"ai": "catalog:peer",
+		"hono": "catalog:dev",
+		"knip": "catalog:dev",
+		"lefthook": "catalog:dev",
+		"msw": "catalog:dev",
+		"openai": "catalog:peer",
+		"oxfmt": "catalog:dev",
+		"oxlint": "catalog:dev",
+		"oxlint-tsgolint": "catalog:dev",
+		"publint": "catalog:dev",
+		"tsdown": "catalog:dev",
+		"type-fest": "catalog:dev",
+		"typescript": "catalog:dev",
+		"unplugin-unused": "catalog:dev",
+		"vitest": "catalog:dev"
+	},
+	"peerDependencies": {
+		"ai": "catalog:peer",
+		"openai": "catalog:peer"
+	},
+	"peerDependenciesMeta": {
+		"ai": {
+			"optional": true
+		},
+		"openai": {
+			"optional": true
+		}
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
+	},
+	"keywords": [
+		"stackone",
+		"ai",
+		"tools",
+		"agents",
+		"ai sdk",
+		"mcp",
+		"model context protocol"
+	],
+	"author": "StackOne",
+	"license": "Apache-2.0",
+	"bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
+	"homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
+	"publishConfig": {
+		"exports": {
+			".": "./dist/index.js",
+			"./package.json": "./package.json"
+		}
+	},
+	"engines": {
+		"node": ">=20.19.6"
+	},
+	"devEngines": {
+		"runtime": [
+			{
+				"name": "node",
+				"version": "^24.11.0",
+				"onFail": "download"
+			}
+		]
+	}
 }

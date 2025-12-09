@@ -1,24 +1,16 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "target": "es2022",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "strict": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "lib": [
-      "es2022"
-    ],
-    "types": [
-      "node",
-    ],
-  },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "es2022",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"strict": true,
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["es2022"],
+		"types": ["node"],
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules"],
 }

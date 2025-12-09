@@ -14,6 +14,7 @@ Guidelines for writing clean, type-safe TypeScript code in this repository.
 When branching on string unions, use the `satisfies never` pattern to guarantee compile-time exhaustiveness without introducing temporary variables.
 
 **Pattern**:
+
 ```typescript
 switch (bodyType) {
   case 'json':
@@ -33,6 +34,7 @@ switch (bodyType) {
 ```
 
 **Benefits**:
+
 - Adding a new union member will trigger a compile-time error
 - Keeps union definition and switch statement in sync automatically
 - No temporary variables needed
@@ -43,6 +45,7 @@ switch (bodyType) {
 Always use specific types instead of `any` when possible.
 
 **Bad**:
+
 ```typescript
 function processData(data: any): any {
   return data.value;
@@ -50,6 +53,7 @@ function processData(data: any): any {
 ```
 
 **Good**:
+
 ```typescript
 function processData<T extends { value: U }, U>(data: T): U {
   return data.value;
@@ -65,6 +69,7 @@ function processData(data: unknown): unknown {
 ```
 
 **Alternatives to `any`**:
+
 - Use `unknown` when type is truly not known, then narrow with type guards
 - Use `Record<string, unknown>` for objects with unknown property values
 - Use union types to represent multiple possible types
@@ -75,6 +80,7 @@ function processData(data: unknown): unknown {
 Never use non-null assertions. Instead, use proper null checking.
 
 **Bad**:
+
 ```typescript
 function getConfig(configMap: Map<string, Config>): Config {
   const config = configMap.get('default');
@@ -83,6 +89,7 @@ function getConfig(configMap: Map<string, Config>): Config {
 ```
 
 **Good**:
+
 ```typescript
 function getConfig(configMap: Map<string, Config>): Config {
   const config = configMap.get('default');
@@ -103,6 +110,7 @@ function getConfig(configMap: Map<string, Config>): Config {
 Create new variables instead of reassigning function parameters.
 
 **Bad**:
+
 ```typescript
 function mergeOptions(options: Options, overrides?: Options): Options {
   options = { ...options, ...overrides }; // Reassignment
@@ -111,6 +119,7 @@ function mergeOptions(options: Options, overrides?: Options): Options {
 ```
 
 **Good**:
+
 ```typescript
 function mergeOptions(options: Options, overrides?: Options): Options {
   const mergedOptions = { ...options, ...overrides };
@@ -123,6 +132,7 @@ function mergeOptions(options: Options, overrides?: Options): Options {
 Use namespaces or simple exported functions instead.
 
 **Bad**:
+
 ```typescript
 export class Utils {
   public static formatDate(date: Date): string {
@@ -136,6 +146,7 @@ export class Utils {
 ```
 
 **Good - Namespace**:
+
 ```typescript
 export namespace Utils {
   export const formatDate = (date: Date): string => {
@@ -149,6 +160,7 @@ export namespace Utils {
 ```
 
 **Better - Simple exports**:
+
 ```typescript
 export const formatDate = (date: Date): string => {
   return date.toISOString();
@@ -164,6 +176,7 @@ export const parseDate = (dateStr: string): Date => {
 Always specify return types for functions.
 
 **Bad**:
+
 ```typescript
 const calculateTotal = (items: Item[]) => {
   return items.reduce((sum, item) => sum + item.price, 0);
@@ -171,6 +184,7 @@ const calculateTotal = (items: Item[]) => {
 ```
 
 **Good**:
+
 ```typescript
 const calculateTotal = (items: Item[]): number => {
   return items.reduce((sum, item) => sum + item.price, 0);
@@ -187,6 +201,7 @@ function calculateTotal(items: Item[]): number {
 Use proper type-safe methods to remove properties instead of setting to `undefined` or using `delete`.
 
 **Bad**:
+
 ```typescript
 function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
   obj['propertyToRemove'] = undefined; // Type error!
@@ -195,6 +210,7 @@ function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
 ```
 
 **Good - Destructuring (Immutable)**:
+
 ```typescript
 function removeProperty(obj: Record<string, JSONSchema7Definition>): Record<string, JSONSchema7Definition> {
   const { propertyToRemove, ...rest } = obj;
@@ -203,6 +219,7 @@ function removeProperty(obj: Record<string, JSONSchema7Definition>): Record<stri
 ```
 
 **Good - Delete (In-place)**:
+
 ```typescript
 function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
   delete obj['propertyToRemove'];
@@ -212,6 +229,7 @@ function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
 ## Remove Unused Code
 
 After refactoring, always remove unused code:
+
 - Delete unused variables, parameters, functions, classes, imports
 - Don't comment out old code - delete it (git history preserves it)
 - Remove unreachable code paths

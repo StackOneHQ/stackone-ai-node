@@ -3,17 +3,17 @@ pre-commit:
   commands:
     # Lint first - fail fast on warnings
     oxlint:
-      glob: "*.{ts,tsx,js,jsx,mts,cts}"
+      glob: '*.{ts,tsx,js,jsx,mts,cts}'
       run: pnpm oxlint --max-warnings=0 --type-aware --fix {staged_files}
       stage_fixed: true
 
     # Format after linting passes
     oxfmt:
-      glob: "*"
+      glob: '*'
       run: pnpm oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
 
     # Type check TypeScript files
     typecheck:
-      glob: "*.{ts,tsx,mts,cts}"
+      glob: '*.{ts,tsx,mts,cts}'
       run: pnpm run typecheck

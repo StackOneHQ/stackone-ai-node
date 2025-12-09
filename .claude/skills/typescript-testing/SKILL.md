@@ -12,6 +12,7 @@ This skill guides testing practices for the StackOne SDK using Vitest test runne
 ## Testing Framework
 
 The project uses **Vitest** as the test runner. Run tests with:
+
 - `pnpm test` - Run all tests (unit, examples, scripts)
 - `pnpm test:unit` - Run only unit tests
 - `pnpm vitest src/path/to/file.spec.ts` - Run a specific test file

@@ -5,11 +5,11 @@ import { z } from 'zod/mini';
  * @see https://docs.stackone.com/platform/api-reference/actions/make-an-rpc-call-to-an-action
  */
 export const rpcActionRequestSchema = z.object({
-  action: z.string(),
-  body: z.optional(z.record(z.string(), z.unknown())),
-  headers: z.optional(z.record(z.string(), z.unknown())),
-  path: z.optional(z.record(z.string(), z.unknown())),
-  query: z.optional(z.record(z.string(), z.unknown())),
+	action: z.string(),
+	body: z.optional(z.record(z.string(), z.unknown())),
+	headers: z.optional(z.record(z.string(), z.unknown())),
+	path: z.optional(z.record(z.string(), z.unknown())),
+	query: z.optional(z.record(z.string(), z.unknown())),
 });
 
 /**
@@ -21,9 +21,9 @@ export type RpcActionRequest = z.infer<typeof rpcActionRequestSchema>;
  * Zod schema for RPC action response data
  */
 const rpcActionResponseDataSchema = z.union([
-  z.record(z.string(), z.unknown()),
-  z.array(z.record(z.string(), z.unknown())),
-  z.null(),
+	z.record(z.string(), z.unknown()),
+	z.array(z.record(z.string(), z.unknown())),
+	z.null(),
 ]);
 
 /**
@@ -37,8 +37,8 @@ const rpcActionResponseDataSchema = z.union([
  * @see unified-cloud-api/src/unified-api-v2/unifiedAPIv2.service.ts processActionCall
  */
 export const rpcActionResponseSchema = z.looseObject({
-  next: z.nullable(z.optional(z.string())),
-  data: z.optional(rpcActionResponseDataSchema),
+	next: z.nullable(z.optional(z.string())),
+	data: z.optional(rpcActionResponseDataSchema),
 });
 
 /**
@@ -51,11 +51,11 @@ export type RpcActionResponse = z.infer<typeof rpcActionResponseSchema>;
  * Zod schema for RPC client configuration validation
  */
 export const rpcClientConfigSchema = z.object({
-  serverURL: z.optional(z.string()),
-  security: z.object({
-    username: z.string(),
-    password: z.optional(z.string()),
-  }),
+	serverURL: z.optional(z.string()),
+	security: z.object({
+		username: z.string(),
+		password: z.optional(z.string()),
+	}),
 });
 
 /**

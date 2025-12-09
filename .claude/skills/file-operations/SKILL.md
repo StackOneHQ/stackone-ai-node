@@ -38,6 +38,7 @@ async function fetchData(url: string): Promise<unknown> {
    - Simply use the globally available `fetch` function
 
 2. **Always check response.ok**:
+
    ```typescript
    if (!response.ok) {
      throw new Error(`API error: ${response.status} for ${url}`);
@@ -61,6 +62,7 @@ async function fetchData(url: string): Promise<unknown> {
 ### Examples
 
 **GET with JSON response**:
+
 ```typescript
 async function getUser(userId: string): Promise<User> {
   try {
@@ -78,6 +80,7 @@ async function getUser(userId: string): Promise<User> {
 ```
 
 **POST with JSON body**:
+
 ```typescript
 async function createUser(data: CreateUserInput): Promise<User> {
   try {
@@ -101,6 +104,7 @@ async function createUser(data: CreateUserInput): Promise<User> {
 ```
 
 **With Authorization**:
+
 ```typescript
 async function getProtectedData(token: string): Promise<Data> {
   try {
@@ -124,6 +128,7 @@ async function getProtectedData(token: string): Promise<Data> {
 ## When to Use Direct HTTP Clients
 
 Only use specialised HTTP clients when:
+
 - You need advanced features not covered by fetch (e.g., interceptors, retries)
 - You're integrating with a framework that requires it
 - Document why you're not using native fetch

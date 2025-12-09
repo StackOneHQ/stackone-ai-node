@@ -1,44 +1,28 @@
 {
-  "compilerOptions": {
-    /* Base Options: */
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "target": "es2022",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    /* Strictness */
-    "strict": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "strictNullChecks": true,
-    /* Build for a library */
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "outDir": "dist",
-    "sourceMap": true,
-    "declaration": true,
-    "erasableSyntaxOnly": true,
-    /* Other */
-    "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "es2022"
-    ],
-    "types": [
-      "node",
-      "vitest/globals",
-      "vitest/importMeta"
-    ],
-  },
-  "include": [
-    "src/**/*",
-    "scripts/**/*",
-    "mocks/**/*",
-    "vitest.config.ts",
-    "vitest.setup.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "examples"
-  ]
+	"compilerOptions": {
+		/* Base Options: */
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "es2022",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		/* Strictness */
+		"strict": true,
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"strictNullChecks": true,
+		/* Build for a library */
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"outDir": "dist",
+		"sourceMap": true,
+		"declaration": true,
+		"erasableSyntaxOnly": true,
+		/* Other */
+		"forceConsistentCasingInFileNames": true,
+		"lib": ["es2022"],
+		"types": ["node", "vitest/globals", "vitest/importMeta"],
+	},
+	"include": ["src/**/*", "scripts/**/*", "mocks/**/*", "vitest.config.ts", "vitest.setup.ts"],
+	"exclude": ["node_modules", "dist", "examples"],
 }

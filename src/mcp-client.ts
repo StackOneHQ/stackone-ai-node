@@ -3,19 +3,19 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { version } from '../package.json';
 
 interface MCPClientOptions {
-  baseUrl: string;
-  headers?: Record<string, string>;
+	baseUrl: string;
+	headers?: Record<string, string>;
 }
 
 interface MCPClient {
-  /** underlying MCP client */
-  client: Client;
+	/** underlying MCP client */
+	client: Client;
 
-  /** underlying transport */
-  transport: StreamableHTTPClientTransport;
+	/** underlying transport */
+	transport: StreamableHTTPClientTransport;
 
-  /** cleanup client and transport */
-  [Symbol.asyncDispose](): Promise<void>;
+	/** cleanup client and transport */
+	[Symbol.asyncDispose](): Promise<void>;
 }
 
 /**
@@ -34,22 +34,22 @@ interface MCPClient {
  * ```
  */
 export async function createMCPClient({ baseUrl, headers }: MCPClientOptions): Promise<MCPClient> {
-  const transport = new StreamableHTTPClientTransport(new URL(baseUrl), {
-    requestInit: {
-      headers,
-    },
-  });
+	const transport = new StreamableHTTPClientTransport(new URL(baseUrl), {
+		requestInit: {
+			headers,
+		},
+	});
 
-  const client = new Client({
-    name: 'StackOne AI SDK',
-    version,
-  });
+	const client = new Client({
+		name: 'StackOne AI SDK',
+		version,
+	});
 
-  return {
-    client,
-    transport,
-    async [Symbol.asyncDispose]() {
-      await Promise.all([client.close(), transport.close()]);
-    },
-  };
+	return {
+		client,
+		transport,
+		async [Symbol.asyncDispose]() {
+			await Promise.all([client.close(), transport.close()]);
+		},
+	};
 }

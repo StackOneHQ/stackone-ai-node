@@ -15,92 +15,92 @@ import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
-  console.error('STACKONE_API_KEY environment variable is required');
-  process.exit(1);
+	console.error('STACKONE_API_KEY environment variable is required');
+	process.exit(1);
 }
 
 interface ToolCall {
-  toolName: string;
-  args: Record<string, unknown>;
+	toolName: string;
+	args: Record<string, unknown>;
 }
 
 const humanInTheLoopExample = async (): Promise<void> => {
-  // Create a toolset
-  const toolset = new StackOneToolSet({
-    accountId: ACCOUNT_IDS.HRIS,
-    baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
-  });
+	// Create a toolset
+	const toolset = new StackOneToolSet({
+		accountId: ACCOUNT_IDS.HRIS,
+		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+	});
 
-  // Fetch tools via MCP
-  const tools = await toolset.fetchTools({
-    actions: ['hris_create_employee'],
-  });
+	// Fetch tools via MCP
+	const tools = await toolset.fetchTools({
+		actions: ['hris_create_employee'],
+	});
 
-  // Get the create employee tool
-  const createEmployeeTool = tools.getTool('hris_create_employee');
+	// Get the create employee tool
+	const createEmployeeTool = tools.getTool('hris_create_employee');
 
-  if (!createEmployeeTool) {
-    throw new Error('Create employee tool not found');
-  }
+	if (!createEmployeeTool) {
+		throw new Error('Create employee tool not found');
+	}
 
-  // Get the AI SDK version of the tool without the execute function
-  const tool = await createEmployeeTool.toAISDK({
-    executable: false,
-  });
+	// Get the AI SDK version of the tool without the execute function
+	const tool = await createEmployeeTool.toAISDK({
+		executable: false,
+	});
 
-  // Use the metadata for AI planning/generation
-  const { toolCalls } = await generateText({
-    model: openai('gpt-5.1'),
-    tools: tool,
-    prompt:
-      'Create a new employee in Workday, params: Full name: John Doe, personal email: john.doe@example.com, department: Engineering, start date: 2025-01-01, hire date: 2025-01-01',
-    stopWhen: stepCountIs(1),
-  });
+	// Use the metadata for AI planning/generation
+	const { toolCalls } = await generateText({
+		model: openai('gpt-5.1'),
+		tools: tool,
+		prompt:
+			'Create a new employee in Workday, params: Full name: John Doe, personal email: john.doe@example.com, department: Engineering, start date: 2025-01-01, hire date: 2025-01-01',
+		stopWhen: stepCountIs(1),
+	});
 
-  // Human validation and modification step
-  const toolCall = toolCalls[0];
-  if (toolCall.type !== 'tool-call') {
-    throw new Error('Expected a tool call');
-  }
-  const shouldExecute = await simulateHumanValidation({
-    toolName: toolCall.toolName,
-    args: 'args' in toolCall ? (toolCall.args as Record<string, unknown>) : {},
-  });
+	// Human validation and modification step
+	const toolCall = toolCalls[0];
+	if (toolCall.type !== 'tool-call') {
+		throw new Error('Expected a tool call');
+	}
+	const shouldExecute = await simulateHumanValidation({
+		toolName: toolCall.toolName,
+		args: 'args' in toolCall ? (toolCall.args as Record<string, unknown>) : {},
+	});
 
-  // Map of tool names to execution functions
-  const executions: Record<string, (args: Record<string, unknown>) => Promise<JsonDict>> = {
-    hris_create_employee: (args) => createEmployeeTool.execute(args as JsonDict),
-  };
+	// Map of tool names to execution functions
+	const executions: Record<string, (args: Record<string, unknown>) => Promise<JsonDict>> = {
+		hris_create_employee: (args) => createEmployeeTool.execute(args as JsonDict),
+	};
 
-  // Execute the tool if approved
-  if (shouldExecute && toolCall.toolName in executions) {
-    // You would call the tool here
-    // const result = await executions[toolCall.toolName](toolCall.args);
-  } else {
-    console.log('Tool execution was not approved or tool not found');
-  }
+	// Execute the tool if approved
+	if (shouldExecute && toolCall.toolName in executions) {
+		// You would call the tool here
+		// const result = await executions[toolCall.toolName](toolCall.args);
+	} else {
+		console.log('Tool execution was not approved or tool not found');
+	}
 };
 
 // Simulate human validation (in a real app, this would be your UI component)
 const simulateHumanValidation = async (toolCall: ToolCall): Promise<boolean> => {
-  // This is where you'd implement your UI for human validation
-  assert(toolCall.toolName === 'hris_create_employee', 'Tool name is not hris_create_employee');
-  assert(toolCall.args.name === 'John Doe', 'Name is not John Doe');
-  assert(
-    toolCall.args.personal_email === 'john.doe@example.com',
-    'Email is not john.doe@example.com'
-  );
-  assert(toolCall.args.department === 'Engineering', 'Department is not Engineering');
-  assert(toolCall.args.start_date === '2025-01-01', 'Start date is not 2025-01-01');
-  assert(toolCall.args.hire_date === '2025-01-01', 'Hire date is not 2025-01-01');
+	// This is where you'd implement your UI for human validation
+	assert(toolCall.toolName === 'hris_create_employee', 'Tool name is not hris_create_employee');
+	assert(toolCall.args.name === 'John Doe', 'Name is not John Doe');
+	assert(
+		toolCall.args.personal_email === 'john.doe@example.com',
+		'Email is not john.doe@example.com',
+	);
+	assert(toolCall.args.department === 'Engineering', 'Department is not Engineering');
+	assert(toolCall.args.start_date === '2025-01-01', 'Start date is not 2025-01-01');
+	assert(toolCall.args.hire_date === '2025-01-01', 'Hire date is not 2025-01-01');
 
-  // In a real application, you might show a UI that allows the user to:
-  // 1. Review the parameters
-  // 2. Edit parameter values if needed
-  // 3. Approve or reject the execution
+	// In a real application, you might show a UI that allows the user to:
+	// 1. Review the parameters
+	// 2. Edit parameter values if needed
+	// 3. Approve or reject the execution
 
-  // For this example, we'll just approve automatically
-  return true;
+	// For this example, we'll just approve automatically
+	return true;
 };
 
 humanInTheLoopExample();

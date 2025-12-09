@@ -16,7 +16,7 @@
 		"suspicious": "error",
 		"pedantic": "error",
 		"perf": "error",
-		"style": "error"
+		"style": "error",
 	},
 	"rules": {
 		// ===================
@@ -38,15 +38,15 @@
 				"vars": "all",
 				"varsIgnorePattern": "^_",
 				"args": "after-used",
-				"argsIgnorePattern": "^_"
-			}
+				"argsIgnorePattern": "^_",
+			},
 		],
 		// Limit cyclomatic complexity (not in any category)
 		"complexity": [
 			"error",
 			{
-				"max": 7
-			}
+				"max": 7,
+			},
 		],
 		// ===================
 		// TypeScript Rules
@@ -58,8 +58,8 @@
 				"vars": "all",
 				"varsIgnorePattern": "^_",
 				"args": "after-used",
-				"argsIgnorePattern": "^_"
-			}
+				"argsIgnorePattern": "^_",
+			},
 		],
 		// Disallow explicit `any` usage (restriction category)
 		"typescript/no-explicit-any": "error",
@@ -73,8 +73,8 @@
 			{
 				"prefer": "type-imports",
 				"disallowTypeAnnotations": false,
-				"fixStyle": "inline-type-imports"
-			}
+				"fixStyle": "inline-type-imports",
+			},
 		],
 		// Disallow unnecessary type arguments
 		"typescript/no-unnecessary-type-arguments": "error",
@@ -86,8 +86,8 @@
 				"allowNullableBoolean": false,
 				"allowNullableObject": false,
 				"allowString": false,
-				"allowNumber": false
-			}
+				"allowNumber": false,
+			},
 		],
 		// Disallow classes with only static members
 		"typescript/no-extraneous-class": "error",
@@ -96,9 +96,9 @@
 			"error",
 			{
 				"ts-ignore": true,
-				"ts-expect-error": "allow-with-description"
-			}
-		]
+				"ts-expect-error": "allow-with-description",
+			},
+		],
 	},
 	"overrides": [
 		{
@@ -107,8 +107,8 @@
 			"rules": {
 				"no-console": "off",
 				"typescript/no-explicit-any": "warn",
-				"typescript/no-floating-promises": "warn"
-			}
-		}
-	]
+				"typescript/no-floating-promises": "warn",
+			},
+		},
+	],
 }
