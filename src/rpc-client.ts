@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/mini';
 import { StackOneAPIError } from './utils/errors';
 
 /**
@@ -7,10 +7,10 @@ import { StackOneAPIError } from './utils/errors';
  */
 const rpcActionRequestSchema = z.object({
   action: z.string(),
-  body: z.record(z.unknown()).optional(),
-  headers: z.record(z.unknown()).optional(),
-  path: z.record(z.unknown()).optional(),
-  query: z.record(z.unknown()).optional(),
+  body: z.optional(z.record(z.string(), z.unknown())),
+  headers: z.optional(z.record(z.string(), z.unknown())),
+  path: z.optional(z.record(z.string(), z.unknown())),
+  query: z.optional(z.record(z.string(), z.unknown())),
 });
 
 /**
@@ -22,8 +22,8 @@ type RpcActionRequest = z.infer<typeof rpcActionRequestSchema>;
  * Zod schema for RPC action response data
  */
 const rpcActionResponseDataSchema = z.union([
-  z.record(z.unknown()),
-  z.array(z.record(z.unknown())),
+  z.record(z.string(), z.unknown()),
+  z.array(z.record(z.string(), z.unknown())),
   z.null(),
 ]);
 
@@ -37,12 +37,10 @@ const rpcActionResponseDataSchema = z.union([
  * Additional fields from the connector response are passed through.
  * @see unified-cloud-api/src/unified-api-v2/unifiedAPIv2.service.ts processActionCall
  */
-const rpcActionResponseSchema = z
-  .object({
-    next: z.string().nullish(),
-    data: rpcActionResponseDataSchema.optional(),
-  })
-  .passthrough();
+const rpcActionResponseSchema = z.looseObject({
+  next: z.nullable(z.optional(z.string())),
+  data: z.optional(rpcActionResponseDataSchema),
+});
 
 /**
  * RPC action response from the StackOne API
@@ -54,10 +52,10 @@ export type RpcActionResponse = z.infer<typeof rpcActionResponseSchema>;
  * Zod schema for RPC client configuration validation
  */
 const rpcClientConfigSchema = z.object({
-  serverURL: z.string().optional(),
+  serverURL: z.optional(z.string()),
   security: z.object({
     username: z.string(),
-    password: z.string().optional(),
+    password: z.optional(z.string()),
   }),
 });
 
