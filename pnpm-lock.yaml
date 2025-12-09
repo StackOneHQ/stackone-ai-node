@@ -94,6 +94,9 @@ importers:
       json-schema:
         specifier: catalog:prod
         version: 0.4.0
+      zod:
+        specifier: catalog:dev
+        version: 4.1.13
     devDependencies:
       '@ai-sdk/provider-utils':
         specifier: catalog:dev
@@ -155,9 +158,6 @@ importers:
       vitest:
         specifier: catalog:dev
         version: 3.2.4(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
-      zod:
-        specifier: catalog:dev
-        version: 4.1.13
 
   examples:
     dependencies:

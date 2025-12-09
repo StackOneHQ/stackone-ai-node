@@ -37,7 +37,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:prod",
     "@orama/orama": "catalog:prod",
-    "json-schema": "catalog:prod"
+    "json-schema": "catalog:prod",
+    "zod": "catalog:dev"
   },
   "devDependencies": {
     "@ai-sdk/provider-utils": "catalog:dev",
@@ -58,8 +59,7 @@
     "type-fest": "catalog:dev",
     "typescript": "catalog:dev",
     "unplugin-unused": "catalog:dev",
-    "vitest": "catalog:dev",
-    "zod": "catalog:dev"
+    "vitest": "catalog:dev"
   },
   "peerDependencies": {
     "ai": "catalog:peer",
