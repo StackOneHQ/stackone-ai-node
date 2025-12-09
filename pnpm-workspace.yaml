@@ -8,7 +8,9 @@ catalogs:
   dev:
     '@ai-sdk/openai': ^2.0.80
     '@ai-sdk/provider-utils': ^3.0.18
-    '@biomejs/biome': ^1.5.3
+    oxfmt: ^0.17.0
+    oxlint: ^1.32.0
+    oxlint-tsgolint: ^0.8.4
     '@hono/mcp': ^0.1.4
     '@types/json-schema': ^7.0.15
     '@types/node': ^22.13.5
@@ -38,10 +40,10 @@ enablePrePostScripts: true
 minimumReleaseAge: 1440
 
 onlyBuiltDependencies:
-  - '@biomejs/biome'
   - esbuild
   - lefthook
   - msw
+  - oxlint
 
 shellEmulator: true
 

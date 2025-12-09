@@ -1,0 +1,114 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	// Enable TypeScript, Unicorn, and Oxc plugins
+	"plugins": ["typescript", "unicorn", "oxc"],
+	// Ignore patterns
+	"ignorePatterns": ["dist", "node_modules", ".claude", "tmp", "*.log", "/nix/store/**"],
+	// Rule categories - strict base configuration
+	// - correctness (196 rules): Catch definite bugs and errors
+	// - suspicious (47 rules): Flag potentially problematic patterns
+	// - pedantic (106 rules): Stricter code quality checks (includes no-throw-literal, require-await, ban-ts-comment, etc.)
+	// - perf (11 rules): Performance-related issues
+	// - style (168 rules): Code style rules
+	// Note: restriction category should be enabled per-rule basis
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error",
+		"pedantic": "error",
+		"perf": "error",
+		"style": "error"
+	},
+	"rules": {
+		// ===================
+		// Restriction Rules (not in categories, must be explicit)
+		// ===================
+		// Disallow console usage in production code
+		"no-console": "error",
+		// Disallow empty blocks
+		"no-empty": "error",
+		// Disallow empty functions
+		"no-empty-function": "error",
+		// ===================
+		// Override category defaults with custom options
+		// ===================
+		// Unused variables - allow underscore prefix for intentional unused
+		"no-unused-vars": [
+			"error",
+			{
+				"vars": "all",
+				"varsIgnorePattern": "^_",
+				"args": "after-used",
+				"argsIgnorePattern": "^_"
+			}
+		],
+		// Limit cyclomatic complexity (not in any category)
+		"complexity": [
+			"error",
+			{
+				"max": 7
+			}
+		],
+		// ===================
+		// TypeScript Rules
+		// ===================
+		// Unused variables (TypeScript version) - allow underscore prefix
+		"typescript/no-unused-vars": [
+			"error",
+			{
+				"vars": "all",
+				"varsIgnorePattern": "^_",
+				"args": "after-used",
+				"argsIgnorePattern": "^_"
+			}
+		],
+		// Disallow explicit `any` usage (restriction category)
+		"typescript/no-explicit-any": "error",
+		// Disallow floating promises - must handle or void
+		"typescript/no-floating-promises": "error",
+		// Error on awaiting non-thenable values
+		"typescript/await-thenable": "error",
+		// Enforce `import type` with inline style
+		"typescript/consistent-type-imports": [
+			"error",
+			{
+				"prefer": "type-imports",
+				"disallowTypeAnnotations": false,
+				"fixStyle": "inline-type-imports"
+			}
+		],
+		// Disallow unnecessary type arguments
+		"typescript/no-unnecessary-type-arguments": "error",
+		// Enforce strict boolean expressions - no implicit coercion
+		// Requires --type-aware flag
+		"typescript/strict-boolean-expressions": [
+			"error",
+			{
+				"allowNullableBoolean": false,
+				"allowNullableObject": false,
+				"allowString": false,
+				"allowNumber": false
+			}
+		],
+		// Disallow classes with only static members
+		"typescript/no-extraneous-class": "error",
+		// Ban @ts-ignore, allow @ts-expect-error with description (override pedantic default)
+		"typescript/ban-ts-comment": [
+			"error",
+			{
+				"ts-ignore": true,
+				"ts-expect-error": "allow-with-description"
+			}
+		]
+	},
+	"overrides": [
+		{
+			// Relaxed rules for test files
+			"files": ["**/*.test.ts", "**/*.spec.ts", "tests/**/*.ts", "src/tests/**/*.ts"],
+			"rules": {
+				"no-console": "off",
+				"typescript/no-explicit-any": "warn",
+				"typescript/no-floating-promises": "warn"
+			}
+		}
+	]
+}

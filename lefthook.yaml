@@ -1,14 +1,19 @@
 pre-commit:
-  parallel: true
+  parallel: false
   commands:
+    # Lint first - fail fast on warnings
+    oxlint:
+      glob: "*.{ts,tsx,js,jsx,mts,cts}"
+      run: pnpm oxlint --max-warnings=0 --type-aware --fix {staged_files}
+      stage_fixed: true
+
+    # Format after linting passes
+    oxfmt:
+      glob: "*"
+      run: pnpm oxfmt --no-error-on-unmatched-pattern {staged_files}
+      stage_fixed: true
+
+    # Type check TypeScript files
     typecheck:
-      glob: "*.{ts,tsx,js,jsx,mts,cts}"
+      glob: "*.{ts,tsx,mts,cts}"
       run: pnpm run typecheck
-    format:
-      glob: "*.{ts,tsx,js,jsx,mts,cts,json,jsonc,yaml,yml,md}"
-      run: pnpm biome check --no-errors-on-unmatched --write {staged_files}
-      stage_fixed: true
-    knip:
-      glob: "*.{ts,tsx,js,jsx,mts,cts}"
-      run: pnpm run format:knip
-      stage_fixed: true
