@@ -80,9 +80,6 @@ catalogs:
     '@orama/orama':
       specifier: ^3.1.11
       version: 3.1.16
-    '@stackone/stackone-client-ts':
-      specifier: 4.32.2
-      version: 4.32.2
     json-schema:
       specifier: ^0.4.0
       version: 0.4.0
@@ -97,9 +94,6 @@ importers:
       '@orama/orama':
         specifier: catalog:prod
         version: 3.1.16
-      '@stackone/stackone-client-ts':
-        specifier: catalog:prod
-        version: 4.32.2
       json-schema:
         specifier: catalog:prod
         version: 0.4.0
@@ -950,9 +944,6 @@ packages:
     resolution: {integrity: sha512-UhTd8u31dXadv0MopwGgNOBpUVROFKWVQgAg5N1ESyCz8AuBcMqm4AuTjrwgQKGDfoFuz02EuMRHQIw/frmYKQ==}
     cpu: [x64]
     os: [win32]
-
-  '@stackone/stackone-client-ts@4.32.2':
-    resolution: {integrity: sha512-fGQ5IO/6faTNw1RoDE/4YOfRhp0vnnK8zo05OsW8aIK3eZuCqNI1J73YlcmJ0PxAr4A7206caEXgBPCfnUDLCA==}
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -2713,10 +2704,6 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.53.3':
     optional: true
-
-  '@stackone/stackone-client-ts@4.32.2':
-    dependencies:
-      zod: 3.25.76
 
   '@standard-schema/spec@1.0.0': {}
 

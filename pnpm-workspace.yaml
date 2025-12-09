@@ -32,15 +32,11 @@ catalogs:
   prod:
     '@modelcontextprotocol/sdk': ^1.19.1
     '@orama/orama': ^3.1.11
-    '@stackone/stackone-client-ts': 4.32.2
     json-schema: ^0.4.0
 
 enablePrePostScripts: true
 
 minimumReleaseAge: 1440
-
-minimumReleaseAgeExclude:
-  - '@stackone/stackone-client-ts'
 
 onlyBuiltDependencies:
   - '@biomejs/biome'

@@ -1,10 +1,10 @@
 import { StreamableHTTPTransport } from '@hono/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { StackOne } from '@stackone/stackone-client-ts';
 import { Hono } from 'hono';
 import { assert, vi } from 'vitest';
 import { z } from 'zod';
 import { server as mswServer } from '../../../mocks/node';
+import type { RpcClient } from '../../client';
 import { ToolSet } from '../base';
 import { StackOneToolSet } from '../stackone';
 
@@ -105,18 +105,18 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
   });
 
   it('creates tools from MCP catalog and wires RPC execution', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     class TestToolSet extends ToolSet {}
 
     const toolset = new TestToolSet({
       baseUrl: origin,
       headers: { 'x-account-id': 'test-account' },
-      stackOneClient,
+      rpcClient,
     });
 
     const tools = await toolset.fetchTools();
@@ -141,7 +141,7 @@ describe('ToolSet.fetchTools (MCP + RPC integration)', () => {
       { toolCallId: 'test-id', messages: [] }
     );
 
-    expect(stackOneClient.actions.rpcAction).toHaveBeenCalledWith({
+    expect(rpcClient.actions.rpcAction).toHaveBeenCalledWith({
       action: 'dummy_action',
       body: { foo: 'bar' },
       headers: { 'x-account-id': 'test-account' },
@@ -224,16 +224,16 @@ describe('StackOneToolSet account filtering', () => {
   });
 
   it('supports setAccounts() for chaining', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Test chaining
@@ -242,16 +242,16 @@ describe('StackOneToolSet account filtering', () => {
   });
 
   it('fetches tools without account filtering when no accountIds provided', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     const tools = await toolset.fetchTools();
@@ -264,16 +264,16 @@ describe('StackOneToolSet account filtering', () => {
   });
 
   it('uses x-account-id header when fetching tools with accountIds', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Fetch tools for acc1
@@ -287,16 +287,16 @@ describe('StackOneToolSet account filtering', () => {
   });
 
   it('uses setAccounts when no accountIds provided in fetchTools', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Set accounts using setAccounts
@@ -317,16 +317,16 @@ describe('StackOneToolSet account filtering', () => {
   });
 
   it('overrides setAccounts when accountIds provided in fetchTools', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Set accounts using setAccounts
@@ -393,16 +393,16 @@ describe('StackOneToolSet provider and action filtering', () => {
   });
 
   it('filters tools by providers', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Filter by providers
@@ -420,16 +420,16 @@ describe('StackOneToolSet provider and action filtering', () => {
   });
 
   it('filters tools by actions with exact match', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Filter by exact action names
@@ -446,16 +446,16 @@ describe('StackOneToolSet provider and action filtering', () => {
   });
 
   it('filters tools by actions with glob pattern', async () => {
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Filter by glob pattern
@@ -504,16 +504,16 @@ describe('StackOneToolSet provider and action filtering', () => {
       acc2: acc2Tools,
     });
 
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: server.origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Combine account and action filters
@@ -557,16 +557,16 @@ describe('StackOneToolSet provider and action filtering', () => {
       acc1: acc1Tools,
     });
 
-    const stackOneClient = {
+    const rpcClient = {
       actions: {
         rpcAction: vi.fn(async () => ({ actionsRpcResponse: { data: null } })),
       },
-    } as unknown as StackOne;
+    } as unknown as RpcClient;
 
     const toolset = new StackOneToolSet({
       baseUrl: server.origin,
       apiKey: 'test-key',
-      stackOneClient,
+      rpcClient,
     });
 
     // Combine all filters

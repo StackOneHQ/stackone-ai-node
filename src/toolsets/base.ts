@@ -1,5 +1,5 @@
-import { StackOne } from '@stackone/stackone-client-ts';
 import type { Arrayable } from 'type-fest';
+import { RpcClient } from '../client';
 import { createMCPClient } from '../mcp';
 import { BaseTool, Tools } from '../tool';
 import type {
@@ -66,7 +66,7 @@ export interface BaseToolSetConfig {
   baseUrl?: string;
   authentication?: AuthenticationConfig;
   headers?: Record<string, string>;
-  stackOneClient?: StackOne;
+  rpcClient?: RpcClient;
 }
 
 /**
@@ -76,7 +76,7 @@ export abstract class ToolSet {
   protected baseUrl?: string;
   protected authentication?: AuthenticationConfig;
   protected headers: Record<string, string>;
-  protected stackOneClient?: StackOne;
+  protected rpcClient?: RpcClient;
 
   /**
    * Initialise a toolset with optional configuration
@@ -86,7 +86,7 @@ export abstract class ToolSet {
     this.baseUrl = config?.baseUrl;
     this.authentication = config?.authentication;
     this.headers = config?.headers || {};
-    this.stackOneClient = config?.stackOneClient;
+    this.rpcClient = config?.rpcClient;
 
     // Set Authentication headers if provided
     if (this.authentication) {
@@ -194,9 +194,9 @@ export abstract class ToolSet {
     return new Tools(tools);
   }
 
-  private getActionsClient(): StackOne {
-    if (this.stackOneClient) {
-      return this.stackOneClient;
+  private getActionsClient(): RpcClient {
+    if (this.rpcClient) {
+      return this.rpcClient;
     }
 
     const credentials = this.authentication?.credentials ?? {};
@@ -212,11 +212,11 @@ export abstract class ToolSet {
 
     if (!apiKey) {
       throw new ToolSetConfigError(
-        'StackOne API key is required to create an actions client. Provide stackOneClient, configure authentication credentials, or set the STACKONE_API_KEY environment variable.'
+        'StackOne API key is required to create an actions client. Provide rpcClient, configure authentication credentials, or set the STACKONE_API_KEY environment variable.'
       );
     }
 
-    this.stackOneClient = new StackOne({
+    this.rpcClient = new RpcClient({
       serverURL: this.baseUrl,
       security: {
         username: apiKey,
@@ -224,7 +224,7 @@ export abstract class ToolSet {
       },
     });
 
-    return this.stackOneClient;
+    return this.rpcClient;
   }
 
   private createRpcBackedTool({
@@ -233,7 +233,7 @@ export abstract class ToolSet {
     description,
     inputSchema,
   }: {
-    actionsClient: StackOne;
+    actionsClient: RpcClient;
     name: string;
     description?: string;
     inputSchema: ToolInputSchema;

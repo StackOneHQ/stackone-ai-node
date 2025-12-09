@@ -215,6 +215,77 @@ export const handlers = [
   }),
 
   // ============================================================
+  // StackOne Actions RPC endpoint
+  // ============================================================
+  http.post('https://api.stackone.com/actions/rpc', async ({ request }) => {
+    const authHeader = request.headers.get('Authorization');
+
+    // Check for authentication
+    if (!authHeader || !authHeader.startsWith('Basic ')) {
+      return HttpResponse.json(
+        { error: 'Unauthorized', message: 'Missing or invalid authorization header' },
+        { status: 401 }
+      );
+    }
+
+    const body = (await request.json()) as {
+      action?: string;
+      body?: Record<string, unknown>;
+      headers?: Record<string, string>;
+      path?: Record<string, string>;
+      query?: Record<string, string>;
+    };
+
+    // Validate action is provided
+    if (!body.action) {
+      return HttpResponse.json(
+        { error: 'Bad Request', message: 'Action is required' },
+        { status: 400 }
+      );
+    }
+
+    // Return mock response based on action
+    if (body.action === 'hris_get_employee') {
+      return HttpResponse.json({
+        data: {
+          id: body.path?.id || 'test-id',
+          name: 'Test Employee',
+          ...(body.body || {}),
+        },
+      });
+    }
+
+    if (body.action === 'hris_list_employees') {
+      return HttpResponse.json({
+        data: [
+          { id: '1', name: 'Employee 1' },
+          { id: '2', name: 'Employee 2' },
+        ],
+      });
+    }
+
+    if (body.action === 'test_error_action') {
+      return HttpResponse.json(
+        { error: 'Internal Server Error', message: 'Test error response' },
+        { status: 500 }
+      );
+    }
+
+    // Default response for other actions
+    return HttpResponse.json({
+      data: {
+        action: body.action,
+        received: {
+          body: body.body,
+          headers: body.headers,
+          path: body.path,
+          query: body.query,
+        },
+      },
+    });
+  }),
+
+  // ============================================================
   // StackOne Unified HRIS endpoints
   // ============================================================
   http.get('https://api.stackone.com/unified/hris/employees', ({ request }) => {

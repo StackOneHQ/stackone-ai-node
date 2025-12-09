@@ -33,7 +33,6 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:prod",
     "@orama/orama": "catalog:prod",
-    "@stackone/stackone-client-ts": "catalog:prod",
     "json-schema": "catalog:prod"
   },
   "devDependencies": {
