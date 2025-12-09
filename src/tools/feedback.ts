@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEFAULT_BASE_URL } from '../consts';
 import { BaseTool } from '../tool';
 import type { ExecuteConfig, ExecuteOptions, JsonDict, ToolParameters } from '../types';
 import { StackOneError } from '../utils/errors';
@@ -39,7 +40,7 @@ const feedbackInputSchema = z.object({
 export function createFeedbackTool(
   apiKey?: string,
   accountId?: string,
-  baseUrl = 'https://api.stackone.com'
+  baseUrl = DEFAULT_BASE_URL
 ): BaseTool {
   const options: FeedbackToolOptions = {
     apiKey,
@@ -102,7 +103,7 @@ export function createFeedbackTool(
   }
 
   const tool = new BaseTool(name, description, parameters, executeConfig, authHeaders);
-  const resolvedBaseUrl = options.baseUrl || 'https://api.stackone.com';
+  const resolvedBaseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
 
   tool.execute = async function (
     this: BaseTool,
