@@ -13,7 +13,7 @@ catalogs:
     '@types/json-schema': ^7.0.15
     '@types/node': ^22.13.5
     '@typescript/native-preview': ^7.0.0-dev.20251202.1
-    '@vitest/coverage-v8': ^3.2.4
+    '@vitest/coverage-v8': ^4.0.15
     hono: ^4.9.10
     knip: ^5.72.0
     lefthook: ^2.0.8
@@ -23,7 +23,7 @@ catalogs:
     type-fest: ^4.41.0
     typescript: ^5.8.3
     unplugin-unused: ^0.5.4
-    vitest: ^3.2.4
+    vitest: ^4.0.15
     zod: ^3.23.8
   peer:
     ai: ^5.0.63
