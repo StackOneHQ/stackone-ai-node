@@ -162,6 +162,8 @@ const currentAccountId = tools.getAccountId(); // Get the current account ID
 
 [View full example](examples/account-id-usage.ts)
 
+## Features
+
 ### Filtering Tools with fetchTools()
 
 You can filter tools by account IDs, providers, and action patterns:
@@ -201,114 +203,6 @@ This is especially useful when you want to:
 - Get only certain types of operations (e.g., all "list" operations)
 
 [View full example](examples/fetch-tools.ts)
-
-## Features
-
-### Feedback Collection Tool
-
-The StackOne AI SDK includes a built-in feedback collection tool (`meta_collect_tool_feedback`) that allows users to provide feedback on their experience with StackOne tools. This tool is automatically included when using `fetchTools()` and helps improve the SDK based on user input.
-
-#### How It Works
-
-The feedback tool:
-
-- **Requires explicit user consent** before submitting feedback
-- **Collects user feedback** about their experience with StackOne tools
-- **Tracks tool usage** by recording which tools were used
-- **Submits to StackOne** via the `/ai/tool-feedback` endpoint
-- **Uses the same API key** as other SDK operations for authentication
-
-#### Usage
-
-The feedback tool is automatically available when using `StackOneToolSet`:
-
-```typescript
-import { StackOneToolSet } from "@stackone/ai";
-
-const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-});
-const tools = await toolset.fetchTools();
-
-// The feedback tool is automatically included
-const feedbackTool = tools.getTool("meta_collect_tool_feedback");
-
-// Use with AI agents - they will ask for user consent first
-const openAITools = tools.toOpenAI();
-// or
-const aiSdkTools = await tools.toAISDK();
-```
-
-#### Manual Usage
-
-You can also use the feedback tool directly:
-
-```typescript
-// Get the feedback tool
-const feedbackTool = tools.getTool("meta_collect_tool_feedback");
-
-// Submit feedback (after getting user consent)
-const result = await feedbackTool.execute({
-  feedback: "The tools worked great! Very easy to use.",
-  account_id: "acc_123456",
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
-});
-```
-
-#### Multiple Account Support
-
-The feedback tool supports both single and multiple account IDs. When you provide an array of account IDs, the feedback will be sent to each account individually:
-
-```typescript
-// Single account ID (string)
-await feedbackTool.execute({
-  feedback: "The tools worked great! Very easy to use.",
-  account_id: "acc_123456",
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
-});
-
-// Multiple account IDs (array)
-await feedbackTool.execute({
-  feedback: "The tools worked great! Very easy to use.",
-  account_id: ["acc_123456", "acc_789012"],
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
-});
-```
-
-**Response Format**: When using multiple account IDs, the tool returns a summary of all submissions:
-
-```typescript
-{
-  message: "Feedback sent to 2 account(s)",
-  total_accounts: 2,
-  successful: 2,
-  failed: 0,
-  results: [
-    {
-      account_id: "acc_123456",
-      status: "success",
-      result: { message: "Feedback successfully stored", ... }
-    },
-    {
-      account_id: "acc_789012",
-      status: "success",
-      result: { message: "Feedback successfully stored", ... }
-    }
-  ]
-}
-```
-
-#### AI Agent Integration
-
-When AI agents use this tool, they will:
-
-1. **Ask for user consent**: "Are you ok with sending feedback to StackOne?"
-2. **Collect feedback**: Get the user's verbatim feedback
-3. **Track tool usage**: Record which tools were used in the session
-4. **Submit to all accounts**: Send the same feedback to each account ID provided
-5. **Report results**: Show which accounts received the feedback successfully
-
-The tool description includes clear instructions for AI agents to always ask for explicit user consent before submitting feedback.
 
 ### Meta Tools (Beta)
 
@@ -430,3 +324,109 @@ The `dryRun` option returns an object containing:
 - `headers`: The request headers
 - `body`: The request body
 - `mappedParams`: The parameters after mapping and derivation
+
+### Feedback Collection Tool
+
+The StackOne AI SDK includes a built-in feedback collection tool (`meta_collect_tool_feedback`) that allows users to provide feedback on their experience with StackOne tools. This tool is automatically included when using `fetchTools()` and helps improve the SDK based on user input.
+
+#### How It Works
+
+The feedback tool:
+
+- **Requires explicit user consent** before submitting feedback
+- **Collects user feedback** about their experience with StackOne tools
+- **Tracks tool usage** by recording which tools were used
+- **Submits to StackOne** via the `/ai/tool-feedback` endpoint
+- **Uses the same API key** as other SDK operations for authentication
+
+#### Usage
+
+The feedback tool is automatically available when using `StackOneToolSet`:
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet({
+  baseUrl: "https://api.stackone.com",
+});
+const tools = await toolset.fetchTools();
+
+// The feedback tool is automatically included
+const feedbackTool = tools.getTool("meta_collect_tool_feedback");
+
+// Use with AI agents - they will ask for user consent first
+const openAITools = tools.toOpenAI();
+// or
+const aiSdkTools = await tools.toAISDK();
+```
+
+#### Manual Usage
+
+You can also use the feedback tool directly:
+
+```typescript
+// Get the feedback tool
+const feedbackTool = tools.getTool("meta_collect_tool_feedback");
+
+// Submit feedback (after getting user consent)
+const result = await feedbackTool.execute({
+  feedback: "The tools worked great! Very easy to use.",
+  account_id: "acc_123456",
+  tool_names: ["hris_list_employees", "hris_create_time_off"],
+});
+```
+
+#### Multiple Account Support
+
+The feedback tool supports both single and multiple account IDs. When you provide an array of account IDs, the feedback will be sent to each account individually:
+
+```typescript
+// Single account ID (string)
+await feedbackTool.execute({
+  feedback: "The tools worked great! Very easy to use.",
+  account_id: "acc_123456",
+  tool_names: ["hris_list_employees", "hris_create_time_off"],
+});
+
+// Multiple account IDs (array)
+await feedbackTool.execute({
+  feedback: "The tools worked great! Very easy to use.",
+  account_id: ["acc_123456", "acc_789012"],
+  tool_names: ["hris_list_employees", "hris_create_time_off"],
+});
+```
+
+**Response Format**: When using multiple account IDs, the tool returns a summary of all submissions:
+
+```typescript
+{
+  message: "Feedback sent to 2 account(s)",
+  total_accounts: 2,
+  successful: 2,
+  failed: 0,
+  results: [
+    {
+      account_id: "acc_123456",
+      status: "success",
+      result: { message: "Feedback successfully stored", ... }
+    },
+    {
+      account_id: "acc_789012",
+      status: "success",
+      result: { message: "Feedback successfully stored", ... }
+    }
+  ]
+}
+```
+
+#### AI Agent Integration
+
+When AI agents use this tool, they will:
+
+1. **Ask for user consent**: "Are you ok with sending feedback to StackOne?"
+2. **Collect feedback**: Get the user's verbatim feedback
+3. **Track tool usage**: Record which tools were used in the session
+4. **Submit to all accounts**: Send the same feedback to each account ID provided
+5. **Report results**: Show which accounts received the feedback successfully
+
+The tool description includes clear instructions for AI agents to always ask for explicit user consent before submitting feedback.
