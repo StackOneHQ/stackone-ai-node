@@ -47,7 +47,7 @@ jobs:
 
       - name: Create Coverage Badge
         if: github.ref == 'refs/heads/main'
-        uses: jaywcjlove/coverage-badges-cli@e07f25709cd25486855c1ba1b26da53476dfb763 # v2.3.2
+        uses: jaywcjlove/coverage-badges-cli@bd6ccbf422c0ed54c01f283019fd2bc648f58541 # v2.2.0
         with:
           source: coverage/coverage-summary.json
           output: coverage/badges.svg
