@@ -8,9 +8,6 @@ catalogs:
   dev:
     '@ai-sdk/openai': ^2.0.80
     '@ai-sdk/provider-utils': ^3.0.18
-    oxfmt: ^0.17.0
-    oxlint: ^1.32.0
-    oxlint-tsgolint: ^0.8.4
     '@hono/mcp': ^0.1.4
     '@types/json-schema': ^7.0.15
     '@types/node': ^22.13.5
@@ -20,6 +17,9 @@ catalogs:
     knip: ^5.72.0
     lefthook: ^2.0.8
     msw: ^2.10.4
+    oxfmt: ^0.17.0
+    oxlint: ^1.32.0
+    oxlint-tsgolint: ^0.8.4
     publint: ^0.3.12
     tsdown: ^0.15.9
     type-fest: ^4.41.0

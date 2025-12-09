@@ -38,31 +38,14 @@ OPENAI_API_KEY=your_api_key_here
 
 ### 3. Configure Account IDs
 
-Update the account IDs in [`constants.ts`](./constants.ts) with your actual integration account IDs:
+Each example includes a placeholder account ID that you need to replace with your actual StackOne account ID:
 
 ```typescript
-export const ACCOUNT_IDS = {
-  // Human Resources Information System
-  HRIS: "your_hris_account_id",
-
-  // Applicant Tracking System
-  ATS: "your_ats_account_id",
-
-  // Customer Relationship Management
-  CRM: "your_crm_account_id",
-
-  // Document Management System
-  DOCUMENTS: "your_documents_account_id",
-
-  // Test account IDs (used in examples that don't make real API calls)
-  TEST: {
-    VALID: "test_account_id",
-    OVERRIDE: "test_account_id_override",
-    DIRECT: "test_account_id_direct",
-    INVALID: "invalid_test_account_id",
-  },
-};
+// Replace with your actual account ID from StackOne dashboard
+const accountId = 'your-hris-account-id';
 ```
+
+You can find your account IDs in the [StackOne dashboard](https://app.stackone.com).
 
 ## Running Examples
 
@@ -287,7 +270,7 @@ cd examples && pnpm test examples.spec.ts
 ### Common Issues
 
 1. **Authentication Errors**: Ensure `STACKONE_API_KEY` is set correctly
-2. **Account ID Errors**: Update account IDs in `constants.ts` with your actual values
+2. **Account ID Errors**: Update account ID placeholders in the example files with your actual values
 3. **Network Errors**: Check if you're behind a proxy or firewall
 4. **TypeScript Errors**: Ensure you're using compatible Node.js and TypeScript versions
 
@@ -306,7 +289,7 @@ When adding new examples:
 3. Include proper error handling
 4. Add TypeScript types
 5. Test with the examples test suite
-6. Update `constants.ts` if new account IDs are needed
+6. Use inline placeholder account IDs with clear comments (e.g., `const accountId = 'your-hris-account-id';`)
 
 ## License
 

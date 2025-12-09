@@ -1,6 +1,6 @@
-import { BaseTool, StackOneTool, Tools } from '../tool';
-import { type ExecuteConfig, ParameterLocation, type ToolParameters } from '../types';
-import { StackOneAPIError } from '../utils/errors';
+import { BaseTool, StackOneTool, Tools } from './tool';
+import { type ExecuteConfig, ParameterLocation, type ToolParameters } from './types';
+import { StackOneAPIError } from './utils/errors';
 
 // Create a mock tool for testing
 const createMockTool = (headers?: Record<string, string>): BaseTool => {

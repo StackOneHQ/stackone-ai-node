@@ -9,7 +9,7 @@ export default defineConfig({
 			provider: 'v8',
 			reporter: ['text', 'json', 'json-summary', 'html'],
 			include: ['src/**/*.ts', 'examples/**/*.ts'],
-			exclude: ['**/*.spec.ts', '**/*.test.ts', '**/*.test-d.ts', '**/tests/**'],
+			exclude: ['**/*.test.ts', '**/*.test-d.ts'],
 		},
 		projects: [
 			{
@@ -17,17 +17,12 @@ export default defineConfig({
 				test: {
 					name: 'root',
 					root: '.',
-					include: ['src/**/*.spec.ts', 'scripts/**/*.spec.ts'],
-					exclude: [
-						'node_modules',
-						'dist',
-						'examples',
-						'src/toolsets/tests/stackone.mcp-fetch.spec.ts',
-					],
+					include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
+					exclude: ['node_modules', 'dist', 'examples'],
 					setupFiles: ['./vitest.setup.ts'],
 					typecheck: {
 						enabled: true,
-						include: ['src/**/*.spec.ts', 'src/**/*.test-d.ts'],
+						include: ['src/**/*.test.ts', 'src/**/*.test-d.ts'],
 					},
 				},
 			},

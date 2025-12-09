@@ -1,6 +1,6 @@
 import { assert } from 'vitest';
-import { BaseTool, type MetaToolSearchResult, Tools } from '../tool';
-import { ParameterLocation } from '../types';
+import { BaseTool, type MetaToolSearchResult, Tools } from './tool';
+import { ParameterLocation } from './types';
 
 // Create mock tools for testing
 const createMockTools = (): BaseTool[] => {

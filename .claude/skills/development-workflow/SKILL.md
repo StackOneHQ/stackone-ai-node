@@ -19,8 +19,7 @@ This skill provides all commands and best practices for building, developing, an
 ## Testing
 
 - `pnpm test` - Run all tests (unit, examples, scripts)
-- `pnpm test:unit` - Run only unit tests
-- `pnpm vitest src/path/to/file.spec.ts` - Run a specific test file
+- `pnpm vitest src/path/to/file.test.ts` - Run a specific test file
 - `pnpm vitest -t "test name"` - Run tests matching a pattern
 
 ## Code Quality
