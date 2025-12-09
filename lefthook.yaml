@@ -6,5 +6,5 @@ pre-commit:
       run: pnpm run typecheck
     format:
       glob: "*.{ts,tsx,js,jsx,mts,cts,json,jsonc,yaml,yml,md}"
-      run: pnpm biome format --no-errors-on-unmatched --write {staged_files}
+      run: pnpm biome check --no-errors-on-unmatched --write {staged_files}
       stage_fixed: true
