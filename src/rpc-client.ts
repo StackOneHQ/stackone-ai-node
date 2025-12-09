@@ -1,34 +1,50 @@
+import { z } from 'zod';
 import type { JsonDict } from './types';
 import { StackOneAPIError } from './utils/errors';
 
 /**
+ * Zod schema for RPC action request validation
+ */
+const rpcActionRequestSchema = z.object({
+  action: z.string(),
+  body: z.record(z.unknown()).optional(),
+  headers: z.record(z.string()).optional(),
+  path: z.record(z.unknown()).optional(),
+  query: z.record(z.unknown()).optional(),
+});
+
+/**
  * RPC action request payload
  */
-export interface RpcActionRequest {
-  action: string;
-  body?: JsonDict;
-  headers?: Record<string, string>;
-  path?: JsonDict;
-  query?: JsonDict;
-}
+export type RpcActionRequest = z.infer<typeof rpcActionRequestSchema>;
+
+/**
+ * Zod schema for RPC action response validation
+ */
+const rpcActionResponseSchema = z.object({
+  actionsRpcResponse: z.record(z.unknown()).optional(),
+});
 
 /**
  * RPC action response from the StackOne API
  */
-export interface RpcActionResponse {
-  actionsRpcResponse?: JsonDict;
-}
+export type RpcActionResponse = z.infer<typeof rpcActionResponseSchema>;
+
+/**
+ * Zod schema for RPC client configuration validation
+ */
+const rpcClientConfigSchema = z.object({
+  serverURL: z.string().optional(),
+  security: z.object({
+    username: z.string(),
+    password: z.string().optional(),
+  }),
+});
 
 /**
  * Configuration for the RPC client
  */
-export interface RpcClientConfig {
-  serverURL?: string;
-  security: {
-    username: string;
-    password?: string;
-  };
-}
+export type RpcClientConfig = z.infer<typeof rpcClientConfigSchema>;
 
 /**
  * Custom RPC client for StackOne API
@@ -39,9 +55,10 @@ export class RpcClient {
   private readonly authHeader: string;
 
   constructor(config: RpcClientConfig) {
-    this.baseUrl = config.serverURL || 'https://api.stackone.com';
-    const username = config.security.username;
-    const password = config.security.password || '';
+    const validatedConfig = rpcClientConfigSchema.parse(config);
+    this.baseUrl = validatedConfig.serverURL || 'https://api.stackone.com';
+    const username = validatedConfig.security.username;
+    const password = validatedConfig.security.password || '';
     this.authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
   }
 
@@ -55,14 +72,15 @@ export class RpcClient {
      * @returns The RPC action response
      */
     rpcAction: async (request: RpcActionRequest): Promise<RpcActionResponse> => {
+      const validatedRequest = rpcActionRequestSchema.parse(request);
       const url = `${this.baseUrl}/actions/rpc`;
 
       const requestBody = {
-        action: request.action,
-        body: request.body,
-        headers: request.headers,
-        path: request.path,
-        query: request.query,
+        action: validatedRequest.action,
+        body: validatedRequest.body,
+        headers: validatedRequest.headers,
+        path: validatedRequest.path,
+        query: validatedRequest.query,
       };
 
       const response = await fetch(url, {
@@ -75,7 +93,7 @@ export class RpcClient {
         body: JSON.stringify(requestBody),
       });
 
-      const responseBody: unknown = await response.json().catch(() => ({}));
+      const responseBody = await response.json();
 
       if (!response.ok) {
         throw new StackOneAPIError(
@@ -86,8 +104,12 @@ export class RpcClient {
         );
       }
 
+      const validated = rpcActionResponseSchema.parse({
+        actionsRpcResponse: responseBody,
+      });
+
       return {
-        actionsRpcResponse: responseBody as JsonDict,
+        actionsRpcResponse: validated.actionsRpcResponse as JsonDict | undefined,
       };
     },
   };
