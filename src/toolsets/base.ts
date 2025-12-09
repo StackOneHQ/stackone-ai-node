@@ -1,6 +1,6 @@
 import type { Arrayable } from 'type-fest';
 import { createMCPClient } from '../mcp-client';
-import { RpcClient } from '../rpc-client';
+import { RpcClient, type RpcActionResponse } from '../rpc-client';
 import { BaseTool, Tools } from '../tool';
 import type {
   ExecuteOptions,
@@ -11,6 +11,22 @@ import type {
 } from '../types';
 import { toArray } from '../utils/array';
 import { StackOneError } from '../utils/errors';
+
+/**
+ * Converts RpcActionResponse to JsonDict in a type-safe manner.
+ * RpcActionResponse uses z.passthrough() which preserves additional fields,
+ * making it structurally compatible with Record<string, unknown>.
+ */
+function rpcResponseToJsonDict(response: RpcActionResponse): JsonDict {
+  // RpcActionResponse with passthrough() has the shape:
+  // { next?: string | null, data?: ..., [key: string]: unknown }
+  // We extract all properties into a plain object
+  const result: JsonDict = {};
+  for (const [key, value] of Object.entries(response)) {
+    result[key] = value;
+  }
+  return result;
+}
 
 type ToolInputSchema = Awaited<
   ReturnType<Awaited<ReturnType<typeof createMCPClient>>['client']['listTools']>
@@ -332,7 +348,7 @@ export abstract class ToolSet {
           query: queryParams ?? undefined,
         });
 
-        return (response.actionsRpcResponse ?? {}) as JsonDict;
+        return rpcResponseToJsonDict(response);
       } catch (error) {
         if (error instanceof StackOneError) {
           throw error;
