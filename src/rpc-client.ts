@@ -47,8 +47,11 @@ const rpcClientConfigSchema = z.object({
 export type RpcClientConfig = z.infer<typeof rpcClientConfigSchema>;
 
 /**
- * Custom RPC client for StackOne API
- * Replaces the @stackone/stackone-client-ts dependency
+ * Custom RPC client for StackOne API.
+ * Replaces the @stackone/stackone-client-ts dependency.
+ *
+ * @see https://docs.stackone.com/platform/api-reference/actions/list-all-actions-metadata
+ * @see https://docs.stackone.com/platform/api-reference/actions/make-an-rpc-call-to-an-action
  */
 export class RpcClient {
   private readonly baseUrl: string;
