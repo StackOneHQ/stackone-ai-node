@@ -13,7 +13,8 @@ const extractTextFromInput = (input: unknown): string => {
 						content !== null &&
 						(content as Record<string, unknown>).type === 'input_text'
 					) {
-						return String((content as Record<string, unknown>).text ?? '');
+						const textValue = (content as Record<string, unknown>).text;
+						return typeof textValue === 'string' ? textValue : '';
 					}
 				}
 			}
@@ -429,7 +430,7 @@ export const handlers = [
 
 	// StackOne AI tool feedback endpoint
 	http.post('https://api.stackone.com/ai/tool-feedback', async ({ request }) => {
-		const body = await request.json();
+		await request.json(); // Validate request body is JSON
 		return HttpResponse.json({
 			message: 'Feedback successfully stored',
 			key: 'test-key.json',

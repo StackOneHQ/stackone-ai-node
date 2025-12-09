@@ -126,7 +126,10 @@ export abstract class ToolSet {
 						break;
 
 					default:
-						throw new ToolSetError(`Unsupported authentication type: ${this.authentication.type}`);
+						this.authentication.type satisfies never;
+						throw new ToolSetError(
+							`Unsupported authentication type: ${String(this.authentication.type)}`,
+						);
 				}
 			}
 
@@ -309,7 +312,13 @@ export abstract class ToolSet {
 				if (additionalHeaders) {
 					for (const [key, value] of Object.entries(additionalHeaders)) {
 						if (value === undefined || value === null) continue;
-						actionHeaders[key] = String(value);
+						if (typeof value === 'string') {
+							actionHeaders[key] = value;
+						} else if (typeof value === 'number' || typeof value === 'boolean') {
+							actionHeaders[key] = String(value);
+						} else {
+							actionHeaders[key] = JSON.stringify(value);
+						}
 					}
 				}
 

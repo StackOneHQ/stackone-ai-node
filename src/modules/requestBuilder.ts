@@ -116,16 +116,19 @@ export class RequestBuilder {
 		// Handle different body types
 		if (Object.keys(bodyParams).length > 0) {
 			switch (this.bodyType) {
-				case 'json':
+				case 'json': {
+					const headersRecord = fetchOptions.headers as Record<string, string>;
 					fetchOptions.headers = {
-						...fetchOptions.headers,
+						...headersRecord,
 						'Content-Type': 'application/json',
 					};
 					fetchOptions.body = JSON.stringify(bodyParams);
 					break;
+				}
 				case 'form': {
+					const headersRecord = fetchOptions.headers as Record<string, string>;
 					fetchOptions.headers = {
-						...fetchOptions.headers,
+						...headersRecord,
 						'Content-Type': 'application/x-www-form-urlencoded',
 					};
 					const formBody = new URLSearchParams();
@@ -180,7 +183,14 @@ export class RequestBuilder {
 		if (value == null) {
 			return '';
 		}
-		return String(value);
+		if (typeof value === 'string') {
+			return value;
+		}
+		if (typeof value === 'number' || typeof value === 'boolean') {
+			return String(value);
+		}
+		// For objects and arrays, use JSON serialization
+		return JSON.stringify(value);
 	}
 
 	/**
