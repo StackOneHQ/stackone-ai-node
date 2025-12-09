@@ -27,15 +27,13 @@
  * # Account IDs
  *
  * StackOne uses account IDs to identify different integrations.
- * See the example in the README for more details.
- *
- * This example will use the centralised account ID:
+ * Replace the placeholder below with your actual account ID from the StackOne dashboard.
  */
 
 import process from 'node:process';
-import { ACCOUNT_IDS } from './constants';
 
-const accountId = ACCOUNT_IDS.HRIS;
+// Replace with your actual account ID from StackOne dashboard
+const accountId = 'your-hris-account-id';
 
 /**
  * # Quickstart

@@ -5,9 +5,14 @@ on:
     paths:
       - 'flake.nix'
       - 'flake.lock'
-      - '.github/workflows/nix-flake.yml'
+      - '.github/workflows/nix-flake.yaml'
       - '.github/actions/setup-nix/**'
   pull_request:
+    paths:
+      - 'flake.nix'
+      - 'flake.lock'
+      - '.github/workflows/nix-flake.yaml'
+      - '.github/actions/setup-nix/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

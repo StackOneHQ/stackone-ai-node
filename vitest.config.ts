@@ -18,7 +18,7 @@ export default defineConfig({
           name: 'root',
           root: '.',
           include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
-          exclude: ['node_modules', 'dist', 'examples', 'src/toolsets/stackone.mcp-fetch.test.ts'],
+          exclude: ['node_modules', 'dist', 'examples'],
           setupFiles: ['./vitest.setup.ts'],
           typecheck: {
             enabled: true,
