@@ -1,6 +1,8 @@
 ---
 name: development-workflow
-description: Build, development, and code quality commands for StackOne SDK
+description: Build commands, testing, linting, git workflow, commit conventions, and file naming standards. (project)
+globs: ""
+alwaysApply: true
 ---
 
 # Development Workflow
@@ -107,7 +109,29 @@ feat(parser): add support for custom parameter transformers
 4. Verify with `git status` before committing
 
 ### TypeScript Issues
-Use the TypeScript exhaustiveness pattern (`satisfies never`) when branching on unions. See `openapi-architecture` skill for examples.
+Use the TypeScript exhaustiveness pattern (`satisfies never`) when branching on unions. See `typescript-patterns` skill for examples.
+
+## Pull Request Guidelines
+
+### PR Title Format
+Use the same format as commit messages: `type(scope): description`
+
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`, `perf`
+
+Examples:
+- `feat(tools): add support for custom OpenAPI specs`
+- `fix(parser): handle empty response bodies`
+- `refactor(skills): unify cursor rules and claude skills`
+
+### PR Body
+Include:
+- **Summary**: 1-3 bullet points describing changes
+- **Test plan**: How to verify the changes work
+- Reference related issues with `Closes #123` or `Fixes #123`
+
+## File Naming Conventions
+
+- Use `.yaml` extension instead of `.yml` for all YAML files (e.g., `lefthook.yaml`, GitHub Actions workflows)
 
 ## Working with Tools
 

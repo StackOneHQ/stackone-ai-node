@@ -1,6 +1,8 @@
 ---
 name: typescript-testing
-description: Vitest test runner and MSW-based testing patterns for StackOne SDK
+description: Use when writing or running tests. Covers Vitest commands, MSW HTTP mocking, fs-fixture for file system tests. (project)
+globs: "*.spec.ts"
+alwaysApply: false
 ---
 
 # TypeScript Testing with Vitest and MSW

@@ -1,11 +1,13 @@
 ---
 name: typescript-patterns
-description: TypeScript patterns and best practices for StackOne SDK
+description: Use when writing or reviewing TypeScript code. Covers type safety, exhaustiveness checks, avoiding any/non-null assertions, clean code practices. (project)
+globs: "*.ts"
+alwaysApply: false
 ---
 
 # TypeScript Patterns and Best Practices
 
-This skill provides guidance on TypeScript patterns and best practices for writing clean, type-safe code in the StackOne SDK.
+Guidelines for writing clean, type-safe TypeScript code in this repository.
 
 ## Exhaustiveness Checking with `satisfies never`
 
@@ -207,12 +209,20 @@ function removeProperty(obj: Record<string, JSONSchema7Definition>): void {
 }
 ```
 
-## Recommendations
+## Remove Unused Code
 
-1. Use `satisfies never` for all union type switches
-2. Prefer `unknown` over `any` and use type guards
-3. Use optional chaining (`?.`) and nullish coalescing (`??`)
+After refactoring, always remove unused code:
+- Delete unused variables, parameters, functions, classes, imports
+- Don't comment out old code - delete it (git history preserves it)
+- Remove unreachable code paths
+
+## Quick Reference
+
+1. Use `satisfies never` for union type switches
+2. Prefer `unknown` over `any` with type guards
+3. Use `?.` and `??` instead of non-null assertions
 4. Always specify return types
-5. Use destructuring for immutable property removal
-6. Write functions as simple exports, not class static methods
-7. Create new variables instead of reassigning parameters
+5. Use destructuring for property removal
+6. Use simple exports instead of static-only classes
+7. Don't reassign parameters - create new variables
+8. Remove unused code after refactoring

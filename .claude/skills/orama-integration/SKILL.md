@@ -1,6 +1,8 @@
 ---
 name: orama-integration
-description: Orama API integration reference for StackOne
+description: Use when integrating with Orama. Links to official docs for search, indexing, answer engine. (project)
+globs: ""
+alwaysApply: false
 ---
 
 # Orama Integration
