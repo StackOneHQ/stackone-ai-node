@@ -6,7 +6,6 @@ import assert from 'node:assert';
 import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 import OpenAI from 'openai';
-import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
@@ -14,10 +13,13 @@ if (!apiKey) {
   process.exit(1);
 }
 
+// Replace with your actual account ID from StackOne dashboard
+const accountId = 'your-hris-account-id';
+
 const openaiIntegration = async (): Promise<void> => {
   // Initialise StackOne
   const toolset = new StackOneToolSet({
-    accountId: ACCOUNT_IDS.HRIS,
+    accountId,
     baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
   });
 

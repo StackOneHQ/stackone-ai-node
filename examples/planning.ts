@@ -9,7 +9,10 @@
 import { openai } from '@ai-sdk/openai';
 import { StackOneToolSet } from '@stackone/ai';
 import { generateText, stepCountIs } from 'ai';
-import { ACCOUNT_IDS } from './constants';
+
+// Replace with your actual account IDs from StackOne dashboard
+const atsAccountId = 'your-ats-account-id';
+const hrisAccountId = 'your-hris-account-id';
 
 export const planningModule = async (): Promise<void> => {
   const toolset = new StackOneToolSet();
@@ -19,7 +22,7 @@ export const planningModule = async (): Promise<void> => {
     input: 'Onboard the last new hire from Teamtailor to Workday',
     model: 'stackone-planner-latest',
     tools: ['hris_*', 'ats_*'],
-    accountIds: [ACCOUNT_IDS.ATS, ACCOUNT_IDS.HRIS],
+    accountIds: [atsAccountId, hrisAccountId],
     cache: true, // saves the plan to $HOME/.stackone/plans
   });
 

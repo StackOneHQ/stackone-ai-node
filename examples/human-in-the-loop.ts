@@ -11,13 +11,15 @@ import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { type JsonDict, StackOneToolSet } from '@stackone/ai';
 import { generateText, stepCountIs } from 'ai';
-import { ACCOUNT_IDS } from './constants';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
   console.error('STACKONE_API_KEY environment variable is required');
   process.exit(1);
 }
+
+// Replace with your actual account ID from StackOne dashboard
+const accountId = 'your-hris-account-id';
 
 interface ToolCall {
   toolName: string;
@@ -27,7 +29,7 @@ interface ToolCall {
 const humanInTheLoopExample = async (): Promise<void> => {
   // Create a toolset
   const toolset = new StackOneToolSet({
-    accountId: ACCOUNT_IDS.HRIS,
+    accountId,
     baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
   });
 
