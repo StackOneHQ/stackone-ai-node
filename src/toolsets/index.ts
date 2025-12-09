@@ -1,6 +1,5 @@
 // Export base toolset types and classes
 export {
-  ToolSet,
   ToolSetConfigError,
   ToolSetError,
   ToolSetLoadError,

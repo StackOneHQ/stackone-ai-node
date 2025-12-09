@@ -8,3 +8,7 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx,mts,cts,json,jsonc,yaml,yml,md}"
       run: pnpm biome check --no-errors-on-unmatched --write {staged_files}
       stage_fixed: true
+    knip:
+      glob: "*.{ts,tsx,js,jsx,mts,cts}"
+      run: pnpm run format:knip
+      stage_fixed: true

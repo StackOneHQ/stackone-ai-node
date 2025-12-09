@@ -19,8 +19,12 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "format": "biome format --write .",
-    "lint": "biome check .",
+    "format": "pnpm --no-bail --aggregate-output run '/^format:/'",
+    "format:biome": "biome format --write .",
+    "format:knip": "knip --fix --no-exit-code",
+    "lint": "pnpm --no-bail --aggregate-output run '/^lint:/'",
+    "lint:biome": "biome check .",
+    "lint:knip": "knip",
     "preinstall": "npx only-allow pnpm",
     "prepack": "npm pkg delete scripts.preinstall && pnpm run build",
     "test": "pnpm --no-bail --aggregate-output run '/^test:/'",
@@ -36,7 +40,6 @@
     "json-schema": "catalog:prod"
   },
   "devDependencies": {
-    "@ai-sdk/openai": "catalog:dev",
     "@ai-sdk/provider-utils": "catalog:dev",
     "@biomejs/biome": "catalog:dev",
     "@hono/mcp": "catalog:dev",
@@ -45,8 +48,8 @@
     "@typescript/native-preview": "catalog:dev",
     "@vitest/coverage-v8": "catalog:dev",
     "ai": "catalog:peer",
-    "fs-fixture": "catalog:dev",
     "hono": "catalog:dev",
+    "knip": "catalog:dev",
     "lefthook": "catalog:dev",
     "msw": "catalog:dev",
     "openai": "catalog:peer",

@@ -16,7 +16,7 @@ const rpcActionRequestSchema = z.object({
 /**
  * RPC action request payload
  */
-export type RpcActionRequest = z.infer<typeof rpcActionRequestSchema>;
+type RpcActionRequest = z.infer<typeof rpcActionRequestSchema>;
 
 /**
  * Zod schema for RPC action response data
@@ -45,11 +45,6 @@ const rpcActionResponseSchema = z
   .passthrough();
 
 /**
- * RPC action response data type - can be object, array of objects, or null
- */
-export type RpcActionResponseData = z.infer<typeof rpcActionResponseDataSchema>;
-
-/**
  * RPC action response from the StackOne API
  * Contains known fields (data, next) plus any additional fields from the connector
  */
@@ -69,7 +64,7 @@ const rpcClientConfigSchema = z.object({
 /**
  * Configuration for the RPC client
  */
-export type RpcClientConfig = z.infer<typeof rpcClientConfigSchema>;
+type RpcClientConfig = z.infer<typeof rpcClientConfigSchema>;
 
 /**
  * Custom RPC client for StackOne API.

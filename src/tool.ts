@@ -520,7 +520,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
   return oramaDb;
 }
 
-export function metaSearchTools(
+function metaSearchTools(
   oramaDb: OramaDb,
   tfidfIndex: TfidfIndex,
   allTools: BaseTool[],
@@ -655,7 +655,7 @@ function clamp01(x: number): number {
   return x < 0 ? 0 : x > 1 ? 1 : x;
 }
 
-export function metaExecuteTool(tools: Tools): BaseTool {
+function metaExecuteTool(tools: Tools): BaseTool {
   const name = 'meta_execute_tool' as const;
   const description =
     'Executes a specific tool by name with the provided parameters. Use this after discovering tools with meta_search_tools.' as const;

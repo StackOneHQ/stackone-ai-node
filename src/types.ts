@@ -14,7 +14,7 @@ export type JsonDict = Record<string, unknown>;
 /**
  * HTTP headers type
  */
-export type Headers = Record<string, string>;
+type Headers = Record<string, string>;
 
 /**
  * JSON Schema properties type
@@ -24,7 +24,7 @@ export type JsonSchemaProperties = Record<string, JSONSchema7Definition>;
 /**
  * JSON Schema type
  */
-export type JsonSchemaType = JSONSchema7['type'];
+type JsonSchemaType = JSONSchema7['type'];
 
 /**
  * EXPERIMENTAL: Function to override the tool schema at creation time
@@ -57,7 +57,7 @@ export type ParameterLocation = ValueOf<typeof ParameterLocation>;
 /**
  * Configuration for executing a tool against an API endpoint
  */
-export interface HttpExecuteParameter {
+interface HttpExecuteParameter {
   name: string;
   location: ParameterLocation;
   type: JsonSchemaType;
