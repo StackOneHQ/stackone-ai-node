@@ -2,6 +2,8 @@ packages:
   - .
   - examples
 
+catalog:
+
 catalogMode: strict
 
 catalogs:
