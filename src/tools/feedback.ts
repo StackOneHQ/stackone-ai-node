@@ -153,7 +153,7 @@ export function createFeedbackTool(
 					};
 
 					const response = await fetch(`${resolvedBaseUrl}${executeConfig.url}`, {
-						method: executeConfig.method,
+						method: executeConfig.method satisfies 'POST',
 						headers,
 						body: JSON.stringify(requestBody),
 					});
@@ -162,7 +162,7 @@ export function createFeedbackTool(
 					let parsed: unknown;
 					try {
 						parsed = text ? JSON.parse(text) : {};
-					} catch (_error) {
+					} catch {
 						parsed = { raw: text };
 					}
 

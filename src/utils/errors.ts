@@ -81,10 +81,12 @@ export class StackOneAPIError extends StackOneError {
 			try {
 				if (typeof this.requestBody === 'object') {
 					errorMessage += `\n${JSON.stringify(this.requestBody, null, 2)}`;
+				} else if (typeof this.requestBody === 'string') {
+					errorMessage += ` ${this.requestBody}`;
 				} else {
-					errorMessage += ` ${String(this.requestBody)}`;
+					errorMessage += ` ${JSON.stringify(this.requestBody)}`;
 				}
-			} catch (_e) {
+			} catch {
 				errorMessage += ' [Unable to stringify request body]';
 			}
 		}
@@ -105,7 +107,7 @@ export class StackOneAPIError extends StackOneError {
 		if (typeof providerError === 'object' && providerError !== null) {
 			errorMessage += '\n\nProvider Error:';
 
-			if ('status' in providerError) {
+			if ('status' in providerError && typeof providerError.status === 'number') {
 				errorMessage += ` ${providerError.status}`;
 			}
 
@@ -114,13 +116,14 @@ export class StackOneAPIError extends StackOneError {
 				'raw' in providerError &&
 				typeof providerError.raw === 'object' &&
 				providerError.raw !== null &&
-				'error' in providerError.raw
+				'error' in providerError.raw &&
+				typeof providerError.raw.error === 'string'
 			) {
 				errorMessage += ` - ${providerError.raw.error}`;
 			}
 
 			// Add provider URL on a new line
-			if ('url' in providerError) {
+			if ('url' in providerError && typeof providerError.url === 'string') {
 				errorMessage += `\nProvider Endpoint: ${providerError.url}`;
 			}
 		}
