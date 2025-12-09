@@ -4,9 +4,9 @@ import type { StackOne } from '@stackone/stackone-client-ts';
 import { Hono } from 'hono';
 import { assert, vi } from 'vitest';
 import { z } from 'zod';
-import { server as mswServer } from '../../../mocks/node';
-import { ToolSet } from '../base';
-import { StackOneToolSet } from '../stackone';
+import { server as mswServer } from '../../mocks/node';
+import { ToolSet } from '../toolsets/base';
+import { StackOneToolSet } from '../toolsets/stackone';
 
 // Bun runtime types for test environment
 declare const Bun: {

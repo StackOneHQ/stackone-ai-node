@@ -1,4 +1,4 @@
-import { TfidfIndex } from './tfidf-index';
+import { TfidfIndex } from '../utils/tfidf-index';
 
 describe('TF-IDF Index - Core Functionality', () => {
   test('ranks documents by cosine similarity with tf-idf weighting', () => {

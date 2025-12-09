@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw';
-import { server } from '../../../mocks/node';
-import { type HttpExecuteConfig, ParameterLocation } from '../../types';
-import { StackOneAPIError } from '../../utils/errors';
-import { RequestBuilder } from '../requestBuilder';
+import { server } from '../../mocks/node';
+import { type HttpExecuteConfig, ParameterLocation } from '../types';
+import { StackOneAPIError } from '../utils/errors';
+import { RequestBuilder } from '../modules/requestBuilder';
 
 describe('RequestBuilder', () => {
   let builder: RequestBuilder;
