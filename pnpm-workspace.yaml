@@ -6,14 +6,14 @@ catalogMode: strict
 
 catalogs:
   dev:
-    '@ai-sdk/openai': ^2.0.80
-    '@ai-sdk/provider-utils': ^3.0.18
-    '@biomejs/biome': ^1.5.3
-    '@hono/mcp': ^0.1.4
-    '@types/json-schema': ^7.0.15
-    '@types/node': ^22.13.5
-    '@typescript/native-preview': ^7.0.0-dev.20251202.1
-    '@vitest/coverage-v8': ^4.0.15
+    "@ai-sdk/openai": ^2.0.80
+    "@ai-sdk/provider-utils": ^3.0.18
+    "@biomejs/biome": ^1.5.3
+    "@hono/mcp": ^0.1.4
+    "@types/json-schema": ^7.0.15
+    "@types/node": ^22.13.5
+    "@typescript/native-preview": ^7.0.0-dev.20251202.1
+    "@vitest/coverage-v8": ^4.0.15
     hono: ^4.9.10
     knip: ^5.72.0
     lefthook: ^2.0.8
@@ -29,8 +29,8 @@ catalogs:
     ai: ^5.0.108
     openai: ^6.2.0
   prod:
-    '@modelcontextprotocol/sdk': ^1.24.3
-    '@orama/orama': ^3.1.11
+    "@modelcontextprotocol/sdk": ^1.24.3
+    "@orama/orama": ^3.1.11
     json-schema: ^0.4.0
 
 enablePrePostScripts: true
@@ -38,7 +38,7 @@ enablePrePostScripts: true
 minimumReleaseAge: 1440
 
 onlyBuiltDependencies:
-  - '@biomejs/biome'
+  - "@biomejs/biome"
   - esbuild
   - lefthook
   - msw
