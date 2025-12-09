@@ -74,7 +74,7 @@ const tools = await toolset.fetchTools({
 });
 
 await openai.chat.completions.create({
-  model: "gpt-4o",
+  model: "gpt-5.1",
   messages: [
     {
       role: "system",
@@ -107,7 +107,7 @@ const tools = await toolset.fetchTools({
 });
 
 await generateText({
-  model: openai("gpt-4o"),
+  model: openai("gpt-5.1"),
   tools: await tools.toAISDK(),
   maxSteps: 3,
 });
@@ -350,7 +350,7 @@ import { generateText } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 const { text } = await generateText({
-  model: openai("gpt-4o-mini"),
+  model: openai("gpt-5.1"),
   tools: aiSdkTools,
   prompt: "Find tools for managing employees and create a time off request",
   maxSteps: 3, // Allow multiple tool calls
