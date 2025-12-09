@@ -42,7 +42,7 @@ async function createMockMcpServer(accountTools: Record<string, readonly MockToo
 				{
 					description: tool.description,
 					// TODO: Remove type assertion - MCP SDK expects Zod schema but we're using JSON Schema objects in tests
-					// biome-ignore lint/suspicious/noExplicitAny: MCP SDK type mismatch - using JSON Schema instead of Zod
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- MCP SDK type mismatch - using JSON Schema instead of Zod
 					inputSchema: tool.shape as any,
 				},
 				async ({ params }: { params: { arguments?: Record<string, unknown> } }) => ({
