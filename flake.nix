@@ -15,6 +15,8 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             pnpm_10
+            git
+            gh
           ];
 
           shellHook = ''
