@@ -1,5 +1,5 @@
-import { ToolSetConfigError } from '../base';
-import { StackOneToolSet } from '../stackone';
+import { ToolSetConfigError } from '../toolsets/base';
+import { StackOneToolSet } from '../toolsets/stackone';
 
 describe('StackOneToolSet', () => {
   beforeEach(() => {

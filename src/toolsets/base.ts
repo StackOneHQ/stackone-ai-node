@@ -1,6 +1,6 @@
-import { StackOne } from '@stackone/stackone-client-ts';
 import type { Arrayable } from 'type-fest';
-import { createMCPClient } from '../mcp';
+import { createMCPClient } from '../mcp-client';
+import { type RpcActionResponse, RpcClient } from '../rpc-client';
 import { BaseTool, Tools } from '../tool';
 import type {
   ExecuteOptions,
@@ -11,6 +11,22 @@ import type {
 } from '../types';
 import { toArray } from '../utils/array';
 import { StackOneError } from '../utils/errors';
+
+/**
+ * Converts RpcActionResponse to JsonDict in a type-safe manner.
+ * RpcActionResponse uses z.passthrough() which preserves additional fields,
+ * making it structurally compatible with Record<string, unknown>.
+ */
+function rpcResponseToJsonDict(response: RpcActionResponse): JsonDict {
+  // RpcActionResponse with passthrough() has the shape:
+  // { next?: string | null, data?: ..., [key: string]: unknown }
+  // We extract all properties into a plain object
+  const result: JsonDict = {};
+  for (const [key, value] of Object.entries(response)) {
+    result[key] = value;
+  }
+  return result;
+}
 
 type ToolInputSchema = Awaited<
   ReturnType<Awaited<ReturnType<typeof createMCPClient>>['client']['listTools']>
@@ -66,7 +82,7 @@ export interface BaseToolSetConfig {
   baseUrl?: string;
   authentication?: AuthenticationConfig;
   headers?: Record<string, string>;
-  stackOneClient?: StackOne;
+  rpcClient?: RpcClient;
 }
 
 /**
@@ -76,7 +92,7 @@ export abstract class ToolSet {
   protected baseUrl?: string;
   protected authentication?: AuthenticationConfig;
   protected headers: Record<string, string>;
-  protected stackOneClient?: StackOne;
+  protected rpcClient?: RpcClient;
 
   /**
    * Initialise a toolset with optional configuration
@@ -86,7 +102,7 @@ export abstract class ToolSet {
     this.baseUrl = config?.baseUrl;
     this.authentication = config?.authentication;
     this.headers = config?.headers || {};
-    this.stackOneClient = config?.stackOneClient;
+    this.rpcClient = config?.rpcClient;
 
     // Set Authentication headers if provided
     if (this.authentication) {
@@ -194,9 +210,9 @@ export abstract class ToolSet {
     return new Tools(tools);
   }
 
-  private getActionsClient(): StackOne {
-    if (this.stackOneClient) {
-      return this.stackOneClient;
+  private getActionsClient(): RpcClient {
+    if (this.rpcClient) {
+      return this.rpcClient;
     }
 
     const credentials = this.authentication?.credentials ?? {};
@@ -212,11 +228,11 @@ export abstract class ToolSet {
 
     if (!apiKey) {
       throw new ToolSetConfigError(
-        'StackOne API key is required to create an actions client. Provide stackOneClient, configure authentication credentials, or set the STACKONE_API_KEY environment variable.'
+        'StackOne API key is required to create an actions client. Provide rpcClient, configure authentication credentials, or set the STACKONE_API_KEY environment variable.'
       );
     }
 
-    this.stackOneClient = new StackOne({
+    this.rpcClient = new RpcClient({
       serverURL: this.baseUrl,
       security: {
         username: apiKey,
@@ -224,7 +240,7 @@ export abstract class ToolSet {
       },
     });
 
-    return this.stackOneClient;
+    return this.rpcClient;
   }
 
   private createRpcBackedTool({
@@ -233,7 +249,7 @@ export abstract class ToolSet {
     description,
     inputSchema,
   }: {
-    actionsClient: StackOne;
+    actionsClient: RpcClient;
     name: string;
     description?: string;
     inputSchema: ToolInputSchema;
@@ -332,7 +348,7 @@ export abstract class ToolSet {
           query: queryParams ?? undefined,
         });
 
-        return (response.actionsRpcResponse ?? {}) as JsonDict;
+        return rpcResponseToJsonDict(response);
       } catch (error) {
         if (error instanceof StackOneError) {
           throw error;
