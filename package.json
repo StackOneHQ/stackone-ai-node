@@ -30,6 +30,7 @@
     "test": "pnpm --aggregate-output run '/^test:/'",
     "test:submodules": "pnpm --parallel -r --aggregate-output test",
     "test:root": "vitest",
+    "coverage": "vitest run --coverage",
     "typecheck": "pnpm --aggregate-output run '/^typecheck:/'",
     "typecheck:submodules": "pnpm --parallel -r --aggregate-output typecheck",
     "typecheck:root": "tsgo --noEmit"
