@@ -1,3 +1,4 @@
+import { DEFAULT_BASE_URL } from '../consts';
 import { type StackOneTool, Tools } from '../tool';
 import { createFeedbackTool } from '../tools/feedback';
 import { type BaseToolSetConfig, ToolSet, ToolSetConfigError } from './base';
@@ -94,7 +95,7 @@ export class StackOneToolSet extends ToolSet {
 
     // Initialise base class
     super({
-      baseUrl: config?.baseUrl,
+      baseUrl: config?.baseUrl ?? process.env.STACKONE_BASE_URL ?? DEFAULT_BASE_URL,
       authentication,
       headers,
     });

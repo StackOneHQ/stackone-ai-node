@@ -1,6 +1,6 @@
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
-import { DEFAULT_HYBRID_ALPHA } from './constants';
+import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './modules/requestBuilder';
 import type {
   AISDKToolDefinition,
