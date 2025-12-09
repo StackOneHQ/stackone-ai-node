@@ -20,8 +20,11 @@
           shellHook = ''
             echo "StackOne AI Node SDK development environment"
 
-            # Install dependencies using lockfile
-            pnpm install --lockfile
+            # Install dependencies only if node_modules/.pnpm/lock.yaml is older than pnpm-lock.yaml
+            if [ ! -f node_modules/.pnpm/lock.yaml ] || [ pnpm-lock.yaml -nt node_modules/.pnpm/lock.yaml ]; then
+              echo "📦 Installing dependencies..."
+              pnpm install --frozen-lockfile
+            fi
           '';
         };
       }

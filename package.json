@@ -27,11 +27,11 @@
     "lint:knip": "knip",
     "preinstall": "npx only-allow pnpm",
     "prepack": "npm pkg delete scripts.preinstall && pnpm run build",
-    "test": "pnpm --no-bail --aggregate-output run '/^test:/'",
-    "test:submodules": "pnpm --parallel -r --no-bail --aggregate-output test",
+    "test": "pnpm --aggregate-output run '/^test:/'",
+    "test:submodules": "pnpm --parallel -r --aggregate-output test",
     "test:root": "vitest",
-    "typecheck": "pnpm --no-bail --aggregate-output run '/^typecheck:/'",
-    "typecheck:submodules": "pnpm --parallel -r --no-bail --aggregate-output typecheck",
+    "typecheck": "pnpm --aggregate-output run '/^typecheck:/'",
+    "typecheck:submodules": "pnpm --parallel -r --aggregate-output typecheck",
     "typecheck:root": "tsgo --noEmit"
   },
   "dependencies": {

@@ -15,6 +15,6 @@ export default defineConfig({
   unused: true,
   unbundle: true,
   exports: {
-    devExports: !process.env.RELEASE,
+    devExports: true,
   },
 });
