@@ -42,12 +42,10 @@ See the **typescript-patterns** skill for TypeScript best practices:
 
 Refer to `.claude/skills/typescript-patterns/SKILL.md` for complete details.
 
-## File Operations and HTTP Standards
+## HTTP Standards
 
-See the **file-operations** skill for file and HTTP guidance:
-- Using `src/utils/file.ts` utilities instead of direct fs/path
+See the **file-operations** skill for HTTP guidance:
 - Native fetch API standards and error handling
-- Type-safe file operations
 - Common HTTP request patterns
 
 Refer to `.claude/skills/file-operations/SKILL.md` for complete details.

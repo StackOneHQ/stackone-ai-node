@@ -4,12 +4,12 @@
  * strips punctuation, removes a small stopword set, and builds a sparse index.
  */
 
-export interface TfidfDocument {
+interface TfidfDocument {
   id: string;
   text: string;
 }
 
-export interface TfidfResult {
+interface TfidfResult {
   id: string;
   score: number; // cosine similarity (0..1)
 }

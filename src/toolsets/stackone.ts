@@ -15,7 +15,7 @@ export interface StackOneToolSetConfig extends BaseToolSetConfig {
 /**
  * Options for filtering tools when fetching from MCP
  */
-export interface FetchToolsOptions {
+interface FetchToolsOptions {
   /**
    * Filter tools by account IDs
    * Only tools available on these accounts will be returned
@@ -40,7 +40,7 @@ export interface FetchToolsOptions {
 /**
  * Configuration for workflow
  */
-export interface WorkflowConfig {
+interface WorkflowConfig {
   key: string;
   input: string;
   model: string;
