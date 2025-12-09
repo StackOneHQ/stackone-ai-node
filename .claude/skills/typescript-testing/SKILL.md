@@ -15,6 +15,24 @@ The project uses **Vitest** as the test runner. Run tests with:
 - `pnpm vitest src/path/to/file.spec.ts` - Run a specific test file
 - `pnpm vitest -t "test name"` - Run tests matching a pattern
 
+### Vitest Globals
+
+**Vitest globals are enabled** (`globals: true` in `vitest.config.ts`). Do NOT import test utilities from `'vitest'` - they are available globally:
+
+```typescript
+// ❌ WRONG - Do NOT import from vitest
+import { describe, it, expect, vi } from 'vitest';
+
+// ✅ CORRECT - Use globals directly (no import needed)
+describe('MyTest', () => {
+  it('should work', () => {
+    expect(true).toBe(true);
+  });
+});
+```
+
+Available globals: `describe`, `it`, `test`, `expect`, `vi`, `beforeAll`, `afterAll`, `beforeEach`, `afterEach`, `assert`, etc.
+
 ## MSW (Mock Service Worker)
 
 **MSW is the preferred HTTP mocking solution.** MSW is configured globally in `vitest.setup.ts`, so no per-file setup is required.
