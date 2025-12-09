@@ -45,6 +45,13 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: nix develop --command pnpm run coverage
 
+      - name: Create Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        uses: jaywcjlove/coverage-badges-cli@e07f25709cd25486855c1ba1b26da53476dfb763 # v2.3.2
+        with:
+          source: coverage/coverage-summary.json
+          output: coverage/badges.svg
+
       - name: Upload coverage artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
