@@ -75,7 +75,7 @@ const quickstart = async (): Promise<void> => {
 };
 
 // Run the example
-quickstart();
+await quickstart();
 
 /**
  * # Next Steps

@@ -272,7 +272,7 @@ const main = async () => {
 
 // Run if this file is executed directly
 if (import.meta.main) {
-	main();
+	await main();
 }
 
 export { metaToolsWithAISDK, metaToolsWithOpenAI, directMetaToolUsage, dynamicToolRouter };

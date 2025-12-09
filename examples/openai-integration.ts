@@ -66,4 +66,4 @@ const openaiIntegration = async (): Promise<void> => {
 };
 
 // Run the example
-openaiIntegration();
+await openaiIntegration();
