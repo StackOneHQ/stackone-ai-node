@@ -12,8 +12,12 @@ test('should successfully execute an RPC action', async () => {
     path: { id: 'emp-123' },
   });
 
-  expect(response.actionsRpcResponse).toBeDefined();
-  expect(response.actionsRpcResponse).toHaveProperty('data');
+  // Response matches server's ActionsRpcResponseApiModel structure
+  expect(response).toHaveProperty('data');
+  expect(response.data).toMatchObject({
+    id: 'emp-123',
+    name: 'Test Employee',
+  });
 });
 
 test('should send correct payload structure', async () => {
@@ -29,20 +33,19 @@ test('should send correct payload structure', async () => {
     query: { filter: 'active' },
   });
 
-  expect(response.actionsRpcResponse).toMatchObject({
-    data: {
-      action: 'custom_action',
-      received: {
-        body: { key: 'value' },
-        headers: { 'x-custom': 'header' },
-        path: { id: '123' },
-        query: { filter: 'active' },
-      },
+  // Response matches server's ActionsRpcResponseApiModel structure
+  expect(response.data).toMatchObject({
+    action: 'custom_action',
+    received: {
+      body: { key: 'value' },
+      headers: { 'x-custom': 'header' },
+      path: { id: '123' },
+      query: { filter: 'active' },
     },
   });
 });
 
-test('should handle list actions', async () => {
+test('should handle list actions with array data', async () => {
   const client = new RpcClient({
     security: { username: 'test-api-key' },
   });
@@ -51,12 +54,12 @@ test('should handle list actions', async () => {
     action: 'hris_list_employees',
   });
 
-  expect(response.actionsRpcResponse).toMatchObject({
-    data: [
-      { id: expect.any(String), name: expect.any(String) },
-      { id: expect.any(String), name: expect.any(String) },
-    ],
-  });
+  // Response data can be an array (matches RpcActionResponseData union type)
+  expect(Array.isArray(response.data)).toBe(true);
+  expect(response.data).toMatchObject([
+    { id: expect.any(String), name: expect.any(String) },
+    { id: expect.any(String), name: expect.any(String) },
+  ]);
 });
 
 test('should throw StackOneAPIError on server error', async () => {
@@ -96,5 +99,6 @@ test('should work with only action parameter', async () => {
     action: 'simple_action',
   });
 
-  expect(response.actionsRpcResponse).toBeDefined();
+  // Response has data field (server returns { data: { action, received } })
+  expect(response).toHaveProperty('data');
 });
