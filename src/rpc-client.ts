@@ -3,11 +3,12 @@ import { StackOneAPIError } from './utils/errors';
 
 /**
  * Zod schema for RPC action request validation
+ * @see https://docs.stackone.com/platform/api-reference/actions/make-an-rpc-call-to-an-action
  */
 const rpcActionRequestSchema = z.object({
   action: z.string(),
   body: z.record(z.unknown()).optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.unknown()).optional(),
   path: z.record(z.unknown()).optional(),
   query: z.record(z.unknown()).optional(),
 });
@@ -18,14 +19,39 @@ const rpcActionRequestSchema = z.object({
 export type RpcActionRequest = z.infer<typeof rpcActionRequestSchema>;
 
 /**
- * Zod schema for RPC action response validation
+ * Zod schema for RPC action response data
  */
-const rpcActionResponseSchema = z.object({
-  actionsRpcResponse: z.record(z.unknown()).optional(),
-});
+const rpcActionResponseDataSchema = z.union([
+  z.record(z.unknown()),
+  z.array(z.record(z.unknown())),
+  z.null(),
+]);
+
+/**
+ * Zod schema for RPC action response validation
+ *
+ * The server returns a flexible JSON structure. Known fields:
+ * - `data`: The main response data (object, array, or null)
+ * - `next`: Pagination cursor for fetching next page
+ *
+ * Additional fields from the connector response are passed through.
+ * @see unified-cloud-api/src/unified-api-v2/unifiedAPIv2.service.ts processActionCall
+ */
+const rpcActionResponseSchema = z
+  .object({
+    next: z.string().nullish(),
+    data: rpcActionResponseDataSchema.optional(),
+  })
+  .passthrough();
+
+/**
+ * RPC action response data type - can be object, array of objects, or null
+ */
+export type RpcActionResponseData = z.infer<typeof rpcActionResponseDataSchema>;
 
 /**
  * RPC action response from the StackOne API
+ * Contains known fields (data, next) plus any additional fields from the connector
  */
 export type RpcActionResponse = z.infer<typeof rpcActionResponseSchema>;
 
@@ -71,7 +97,7 @@ export class RpcClient {
     /**
      * Execute an RPC action
      * @param request The RPC action request
-     * @returns The RPC action response
+     * @returns The RPC action response matching server's ActionsRpcResponseApiModel
      */
     rpcAction: async (request: RpcActionRequest): Promise<RpcActionResponse> => {
       const validatedRequest = rpcActionRequestSchema.parse(request);
@@ -95,7 +121,7 @@ export class RpcClient {
         body: JSON.stringify(requestBody),
       });
 
-      const responseBody = await response.json();
+      const responseBody: unknown = await response.json();
 
       if (!response.ok) {
         throw new StackOneAPIError(
@@ -106,9 +132,7 @@ export class RpcClient {
         );
       }
 
-      const validation = rpcActionResponseSchema.safeParse({
-        actionsRpcResponse: responseBody,
-      });
+      const validation = rpcActionResponseSchema.safeParse(responseBody);
 
       if (!validation.success) {
         throw new StackOneAPIError(
@@ -119,9 +143,7 @@ export class RpcClient {
         );
       }
 
-      const { actionsRpcResponse } = validation.data;
-
-      return { actionsRpcResponse };
+      return validation.data;
     },
   };
 }
