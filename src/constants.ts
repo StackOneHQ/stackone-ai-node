@@ -8,3 +8,8 @@
  * - Higher values favour TF-IDF scoring (better semantic matching)
  */
 export const DEFAULT_HYBRID_ALPHA = 0.2;
+
+/**
+ * Default base URL for StackOne API
+ */
+export const DEFAULT_BASE_URL = 'https://api.stackone.com';

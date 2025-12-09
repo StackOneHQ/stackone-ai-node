@@ -2,7 +2,7 @@
  * StackOne AI Node.js SDK
  */
 
-export { DEFAULT_BASE_URL } from './consts';
+export { DEFAULT_BASE_URL } from './constants';
 export { BaseTool, StackOneTool, Tools } from './tool';
 export { createFeedbackTool } from './tools/feedback';
 export { StackOneAPIError, StackOneError } from './utils/errors';
