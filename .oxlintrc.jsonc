@@ -1,7 +1,13 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	// Enable TypeScript, Unicorn, and Oxc plugins
-	"plugins": ["typescript", "unicorn", "oxc"],
+	// Enable TypeScript, Unicorn, Oxc, Node, JSDoc, and Import plugins
+	"plugins": ["typescript", "unicorn", "oxc", "node", "jsdoc", "import"],
+	// Environment settings
+	"env": {
+		"builtin": true,
+		"es2024": true,
+		"node": true,
+	},
 	// Ignore patterns
 	"ignorePatterns": ["dist", "node_modules", ".claude", "tmp", "*.log", "/nix/store/**"],
 	// Rule categories - strict base configuration
@@ -99,6 +105,44 @@
 				"ts-expect-error": "allow-with-description",
 			},
 		],
+		// ===================
+		// Node.js Rules
+		// ===================
+		// Disallow direct assignment to exports
+		"node/no-exports-assign": "error",
+		// Disallow new require calls
+		"node/no-new-require": "error",
+		// ===================
+		// JSDoc Rules
+		// ===================
+		"jsdoc/check-access": "warn",
+		"jsdoc/check-property-names": "warn",
+		"jsdoc/empty-tags": "warn",
+		"jsdoc/implements-on-classes": "warn",
+		"jsdoc/no-defaults": "warn",
+		"jsdoc/require-param-name": "warn",
+		"jsdoc/require-property": "warn",
+		"jsdoc/require-property-description": "warn",
+		"jsdoc/require-property-name": "warn",
+		"jsdoc/require-returns-description": "warn",
+		// ===================
+		// Import Rules
+		// ===================
+		// Enforce top-level type specifier style
+		"import/consistent-type-specifier-style": ["error", "top-level"],
+		// Ensure imports are at the top
+		"import/first": "error",
+		// Disallow duplicate imports
+		"import/no-duplicates": "error",
+		// Disallow mutable exports
+		"import/no-mutable-exports": "error",
+		// Disallow named default exports
+		"import/no-named-default": "error",
+		// ===================
+		// Style Rules
+		// ===================
+		// Enforce consistent brace style for all control statements
+		"curly": ["error", "all"],
 	},
 	"overrides": [
 		{
