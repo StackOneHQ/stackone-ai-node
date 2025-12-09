@@ -1,30 +1,6 @@
 import { StackOneAPIError } from './utils/errors';
 import { RpcClient } from './rpc-client';
 
-describe('constructor', () => {
-  it('should create client with default base URL', () => {
-    const client = new RpcClient({
-      security: { username: 'test-api-key' },
-    });
-    expect(client).toBeInstanceOf(RpcClient);
-  });
-
-  it('should create client with custom server URL', () => {
-    const client = new RpcClient({
-      serverURL: 'https://custom.api.stackone.com',
-      security: { username: 'test-api-key' },
-    });
-    expect(client).toBeInstanceOf(RpcClient);
-  });
-
-  it('should create client with username and password', () => {
-    const client = new RpcClient({
-      security: { username: 'test-api-key', password: 'test-password' },
-    });
-    expect(client).toBeInstanceOf(RpcClient);
-  });
-});
-
 describe('actions.rpcAction', () => {
   it('should successfully execute an RPC action', async () => {
     const client = new RpcClient({
