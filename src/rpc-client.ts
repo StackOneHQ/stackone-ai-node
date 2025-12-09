@@ -81,7 +81,7 @@ export class RpcClient {
         headers: validatedRequest.headers,
         path: validatedRequest.path,
         query: validatedRequest.query,
-      };
+      } as const satisfies RpcActionRequest;
 
       const response = await fetch(url, {
         method: 'POST',
@@ -104,13 +104,22 @@ export class RpcClient {
         );
       }
 
-      const validated = rpcActionResponseSchema.parse({
+      const validation = rpcActionResponseSchema.safeParse({
         actionsRpcResponse: responseBody,
       });
 
-      return {
-        actionsRpcResponse: validated.actionsRpcResponse as JsonDict | undefined,
-      };
+      if (!validation.success) {
+        throw new StackOneAPIError(
+          `Invalid RPC action response for ${url}`,
+          response.status,
+          responseBody,
+          requestBody
+        );
+      }
+
+      const { actionsRpcResponse } = validation.data;
+
+      return { actionsRpcResponse };
     },
   };
 }
