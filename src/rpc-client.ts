@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { JsonDict } from './types';
 import { StackOneAPIError } from './utils/errors';
 
 /**
