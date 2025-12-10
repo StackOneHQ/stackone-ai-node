@@ -55,7 +55,7 @@ describe('StackOneTool', () => {
 		});
 	});
 
-	it('should convert to OpenAI tool format', () => {
+	it('should convert to OpenAI Chat Completions API tool format', () => {
 		const tool = createMockTool();
 		const openAIFormat = tool.toOpenAI();
 
@@ -70,6 +70,41 @@ describe('StackOneTool', () => {
 				}
 			).properties.id.type,
 		).toBe('string');
+	});
+
+	it('should convert to OpenAI Responses API tool format', () => {
+		const tool = createMockTool();
+		const responsesFormat = tool.toOpenAIResponses();
+
+		expect(responsesFormat.type).toBe('function');
+		expect(responsesFormat.name).toBe('test_tool');
+		expect(responsesFormat.description).toBe('Test tool');
+		expect(responsesFormat.strict).toBe(true);
+		expect(responsesFormat.parameters?.type).toBe('object');
+		expect(
+			(
+				responsesFormat.parameters as {
+					properties: { id: { type: string } };
+					additionalProperties: boolean;
+				}
+			).properties.id.type,
+		).toBe('string');
+		expect(
+			(responsesFormat.parameters as { additionalProperties: boolean }).additionalProperties,
+		).toBe(false);
+	});
+
+	it('should convert to OpenAI Responses API tool format with strict disabled', () => {
+		const tool = createMockTool();
+		const responsesFormat = tool.toOpenAIResponses({ strict: false });
+
+		expect(responsesFormat.type).toBe('function');
+		expect(responsesFormat.name).toBe('test_tool');
+		expect(responsesFormat.strict).toBe(false);
+		expect(responsesFormat.parameters).toBeDefined();
+		expect(
+			(responsesFormat.parameters as { additionalProperties?: boolean }).additionalProperties,
+		).toBeUndefined();
 	});
 
 	it('should convert to AI SDK tool format', async () => {
@@ -315,6 +350,58 @@ describe('Tools', () => {
 		expect(openAITools[0].type).toBe('function');
 		expect(openAITools[0].function.name).toBe('tool1');
 		expect(openAITools[1].function.name).toBe('tool2');
+	});
+
+	it('should convert all tools to OpenAI Responses API tools', () => {
+		const tool1 = new StackOneTool(
+			'tool1',
+			'Tool 1',
+			{
+				type: 'object',
+				properties: { id: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'GET',
+				url: 'https://api.example.com/test/{id}',
+				bodyType: 'json',
+				params: [],
+			},
+		);
+		const tool2 = new StackOneTool(
+			'tool2',
+			'Tool 2',
+			{
+				type: 'object',
+				properties: { name: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'POST',
+				url: 'https://api.example.com/test',
+				bodyType: 'json',
+				params: [],
+			},
+		);
+
+		const tools = new Tools([tool1, tool2]);
+		const responsesTools = tools.toOpenAIResponses();
+
+		expect(responsesTools).toBeInstanceOf(Array);
+		expect(responsesTools.length).toBe(2);
+		expect(responsesTools[0].type).toBe('function');
+		expect(responsesTools[0].name).toBe('tool1');
+		expect(responsesTools[0].strict).toBe(true);
+		expect(responsesTools[1].name).toBe('tool2');
+		expect(responsesTools[1].strict).toBe(true);
+	});
+
+	it('should convert all tools to OpenAI Responses API tools with strict disabled', () => {
+		const tool1 = createMockTool();
+		const tools = new Tools([tool1]);
+		const responsesTools = tools.toOpenAIResponses({ strict: false });
+
+		expect(responsesTools[0].strict).toBe(false);
 	});
 
 	it('should convert all tools to AI SDK tools', async () => {
