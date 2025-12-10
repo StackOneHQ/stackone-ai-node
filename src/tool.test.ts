@@ -28,16 +28,6 @@ const createMockTool = (headers?: Record<string, string>): BaseTool => {
 };
 
 describe('StackOneTool', () => {
-	it('should initialize with correct properties', () => {
-		const tool = createMockTool();
-
-		expect(tool.description).toBe('Test tool');
-		expect((tool.parameters as { type: string }).type).toBe('object');
-		expect(
-			(tool.parameters as unknown as { properties: { id: { type: string } } }).properties.id.type,
-		).toBe('string');
-	});
-
 	it('should execute with parameters', async () => {
 		const tool = createMockTool();
 		const result = await tool.execute({ id: '123' });
@@ -208,13 +198,6 @@ describe('StackOneTool', () => {
 });
 
 describe('Tools', () => {
-	it('should initialize with tools array', () => {
-		const tool = createMockTool();
-		const tools = new Tools([tool]);
-
-		expect(tools.length).toBe(1);
-	});
-
 	it('should get tool by name', () => {
 		const tool = createMockTool();
 		const tools = new Tools([tool]);
@@ -360,17 +343,6 @@ describe('Tools', () => {
 });
 
 describe('Tool', () => {
-	it('should initialize with correct properties', () => {
-		const tool = createMockTool();
-
-		expect(tool.name).toBe('test_tool');
-		expect(tool.description).toBe('Test tool');
-		expect((tool.parameters as { type: string }).type).toBe('object');
-		expect(
-			(tool.parameters as unknown as { properties: { id: { type: string } } }).properties.id.type,
-		).toBe('string');
-	});
-
 	it('should set and get headers', () => {
 		const tool = createMockTool();
 

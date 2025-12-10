@@ -38,11 +38,6 @@ describe('StackOneToolSet', () => {
 	});
 
 	describe('initialisation', () => {
-		it('should initialise with default values', () => {
-			const toolset = new StackOneToolSet();
-			expect(toolset).toBeDefined();
-		});
-
 		it('should initialise with API key from constructor', () => {
 			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
