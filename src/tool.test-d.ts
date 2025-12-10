@@ -1,5 +1,4 @@
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
-import { assertType, test } from 'vitest';
 import { BaseTool, Tools } from './tool';
 import type { AISDKToolResult } from './types';
 

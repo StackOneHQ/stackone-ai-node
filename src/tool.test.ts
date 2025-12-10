@@ -1,4 +1,3 @@
-import { assert } from 'vitest';
 import { jsonSchema } from 'ai';
 import type { JSONSchema7 } from 'json-schema';
 import { BaseTool, type MetaToolSearchResult, StackOneTool, Tools } from './tool';
