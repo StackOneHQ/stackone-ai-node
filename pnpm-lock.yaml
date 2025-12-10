@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   dev:
+    '@ai-sdk/openai':
+      specifier: ^2.0.80
+      version: 2.0.80
     '@ai-sdk/provider-utils':
       specifier: ^3.0.18
       version: 3.0.18
@@ -80,6 +83,9 @@ catalogs:
     '@orama/orama':
       specifier: ^3.1.11
       version: 3.1.16
+    defu:
+      specifier: ^6.1.4
+      version: 6.1.4
     json-schema:
       specifier: ^0.4.0
       version: 0.4.0
@@ -93,6 +99,9 @@ importers:
       '@orama/orama':
         specifier: catalog:prod
         version: 3.1.16
+      defu:
+        specifier: catalog:prod
+        version: 6.1.4
       json-schema:
         specifier: catalog:prod
         version: 0.4.0

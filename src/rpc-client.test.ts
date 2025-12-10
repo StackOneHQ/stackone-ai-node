@@ -1,4 +1,5 @@
 import { RpcClient } from './rpc-client';
+import { stackOneHeadersSchema } from './schemas/headers';
 import { StackOneAPIError } from './utils/errors';
 
 test('should successfully execute an RPC action', async () => {
@@ -28,7 +29,7 @@ test('should send correct payload structure', async () => {
 	const response = await client.actions.rpcAction({
 		action: 'custom_action',
 		body: { key: 'value' },
-		headers: { 'x-custom': 'header' },
+		headers: stackOneHeadersSchema.parse({ 'x-custom': 'header' }),
 		path: { id: '123' },
 		query: { filter: 'active' },
 	});
@@ -101,4 +102,21 @@ test('should work with only action parameter', async () => {
 
 	// Response has data field (server returns { data: { action, received } })
 	expect(response).toHaveProperty('data');
+});
+
+test('should send x-account-id as HTTP header', async () => {
+	const client = new RpcClient({
+		security: { username: 'test-api-key' },
+	});
+
+	const response = await client.actions.rpcAction({
+		action: 'test_account_id_header',
+		headers: stackOneHeadersSchema.parse({ 'x-account-id': 'test-account-123' }),
+	});
+
+	// Verify x-account-id is sent both as HTTP header and in request body
+	expect(response.data).toMatchObject({
+		httpHeader: 'test-account-123',
+		bodyHeader: 'test-account-123',
+	});
 });

@@ -1,3 +1,4 @@
+import { STACKONE_HEADER_KEYS } from './schemas/headers';
 import {
 	type RpcActionRequest,
 	type RpcActionResponse,
@@ -53,13 +54,27 @@ export class RpcClient {
 				query: validatedRequest.query,
 			} as const satisfies RpcActionRequest;
 
+			// Forward StackOne-specific headers as HTTP headers
+			const requestHeaders = validatedRequest.headers;
+			const forwardedHeaders: Record<string, string> = {};
+			if (requestHeaders) {
+				for (const key of STACKONE_HEADER_KEYS) {
+					const value = requestHeaders[key];
+					if (value !== undefined) {
+						forwardedHeaders[key] = value;
+					}
+				}
+			}
+			const httpHeaders = {
+				'Content-Type': 'application/json',
+				Authorization: this.authHeader,
+				'User-Agent': 'stackone-ai-node',
+				...forwardedHeaders,
+			} satisfies Record<string, string>;
+
 			const response = await fetch(url, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: this.authHeader,
-					'User-Agent': 'stackone-ai-node',
-				},
+				headers: httpHeaders,
 				body: JSON.stringify(requestBody),
 			});
 

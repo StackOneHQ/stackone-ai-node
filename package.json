@@ -37,6 +37,7 @@
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "catalog:prod",
 		"@orama/orama": "catalog:prod",
+		"defu": "catalog:prod",
 		"json-schema": "catalog:prod",
 		"zod": "catalog:dev"
 	},

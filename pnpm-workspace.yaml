@@ -33,6 +33,7 @@ catalogs:
   prod:
     '@modelcontextprotocol/sdk': ^1.24.3
     '@orama/orama': ^3.1.11
+    defu: ^6.1.4
     json-schema: ^0.4.0
 
 enablePrePostScripts: true
