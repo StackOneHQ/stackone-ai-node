@@ -9,3 +9,8 @@ pre-commit:
       glob: '*'
       run: bun oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
+
+push:
+  jobs:
+    - name: knip
+      run: pnpm run lint:knip

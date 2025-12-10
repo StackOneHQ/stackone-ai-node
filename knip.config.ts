@@ -13,8 +13,9 @@ export default {
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
 	ignoreBinaries: ['only-allow'],
-	ignoreDependencies: ['@typescript/native-preview'],
+	ignoreDependencies: ['@typescript/native-preview', 'lefthook'],
 	rules: {
 		optionalPeerDependencies: 'off',
+		devDependencies: 'warn',
 	},
 } satisfies KnipConfig;
