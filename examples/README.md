@@ -78,6 +78,14 @@ Basic example showing how to initialize the toolset and make your first API call
 - **API Calls**: Yes
 - **Key Features**: Basic tool usage, employee listing
 
+#### [`interactive-cli.ts`](./interactive-cli.ts) - Interactive CLI Demo
+
+Interactive command-line interface for dynamically discovering and executing StackOne tools using [@clack/prompts](https://github.com/bombshell-dev/clack).
+
+- **Account ID**: User-provided or from environment
+- **API Calls**: Yes (user selects which tool to execute)
+- **Key Features**: Interactive prompts, environment variable fallback, spinner feedback, dynamic tool discovery
+
 #### [`ai-sdk-integration.ts`](./ai-sdk-integration.ts) - AI SDK Integration
 
 Demonstrates integration with Vercel's AI SDK for building AI agents.
@@ -183,6 +191,7 @@ Comprehensive error handling patterns and best practices.
 Examples that are stable and recommended for production use:
 
 - `index.ts`
+- `interactive-cli.ts`
 - `ai-sdk-integration.ts`
 - `openai-integration.ts`
 - `account-id-usage.ts`
