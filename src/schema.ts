@@ -1,4 +1,5 @@
 import { z } from 'zod/mini';
+import { stackOneHeadersSchema } from './headers';
 
 /**
  * Zod schema for RPC action request validation
@@ -7,7 +8,7 @@ import { z } from 'zod/mini';
 export const rpcActionRequestSchema = z.object({
 	action: z.string(),
 	body: z.optional(z.record(z.string(), z.unknown())),
-	headers: z.optional(z.record(z.string(), z.unknown())),
+	headers: z.optional(stackOneHeadersSchema),
 	path: z.optional(z.record(z.string(), z.unknown())),
 	query: z.optional(z.record(z.string(), z.unknown())),
 });

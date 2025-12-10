@@ -1,9 +1,11 @@
+import { defu } from 'defu';
 import type { Arrayable } from 'type-fest';
 import { DEFAULT_BASE_URL } from './consts';
+import { createFeedbackTool } from './feedback';
+import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { BaseTool, type StackOneTool, Tools } from './tool';
-import { createFeedbackTool } from './feedback';
 import type {
 	ExecuteOptions,
 	JsonDict,
@@ -473,23 +475,14 @@ export class StackOneToolSet {
 					typeof inputParams === 'string' ? JSON.parse(inputParams) : (inputParams ?? {});
 
 				const currentHeaders = tool.getHeaders();
-				const actionHeaders = this.buildActionHeaders(currentHeaders);
+				const baseHeaders = this.buildActionHeaders(currentHeaders);
 
 				const pathParams = this.extractRecord(parsedParams, 'path');
 				const queryParams = this.extractRecord(parsedParams, 'query');
 				const additionalHeaders = this.extractRecord(parsedParams, 'headers');
-				if (additionalHeaders) {
-					for (const [key, value] of Object.entries(additionalHeaders)) {
-						if (value === undefined || value === null) continue;
-						if (typeof value === 'string') {
-							actionHeaders[key] = value;
-						} else if (typeof value === 'number' || typeof value === 'boolean') {
-							actionHeaders[key] = String(value);
-						} else {
-							actionHeaders[key] = JSON.stringify(value);
-						}
-					}
-				}
+				const extraHeaders = normaliseHeaders(additionalHeaders);
+				// defu merges extraHeaders into baseHeaders, both are already branded types
+				const actionHeaders = defu(extraHeaders, baseHeaders) as StackOneHeaders;
 
 				const bodyPayload = this.extractRecord(parsedParams, 'body');
 				const rpcBody: JsonDict = bodyPayload ? { ...bodyPayload } : {};
@@ -538,12 +531,14 @@ export class StackOneToolSet {
 		return tool;
 	}
 
-	private buildActionHeaders(headers: Record<string, string>): Record<string, string> {
+	private buildActionHeaders(headers: Record<string, string>): StackOneHeaders {
 		const sanitizedEntries = Object.entries(headers).filter(
 			([key]) => key.toLowerCase() !== 'authorization',
 		);
 
-		return Object.fromEntries(sanitizedEntries.map(([key, value]) => [key, String(value)]));
+		return stackOneHeadersSchema.parse(
+			Object.fromEntries(sanitizedEntries.map(([key, value]) => [key, String(value)])),
+		);
 	}
 
 	private extractRecord(

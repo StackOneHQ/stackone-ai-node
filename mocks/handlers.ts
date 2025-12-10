@@ -233,6 +233,7 @@ export const handlers = [
 	// ============================================================
 	http.post('https://api.stackone.com/actions/rpc', async ({ request }) => {
 		const authHeader = request.headers.get('Authorization');
+		const accountIdHeader = request.headers.get('x-account-id');
 
 		// Check for authentication
 		if (!authHeader || !authHeader.startsWith('Basic ')) {
@@ -256,6 +257,16 @@ export const handlers = [
 				{ error: 'Bad Request', message: 'Action is required' },
 				{ status: 400 },
 			);
+		}
+
+		// Test action to verify x-account-id is sent as HTTP header
+		if (body.action === 'test_account_id_header') {
+			return HttpResponse.json({
+				data: {
+					httpHeader: accountIdHeader,
+					bodyHeader: body.headers?.['x-account-id'],
+				},
+			});
 		}
 
 		// Return mock response based on action
