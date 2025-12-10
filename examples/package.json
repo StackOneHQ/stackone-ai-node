@@ -12,6 +12,7 @@
 	},
 	"devDependencies": {
 		"@ai-sdk/openai": "catalog:dev",
+		"@clack/prompts": "catalog:dev",
 		"@types/node": "catalog:dev",
 		"ai": "catalog:peer",
 		"openai": "catalog:peer",

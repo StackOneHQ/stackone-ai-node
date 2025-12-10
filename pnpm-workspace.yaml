@@ -7,6 +7,7 @@ catalogMode: strict
 catalogs:
   dev:
     '@ai-sdk/openai': ^2.0.80
+    '@clack/prompts': ^0.11.0
     '@ai-sdk/provider-utils': ^3.0.18
     '@hono/mcp': ^0.1.4
     '@types/json-schema': ^7.0.15

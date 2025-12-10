@@ -6,9 +6,15 @@ settings:
 
 catalogs:
   dev:
+    '@ai-sdk/openai':
+      specifier: ^2.0.80
+      version: 2.0.80
     '@ai-sdk/provider-utils':
       specifier: ^3.0.18
       version: 3.0.18
+    '@clack/prompts':
+      specifier: ^0.11.0
+      version: 0.11.0
     '@hono/mcp':
       specifier: ^0.1.4
       version: 0.1.5
@@ -176,6 +182,9 @@ importers:
       '@ai-sdk/openai':
         specifier: catalog:dev
         version: 2.0.80(zod@4.1.13)
+      '@clack/prompts':
+        specifier: catalog:dev
+        version: 0.11.0
       '@types/node':
         specifier: catalog:dev
         version: 22.19.1
@@ -269,6 +278,18 @@ packages:
         integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==,
       }
     engines: { node: '>=18' }
+
+  '@clack/core@0.5.0':
+    resolution:
+      {
+        integrity: sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow==,
+      }
+
+  '@clack/prompts@0.11.0':
+    resolution:
+      {
+        integrity: sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw==,
+      }
 
   '@emnapi/core@1.7.1':
     resolution:
@@ -3259,6 +3280,12 @@ packages:
       }
     engines: { node: '>=14' }
 
+  sisteransi@1.0.5:
+    resolution:
+      {
+        integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==,
+      }
+
   smol-toml@1.5.2:
     resolution:
       {
@@ -3750,6 +3777,17 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bcoe/v8-coverage@1.0.2': {}
+
+  '@clack/core@0.5.0':
+    dependencies:
+      picocolors: 1.1.1
+      sisteransi: 1.0.5
+
+  '@clack/prompts@0.11.0':
+    dependencies:
+      '@clack/core': 0.5.0
+      picocolors: 1.1.1
+      sisteransi: 1.0.5
 
   '@emnapi/core@1.7.1':
     dependencies:
@@ -5272,6 +5310,8 @@ snapshots:
   siginfo@2.0.0: {}
 
   signal-exit@4.1.0: {}
+
+  sisteransi@1.0.5: {}
 
   smol-toml@1.5.2: {}
 
