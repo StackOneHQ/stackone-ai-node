@@ -24,8 +24,8 @@ This skill provides all commands and best practices for building, developing, an
 
 ## Code Quality
 
-- `pnpm lint` - Run Biome linter
-- `pnpm format` - Format code with Biome
+- `pnpm lint` - Run linter (oxfmt, oxlint, knip)
+- `pnpm format` - Format code (oxfmt, oxlint, knip)
 - `pnpm typecheck` - Type check with tsgo
 - `pnpm lint:fix` - Auto-fix linting issues
 
