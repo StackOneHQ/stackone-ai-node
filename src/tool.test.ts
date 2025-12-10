@@ -72,6 +72,21 @@ describe('StackOneTool', () => {
 		).toBe('string');
 	});
 
+	it('should convert to Anthropic tool format', () => {
+		const tool = createMockTool();
+		const anthropicFormat = tool.toAnthropic();
+
+		expect(anthropicFormat.name).toBe('test_tool');
+		expect(anthropicFormat.description).toBe('Test tool');
+		expect(anthropicFormat.input_schema.type).toBe('object');
+		const properties = anthropicFormat.input_schema.properties as Record<
+			string,
+			{ type: string }
+		>;
+		expect(properties.id).toBeDefined();
+		expect(properties.id.type).toBe('string');
+	});
+
 	it('should convert to AI SDK tool format', async () => {
 		const tool = createMockTool();
 
@@ -315,6 +330,63 @@ describe('Tools', () => {
 		expect(openAITools[0].type).toBe('function');
 		expect(openAITools[0].function.name).toBe('tool1');
 		expect(openAITools[1].function.name).toBe('tool2');
+	});
+
+	it('should convert all tools to Anthropic format', () => {
+		const tool1 = new BaseTool(
+			'tool1',
+			'Tool 1',
+			{
+				type: 'object',
+				properties: { id: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'GET',
+				url: 'https://api.example.com/test/{id}',
+				bodyType: 'json',
+				params: [
+					{
+						name: 'id',
+						location: ParameterLocation.PATH,
+						type: 'string',
+					},
+				],
+			},
+		);
+
+		const tool2 = new BaseTool(
+			'tool2',
+			'Tool 2',
+			{
+				type: 'object',
+				properties: { name: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'POST',
+				url: 'https://api.example.com/test',
+				bodyType: 'json',
+				params: [
+					{
+						name: 'name',
+						location: ParameterLocation.BODY,
+						type: 'string',
+					},
+				],
+			},
+		);
+
+		const tools = new Tools([tool1, tool2]);
+		const anthropicTools = tools.toAnthropic();
+
+		expect(anthropicTools).toBeInstanceOf(Array);
+		expect(anthropicTools.length).toBe(2);
+		expect(anthropicTools[0].name).toBe('tool1');
+		expect(anthropicTools[0].description).toBe('Tool 1');
+		expect(anthropicTools[0].input_schema.type).toBe('object');
+		expect(anthropicTools[1].name).toBe('tool2');
+		expect(anthropicTools[1].description).toBe('Tool 2');
 	});
 
 	it('should convert all tools to AI SDK tools', async () => {
