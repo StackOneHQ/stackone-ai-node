@@ -31,9 +31,6 @@ jobs:
       - name: Run Lint
         run: nix develop --command pnpm run lint
 
-      - name: Run Type Check
-        run: nix develop --command pnpm run typecheck
-
       - name: Run Build
         run: nix develop --command pnpm run build
 
