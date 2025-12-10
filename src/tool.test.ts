@@ -79,10 +79,7 @@ describe('StackOneTool', () => {
 		expect(anthropicFormat.name).toBe('test_tool');
 		expect(anthropicFormat.description).toBe('Test tool');
 		expect(anthropicFormat.input_schema.type).toBe('object');
-		const properties = anthropicFormat.input_schema.properties as Record<
-			string,
-			{ type: string }
-		>;
+		const properties = anthropicFormat.input_schema.properties as Record<string, { type: string }>;
 		expect(properties.id).toBeDefined();
 		expect(properties.id.type).toBe('string');
 	});
