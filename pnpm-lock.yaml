@@ -73,6 +73,9 @@ catalogs:
       specifier: ^4.1.13
       version: 4.1.13
   peer:
+    '@anthropic-ai/sdk':
+      specifier: ^0.52.0
+      version: 0.52.0
     ai:
       specifier: ^5.0.108
       version: 5.0.108
@@ -96,6 +99,9 @@ catalogs:
 importers:
   .:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: catalog:peer
+        version: 0.52.0
       '@modelcontextprotocol/sdk':
         specifier: catalog:prod
         version: 1.24.3(zod@4.1.13)
@@ -188,6 +194,9 @@ importers:
       '@ai-sdk/openai':
         specifier: catalog:dev
         version: 2.0.80(zod@4.1.13)
+      '@anthropic-ai/sdk':
+        specifier: catalog:peer
+        version: 0.52.0
       '@clack/prompts':
         specifier: catalog:dev
         version: 0.11.0
@@ -241,6 +250,13 @@ packages:
         integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==,
       }
     engines: { node: '>=18' }
+
+  '@anthropic-ai/sdk@0.52.0':
+    resolution:
+      {
+        integrity: sha512-d4c+fg+xy9e46c8+YnrrgIQR45CZlAi7PwdzIfDXDM6ACxEZli1/fxhURsq30ZpMZy6LvSkr41jGq5aF5TD7rQ==,
+      }
+    hasBin: true
 
   '@babel/generator@7.28.5':
     resolution:
@@ -3760,6 +3776,8 @@ snapshots:
   '@ai-sdk/provider@2.0.0':
     dependencies:
       json-schema: 0.4.0
+
+  '@anthropic-ai/sdk@0.52.0': {}
 
   '@babel/generator@7.28.5':
     dependencies:

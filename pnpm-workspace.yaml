@@ -29,6 +29,7 @@ catalogs:
     vitest: ^4.0.15
     zod: ^4.1.13
   peer:
+    '@anthropic-ai/sdk': ^0.52.0
     ai: ^5.0.108
     openai: ^6.2.0
   prod:

@@ -65,10 +65,14 @@
 		"vitest": "catalog:dev"
 	},
 	"peerDependencies": {
+		"@anthropic-ai/sdk": "catalog:peer",
 		"ai": "catalog:peer",
 		"openai": "catalog:peer"
 	},
 	"peerDependenciesMeta": {
+		"@anthropic-ai/sdk": {
+			"optional": true
+		},
 		"ai": {
 			"optional": true
 		},
