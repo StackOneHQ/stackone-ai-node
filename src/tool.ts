@@ -1,3 +1,4 @@
+import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
@@ -182,6 +183,22 @@ export class BaseTool {
 	}
 
 	/**
+	 * Convert the tool to Anthropic format
+	 * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
+	 */
+	toAnthropic(): AnthropicTool {
+		return {
+			name: this.name,
+			description: this.description,
+			input_schema: {
+				type: 'object',
+				properties: this.parameters.properties,
+				required: this.parameters.required,
+			},
+		};
+	}
+
+	/**
 	 * Convert the tool to AI SDK format
 	 */
 	async toAISDK(
@@ -356,6 +373,14 @@ export class Tools implements Iterable<BaseTool> {
 	 */
 	toOpenAI(): ChatCompletionFunctionTool[] {
 		return this.tools.map((tool) => tool.toOpenAI());
+	}
+
+	/**
+	 * Convert all tools to Anthropic format
+	 * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
+	 */
+	toAnthropic(): AnthropicTool[] {
+		return this.tools.map((tool) => tool.toAnthropic());
 	}
 
 	/**
