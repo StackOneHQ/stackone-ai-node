@@ -195,6 +195,57 @@ describe('StackOneTool', () => {
 		);
 		expect(result).toMatch(/Error executing tool:/);
 	});
+
+	it('should set and get headers', () => {
+		const tool = createMockTool();
+
+		// Set headers
+		const headers = { 'X-Custom-Header': 'test-value' };
+		tool.setHeaders(headers);
+
+		// Headers should include custom header
+		const updatedHeaders = tool.getHeaders();
+		expect(updatedHeaders['X-Custom-Header']).toBe('test-value');
+
+		// Set additional headers
+		tool.setHeaders({ 'X-Another-Header': 'another-value' });
+
+		// Headers should include all headers
+		const finalHeaders = tool.getHeaders();
+		expect(finalHeaders['X-Custom-Header']).toBe('test-value');
+		expect(finalHeaders['X-Another-Header']).toBe('another-value');
+	});
+
+	it('should use basic authentication', async () => {
+		const headers = {
+			Authorization: `Basic ${Buffer.from('testuser:testpass').toString('base64')}`,
+		};
+		const tool = createMockTool(headers);
+
+		const result = await tool.execute({ id: '123' });
+		expect(result).toEqual({ id: '123', name: 'Test' });
+	});
+
+	it('should use bearer authentication', async () => {
+		const headers = {
+			Authorization: 'Bearer test-token',
+		};
+		const tool = createMockTool(headers);
+
+		const result = await tool.execute({ id: '123' });
+		expect(result).toEqual({ id: '123', name: 'Test' });
+	});
+
+	it('should use api-key authentication', async () => {
+		const apiKey = 'test-api-key';
+		const headers = {
+			Authorization: `Bearer ${apiKey}`,
+		};
+		const tool = createMockTool(headers);
+
+		const result = await tool.execute({ id: '123' });
+		expect(result).toEqual({ id: '123', name: 'Test' });
+	});
 });
 
 describe('Tools', () => {
@@ -339,81 +390,5 @@ describe('Tools', () => {
 		}
 
 		expect(count).toBe(2);
-	});
-});
-
-describe('Tool', () => {
-	it('should set and get headers', () => {
-		const tool = createMockTool();
-
-		// Set headers
-		const headers = { 'X-Custom-Header': 'test-value' };
-		tool.setHeaders(headers);
-
-		// Headers should include custom header
-		const updatedHeaders = tool.getHeaders();
-		expect(updatedHeaders['X-Custom-Header']).toBe('test-value');
-
-		// Set additional headers
-		tool.setHeaders({ 'X-Another-Header': 'another-value' });
-
-		// Headers should include all headers
-		const finalHeaders = tool.getHeaders();
-		expect(finalHeaders['X-Custom-Header']).toBe('test-value');
-		expect(finalHeaders['X-Another-Header']).toBe('another-value');
-	});
-
-	it('should use basic authentication', async () => {
-		const headers = {
-			Authorization: `Basic ${Buffer.from('testuser:testpass').toString('base64')}`,
-		};
-		const tool = createMockTool(headers);
-
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
-	});
-
-	it('should use bearer authentication', async () => {
-		const headers = {
-			Authorization: 'Bearer test-token',
-		};
-		const tool = createMockTool(headers);
-
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
-	});
-
-	it('should use api-key authentication', async () => {
-		const apiKey = 'test-api-key';
-		const headers = {
-			Authorization: `Bearer ${apiKey}`,
-		};
-		const tool = createMockTool(headers);
-
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
-	});
-
-	it('should execute with parameters', async () => {
-		const tool = createMockTool();
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
-	});
-
-	it('should convert to OpenAI tool format', () => {
-		const tool = createMockTool();
-		const openAIFormat = tool.toOpenAI();
-
-		expect(openAIFormat.type).toBe('function');
-		expect(openAIFormat.function.name).toBe('test_tool');
-		expect(openAIFormat.function.description).toBe('Test tool');
-		expect(openAIFormat.function.parameters?.type).toBe('object');
-		expect(
-			(
-				openAIFormat.function.parameters as {
-					properties: { id: { type: string } };
-				}
-			).properties.id.type,
-		).toBe('string');
 	});
 });
