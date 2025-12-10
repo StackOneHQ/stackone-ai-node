@@ -3,7 +3,7 @@ import { DEFAULT_BASE_URL } from './consts';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { BaseTool, type StackOneTool, Tools } from './tool';
-import { createFeedbackTool } from './tools/feedback';
+import { createFeedbackTool } from './feedback';
 import type {
 	ExecuteOptions,
 	JsonDict,

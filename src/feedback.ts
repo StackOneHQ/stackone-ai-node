@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { DEFAULT_BASE_URL } from '../consts';
-import { BaseTool } from '../tool';
-import type { ExecuteConfig, ExecuteOptions, JsonDict, ToolParameters } from '../types';
-import { StackOneError } from '../utils/errors';
+import { DEFAULT_BASE_URL } from './consts';
+import { BaseTool } from './tool';
+import type { ExecuteConfig, ExecuteOptions, JsonDict, ToolParameters } from './types';
+import { StackOneError } from './utils/errors';
 
 interface FeedbackToolOptions {
 	baseUrl?: string;

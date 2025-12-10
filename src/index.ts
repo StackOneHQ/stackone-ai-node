@@ -4,7 +4,7 @@
 
 export { DEFAULT_BASE_URL, DEFAULT_HYBRID_ALPHA } from './consts';
 export { BaseTool, StackOneTool, Tools } from './tool';
-export { createFeedbackTool } from './tools/feedback';
+export { createFeedbackTool } from './feedback';
 export { StackOneAPIError, StackOneError } from './utils/errors';
 
 export {

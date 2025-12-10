@@ -4,8 +4,8 @@ import {
 	type HttpExecuteConfig,
 	type JsonDict,
 	ParameterLocation,
-} from '../types';
-import { StackOneAPIError } from '../utils/errors';
+} from './types';
+import { StackOneAPIError } from './utils/errors';
 
 interface SerializationOptions {
 	maxDepth?: number;
