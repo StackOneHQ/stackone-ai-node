@@ -1,16 +1,18 @@
 import type { Arrayable } from 'type-fest';
-import { createMCPClient } from '../mcp-client';
-import { type RpcActionResponse, RpcClient } from '../rpc-client';
-import { BaseTool, Tools } from '../tool';
+import { DEFAULT_BASE_URL } from './consts';
+import { createMCPClient } from './mcp-client';
+import { type RpcActionResponse, RpcClient } from './rpc-client';
+import { BaseTool, type StackOneTool, Tools } from './tool';
+import { createFeedbackTool } from './tools/feedback';
 import type {
 	ExecuteOptions,
 	JsonDict,
 	JsonSchemaProperties,
 	RpcExecuteConfig,
 	ToolParameters,
-} from '../types';
-import { toArray } from '../utils/array';
-import { StackOneError } from '../utils/errors';
+} from './types';
+import { toArray } from './utils/array';
+import { StackOneError } from './utils/errors';
 
 /**
  * Converts RpcActionResponse to JsonDict in a type-safe manner.
@@ -86,23 +88,106 @@ export interface BaseToolSetConfig {
 }
 
 /**
- * Base class for all toolsets
+ * Configuration for StackOne toolset
  */
-export abstract class ToolSet {
-	protected baseUrl?: string;
-	protected authentication?: AuthenticationConfig;
-	protected headers: Record<string, string>;
-	protected rpcClient?: RpcClient;
+export interface StackOneToolSetConfig extends BaseToolSetConfig {
+	apiKey?: string;
+	accountId?: string;
+	strict?: boolean;
+}
+
+/**
+ * Options for filtering tools when fetching from MCP
+ */
+interface FetchToolsOptions {
+	/**
+	 * Filter tools by account IDs
+	 * Only tools available on these accounts will be returned
+	 */
+	accountIds?: string[];
 
 	/**
-	 * Initialise a toolset with optional configuration
-	 * @param config Optional configuration object
+	 * Filter tools by provider names
+	 * Only tools from these providers will be returned
+	 * @example ['hibob', 'bamboohr']
 	 */
-	constructor(config?: BaseToolSetConfig) {
-		this.baseUrl = config?.baseUrl;
-		this.authentication = config?.authentication;
-		this.headers = config?.headers || {};
+	providers?: string[];
+
+	/**
+	 * Filter tools by action patterns with glob support
+	 * Only tools matching these patterns will be returned
+	 * @example ['*_list_employees', 'hibob_create_employees']
+	 */
+	actions?: string[];
+}
+
+/**
+ * Configuration for workflow
+ */
+interface WorkflowConfig {
+	key: string;
+	input: string;
+	model: string;
+	tools: string[];
+	accountIds: string[];
+	cache?: boolean;
+}
+
+/**
+ * Class for loading StackOne tools via MCP
+ */
+export class StackOneToolSet {
+	private baseUrl?: string;
+	private authentication?: AuthenticationConfig;
+	private headers: Record<string, string>;
+	private rpcClient?: RpcClient;
+
+	/**
+	 * Account ID for StackOne API
+	 */
+	private accountId?: string;
+	private accountIds: string[] = [];
+
+	/**
+	 * Initialise StackOne toolset with API key and optional account ID
+	 * @param config Configuration object containing API key and optional account ID
+	 */
+	constructor(config?: StackOneToolSetConfig) {
+		const apiKey = config?.apiKey || process.env.STACKONE_API_KEY;
+
+		if (!apiKey && config?.strict) {
+			throw new ToolSetConfigError(
+				'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.',
+			);
+		}
+
+		if (!apiKey) {
+			console.warn(
+				'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.',
+			);
+		}
+
+		const authentication: AuthenticationConfig = {
+			type: 'basic',
+			credentials: {
+				username: apiKey || '',
+				password: '',
+			},
+		};
+
+		const accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
+
+		const configHeaders = {
+			...config?.headers,
+			...(accountId ? { 'x-account-id': accountId } : {}),
+		};
+
+		// Initialise base properties
+		this.baseUrl = config?.baseUrl ?? process.env.STACKONE_BASE_URL ?? DEFAULT_BASE_URL;
+		this.authentication = authentication;
+		this.headers = configHeaders;
 		this.rpcClient = config?.rpcClient;
+		this.accountId = accountId;
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -141,57 +226,71 @@ export abstract class ToolSet {
 	}
 
 	/**
-	 * Check if a tool name matches a filter pattern
-	 * @param toolName Tool name to check
-	 * @param filterPattern Filter pattern or array of patterns
-	 * @returns True if the tool name matches the filter pattern
+	 * Set account IDs for filtering tools
+	 * @param accountIds Array of account IDs to filter tools by
+	 * @returns This toolset instance for chaining
 	 */
-	protected _matchesFilter(toolName: string, filterPattern: Arrayable<string>): boolean {
-		// Convert to array to handle both single string and array patterns
-		const patterns = toArray(filterPattern);
-
-		// Split into positive and negative patterns
-		const positivePatterns = patterns.filter((p) => !p.startsWith('!'));
-		const negativePatterns = patterns.filter((p) => p.startsWith('!')).map((p) => p.substring(1));
-
-		// If no positive patterns, treat as match all
-		const matchesPositive =
-			positivePatterns.length === 0 || positivePatterns.some((p) => this._matchGlob(toolName, p));
-
-		// If any negative pattern matches, exclude the tool
-		const matchesNegative = negativePatterns.some((p) => this._matchGlob(toolName, p));
-
-		return matchesPositive && !matchesNegative;
+	setAccounts(accountIds: string[]): this {
+		this.accountIds = accountIds;
+		return this;
 	}
 
 	/**
-	 * Check if a string matches a glob pattern
-	 * @param str String to check
-	 * @param pattern Glob pattern
-	 * @returns True if the string matches the pattern
+	 * Fetch tools from MCP with optional filtering
+	 * @param options Optional filtering options for account IDs, providers, and actions
+	 * @returns Collection of tools matching the filter criteria
 	 */
-	protected _matchGlob(str: string, pattern: string): boolean {
-		// Convert glob pattern to regex
-		const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.');
+	async fetchTools(options?: FetchToolsOptions): Promise<Tools> {
+		// Use account IDs from options, or fall back to instance state
+		const effectiveAccountIds = options?.accountIds || this.accountIds;
 
-		// Create regex with start and end anchors
-		const regex = new RegExp(`^${regexPattern}$`);
+		// Fetch tools (with account filtering if needed)
+		let tools: Tools;
+		if (effectiveAccountIds.length > 0) {
+			const toolsPromises = effectiveAccountIds.map(async (accountId) => {
+				const headers = { 'x-account-id': accountId };
+				const mergedHeaders = { ...this.headers, ...headers };
 
-		// Test if the string matches the pattern
-		return regex.test(str);
+				// Create a temporary toolset instance with the account-specific headers
+				const tempHeaders = mergedHeaders;
+				const originalHeaders = this.headers;
+				this.headers = tempHeaders;
+
+				try {
+					const tools = await this.fetchToolsFromMcp();
+					return tools.toArray();
+				} finally {
+					// Restore original headers
+					this.headers = originalHeaders;
+				}
+			});
+
+			const toolArrays = await Promise.all(toolsPromises);
+			const allTools = toolArrays.flat();
+			tools = new Tools(allTools);
+		} else {
+			// No account filtering - fetch all tools
+			tools = await this.fetchToolsFromMcp();
+		}
+
+		// Apply provider and action filters
+		const filteredTools = this.filterTools(tools, options);
+
+		// Add feedback tool
+		const feedbackTool = createFeedbackTool(undefined, this.accountId, this.baseUrl);
+		const toolsWithFeedback = new Tools([...filteredTools.toArray(), feedbackTool]);
+
+		return toolsWithFeedback;
 	}
 
 	/**
 	 * Fetch tool definitions from MCP
 	 */
-	async fetchTools(): Promise<Tools> {
+	private async fetchToolsFromMcp(): Promise<Tools> {
 		if (!this.baseUrl) {
 			throw new ToolSetConfigError('baseUrl is required to fetch MCP tools');
 		}
 
-		// TODO(ENG-????): allow passing account/provider/action filters when fetching tools
-		// e.g. fetchTools({ accountIDs: ['123'], actions: ['*_list_employees'] })
-		// and eventually expose helpers like stackone.setAccounts([...]) for meta usage.
 		await using clients = await createMCPClient({
 			baseUrl: `${this.baseUrl}/mcp`,
 			headers: this.headers,
@@ -211,6 +310,76 @@ export abstract class ToolSet {
 		);
 
 		return new Tools(tools);
+	}
+
+	/**
+	 * Filter tools by providers and actions
+	 * @param tools Tools collection to filter
+	 * @param options Filtering options
+	 * @returns Filtered tools collection
+	 */
+	private filterTools(tools: Tools, options?: FetchToolsOptions): Tools {
+		let filteredTools = tools.toArray();
+
+		// Filter by providers if specified
+		if (options?.providers && options.providers.length > 0) {
+			const providerSet = new Set(options.providers.map((p) => p.toLowerCase()));
+			filteredTools = filteredTools.filter((tool) => {
+				// Extract provider from tool name (assuming format: provider_action)
+				const provider = tool.name.split('_')[0]?.toLowerCase();
+				return provider && providerSet.has(provider);
+			});
+		}
+
+		// Filter by actions if specified (with glob support)
+		if (options?.actions && options.actions.length > 0) {
+			filteredTools = filteredTools.filter((tool) =>
+				options.actions?.some((pattern) => this.matchGlob(tool.name, pattern)),
+			);
+		}
+
+		return new Tools(filteredTools);
+	}
+
+	/**
+	 * Check if a tool name matches a filter pattern
+	 * @param toolName Tool name to check
+	 * @param filterPattern Filter pattern or array of patterns
+	 * @returns True if the tool name matches the filter pattern
+	 */
+	private matchesFilter(toolName: string, filterPattern: Arrayable<string>): boolean {
+		// Convert to array to handle both single string and array patterns
+		const patterns = toArray(filterPattern);
+
+		// Split into positive and negative patterns
+		const positivePatterns = patterns.filter((p) => !p.startsWith('!'));
+		const negativePatterns = patterns.filter((p) => p.startsWith('!')).map((p) => p.substring(1));
+
+		// If no positive patterns, treat as match all
+		const matchesPositive =
+			positivePatterns.length === 0 || positivePatterns.some((p) => this.matchGlob(toolName, p));
+
+		// If any negative pattern matches, exclude the tool
+		const matchesNegative = negativePatterns.some((p) => this.matchGlob(toolName, p));
+
+		return matchesPositive && !matchesNegative;
+	}
+
+	/**
+	 * Check if a string matches a glob pattern
+	 * @param str String to check
+	 * @param pattern Glob pattern
+	 * @returns True if the string matches the pattern
+	 */
+	private matchGlob(str: string, pattern: string): boolean {
+		// Convert glob pattern to regex
+		const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.');
+
+		// Create regex with start and end anchors
+		const regex = new RegExp(`^${regexPattern}$`);
+
+		// Test if the string matches the pattern
+		return regex.test(str);
 	}
 
 	private getActionsClient(): RpcClient {
@@ -386,5 +555,14 @@ export abstract class ToolSet {
 			return value as JsonDict;
 		}
 		return undefined;
+	}
+
+	/**
+	 * Plan a workflow
+	 * @param config Configuration object containing workflow details
+	 * @returns Workflow object
+	 */
+	plan(_: WorkflowConfig): Promise<StackOneTool> {
+		throw new Error('Not implemented yet');
 	}
 }
