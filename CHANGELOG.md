@@ -1,5 +1,43 @@
 # Changelog
 
+## [2.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v1.1.1...v2.0.0) (2025-12-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **lint:** Linting rules are now significantly stricter. Code that previously passed Biome's checks may now fail with oxlint's pedantic, correctness, suspicious, performance, and style rule categories all set to error level.
+* resolve typecheck errors by upgrading to zod v4 and ai SDK 5.0.108 ([#183](https://github.com/StackOneHQ/stackone-ai-node/issues/183))
+* BaseToolSetConfig.stackOneClient is now rpcClient
+* bun -> pnpm+vitest && manage deps with flake.nix ([#143](https://github.com/StackOneHQ/stackone-ai-node/issues/143))
+* OpenAPI spec imports from src/openapi/ are removed
+
+### Features
+
+* add knip for unused code detection ([#174](https://github.com/StackOneHQ/stackone-ai-node/issues/174)) ([9df963d](https://github.com/StackOneHQ/stackone-ai-node/commit/9df963da3582712997564611ef170b78f5e5b6e4))
+* add test coverage reporting with GitHub Pages deployment ([#188](https://github.com/StackOneHQ/stackone-ai-node/issues/188)) ([02a572e](https://github.com/StackOneHQ/stackone-ai-node/commit/02a572ede612db5e26b5f6c510c1b57a84ca050a))
+* **example:** add interactive CLI demo with @clack/prompts ([#203](https://github.com/StackOneHQ/stackone-ai-node/issues/203)) ([c5c6990](https://github.com/StackOneHQ/stackone-ai-node/commit/c5c699012b4e7260cb799a4fa7e2625bc69dc769))
+* remove deprecated OAS-based getTools, migrate to fetchTools only ([#148](https://github.com/StackOneHQ/stackone-ai-node/issues/148)) ([aea526e](https://github.com/StackOneHQ/stackone-ai-node/commit/aea526e859af14c4280453ccd709c7e403e1901d))
+
+
+### Bug Fixes
+
+* add baseURL default ([#164](https://github.com/StackOneHQ/stackone-ai-node/issues/164)) ([83ad198](https://github.com/StackOneHQ/stackone-ai-node/commit/83ad198be6f1482645f933723b76f8d1f2f3e30b))
+* **lint:** resolve all oxlint errors ([#193](https://github.com/StackOneHQ/stackone-ai-node/issues/193)) ([15e849f](https://github.com/StackOneHQ/stackone-ai-node/commit/15e849fa645e4df7280efe816bee8fecb1245177))
+* **package.json:** add engines ([#182](https://github.com/StackOneHQ/stackone-ai-node/issues/182)) ([ef2189d](https://github.com/StackOneHQ/stackone-ai-node/commit/ef2189d1eb5131652bf651965a18d79dc0ea1035))
+* resolve type errors and ensure CI fails on errors ([#175](https://github.com/StackOneHQ/stackone-ai-node/issues/175)) ([4d465bf](https://github.com/StackOneHQ/stackone-ai-node/commit/4d465bfe461e7c34343fdc9b15c600ea2fb66544))
+* resolve typecheck errors by upgrading to zod v4 and ai SDK 5.0.108 ([#183](https://github.com/StackOneHQ/stackone-ai-node/issues/183)) ([a2a4aaa](https://github.com/StackOneHQ/stackone-ai-node/commit/a2a4aaa4105c6c40d2272b97987c0f0cf5c5812a))
+* **rpc:** send x-account-id as HTTP header in RPC requests ([#202](https://github.com/StackOneHQ/stackone-ai-node/issues/202)) ([b3843a5](https://github.com/StackOneHQ/stackone-ai-node/commit/b3843a5765b33767f452d8cca684e2429c5cbc99))
+
+
+### Miscellaneous Chores
+
+* bun -&gt; pnpm+vitest && manage deps with flake.nix ([#143](https://github.com/StackOneHQ/stackone-ai-node/issues/143)) ([fb77062](https://github.com/StackOneHQ/stackone-ai-node/commit/fb77062f2dd0fd7dbc00f2e62ff2825b4e370b9f))
+
+
+### Code Refactoring
+
+* flatten client structure and add Zod validation to RPC client ([#168](https://github.com/StackOneHQ/stackone-ai-node/issues/168)) ([53bce87](https://github.com/StackOneHQ/stackone-ai-node/commit/53bce8708ec2f6cdbb6a2bfd18521725caf784da))
+
 ## [1.1.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v1.1.0...v1.1.1) (2025-12-04)
 
 ### Bug Fixes

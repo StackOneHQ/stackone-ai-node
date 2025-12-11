@@ -1,6 +1,6 @@
 {
 	"name": "@stackone/ai",
-	"version": "1.1.1",
+	"version": "2.0.0",
 	"description": "Tools for agents to perform actions on your SaaS",
 	"packageManager": "pnpm@10.24.0",
 	"module": "./dist/index.mjs",
