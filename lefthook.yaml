@@ -3,14 +3,14 @@ pre-commit:
   jobs:
     - name: oxlint
       glob: '*.{ts,tsx,js,jsx,mts,cts}'
-      run: bun oxlint --max-warnings=0 --type-aware --type-check --fix {staged_files}
+      run: pnpm oxlint --max-warnings=0 --type-aware --type-check --fix {staged_files}
       stage_fixed: true
     - name: oxfmt
       glob: '*'
-      run: bun oxfmt --no-error-on-unmatched-pattern {staged_files}
+      run: pnpm oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
 
-push:
+pre-push:
   jobs:
     - name: knip
       run: pnpm run lint:knip
