@@ -22,7 +22,7 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 
 	// Fetch HRIS tools via MCP
 	const tools = await toolset.fetchTools({
-		actions: ['hris_get_*'],
+		actions: ['_list_*'],
 	});
 	const openAIResponsesTools = tools.toOpenAIResponses();
 
