@@ -14,7 +14,7 @@ if (!apiKey) {
 }
 
 // Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
+const accountId = 'your-stackone-account-id';
 
 const openaiResponsesIntegration = async (): Promise<void> => {
 	// Initialise StackOne
