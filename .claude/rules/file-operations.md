@@ -1,13 +1,13 @@
 ---
-name: file-operations
 description: Use when making HTTP requests. Covers native fetch API patterns and error handling. (project)
-globs: "*.ts"
 alwaysApply: false
+paths: "**/*.ts"
+globs: "**/*.ts"
 ---
 
 # HTTP Request Standards
 
-This skill provides guidance on HTTP request patterns in the StackOne SDK.
+This rule provides guidance on HTTP request patterns in the StackOne SDK.
 
 ## Native Fetch API Standards
 

@@ -2,16 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Skills and Rules Structure
+## Rules and Skills Structure
 
-Claude skills (`.claude/skills/`) are the source of truth. Cursor rules (`.cursor/rules/`) are symlinks to skill files for consistency.
+- **Rules** (`.claude/rules/`): Automatically loaded based on file paths. Source of truth for project conventions.
+- **Skills** (`.claude/skills/`): Manually invoked for specific integrations.
+- **Cursor rules** (`.cursor/rules/`): Symlinks to `.claude/rules/` for consistency.
+
+## Available Rules
+
+| Rule                     | Applies To     | Description                                        |
+| ------------------------ | -------------- | -------------------------------------------------- |
+| **pnpm-usage**           | All files      | pnpm commands and troubleshooting                  |
+| **git-workflow**         | All files      | Commit conventions, branch strategy, PR guidelines |
+| **development-workflow** | All files      | Code style, file naming, project conventions       |
+| **typescript-patterns**  | `**/*.ts`      | Type safety, exhaustiveness checks, clean code     |
+| **typescript-testing**   | `**/*.test.ts` | Vitest, MSW mocking, fs-fixture                    |
+| **file-operations**      | `**/*.ts`      | Native fetch API patterns and error handling       |
 
 ## Available Skills
 
-| Skill                    | When to Use                                                            |
-| ------------------------ | ---------------------------------------------------------------------- |
-| **development-workflow** | Build commands, testing, linting, git workflow, commit conventions     |
-| **typescript-patterns**  | Writing/reviewing TypeScript - type safety, exhaustiveness, clean code |
-| **typescript-testing**   | Writing tests - Vitest, MSW mocking, fs-fixture                        |
-| **file-operations**      | Making HTTP requests - native fetch patterns                           |
-| **orama-integration**    | Integrating with Orama search/indexing                                 |
+| Skill                 | When to Use                            |
+| --------------------- | -------------------------------------- |
+| **orama-integration** | Integrating with Orama search/indexing |
