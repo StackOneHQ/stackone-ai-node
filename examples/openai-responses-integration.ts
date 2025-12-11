@@ -32,7 +32,7 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 	// Create a response with tool calls using the Responses API
 	const response = await openai.responses.create({
 		model: 'gpt-5.1',
-		instructions: 'You are a helpful assistant that can access HRIS information.',
+		instructions: 'You are a helpful assistant that can access various tools.',
 		input: 'What is the employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA phone number?',
 		tools: openAIResponsesTools,
 	});
