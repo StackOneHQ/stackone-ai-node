@@ -23,9 +23,9 @@ const anthropicIntegration = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch HRIS tools via MCP
+	// Filter for any relevant tools
 	const tools = await toolset.fetchTools({
-		actions: ['hris_get_*'],
+		actions: ['*_list_*', '*_search_*'],
 	});
 	const anthropicTools = tools.toAnthropic();
 
