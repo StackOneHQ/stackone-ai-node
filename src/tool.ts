@@ -1,5 +1,6 @@
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
+import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
 import type {
@@ -164,7 +165,7 @@ export class BaseTool {
 	}
 
 	/**
-	 * Convert the tool to OpenAI format
+	 * Convert the tool to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool {
 		return {
@@ -177,6 +178,26 @@ export class BaseTool {
 					properties: this.parameters.properties,
 					required: this.parameters.required,
 				},
+			},
+		};
+	}
+
+	/**
+	 * Convert the tool to OpenAI Responses API format
+	 * @see https://platform.openai.com/docs/api-reference/responses
+	 */
+	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool {
+		const { strict = true } = options;
+		return {
+			type: 'function',
+			name: this.name,
+			description: this.description,
+			strict,
+			parameters: {
+				type: 'object',
+				properties: this.parameters.properties,
+				required: this.parameters.required,
+				...(strict ? { additionalProperties: false } : {}),
 			},
 		};
 	}
@@ -352,10 +373,18 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Convert all tools to OpenAI format
+	 * Convert all tools to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool[] {
 		return this.tools.map((tool) => tool.toOpenAI());
+	}
+
+	/**
+	 * Convert all tools to OpenAI Responses API format
+	 * @see https://platform.openai.com/docs/api-reference/responses
+	 */
+	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool[] {
+		return this.tools.map((tool) => tool.toOpenAIResponses(options));
 	}
 
 	/**

@@ -134,7 +134,7 @@ export const accountMcpTools = {
 				required: ['id'],
 			},
 		},
-	] as const satisfies McpToolDefinition[],
+	],
 	acc2: [
 		{
 			name: 'acc2_tool_1',
@@ -153,7 +153,7 @@ export const accountMcpTools = {
 				required: ['id'],
 			},
 		},
-	] as const satisfies McpToolDefinition[],
+	],
 	acc3: [
 		{
 			name: 'acc3_tool_1',
@@ -163,7 +163,7 @@ export const accountMcpTools = {
 				properties: { fields: { type: 'string' } },
 			},
 		},
-	] as const satisfies McpToolDefinition[],
+	],
 	'test-account': [
 		{
 			name: 'dummy_action',
@@ -180,8 +180,8 @@ export const accountMcpTools = {
 				additionalProperties: false,
 			},
 		},
-	] as const satisfies McpToolDefinition[],
-} as const;
+	],
+} as const satisfies Record<string, McpToolDefinition[]>;
 
 export const mixedProviderTools = [
 	{
