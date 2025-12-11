@@ -36,7 +36,7 @@ const anthropicIntegration = async (): Promise<void> => {
 	const response = await anthropic.messages.create({
 		model: 'claude-haiku-4-5-20241022',
 		max_tokens: 1024,
-		system: 'You are a helpful assistant that can access HRIS information.',
+		system: 'You are a helpful assistant that can access tools.',
 		messages: [
 			{
 				role: 'user',
