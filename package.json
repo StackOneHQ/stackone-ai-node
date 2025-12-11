@@ -3,9 +3,9 @@
 	"version": "1.1.1",
 	"description": "Tools for agents to perform actions on your SaaS",
 	"packageManager": "pnpm@10.24.0",
-	"module": "./dist/index.js",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"module": "./dist/index.mjs",
+	"main": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
 	"exports": {
 		".": "./src/index.ts",
 		"./package.json": "./package.json"
@@ -60,7 +60,6 @@
 		"publint": "catalog:dev",
 		"tsdown": "catalog:dev",
 		"type-fest": "catalog:dev",
-		"typescript": "catalog:dev",
 		"unplugin-unused": "catalog:dev",
 		"vitest": "catalog:dev"
 	},
@@ -99,7 +98,7 @@
 	"homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
 	"publishConfig": {
 		"exports": {
-			".": "./dist/index.js",
+			".": "./dist/index.mjs",
 			"./package.json": "./package.json"
 		}
 	},

@@ -1,0 +1,54 @@
+---
+description: pnpm package manager commands and troubleshooting. (project)
+alwaysApply: true
+---
+
+# pnpm Usage
+
+This rule provides guidance on using pnpm in the StackOne SDK.
+
+## Building
+
+- `pnpm build` - Build the project using tsdown
+
+## Testing
+
+- `pnpm test` - Run all tests (unit, examples, scripts)
+- `pnpm vitest src/path/to/file.test.ts` - Run a specific test file
+- `pnpm vitest -t "test name"` - Run tests matching a pattern
+
+## Code Quality
+
+- `pnpm lint` - Run Biome linter
+- `pnpm format` - Format code with Biome
+
+## Command Execution
+
+- `pnpm <script>` - Run a script defined in package.json
+- `pnpm exec <command>` - Run a command from node_modules/.bin
+- `pnpm dlx <package>` - Run a package without installing (like npx)
+
+## Troubleshooting
+
+If `pnpm exec <command>` fails, try `pnpm dlx <command>` instead.
+
+If bash commands fail, try running with fish shell:
+
+```bash
+fish -c "<command>"
+```
+
+## Common Issues
+
+1. **Script not found**: Check package.json scripts section
+2. **Binary not found**: Use `pnpm dlx` instead of `pnpm exec`
+3. **Permission errors**: Check node_modules permissions
+
+## Publishing & Deployment
+
+When ready to release:
+
+1. Ensure all tests pass: `pnpm test`
+2. Bump version in package.json
+3. Create release commit
+4. Push to main or create release PR

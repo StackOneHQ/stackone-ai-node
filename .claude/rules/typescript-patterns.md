@@ -1,8 +1,8 @@
 ---
-name: typescript-patterns
 description: Use when writing or reviewing TypeScript code. Covers type safety, exhaustiveness checks, avoiding any/non-null assertions, clean code practices. (project)
-globs: "*.ts"
 alwaysApply: false
+paths: "**/*.ts"
+globs: "*.ts"
 ---
 
 # TypeScript Patterns and Best Practices
