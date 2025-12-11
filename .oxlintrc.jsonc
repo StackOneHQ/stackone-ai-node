@@ -130,6 +130,11 @@
 		// ===================
 		// Enforce top-level type specifier style
 		"import/consistent-type-specifier-style": ["error", "top-level"],
+		// ===================
+		// Unicorn Rules
+		// ===================
+		// Disable top-level await in src (library code should not use top-level await)
+		"unicorn/prefer-top-level-await": "off",
 		// Ensure imports are at the top
 		"import/first": "error",
 		// Disallow duplicate imports
@@ -152,6 +157,14 @@
 				"no-console": "off",
 				"typescript/no-explicit-any": "warn",
 				"typescript/no-floating-promises": "warn",
+			},
+		},
+		{
+			// Examples should use top-level await for cleaner code
+			"files": ["examples/**/*.ts"],
+			"rules": {
+				"no-console": "off",
+				"unicorn/prefer-top-level-await": "error",
 			},
 		},
 	],
