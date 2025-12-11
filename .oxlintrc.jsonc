@@ -135,6 +135,8 @@
 		// ===================
 		// Disable top-level await in src (library code should not use top-level await)
 		"unicorn/prefer-top-level-await": "off",
+		// Enforce ESM style (import.meta.url instead of __dirname, etc.)
+		"unicorn/prefer-module": "error",
 		// Ensure imports are at the top
 		"import/first": "error",
 		// Disallow duplicate imports
