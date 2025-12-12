@@ -2,13 +2,16 @@ packages:
   - .
   - examples
 
+catalog:
+  '@ai-sdk/provider': ^2.0.0
+
 catalogMode: strict
 
 catalogs:
   dev:
     '@ai-sdk/openai': ^2.0.80
-    '@clack/prompts': ^0.11.0
     '@ai-sdk/provider-utils': ^3.0.18
+    '@clack/prompts': ^0.11.0
     '@hono/mcp': ^0.1.4
     '@types/node': ^22.13.5
     '@typescript/native-preview': ^7.0.0-dev.20251209.1

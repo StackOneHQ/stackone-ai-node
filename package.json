@@ -41,6 +41,7 @@
 		"zod": "catalog:dev"
 	},
 	"devDependencies": {
+		"@ai-sdk/provider": "catalog:",
 		"@ai-sdk/provider-utils": "catalog:dev",
 		"@hono/mcp": "catalog:dev",
 		"@types/node": "catalog:dev",
