@@ -87,7 +87,7 @@ The StackOneToolSet makes it super easy to use StackOne APIs as tools in your AI
 <summary><strong>With OpenAI Chat Completions API</strong></summary>
 
 ```bash
-npm install openai  # or: yarn add openai / pnpm add openai / bun add openai
+npm install @stackone/ai openai  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
@@ -125,7 +125,7 @@ await openai.chat.completions.create({
 <summary><strong>With OpenAI Responses API</strong></summary>
 
 ```bash
-npm install openai  # or: yarn add openai / pnpm add openai / bun add openai
+npm install @stackone/ai openai  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
@@ -157,7 +157,7 @@ await openai.responses.create({
 <summary><strong>With Anthropic Claude</strong></summary>
 
 ```bash
-npm install @anthropic-ai/sdk  # or: yarn/pnpm/bun add @anthropic-ai/sdk
+npm install @stackone/ai @anthropic-ai/sdk  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
@@ -195,7 +195,7 @@ await anthropic.messages.create({
 <summary><strong>With AI SDK by Vercel</strong></summary>
 
 ```bash
-npm install ai @ai-sdk/openai  # or: yarn/pnpm/bun add ai @ai-sdk/openai
+npm install @stackone/ai ai @ai-sdk/openai  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
@@ -225,7 +225,7 @@ await generateText({
 <summary><strong>With TanStack AI</strong></summary>
 
 ```bash
-npm install @tanstack/ai @tanstack/ai-openai zod  # or: yarn/pnpm/bun add
+npm install @stackone/ai @tanstack/ai @tanstack/ai-openai zod  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
@@ -275,7 +275,7 @@ for await (const chunk of stream) {
 <summary><strong>With Claude Agent SDK</strong></summary>
 
 ```bash
-npm install @anthropic-ai/claude-agent-sdk zod  # or: yarn/pnpm/bun add
+npm install @stackone/ai @anthropic-ai/claude-agent-sdk zod  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
