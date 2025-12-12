@@ -67,11 +67,10 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
 });
 
-const tools = await toolset.fetchTools({
-  actions: ["bamboohr_*"],
-});
+const tools = await toolset.fetchTools();
 
 await openai.chat.completions.create({
   model: "gpt-5.1",
@@ -100,11 +99,10 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
 });
 
-const tools = await toolset.fetchTools({
-  actions: ["bamboohr_*"],
-});
+const tools = await toolset.fetchTools();
 
 await generateText({
   model: openai("gpt-5.1"),
@@ -122,6 +120,7 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
 });
 
 const tools = await toolset.fetchTools();

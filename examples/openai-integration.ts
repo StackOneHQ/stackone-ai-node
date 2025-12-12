@@ -23,10 +23,8 @@ const openaiIntegration = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch BambooHR tools via MCP
-	const tools = await toolset.fetchTools({
-		actions: ['bamboohr_get_*'],
-	});
+	// Fetch all tools for this account via MCP
+	const tools = await toolset.fetchTools();
 	const openAITools = tools.toOpenAI();
 
 	// Initialise OpenAI client

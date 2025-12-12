@@ -54,13 +54,11 @@ const quickstart = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch BambooHR-related tools via MCP
-	const tools = await toolset.fetchTools({
-		actions: ['bamboohr_*'],
-	});
+	// Fetch all tools for this account via MCP
+	const tools = await toolset.fetchTools();
 
 	// Verify we have tools
-	assert(tools.length > 0, 'Expected to find BambooHR tools');
+	assert(tools.length > 0, 'Expected to find tools');
 
 	// Use a specific tool
 	const employeeTool = tools.getTool('bamboohr_list_employees');
