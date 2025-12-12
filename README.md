@@ -147,19 +147,26 @@ StackOne uses account IDs to identify different integrations. You can specify th
 ```typescript
 import { StackOneToolSet } from "@stackone/ai";
 
-// Method 1: Set at toolset initialisation
-const toolset = new StackOneToolSet({ accountId: "your-account-id" });
-
-// Method 2: Use setAccounts for filtering when fetching
-toolset.setAccounts(["account-123", "account-456"]);
+// Single account - simplest approach
+const toolset = new StackOneToolSet({ accountId: "your-bamboohr-account" });
 const tools = await toolset.fetchTools();
 
-// Method 3: Set directly on a tool instance
+// Multiple accounts - returns tools from both integrations
+const multiAccountToolset = new StackOneToolSet();
+const allTools = await multiAccountToolset.fetchTools({
+  accountIds: ["bamboohr-account-123", "workday-account-456"],
+});
+
+// Filter to specific integration when using multiple accounts
+const bamboohrOnly = await multiAccountToolset.fetchTools({
+  accountIds: ["bamboohr-account-123", "workday-account-456"],
+  actions: ["bamboohr_*"], // Only BambooHR tools
+});
+
+// Set directly on a tool instance
 tools.setAccountId("direct-account-id");
 const currentAccountId = tools.getAccountId(); // Get the current account ID
 ```
-
-[View full example](examples/account-id-usage.ts)
 
 ## Features
 
