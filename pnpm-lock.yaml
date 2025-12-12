@@ -175,31 +175,31 @@ importers:
 
   examples:
     dependencies:
-      '@stackone/ai':
-        specifier: workspace:*
-        version: link:..
-    devDependencies:
       '@ai-sdk/openai':
         specifier: catalog:dev
         version: 2.0.80(zod@4.1.13)
       '@clack/prompts':
         specifier: catalog:dev
         version: 0.11.0
-      '@types/node':
-        specifier: catalog:dev
-        version: 22.19.1
+      '@stackone/ai':
+        specifier: workspace:*
+        version: link:..
       ai:
         specifier: catalog:peer
         version: 5.0.108(zod@4.1.13)
-      node:
-        specifier: runtime:^24.11.0
-        version: runtime:24.11.1
       openai:
         specifier: catalog:peer
         version: 6.9.1(zod@4.1.13)
-      zod:
+    devDependencies:
+      '@types/node':
         specifier: catalog:dev
-        version: 4.1.13
+        version: 22.19.1
+      msw:
+        specifier: catalog:dev
+        version: 2.12.3(@types/node@22.19.1)(typescript@5.9.3)
+      node:
+        specifier: runtime:^24.11.0
+        version: runtime:24.11.1
 
 packages:
   '@ai-sdk/gateway@2.0.18':
