@@ -1,3 +1,4 @@
+import { USER_AGENT } from './consts';
 import {
 	type ExecuteOptions,
 	type HttpBodyType,
@@ -57,7 +58,7 @@ export class RequestBuilder {
 	 */
 	prepareHeaders(): Record<string, string> {
 		return {
-			'User-Agent': 'stackone-ai-node',
+			'User-Agent': USER_AGENT,
 			...this.headers,
 		};
 	}

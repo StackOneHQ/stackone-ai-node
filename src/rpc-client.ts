@@ -1,3 +1,4 @@
+import { USER_AGENT } from './consts';
 import { STACKONE_HEADER_KEYS } from './headers';
 import {
 	type RpcActionRequest,
@@ -68,7 +69,7 @@ export class RpcClient {
 			const httpHeaders = {
 				'Content-Type': 'application/json',
 				Authorization: this.authHeader,
-				'User-Agent': 'stackone-ai-node',
+				'User-Agent': USER_AGENT,
 				...forwardedHeaders,
 			} satisfies Record<string, string>;
 

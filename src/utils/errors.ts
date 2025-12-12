@@ -1,4 +1,4 @@
-// Type aliases for common types
+import { USER_AGENT } from '../consts';
 
 /**
  * Base exception for StackOne errors
@@ -73,7 +73,7 @@ export class StackOneAPIError extends StackOneError {
 		// Add request headers information (for debugging)
 		errorMessage += '\n\nRequest Headers:';
 		errorMessage += '\n- Authorization: [REDACTED]';
-		errorMessage += '\n- User-Agent: stackone-ai-node';
+		errorMessage += `\n- User-Agent: ${USER_AGENT}`;
 
 		// Add request body information if available
 		if (this.requestBody) {

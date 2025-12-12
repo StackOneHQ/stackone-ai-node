@@ -1,8 +1,9 @@
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/node';
+import { USER_AGENT } from './consts';
+import { RequestBuilder } from './requestBuilder';
 import { type HttpExecuteConfig, ParameterLocation } from './types';
 import { StackOneAPIError } from './utils/errors';
-import { RequestBuilder } from './requestBuilder';
 
 describe('RequestBuilder', () => {
 	let builder: RequestBuilder;
@@ -79,7 +80,7 @@ describe('RequestBuilder', () => {
 		const headers = builder.prepareHeaders();
 
 		expect(headers).toEqual({
-			'User-Agent': 'stackone-ai-node',
+			'User-Agent': USER_AGENT,
 			'Initial-Header': 'test',
 			'Custom-Header': 'value',
 		});
@@ -170,7 +171,7 @@ describe('RequestBuilder', () => {
 			url: 'https://api.example.com/test/path-value',
 			method: 'GET',
 			headers: {
-				'User-Agent': 'stackone-ai-node',
+				'User-Agent': USER_AGENT,
 				'Initial-Header': 'test',
 			},
 			body: undefined,
