@@ -5,10 +5,11 @@ export default defineConfig({
 		watch: false,
 		globals: true,
 		testTimeout: 30000,
+		setupFiles: ['./vitest.setup.ts'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'json-summary', 'html'],
-			include: ['src/**/*.ts', 'examples/**/*.ts'],
+			include: ['src/**/*.ts'],
 			exclude: ['**/*.test.ts', '**/*.test-d.ts'],
 		},
 		projects: [
@@ -19,7 +20,6 @@ export default defineConfig({
 					root: '.',
 					include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
 					exclude: ['node_modules', 'dist', 'examples'],
-					setupFiles: ['./vitest.setup.ts'],
 					typecheck: {
 						enabled: true,
 						include: ['src/**/*.test.ts', 'src/**/*.test-d.ts'],

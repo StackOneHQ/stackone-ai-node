@@ -4,7 +4,6 @@
 
 import type { Tool } from '@ai-sdk/provider-utils';
 import type { ToolSet } from 'ai';
-import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type { ValueOf } from 'type-fest';
 
 /**
@@ -18,14 +17,61 @@ export type JsonDict = Record<string, unknown>;
 type Headers = Record<string, string>;
 
 /**
- * JSON Schema properties type
+ * JSON Schema type for defining tool input/output schemas as raw JSON Schema objects.
+ * This allows tools to be defined without Zod when you have JSON Schema definitions available.
+ *
+ * @see https://github.com/TanStack/ai/blob/049eb8acd83e6d566c6040c0c4cb53dbe222d46a/packages/typescript/ai/src/types.ts#L5C1-L49C1
  */
-export type JsonSchemaProperties = Record<string, JSONSchema7Definition>;
+export interface JSONSchema {
+	type?: string | Array<string>;
+	properties?: Record<string, JSONSchema>;
+	items?: JSONSchema | Array<JSONSchema>;
+	required?: Array<string>;
+	enum?: Array<unknown>;
+	const?: unknown;
+	description?: string;
+	default?: unknown;
+	$ref?: string;
+	$defs?: Record<string, JSONSchema>;
+	definitions?: Record<string, JSONSchema>;
+	allOf?: Array<JSONSchema>;
+	anyOf?: Array<JSONSchema>;
+	oneOf?: Array<JSONSchema>;
+	not?: JSONSchema;
+	if?: JSONSchema;
+	then?: JSONSchema;
+	else?: JSONSchema;
+	minimum?: number;
+	maximum?: number;
+	exclusiveMinimum?: number;
+	exclusiveMaximum?: number;
+	minLength?: number;
+	maxLength?: number;
+	pattern?: string;
+	format?: string;
+	minItems?: number;
+	maxItems?: number;
+	uniqueItems?: boolean;
+	additionalProperties?: boolean | JSONSchema;
+	additionalItems?: boolean | JSONSchema;
+	patternProperties?: Record<string, JSONSchema>;
+	propertyNames?: JSONSchema;
+	minProperties?: number;
+	maxProperties?: number;
+	title?: string;
+	examples?: Array<unknown>;
+	[key: string]: unknown; // Allow additional properties for extensibility
+}
 
 /**
- * JSON Schema type
+ * JSON Schema properties type
  */
-type JsonSchemaType = JSONSchema7['type'];
+export type JsonSchemaProperties = Record<string, JSONSchema>;
+
+/**
+ * JSON Schema type union
+ */
+type JsonSchemaType = JSONSchema['type'];
 
 /**
  * Valid locations for parameters in requests

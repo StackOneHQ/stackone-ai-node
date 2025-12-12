@@ -3,21 +3,20 @@
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
-	"scripts": {
-		"lint": "oxlint --max-warnings=0 --type-aware --type-check",
-		"format": "oxlint --max-warnings=0 --type-aware --type-check --fix"
-	},
 	"dependencies": {
-		"@stackone/ai": "workspace:*"
-	},
-	"devDependencies": {
 		"@ai-sdk/openai": "catalog:dev",
+		"@anthropic-ai/claude-agent-sdk": "catalog:examples",
 		"@anthropic-ai/sdk": "catalog:peer",
 		"@clack/prompts": "catalog:dev",
-		"@types/node": "catalog:dev",
+		"@stackone/ai": "workspace:*",
+		"@tanstack/ai": "catalog:examples",
+		"@tanstack/ai-openai": "catalog:examples",
 		"ai": "catalog:peer",
-		"openai": "catalog:peer",
-		"zod": "catalog:dev"
+		"openai": "catalog:peer"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:dev",
+		"msw": "catalog:dev"
 	},
 	"devEngines": {
 		"runtime": [

@@ -41,6 +41,30 @@ export const openaiHandlers = [
 			});
 		}
 
+		// For openai-responses-integration.ts
+		if (hasTools && userMessage.includes('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA')) {
+			return HttpResponse.json({
+				id: 'resp_mock_responses',
+				object: 'response',
+				created_at: Date.now(),
+				model: 'gpt-5',
+				status: 'completed',
+				output: [
+					{
+						type: 'function_call',
+						id: 'call_mock_get',
+						call_id: 'call_mock_get',
+						name: 'bamboohr_get_employee',
+						arguments: JSON.stringify({
+							id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+						}),
+						status: 'completed',
+					},
+				],
+				usage: { input_tokens: 100, output_tokens: 50, total_tokens: 150 },
+			});
+		}
+
 		// For human-in-the-loop.ts
 		if (hasTools && userMessage.includes('Create a new employee')) {
 			return HttpResponse.json({

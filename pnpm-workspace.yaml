@@ -7,10 +7,10 @@ catalogMode: strict
 catalogs:
   dev:
     '@ai-sdk/openai': ^2.0.80
-    '@clack/prompts': ^0.11.0
+    '@ai-sdk/provider': ^2.0.0
     '@ai-sdk/provider-utils': ^3.0.18
+    '@clack/prompts': ^0.11.0
     '@hono/mcp': ^0.1.4
-    '@types/json-schema': ^7.0.15
     '@types/node': ^22.13.5
     '@typescript/native-preview': ^7.0.0-dev.20251209.1
     '@vitest/coverage-v8': ^4.0.15
@@ -27,6 +27,10 @@ catalogs:
     unplugin-unused: ^0.5.4
     vitest: ^4.0.15
     zod: ^4.1.13
+  examples:
+    '@anthropic-ai/claude-agent-sdk': ^0.1.67
+    '@tanstack/ai': ^0.0.3
+    '@tanstack/ai-openai': ^0.0.3
   peer:
     '@anthropic-ai/sdk': ^0.52.0
     ai: ^5.0.108
@@ -35,11 +39,15 @@ catalogs:
     '@modelcontextprotocol/sdk': ^1.24.3
     '@orama/orama': ^3.1.11
     defu: ^6.1.4
-    json-schema: ^0.4.0
 
 enablePrePostScripts: true
 
 minimumReleaseAge: 1440
+
+minimumReleaseAgeExclude:
+  - '@anthropic-ai/claude-agent-sdk'
+  - '@tanstack/ai'
+  - '@tanstack/ai-openai'
 
 onlyBuiltDependencies:
   - esbuild
