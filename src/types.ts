@@ -19,6 +19,8 @@ type Headers = Record<string, string>;
 /**
  * JSON Schema type for defining tool input/output schemas as raw JSON Schema objects.
  * This allows tools to be defined without Zod when you have JSON Schema definitions available.
+ *
+ * @see https://github.com/TanStack/ai/blob/049eb8acd83e6d566c6040c0c4cb53dbe222d46a/packages/typescript/ai/src/types.ts#L5C1-L49C1
  */
 export interface JSONSchema {
 	type?: string | Array<string>;
