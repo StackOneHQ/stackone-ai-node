@@ -1,5 +1,13 @@
 /**
  * This example shows how to use StackOne tools with the AI SDK.
+ *
+ * The AI SDK provides an agent-like pattern through the `stopWhen` parameter
+ * with `stepCountIs()`. This creates a multi-step tool loop where the model
+ * can autonomously call tools and reason over results until the stop condition
+ * is met.
+ *
+ * In AI SDK v6+, you can use the `ToolLoopAgent` class for more explicit
+ * agent functionality.
  */
 
 import assert from 'node:assert';
