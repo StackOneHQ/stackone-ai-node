@@ -26,21 +26,6 @@ pnpm add @stackone/ai
 bun add @stackone/ai
 ```
 
-### Optional: AI SDK Integration
-
-If you plan to use the AI SDK integration (Vercel AI SDK), install it separately:
-
-```bash
-# Using npm
-npm install ai
-
-# Using yarn
-yarn add ai
-
-# Using pnpm
-pnpm add ai
-```
-
 ## Usage
 
 ```typescript
