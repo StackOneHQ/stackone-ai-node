@@ -55,7 +55,7 @@ const tanstackAiIntegration = async (): Promise<void> => {
 	const adapter = openai();
 	const stream = chat({
 		adapter,
-		model: 'gpt-4o',
+		model: 'gpt-5.1',
 		messages: [
 			{
 				role: 'user',
