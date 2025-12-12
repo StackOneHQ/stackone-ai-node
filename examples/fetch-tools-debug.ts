@@ -11,7 +11,7 @@
  *
  * Run with:
  * ```bash
- * npx tsx examples/interactive-cli.ts
+ * node --env-files=.env examples/interactive-cli.ts
  * ```
  */
 
