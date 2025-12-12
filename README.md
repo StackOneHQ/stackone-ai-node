@@ -26,6 +26,61 @@ pnpm add @stackone/ai
 bun add @stackone/ai
 ```
 
+## Usage
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet({
+  baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
+});
+
+const tools = await toolset.fetchTools();
+const employeeTool = tools.getTool("bamboohr_list_employees");
+const employees = await employeeTool.execute();
+```
+
+[View full example](examples/index.ts)
+
+### Authentication
+
+Set the `STACKONE_API_KEY` environment variable:
+
+```bash
+export STACKONE_API_KEY=<your-api-key>
+```
+
+or load from a .env file using your preferred environment variable library.
+
+### Account IDs
+
+StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels:
+
+```typescript
+import { StackOneToolSet } from "@stackone/ai";
+
+// Single account - simplest approach
+const toolset = new StackOneToolSet({ accountId: "your-bamboohr-account" });
+const tools = await toolset.fetchTools();
+
+// Multiple accounts - returns tools from both integrations
+const multiAccountToolset = new StackOneToolSet();
+const allTools = await multiAccountToolset.fetchTools({
+  accountIds: ["bamboohr-account-123", "workday-account-456"],
+});
+
+// Filter to specific integration when using multiple accounts
+const bamboohrOnly = await multiAccountToolset.fetchTools({
+  accountIds: ["bamboohr-account-123", "workday-account-456"],
+  actions: ["bamboohr_*"], // Only BambooHR tools
+});
+
+// Set directly on a tool instance
+tools.setAccountId("direct-account-id");
+const currentAccountId = tools.getAccountId(); // Get the current account ID
+```
+
 ## Integrations
 
 The StackOneToolSet makes it super easy to use StackOne APIs as tools in your AI applications.
@@ -167,61 +222,6 @@ await generateText({
 [View full example](examples/ai-sdk-integration.ts)
 
 </details>
-
-## Usage
-
-```typescript
-import { StackOneToolSet } from "@stackone/ai";
-
-const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
-});
-
-const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("bamboohr_list_employees");
-const employees = await employeeTool.execute();
-```
-
-[View full example](examples/index.ts)
-
-### Authentication
-
-Set the `STACKONE_API_KEY` environment variable:
-
-```bash
-export STACKONE_API_KEY=<your-api-key>
-```
-
-or load from a .env file using your preferred environment variable library.
-
-### Account IDs
-
-StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels:
-
-```typescript
-import { StackOneToolSet } from "@stackone/ai";
-
-// Single account - simplest approach
-const toolset = new StackOneToolSet({ accountId: "your-bamboohr-account" });
-const tools = await toolset.fetchTools();
-
-// Multiple accounts - returns tools from both integrations
-const multiAccountToolset = new StackOneToolSet();
-const allTools = await multiAccountToolset.fetchTools({
-  accountIds: ["bamboohr-account-123", "workday-account-456"],
-});
-
-// Filter to specific integration when using multiple accounts
-const bamboohrOnly = await multiAccountToolset.fetchTools({
-  accountIds: ["bamboohr-account-123", "workday-account-456"],
-  actions: ["bamboohr_*"], // Only BambooHR tools
-});
-
-// Set directly on a tool instance
-tools.setAccountId("direct-account-id");
-const currentAccountId = tools.getAccountId(); // Get the current account ID
-```
 
 ## Features
 
