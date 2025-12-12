@@ -1,5 +1,6 @@
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
+import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
 import type {
@@ -164,7 +165,7 @@ export class BaseTool {
 	}
 
 	/**
-	 * Convert the tool to OpenAI format
+	 * Convert the tool to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool {
 		return {
@@ -177,6 +178,26 @@ export class BaseTool {
 					properties: this.parameters.properties,
 					required: this.parameters.required,
 				},
+			},
+		};
+	}
+
+	/**
+	 * Convert the tool to OpenAI Responses API format
+	 * @see https://platform.openai.com/docs/api-reference/responses
+	 */
+	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool {
+		const { strict = true } = options;
+		return {
+			type: 'function',
+			name: this.name,
+			description: this.description,
+			strict,
+			parameters: {
+				type: 'object',
+				properties: this.parameters.properties,
+				required: this.parameters.required,
+				...(strict ? { additionalProperties: false } : {}),
 			},
 		};
 	}
@@ -352,10 +373,18 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Convert all tools to OpenAI format
+	 * Convert all tools to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool[] {
 		return this.tools.map((tool) => tool.toOpenAI());
+	}
+
+	/**
+	 * Convert all tools to OpenAI Responses API format
+	 * @see https://platform.openai.com/docs/api-reference/responses
+	 */
+	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool[] {
+		return this.tools.map((tool) => tool.toOpenAIResponses(options));
 	}
 
 	/**
@@ -453,9 +482,9 @@ type OramaDb = ReturnType<typeof orama.create>;
 function initializeTfidfIndex(tools: BaseTool[]): TfidfIndex {
 	const index = new TfidfIndex();
 	const corpus = tools.map((tool) => {
-		// Extract category from tool name (e.g., 'hris_create_employee' -> 'hris')
+		// Extract integration from tool name (e.g., 'bamboohr_create_employee' -> 'bamboohr')
 		const parts = tool.name.split('_');
-		const category = parts[0];
+		const integration = parts[0];
 
 		// Extract action type
 		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
@@ -464,7 +493,7 @@ function initializeTfidfIndex(tools: BaseTool[]): TfidfIndex {
 		// Build text corpus for TF-IDF (similar weighting strategy as in tool-calling-evals)
 		const text = [
 			`${tool.name} ${tool.name} ${tool.name}`, // boost name
-			`${category} ${actions.join(' ')}`,
+			`${integration} ${actions.join(' ')}`,
 			tool.description,
 			parts.join(' '),
 		].join(' ');
@@ -489,7 +518,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 		schema: {
 			name: 'string' as const,
 			description: 'string' as const,
-			category: 'string' as const,
+			integration: 'string' as const,
 			tags: 'string[]' as const,
 		},
 		components: {
@@ -501,9 +530,9 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 
 	// Index all tools
 	for (const tool of tools) {
-		// Extract category from tool name (e.g., 'hris_create_employee' -> 'hris')
+		// Extract integration from tool name (e.g., 'bamboohr_create_employee' -> 'bamboohr')
 		const parts = tool.name.split('_');
-		const category = parts[0];
+		const integration = parts[0];
 
 		// Extract action type
 		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
@@ -512,7 +541,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 		await orama.insert(oramaDb, {
 			name: tool.name,
 			description: tool.description,
-			category: category,
+			integration: integration,
 			tags: [...parts, ...actions],
 		});
 	}

@@ -47,7 +47,7 @@ console.log(`Loaded ${toolsByProviders.length} tools for HiBob and BambooHR`);
 // Example 5: Filter by actions with exact match
 console.log('\n=== Example 5: Filter by actions (exact match) ===');
 const toolsByActions = await toolset.fetchTools({
-	actions: ['hris_list_employees', 'hris_create_employee'],
+	actions: ['bamboohr_list_employees', 'bamboohr_create_employee'],
 });
 console.log(`Loaded ${toolsByActions.length} tools matching exact action names`);
 
@@ -71,9 +71,9 @@ console.log(
 
 // Execute a tool
 console.log('\n=== Executing a tool ===');
-const tool = allTools.getTool('hris_list_employees');
+const tool = allTools.getTool('bamboohr_list_employees');
 if (!tool) {
-	throw new Error('Tool hris_list_employees not found in the catalog');
+	throw new Error('Tool bamboohr_list_employees not found in the catalog');
 }
 
 const result = await tool.execute({

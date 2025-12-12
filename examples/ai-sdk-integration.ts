@@ -15,7 +15,7 @@ if (!apiKey) {
 }
 
 // Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
+const accountId = 'your-bamboohr-account-id';
 
 const aiSdkIntegration = async (): Promise<void> => {
 	// Initialise StackOne
@@ -24,10 +24,8 @@ const aiSdkIntegration = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch HRIS tools via MCP
-	const tools = await toolset.fetchTools({
-		actions: ['hris_get_*'],
-	});
+	// Fetch all tools for this account via MCP
+	const tools = await toolset.fetchTools();
 
 	// Convert to AI SDK tools
 	const aiSdkTools = await tools.toAISDK();

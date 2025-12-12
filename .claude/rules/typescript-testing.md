@@ -1,13 +1,13 @@
 ---
-name: typescript-testing
 description: Use when writing or running tests. Covers Vitest commands, MSW HTTP mocking, fs-fixture for file system tests. (project)
-globs: "*.test.ts"
 alwaysApply: false
+paths: "**/*.test.ts"
+globs: "*.test.ts"
 ---
 
 # TypeScript Testing with Vitest and MSW
 
-This skill guides testing practices for the StackOne SDK using Vitest test runner and Mock Service Worker (MSW) for HTTP mocking.
+This rule guides testing practices for the StackOne SDK using Vitest test runner and Mock Service Worker (MSW) for HTTP mocking.
 
 ## Testing Framework
 
@@ -116,7 +116,7 @@ it('should save file to disk', async () => {
 
 **Reference:** See `node_modules/fs-fixture/README.md` for full API and advanced usage
 
-## Test Organization
+## Test Organisation
 
 - Use snapshot testing for generated outputs
 - Comprehensive unit tests for parsing logic
@@ -127,6 +127,6 @@ it('should save file to disk', async () => {
 
 - Run tests frequently during development
 - Maintain >90% code coverage for core modules
-- Use descriptive test names that explain the behavior being tested
+- Use descriptive test names that explain the behaviour being tested
 - Keep tests isolated and independent
 - Clean up MSW overrides automatically via global hooks

@@ -67,18 +67,17 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
 });
 
-const tools = await toolset.fetchTools({
-  actions: ["hris_*"],
-});
+const tools = await toolset.fetchTools();
 
 await openai.chat.completions.create({
   model: "gpt-5.1",
   messages: [
     {
       role: "system",
-      content: "You are a helpful HR assistant.",
+      content: "You are a helpful HR assistant using BambooHR.",
     },
     {
       role: "user",
@@ -100,11 +99,10 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
 });
 
-const tools = await toolset.fetchTools({
-  actions: ["hris_*"],
-});
+const tools = await toolset.fetchTools();
 
 await generateText({
   model: openai("gpt-5.1"),
@@ -122,10 +120,11 @@ import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("hris_list_employees");
+const employeeTool = tools.getTool("bamboohr_list_employees");
 const employees = await employeeTool.execute();
 ```
 
@@ -148,19 +147,26 @@ StackOne uses account IDs to identify different integrations. You can specify th
 ```typescript
 import { StackOneToolSet } from "@stackone/ai";
 
-// Method 1: Set at toolset initialisation
-const toolset = new StackOneToolSet({ accountId: "your-account-id" });
-
-// Method 2: Use setAccounts for filtering when fetching
-toolset.setAccounts(["account-123", "account-456"]);
+// Single account - simplest approach
+const toolset = new StackOneToolSet({ accountId: "your-bamboohr-account" });
 const tools = await toolset.fetchTools();
 
-// Method 3: Set directly on a tool instance
+// Multiple accounts - returns tools from both integrations
+const multiAccountToolset = new StackOneToolSet();
+const allTools = await multiAccountToolset.fetchTools({
+  accountIds: ["bamboohr-account-123", "workday-account-456"],
+});
+
+// Filter to specific integration when using multiple accounts
+const bamboohrOnly = await multiAccountToolset.fetchTools({
+  accountIds: ["bamboohr-account-123", "workday-account-456"],
+  actions: ["bamboohr_*"], // Only BambooHR tools
+});
+
+// Set directly on a tool instance
 tools.setAccountId("direct-account-id");
 const currentAccountId = tools.getAccountId(); // Get the current account ID
 ```
-
-[View full example](examples/account-id-usage.ts)
 
 ## Features
 
@@ -265,7 +271,7 @@ const searchResult = await filterTool.execute({
 // Step 2: Execute a discovered tool
 const executeTool = metaTools.getTool("meta_execute_tool");
 const result = await executeTool.execute({
-  toolName: "hris_create_time_off",
+  toolName: "bamboohr_create_time_off",
   params: {
     employeeId: "emp_123",
     startDate: "2024-01-15",
@@ -299,7 +305,7 @@ const toolset = new StackOneToolSet({
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("hris_list_employees");
+const employeeTool = tools.getTool("bamboohr_list_employees");
 
 // Use dryRun to see the request details
 const dryRunResult = await employeeTool.execute(
@@ -372,7 +378,7 @@ const feedbackTool = tools.getTool("meta_collect_tool_feedback");
 const result = await feedbackTool.execute({
   feedback: "The tools worked great! Very easy to use.",
   account_id: "acc_123456",
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
+  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
 });
 ```
 
@@ -385,14 +391,14 @@ The feedback tool supports both single and multiple account IDs. When you provid
 await feedbackTool.execute({
   feedback: "The tools worked great! Very easy to use.",
   account_id: "acc_123456",
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
+  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
 });
 
 // Multiple account IDs (array)
 await feedbackTool.execute({
   feedback: "The tools worked great! Very easy to use.",
   account_id: ["acc_123456", "acc_789012"],
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
+  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
 });
 ```
 

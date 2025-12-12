@@ -33,7 +33,7 @@
 import process from 'node:process';
 
 // Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
+const accountId = 'your-bamboohr-account-id';
 
 /**
  * # Quickstart
@@ -54,17 +54,15 @@ const quickstart = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch HRIS-related tools via MCP
-	const tools = await toolset.fetchTools({
-		actions: ['hris_*'],
-	});
+	// Fetch all tools for this account via MCP
+	const tools = await toolset.fetchTools();
 
 	// Verify we have tools
-	assert(tools.length > 0, 'Expected to find HRIS tools');
+	assert(tools.length > 0, 'Expected to find tools');
 
 	// Use a specific tool
-	const employeeTool = tools.getTool('hris_list_employees');
-	assert(employeeTool !== undefined, 'Expected to find hris_list_employees tool');
+	const employeeTool = tools.getTool('bamboohr_list_employees');
+	assert(employeeTool !== undefined, 'Expected to find bamboohr_list_employees tool');
 
 	// Execute the tool and verify the response
 	const result = await employeeTool.execute();

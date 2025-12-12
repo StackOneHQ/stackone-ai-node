@@ -1,11 +1,11 @@
 import { defu } from 'defu';
 import type { Arrayable } from 'type-fest';
-import { DEFAULT_BASE_URL } from './consts';
+import { DEFAULT_BASE_URL, UNIFIED_API_PREFIX } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
-import { BaseTool, type StackOneTool, Tools } from './tool';
+import { BaseTool, Tools } from './tool';
 import type {
 	ExecuteOptions,
 	JsonDict,
@@ -121,18 +121,6 @@ interface FetchToolsOptions {
 	 * @example ['*_list_employees', 'hibob_create_employees']
 	 */
 	actions?: string[];
-}
-
-/**
- * Configuration for workflow
- */
-interface WorkflowConfig {
-	key: string;
-	input: string;
-	model: string;
-	tools: string[];
-	accountIds: string[];
-	cache?: boolean;
 }
 
 /**
@@ -286,6 +274,19 @@ export class StackOneToolSet {
 	}
 
 	/**
+	 * Validate that tool name is not from unified API
+	 * Unified API tools indicate missing or incorrect account configuration
+	 */
+	private validateToolName(toolName: string): void {
+		if (toolName.startsWith(UNIFIED_API_PREFIX)) {
+			throw new ToolSetConfigError(
+				`Received unified API tool "${toolName}". This indicates the account is not properly configured. ` +
+					`Unified API tools require versioned connectors. Please check your account's integration setup.`,
+			);
+		}
+	}
+
+	/**
 	 * Fetch tool definitions from MCP
 	 */
 	private async fetchToolsFromMcp(): Promise<Tools> {
@@ -302,14 +303,16 @@ export class StackOneToolSet {
 		const listToolsResult = await clients.client.listTools();
 		const actionsClient = this.getActionsClient();
 
-		const tools = listToolsResult.tools.map(({ name, description, inputSchema }) =>
-			this.createRpcBackedTool({
+		const tools = listToolsResult.tools.map(({ name, description, inputSchema }) => {
+			this.validateToolName(name);
+
+			return this.createRpcBackedTool({
 				actionsClient,
 				name,
 				description,
 				inputSchema,
-			}),
-		);
+			});
+		});
 
 		return new Tools(tools);
 	}
@@ -550,14 +553,5 @@ export class StackOneToolSet {
 			return value as JsonDict;
 		}
 		return undefined;
-	}
-
-	/**
-	 * Plan a workflow
-	 * @param config Configuration object containing workflow details
-	 * @returns Workflow object
-	 */
-	plan(_: WorkflowConfig): Promise<StackOneTool> {
-		throw new Error('Not implemented yet');
 	}
 }
