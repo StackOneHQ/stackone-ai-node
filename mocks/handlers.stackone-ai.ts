@@ -73,7 +73,7 @@ export const stackoneAiHandlers = [
 		return HttpResponse.json({
 			openapi: '3.0.0',
 			info: { title: 'StackOne HRIS API', version: '1.0.0' },
-			servers: [{ url: 'https://api.stackone.com/unified' }],
+			servers: [{ url: 'https://api.stackone.com' }],
 			paths: {
 				'/hris/employees': {
 					get: {
