@@ -1,4 +1,3 @@
-import type { jsonSchema } from 'ai';
 import type { JSONSchema7 as AISDKJSONSchema } from '@ai-sdk/provider';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import * as orama from '@orama/orama';
@@ -25,6 +24,7 @@ import type {
 
 import { StackOneError } from './utils/errors';
 import { TfidfIndex } from './utils/tfidf-index';
+import { tryImport } from './utils/try-import';
 
 /**
  * JSON Schema with type narrowed to 'object'
@@ -246,17 +246,11 @@ export class BaseTool {
 		} satisfies AISDKJSONSchema;
 
 		/** AI SDK is optional dependency, import only when needed */
-		let jsonSchemaFn: typeof jsonSchema;
-		try {
-			const ai = await import('ai');
-			jsonSchemaFn = ai.jsonSchema;
-		} catch {
-			throw new StackOneError(
-				'AI SDK is not installed. Please install it with: npm install ai@4.x|5.x or pnpm add ai@4.x|5.x',
-			);
-		}
-
-		const schemaObject = jsonSchemaFn(schema);
+		const ai = await tryImport<typeof import('ai')>(
+			'ai',
+			'npm install ai@4.x|5.x or pnpm add ai@4.x|5.x',
+		);
+		const schemaObject = ai.jsonSchema(schema);
 		// TODO: Remove ts-ignore once AISDKToolDefinition properly types the inputSchema and parameters
 		// We avoid defining our own types as much as possible, so we use the AI SDK Tool type
 		// but need to suppress errors for backward compatibility properties
