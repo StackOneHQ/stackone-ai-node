@@ -38,13 +38,11 @@
 		"@modelcontextprotocol/sdk": "catalog:prod",
 		"@orama/orama": "catalog:prod",
 		"defu": "catalog:prod",
-		"json-schema": "catalog:prod",
 		"zod": "catalog:dev"
 	},
 	"devDependencies": {
 		"@ai-sdk/provider-utils": "catalog:dev",
 		"@hono/mcp": "catalog:dev",
-		"@types/json-schema": "catalog:dev",
 		"@types/node": "catalog:dev",
 		"@typescript/native-preview": "catalog:dev",
 		"@vitest/coverage-v8": "catalog:dev",

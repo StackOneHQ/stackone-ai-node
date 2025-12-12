@@ -2,6 +2,7 @@ import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
+import type { OverrideProperties } from 'type-fest';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
 import type {
@@ -13,13 +14,21 @@ import type {
 	Experimental_ToolCreationOptions,
 	HttpExecuteConfig,
 	JsonDict,
+	JSONSchema,
 	LocalExecuteConfig,
 	RpcExecuteConfig,
 	ToolExecution,
 	ToolParameters,
 } from './types';
+
 import { StackOneError } from './utils/errors';
 import { TfidfIndex } from './utils/tfidf-index';
+
+/**
+ * JSON Schema with type narrowed to 'object'
+ * Used for tool parameter schemas which are always objects
+ */
+type ObjectJSONSchema = OverrideProperties<JSONSchema, { type: 'object' }>;
 
 /**
  * Base class for all tools. Provides common functionality for executing API calls
@@ -166,6 +175,18 @@ export class BaseTool {
 	}
 
 	/**
+	 * Convert the tool parameters to a pure JSON Schema format
+	 * This is framework-agnostic and can be used with any LLM that accepts JSON Schema
+	 */
+	toJsonSchema(): ObjectJSONSchema {
+		return {
+			type: 'object',
+			properties: this.parameters.properties,
+			required: this.parameters.required,
+		};
+	}
+
+	/**
 	 * Convert the tool to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool {
@@ -174,11 +195,7 @@ export class BaseTool {
 			function: {
 				name: this.name,
 				description: this.description,
-				parameters: {
-					type: 'object',
-					properties: this.parameters.properties,
-					required: this.parameters.required,
-				},
+				parameters: this.toJsonSchema(),
 			},
 		};
 	}
@@ -191,11 +208,7 @@ export class BaseTool {
 		return {
 			name: this.name,
 			description: this.description,
-			input_schema: {
-				type: 'object',
-				properties: this.parameters.properties,
-				required: this.parameters.required,
-			},
+			input_schema: this.toJsonSchema(),
 		};
 	}
 
@@ -211,9 +224,7 @@ export class BaseTool {
 			description: this.description,
 			strict,
 			parameters: {
-				type: 'object',
-				properties: this.parameters.properties,
-				required: this.parameters.required,
+				...this.toJsonSchema(),
 				...(strict ? { additionalProperties: false } : {}),
 			},
 		};
@@ -387,6 +398,18 @@ export class Tools implements Iterable<BaseTool> {
 	 */
 	getStackOneTools(): StackOneTool[] {
 		return this.tools.filter((tool): tool is StackOneTool => tool instanceof StackOneTool);
+	}
+
+	/**
+	 * Convert all tools to pure JSON Schema format
+	 * Returns an array of objects with name, description, and schema
+	 */
+	toJsonSchema(): Array<{ name: string; description: string; parameters: JSONSchema }> {
+		return this.tools.map((tool) => ({
+			name: tool.name,
+			description: tool.description,
+			parameters: tool.toJsonSchema(),
+		}));
 	}
 
 	/**

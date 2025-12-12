@@ -1,7 +1,11 @@
 import { jsonSchema } from 'ai';
-import type { JSONSchema7 } from 'json-schema';
 import { BaseTool, type MetaToolSearchResult, StackOneTool, Tools } from './tool';
-import { type ExecuteConfig, ParameterLocation, type ToolParameters } from './types';
+import {
+	type ExecuteConfig,
+	type JSONSchema,
+	ParameterLocation,
+	type ToolParameters,
+} from './types';
 import { StackOneAPIError } from './utils/errors';
 
 // Create a mock tool for testing
@@ -1107,11 +1111,10 @@ describe('Schema Validation', () => {
 			);
 
 			const parameters = tool.toOpenAI().function.parameters;
-			expect(parameters).toBeDefined();
-			const properties = parameters?.properties as Record<string, JSONSchema7>;
+			const properties = parameters?.properties as Record<string, JSONSchema>;
 
 			expect(properties.arrayWithItems.items).toBeDefined();
-			expect((properties.arrayWithItems.items as JSONSchema7).type).toBe('number');
+			expect((properties.arrayWithItems.items as JSONSchema).type).toBe('number');
 		});
 
 		it('should handle nested object structure', () => {
@@ -1144,7 +1147,7 @@ describe('Schema Validation', () => {
 
 			const parameters = tool.toOpenAI().function.parameters;
 			expect(parameters).toBeDefined();
-			const properties = parameters?.properties as Record<string, JSONSchema7>;
+			const properties = parameters?.properties as Record<string, JSONSchema>;
 			const nestedObject = properties.nestedObject;
 
 			expect(nestedObject.type).toBe('object');
@@ -1185,7 +1188,7 @@ describe('Schema Validation', () => {
 			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
 			const arrayWithItems = toolObj.inputSchema.jsonSchema.properties?.arrayWithItems;
 			expect(arrayWithItems?.type).toBe('array');
-			expect((arrayWithItems?.items as JSONSchema7)?.type).toBe('string');
+			expect((arrayWithItems?.items as JSONSchema)?.type).toBe('string');
 		});
 
 		it('should handle nested filter object for AI SDK', async () => {
@@ -1220,14 +1223,14 @@ describe('Schema Validation', () => {
 
 			const parameters = tool.toOpenAI().function.parameters;
 			expect(parameters).toBeDefined();
-			const aiSchema = jsonSchema(parameters as JSONSchema7);
+			const aiSchema = jsonSchema(parameters as JSONSchema);
 			expect(aiSchema).toBeDefined();
 
 			const aiSdkTool = await tool.toAISDK();
 			// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
 			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
 			const filterProp = aiSdkTool[tool.name].inputSchema.jsonSchema.properties?.filter as
-				| (JSONSchema7 & { properties: Record<string, JSONSchema7> })
+				| (JSONSchema & { properties: Record<string, JSONSchema> })
 				| undefined;
 
 			expect(filterProp?.type).toBe('object');
