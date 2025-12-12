@@ -11,18 +11,18 @@ import { StackOneToolSet } from '@stackone/ai';
 import { generateText, stepCountIs } from 'ai';
 
 // Replace with your actual account IDs from StackOne dashboard
-const atsAccountId = 'your-ats-account-id';
-const hrisAccountId = 'your-hris-account-id';
+const workdayAccountId = 'your-workday-account-id';
+const bamboohrAccountId = 'your-bamboohr-account-id';
 
 export const planningModule = async (): Promise<void> => {
 	const toolset = new StackOneToolSet();
 
 	const onboardWorkflow = await toolset.plan({
 		key: 'custom_onboarding',
-		input: 'Onboard the last new hire from Teamtailor to Workday',
+		input: 'Onboard the last new hire from Workday to BambooHR',
 		model: 'stackone-planner-latest',
-		tools: ['hris_*', 'ats_*'],
-		accountIds: [atsAccountId, hrisAccountId],
+		tools: ['bamboohr_*', 'workday_*'],
+		accountIds: [workdayAccountId, bamboohrAccountId],
 		cache: true, // saves the plan to $HOME/.stackone/plans
 	});
 

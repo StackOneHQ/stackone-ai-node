@@ -147,51 +147,51 @@ describe('TF-IDF Index - Tool Name Scenarios', () => {
 	test('handles tool names with underscores', () => {
 		const index = new TfidfIndex();
 		index.build([
-			{ id: 'hris_create_employee', text: 'hris_create_employee create employee hris' },
-			{ id: 'hris_list_employees', text: 'hris_list_employees list employees hris' },
-			{ id: 'ats_create_candidate', text: 'ats_create_candidate create candidate ats' },
+			{ id: 'bamboohr_create_employee', text: 'bamboohr_create_employee create employee bamboohr' },
+			{ id: 'bamboohr_list_employees', text: 'bamboohr_list_employees list employees bamboohr' },
+			{ id: 'workday_create_candidate', text: 'workday_create_candidate create candidate workday' },
 		]);
 
 		// Search for terms that appear in tool names
-		const results = index.search('hris create employee');
+		const results = index.search('bamboohr create employee');
 
 		expect(results.length).toBeGreaterThan(0);
-		// The HRIS create employee tool should be highly ranked
+		// The BambooHR create employee tool should be highly ranked
 		const topIds = results.slice(0, 2).map((r) => r.id);
-		expect(topIds).toContain('hris_create_employee');
+		expect(topIds).toContain('bamboohr_create_employee');
 	});
 
 	test('finds relevant tools with multiple query terms', () => {
 		const index = new TfidfIndex();
 		index.build([
-			{ id: 'hris_create_employee', text: 'create employee hris system' },
-			{ id: 'hris_list_employees', text: 'list employees hris system' },
-			{ id: 'ats_create_candidate', text: 'create candidate ats system' },
-			{ id: 'crm_list_contacts', text: 'list contacts crm system' },
+			{ id: 'bamboohr_create_employee', text: 'create employee bamboohr system' },
+			{ id: 'bamboohr_list_employees', text: 'list employees bamboohr system' },
+			{ id: 'workday_create_candidate', text: 'create candidate workday system' },
+			{ id: 'salesforce_list_contacts', text: 'list contacts salesforce system' },
 		]);
 
-		const results = index.search('employee hris');
+		const results = index.search('employee bamboohr');
 
 		expect(results.length).toBeGreaterThan(0);
-		// HRIS employee tools should be top ranked
+		// BambooHR employee tools should be top ranked
 		const topIds = results.slice(0, 2).map((r) => r.id);
-		expect(topIds.some((id) => id.includes('hris') && id.includes('employee'))).toBe(true);
+		expect(topIds.some((id) => id.includes('bamboohr') && id.includes('employee'))).toBe(true);
 	});
 
 	test('ranks by action type (create, list, etc)', () => {
 		const index = new TfidfIndex();
 		index.build([
-			{ id: 'hris_create_employee', text: 'create employee record' },
-			{ id: 'hris_update_employee', text: 'update employee record' },
-			{ id: 'hris_delete_employee', text: 'delete employee record' },
-			{ id: 'hris_list_employees', text: 'list employee records' },
+			{ id: 'bamboohr_create_employee', text: 'create employee record' },
+			{ id: 'bamboohr_update_employee', text: 'update employee record' },
+			{ id: 'bamboohr_delete_employee', text: 'delete employee record' },
+			{ id: 'bamboohr_list_employees', text: 'list employee records' },
 		]);
 
 		const results = index.search('create employee');
 
 		expect(results.length).toBeGreaterThan(0);
 		// create_employee should be top result
-		expect(results[0]?.id).toBe('hris_create_employee');
+		expect(results[0]?.id).toBe('bamboohr_create_employee');
 	});
 });
 

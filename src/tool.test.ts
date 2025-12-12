@@ -489,7 +489,7 @@ const createMockTools = (): BaseTool[] => {
 	// HRIS tools
 	tools.push(
 		new BaseTool(
-			'hris_create_employee',
+			'bamboohr_create_employee',
 			'Create a new employee record in the HRIS system',
 			{
 				type: 'object',
@@ -511,7 +511,7 @@ const createMockTools = (): BaseTool[] => {
 
 	tools.push(
 		new BaseTool(
-			'hris_list_employees',
+			'bamboohr_list_employees',
 			'List all employees in the HRIS system',
 			{
 				type: 'object',
@@ -537,7 +537,7 @@ const createMockTools = (): BaseTool[] => {
 
 	tools.push(
 		new BaseTool(
-			'hris_create_time_off',
+			'bamboohr_create_time_off',
 			'Create a time off request for an employee',
 			{
 				type: 'object',
@@ -561,7 +561,7 @@ const createMockTools = (): BaseTool[] => {
 	// ATS tools
 	tools.push(
 		new BaseTool(
-			'ats_create_candidate',
+			'workday_create_candidate',
 			'Create a new candidate in the ATS',
 			{
 				type: 'object',
@@ -583,7 +583,7 @@ const createMockTools = (): BaseTool[] => {
 
 	tools.push(
 		new BaseTool(
-			'ats_list_candidates',
+			'workday_list_candidates',
 			'List all candidates in the ATS',
 			{
 				type: 'object',
@@ -610,7 +610,7 @@ const createMockTools = (): BaseTool[] => {
 	// CRM tools
 	tools.push(
 		new BaseTool(
-			'crm_create_contact',
+			'salesforce_create_contact',
 			'Create a new contact in the CRM',
 			{
 				type: 'object',
@@ -662,12 +662,12 @@ describe('Meta Search Tools', () => {
 	});
 
 	describe('meta_search_tools', () => {
-		it('should find relevant HRIS tools', async () => {
+		it('should find relevant BambooHR tools', async () => {
 			const filterTool = metaTools.getTool('meta_search_tools');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
-				query: 'manage employees in HRIS',
+				query: 'manage employees in bamboohr',
 				limit: 5,
 			});
 
@@ -677,8 +677,8 @@ describe('Meta Search Tools', () => {
 			const toolResults = result.tools as MetaToolSearchResult[];
 			const toolNames = toolResults.map((t) => t.name);
 
-			expect(toolNames).toContain('hris_create_employee');
-			expect(toolNames).toContain('hris_list_employees');
+			expect(toolNames).toContain('bamboohr_create_employee');
+			expect(toolNames).toContain('bamboohr_list_employees');
 		});
 
 		it('should find time off related tools', async () => {
@@ -693,7 +693,7 @@ describe('Meta Search Tools', () => {
 			const toolResults = result.tools as MetaToolSearchResult[];
 			const toolNames = toolResults.map((t) => t.name);
 
-			expect(toolNames).toContain('hris_create_time_off');
+			expect(toolNames).toContain('bamboohr_create_time_off');
 		});
 
 		it('should respect limit parameter', async () => {
@@ -770,7 +770,7 @@ describe('Meta Search Tools', () => {
 			const toolNames = toolResults.map((t) => t.name);
 
 			const hasCandidateTool = toolNames.some(
-				(name) => name === 'ats_create_candidate' || name === 'ats_list_candidates',
+				(name) => name === 'workday_create_candidate' || name === 'workday_list_candidates',
 			);
 			expect(hasCandidateTool).toBe(true);
 		});
@@ -782,7 +782,7 @@ describe('Meta Search Tools', () => {
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute({
-				toolName: 'hris_list_employees',
+				toolName: 'bamboohr_list_employees',
 				params: { limit: 10 },
 			});
 
@@ -794,7 +794,7 @@ describe('Meta Search Tools', () => {
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute({
-				toolName: 'hris_create_employee',
+				toolName: 'bamboohr_create_employee',
 				params: {
 					name: 'John Doe',
 					email: 'john@example.com',
@@ -825,7 +825,7 @@ describe('Meta Search Tools', () => {
 
 			const result = await executeTool.execute(
 				JSON.stringify({
-					toolName: 'crm_create_contact',
+					toolName: 'salesforce_create_contact',
 					params: {
 						name: 'Jane Smith',
 						company: 'Acme Corp',
@@ -844,7 +844,7 @@ describe('Meta Search Tools', () => {
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute({
-				toolName: 'ats_list_candidates',
+				toolName: 'workday_list_candidates',
 				params: { status: 'active' },
 			});
 
@@ -869,7 +869,7 @@ describe('Meta Search Tools', () => {
 			expect(toolResults.length).toBeGreaterThan(0);
 
 			// Find the create employee tool
-			const createEmployeeTool = toolResults.find((t) => t.name === 'hris_create_employee');
+			const createEmployeeTool = toolResults.find((t) => t.name === 'bamboohr_create_employee');
 			assert(createEmployeeTool, 'createEmployeeTool should be defined');
 
 			// Step 2: Execute the discovered tool
@@ -924,7 +924,7 @@ describe('Meta Search Tools', () => {
 			expect(aiSdkTools.meta_search_tools.execute).toBeDefined();
 
 			const result = await aiSdkTools.meta_search_tools.execute?.(
-				{ query: 'ATS candidates', limit: 2 },
+				{ query: 'workday candidates', limit: 2 },
 				{ toolCallId: 'test-call-1', messages: [] },
 			);
 			expect(result).toBeDefined();
@@ -933,7 +933,7 @@ describe('Meta Search Tools', () => {
 			expect(Array.isArray(toolResults)).toBe(true);
 
 			const toolNames = toolResults.map((t) => t.name);
-			expect(toolNames).toContain('ats_create_candidate');
+			expect(toolNames).toContain('workday_create_candidate');
 		});
 	});
 });
@@ -970,7 +970,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 
 			const toolResults = result.tools as MetaToolSearchResult[];
 			const toolNames = toolResults.map((t) => t.name);
-			expect(toolNames).toContain('ats_create_candidate');
+			expect(toolNames).toContain('workday_create_candidate');
 		});
 
 		it('should combine BM25 and TF-IDF scores', async () => {
@@ -1006,7 +1006,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 
 			const toolResults = result.tools as MetaToolSearchResult[];
 			const toolNames = toolResults.map((t) => t.name);
-			expect(toolNames).toContain('hris_create_time_off');
+			expect(toolNames).toContain('bamboohr_create_time_off');
 		});
 	});
 });

@@ -54,7 +54,7 @@ export const openaiHandlers = [
 						type: 'function_call',
 						id: 'call_mock_create',
 						call_id: 'call_mock_create',
-						name: 'hris_create_employee',
+						name: 'bamboohr_create_employee',
 						arguments: JSON.stringify({
 							name: 'John Doe',
 							personal_email: 'john.doe@example.com',
@@ -100,7 +100,7 @@ export const openaiHandlers = [
 			'';
 		const hasTools = body.tools && body.tools.length > 0;
 
-		// For openai-integration.ts - returns tool call for hris_get_employee
+		// For openai-integration.ts - returns tool call for bamboohr_get_employee
 		if (hasTools && userMessage.includes('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA')) {
 			return HttpResponse.json({
 				id: 'chatcmpl-mock',
@@ -118,7 +118,7 @@ export const openaiHandlers = [
 									id: 'call_mock',
 									type: 'function',
 									function: {
-										name: 'hris_get_employee',
+										name: 'bamboohr_get_employee',
 										arguments: JSON.stringify({
 											id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
 											fields: 'phone_number',
@@ -134,7 +134,7 @@ export const openaiHandlers = [
 			});
 		}
 
-		// For human-in-the-loop.ts - returns tool call for hris_create_employee
+		// For human-in-the-loop.ts - returns tool call for bamboohr_create_employee
 		if (hasTools && userMessage.includes('Create a new employee')) {
 			return HttpResponse.json({
 				id: 'chatcmpl-mock-hitl',
@@ -152,7 +152,7 @@ export const openaiHandlers = [
 									id: 'call_mock_create',
 									type: 'function',
 									function: {
-										name: 'hris_create_employee',
+										name: 'bamboohr_create_employee',
 										arguments: JSON.stringify({
 											name: 'John Doe',
 											personal_email: 'john.doe@example.com',

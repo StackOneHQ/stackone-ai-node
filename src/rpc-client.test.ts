@@ -8,7 +8,7 @@ test('should successfully execute an RPC action', async () => {
 	});
 
 	const response = await client.actions.rpcAction({
-		action: 'hris_get_employee',
+		action: 'bamboohr_get_employee',
 		body: { fields: 'name,email' },
 		path: { id: 'emp-123' },
 	});
@@ -52,7 +52,7 @@ test('should handle list actions with array data', async () => {
 	});
 
 	const response = await client.actions.rpcAction({
-		action: 'hris_list_employees',
+		action: 'bamboohr_list_employees',
 	});
 
 	// Response data can be an array (matches RpcActionResponseData union type)

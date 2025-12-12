@@ -70,7 +70,7 @@ const toolset = new StackOneToolSet({
 });
 
 const tools = await toolset.fetchTools({
-  actions: ["hris_*"],
+  actions: ["bamboohr_*"],
 });
 
 await openai.chat.completions.create({
@@ -78,7 +78,7 @@ await openai.chat.completions.create({
   messages: [
     {
       role: "system",
-      content: "You are a helpful HR assistant.",
+      content: "You are a helpful HR assistant using BambooHR.",
     },
     {
       role: "user",
@@ -103,7 +103,7 @@ const toolset = new StackOneToolSet({
 });
 
 const tools = await toolset.fetchTools({
-  actions: ["hris_*"],
+  actions: ["bamboohr_*"],
 });
 
 await generateText({
@@ -125,7 +125,7 @@ const toolset = new StackOneToolSet({
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("hris_list_employees");
+const employeeTool = tools.getTool("bamboohr_list_employees");
 const employees = await employeeTool.execute();
 ```
 
@@ -265,7 +265,7 @@ const searchResult = await filterTool.execute({
 // Step 2: Execute a discovered tool
 const executeTool = metaTools.getTool("meta_execute_tool");
 const result = await executeTool.execute({
-  toolName: "hris_create_time_off",
+  toolName: "bamboohr_create_time_off",
   params: {
     employeeId: "emp_123",
     startDate: "2024-01-15",
@@ -299,7 +299,7 @@ const toolset = new StackOneToolSet({
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("hris_list_employees");
+const employeeTool = tools.getTool("bamboohr_list_employees");
 
 // Use dryRun to see the request details
 const dryRunResult = await employeeTool.execute(
@@ -372,7 +372,7 @@ const feedbackTool = tools.getTool("meta_collect_tool_feedback");
 const result = await feedbackTool.execute({
   feedback: "The tools worked great! Very easy to use.",
   account_id: "acc_123456",
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
+  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
 });
 ```
 
@@ -385,14 +385,14 @@ The feedback tool supports both single and multiple account IDs. When you provid
 await feedbackTool.execute({
   feedback: "The tools worked great! Very easy to use.",
   account_id: "acc_123456",
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
+  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
 });
 
 // Multiple account IDs (array)
 await feedbackTool.execute({
   feedback: "The tools worked great! Very easy to use.",
   account_id: ["acc_123456", "acc_789012"],
-  tool_names: ["hris_list_employees", "hris_create_time_off"],
+  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
 });
 ```
 

@@ -178,26 +178,34 @@ describe('StackOneToolSet', () => {
 		it('should correctly match glob patterns', () => {
 			const toolset = new TestableStackOneToolSet({ apiKey: 'test_key' });
 
-			expect(toolset.testMatchGlob('hris_get_employee', 'hris_*')).toBe(true);
-			expect(toolset.testMatchGlob('hris_get_employee', 'crm_*')).toBe(false);
-			expect(toolset.testMatchGlob('hris_get_employee', '*_get_*')).toBe(true);
-			expect(toolset.testMatchGlob('hris_get_employee', 'hris_get_?mployee')).toBe(true);
-			expect(toolset.testMatchGlob('hris.get.employee', 'hris.get.employee')).toBe(true);
+			expect(toolset.testMatchGlob('bamboohr_get_employee', 'bamboohr_*')).toBe(true);
+			expect(toolset.testMatchGlob('bamboohr_get_employee', 'salesforce_*')).toBe(false);
+			expect(toolset.testMatchGlob('bamboohr_get_employee', '*_get_*')).toBe(true);
+			expect(toolset.testMatchGlob('bamboohr_get_employee', 'bamboohr_get_?mployee')).toBe(true);
+			expect(toolset.testMatchGlob('bamboohr.get.employee', 'bamboohr.get.employee')).toBe(true);
 		});
 
 		it('should correctly filter tools with a pattern', () => {
 			const toolset = new TestableStackOneToolSet({ apiKey: 'test_key' });
 
-			expect(toolset.testMatchesFilter('hris_get_employee', 'hris_*')).toBe(true);
-			expect(toolset.testMatchesFilter('crm_get_contact', 'hris_*')).toBe(false);
-			expect(toolset.testMatchesFilter('hris_get_employee', ['hris_*', 'crm_*'])).toBe(true);
-			expect(toolset.testMatchesFilter('crm_get_contact', ['hris_*', 'crm_*'])).toBe(true);
-			expect(toolset.testMatchesFilter('ats_get_candidate', ['hris_*', 'crm_*'])).toBe(false);
+			expect(toolset.testMatchesFilter('bamboohr_get_employee', 'bamboohr_*')).toBe(true);
+			expect(toolset.testMatchesFilter('salesforce_get_contact', 'bamboohr_*')).toBe(false);
+			expect(
+				toolset.testMatchesFilter('bamboohr_get_employee', ['bamboohr_*', 'salesforce_*']),
+			).toBe(true);
+			expect(
+				toolset.testMatchesFilter('salesforce_get_contact', ['bamboohr_*', 'salesforce_*']),
+			).toBe(true);
+			expect(
+				toolset.testMatchesFilter('workday_get_candidate', ['bamboohr_*', 'salesforce_*']),
+			).toBe(false);
 
 			// Test negative patterns
-			expect(toolset.testMatchesFilter('hris_get_employee', ['*', '!crm_*'])).toBe(true);
-			expect(toolset.testMatchesFilter('crm_get_contact', ['*', '!crm_*'])).toBe(false);
-			expect(toolset.testMatchesFilter('hris_get_employee', ['*', '!hris_*'])).toBe(false);
+			expect(toolset.testMatchesFilter('bamboohr_get_employee', ['*', '!salesforce_*'])).toBe(true);
+			expect(toolset.testMatchesFilter('salesforce_get_contact', ['*', '!salesforce_*'])).toBe(
+				false,
+			);
+			expect(toolset.testMatchesFilter('bamboohr_get_employee', ['*', '!bamboohr_*'])).toBe(false);
 		});
 	});
 

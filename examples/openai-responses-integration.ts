@@ -20,9 +20,9 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 	// Initialise StackOne
 	const toolset = new StackOneToolSet({ accountId });
 
-	// Fetch HRIS tools via MCP
+	// Fetch tools via MCP
 	const tools = await toolset.fetchTools({
-		actions: ['_list_*'],
+		actions: ['*_list_*'],
 	});
 	const openAIResponsesTools = tools.toOpenAIResponses();
 
@@ -49,7 +49,10 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 	assert(toolCalls.length > 0, 'Expected at least one tool call');
 
 	const toolCall = toolCalls[0];
-	assert(toolCall.name === 'hris_get_employee', 'Expected tool call to be hris_get_employee');
+	assert(
+		toolCall.name === 'bamboohr_get_employee',
+		'Expected tool call to be bamboohr_get_employee',
+	);
 
 	// Parse the arguments to verify they contain the expected fields
 	const args = JSON.parse(toolCall.arguments);

@@ -14,7 +14,7 @@ if (!apiKey) {
 }
 
 // Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
+const accountId = 'your-bamboohr-account-id';
 
 const openaiIntegration = async (): Promise<void> => {
 	// Initialise StackOne
@@ -23,9 +23,9 @@ const openaiIntegration = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch HRIS tools via MCP
+	// Fetch BambooHR tools via MCP
 	const tools = await toolset.fetchTools({
-		actions: ['hris_get_*'],
+		actions: ['bamboohr_get_*'],
 	});
 	const openAITools = tools.toOpenAI();
 
@@ -38,7 +38,7 @@ const openaiIntegration = async (): Promise<void> => {
 		messages: [
 			{
 				role: 'system',
-				content: 'You are a helpful assistant that can access HRIS information.',
+				content: 'You are a helpful assistant that can access BambooHR information.',
 			},
 			{
 				role: 'user',
@@ -58,8 +58,8 @@ const openaiIntegration = async (): Promise<void> => {
 	const toolCall = choice.message.tool_calls[0];
 	assert(toolCall.type === 'function', 'Expected tool call to be a function');
 	assert(
-		toolCall.function.name === 'hris_get_employee',
-		'Expected tool call to be hris_get_employee',
+		toolCall.function.name === 'bamboohr_get_employee',
+		'Expected tool call to be bamboohr_get_employee',
 	);
 
 	// Parse the arguments to verify they contain the expected fields

@@ -43,7 +43,7 @@ export const stackoneRpcHandlers = [
 		}
 
 		// Return mock response based on action
-		if (body.action === 'hris_get_employee') {
+		if (body.action === 'bamboohr_get_employee') {
 			return HttpResponse.json({
 				data: {
 					id: body.path?.id || 'test-id',
@@ -53,7 +53,7 @@ export const stackoneRpcHandlers = [
 			});
 		}
 
-		if (body.action === 'hris_list_employees') {
+		if (body.action === 'bamboohr_list_employees') {
 			return HttpResponse.json({
 				data: [
 					{ id: '1', name: 'Employee 1' },

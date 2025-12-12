@@ -482,9 +482,9 @@ type OramaDb = ReturnType<typeof orama.create>;
 function initializeTfidfIndex(tools: BaseTool[]): TfidfIndex {
 	const index = new TfidfIndex();
 	const corpus = tools.map((tool) => {
-		// Extract category from tool name (e.g., 'hris_create_employee' -> 'hris')
+		// Extract integration from tool name (e.g., 'bamboohr_create_employee' -> 'bamboohr')
 		const parts = tool.name.split('_');
-		const category = parts[0];
+		const integration = parts[0];
 
 		// Extract action type
 		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
@@ -493,7 +493,7 @@ function initializeTfidfIndex(tools: BaseTool[]): TfidfIndex {
 		// Build text corpus for TF-IDF (similar weighting strategy as in tool-calling-evals)
 		const text = [
 			`${tool.name} ${tool.name} ${tool.name}`, // boost name
-			`${category} ${actions.join(' ')}`,
+			`${integration} ${actions.join(' ')}`,
 			tool.description,
 			parts.join(' '),
 		].join(' ');
@@ -518,7 +518,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 		schema: {
 			name: 'string' as const,
 			description: 'string' as const,
-			category: 'string' as const,
+			integration: 'string' as const,
 			tags: 'string[]' as const,
 		},
 		components: {
@@ -530,9 +530,9 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 
 	// Index all tools
 	for (const tool of tools) {
-		// Extract category from tool name (e.g., 'hris_create_employee' -> 'hris')
+		// Extract integration from tool name (e.g., 'bamboohr_create_employee' -> 'bamboohr')
 		const parts = tool.name.split('_');
-		const category = parts[0];
+		const integration = parts[0];
 
 		// Extract action type
 		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
@@ -541,7 +541,7 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 		await orama.insert(oramaDb, {
 			name: tool.name,
 			description: tool.description,
-			category: category,
+			integration: integration,
 			tags: [...parts, ...actions],
 		});
 	}

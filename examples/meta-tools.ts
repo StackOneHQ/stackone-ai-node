@@ -18,7 +18,7 @@ if (!apiKey) {
 }
 
 // Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
+const accountId = 'your-bamboohr-account-id';
 
 /**
  * Example 1: Using meta tools with AI SDK for dynamic tool discovery
@@ -70,13 +70,13 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch HRIS tools via MCP
-	const hrisTools = await toolset.fetchTools({
-		actions: ['hris_*'],
+	// Fetch BambooHR tools via MCP
+	const bamboohrTools = await toolset.fetchTools({
+		actions: ['bamboohr_*'],
 	});
 
 	// Get meta tools
-	const metaTools = await hrisTools.metaTools();
+	const metaTools = await bamboohrTools.metaTools();
 	const openAIMetaTools = metaTools.toOpenAI();
 
 	// Create an HR assistant that can discover and use tools dynamically
@@ -161,9 +161,9 @@ const directMetaToolUsage = async (): Promise<void> => {
 		try {
 			// Prepare parameters based on the tool's schema
 			let params: Record<string, unknown> = {};
-			if (firstTool.name === 'hris_list_employees') {
+			if (firstTool.name === 'bamboohr_list_employees') {
 				params = { limit: 5 };
-			} else if (firstTool.name === 'hris_create_employee') {
+			} else if (firstTool.name === 'bamboohr_create_employee') {
 				params = {
 					name: 'John Doe',
 					email: 'john.doe@example.com',
@@ -194,16 +194,16 @@ const dynamicToolRouter = async (): Promise<void> => {
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
 	});
 
-	// Fetch tools from multiple categories via MCP
-	const hrisTools = await toolset.fetchTools({
-		actions: ['hris_*'],
+	// Fetch tools from multiple integrations via MCP
+	const bamboohrTools = await toolset.fetchTools({
+		actions: ['bamboohr_*'],
 	});
-	const atsTools = await toolset.fetchTools({
-		actions: ['ats_*'],
+	const workdayTools = await toolset.fetchTools({
+		actions: ['workday_*'],
 	});
 
 	// Combine tools
-	const combinedTools = new Tools([...hrisTools.toArray(), ...atsTools.toArray()]);
+	const combinedTools = new Tools([...bamboohrTools.toArray(), ...workdayTools.toArray()]);
 
 	// Get meta tools for the combined set
 	const metaTools = await combinedTools.metaTools();
