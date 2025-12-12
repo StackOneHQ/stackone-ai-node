@@ -183,6 +183,52 @@ export const accountMcpTools = {
 	],
 } as const satisfies Record<string, McpToolDefinition[]>;
 
+/** Tools for the quickstart and example tests */
+export const exampleBamboohrTools = [
+	{
+		name: 'bamboohr_list_employees',
+		description: 'List all employees from BambooHR',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: {
+					type: 'object',
+					properties: {
+						limit: { type: 'number', description: 'Limit the number of results' },
+					},
+				},
+			},
+		},
+	},
+	{
+		name: 'bamboohr_get_employee',
+		description: 'Get a single employee by ID from BambooHR',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				id: { type: 'string', description: 'The employee ID' },
+				fields: { type: 'string', description: 'Fields to retrieve' },
+			},
+			required: ['id'],
+		},
+	},
+	{
+		name: 'bamboohr_create_employee',
+		description: 'Create a new employee in BambooHR',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				name: { type: 'string', description: 'Employee name' },
+				personal_email: { type: 'string', description: 'Employee email' },
+				department: { type: 'string', description: 'Department name' },
+				start_date: { type: 'string', description: 'Start date' },
+				hire_date: { type: 'string', description: 'Hire date' },
+			},
+			required: ['name'],
+		},
+	},
+] as const satisfies McpToolDefinition[];
+
 export const mixedProviderTools = [
 	{
 		name: 'hibob_list_employees',

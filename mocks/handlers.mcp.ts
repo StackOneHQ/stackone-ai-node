@@ -1,5 +1,11 @@
 import { http } from 'msw';
-import { accountMcpTools, createMcpApp, defaultMcpTools, mixedProviderTools } from './mcp-server';
+import {
+	accountMcpTools,
+	createMcpApp,
+	defaultMcpTools,
+	exampleBamboohrTools,
+	mixedProviderTools,
+} from './mcp-server';
 
 // Create MCP apps for testing
 const defaultMcpApp = createMcpApp({
@@ -10,6 +16,9 @@ const defaultMcpApp = createMcpApp({
 		acc3: accountMcpTools.acc3,
 		'test-account': accountMcpTools['test-account'],
 		mixed: mixedProviderTools,
+		// For examples testing
+		'your-bamboohr-account-id': exampleBamboohrTools,
+		'your-stackone-account-id': exampleBamboohrTools,
 	},
 });
 

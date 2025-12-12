@@ -2,6 +2,8 @@
  * Helper to extract text content from OpenAI responses API input
  */
 export const extractTextFromInput = (input: unknown): string => {
+	// Handle string input directly (OpenAI Responses API can accept plain strings)
+	if (typeof input === 'string') return input;
 	if (!Array.isArray(input)) return '';
 	for (const item of input) {
 		if (typeof item === 'object' && item !== null) {
