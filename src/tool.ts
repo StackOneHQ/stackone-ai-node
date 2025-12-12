@@ -251,14 +251,6 @@ export class BaseTool {
 			'npm install ai@4.x|5.x or pnpm add ai@4.x|5.x',
 		);
 		const schemaObject = ai.jsonSchema(schema);
-		// TODO: Remove ts-ignore once AISDKToolDefinition properly types the inputSchema and parameters
-		// We avoid defining our own types as much as possible, so we use the AI SDK Tool type
-		// but need to suppress errors for backward compatibility properties
-		const toolDefinition = {
-			inputSchema: schemaObject,
-			parameters: schemaObject, // v4 (backward compatibility)
-			description: this.description,
-		} as AISDKToolDefinition;
 
 		const executionOption =
 			options.execution !== undefined
@@ -267,19 +259,21 @@ export class BaseTool {
 					? this.createExecutionMetadata()
 					: false;
 
-		if (executionOption !== false) {
-			toolDefinition.execution = executionOption;
-		}
-
-		if (options.executable ?? true) {
-			toolDefinition.execute = async (args: Record<string, unknown>) => {
-				try {
-					return await this.execute(args as JsonDict);
-				} catch (error) {
-					return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
-				}
-			};
-		}
+		const toolDefinition = {
+			inputSchema: schemaObject,
+			description: this.description,
+			execution: executionOption !== false ? executionOption : undefined,
+			execute:
+				(options.executable ?? true)
+					? async (args: Record<string, unknown>) => {
+							try {
+								return await this.execute(args as JsonDict);
+							} catch (error) {
+								return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+							}
+						}
+					: undefined,
+		} satisfies AISDKToolDefinition;
 
 		return {
 			[this.name]: toolDefinition,
