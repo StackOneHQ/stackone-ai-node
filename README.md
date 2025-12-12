@@ -257,7 +257,7 @@ const getEmployeeTool = {
 const adapter = openai();
 const stream = chat({
   adapter,
-  model: "gpt-4o",
+  model: "gpt-5.1",
   messages: [{ role: "user", content: "Get employee with id: abc123" }],
   tools: [getEmployeeTool],
 });
