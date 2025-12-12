@@ -3,5 +3,4 @@
 	"useTabs": true,
 	"semi": true,
 	"singleQuote": true,
-	"ignorePatterns": [".claude/settings.local.json"],
 }
