@@ -15,7 +15,9 @@
 		"src",
 		"dist",
 		"README.md",
-		"LICENSE"
+		"LICENSE",
+		"examples/*.ts",
+		"!example/*.test.ts"
 	],
 	"scripts": {
 		"build": "tsdown",
