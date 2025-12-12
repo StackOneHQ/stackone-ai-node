@@ -1,6 +1,9 @@
+import type { JSONSchema7 as AISDKJSONSchema } from '@ai-sdk/provider';
+import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
+import type { OverrideProperties } from 'type-fest';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
 import type {
@@ -12,13 +15,22 @@ import type {
 	Experimental_ToolCreationOptions,
 	HttpExecuteConfig,
 	JsonDict,
+	JSONSchema,
 	LocalExecuteConfig,
 	RpcExecuteConfig,
 	ToolExecution,
 	ToolParameters,
 } from './types';
+
 import { StackOneError } from './utils/errors';
 import { TfidfIndex } from './utils/tfidf-index';
+import { tryImport } from './utils/try-import';
+
+/**
+ * JSON Schema with type narrowed to 'object'
+ * Used for tool parameter schemas which are always objects
+ */
+type ObjectJSONSchema = OverrideProperties<JSONSchema, { type: 'object' }>;
 
 /**
  * Base class for all tools. Provides common functionality for executing API calls
@@ -165,6 +177,18 @@ export class BaseTool {
 	}
 
 	/**
+	 * Convert the tool parameters to a pure JSON Schema format
+	 * This is framework-agnostic and can be used with any LLM that accepts JSON Schema
+	 */
+	toJsonSchema(): ObjectJSONSchema {
+		return {
+			type: 'object',
+			properties: this.parameters.properties,
+			required: this.parameters.required,
+		};
+	}
+
+	/**
 	 * Convert the tool to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool {
@@ -173,12 +197,20 @@ export class BaseTool {
 			function: {
 				name: this.name,
 				description: this.description,
-				parameters: {
-					type: 'object',
-					properties: this.parameters.properties,
-					required: this.parameters.required,
-				},
+				parameters: this.toJsonSchema(),
 			},
+		};
+	}
+
+	/**
+	 * Convert the tool to Anthropic format
+	 * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
+	 */
+	toAnthropic(): AnthropicTool {
+		return {
+			name: this.name,
+			description: this.description,
+			input_schema: this.toJsonSchema(),
 		};
 	}
 
@@ -194,9 +226,7 @@ export class BaseTool {
 			description: this.description,
 			strict,
 			parameters: {
-				type: 'object',
-				properties: this.parameters.properties,
-				required: this.parameters.required,
+				...this.toJsonSchema(),
 				...(strict ? { additionalProperties: false } : {}),
 			},
 		};
@@ -211,32 +241,16 @@ export class BaseTool {
 		},
 	): Promise<AISDKToolResult> {
 		const schema = {
-			type: 'object' as const,
-			properties: this.parameters.properties || {},
-			required: this.parameters.required || [],
+			...this.toJsonSchema(),
 			additionalProperties: false,
-		};
+		} satisfies AISDKJSONSchema;
 
 		/** AI SDK is optional dependency, import only when needed */
-		let jsonSchema: typeof import('ai').jsonSchema;
-		try {
-			const ai = await import('ai');
-			jsonSchema = ai.jsonSchema;
-		} catch {
-			throw new StackOneError(
-				'AI SDK is not installed. Please install it with: npm install ai@4.x|5.x or pnpm add ai@4.x|5.x',
-			);
-		}
-
-		const schemaObject = jsonSchema(schema);
-		// TODO: Remove ts-ignore once AISDKToolDefinition properly types the inputSchema and parameters
-		// We avoid defining our own types as much as possible, so we use the AI SDK Tool type
-		// but need to suppress errors for backward compatibility properties
-		const toolDefinition = {
-			inputSchema: schemaObject,
-			parameters: schemaObject, // v4 (backward compatibility)
-			description: this.description,
-		} as AISDKToolDefinition;
+		const ai = await tryImport<typeof import('ai')>(
+			'ai',
+			'npm install ai@4.x|5.x or pnpm add ai@4.x|5.x',
+		);
+		const schemaObject = ai.jsonSchema(schema);
 
 		const executionOption =
 			options.execution !== undefined
@@ -245,23 +259,25 @@ export class BaseTool {
 					? this.createExecutionMetadata()
 					: false;
 
-		if (executionOption !== false) {
-			toolDefinition.execution = executionOption;
-		}
-
-		if (options.executable ?? true) {
-			toolDefinition.execute = async (args: Record<string, unknown>) => {
-				try {
-					return await this.execute(args as JsonDict);
-				} catch (error) {
-					return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
-				}
-			};
-		}
+		const toolDefinition = {
+			inputSchema: schemaObject,
+			description: this.description,
+			execution: executionOption !== false ? executionOption : undefined,
+			execute:
+				(options.executable ?? true)
+					? async (args: Record<string, unknown>) => {
+							try {
+								return await this.execute(args as JsonDict);
+							} catch (error) {
+								return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+							}
+						}
+					: undefined,
+		} satisfies AISDKToolDefinition;
 
 		return {
 			[this.name]: toolDefinition,
-		} as AISDKToolResult;
+		} satisfies AISDKToolResult;
 	}
 }
 
@@ -373,10 +389,30 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
+	 * Convert all tools to pure JSON Schema format
+	 * Returns an array of objects with name, description, and schema
+	 */
+	toJsonSchema(): Array<{ name: string; description: string; parameters: JSONSchema }> {
+		return this.tools.map((tool) => ({
+			name: tool.name,
+			description: tool.description,
+			parameters: tool.toJsonSchema(),
+		}));
+	}
+
+	/**
 	 * Convert all tools to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool[] {
 		return this.tools.map((tool) => tool.toOpenAI());
+	}
+
+	/**
+	 * Convert all tools to Anthropic format
+	 * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
+	 */
+	toAnthropic(): AnthropicTool[] {
+		return this.tools.map((tool) => tool.toAnthropic());
 	}
 
 	/**

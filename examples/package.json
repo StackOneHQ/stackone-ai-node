@@ -9,6 +9,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "catalog:dev",
+		"@anthropic-ai/sdk": "catalog:peer",
 		"@clack/prompts": "catalog:dev",
 		"@stackone/ai": "workspace:*",
 		"ai": "catalog:peer",

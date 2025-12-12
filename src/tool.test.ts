@@ -1,7 +1,11 @@
 import { jsonSchema } from 'ai';
-import type { JSONSchema7 } from 'json-schema';
 import { BaseTool, type MetaToolSearchResult, StackOneTool, Tools } from './tool';
-import { type ExecuteConfig, ParameterLocation, type ToolParameters } from './types';
+import {
+	type ExecuteConfig,
+	type JSONSchema,
+	ParameterLocation,
+	type ToolParameters,
+} from './types';
 import { StackOneAPIError } from './utils/errors';
 
 // Create a mock tool for testing
@@ -70,6 +74,18 @@ describe('StackOneTool', () => {
 				}
 			).properties.id.type,
 		).toBe('string');
+	});
+
+	it('should convert to Anthropic tool format', () => {
+		const tool = createMockTool();
+		const anthropicFormat = tool.toAnthropic();
+
+		expect(anthropicFormat.name).toBe('test_tool');
+		expect(anthropicFormat.description).toBe('Test tool');
+		expect(anthropicFormat.input_schema.type).toBe('object');
+		const properties = anthropicFormat.input_schema.properties as Record<string, { type: string }>;
+		expect(properties.id).toBeDefined();
+		expect(properties.id.type).toBe('string');
 	});
 
 	it('should convert to OpenAI Responses API tool format', () => {
@@ -350,6 +366,63 @@ describe('Tools', () => {
 		expect(openAITools[0].type).toBe('function');
 		expect(openAITools[0].function.name).toBe('tool1');
 		expect(openAITools[1].function.name).toBe('tool2');
+	});
+
+	it('should convert all tools to Anthropic format', () => {
+		const tool1 = new BaseTool(
+			'tool1',
+			'Tool 1',
+			{
+				type: 'object',
+				properties: { id: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'GET',
+				url: 'https://api.example.com/test/{id}',
+				bodyType: 'json',
+				params: [
+					{
+						name: 'id',
+						location: ParameterLocation.PATH,
+						type: 'string',
+					},
+				],
+			},
+		);
+
+		const tool2 = new BaseTool(
+			'tool2',
+			'Tool 2',
+			{
+				type: 'object',
+				properties: { name: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'POST',
+				url: 'https://api.example.com/test',
+				bodyType: 'json',
+				params: [
+					{
+						name: 'name',
+						location: ParameterLocation.BODY,
+						type: 'string',
+					},
+				],
+			},
+		);
+
+		const tools = new Tools([tool1, tool2]);
+		const anthropicTools = tools.toAnthropic();
+
+		expect(anthropicTools).toBeInstanceOf(Array);
+		expect(anthropicTools.length).toBe(2);
+		expect(anthropicTools[0].name).toBe('tool1');
+		expect(anthropicTools[0].description).toBe('Tool 1');
+		expect(anthropicTools[0].input_schema.type).toBe('object');
+		expect(anthropicTools[1].name).toBe('tool2');
+		expect(anthropicTools[1].description).toBe('Tool 2');
 	});
 
 	it('should convert all tools to OpenAI Responses API tools', () => {
@@ -1038,11 +1111,10 @@ describe('Schema Validation', () => {
 			);
 
 			const parameters = tool.toOpenAI().function.parameters;
-			expect(parameters).toBeDefined();
-			const properties = parameters?.properties as Record<string, JSONSchema7>;
+			const properties = parameters?.properties as Record<string, JSONSchema>;
 
 			expect(properties.arrayWithItems.items).toBeDefined();
-			expect((properties.arrayWithItems.items as JSONSchema7).type).toBe('number');
+			expect((properties.arrayWithItems.items as JSONSchema).type).toBe('number');
 		});
 
 		it('should handle nested object structure', () => {
@@ -1075,7 +1147,7 @@ describe('Schema Validation', () => {
 
 			const parameters = tool.toOpenAI().function.parameters;
 			expect(parameters).toBeDefined();
-			const properties = parameters?.properties as Record<string, JSONSchema7>;
+			const properties = parameters?.properties as Record<string, JSONSchema>;
 			const nestedObject = properties.nestedObject;
 
 			expect(nestedObject.type).toBe('object');
@@ -1116,7 +1188,7 @@ describe('Schema Validation', () => {
 			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
 			const arrayWithItems = toolObj.inputSchema.jsonSchema.properties?.arrayWithItems;
 			expect(arrayWithItems?.type).toBe('array');
-			expect((arrayWithItems?.items as JSONSchema7)?.type).toBe('string');
+			expect((arrayWithItems?.items as JSONSchema)?.type).toBe('string');
 		});
 
 		it('should handle nested filter object for AI SDK', async () => {
@@ -1151,14 +1223,14 @@ describe('Schema Validation', () => {
 
 			const parameters = tool.toOpenAI().function.parameters;
 			expect(parameters).toBeDefined();
-			const aiSchema = jsonSchema(parameters as JSONSchema7);
+			const aiSchema = jsonSchema(parameters as JSONSchema);
 			expect(aiSchema).toBeDefined();
 
 			const aiSdkTool = await tool.toAISDK();
 			// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
 			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
 			const filterProp = aiSdkTool[tool.name].inputSchema.jsonSchema.properties?.filter as
-				| (JSONSchema7 & { properties: Record<string, JSONSchema7> })
+				| (JSONSchema & { properties: Record<string, JSONSchema> })
 				| undefined;
 
 			expect(filterProp?.type).toBe('object');
