@@ -277,7 +277,7 @@ export class BaseTool {
 
 		return {
 			[this.name]: toolDefinition,
-		} as AISDKToolResult;
+		} satisfies AISDKToolResult;
 	}
 }
 
