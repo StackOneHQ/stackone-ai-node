@@ -5,7 +5,7 @@ import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
-import { BaseTool, type StackOneTool, Tools } from './tool';
+import { BaseTool, Tools } from './tool';
 import type {
 	ExecuteOptions,
 	JsonDict,
@@ -121,18 +121,6 @@ interface FetchToolsOptions {
 	 * @example ['*_list_employees', 'hibob_create_employees']
 	 */
 	actions?: string[];
-}
-
-/**
- * Configuration for workflow
- */
-interface WorkflowConfig {
-	key: string;
-	input: string;
-	model: string;
-	tools: string[];
-	accountIds: string[];
-	cache?: boolean;
 }
 
 /**
@@ -550,14 +538,5 @@ export class StackOneToolSet {
 			return value as JsonDict;
 		}
 		return undefined;
-	}
-
-	/**
-	 * Plan a workflow
-	 * @param config Configuration object containing workflow details
-	 * @returns Workflow object
-	 */
-	plan(_: WorkflowConfig): Promise<StackOneTool> {
-		throw new Error('Not implemented yet');
 	}
 }

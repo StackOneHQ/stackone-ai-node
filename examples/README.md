@@ -164,16 +164,6 @@ Demonstrates loading and using OpenAPI specifications directly.
 - **API Calls**: No (dry run)
 - **Key Features**: File loading, URL loading, OpenAPI parsing
 
-### Planning Module (Beta)
-
-#### [`planning.ts`](./planning.ts) - Workflow Planning
-
-**🚧 CLOSED BETA**: Advanced workflow planning with StackOne's planning agent.
-
-- **Account ID**: ATS, HRIS
-- **API Calls**: Planning API
-- **Key Features**: Multi-step workflows, caching, complex business processes
-
 ### Error Handling
 
 #### [`error-handling.ts`](./error-handling.ts) - Error Management
