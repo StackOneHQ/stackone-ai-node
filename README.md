@@ -113,6 +113,100 @@ await generateText({
 
 [View full example](examples/ai-sdk-integration.ts)
 
+### TanStack AI
+
+```typescript
+import { chat } from "@tanstack/ai";
+import { openai } from "@tanstack/ai-openai";
+import { z } from "zod";
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet({
+  baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
+});
+
+const tools = await toolset.fetchTools();
+const employeeTool = tools.getTool("bamboohr_get_employee");
+
+// TanStack AI requires Zod schemas for tool input validation
+const getEmployeeTool = {
+  name: employeeTool.name,
+  description: employeeTool.description,
+  inputSchema: z.object({
+    id: z.string().describe("The employee ID"),
+  }),
+  execute: async (args: { id: string }) => {
+    return employeeTool.execute(args);
+  },
+};
+
+const adapter = openai();
+const stream = chat({
+  adapter,
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Get employee with id: abc123" }],
+  tools: [getEmployeeTool],
+});
+
+for await (const chunk of stream) {
+  // Process streaming chunks
+}
+```
+
+[View full example](examples/tanstack-ai-integration.ts)
+
+### Claude Agent SDK
+
+```typescript
+import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import { z } from "zod";
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet({
+  baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
+});
+
+const tools = await toolset.fetchTools();
+const employeeTool = tools.getTool("bamboohr_get_employee");
+
+// Create a Claude Agent SDK tool from the StackOne tool
+const getEmployeeTool = tool(
+  employeeTool.name,
+  employeeTool.description,
+  { id: z.string().describe("The employee ID") },
+  async (args) => {
+    const result = await employeeTool.execute(args);
+    return { content: [{ type: "text", text: JSON.stringify(result) }] };
+  }
+);
+
+// Create an MCP server with the StackOne tool
+const mcpServer = createSdkMcpServer({
+  name: "stackone-tools",
+  version: "1.0.0",
+  tools: [getEmployeeTool],
+});
+
+// Use with Claude Agent SDK query
+const result = query({
+  prompt: "Get the employee with id: abc123",
+  options: {
+    model: "claude-sonnet-4-5-20250929",
+    mcpServers: { "stackone-tools": mcpServer },
+    tools: [], // Disable built-in tools
+    maxTurns: 3,
+  },
+});
+
+for await (const message of result) {
+  // Process streaming messages
+}
+```
+
+[View full example](examples/claude-agent-sdk-integration.ts)
+
 ## Usage
 
 ```typescript
@@ -127,8 +221,6 @@ const tools = await toolset.fetchTools();
 const employeeTool = tools.getTool("bamboohr_list_employees");
 const employees = await employeeTool.execute();
 ```
-
-[View full example](examples/index.ts)
 
 ### Authentication
 
