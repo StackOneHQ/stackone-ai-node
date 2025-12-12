@@ -21,45 +21,21 @@ yarn add @stackone/ai
 
 # Using pnpm
 pnpm add @stackone/ai
+
+# Using bun
+bun add @stackone/ai
 ```
-
-### Optional: AI SDK Integration
-
-If you plan to use the AI SDK integration (Vercel AI SDK), install it separately:
-
-```bash
-# Using npm
-npm install ai
-
-# Using yarn
-yarn add ai
-
-# Using pnpm
-pnpm add ai
-```
-
-## Development Environment
-
-### Using Nix Flake
-
-This project includes a Nix flake for reproducible development environments. If you have Nix installed with flakes enabled, you can use it to set up your development environment:
-
-```bash
-# Enter development shell
-nix develop
-
-# Or use direnv for automatic activation
-echo "use flake" > .envrc
-direnv allow
-```
-
-The flake provides all necessary development dependencies including Node.js, pnpm, and other build tools.
 
 ## Integrations
 
 The StackOneToolSet makes it super easy to use StackOne APIs as tools in your AI applications.
 
-### With OpenAI library
+<details>
+<summary><strong>With OpenAI Chat Completions API</strong></summary>
+
+```bash
+npm install openai  # or: yarn add openai / pnpm add openai / bun add openai
+```
 
 ```typescript
 import { OpenAI } from "openai";
@@ -90,7 +66,84 @@ await openai.chat.completions.create({
 
 [View full example](examples/openai-integration.ts)
 
-### AI SDK by Vercel
+</details>
+
+<details>
+<summary><strong>With OpenAI Responses API</strong></summary>
+
+```bash
+npm install openai  # or: yarn add openai / pnpm add openai / bun add openai
+```
+
+```typescript
+import OpenAI from "openai";
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet({
+  baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
+});
+
+const tools = await toolset.fetchTools();
+
+const openai = new OpenAI();
+
+await openai.responses.create({
+  model: "gpt-5.1",
+  instructions: "You are a helpful HR assistant.",
+  input: "What is the phone number for employee c28xIQ?",
+  tools: tools.toOpenAIResponses(),
+});
+```
+
+[View full example](examples/openai-responses-integration.ts)
+
+</details>
+
+<details>
+<summary><strong>With Anthropic Claude</strong></summary>
+
+```bash
+npm install @anthropic-ai/sdk  # or: yarn/pnpm/bun add @anthropic-ai/sdk
+```
+
+```typescript
+import Anthropic from "@anthropic-ai/sdk";
+import { StackOneToolSet } from "@stackone/ai";
+
+const toolset = new StackOneToolSet({
+  baseUrl: "https://api.stackone.com",
+  accountId: "your-account-id",
+});
+
+const tools = await toolset.fetchTools();
+
+const anthropic = new Anthropic();
+
+await anthropic.messages.create({
+  model: "claude-haiku-4-5-20241022",
+  max_tokens: 1024,
+  system: "You are a helpful HR assistant.",
+  messages: [
+    {
+      role: "user",
+      content: "What is the phone number for employee c28xIQ?",
+    },
+  ],
+  tools: tools.toAnthropic(),
+});
+```
+
+[View full example](examples/anthropic-integration.ts)
+
+</details>
+
+<details>
+<summary><strong>With AI SDK by Vercel</strong></summary>
+
+```bash
+npm install ai @ai-sdk/openai  # or: yarn/pnpm/bun add ai @ai-sdk/openai
+```
 
 ```typescript
 import { openai } from "@ai-sdk/openai";
@@ -112,6 +165,8 @@ await generateText({
 ```
 
 [View full example](examples/ai-sdk-integration.ts)
+
+</details>
 
 ## Usage
 
@@ -436,3 +491,20 @@ When AI agents use this tool, they will:
 5. **Report results**: Show which accounts received the feedback successfully
 
 The tool description includes clear instructions for AI agents to always ask for explicit user consent before submitting feedback.
+
+## Development Environment
+
+### Using Nix Flake
+
+This project includes a Nix flake for reproducible development environments. If you have Nix installed with flakes enabled, you can use it to set up your development environment:
+
+```bash
+# Enter development shell
+nix develop
+
+# Or use direnv for automatic activation
+echo "use flake" > .envrc
+direnv allow
+```
+
+The flake provides all necessary development dependencies including Node.js, pnpm, and other build tools.
