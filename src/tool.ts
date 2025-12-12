@@ -9,8 +9,6 @@ import type {
 	AISDKToolResult,
 	ExecuteConfig,
 	ExecuteOptions,
-	Experimental_PreExecuteFunction,
-	Experimental_ToolCreationOptions,
 	HttpExecuteConfig,
 	JsonDict,
 	LocalExecuteConfig,
@@ -31,7 +29,6 @@ export class BaseTool {
 	parameters: ToolParameters;
 	executeConfig: ExecuteConfig;
 	protected requestBuilder?: RequestBuilder;
-	protected experimental_preExecute?: Experimental_PreExecuteFunction;
 	#exposeExecutionMetadata = true;
 	#headers: Record<string, string>;
 
@@ -77,7 +74,6 @@ export class BaseTool {
 		parameters: ToolParameters,
 		executeConfig: ExecuteConfig,
 		headers?: Record<string, string>,
-		experimental_preExecute?: Experimental_PreExecuteFunction,
 	) {
 		this.name = name;
 		this.description = description;
@@ -87,7 +83,6 @@ export class BaseTool {
 		if (executeConfig.kind === 'http') {
 			this.requestBuilder = new RequestBuilder(executeConfig, this.#headers);
 		}
-		this.experimental_preExecute = experimental_preExecute;
 	}
 
 	/**
@@ -146,15 +141,8 @@ export class BaseTool {
 			// Convert string params to object
 			const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
 
-			// Apply experimental preExecute function (either from tool creation or execution options)
-			let processedParams = params;
-
-			if (this.experimental_preExecute) {
-				processedParams = await this.experimental_preExecute(params);
-			}
-
-			// Execute the request directly with processed parameters
-			return await this.requestBuilder.execute(processedParams, options);
+			// Execute the request directly with parameters
+			return await this.requestBuilder.execute(params, options);
 		} catch (error) {
 			if (error instanceof StackOneError) {
 				throw error;
@@ -322,46 +310,8 @@ export class Tools implements Iterable<BaseTool> {
 	/**
 	 * Get a tool by name
 	 */
-	getTool(name: string, options?: Experimental_ToolCreationOptions): BaseTool | undefined {
-		const originalTool = this.tools.find((tool) => tool.name === name);
-		if (!originalTool) {
-			return undefined;
-		}
-
-		// If no experimental options provided, return original tool
-		if (!options?.experimental_schemaOverride && !options?.experimental_preExecute) {
-			return originalTool;
-		}
-
-		// Create a new tool with experimental schema override and preExecute
-		let parameters = originalTool.parameters;
-
-		// Apply schema override if provided
-		if (options.experimental_schemaOverride) {
-			parameters = options.experimental_schemaOverride(originalTool.parameters);
-		}
-
-		// Create new tool instance with modified schema and preExecute function
-		if (originalTool instanceof StackOneTool) {
-			const newTool = new StackOneTool(
-				originalTool.name,
-				originalTool.description,
-				parameters,
-				originalTool.executeConfig,
-				originalTool.getHeaders(),
-				options.experimental_preExecute,
-			);
-			return newTool;
-		}
-		const newTool = new BaseTool(
-			originalTool.name,
-			originalTool.description,
-			parameters,
-			originalTool.executeConfig,
-			originalTool.getHeaders(),
-			options.experimental_preExecute,
-		);
-		return newTool;
+	getTool(name: string): BaseTool | undefined {
+		return this.tools.find((tool) => tool.name === name);
 	}
 
 	/**

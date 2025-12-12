@@ -28,22 +28,6 @@ export type JsonSchemaProperties = Record<string, JSONSchema7Definition>;
 type JsonSchemaType = JSONSchema7['type'];
 
 /**
- * EXPERIMENTAL: Function to override the tool schema at creation time
- * Takes the original tool parameters and returns a new schema
- * @param originalSchema - The original tool parameters schema from OpenAPI
- * @returns New schema definition for the tool
- */
-export type Experimental_SchemaOverride = (originalSchema: ToolParameters) => ToolParameters;
-
-/**
- * EXPERIMENTAL: Function to preprocess parameters before tool execution
- * Transforms parameters from override schema format back to original API format
- * @param params - The input parameters in override schema format
- * @returns Parameters in original API format
- */
-export type Experimental_PreExecuteFunction = (params: JsonDict) => Promise<JsonDict> | JsonDict;
-
-/**
  * Valid locations for parameters in requests
  */
 export const ParameterLocation = {
@@ -98,23 +82,6 @@ export interface LocalExecuteConfig {
  * Discriminated union lets call sites branch on execution style without relying on nullable fields.
  */
 export type ExecuteConfig = HttpExecuteConfig | RpcExecuteConfig | LocalExecuteConfig;
-
-/**
- * EXPERIMENTAL: Options for creating tools with schema overrides and preExecute functions
- */
-export interface Experimental_ToolCreationOptions {
-	/**
-	 * EXPERIMENTAL: Function to override the tool schema at creation time
-	 * Takes the original schema and returns a new schema for the tool
-	 */
-	experimental_schemaOverride?: Experimental_SchemaOverride;
-
-	/**
-	 * EXPERIMENTAL: Function to preprocess parameters before execution
-	 * Transforms parameters from override schema format back to original API format
-	 */
-	experimental_preExecute?: Experimental_PreExecuteFunction;
-}
 
 /**
  * Options for executing a tool
