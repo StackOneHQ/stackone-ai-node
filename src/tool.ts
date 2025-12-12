@@ -239,9 +239,7 @@ export class BaseTool {
 		},
 	): Promise<AISDKToolResult> {
 		const schema = {
-			type: 'object' as const,
-			properties: this.parameters.properties || {},
-			required: this.parameters.required || [],
+			...this.toJsonSchema(),
 			additionalProperties: false,
 		};
 
