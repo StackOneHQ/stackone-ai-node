@@ -27,6 +27,10 @@ catalogs:
     unplugin-unused: ^0.5.4
     vitest: ^4.0.15
     zod: ^4.1.13
+  examples:
+    '@anthropic-ai/claude-agent-sdk': ^0.1.67
+    '@tanstack/ai': ^0.0.3
+    '@tanstack/ai-openai': ^0.0.3
   peer:
     '@anthropic-ai/sdk': ^0.52.0
     ai: ^5.0.108
@@ -39,6 +43,11 @@ catalogs:
 enablePrePostScripts: true
 
 minimumReleaseAge: 1440
+
+minimumReleaseAgeExclude:
+  - '@anthropic-ai/claude-agent-sdk'
+  - '@tanstack/ai'
+  - '@tanstack/ai-openai'
 
 onlyBuiltDependencies:
   - esbuild
