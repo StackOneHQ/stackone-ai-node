@@ -66,9 +66,6 @@ catalogs:
     vitest:
       specifier: ^4.0.15
       version: 4.0.15
-    zod:
-      specifier: ^4.1.13
-      version: 4.1.13
   examples:
     '@anthropic-ai/claude-agent-sdk':
       specifier: ^0.1.67
@@ -99,6 +96,9 @@ catalogs:
     defu:
       specifier: ^6.1.4
       version: 6.1.4
+    zod:
+      specifier: ^4.1.13
+      version: 4.1.13
 
 importers:
   .:
@@ -116,7 +116,7 @@ importers:
         specifier: catalog:prod
         version: 6.1.4
       zod:
-        specifier: catalog:dev
+        specifier: catalog:prod
         version: 4.1.13
     devDependencies:
       '@ai-sdk/provider':

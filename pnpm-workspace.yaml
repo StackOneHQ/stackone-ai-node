@@ -26,7 +26,6 @@ catalogs:
     type-fest: ^4.41.0
     unplugin-unused: ^0.5.4
     vitest: ^4.0.15
-    zod: ^4.1.13
   examples:
     '@anthropic-ai/claude-agent-sdk': ^0.1.67
     '@tanstack/ai': ^0.0.3
@@ -39,6 +38,7 @@ catalogs:
     '@modelcontextprotocol/sdk': ^1.24.3
     '@orama/orama': ^3.1.11
     defu: ^6.1.4
+    zod: ^4.1.13
 
 enablePrePostScripts: true
 

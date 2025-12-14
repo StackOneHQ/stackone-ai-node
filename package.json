@@ -38,7 +38,7 @@
 		"@modelcontextprotocol/sdk": "catalog:prod",
 		"@orama/orama": "catalog:prod",
 		"defu": "catalog:prod",
-		"zod": "catalog:dev"
+		"zod": "catalog:prod"
 	},
 	"devDependencies": {
 		"@ai-sdk/provider": "catalog:dev",
