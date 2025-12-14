@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DEFAULT_BASE_URL } from './consts';
 import { BaseTool } from './tool';
-import type { ExecuteConfig, ExecuteOptions, JsonDict, ToolParameters } from './types';
+import type { ExecuteConfig, ExecuteOptions, JsonObject, JsonValue, ToolParameters } from './types';
 import { StackOneError } from './utils/errors';
 
 interface FeedbackToolOptions {
@@ -107,9 +107,9 @@ export function createFeedbackTool(
 
 	tool.execute = async function (
 		this: BaseTool,
-		inputParams?: JsonDict | string,
+		inputParams?: JsonObject | string,
 		executeOptions?: ExecuteOptions,
-	): Promise<JsonDict> {
+	): Promise<JsonObject> {
 		try {
 			const rawParams =
 				typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
@@ -137,12 +137,12 @@ export function createFeedbackTool(
 				return {
 					multiple_requests: dryRunResults,
 					total_accounts: parsedParams.account_id.length,
-				} satisfies JsonDict;
+				} satisfies JsonObject;
 			}
 
 			// Send feedback to each account individually
-			const results = [];
-			const errors = [];
+			const results: Array<{ account_id: string; status: number; response: JsonValue }> = [];
+			const errors: Array<{ account_id: string; status?: number; error: string }> = [];
 
 			for (const accountId of parsedParams.account_id) {
 				try {
@@ -159,9 +159,9 @@ export function createFeedbackTool(
 					});
 
 					const text = await response.text();
-					let parsed: unknown;
+					let parsed: JsonValue;
 					try {
-						parsed = text ? JSON.parse(text) : {};
+						parsed = text ? (JSON.parse(text) satisfies JsonValue) : {};
 					} catch {
 						parsed = { raw: text };
 					}
@@ -191,7 +191,7 @@ export function createFeedbackTool(
 			}
 
 			// Return summary of all submissions in Python SDK format
-			const response: JsonDict = {
+			const response = {
 				message: `Feedback sent to ${parsedParams.account_id.length} account(s)`,
 				total_accounts: parsedParams.account_id.length,
 				successful: results.length,
@@ -208,7 +208,7 @@ export function createFeedbackTool(
 						error: e.error,
 					})),
 				],
-			};
+			} satisfies JsonObject;
 
 			// If all submissions failed, throw an error
 			if (errors.length > 0 && results.length === 0) {

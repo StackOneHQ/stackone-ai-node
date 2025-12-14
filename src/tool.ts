@@ -12,7 +12,7 @@ import type {
 	ExecuteConfig,
 	ExecuteOptions,
 	HttpExecuteConfig,
-	JsonDict,
+	JsonObject,
 	JSONSchema,
 	LocalExecuteConfig,
 	RpcExecuteConfig,
@@ -130,7 +130,7 @@ export class BaseTool {
 	/**
 	 * Execute the tool with the provided parameters
 	 */
-	async execute(inputParams?: JsonDict | string, options?: ExecuteOptions): Promise<JsonDict> {
+	async execute(inputParams?: JsonObject | string, options?: ExecuteOptions): Promise<JsonObject> {
 		try {
 			if (!this.requestBuilder || this.executeConfig.kind !== 'http') {
 				// Non-HTTP tools provide their own execute override (e.g. RPC, local meta tools).
@@ -255,7 +255,7 @@ export class BaseTool {
 				(options.executable ?? true)
 					? async (args: Record<string, unknown>) => {
 							try {
-								return await this.execute(args as JsonDict);
+								return await this.execute(args as JsonObject);
 							} catch (error) {
 								return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
 							}
@@ -573,7 +573,7 @@ function metaSearchTools(
 	} as const satisfies LocalExecuteConfig;
 
 	const tool = new BaseTool(name, description, parameters, executeConfig);
-	tool.execute = async (inputParams?: JsonDict | string): Promise<JsonDict> => {
+	tool.execute = async (inputParams?: JsonObject | string): Promise<JsonObject> => {
 		try {
 			// Validate params is either undefined, string, or object
 			if (
@@ -639,18 +639,18 @@ function metaSearchTools(
 					const tool = allTools.find((t) => t.name === r.name);
 					if (!tool) return null;
 
-					const result: MetaToolSearchResult = {
+					return {
 						name: tool.name,
 						description: tool.description,
 						parameters: tool.parameters,
 						score: r.score,
 					};
-					return result;
 				})
 				.filter((t): t is MetaToolSearchResult => t !== null)
 				.slice(0, limit);
 
-			return { tools: toolConfigs } satisfies JsonDict;
+			// Convert to JSON-serialisable format (removes undefined values)
+			return JSON.parse(JSON.stringify({ tools: toolConfigs })) satisfies JsonObject;
 		} catch (error) {
 			if (error instanceof StackOneError) {
 				throw error;
@@ -701,9 +701,9 @@ function metaExecuteTool(tools: Tools): BaseTool {
 	// Override the execute method to handle tool execution
 	// receives tool name and parameters and executes the tool
 	tool.execute = async (
-		inputParams?: JsonDict | string,
+		inputParams?: JsonObject | string,
 		options?: ExecuteOptions,
-	): Promise<JsonDict> => {
+	): Promise<JsonObject> => {
 		try {
 			// Validate params is either undefined, string, or object
 			if (

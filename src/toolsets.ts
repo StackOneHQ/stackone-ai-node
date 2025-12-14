@@ -8,7 +8,7 @@ import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { BaseTool, Tools } from './tool';
 import type {
 	ExecuteOptions,
-	JsonDict,
+	JsonObject,
 	JsonSchemaProperties,
 	RpcExecuteConfig,
 	ToolParameters,
@@ -17,17 +17,17 @@ import { toArray } from './utils/array';
 import { StackOneError } from './utils/errors';
 
 /**
- * Converts RpcActionResponse to JsonDict in a type-safe manner.
+ * Converts RpcActionResponse to JsonObject in a type-safe manner.
  * RpcActionResponse uses z.passthrough() which preserves additional fields,
- * making it structurally compatible with Record<string, unknown>.
+ * making it structurally compatible with Record<string, JsonValue>.
  */
-function rpcResponseToJsonDict(response: RpcActionResponse): JsonDict {
+function rpcResponseToJsonObject(response: RpcActionResponse): JsonObject {
 	// RpcActionResponse with passthrough() has the shape:
 	// { next?: string | null, data?: ..., [key: string]: unknown }
 	// We extract all properties into a plain object
-	const result: JsonDict = {};
+	const result: JsonObject = {};
 	for (const [key, value] of Object.entries(response)) {
-		result[key] = value;
+		result[key] = value as JsonObject[string];
 	}
 	return result;
 }
@@ -460,9 +460,9 @@ export class StackOneToolSet {
 		).setExposeExecutionMetadata(false);
 
 		tool.execute = async (
-			inputParams?: JsonDict | string,
+			inputParams?: JsonObject | string,
 			options?: ExecuteOptions,
-		): Promise<JsonDict> => {
+		): Promise<JsonObject> => {
 			try {
 				if (
 					inputParams !== undefined &&
@@ -488,12 +488,12 @@ export class StackOneToolSet {
 				const actionHeaders = defu(extraHeaders, baseHeaders) as StackOneHeaders;
 
 				const bodyPayload = this.extractRecord(parsedParams, 'body');
-				const rpcBody: JsonDict = bodyPayload ? { ...bodyPayload } : {};
+				const rpcBody: JsonObject = bodyPayload ? { ...bodyPayload } : {};
 				for (const [key, value] of Object.entries(parsedParams)) {
 					if (key === 'body' || key === 'headers' || key === 'path' || key === 'query') {
 						continue;
 					}
-					rpcBody[key] = value as unknown;
+					rpcBody[key] = value as JsonObject[string];
 				}
 
 				if (options?.dryRun) {
@@ -511,7 +511,7 @@ export class StackOneToolSet {
 						headers: actionHeaders,
 						body: JSON.stringify(requestPayload),
 						mappedParams: parsedParams,
-					} satisfies JsonDict;
+					} satisfies JsonObject;
 				}
 
 				const response = await actionsClient.actions.rpcAction({
@@ -522,7 +522,7 @@ export class StackOneToolSet {
 					query: queryParams ?? undefined,
 				});
 
-				return rpcResponseToJsonDict(response);
+				return rpcResponseToJsonObject(response);
 			} catch (error) {
 				if (error instanceof StackOneError) {
 					throw error;
@@ -545,12 +545,12 @@ export class StackOneToolSet {
 	}
 
 	private extractRecord(
-		params: JsonDict,
+		params: JsonObject,
 		key: 'body' | 'headers' | 'path' | 'query',
-	): JsonDict | undefined {
+	): JsonObject | undefined {
 		const value = params[key];
 		if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-			return value as JsonDict;
+			return value as JsonObject;
 		}
 		return undefined;
 	}
