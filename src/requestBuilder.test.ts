@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/node';
-import { type HttpExecuteConfig, ParameterLocation } from './types';
+import { type HttpExecuteConfig, type JsonObject, ParameterLocation } from './types';
 import { StackOneAPIError } from './utils/errors';
 import { RequestBuilder } from './requestBuilder';
 
@@ -173,7 +173,7 @@ describe('RequestBuilder', () => {
 				'User-Agent': 'stackone-ai-node',
 				'Initial-Header': 'test',
 			},
-			body: undefined,
+			body: null,
 			mappedParams: params,
 		});
 		expect(recordedRequests).toHaveLength(0);
@@ -227,13 +227,12 @@ describe('RequestBuilder', () => {
 		expect(url.searchParams.get('proxy')).toBeNull();
 	});
 
-	it('should handle null and undefined values in deep objects', async () => {
+	it('should handle null values in deep objects', async () => {
 		const params = {
 			pathParam: 'test-value',
 			filter: {
 				valid_field: 'value',
 				null_field: null,
-				undefined_field: undefined,
 				empty_string: '',
 				zero: 0,
 				false_value: false,
@@ -249,9 +248,8 @@ describe('RequestBuilder', () => {
 		expect(url.searchParams.get('filter[zero]')).toBe('0');
 		expect(url.searchParams.get('filter[false_value]')).toBe('false');
 
-		// Check that null and undefined values are excluded
+		// Check that null values are excluded
 		expect(url.searchParams.get('filter[null_field]')).toBeNull();
-		expect(url.searchParams.get('filter[undefined_field]')).toBeNull();
 	});
 
 	it('should apply deep object serialization to all object parameters', async () => {
@@ -311,7 +309,7 @@ describe('RequestBuilder', () => {
 	describe('Security and Performance Improvements', () => {
 		it('should throw error when recursion depth limit is exceeded', async () => {
 			// Create a deeply nested object that exceeds the default depth limit of 10
-			let deepObject: Record<string, unknown> = { value: 'test' };
+			let deepObject: JsonObject = { value: 'test' };
 			for (let i = 0; i < 12; i++) {
 				deepObject = { nested: deepObject };
 			}
@@ -319,7 +317,7 @@ describe('RequestBuilder', () => {
 			const params = {
 				pathParam: 'test-value',
 				deepFilter: deepObject,
-			};
+			} satisfies JsonObject;
 
 			await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
 				'Maximum nesting depth (10) exceeded for parameter serialization',
@@ -327,6 +325,8 @@ describe('RequestBuilder', () => {
 		});
 
 		it('should throw error when circular reference is detected', async () => {
+			// Test runtime behaviour when circular reference is passed
+			// Note: This tests error handling for malformed input at runtime
 			const inner: Record<string, unknown> = { b: 'test' };
 			const circular: Record<string, unknown> = { a: inner };
 			inner.circular = circular; // Create circular reference
@@ -334,7 +334,7 @@ describe('RequestBuilder', () => {
 			const params = {
 				pathParam: 'test-value',
 				filter: circular,
-			};
+			} as unknown as JsonObject; // Cast to test runtime error handling
 
 			await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
 				'Circular reference detected in parameter object',
@@ -355,7 +355,10 @@ describe('RequestBuilder', () => {
 			);
 		});
 
-		it('should handle special types correctly', async () => {
+		it('should handle special types correctly at runtime', async () => {
+			// Test runtime behaviour when non-JSON types are passed
+			// Note: Date and RegExp are not valid JsonValue types, but we test
+			// the serialiser's runtime handling of these edge cases
 			const testDate = new Date('2023-01-01T00:00:00.000Z');
 			const testRegex = /test-pattern/gi;
 
@@ -365,10 +368,9 @@ describe('RequestBuilder', () => {
 					dateField: testDate,
 					regexField: testRegex,
 					nullField: null,
-					undefinedField: undefined,
 					emptyString: '',
 				},
-			};
+			} as unknown as JsonObject; // Cast to test runtime serialisation
 
 			const result = await builder.execute(params, { dryRun: true });
 			const url = new URL(result.url as string);
@@ -379,22 +381,22 @@ describe('RequestBuilder', () => {
 			// RegExp should be serialized to string representation
 			expect(url.searchParams.get('filter[regexField]')).toBe('/test-pattern/gi');
 
-			// Null and undefined should result in empty string (but won't be added since they're filtered out)
+			// Null should be filtered out
 			expect(url.searchParams.get('filter[nullField]')).toBeNull();
-			expect(url.searchParams.get('filter[undefinedField]')).toBeNull();
 
 			// Empty string should be preserved
 			expect(url.searchParams.get('filter[emptyString]')).toBe('');
 		});
 
-		it('should throw error when trying to serialize functions', async () => {
+		it('should throw error when trying to serialize functions at runtime', async () => {
+			// Test runtime error handling when functions are passed
 			const params = {
 				pathParam: 'test-value',
 				filter: {
 					validField: 'test',
 					functionField: () => 'test', // Functions should not be serializable
 				},
-			};
+			} as unknown as JsonObject; // Cast to test runtime error handling
 
 			await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
 				'Functions cannot be serialized as parameters',
@@ -441,7 +443,8 @@ describe('RequestBuilder', () => {
 			expect(url.searchParams.get('filter[mixed]')).toBe('["string",42,true]');
 		});
 
-		it('should handle nested objects with special types', async () => {
+		it('should handle nested objects with special types at runtime', async () => {
+			// Test runtime serialisation of nested non-JSON types
 			const params = {
 				pathParam: 'test-value',
 				filter: {
@@ -453,7 +456,7 @@ describe('RequestBuilder', () => {
 						},
 					},
 				},
-			};
+			} as unknown as JsonObject; // Cast to test runtime serialisation
 
 			const result = await builder.execute(params, { dryRun: true });
 			const url = new URL(result.url as string);
@@ -465,7 +468,7 @@ describe('RequestBuilder', () => {
 
 		it('should maintain performance with large objects', async () => {
 			// Create a moderately large object to test performance optimizations
-			const largeFilter: Record<string, unknown> = {};
+			const largeFilter: Record<string, string | { subField1: string; subField2: string }> = {};
 			for (let i = 0; i < 100; i++) {
 				largeFilter[`field_${i}`] = `value_${i}`;
 				if (i % 10 === 0) {
@@ -479,7 +482,7 @@ describe('RequestBuilder', () => {
 			const params = {
 				pathParam: 'test-value',
 				filter: largeFilter,
-			};
+			} satisfies JsonObject;
 
 			const startTime = performance.now();
 			const result = await builder.execute(params, { dryRun: true });

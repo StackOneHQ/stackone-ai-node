@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'vitest';
 import { normaliseHeaders } from './headers';
 
 describe('normaliseHeaders', () => {
@@ -43,12 +42,6 @@ describe('normaliseHeaders', () => {
 		});
 	});
 
-	it('skips undefined values', () => {
-		expect(normaliseHeaders({ foo: 'bar', baz: undefined })).toEqual({
-			foo: 'bar',
-		});
-	});
-
 	it('skips null values', () => {
 		expect(normaliseHeaders({ foo: 'bar', baz: null })).toEqual({
 			foo: 'bar',
@@ -64,7 +57,6 @@ describe('normaliseHeaders', () => {
 				object: { nested: 'value' },
 				array: [1, 2, 3],
 				nullValue: null,
-				undefinedValue: undefined,
 			}),
 		).toEqual({
 			string: 'text',
