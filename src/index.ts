@@ -21,7 +21,8 @@ export type {
 	AISDKToolResult,
 	ExecuteConfig,
 	ExecuteOptions,
-	JsonDict,
+	JsonObject,
+	JsonValue,
 	ParameterLocation,
 	ToolDefinition,
 } from './types';
