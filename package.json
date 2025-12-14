@@ -59,6 +59,7 @@
 		"publint": "catalog:dev",
 		"tsdown": "catalog:dev",
 		"type-fest": "catalog:dev",
+		"typescript": "catalog:dev",
 		"unplugin-unused": "catalog:dev",
 		"vitest": "catalog:dev"
 	},
