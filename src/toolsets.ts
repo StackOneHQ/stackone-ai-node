@@ -1,5 +1,4 @@
 import { defu } from 'defu';
-import type { Arrayable } from 'type-fest';
 import { DEFAULT_BASE_URL, UNIFIED_API_PREFIX } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
@@ -13,7 +12,6 @@ import type {
 	RpcExecuteConfig,
 	ToolParameters,
 } from './types';
-import { toArray } from './utils/array';
 import { StackOneError } from './utils/errors';
 
 /**
@@ -344,30 +342,6 @@ export class StackOneToolSet {
 		}
 
 		return new Tools(filteredTools);
-	}
-
-	/**
-	 * Check if a tool name matches a filter pattern
-	 * @param toolName Tool name to check
-	 * @param filterPattern Filter pattern or array of patterns
-	 * @returns True if the tool name matches the filter pattern
-	 */
-	private matchesFilter(toolName: string, filterPattern: Arrayable<string>): boolean {
-		// Convert to array to handle both single string and array patterns
-		const patterns = toArray(filterPattern);
-
-		// Split into positive and negative patterns
-		const positivePatterns = patterns.filter((p) => !p.startsWith('!'));
-		const negativePatterns = patterns.filter((p) => p.startsWith('!')).map((p) => p.substring(1));
-
-		// If no positive patterns, treat as match all
-		const matchesPositive =
-			positivePatterns.length === 0 || positivePatterns.some((p) => this.matchGlob(toolName, p));
-
-		// If any negative pattern matches, exclude the tool
-		const matchesNegative = negativePatterns.some((p) => this.matchGlob(toolName, p));
-
-		return matchesPositive && !matchesNegative;
 	}
 
 	/**
