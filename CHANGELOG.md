@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.6](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.5...v2.0.6) (2025-12-15)
+
+
+### Bug Fixes
+
+* **ci:** remove --provenance ([#242](https://github.com/StackOneHQ/stackone-ai-node/issues/242)) ([86f18bf](https://github.com/StackOneHQ/stackone-ai-node/commit/86f18bfd08c5ac02c64783506f75c39a2c5c0816))
+
 ## [2.0.5](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.4...v2.0.5) (2025-12-15)
 
 
