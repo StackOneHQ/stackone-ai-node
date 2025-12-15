@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.2...v2.0.3) (2025-12-15)
+
+
+### Bug Fixes
+
+* **release:** enable provence ([#236](https://github.com/StackOneHQ/stackone-ai-node/issues/236)) ([a784cd4](https://github.com/StackOneHQ/stackone-ai-node/commit/a784cd459d13a03daa791e363f56eaeebe43398a))
+
 ## [2.0.2](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.1...v2.0.2) (2025-12-15)
 
 
