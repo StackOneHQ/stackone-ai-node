@@ -19,8 +19,8 @@ This rule provides guidance on using pnpm in the StackOne SDK.
 
 ## Code Quality
 
-- `pnpm lint` - Run Biome linter
-- `pnpm format` - Format code with Biome
+- `pnpm lint` - Run oxfmt/oxlint/knip linter
+- `pnpm format` - Format code with oxfmt/oxlint/knip
 
 ## Command Execution
 
