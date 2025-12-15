@@ -1,5 +1,32 @@
 import { jsonSchema } from 'ai';
 import { BaseTool, type MetaToolSearchResult, StackOneTool, Tools } from './tool';
+import type { JsonObject } from './types';
+
+/**
+ * Type guard for MetaToolSearchResult array from execute result.
+ * Used to safely extract tools from meta_search_tools response.
+ */
+function isMetaToolSearchResults(value: unknown): value is MetaToolSearchResult[] {
+	return (
+		Array.isArray(value) &&
+		value.every(
+			(item) =>
+				typeof item === 'object' &&
+				item !== null &&
+				'name' in item &&
+				'description' in item &&
+				'score' in item,
+		)
+	);
+}
+
+/** Extract tools from search result with type safety */
+function getSearchResults(result: JsonObject): MetaToolSearchResult[] {
+	if (!isMetaToolSearchResults(result.tools)) {
+		throw new Error('Invalid tools response');
+	}
+	return result.tools;
+}
 import {
 	type ExecuteConfig,
 	type JSONSchema,
@@ -747,7 +774,7 @@ describe('Meta Search Tools', () => {
 			expect(result.tools).toBeDefined();
 			expect(Array.isArray(result.tools)).toBe(true);
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			const toolNames = toolResults.map((t) => t.name);
 
 			expect(toolNames).toContain('bamboohr_create_employee');
@@ -763,7 +790,7 @@ describe('Meta Search Tools', () => {
 				limit: 3,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			const toolNames = toolResults.map((t) => t.name);
 
 			expect(toolNames).toContain('bamboohr_create_time_off');
@@ -778,7 +805,7 @@ describe('Meta Search Tools', () => {
 				limit: 2,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			expect(toolResults.length).toBeLessThanOrEqual(2);
 		});
 
@@ -791,7 +818,7 @@ describe('Meta Search Tools', () => {
 				minScore: 0.8,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			expect(toolResults.length).toBe(0);
 		});
 
@@ -804,7 +831,7 @@ describe('Meta Search Tools', () => {
 				limit: 1,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			expect(toolResults.length).toBeGreaterThan(0);
 
 			const firstTool = toolResults[0];
@@ -839,7 +866,7 @@ describe('Meta Search Tools', () => {
 				}),
 			);
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			const toolNames = toolResults.map((t) => t.name);
 
 			const hasCandidateTool = toolNames.some(
@@ -938,7 +965,7 @@ describe('Meta Search Tools', () => {
 				limit: 3,
 			});
 
-			const toolResults = searchResult.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(searchResult);
 			expect(toolResults.length).toBeGreaterThan(0);
 
 			// Find the create employee tool
@@ -1026,7 +1053,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 
 			expect(result.tools).toBeDefined();
 			expect(Array.isArray(result.tools)).toBe(true);
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			expect(toolResults.length).toBeGreaterThan(0);
 		});
 
@@ -1041,7 +1068,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 				limit: 3,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			const toolNames = toolResults.map((t) => t.name);
 			expect(toolNames).toContain('workday_create_candidate');
 		});
@@ -1057,7 +1084,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 				limit: 10,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			expect(toolResults.length).toBeGreaterThan(0);
 
 			for (const tool of toolResults) {
@@ -1077,7 +1104,7 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 				limit: 3,
 			});
 
-			const toolResults = result.tools as MetaToolSearchResult[];
+			const toolResults = getSearchResults(result);
 			const toolNames = toolResults.map((t) => t.name);
 			expect(toolNames).toContain('bamboohr_create_time_off');
 		});

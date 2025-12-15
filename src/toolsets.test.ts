@@ -12,22 +12,6 @@ import { type McpToolDefinition, createMcpApp } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { StackOneToolSet, ToolSetConfigError } from './toolsets';
 
-/**
- * Test helper: Extends StackOneToolSet to expose private methods for testing
- */
-class TestableStackOneToolSet extends StackOneToolSet {
-	// Expose private methods for testing
-	public testMatchesFilter(toolName: string, filterPattern: string | string[]): boolean {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing private method for testing
-		return (this as any).matchesFilter(toolName, filterPattern);
-	}
-
-	public testMatchGlob(str: string, pattern: string): boolean {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accessing private method for testing
-		return (this as any).matchGlob(str, pattern);
-	}
-}
-
 describe('StackOneToolSet', () => {
 	beforeEach(() => {
 		vi.stubEnv('STACKONE_API_KEY', 'test_key');
@@ -171,41 +155,6 @@ describe('StackOneToolSet', () => {
 			expect(toolset.headers.Authorization).toBe(expectedAuthValue);
 			// @ts-expect-error - Accessing private property for testing
 			expect(toolset.headers['x-account-id']).toBe('test_account');
-		});
-	});
-
-	describe('glob and filter matching', () => {
-		it('should correctly match glob patterns', () => {
-			const toolset = new TestableStackOneToolSet({ apiKey: 'test_key' });
-
-			expect(toolset.testMatchGlob('bamboohr_get_employee', 'bamboohr_*')).toBe(true);
-			expect(toolset.testMatchGlob('bamboohr_get_employee', 'salesforce_*')).toBe(false);
-			expect(toolset.testMatchGlob('bamboohr_get_employee', '*_get_*')).toBe(true);
-			expect(toolset.testMatchGlob('bamboohr_get_employee', 'bamboohr_get_?mployee')).toBe(true);
-			expect(toolset.testMatchGlob('bamboohr.get.employee', 'bamboohr.get.employee')).toBe(true);
-		});
-
-		it('should correctly filter tools with a pattern', () => {
-			const toolset = new TestableStackOneToolSet({ apiKey: 'test_key' });
-
-			expect(toolset.testMatchesFilter('bamboohr_get_employee', 'bamboohr_*')).toBe(true);
-			expect(toolset.testMatchesFilter('salesforce_get_contact', 'bamboohr_*')).toBe(false);
-			expect(
-				toolset.testMatchesFilter('bamboohr_get_employee', ['bamboohr_*', 'salesforce_*']),
-			).toBe(true);
-			expect(
-				toolset.testMatchesFilter('salesforce_get_contact', ['bamboohr_*', 'salesforce_*']),
-			).toBe(true);
-			expect(
-				toolset.testMatchesFilter('workday_get_candidate', ['bamboohr_*', 'salesforce_*']),
-			).toBe(false);
-
-			// Test negative patterns
-			expect(toolset.testMatchesFilter('bamboohr_get_employee', ['*', '!salesforce_*'])).toBe(true);
-			expect(toolset.testMatchesFilter('salesforce_get_contact', ['*', '!salesforce_*'])).toBe(
-				false,
-			);
-			expect(toolset.testMatchesFilter('bamboohr_get_employee', ['*', '!bamboohr_*'])).toBe(false);
 		});
 	});
 

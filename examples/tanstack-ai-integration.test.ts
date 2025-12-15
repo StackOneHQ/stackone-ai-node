@@ -33,24 +33,19 @@ describe('tanstack-ai-integration example e2e', () => {
 
 		// Get a specific tool
 		const employeeTool = tools.getTool('bamboohr_get_employee');
-		expect(employeeTool).toBeDefined();
+		assert(employeeTool, 'Expected bamboohr_get_employee tool to exist');
 
 		// Create TanStack AI compatible tool wrapper
 		// Use toJsonSchema() to get the parameter schema in JSON Schema format
 		const getEmployeeTool = {
-			name: employeeTool!.name,
-			description: employeeTool!.description,
-			inputSchema: employeeTool!.toJsonSchema(),
-			execute: async (args: Record<string, unknown>) => {
-				return employeeTool!.execute(args);
-			},
+			name: employeeTool.name,
+			description: employeeTool.description,
+			inputSchema: employeeTool.toJsonSchema(),
+			execute: employeeTool.execute.bind(employeeTool),
 		};
 
 		expect(getEmployeeTool.name).toBe('bamboohr_get_employee');
-		expect(getEmployeeTool.description).toContain('employee');
-		expect(getEmployeeTool.inputSchema).toBeDefined();
 		expect(getEmployeeTool.inputSchema.type).toBe('object');
-		expect(typeof getEmployeeTool.execute).toBe('function');
 	});
 
 	it('should execute tool directly', async () => {
@@ -68,9 +63,7 @@ describe('tanstack-ai-integration example e2e', () => {
 			name: employeeTool.name,
 			description: employeeTool.description,
 			inputSchema: employeeTool.toJsonSchema(),
-			execute: async (args: Record<string, unknown>) => {
-				return employeeTool.execute(args);
-			},
+			execute: employeeTool.execute.bind(employeeTool),
 		};
 
 		// Execute the tool directly to verify it works

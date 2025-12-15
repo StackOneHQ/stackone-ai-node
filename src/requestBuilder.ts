@@ -1,9 +1,10 @@
+import type { JsonValue } from 'type-fest';
 import { USER_AGENT } from './consts';
 import {
 	type ExecuteOptions,
 	type HttpBodyType,
 	type HttpExecuteConfig,
-	type JsonDict,
+	type JsonObject,
 	ParameterLocation,
 } from './types';
 import { StackOneAPIError } from './utils/errors';
@@ -18,6 +19,24 @@ class ParameterSerializationError extends Error {
 		super(message, options);
 		this.name = 'ParameterSerializationError';
 	}
+}
+
+/**
+ * Convert a JsonValue to a string representation suitable for URLs and form data.
+ * Objects and arrays are JSON-stringified, primitives are converted directly.
+ */
+function stringifyValue(value: JsonValue): string {
+	if (typeof value === 'string') {
+		return value;
+	}
+	if (typeof value === 'number' || typeof value === 'boolean') {
+		return String(value);
+	}
+	if (value === null) {
+		return '';
+	}
+	// Arrays and objects
+	return JSON.stringify(value);
 }
 
 /**
@@ -66,10 +85,10 @@ export class RequestBuilder {
 	/**
 	 * Prepare URL and parameters for the API request
 	 */
-	prepareRequestParams(params: JsonDict): [string, JsonDict, JsonDict] {
+	prepareRequestParams(params: JsonObject): [string, JsonObject, JsonObject] {
 		let url = this.url;
-		const bodyParams: JsonDict = {};
-		const queryParams: JsonDict = {};
+		const bodyParams: JsonObject = {};
+		const queryParams: JsonObject = {};
 
 		for (const [key, value] of Object.entries(params)) {
 			// Find the parameter configuration in the params array
@@ -79,7 +98,7 @@ export class RequestBuilder {
 			switch (paramLocation) {
 				case ParameterLocation.PATH:
 					// Replace path parameter in URL
-					url = url.replace(`{${key}}`, encodeURIComponent(String(value)));
+					url = url.replace(`{${key}}`, encodeURIComponent(stringifyValue(value)));
 					break;
 				case ParameterLocation.QUERY:
 					// Add to query parameters
@@ -87,7 +106,7 @@ export class RequestBuilder {
 					break;
 				case ParameterLocation.HEADER:
 					// Add to headers
-					this.headers[key] = String(value);
+					this.headers[key] = stringifyValue(value);
 					break;
 				case ParameterLocation.BODY:
 					// Add to body parameters
@@ -107,7 +126,7 @@ export class RequestBuilder {
 	/**
 	 * Build the fetch options for the request
 	 */
-	buildFetchOptions(bodyParams: JsonDict): RequestInit {
+	buildFetchOptions(bodyParams: JsonObject): RequestInit {
 		const headers = this.prepareHeaders();
 		const fetchOptions: RequestInit = {
 			method: this.method,
@@ -134,7 +153,7 @@ export class RequestBuilder {
 					};
 					const formBody = new URLSearchParams();
 					for (const [key, value] of Object.entries(bodyParams)) {
-						formBody.append(key, String(value));
+						formBody.append(key, stringifyValue(value));
 					}
 					fetchOptions.body = formBody.toString();
 					break;
@@ -143,7 +162,7 @@ export class RequestBuilder {
 					// Handle file uploads
 					const formData = new FormData();
 					for (const [key, value] of Object.entries(bodyParams)) {
-						formData.append(key, String(value));
+						formData.append(key, stringifyValue(value));
 					}
 					fetchOptions.body = formData;
 					// Don't set Content-Type for FormData, it will be set automatically with the boundary
@@ -276,7 +295,7 @@ export class RequestBuilder {
 	/**
 	 * Builds all query parameters with optimized batching
 	 */
-	private buildQueryParameters(queryParams: JsonDict): [string, string][] {
+	private buildQueryParameters(queryParams: JsonObject): [string, string][] {
 		const allParams: [string, string][] = [];
 
 		for (const [key, value] of Object.entries(queryParams)) {
@@ -295,7 +314,7 @@ export class RequestBuilder {
 	/**
 	 * Execute the request
 	 */
-	async execute(params: JsonDict, options?: ExecuteOptions): Promise<JsonDict> {
+	async execute(params: JsonObject, options?: ExecuteOptions): Promise<JsonObject> {
 		// Prepare request parameters
 		const [url, bodyParams, queryParams] = this.prepareRequestParams(params);
 
@@ -313,13 +332,29 @@ export class RequestBuilder {
 
 		// If dryRun is true, return the request details instead of making the API call
 		if (options?.dryRun) {
+			// Convert headers to a plain object for JSON serialisation
+			const headersObj =
+				fetchOptions.headers instanceof Headers
+					? Object.fromEntries(fetchOptions.headers.entries())
+					: Array.isArray(fetchOptions.headers)
+						? Object.fromEntries(fetchOptions.headers)
+						: (fetchOptions.headers ?? {});
+
+			// Convert body to a JSON-serialisable value
+			const bodyValue =
+				fetchOptions.body instanceof FormData
+					? '[FormData]'
+					: typeof fetchOptions.body === 'string'
+						? fetchOptions.body
+						: null;
+
 			return {
 				url: urlWithQuery.toString(),
 				method: this.method,
-				headers: fetchOptions.headers,
-				body: fetchOptions.body instanceof FormData ? '[FormData]' : fetchOptions.body,
+				headers: headersObj,
+				body: bodyValue,
 				mappedParams: params,
-			};
+			} satisfies JsonObject;
 		}
 
 		// Execute the request
@@ -337,6 +372,6 @@ export class RequestBuilder {
 		}
 
 		// Parse the response
-		return (await response.json()) as JsonDict;
+		return (await response.json()) as JsonObject;
 	}
 }

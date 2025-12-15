@@ -1,5 +1,5 @@
 import { z } from 'zod/mini';
-import type { JsonDict } from './types';
+import type { JsonObject } from './types';
 
 /**
  * Known StackOne API header keys that are forwarded as HTTP headers
@@ -18,13 +18,13 @@ export const stackOneHeadersSchema = z.record(z.string(), z.string()).brand<'Sta
 export type StackOneHeaders = z.infer<typeof stackOneHeadersSchema>;
 
 /**
- * Normalises header values from JsonDict to StackOneHeaders (branded type)
+ * Normalises header values from JsonObject to StackOneHeaders (branded type)
  * Converts numbers and booleans to strings, and serialises objects to JSON
  *
- * @param headers - Headers object with unknown value types
+ * @param headers - Headers object with JSON value types
  * @returns Normalised headers with string values only (branded type)
  */
-export function normaliseHeaders(headers: JsonDict | undefined): StackOneHeaders {
+export function normaliseHeaders(headers: JsonObject | undefined): StackOneHeaders {
 	if (!headers) return stackOneHeadersSchema.parse({});
 	const result: Record<string, string> = {};
 	for (const [key, value] of Object.entries(headers)) {

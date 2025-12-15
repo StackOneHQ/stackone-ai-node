@@ -8,7 +8,7 @@
 
 import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
-import { StackOneToolSet, Tools } from '@stackone/ai';
+import { type JsonObject, StackOneToolSet, Tools } from '@stackone/ai';
 import { generateText, stepCountIs } from 'ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
@@ -160,7 +160,7 @@ const directMetaToolUsage = async (): Promise<void> => {
 
 		try {
 			// Prepare parameters based on the tool's schema
-			let params: Record<string, unknown> = {};
+			let params = {} satisfies JsonObject;
 			if (firstTool.name === 'bamboohr_list_employees') {
 				params = { limit: 5 };
 			} else if (firstTool.name === 'bamboohr_create_employee') {
@@ -173,7 +173,7 @@ const directMetaToolUsage = async (): Promise<void> => {
 
 			const result = await executeTool.execute({
 				toolName: firstTool.name,
-				params: params,
+				params,
 			});
 
 			console.log('Execution result:', JSON.stringify(result, null, 2));
@@ -209,7 +209,7 @@ const dynamicToolRouter = async (): Promise<void> => {
 	const metaTools = await combinedTools.metaTools();
 
 	// Create a router function that finds and executes tools based on intent
-	const routeAndExecute = async (intent: string, params: Record<string, unknown> = {}) => {
+	const routeAndExecute = async (intent: string, params: JsonObject = {}) => {
 		const filterTool = metaTools.getTool('meta_search_tools');
 		const executeTool = metaTools.getTool('meta_execute_tool');
 		if (!filterTool || !executeTool) throw new Error('Meta tools not found');
@@ -221,18 +221,18 @@ const dynamicToolRouter = async (): Promise<void> => {
 			minScore: 0.5,
 		});
 
-		const tools = searchResult.tools as Array<{ name: string; score: number }>;
-		if (tools.length === 0) {
+		const tools = searchResult.tools;
+		if (!Array.isArray(tools) || tools.length === 0) {
 			return { error: 'No relevant tools found for the given intent' };
 		}
 
-		const selectedTool = tools[0];
+		const selectedTool = tools[0] as { name: string; score: number };
 		console.log(`Routing to: ${selectedTool.name} (score: ${selectedTool.score.toFixed(2)})`);
 
 		// Execute the selected tool
 		return await executeTool.execute({
 			toolName: selectedTool.name,
-			params: params,
+			params,
 		});
 	};
 
@@ -244,7 +244,7 @@ const dynamicToolRouter = async (): Promise<void> => {
 			params: { name: 'Jane Smith', email: 'jane@example.com' },
 		},
 		{ intent: 'Find recruitment candidates', params: { status: 'active' } },
-	];
+	] as const satisfies { intent: string; params: JsonObject }[];
 
 	for (const { intent, params } of intents) {
 		console.log(`\nIntent: "${intent}"`);

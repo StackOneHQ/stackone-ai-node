@@ -4,12 +4,9 @@
 
 import type { Tool } from '@ai-sdk/provider-utils';
 import type { ToolSet } from 'ai';
-import type { ValueOf } from 'type-fest';
+import type { JsonObject, JsonValue, ValueOf } from 'type-fest';
 
-/**
- * Generic dictionary type for JSON-compatible objects
- */
-export type JsonDict = Record<string, unknown>;
+export type { JsonObject, JsonValue };
 
 /**
  * HTTP headers type
@@ -27,10 +24,10 @@ export interface JSONSchema {
 	properties?: Record<string, JSONSchema>;
 	items?: JSONSchema | Array<JSONSchema>;
 	required?: Array<string>;
-	enum?: Array<unknown>;
-	const?: unknown;
+	enum?: Array<JsonValue>;
+	const?: JsonValue;
 	description?: string;
-	default?: unknown;
+	default?: JsonValue;
 	$ref?: string;
 	$defs?: Record<string, JSONSchema>;
 	definitions?: Record<string, JSONSchema>;
@@ -59,8 +56,13 @@ export interface JSONSchema {
 	minProperties?: number;
 	maxProperties?: number;
 	title?: string;
-	examples?: Array<unknown>;
-	[key: string]: unknown; // Allow additional properties for extensibility
+	examples?: Array<JsonValue>;
+	[key: string]:
+		| JsonValue
+		| JSONSchema
+		| Array<JSONSchema>
+		| Record<string, JSONSchema>
+		| undefined; // Allow additional properties for extensibility
 }
 
 /**
