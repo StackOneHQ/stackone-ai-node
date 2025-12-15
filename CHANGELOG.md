@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.5](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.4...v2.0.5) (2025-12-15)
+
+
+### Bug Fixes
+
+* **ci:** move install to nix action ([#240](https://github.com/StackOneHQ/stackone-ai-node/issues/240)) ([fe729aa](https://github.com/StackOneHQ/stackone-ai-node/commit/fe729aa6a938a845b321739384ee1bc4e9d090f4))
+
 ## [2.0.4](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.3...v2.0.4) (2025-12-15)
 
 
