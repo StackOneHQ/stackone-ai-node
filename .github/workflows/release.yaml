@@ -42,7 +42,7 @@ jobs:
           node-version: lts/*
 
       - name: 📦 Pack package
-        run: nix develop --command pnpm pack --no-git-checks
+        run: nix develop --command pnpm pack
 
       - name: 🚀 Publish package
         shell: bash
