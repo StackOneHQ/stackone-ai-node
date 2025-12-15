@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.8](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.7...v2.0.8) (2025-12-15)
+
+
+### Bug Fixes
+
+* **ci:** revert changes 2.0.5 ~ 2.0.7 ([#246](https://github.com/StackOneHQ/stackone-ai-node/issues/246)) ([91909a2](https://github.com/StackOneHQ/stackone-ai-node/commit/91909a29cdb3131b7bc808722fb636e82856abd8))
+
 ## [2.0.7](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.6...v2.0.7) (2025-12-15)
 
 
