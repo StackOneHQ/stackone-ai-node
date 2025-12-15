@@ -41,5 +41,12 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           node-version: lts/*
 
+      - name: 📦 Pack package
+        run: nix develop --command pnpm pack
+
       - name: 🚀 Publish package
-        run: nix develop --command pnpm publish --provenance --no-git-checks --access public
+        shell: bash
+        run: |
+          PACKAGE_TGZ=$(ls *.tgz | head -n 1)
+          echo "Publishing package: $PACKAGE_TGZ"
+          npm publish "$PACKAGE_TGZ" --access public

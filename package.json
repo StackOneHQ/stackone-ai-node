@@ -29,7 +29,6 @@
 		"lint:oxfmt": "oxfmt --no-error-on-unmatched-pattern --check .",
 		"lint:oxlint": "oxlint --max-warnings=0 --type-aware --type-check",
 		"lint:knip": "knip",
-		"preinstall": "npx only-allow pnpm",
 		"prepack": "npm pkg delete scripts.preinstall && pnpm run build",
 		"test": "vitest",
 		"coverage": "vitest run --coverage"
