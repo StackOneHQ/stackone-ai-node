@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.1...v2.0.2) (2025-12-15)
+
+
+### Bug Fixes
+
+* **release:** give permission to create id for publishing ([#234](https://github.com/StackOneHQ/stackone-ai-node/issues/234)) ([dd5b894](https://github.com/StackOneHQ/stackone-ai-node/commit/dd5b894352fc9d2ec45834537c243907404063f4))
+
 ## [2.0.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.0...v2.0.1) (2025-12-15)
 
 
