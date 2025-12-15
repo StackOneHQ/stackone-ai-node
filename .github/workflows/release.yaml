@@ -42,4 +42,4 @@ jobs:
           node-version: lts/*
 
       - name: 🚀 Publish package
-        run: nix develop --command pnpm publish --provenance --no-git-checks --access public
+        run: nix develop --command pnpm publish --no-git-checks --access public
