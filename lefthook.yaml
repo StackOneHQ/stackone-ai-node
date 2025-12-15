@@ -9,6 +9,10 @@ pre-commit:
       glob: '*'
       run: pnpm oxfmt --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true
+    - name: nixfmt
+      glob: '*.nix'
+      run: nix develop --command nixfmt {staged_files}
+      stage_fixed: true
 
 pre-push:
   jobs:
