@@ -43,4 +43,4 @@ jobs:
         run: nix develop --command pnpm install --frozen-lockfile
 
       - name: 🚀 Publish package
-        run: nix develop --command pnpm publish --access public --no-git-checks
+        run: nix develop --command pnpm publish --provenance --no-git-checks --access public
