@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.0...v2.0.1) (2025-12-15)
+
+
+### Bug Fixes
+
+* ignore changelog from oxfmt ([#232](https://github.com/StackOneHQ/stackone-ai-node/issues/232)) ([8ae4480](https://github.com/StackOneHQ/stackone-ai-node/commit/8ae4480306aa132334b2e3e8e4c33003285bab3d))
+
 ## [2.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.0...v2.0.0) (2025-12-15)
 
 
