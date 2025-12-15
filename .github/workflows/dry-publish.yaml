@@ -13,8 +13,5 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
 
-      - name: Install dependencies
-        run: nix develop --command pnpm install --frozen-lockfile
-
       - name: 🚀 Dry Run Publish Package
         run: nix develop --command pnpm dlx pkg-pr-new publish --pnpm

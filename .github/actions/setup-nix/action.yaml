@@ -13,3 +13,7 @@ runs:
       with:
         name: numtide
         authToken: ''
+
+    - name: Load Nix development environment
+      shell: bash
+      run: nix develop --command true

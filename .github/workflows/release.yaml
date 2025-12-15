@@ -41,8 +41,5 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           node-version: lts/*
 
-      - name: 💫 Install dependencies
-        run: nix develop --command pnpm install --frozen-lockfile
-
       - name: 🚀 Publish package
         run: nix develop --command pnpm publish --provenance --no-git-checks --access public

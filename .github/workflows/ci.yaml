@@ -25,9 +25,6 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
 
-      - name: Initialise Nix environment
-        run: nix develop --command true
-
       - name: Run Lint
         run: nix develop --command pnpm run lint
 
