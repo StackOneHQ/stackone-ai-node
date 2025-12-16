@@ -175,6 +175,13 @@ export class StackOneToolSet {
 	 * @param config Configuration object containing API key and optional account ID(s)
 	 */
 	constructor(config?: StackOneToolSetConfig) {
+		// Validate mutually exclusive account options
+		if (config?.accountId != null && config?.accountIds != null) {
+			throw new ToolSetConfigError(
+				'Cannot provide both accountId and accountIds. Use accountId for a single account or accountIds for multiple accounts.',
+			);
+		}
+
 		const apiKey = config?.apiKey || process.env.STACKONE_API_KEY;
 
 		if (!apiKey && config?.strict) {
