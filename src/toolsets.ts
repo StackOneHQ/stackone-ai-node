@@ -1,4 +1,5 @@
 import { defu } from 'defu';
+import type { MergeExclusive } from 'type-fest';
 import { DEFAULT_BASE_URL, UNIFIED_API_PREFIX } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
@@ -88,19 +89,46 @@ export interface BaseToolSetConfig {
 }
 
 /**
- * Configuration for StackOne toolset
+ * Configuration with a single account ID
  */
-export interface StackOneToolSetConfig extends BaseToolSetConfig {
-	apiKey?: string;
-	accountId?: string;
+interface SingleAccountConfig {
+	/**
+	 * Single account ID for StackOne API operations
+	 * Use this when working with a single account
+	 */
+	accountId: string;
+}
+
+/**
+ * Configuration with multiple account IDs
+ */
+interface MultipleAccountsConfig {
 	/**
 	 * Array of account IDs for filtering tools across multiple accounts
 	 * When provided, tools will be fetched for all specified accounts
 	 * @example ['account-1', 'account-2']
 	 */
-	accountIds?: string[];
+	accountIds: string[];
+}
+
+/**
+ * Account configuration options - either single accountId or multiple accountIds, but not both
+ */
+type AccountConfig = MergeExclusive<SingleAccountConfig, MultipleAccountsConfig>;
+
+/**
+ * Base configuration for StackOne toolset (without account options)
+ */
+interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
+	apiKey?: string;
 	strict?: boolean;
 }
+
+/**
+ * Configuration for StackOne toolset
+ * Accepts either accountId (single) or accountIds (multiple), but not both
+ */
+export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountConfig>;
 
 /**
  * Options for filtering tools when fetching from MCP
