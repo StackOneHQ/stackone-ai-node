@@ -93,6 +93,12 @@ export interface BaseToolSetConfig {
 export interface StackOneToolSetConfig extends BaseToolSetConfig {
 	apiKey?: string;
 	accountId?: string;
+	/**
+	 * Array of account IDs for filtering tools across multiple accounts
+	 * When provided, tools will be fetched for all specified accounts
+	 * @example ['account-1', 'account-2']
+	 */
+	accountIds?: string[];
 	strict?: boolean;
 }
 
@@ -137,8 +143,8 @@ export class StackOneToolSet {
 	private accountIds: string[] = [];
 
 	/**
-	 * Initialise StackOne toolset with API key and optional account ID
-	 * @param config Configuration object containing API key and optional account ID
+	 * Initialise StackOne toolset with API key and optional account ID(s)
+	 * @param config Configuration object containing API key and optional account ID(s)
 	 */
 	constructor(config?: StackOneToolSetConfig) {
 		const apiKey = config?.apiKey || process.env.STACKONE_API_KEY;
@@ -176,6 +182,7 @@ export class StackOneToolSet {
 		this.headers = configHeaders;
 		this.rpcClient = config?.rpcClient;
 		this.accountId = accountId;
+		this.accountIds = config?.accountIds ?? [];
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
