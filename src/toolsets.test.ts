@@ -83,6 +83,38 @@ describe('StackOneToolSet', () => {
 			expect(toolset.accountIds).toEqual(['account-1', 'account-2']);
 		});
 
+		it('should initialise with multiple account IDs from constructor', () => {
+			const toolset = new StackOneToolSet({
+				apiKey: 'custom_key',
+				accountIds: ['account-1', 'account-2', 'account-3'],
+			});
+
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.accountIds).toEqual(['account-1', 'account-2', 'account-3']);
+		});
+
+		it('should initialise with empty accountIds array when not provided', () => {
+			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
+
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.accountIds).toEqual([]);
+		});
+
+		it('should allow both accountId and accountIds in constructor', () => {
+			const toolset = new StackOneToolSet({
+				apiKey: 'custom_key',
+				accountId: 'primary-account',
+				accountIds: ['account-1', 'account-2'],
+			});
+
+			// Single accountId should be set in headers
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.headers['x-account-id']).toBe('primary-account');
+			// Multiple accountIds should be stored separately
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.accountIds).toEqual(['account-1', 'account-2']);
+		});
+
 		it('should set baseUrl from config', () => {
 			const toolset = new StackOneToolSet({
 				apiKey: 'custom_key',
@@ -280,6 +312,51 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc1_tool_2');
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
+			expect(toolNames).toContain('meta_collect_tool_feedback');
+		});
+
+		it('uses accountIds from constructor when no accountIds provided in fetchTools', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountIds: ['acc1', 'acc2'],
+			});
+
+			// Fetch without accountIds - should use constructor accountIds
+			const tools = await toolset.fetchTools();
+
+			// Should fetch tools for 2 accounts from constructor
+			// acc1 has 2 tools, acc2 has 2 tools, + 1 feedback tool = 5
+			expect(tools.length).toBe(5);
+			const toolNames = tools.toArray().map((t) => t.name);
+			expect(toolNames).toContain('acc1_tool_1');
+			expect(toolNames).toContain('acc1_tool_2');
+			expect(toolNames).toContain('acc2_tool_1');
+			expect(toolNames).toContain('acc2_tool_2');
+			expect(toolNames).toContain('meta_collect_tool_feedback');
+		});
+
+		it('setAccounts overrides constructor accountIds', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountIds: ['acc1'],
+			});
+
+			// Override with setAccounts
+			toolset.setAccounts(['acc2', 'acc3']);
+
+			// Fetch without accountIds - should use setAccounts, not constructor
+			const tools = await toolset.fetchTools();
+
+			// Should fetch tools for acc2 and acc3 (not acc1)
+			// acc2 has 2 tools, acc3 has 1 tool, + 1 feedback tool = 4
+			expect(tools.length).toBe(4);
+			const toolNames = tools.toArray().map((t) => t.name);
+			expect(toolNames).not.toContain('acc1_tool_1');
+			expect(toolNames).toContain('acc2_tool_1');
+			expect(toolNames).toContain('acc2_tool_2');
+			expect(toolNames).toContain('acc3_tool_1');
 			expect(toolNames).toContain('meta_collect_tool_feedback');
 		});
 
