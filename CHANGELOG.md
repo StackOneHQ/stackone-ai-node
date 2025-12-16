@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.9](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.8...v2.0.9) (2025-12-16)
+
+
+### Bug Fixes
+
+* **toolsets:** add accountIds option to StackOneToolSetConfig ([#252](https://github.com/StackOneHQ/stackone-ai-node/issues/252)) ([33973ed](https://github.com/StackOneHQ/stackone-ai-node/commit/33973edd31c7b16cb55d53b4354069ed76da3d9b))
+
 ## [2.0.8](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.7...v2.0.8) (2025-12-15)
 
 
