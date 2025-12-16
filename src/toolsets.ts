@@ -1,5 +1,5 @@
 import { defu } from 'defu';
-import type { MergeExclusive } from 'type-fest';
+import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import { DEFAULT_BASE_URL, UNIFIED_API_PREFIX } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
@@ -114,7 +114,7 @@ interface MultipleAccountsConfig {
 /**
  * Account configuration options - either single accountId or multiple accountIds, but not both
  */
-type AccountConfig = MergeExclusive<SingleAccountConfig, MultipleAccountsConfig>;
+type AccountConfig = SimplifyDeep<MergeExclusive<SingleAccountConfig, MultipleAccountsConfig>>;
 
 /**
  * Base configuration for StackOne toolset (without account options)
