@@ -130,6 +130,24 @@ describe('StackOneToolSet', () => {
 			expect(toolsetMultiple.accountIds).toEqual(['account-1', 'account-2']);
 		});
 
+		it('should throw error when both accountId and accountIds are provided at runtime', () => {
+			// Runtime validation for JavaScript users or when TypeScript is bypassed
+			expect(() => {
+				new StackOneToolSet({
+					apiKey: 'custom_key',
+					accountId: 'primary-account',
+					accountIds: ['account-1', 'account-2'],
+				} as never); // Use 'as never' to bypass TypeScript for runtime test
+			}).toThrow(ToolSetConfigError);
+			expect(() => {
+				new StackOneToolSet({
+					apiKey: 'custom_key',
+					accountId: 'primary-account',
+					accountIds: ['account-1', 'account-2'],
+				} as never);
+			}).toThrow(/Cannot provide both accountId and accountIds/);
+		});
+
 		it('should set baseUrl from config', () => {
 			const toolset = new StackOneToolSet({
 				apiKey: 'custom_key',
