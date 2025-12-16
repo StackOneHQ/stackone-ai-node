@@ -100,19 +100,34 @@ describe('StackOneToolSet', () => {
 			expect(toolset.accountIds).toEqual([]);
 		});
 
-		it('should allow both accountId and accountIds in constructor', () => {
-			const toolset = new StackOneToolSet({
+		it('should not allow both accountId and accountIds in constructor (type check)', () => {
+			// This test verifies the type system prevents using both accountId and accountIds
+			// The following would be a type error:
+			// new StackOneToolSet({
+			//   apiKey: 'custom_key',
+			//   accountId: 'primary-account',
+			//   accountIds: ['account-1', 'account-2'],
+			// });
+
+			// Valid: only accountId
+			const toolsetSingle = new StackOneToolSet({
 				apiKey: 'custom_key',
 				accountId: 'primary-account',
+			});
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolsetSingle.headers['x-account-id']).toBe('primary-account');
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolsetSingle.accountIds).toEqual([]);
+
+			// Valid: only accountIds
+			const toolsetMultiple = new StackOneToolSet({
+				apiKey: 'custom_key',
 				accountIds: ['account-1', 'account-2'],
 			});
-
-			// Single accountId should be set in headers
 			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.headers['x-account-id']).toBe('primary-account');
-			// Multiple accountIds should be stored separately
+			expect(toolsetMultiple.headers['x-account-id']).toBeUndefined();
 			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.accountIds).toEqual(['account-1', 'account-2']);
+			expect(toolsetMultiple.accountIds).toEqual(['account-1', 'account-2']);
 		});
 
 		it('should set baseUrl from config', () => {
