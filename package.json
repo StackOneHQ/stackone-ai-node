@@ -2,22 +2,38 @@
 	"name": "@stackone/ai",
 	"version": "2.0.9",
 	"description": "Tools for agents to perform actions on your SaaS",
-	"packageManager": "pnpm@10.24.0",
-	"module": "./dist/index.mjs",
+	"keywords": [
+		"agents",
+		"ai",
+		"ai sdk",
+		"mcp",
+		"model context protocol",
+		"stackone",
+		"tools"
+	],
+	"homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
+	"bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
+	},
+	"author": "StackOne",
+	"license": "Apache-2.0",
+	"type": "module",
 	"main": "./dist/index.mjs",
-	"types": "./dist/index.d.mts",
 	"exports": {
 		".": "./src/index.ts",
 		"./package.json": "./package.json"
 	},
-	"type": "module",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
 	"files": [
-		"src",
-		"dist",
-		"README.md",
+		"!example/*.test.ts",
 		"LICENSE",
+		"README.md",
+		"dist",
 		"examples/*.ts",
-		"!example/*.test.ts"
+		"src"
 	],
 	"scripts": {
 		"build": "tsdown",
@@ -79,29 +95,7 @@
 			"optional": true
 		}
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
-	},
-	"keywords": [
-		"stackone",
-		"ai",
-		"tools",
-		"agents",
-		"ai sdk",
-		"mcp",
-		"model context protocol"
-	],
-	"author": "StackOne",
-	"license": "Apache-2.0",
-	"bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
-	"homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
-	"publishConfig": {
-		"exports": {
-			".": "./dist/index.mjs",
-			"./package.json": "./package.json"
-		}
-	},
+	"packageManager": "pnpm@10.26.0",
 	"engines": {
 		"node": ">=20.19.6"
 	},
@@ -113,5 +107,11 @@
 				"onFail": "download"
 			}
 		]
+	},
+	"publishConfig": {
+		"exports": {
+			".": "./dist/index.mjs",
+			"./package.json": "./package.json"
+		}
 	}
 }

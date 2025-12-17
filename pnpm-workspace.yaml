@@ -18,9 +18,9 @@ catalogs:
     knip: ^5.72.0
     lefthook: ^2.0.8
     msw: ^2.10.4
-    oxfmt: ^0.17.0
+    oxfmt: ^0.18.0
     oxlint: ^1.32.0
-    oxlint-tsgolint: ^0.8.4
+    oxlint-tsgolint: ^0.8.6
     publint: ^0.3.12
     tsdown: ^0.17.2
     type-fest: ^4.41.0
