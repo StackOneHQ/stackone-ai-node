@@ -9,7 +9,15 @@
 		"node": true,
 	},
 	// Ignore patterns
-	"ignorePatterns": ["dist", "node_modules", ".claude", "tmp", "*.log", "/nix/store/**"],
+	"ignorePatterns": [
+		"dist",
+		"node_modules",
+		".claude",
+		"tmp",
+		"*.log",
+		"/nix/store/**",
+		"CHANGELOG.md",
+	],
 	// Rule categories - strict base configuration
 	// - correctness (196 rules): Catch definite bugs and errors
 	// - suspicious (47 rules): Flag potentially problematic patterns
