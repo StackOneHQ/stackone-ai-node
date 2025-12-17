@@ -16,7 +16,7 @@ permissions:
   id-token: write
 
 jobs:
-  ci:
+  typos:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,6 +25,8 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
 
+      - name: Run Typo Check
+        run: nix develop --command typos .
       - name: Run Lint
         run: nix develop --command pnpm run lint
 
