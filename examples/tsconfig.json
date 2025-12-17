@@ -9,8 +9,8 @@
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"lib": ["es2022"],
-		"types": ["node", "vitest/globals"],
+		"types": ["node", "vitest/globals"]
 	},
 	"include": ["**/*.ts"],
-	"exclude": ["node_modules"],
+	"exclude": ["node_modules"]
 }
