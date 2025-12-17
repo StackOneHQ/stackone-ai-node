@@ -27,36 +27,54 @@ jobs:
 
       - name: Run Typo Check
         run: nix develop --command typos .
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
       - name: Run Lint
         run: nix develop --command pnpm run lint
+
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
 
       - name: Run Build
         run: nix develop --command pnpm run build
 
       - name: Run Tests
-        if: github.ref != 'refs/heads/main'
         run: nix develop --command pnpm test
 
+  coverage:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
       - name: Run Tests with Coverage
-        if: github.ref == 'refs/heads/main'
         run: nix develop --command pnpm run coverage
-
       - name: Create Coverage Badge
-        if: github.ref == 'refs/heads/main'
         uses: jaywcjlove/coverage-badges-cli@bd6ccbf422c0ed54c01f283019fd2bc648f58541 # v2.2.0
         with:
           source: coverage/coverage-summary.json
           output: coverage/badges.svg
-
       - name: Upload coverage artifact
-        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
         with:
           path: coverage
 
   deploy-coverage:
-    if: github.ref == 'refs/heads/main'
-    needs: ci
+    needs: coverage
     runs-on: ubuntu-latest
     environment:
       name: github-pages
