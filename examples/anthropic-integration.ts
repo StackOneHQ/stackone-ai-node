@@ -17,7 +17,7 @@ if (!apiKey) {
 const accountId = 'your-hris-account-id';
 
 const anthropicIntegration = async (): Promise<void> => {
-	// Initialise StackOne
+	// Initialize StackOne
 	const toolset = new StackOneToolSet({
 		accountId,
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
@@ -29,7 +29,7 @@ const anthropicIntegration = async (): Promise<void> => {
 	});
 	const anthropicTools = tools.toAnthropic();
 
-	// Initialise Anthropic client
+	// Initialize Anthropic client
 	const anthropic = new Anthropic();
 
 	// Create a message with tool calls

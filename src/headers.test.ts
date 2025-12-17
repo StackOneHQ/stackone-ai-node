@@ -1,56 +1,56 @@
-import { normaliseHeaders } from './headers';
+import { normalizeHeaders } from './headers';
 
-describe('normaliseHeaders', () => {
+describe('normalizeHeaders', () => {
 	it('returns empty object for undefined input', () => {
-		expect(normaliseHeaders(undefined)).toEqual({});
+		expect(normalizeHeaders(undefined)).toEqual({});
 	});
 
 	it('returns empty object for empty input', () => {
-		expect(normaliseHeaders({})).toEqual({});
+		expect(normalizeHeaders({})).toEqual({});
 	});
 
 	it('preserves string values', () => {
-		expect(normaliseHeaders({ foo: 'bar', baz: 'qux' })).toEqual({
+		expect(normalizeHeaders({ foo: 'bar', baz: 'qux' })).toEqual({
 			foo: 'bar',
 			baz: 'qux',
 		});
 	});
 
 	it('converts numbers to strings', () => {
-		expect(normaliseHeaders({ port: 8080, timeout: 30 })).toEqual({
+		expect(normalizeHeaders({ port: 8080, timeout: 30 })).toEqual({
 			port: '8080',
 			timeout: '30',
 		});
 	});
 
 	it('converts booleans to strings', () => {
-		expect(normaliseHeaders({ enabled: true, debug: false })).toEqual({
+		expect(normalizeHeaders({ enabled: true, debug: false })).toEqual({
 			enabled: 'true',
 			debug: 'false',
 		});
 	});
 
-	it('serialises objects to JSON', () => {
-		expect(normaliseHeaders({ config: { key: 'value' } })).toEqual({
+	it('serializes objects to JSON', () => {
+		expect(normalizeHeaders({ config: { key: 'value' } })).toEqual({
 			config: '{"key":"value"}',
 		});
 	});
 
-	it('serialises arrays to JSON', () => {
-		expect(normaliseHeaders({ tags: ['foo', 'bar'] })).toEqual({
+	it('serializes arrays to JSON', () => {
+		expect(normalizeHeaders({ tags: ['foo', 'bar'] })).toEqual({
 			tags: '["foo","bar"]',
 		});
 	});
 
 	it('skips null values', () => {
-		expect(normaliseHeaders({ foo: 'bar', baz: null })).toEqual({
+		expect(normalizeHeaders({ foo: 'bar', baz: null })).toEqual({
 			foo: 'bar',
 		});
 	});
 
 	it('handles mixed value types', () => {
 		expect(
-			normaliseHeaders({
+			normalizeHeaders({
 				string: 'text',
 				number: 42,
 				boolean: true,

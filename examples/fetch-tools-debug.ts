@@ -203,7 +203,7 @@ if ((typeof globalThis.Bun as any) !== 'undefined') {
 }
 
 const spinner = clack.spinner();
-spinner.start('Initialising StackOne client...');
+spinner.start('Initializing StackOne client...');
 
 const toolset = new StackOneToolSet({
 	apiKey,

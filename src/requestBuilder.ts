@@ -332,7 +332,7 @@ export class RequestBuilder {
 
 		// If dryRun is true, return the request details instead of making the API call
 		if (options?.dryRun) {
-			// Convert headers to a plain object for JSON serialisation
+			// Convert headers to a plain object for JSON serialization
 			const headersObj =
 				fetchOptions.headers instanceof Headers
 					? Object.fromEntries(fetchOptions.headers.entries())

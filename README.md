@@ -458,7 +458,7 @@ You can use the `dryRun` option to return the api arguments from a tool call wit
 ```typescript
 import { StackOneToolSet } from "@stackone/ai";
 
-// Initialise the toolset
+// Initialize the toolset
 const toolset = new StackOneToolSet({
   baseUrl: "https://api.stackone.com",
 });

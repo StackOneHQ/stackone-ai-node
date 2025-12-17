@@ -17,7 +17,7 @@ if (!apiKey) {
 const accountId = 'your-stackone-account-id';
 
 const openaiResponsesIntegration = async (): Promise<void> => {
-	// Initialise StackOne
+	// Initialize StackOne
 	const toolset = new StackOneToolSet({ accountId });
 
 	// Fetch tools via MCP
@@ -26,7 +26,7 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 	});
 	const openAIResponsesTools = tools.toOpenAIResponses();
 
-	// Initialise OpenAI client
+	// Initialize OpenAI client
 	const openai = new OpenAI();
 
 	// Create a response with tool calls using the Responses API

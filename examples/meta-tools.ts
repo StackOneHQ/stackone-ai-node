@@ -26,7 +26,7 @@ const accountId = 'your-bamboohr-account-id';
 const metaToolsWithAISDK = async (): Promise<void> => {
 	console.log('🔍 Example 1: Dynamic tool discovery with AI SDK\n');
 
-	// Initialise StackOne toolset
+	// Initialize StackOne toolset
 	const toolset = new StackOneToolSet({
 		accountId,
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
@@ -64,7 +64,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 		apiKey: process.env.OPENAI_API_KEY,
 	});
 
-	// Initialise StackOne toolset
+	// Initialize StackOne toolset
 	const toolset = new StackOneToolSet({
 		accountId,
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
@@ -118,7 +118,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 const directMetaToolUsage = async (): Promise<void> => {
 	console.log('\n🛠️  Example 3: Direct meta tool usage\n');
 
-	// Initialise toolset
+	// Initialize toolset
 	const toolset = new StackOneToolSet({
 		accountId,
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',

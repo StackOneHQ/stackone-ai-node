@@ -32,7 +32,7 @@ describe('openai-responses-integration example e2e', () => {
 		expect(Array.isArray(openAIResponsesTools)).toBe(true);
 		expect(openAIResponsesTools.length).toBeGreaterThan(0);
 
-		// Initialise OpenAI client
+		// Initialize OpenAI client
 		const openai = new OpenAI();
 
 		// Create a response with tool calls using the Responses API

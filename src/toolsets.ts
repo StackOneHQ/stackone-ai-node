@@ -2,7 +2,7 @@ import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import { DEFAULT_BASE_URL, UNIFIED_API_PREFIX } from './consts';
 import { createFeedbackTool } from './feedback';
-import { type StackOneHeaders, normaliseHeaders, stackOneHeadersSchema } from './headers';
+import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { BaseTool, Tools } from './tool';
@@ -171,7 +171,7 @@ export class StackOneToolSet {
 	private accountIds: string[] = [];
 
 	/**
-	 * Initialise StackOne toolset with API key and optional account ID(s)
+	 * Initialize StackOne toolset with API key and optional account ID(s)
 	 * @param config Configuration object containing API key and optional account ID(s)
 	 */
 	constructor(config?: StackOneToolSetConfig) {
@@ -211,7 +211,7 @@ export class StackOneToolSet {
 			...(accountId ? { 'x-account-id': accountId } : {}),
 		};
 
-		// Initialise base properties
+		// Initialize base properties
 		this.baseUrl = config?.baseUrl ?? process.env.STACKONE_BASE_URL ?? DEFAULT_BASE_URL;
 		this.authentication = authentication;
 		this.headers = configHeaders;
@@ -499,7 +499,7 @@ export class StackOneToolSet {
 				const pathParams = this.extractRecord(parsedParams, 'path');
 				const queryParams = this.extractRecord(parsedParams, 'query');
 				const additionalHeaders = this.extractRecord(parsedParams, 'headers');
-				const extraHeaders = normaliseHeaders(additionalHeaders);
+				const extraHeaders = normalizeHeaders(additionalHeaders);
 				// defu merges extraHeaders into baseHeaders, both are already branded types
 				const actionHeaders = defu(extraHeaders, baseHeaders) as StackOneHeaders;
 

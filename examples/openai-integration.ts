@@ -17,7 +17,7 @@ if (!apiKey) {
 const accountId = 'your-bamboohr-account-id';
 
 const openaiIntegration = async (): Promise<void> => {
-	// Initialise StackOne
+	// Initialize StackOne
 	const toolset = new StackOneToolSet({
 		accountId,
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
@@ -27,7 +27,7 @@ const openaiIntegration = async (): Promise<void> => {
 	const tools = await toolset.fetchTools();
 	const openAITools = tools.toOpenAI();
 
-	// Initialise OpenAI client
+	// Initialize OpenAI client
 	const openai = new OpenAI();
 
 	// Create a chat completion with tool calls

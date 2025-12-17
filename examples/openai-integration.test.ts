@@ -33,7 +33,7 @@ describe('openai-integration example e2e', () => {
 		expect(openAITools[0]).toHaveProperty('type', 'function');
 		expect(openAITools[0]).toHaveProperty('function');
 
-		// Initialise OpenAI client
+		// Initialize OpenAI client
 		const openai = new OpenAI();
 
 		// Create a chat completion with tool calls

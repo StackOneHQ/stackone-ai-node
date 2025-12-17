@@ -1,6 +1,6 @@
 /**
  * StackOneToolSet tests - comprehensive test suite covering:
- * - Initialisation and configuration
+ * - Initialization and configuration
  * - Authentication (basic, bearer)
  * - Glob and filter matching
  * - MCP fetch integration
@@ -21,8 +21,8 @@ describe('StackOneToolSet', () => {
 		vi.unstubAllEnvs();
 	});
 
-	describe('initialisation', () => {
-		it('should initialise with API key from constructor', () => {
+	describe('initialization', () => {
+		it('should initialize with API key from constructor', () => {
 			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
 			expect(toolset).toBeDefined();
@@ -30,7 +30,7 @@ describe('StackOneToolSet', () => {
 			expect(toolset.authentication?.credentials?.username).toBe('custom_key');
 		});
 
-		it('should initialise with API key from environment', () => {
+		it('should initialize with API key from environment', () => {
 			const toolset = new StackOneToolSet();
 
 			expect(toolset).toBeDefined();
@@ -38,7 +38,7 @@ describe('StackOneToolSet', () => {
 			expect(toolset.authentication?.credentials?.username).toBe('test_key');
 		});
 
-		it('should initialise with custom values', () => {
+		it('should initialize with custom values', () => {
 			const baseUrl = 'https://api.example.com';
 			const headers = { 'X-Custom-Header': 'test' };
 
@@ -83,7 +83,7 @@ describe('StackOneToolSet', () => {
 			expect(toolset.accountIds).toEqual(['account-1', 'account-2']);
 		});
 
-		it('should initialise with multiple account IDs from constructor', () => {
+		it('should initialize with multiple account IDs from constructor', () => {
 			const toolset = new StackOneToolSet({
 				apiKey: 'custom_key',
 				accountIds: ['account-1', 'account-2', 'account-3'],
@@ -93,7 +93,7 @@ describe('StackOneToolSet', () => {
 			expect(toolset.accountIds).toEqual(['account-1', 'account-2', 'account-3']);
 		});
 
-		it('should initialise with empty accountIds array when not provided', () => {
+		it('should initialize with empty accountIds array when not provided', () => {
 			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
 
 			// @ts-expect-error - Accessing private property for testing

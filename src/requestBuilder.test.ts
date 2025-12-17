@@ -62,7 +62,7 @@ describe('RequestBuilder', () => {
 		server.events.removeAllListeners('request:start');
 	});
 
-	it('should initialise with headers from constructor', () => {
+	it('should initialize with headers from constructor', () => {
 		expect(builder.getHeaders()).toEqual({ 'Initial-Header': 'test' });
 	});
 
@@ -325,7 +325,7 @@ describe('RequestBuilder', () => {
 		});
 
 		it('should throw error when circular reference is detected', async () => {
-			// Test runtime behaviour when circular reference is passed
+			// Test runtime behavior when circular reference is passed
 			// Note: This tests error handling for malformed input at runtime
 			const inner: Record<string, unknown> = { b: 'test' };
 			const circular: Record<string, unknown> = { a: inner };
@@ -356,7 +356,7 @@ describe('RequestBuilder', () => {
 		});
 
 		it('should handle special types correctly at runtime', async () => {
-			// Test runtime behaviour when non-JSON types are passed
+			// Test runtime behavior when non-JSON types are passed
 			// Note: Date and RegExp are not valid JsonValue types, but we test
 			// the serialiser's runtime handling of these edge cases
 			const testDate = new Date('2023-01-01T00:00:00.000Z');
@@ -370,7 +370,7 @@ describe('RequestBuilder', () => {
 					nullField: null,
 					emptyString: '',
 				},
-			} as unknown as JsonObject; // Cast to test runtime serialisation
+			} as unknown as JsonObject; // Cast to test runtime serialization
 
 			const result = await builder.execute(params, { dryRun: true });
 			const url = new URL(result.url as string);
@@ -444,7 +444,7 @@ describe('RequestBuilder', () => {
 		});
 
 		it('should handle nested objects with special types at runtime', async () => {
-			// Test runtime serialisation of nested non-JSON types
+			// Test runtime serialization of nested non-JSON types
 			const params = {
 				pathParam: 'test-value',
 				filter: {
@@ -456,7 +456,7 @@ describe('RequestBuilder', () => {
 						},
 					},
 				},
-			} as unknown as JsonObject; // Cast to test runtime serialisation
+			} as unknown as JsonObject; // Cast to test runtime serialization
 
 			const result = await builder.execute(params, { dryRun: true });
 			const url = new URL(result.url as string);

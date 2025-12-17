@@ -21,7 +21,7 @@ if (!apiKey) {
 const accountId = 'your-bamboohr-account-id';
 
 const claudeAgentSdkIntegration = async (): Promise<void> => {
-	// Initialise StackOne
+	// Initialize StackOne
 	const toolset = new StackOneToolSet({
 		accountId,
 		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',

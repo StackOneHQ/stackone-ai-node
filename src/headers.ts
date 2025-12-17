@@ -18,13 +18,13 @@ export const stackOneHeadersSchema = z.record(z.string(), z.string()).brand<'Sta
 export type StackOneHeaders = z.infer<typeof stackOneHeadersSchema>;
 
 /**
- * Normalises header values from JsonObject to StackOneHeaders (branded type)
- * Converts numbers and booleans to strings, and serialises objects to JSON
+ * Normalizes header values from JsonObject to StackOneHeaders (branded type)
+ * Converts numbers and booleans to strings, and serializes objects to JSON
  *
  * @param headers - Headers object with JSON value types
- * @returns Normalised headers with string values only (branded type)
+ * @returns Normalized headers with string values only (branded type)
  */
-export function normaliseHeaders(headers: JsonObject | undefined): StackOneHeaders {
+export function normalizeHeaders(headers: JsonObject | undefined): StackOneHeaders {
 	if (!headers) return stackOneHeadersSchema.parse({});
 	const result: Record<string, string> = {};
 	for (const [key, value] of Object.entries(headers)) {
