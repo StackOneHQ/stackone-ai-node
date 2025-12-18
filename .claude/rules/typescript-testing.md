@@ -116,7 +116,7 @@ it('should save file to disk', async () => {
 
 **Reference:** See `node_modules/fs-fixture/README.md` for full API and advanced usage
 
-## Test Organisation
+## Test Organization
 
 - Use snapshot testing for generated outputs
 - Comprehensive unit tests for parsing logic
@@ -127,6 +127,6 @@ it('should save file to disk', async () => {
 
 - Run tests frequently during development
 - Maintain >90% code coverage for core modules
-- Use descriptive test names that explain the behaviour being tested
+- Use descriptive test names that explain the behavior being tested
 - Keep tests isolated and independent
 - Clean up MSW overrides automatically via global hooks

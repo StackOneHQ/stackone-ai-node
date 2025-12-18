@@ -127,7 +127,7 @@ async function getProtectedData(token: string): Promise<Data> {
 
 ## When to Use Direct HTTP Clients
 
-Only use specialised HTTP clients when:
+Only use specialized HTTP clients when:
 
 - You need advanced features not covered by fetch (e.g., interceptors, retries)
 - You're integrating with a framework that requires it
