@@ -8,7 +8,9 @@ extend-ignore-re = [
 ]
 
 [files]
+ignore-hidden = false
 extend-exclude = [
+  ".git",
   "node_modules",
   "package.json",
   "pnpm-lock.yaml",
