@@ -18,9 +18,3 @@ export const DEFAULT_BASE_URL = 'https://api.stackone.com';
  * - Higher values favor TF-IDF scoring (better semantic matching)
  */
 export const DEFAULT_HYBRID_ALPHA = 0.2;
-
-/**
- * Prefix used by legacy Unified API tools.
- * Tools with this prefix indicate missing or incorrect account configuration.
- */
-export const UNIFIED_API_PREFIX = 'unified_';

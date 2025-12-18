@@ -250,36 +250,6 @@ describe('StackOneToolSet', () => {
 			const executableTool = (await tool?.toAISDK())?.dummy_action;
 			expect(executableTool?.execute).toBeDefined();
 		});
-
-		it('throws error when receiving unified API tools', async () => {
-			const unifiedToolMcpApp = createMcpApp({
-				accountTools: {
-					'unified-test-account': [
-						{
-							name: 'unified_hris_list_employees',
-							description: 'Unified HRIS tool',
-							inputSchema: { type: 'object', properties: {} },
-						},
-					],
-				},
-			});
-
-			server.use(
-				http.all('https://api.stackone-dev.com/mcp', async ({ request }) => {
-					return unifiedToolMcpApp.fetch(request);
-				}),
-			);
-
-			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
-				apiKey: 'test-key',
-				accountId: 'unified-test-account',
-			});
-
-			await expect(toolset.fetchTools()).rejects.toThrow(ToolSetConfigError);
-			await expect(toolset.fetchTools()).rejects.toThrow(/unified API tool/);
-			await expect(toolset.fetchTools()).rejects.toThrow(/unified_hris_list_employees/);
-		});
 	});
 
 	describe('account filtering', () => {

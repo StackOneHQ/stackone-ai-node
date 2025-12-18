@@ -35,7 +35,6 @@ const rpcActionResponseDataSchema = z.union([
  * - `next`: Pagination cursor for fetching next page
  *
  * Additional fields from the connector response are passed through.
- * @see unified-cloud-api/src/unified-api-v2/unifiedAPIv2.service.ts processActionCall
  */
 export const rpcActionResponseSchema = z.looseObject({
 	next: z.nullable(z.optional(z.string())),

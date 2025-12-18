@@ -1,6 +1,6 @@
 import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
-import { DEFAULT_BASE_URL, UNIFIED_API_PREFIX } from './consts';
+import { DEFAULT_BASE_URL } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
@@ -314,19 +314,6 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * Validate that tool name is not from unified API
-	 * Unified API tools indicate missing or incorrect account configuration
-	 */
-	private validateToolName(toolName: string): void {
-		if (toolName.startsWith(UNIFIED_API_PREFIX)) {
-			throw new ToolSetConfigError(
-				`Received unified API tool "${toolName}". This indicates the account is not properly configured. ` +
-					`Unified API tools require versioned connectors. Please check your account's integration setup.`,
-			);
-		}
-	}
-
-	/**
 	 * Fetch tool definitions from MCP
 	 */
 	private async fetchToolsFromMcp(): Promise<Tools> {
@@ -344,8 +331,6 @@ export class StackOneToolSet {
 		const actionsClient = this.getActionsClient();
 
 		const tools = listToolsResult.tools.map(({ name, description, inputSchema }) => {
-			this.validateToolName(name);
-
 			return this.createRpcBackedTool({
 				actionsClient,
 				name,
