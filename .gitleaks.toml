@@ -7,8 +7,5 @@ useDefault = true
 [allowlist]
 description = "Global allowlist"
 paths = [
-    '''\.lock$''',
-    '''\.snap$''',
-    '''go\.sum$''',
     '''pnpm-lock\.yaml$''',
 ]
