@@ -13,6 +13,10 @@ pre-commit:
       glob: '*.nix'
       run: nix develop --command nixfmt {staged_files}
       stage_fixed: true
+    - name: update-pnpm-hash
+      glob: 'pnpm-lock.yaml'
+      run: ./scripts/update-pnpm-hash.sh
+      stage_fixed: true
 
 pre-push:
   jobs:
