@@ -181,3 +181,4 @@ dist
 .direnv
 !.envrc
 
+result
