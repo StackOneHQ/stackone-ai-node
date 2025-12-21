@@ -1,0 +1,14 @@
+# Gitleaks configuration
+# https://github.com/gitleaks/gitleaks
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist"
+paths = [
+    '''\.lock$''',
+    '''\.snap$''',
+    '''go\.sum$''',
+    '''pnpm-lock\.yaml$''',
+]

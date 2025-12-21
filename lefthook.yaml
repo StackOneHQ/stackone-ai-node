@@ -1,6 +1,8 @@
 pre-commit:
   piped: true
   jobs:
+    - name: gitleaks
+      run: gitleaks protect --staged --config .gitleaks.toml
     - name: oxlint
       glob: '*.{ts,tsx,js,jsx,mts,cts}'
       run: pnpm oxlint --max-warnings=0 --type-aware --type-check --fix {staged_files}

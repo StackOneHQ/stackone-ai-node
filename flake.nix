@@ -29,6 +29,9 @@
               nixfmt-rfc-style
               typos
               typos-lsp
+
+              # security
+              gitleaks
             ];
 
             shellHook = ''
