@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Update pnpm deps hash in flake.nix
+# Update pnpm deps hash in flake.nix for the current system
 # This script runs nix build to get the correct hash and updates flake.nix
 
 FLAKE_FILE="flake.nix"
@@ -11,6 +11,10 @@ if [[ ! -f "$FLAKE_FILE" ]]; then
   echo "Error: $FLAKE_FILE not found"
   exit 1
 fi
+
+# Detect current system
+SYSTEM=$(nix eval --impure --raw --expr 'builtins.currentSystem')
+echo "Current system: $SYSTEM"
 
 # Run nix build and capture the output
 echo "Calculating pnpm deps hash..."
@@ -26,13 +30,13 @@ if echo "$OUTPUT" | grep -q "hash mismatch"; then
     exit 1
   fi
 
-  echo "New hash: $NEW_HASH"
+  echo "New hash for $SYSTEM: $NEW_HASH"
 
-  # Update the hash in flake.nix (simple pattern for the hash line)
-  sed -i.bak "s|hash = \"sha256-[^\"]*\"|hash = \"${NEW_HASH}\"|" "$FLAKE_FILE"
+  # Update the hash for current system in flake.nix
+  sed -i.bak "s|${SYSTEM} = \"sha256-[^\"]*\"|${SYSTEM} = \"${NEW_HASH}\"|" "$FLAKE_FILE"
   rm -f "${FLAKE_FILE}.bak"
 
-  echo "Updated $FLAKE_FILE with new hash"
+  echo "Updated $FLAKE_FILE with new hash for $SYSTEM"
 else
-  echo "Hash is up to date"
+  echo "Hash is up to date for $SYSTEM"
 fi

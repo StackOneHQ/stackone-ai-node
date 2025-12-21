@@ -16,11 +16,16 @@
       ];
 
       perSystem =
-        { pkgs, ... }:
+        { pkgs, system, ... }:
         {
           packages.default =
             let
               packageJson = builtins.fromJSON (builtins.readFile ./package.json);
+              pnpmDepsHash = {
+                x86_64-linux = "sha256-PrCGXf5r03gfsoGJAzew592Al1G5dx6xa/qFxazuqUo=";
+                aarch64-linux = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+                aarch64-darwin = "sha256-GDY7RZUl6A0d3l8Rz6X1sHQfwHgM2GKpcJ65yAKOmrg=";
+              };
             in
             pkgs.stdenv.mkDerivation (finalAttrs: {
               pname = "stackone-ai";
@@ -36,7 +41,7 @@
 
               pnpmDeps = pkgs.pnpm_10.fetchDeps {
                 inherit (finalAttrs) pname version src;
-                hash = "sha256-GDY7RZUl6A0d3l8Rz6X1sHQfwHgM2GKpcJ65yAKOmrg=";
+                hash = pnpmDepsHash.${system};
                 fetcherVersion = 1;
               };
 
