@@ -18,6 +18,42 @@
       perSystem =
         { pkgs, ... }:
         {
+          packages.default =
+            let
+              packageJson = builtins.fromJSON (builtins.readFile ./package.json);
+            in
+            pkgs.stdenv.mkDerivation (finalAttrs: {
+              pname = "stackone-ai";
+              version = packageJson.version;
+
+              src = ./.;
+
+              nativeBuildInputs = with pkgs; [
+                nodejs_24
+                pnpm_10
+                pnpm_10.configHook
+              ];
+
+              pnpmDeps = pkgs.pnpm_10.fetchDeps {
+                inherit (finalAttrs) pname version src;
+                hash = "sha256-GDY7RZUl6A0d3l8Rz6X1sHQfwHgM2GKpcJ65yAKOmrg=";
+                fetcherVersion = 1;
+              };
+
+              buildPhase = ''
+                runHook preBuild
+                pnpm run build
+                runHook postBuild
+              '';
+
+              installPhase = ''
+                runHook preInstall
+                mkdir -p $out
+                pnpm pack --pack-destination $out
+                runHook postInstall
+              '';
+            });
+
           devShells.default = pkgs.mkShell {
             buildInputs = with pkgs; [
               # runtime
