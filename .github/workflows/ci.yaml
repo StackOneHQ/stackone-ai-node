@@ -48,7 +48,7 @@ jobs:
         uses: ./.github/actions/setup-nix
 
       - name: Build package
-        run: nix build
+        run: nix build --print-build-logs
 
   test:
     runs-on: ubuntu-latest

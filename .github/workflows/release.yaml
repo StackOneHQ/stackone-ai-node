@@ -42,7 +42,7 @@ jobs:
           node-version: lts/*
 
       - name: 📦 Build package
-        run: nix build
+        run: nix build --print-build-logs
 
       - name: 🚀 Publish package
         shell: bash
