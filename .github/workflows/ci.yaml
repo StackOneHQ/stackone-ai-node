@@ -38,7 +38,7 @@ jobs:
       - name: Run Lint
         run: nix develop --command pnpm run lint
 
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -47,8 +47,17 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
 
-      - name: Run Build
-        run: nix develop --command pnpm run build
+      - name: Build package
+        run: nix build
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
 
       - name: Run Tests
         run: nix develop --command pnpm test
