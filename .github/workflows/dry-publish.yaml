@@ -13,5 +13,8 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
 
+      - name: 📦 Build package
+        run: nix build
+
       - name: 🚀 Dry Run Publish Package
-        run: nix develop --command pnpm dlx pkg-pr-new publish --pnpm
+        run: nix develop --command pnpm dlx pkg-pr-new publish result/*.tgz
