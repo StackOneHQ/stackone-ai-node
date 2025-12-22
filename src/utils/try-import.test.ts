@@ -1,4 +1,4 @@
-import { StackOneError } from './errors';
+import { StackOneError } from './error-stackone';
 import { tryImport } from './try-import';
 
 describe('tryImport', () => {

@@ -383,6 +383,134 @@ describe('StackOneToolSet', () => {
 		});
 	});
 
+	describe('tool execution', () => {
+		it('should execute tool with dryRun option', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			expect(result.url).toBe('https://api.stackone-dev.com/actions/rpc');
+			expect(result.method).toBe('POST');
+			expect(result.headers).toBeDefined();
+			expect(result.body).toBeDefined();
+			expect(result.mappedParams).toEqual({ body: { name: 'test' } });
+		});
+
+		it('should execute tool with path, query, and headers params', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute(
+				{
+					body: { name: 'test' },
+					path: { id: '123' },
+					query: { limit: 10 },
+					headers: { 'x-custom': 'value' },
+				},
+				{ dryRun: true },
+			);
+
+			expect(result.mappedParams).toEqual({
+				body: { name: 'test' },
+				path: { id: '123' },
+				query: { limit: 10 },
+				headers: { 'x-custom': 'value' },
+			});
+		});
+
+		it('should execute tool with string parameters', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute(JSON.stringify({ body: { name: 'test' } }), {
+				dryRun: true,
+			});
+
+			expect(result.mappedParams).toEqual({ body: { name: 'test' } });
+		});
+
+		it('should throw StackOneError for invalid parameter type', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			// @ts-expect-error - intentionally passing invalid type
+			await expect(tool.execute(12345)).rejects.toThrow('Invalid parameters type');
+		});
+
+		it('should wrap non-StackOneError in execute', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			// Pass invalid JSON string to trigger JSON.parse error
+			await expect(tool.execute('not valid json')).rejects.toThrow('Error executing RPC action');
+		});
+
+		it('should include extra params in rpcBody', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: 'https://api.stackone-dev.com',
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute(
+				{
+					body: { nested: 'value' },
+					extraParam: 'extra-value',
+					anotherParam: 123,
+				},
+				{ dryRun: true },
+			);
+
+			// The body should include both the nested body and extra params
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody.body).toEqual({
+				nested: 'value',
+				extraParam: 'extra-value',
+				anotherParam: 123,
+			});
+		});
+	});
+
 	describe('provider and action filtering', () => {
 		it('filters tools by providers', async () => {
 			const toolset = new StackOneToolSet({

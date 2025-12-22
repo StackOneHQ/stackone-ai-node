@@ -33,7 +33,7 @@ import {
 	ParameterLocation,
 	type ToolParameters,
 } from './types';
-import { StackOneAPIError } from './utils/errors';
+import { StackOneAPIError } from './utils/error-stackone-api';
 
 // Create a mock tool for testing
 const createMockTool = (headers?: Record<string, string>): BaseTool => {
@@ -325,6 +325,157 @@ describe('StackOneTool', () => {
 
 		const result = await tool.execute({ id: '123' });
 		expect(result).toEqual({ id: '123', name: 'Test' });
+	});
+});
+
+describe('BaseTool - additional coverage', () => {
+	it('should throw error when execute is called on non-HTTP tool', async () => {
+		const rpcTool = new BaseTool(
+			'rpc_tool',
+			'RPC tool',
+			{ type: 'object', properties: {} },
+			{
+				kind: 'rpc',
+				method: 'test_method',
+				url: 'https://api.example.com/rpc',
+				payloadKeys: { action: 'action', body: 'body' },
+			},
+		);
+
+		await expect(rpcTool.execute({})).rejects.toThrow(
+			'BaseTool.execute is only available for HTTP-backed tools',
+		);
+	});
+
+	it('should throw error for invalid parameter type', async () => {
+		const tool = createMockTool();
+
+		// @ts-expect-error - intentionally passing invalid type
+		await expect(tool.execute(12345)).rejects.toThrow('Invalid parameters type');
+	});
+
+	it('should create execution metadata for RPC config in toAISDK', async () => {
+		const rpcTool = new BaseTool(
+			'rpc_tool',
+			'RPC tool',
+			{ type: 'object', properties: {} },
+			{
+				kind: 'rpc',
+				method: 'test_method',
+				url: 'https://api.example.com/rpc',
+				payloadKeys: { action: 'action', body: 'body', headers: 'headers' },
+			},
+		);
+
+		const aiSdkTool = await rpcTool.toAISDK({ executable: false });
+		const execution = aiSdkTool.rpc_tool.execution;
+
+		expect(execution).toBeDefined();
+		expect(execution?.config.kind).toBe('rpc');
+		if (execution?.config.kind === 'rpc') {
+			expect(execution.config.method).toBe('test_method');
+			expect(execution.config.url).toBe('https://api.example.com/rpc');
+			expect(execution.config.payloadKeys).toEqual({
+				action: 'action',
+				body: 'body',
+				headers: 'headers',
+			});
+		}
+	});
+
+	it('should create execution metadata for local config in toAISDK', async () => {
+		const localTool = new BaseTool(
+			'local_tool',
+			'Local tool',
+			{ type: 'object', properties: {} },
+			{
+				kind: 'local',
+				identifier: 'local_test',
+				description: 'local://test',
+			},
+		);
+
+		const aiSdkTool = await localTool.toAISDK({ executable: false });
+		const execution = aiSdkTool.local_tool.execution;
+
+		expect(execution).toBeDefined();
+		expect(execution?.config.kind).toBe('local');
+		if (execution?.config.kind === 'local') {
+			expect(execution.config.identifier).toBe('local_test');
+			expect(execution.config.description).toBe('local://test');
+		}
+	});
+
+	it('should allow providing custom execution metadata in toAISDK', async () => {
+		const tool = createMockTool();
+		const customExecution = {
+			config: {
+				kind: 'http' as const,
+				method: 'POST' as const,
+				url: 'https://custom.example.com',
+				bodyType: 'json' as const,
+				params: [],
+			},
+			headers: { 'X-Custom': 'value' },
+		};
+
+		const aiSdkTool = await tool.toAISDK({ execution: customExecution });
+		const execution = aiSdkTool.test_tool.execution;
+
+		expect(execution).toBeDefined();
+		expect(execution?.config.kind).toBe('http');
+		if (execution?.config.kind === 'http') {
+			expect(execution.config.url).toBe('https://custom.example.com');
+		}
+		expect(execution?.headers).toEqual({ 'X-Custom': 'value' });
+	});
+
+	it('should return undefined execution when execution option is false', async () => {
+		const tool = createMockTool();
+
+		const aiSdkTool = await tool.toAISDK({ execution: false });
+		expect(aiSdkTool.test_tool.execution).toBeUndefined();
+	});
+
+	it('should return undefined execute when executable option is false', async () => {
+		const tool = createMockTool();
+
+		const aiSdkTool = await tool.toAISDK({ executable: false });
+		expect(aiSdkTool.test_tool.execute).toBeUndefined();
+	});
+
+	it('should get headers from tool without requestBuilder', () => {
+		const rpcTool = new BaseTool(
+			'rpc_tool',
+			'RPC tool',
+			{ type: 'object', properties: {} },
+			{
+				kind: 'rpc',
+				method: 'test_method',
+				url: 'https://api.example.com/rpc',
+				payloadKeys: { action: 'action', body: 'body' },
+			},
+			{ 'X-Custom': 'value' },
+		);
+
+		expect(rpcTool.getHeaders()).toEqual({ 'X-Custom': 'value' });
+	});
+
+	it('should set headers on tool without requestBuilder', () => {
+		const rpcTool = new BaseTool(
+			'rpc_tool',
+			'RPC tool',
+			{ type: 'object', properties: {} },
+			{
+				kind: 'rpc',
+				method: 'test_method',
+				url: 'https://api.example.com/rpc',
+				payloadKeys: { action: 'action', body: 'body' },
+			},
+		);
+
+		rpcTool.setHeaders({ 'X-New-Header': 'new-value' });
+		expect(rpcTool.getHeaders()).toEqual({ 'X-New-Header': 'new-value' });
 	});
 });
 
@@ -949,6 +1100,40 @@ describe('Meta Search Tools', () => {
 			});
 
 			expect(result).toEqual({ status: 'active' });
+		});
+	});
+
+	describe('Error handling', () => {
+		it('should wrap non-StackOneError in meta_search_tools execute', async () => {
+			const filterTool = metaTools.getTool('meta_search_tools');
+			assert(filterTool, 'filterTool should be defined');
+
+			// Pass invalid params type to trigger JSON.parse error on non-JSON string
+			await expect(filterTool.execute('not valid json')).rejects.toThrow('Error executing tool:');
+		});
+
+		it('should wrap non-StackOneError in meta_execute_tool execute', async () => {
+			const executeTool = metaTools.getTool('meta_execute_tool');
+			assert(executeTool, 'executeTool should be defined');
+
+			// Pass invalid JSON string to trigger JSON.parse error
+			await expect(executeTool.execute('not valid json')).rejects.toThrow('Error executing tool:');
+		});
+
+		it('should throw StackOneError for invalid params type in meta_search_tools', async () => {
+			const filterTool = metaTools.getTool('meta_search_tools');
+			assert(filterTool, 'filterTool should be defined');
+
+			// @ts-expect-error - intentionally passing invalid type
+			await expect(filterTool.execute(123)).rejects.toThrow('Invalid parameters type');
+		});
+
+		it('should throw StackOneError for invalid params type in meta_execute_tool', async () => {
+			const executeTool = metaTools.getTool('meta_execute_tool');
+			assert(executeTool, 'executeTool should be defined');
+
+			// @ts-expect-error - intentionally passing invalid type
+			await expect(executeTool.execute(true)).rejects.toThrow('Invalid parameters type');
 		});
 	});
 

@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/node';
 import { type HttpExecuteConfig, type JsonObject, ParameterLocation } from './types';
-import { StackOneAPIError } from './utils/errors';
+import { StackOneAPIError } from './utils/error-stackone-api';
 import { RequestBuilder } from './requestBuilder';
 
 describe('RequestBuilder', () => {

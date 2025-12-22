@@ -1,6 +1,6 @@
 import { RpcClient } from './rpc-client';
 import { stackOneHeadersSchema } from './headers';
-import { StackOneAPIError } from './utils/errors';
+import { StackOneAPIError } from './utils/error-stackone-api';
 
 test('should successfully execute an RPC action', async () => {
 	const client = new RpcClient({
