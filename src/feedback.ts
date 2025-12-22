@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { DEFAULT_BASE_URL } from './consts';
 import { BaseTool } from './tool';
 import type { ExecuteConfig, ExecuteOptions, JsonObject, JsonValue, ToolParameters } from './types';
-import { StackOneError } from './utils/errors';
+import { StackOneError } from './utils/error-stackone';
 
 interface FeedbackToolOptions {
 	baseUrl?: string;

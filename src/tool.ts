@@ -20,7 +20,7 @@ import type {
 	ToolParameters,
 } from './types';
 
-import { StackOneError } from './utils/errors';
+import { StackOneError } from './utils/error-stackone';
 import { TfidfIndex } from './utils/tfidf-index';
 import { tryImport } from './utils/try-import';
 

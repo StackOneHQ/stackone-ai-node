@@ -13,7 +13,7 @@ import type {
 	RpcExecuteConfig,
 	ToolParameters,
 } from './types';
-import { StackOneError } from './utils/errors';
+import { StackOneError } from './utils/error-stackone';
 
 /**
  * Converts RpcActionResponse to JsonObject in a type-safe manner.

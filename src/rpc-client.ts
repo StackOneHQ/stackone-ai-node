@@ -8,7 +8,7 @@ import {
 	rpcActionResponseSchema,
 	rpcClientConfigSchema,
 } from './schema';
-import { StackOneAPIError } from './utils/errors';
+import { StackOneAPIError } from './utils/error-stackone-api';
 
 // Re-export types for consumers and to make types portable
 export type { RpcActionResponse } from './schema';

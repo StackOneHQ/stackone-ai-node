@@ -1,4 +1,4 @@
-import { StackOneError } from './errors';
+import { StackOneError } from './error-stackone';
 
 /**
  * Dynamically import an optional dependency with a friendly error message

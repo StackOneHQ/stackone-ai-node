@@ -1,14 +1,5 @@
 import { USER_AGENT } from '../consts';
-
-/**
- * Base exception for StackOne errors
- */
-export class StackOneError extends Error {
-	constructor(message: string, options?: ErrorOptions) {
-		super(message, options);
-		this.name = 'StackOneError';
-	}
-}
+import { StackOneError } from './error-stackone';
 
 /**
  * Raised when the StackOne API returns an error

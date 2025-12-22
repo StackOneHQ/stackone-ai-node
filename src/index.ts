@@ -4,7 +4,8 @@
 
 export { BaseTool, StackOneTool, Tools } from './tool';
 export { createFeedbackTool } from './feedback';
-export { StackOneAPIError, StackOneError } from './utils/errors';
+export { StackOneError } from './utils/error-stackone';
+export { StackOneAPIError } from './utils/error-stackone-api';
 
 export {
 	StackOneToolSet,
