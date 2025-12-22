@@ -70,12 +70,12 @@ describe('StackOneAPIError', () => {
 
 	it('should include endpoint URL when present in message', () => {
 		const error = new StackOneAPIError(
-			'Request failed for https://api.stackone.com/unified/hris/employees',
+			'Request failed for https://api.stackone.com/tools/execute',
 			404,
 			{},
 		);
 		const result = error.toString();
-		expect(result).toContain('Endpoint: https://api.stackone.com/unified/hris/employees');
+		expect(result).toContain('Endpoint: https://api.stackone.com/tools/execute');
 	});
 
 	it('should format object requestBody as JSON', () => {
