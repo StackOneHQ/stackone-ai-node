@@ -606,8 +606,6 @@ This project includes a Nix flake for reproducible development environments. If 
 # Enter development shell
 nix develop
 
-# Or use direnv for automatic activation
-echo "use flake" > .envrc
 direnv allow
 ```
 
