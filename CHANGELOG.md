@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.9...v2.1.0) (2025-12-23)
+
+
+### Features
+
+* **security:** add gitleaks for secret detection ([#259](https://github.com/StackOneHQ/stackone-ai-node/issues/259)) ([4c89e91](https://github.com/StackOneHQ/stackone-ai-node/commit/4c89e919f537fd30f73f8176a67a53d33c315d31))
+
 ## [2.0.9](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.8...v2.0.9) (2025-12-16)
 
 
