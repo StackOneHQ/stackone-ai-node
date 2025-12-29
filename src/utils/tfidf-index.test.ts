@@ -1,3 +1,4 @@
+import { fc, test as fcTest } from '@fast-check/vitest';
 import { TfidfIndex } from './tfidf-index';
 
 describe('TF-IDF Index - Core Functionality', () => {
@@ -246,4 +247,115 @@ describe('TF-IDF Index - IDF Calculation', () => {
 		// The document with "rare" should have a good score because it's unique
 		expect(rareResults[0]?.score ?? 0).toBeGreaterThan(0);
 	});
+});
+
+describe('TF-IDF Index - Property-Based Tests', () => {
+	// Arbitrary for generating document corpora
+	const documentArbitrary = fc.record({
+		id: fc.string({ minLength: 1, maxLength: 20 }).filter((s) => s.trim().length > 0),
+		text: fc.string({ minLength: 1, maxLength: 200 }),
+	});
+
+	const corpusArbitrary = fc.array(documentArbitrary, { minLength: 1, maxLength: 20 });
+
+	// Arbitrary for generating non-empty queries with alphanumeric content
+	const queryArbitrary = fc
+		.array(fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9]*$/), { minLength: 1, maxLength: 5 })
+		.map((words) => words.join(' '));
+
+	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
+		'scores are always within [0, 1] range',
+		(corpus, query) => {
+			const index = new TfidfIndex();
+			index.build(corpus);
+			const results = index.search(query, 100);
+
+			for (const result of results) {
+				expect(result.score).toBeGreaterThanOrEqual(0);
+				expect(result.score).toBeLessThanOrEqual(1);
+			}
+		},
+	);
+
+	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
+		'results are always sorted by score in descending order',
+		(corpus, query) => {
+			const index = new TfidfIndex();
+			index.build(corpus);
+			const results = index.search(query, 100);
+
+			for (let i = 0; i < results.length - 1; i++) {
+				expect(results[i]?.score ?? 0).toBeGreaterThanOrEqual(results[i + 1]?.score ?? 0);
+			}
+		},
+	);
+
+	fcTest.prop([corpusArbitrary, queryArbitrary, fc.integer({ min: 1, max: 50 })], { numRuns: 100 })(
+		'search returns at most k results',
+		(corpus, query, k) => {
+			const index = new TfidfIndex();
+			index.build(corpus);
+			const results = index.search(query, k);
+
+			expect(results.length).toBeLessThanOrEqual(k);
+		},
+	);
+
+	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
+		'search is case-insensitive (same results for different cases)',
+		(corpus, query) => {
+			const index = new TfidfIndex();
+			index.build(corpus);
+
+			const lowerResults = index.search(query.toLowerCase());
+			const upperResults = index.search(query.toUpperCase());
+
+			expect(lowerResults.length).toBe(upperResults.length);
+			for (let i = 0; i < lowerResults.length; i++) {
+				expect(lowerResults[i]?.id).toBe(upperResults[i]?.id);
+				expect(lowerResults[i]?.score).toBeCloseTo(upperResults[i]?.score ?? 0, 10);
+			}
+		},
+	);
+
+	fcTest.prop([queryArbitrary], { numRuns: 50 })(
+		'empty corpus always returns empty results',
+		(query) => {
+			const index = new TfidfIndex();
+			index.build([]);
+			const results = index.search(query);
+
+			expect(results).toHaveLength(0);
+		},
+	);
+
+	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
+		'result IDs are always from the indexed corpus',
+		(corpus, query) => {
+			const index = new TfidfIndex();
+			index.build(corpus);
+			const results = index.search(query, 100);
+
+			const corpusIds = new Set(corpus.map((doc) => doc.id));
+			for (const result of results) {
+				expect(corpusIds.has(result.id)).toBe(true);
+			}
+		},
+	);
+
+	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 50 })(
+		'search is deterministic (same input produces same output)',
+		(corpus, query) => {
+			const index1 = new TfidfIndex();
+			const index2 = new TfidfIndex();
+
+			index1.build(corpus);
+			index2.build(corpus);
+
+			const results1 = index1.search(query, 10);
+			const results2 = index2.search(query, 10);
+
+			expect(results1).toEqual(results2);
+		},
+	);
 });
