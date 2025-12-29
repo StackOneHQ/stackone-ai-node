@@ -394,6 +394,25 @@ describe('RequestBuilder', () => {
 			expect(url.searchParams.get('filter[validField]')).toBe('test');
 		});
 
+		it('should handle arrays correctly within objects', async () => {
+			const params = {
+				pathParam: 'test-value',
+				filter: {
+					arrayField: [1, 2, 3],
+					stringArray: ['a', 'b', 'c'],
+					mixed: ['string', 42, true],
+				},
+			};
+
+			const result = await builder.execute(params, { dryRun: true });
+			const url = new URL(result.url as string);
+
+			// Arrays should be converted to JSON strings
+			expect(url.searchParams.get('filter[arrayField]')).toBe('[1,2,3]');
+			expect(url.searchParams.get('filter[stringArray]')).toBe('["a","b","c"]');
+			expect(url.searchParams.get('filter[mixed]')).toBe('["string",42,true]');
+		});
+
 		it('should handle nested objects with special types at runtime', async () => {
 			// Test runtime serialization of nested non-JSON types
 			const params = {
@@ -474,6 +493,24 @@ describe('RequestBuilder', () => {
 	});
 });
 
+/**
+ * Property-Based Tests for RequestBuilder
+ *
+ * These tests verify invariants that must hold for ANY valid input,
+ * replacing/supplementing example-based tests:
+ *
+ * Parameter Key Validation (replaces "should validate parameter keys and reject invalid characters"):
+ *   - Valid: "user_id", "filter.name", "x-custom-field" => accepted
+ *   - Invalid: "invalid key with spaces", "key@special!" => throws "Invalid parameter key"
+ *
+ * Value Serialization (supplements "should handle arrays correctly within objects" - kept for clarity):
+ *   - { arrayField: [1, 2, 3] } => filter[arrayField]="[1,2,3]"
+ *   - { stringArray: ["a", "b"] } => filter[stringArray]='["a","b"]'
+ *
+ * Deep Object Nesting (replaces "should throw error when recursion depth limit is exceeded"):
+ *   - { nested: { nested: { value: "ok" } } } (depth 3) => accepted
+ *   - { nested: { nested: { ... 12 levels ... } } } => throws "Maximum nesting depth (10) exceeded"
+ */
 describe('RequestBuilder - Property-Based Tests', () => {
 	const baseConfig = {
 		kind: 'http',
@@ -491,7 +528,14 @@ describe('RequestBuilder - Property-Based Tests', () => {
 		.string({ minLength: 1, maxLength: 20 })
 		.filter((s) => /[^a-zA-Z0-9_.-]/.test(s) && s.trim().length > 0);
 
+	/**
+	 * Parameter Key Validation
+	 *
+	 * Examples of valid keys: "user_id", "filter.name", "X-Custom-Header"
+	 * Examples of invalid keys: "invalid key", "special@char", "has spaces"
+	 */
 	describe('Parameter Key Validation', () => {
+		// Example: { filter: { user_id: "123" } } => ?filter[user_id]=123 (no error)
 		fcTest.prop([validKeyArbitrary, fc.string()], { numRuns: 100 })(
 			'accepts valid parameter keys',
 			async (key, value) => {
@@ -506,6 +550,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: { filter: { "invalid key with spaces": "test" } } => throws Error
 		fcTest.prop([invalidKeyArbitrary, fc.string()], { numRuns: 100 })(
 			'rejects invalid parameter keys',
 			async (key, value) => {
@@ -521,6 +566,14 @@ describe('RequestBuilder - Property-Based Tests', () => {
 		);
 	});
 
+	/**
+	 * Header Management
+	 *
+	 * Examples:
+	 * - new RequestBuilder(config, { "Auth": "token" }).setHeaders({ "X-Api": "key" })
+	 *   => getHeaders() returns { "Auth": "token", "X-Api": "key" }
+	 * - prepareHeaders() always includes "User-Agent: stackone-ai-node"
+	 */
 	describe('Header Management', () => {
 		// Arbitrary for header key-value pairs
 		const headerArbitrary = fc.dictionary(
@@ -529,6 +582,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			{ minKeys: 1, maxKeys: 5 },
 		);
 
+		// Example: init with {"A": "1"}, setHeaders({"B": "2"}) => {"A": "1", "B": "2"}
 		fcTest.prop([headerArbitrary, headerArbitrary], { numRuns: 50 })(
 			'setHeaders accumulates headers without losing existing ones',
 			(headers1, headers2) => {
@@ -549,6 +603,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: prepareHeaders() => { "User-Agent": "stackone-ai-node", ...customHeaders }
 		fcTest.prop([headerArbitrary], { numRuns: 50 })(
 			'prepareHeaders always includes User-Agent',
 			(headers) => {
@@ -559,6 +614,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: const h = getHeaders(); h["X"] = "Y"; getHeaders()["X"] is still undefined
 		fcTest.prop([headerArbitrary], { numRuns: 50 })(
 			'getHeaders returns a copy, not the original',
 			(headers) => {
@@ -573,7 +629,18 @@ describe('RequestBuilder - Property-Based Tests', () => {
 		);
 	});
 
+	/**
+	 * Value Serialization
+	 *
+	 * Examples:
+	 * - { key: "hello" } => ?filter[key]=hello
+	 * - { key: 42 } => ?filter[key]=42
+	 * - { key: true } => ?filter[key]=true
+	 * - { key: [1, 2, 3] } => ?filter[key]=[1,2,3]
+	 * - { key: ["a", "b"] } => ?filter[key]=["a","b"]
+	 */
 	describe('Value Serialization', () => {
+		// Example: { filter: { key: "hello world" } } => ?filter[key]=hello%20world
 		fcTest.prop([fc.string()], { numRuns: 100 })(
 			'string values serialize to themselves',
 			async (str) => {
@@ -587,6 +654,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: { filter: { key: 42 } } => ?filter[key]=42
 		fcTest.prop([fc.integer()], { numRuns: 100 })(
 			'integer values serialize to string',
 			async (num) => {
@@ -600,6 +668,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: { filter: { key: true } } => ?filter[key]=true
 		fcTest.prop([fc.boolean()], { numRuns: 10 })(
 			'boolean values serialize to string',
 			async (bool) => {
@@ -613,6 +682,8 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: { filter: { key: [1, 2, 3] } } => ?filter[key]=[1,2,3]
+		// Example: { filter: { key: ["a", "b"] } } => ?filter[key]=["a","b"]
 		fcTest.prop(
 			[fc.array(fc.oneof(fc.string(), fc.integer(), fc.boolean()), { minLength: 1, maxLength: 5 })],
 			{
@@ -629,7 +700,16 @@ describe('RequestBuilder - Property-Based Tests', () => {
 		});
 	});
 
+	/**
+	 * Deep Object Nesting
+	 *
+	 * Examples:
+	 * - { nested: { value: "ok" } } (depth 2) => accepted
+	 * - { a: { b: { c: { d: { e: { f: { g: { h: { i: { j: { k: "too deep" } } } } } } } } } } }
+	 *   (depth 11) => throws "Maximum nesting depth (10) exceeded"
+	 */
 	describe('Deep Object Nesting', () => {
+		// Example: depth 5 => { nested: { nested: { nested: { nested: { nested: { value: "test" } } } } } }
 		fcTest.prop([fc.integer({ min: 1, max: 9 })], { numRuns: 20 })(
 			'accepts objects within depth limit',
 			async (depth) => {
@@ -649,6 +729,7 @@ describe('RequestBuilder - Property-Based Tests', () => {
 			},
 		);
 
+		// Example: 12 levels of nesting => throws error
 		test('rejects objects exceeding depth limit of 10', async () => {
 			const builder = new RequestBuilder(baseConfig);
 			let deepObject: Record<string, unknown> = { value: 'test' };
@@ -664,9 +745,18 @@ describe('RequestBuilder - Property-Based Tests', () => {
 		});
 	});
 
+	/**
+	 * Body Type Handling
+	 *
+	 * Examples:
+	 * - bodyType: "json" => Content-Type: application/json, body: '{"test":"value"}'
+	 * - bodyType: "form" => Content-Type: application/x-www-form-urlencoded, body: "test=value"
+	 * - bodyType: "multipart-form" => body is FormData instance
+	 */
 	describe('Body Type Handling', () => {
 		const bodyTypes = ['json', 'form', 'multipart-form'] as const;
 
+		// Example: buildFetchOptions({ test: "value" }) with bodyType "json" => valid options
 		fcTest.prop(
 			[
 				fc.constantFrom(...bodyTypes),

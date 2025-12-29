@@ -81,6 +81,17 @@ describe('TF-IDF Index - Tool Name Scenarios', () => {
 	});
 });
 
+/**
+ * Property-Based Tests for TfidfIndex
+ *
+ * These tests verify invariants that must hold for ANY valid input,
+ * replacing the following example-based tests:
+ *
+ * - Score Validation: scores like 0.7071, 0.5, 1.0 are always in [0, 1]
+ * - Edge Cases: empty query "" returns [], query with no matches returns []
+ * - Case Sensitivity: "Alpha" and "ALPHA" and "alpha" return same results
+ * - Search Limits: search("term", 5) returns at most 5 results
+ */
 describe('TF-IDF Index - Property-Based Tests', () => {
 	const documentArbitrary = fc.record({
 		id: fc.string({ minLength: 1, maxLength: 20 }).filter((s) => s.trim().length > 0),
@@ -93,6 +104,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		.array(fc.stringMatching(/^[a-zA-Z][a-zA-Z0-9]*$/), { minLength: 1, maxLength: 5 })
 		.map((words) => words.join(' '));
 
+	// Example: search("alpha") on any corpus returns scores like 0.0, 0.5, 1.0 - never 1.5 or -0.1
 	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
 		'scores are always within [0, 1] range',
 		(corpus, query) => {
@@ -107,6 +119,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		},
 	);
 
+	// Example: [{ score: 0.9 }, { score: 0.7 }, { score: 0.3 }] - always descending
 	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
 		'results are always sorted by score in descending order',
 		(corpus, query) => {
@@ -120,6 +133,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		},
 	);
 
+	// Example: search("term", 3) with 10 matching docs returns only 3 results
 	fcTest.prop([corpusArbitrary, queryArbitrary, fc.integer({ min: 1, max: 50 })], { numRuns: 100 })(
 		'search returns at most k results',
 		(corpus, query, k) => {
@@ -131,6 +145,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		},
 	);
 
+	// Example: search("Alpha"), search("ALPHA"), search("alpha") all return identical results
 	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
 		'search is case-insensitive',
 		(corpus, query) => {
@@ -148,6 +163,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		},
 	);
 
+	// Example: index.build([]) then search("anything") returns []
 	fcTest.prop([queryArbitrary], { numRuns: 50 })('empty corpus returns empty results', (query) => {
 		const index = new TfidfIndex();
 		index.build([]);
@@ -156,6 +172,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		expect(results).toHaveLength(0);
 	});
 
+	// Example: corpus has ids ["doc1", "doc2"], results only contain "doc1" or "doc2"
 	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 100 })(
 		'result IDs are from the indexed corpus',
 		(corpus, query) => {
@@ -170,6 +187,7 @@ describe('TF-IDF Index - Property-Based Tests', () => {
 		},
 	);
 
+	// Example: same corpus + same query always produces identical results
 	fcTest.prop([corpusArbitrary, queryArbitrary], { numRuns: 50 })(
 		'search is deterministic',
 		(corpus, query) => {
