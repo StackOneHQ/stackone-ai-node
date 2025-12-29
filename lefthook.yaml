@@ -18,7 +18,5 @@ pre-commit:
 
 pre-push:
   jobs:
-    - name: typos
-      run: typos --config typos.toml
     - name: knip
       run: pnpm run lint:knip
