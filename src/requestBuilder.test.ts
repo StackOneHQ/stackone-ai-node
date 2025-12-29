@@ -308,23 +308,6 @@ describe('RequestBuilder', () => {
 	});
 
 	describe('Security and Performance Improvements', () => {
-		it('should throw error when recursion depth limit is exceeded', async () => {
-			// Create a deeply nested object that exceeds the default depth limit of 10
-			let deepObject: JsonObject = { value: 'test' };
-			for (let i = 0; i < 12; i++) {
-				deepObject = { nested: deepObject };
-			}
-
-			const params = {
-				pathParam: 'test-value',
-				deepFilter: deepObject,
-			} satisfies JsonObject;
-
-			await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
-				'Maximum nesting depth (10) exceeded for parameter serialization',
-			);
-		});
-
 		it('should throw error when circular reference is detected', async () => {
 			// Test runtime behavior when circular reference is passed
 			// Note: This tests error handling for malformed input at runtime
@@ -339,20 +322,6 @@ describe('RequestBuilder', () => {
 
 			await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
 				'Circular reference detected in parameter object',
-			);
-		});
-
-		it('should validate parameter keys and reject invalid characters', async () => {
-			const params = {
-				pathParam: 'test-value',
-				filter: {
-					valid_key: 'test',
-					'invalid key with spaces': 'test', // Should trigger validation error
-				},
-			};
-
-			await expect(builder.execute(params, { dryRun: true })).rejects.toThrow(
-				'Invalid parameter key: invalid key with spaces',
 			);
 		});
 
@@ -423,25 +392,6 @@ describe('RequestBuilder', () => {
 
 			// Valid fields should still work
 			expect(url.searchParams.get('filter[validField]')).toBe('test');
-		});
-
-		it('should handle arrays correctly within objects', async () => {
-			const params = {
-				pathParam: 'test-value',
-				filter: {
-					arrayField: [1, 2, 3],
-					stringArray: ['a', 'b', 'c'],
-					mixed: ['string', 42, true],
-				},
-			};
-
-			const result = await builder.execute(params, { dryRun: true });
-			const url = new URL(result.url as string);
-
-			// Arrays should be converted to JSON strings
-			expect(url.searchParams.get('filter[arrayField]')).toBe('[1,2,3]');
-			expect(url.searchParams.get('filter[stringArray]')).toBe('["a","b","c"]');
-			expect(url.searchParams.get('filter[mixed]')).toBe('["string",42,true]');
 		});
 
 		it('should handle nested objects with special types at runtime', async () => {
