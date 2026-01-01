@@ -486,7 +486,7 @@ export class StackOneToolSet {
 				const additionalHeaders = this.extractRecord(parsedParams, 'headers');
 				const extraHeaders = normalizeHeaders(additionalHeaders);
 				// defu merges extraHeaders into baseHeaders, both are already branded types
-				const actionHeaders = defu(extraHeaders, baseHeaders) as StackOneHeaders;
+				const actionHeaders = defu(extraHeaders, baseHeaders);
 
 				const bodyPayload = this.extractRecord(parsedParams, 'body');
 				const rpcBody: JsonObject = bodyPayload ? { ...bodyPayload } : {};
