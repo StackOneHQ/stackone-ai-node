@@ -1,0 +1,63 @@
+name: 'Scheduled: Nix flake update'
+
+on:
+  schedule:
+    # Run every Monday at 09:00 UTC (same as Dependabot)
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+
+      - name: Update flake.lock
+        run: nix flake update
+
+      - name: Check if flake.lock changed
+        id: check-changes
+        run: |
+          if git diff --quiet flake.lock; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        id: create-pr
+        if: steps.check-changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7.0.11
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update nix flake inputs'
+          title: 'chore(deps): update nix flake inputs'
+          body: |
+            ## Summary
+            - Automated update of Nix flake inputs (`nixpkgs`, `flake-parts`)
+
+            ## Test plan
+            - [ ] `nix flake check` passes in CI
+            - [ ] Development shell works correctly
+
+            ---
+            🤖 This PR was automatically created by the scheduled Nix flake update workflow.
+          branch: chore/nix-flake-update
+          labels: |
+            dependencies
+            nix
+          delete-branch: true
+
+      - name: Enable auto-merge
+        if: steps.create-pr.outputs.pull-request-number
+        run: gh pr merge --auto --squash "${{ steps.create-pr.outputs.pull-request-url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
