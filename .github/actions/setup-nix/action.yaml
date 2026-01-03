@@ -1,10 +1,10 @@
 name: 'Setup Nix'
-description: 'Install Nix and configure Cachix'
+description: 'Install Nix and configure cache'
 runs:
   using: 'composite'
   steps:
     - name: Install Nix
-      uses: cachix/install-nix-action@0b0e072294b088b73964f1d72dfdac0951439dbd # v31.8.4
+      uses: cachix/install-nix-action@4e002c8ec80594ecd40e759629461e26c8abed15 # v31.9.0
       with:
         github_access_token: ${{ github.token }}
 
@@ -12,12 +12,6 @@ runs:
       uses: nix-community/cache-nix-action@b426b118b6dc86d6952988d396aa7c6b09776d08 # v7
       with:
         primary-key: nix-${{ runner.os }}
-
-    - name: Setup Cachix (numtide)
-      uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
-      with:
-        name: numtide
-        authToken: ''
 
     - name: Load Nix development environment
       shell: bash
