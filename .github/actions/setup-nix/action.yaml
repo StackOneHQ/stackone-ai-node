@@ -8,6 +8,11 @@ runs:
       with:
         github_access_token: ${{ github.token }}
 
+    - name: Cache Nix store
+      uses: nix-community/cache-nix-action@b426b118b6dc86d6952988d396aa7c6b09776d08 # v7
+      with:
+        primary-key: nix-${{ runner.os }}
+
     - name: Setup Cachix (numtide)
       uses: cachix/cachix-action@0fc020193b5a1fa3ac4575aa3a7d3aa6a35435ad # v16
       with:
