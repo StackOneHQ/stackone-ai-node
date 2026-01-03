@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.9...v2.1.0) (2026-01-03)
+
+
+### Features
+
+* **security:** add gitleaks for secret detection ([#259](https://github.com/StackOneHQ/stackone-ai-node/issues/259)) ([4c89e91](https://github.com/StackOneHQ/stackone-ai-node/commit/4c89e919f537fd30f73f8176a67a53d33c315d31))
+* **test:** add property-based testing with @fast-check/vitest ([#266](https://github.com/StackOneHQ/stackone-ai-node/issues/266)) ([5d82f23](https://github.com/StackOneHQ/stackone-ai-node/commit/5d82f23c77066b1a37d90dbd67a02c8382419546))
+
+
+### Bug Fixes
+
+* **toolsets:** remove as StackOneHeaders ([#267](https://github.com/StackOneHQ/stackone-ai-node/issues/267)) ([ad101a3](https://github.com/StackOneHQ/stackone-ai-node/commit/ad101a30b0a52b08e96592d920ccc83bd8dacec8))
+
 ## [2.0.9](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.8...v2.0.9) (2025-12-16)
 
 
