@@ -4,6 +4,7 @@ import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
+import { peerDependencies } from '../package.json';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
 import type {
@@ -240,7 +241,7 @@ export class BaseTool {
 		/** AI SDK is optional dependency, import only when needed */
 		const ai = await tryImport<typeof import('ai')>(
 			'ai',
-			'npm install ai@4.x|5.x or pnpm add ai@4.x|5.x',
+			`npm install ai (requires ${peerDependencies.ai})`,
 		);
 		const schemaObject = ai.jsonSchema(schema);
 

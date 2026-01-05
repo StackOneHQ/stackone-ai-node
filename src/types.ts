@@ -176,7 +176,7 @@ export interface ToolDefinition {
 
 /**
  * Extended AI SDK tool definition with StackOne-specific execution metadata.
- * Extends the base Tool type from @ai-sdk/provider-utils.
+ * Extends the base Tool type from the 'ai' package.
  *
  * NOTE: We avoid defining our own types as much as possible and use existing
  * types from dependencies. This type only extends the AI SDK Tool type with

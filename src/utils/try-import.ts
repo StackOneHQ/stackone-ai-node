@@ -10,7 +10,7 @@ import { StackOneError } from './error-stackone';
  *
  * @example
  * ```ts
- * const ai = await tryImport('ai', 'npm install ai@4.x|5.x');
+ * const ai = await tryImport('ai', 'npm install ai');
  * const { jsonSchema } = ai;
  * ```
  */
