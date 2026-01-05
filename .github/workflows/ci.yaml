@@ -66,7 +66,7 @@ jobs:
       - name: Run Tests with Coverage
         run: nix develop --command pnpm run coverage
       - name: Create Coverage Badge
-        uses: jaywcjlove/coverage-badges-cli@bd6ccbf422c0ed54c01f283019fd2bc648f58541 # v2.2.0
+        uses: jaywcjlove/coverage-badges-cli@4e8975aa2628e3329126e7eee36724d07ed86fda # v2.2.0
         with:
           source: coverage/coverage-summary.json
           output: coverage/badges.svg
