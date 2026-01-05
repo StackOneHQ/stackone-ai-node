@@ -11,7 +11,7 @@ runs:
     - name: Cache Nix store
       uses: nix-community/cache-nix-action@b426b118b6dc86d6952988d396aa7c6b09776d08 # v7.0.0
       with:
-        primary-key: nix-${{ runner.os }}
+        primary-key: nix-${{ runner.os }}-${{ hashFiles('**/*.nix', 'flake.lock', 'pnpm-lock.yaml') }}
 
     - name: Load Nix development environment
       shell: bash
