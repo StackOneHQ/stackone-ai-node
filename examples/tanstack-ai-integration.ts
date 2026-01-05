@@ -9,7 +9,7 @@
 import assert from 'node:assert';
 import process from 'node:process';
 import { chat } from '@tanstack/ai';
-import { openai } from '@tanstack/ai-openai';
+import { openaiText } from '@tanstack/ai-openai';
 import { z } from 'zod';
 import { StackOneToolSet } from '@stackone/ai';
 
@@ -52,10 +52,9 @@ const tanstackAiIntegration = async (): Promise<void> => {
 
 	// Use TanStack AI chat with the tool
 	// The adapter reads OPENAI_API_KEY from the environment automatically
-	const adapter = openai();
+	const adapter = openaiText('gpt-5');
 	const stream = chat({
 		adapter,
-		model: 'gpt-5.1',
 		messages: [
 			{
 				role: 'user',
