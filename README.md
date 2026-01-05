@@ -600,13 +600,27 @@ The tool description includes clear instructions for AI agents to always ask for
 
 ### Using Nix Flake
 
-This project includes a Nix flake for reproducible development environments. If you have Nix installed with flakes enabled, you can use it to set up your development environment:
+This project includes a Nix flake for reproducible development environments. All development tools are defined in [flake.nix](./flake.nix) and provided via Nix.
+
+#### Installing Nix
 
 ```bash
-# Enter development shell
-nix develop
+# Install Nix with flakes enabled (if not already installed)
+curl --proto '=https' --tlsv1.2 -sSf -L https://artifacts.nixos.org/experimental-installer | \
+  sh -s -- install
 
+# If flakes are not enabled, enable them with:
+mkdir -p ~/.config/nix && echo "experimental-features = nix-command flakes" >> ~/.config/nix/nix.conf
+```
+
+#### Activating the Development Environment
+
+```bash
+# Automatic activation with direnv (recommended)
 direnv allow
+
+# Or manual activation
+nix develop
 ```
 
 The flake provides all necessary development dependencies including Node.js, pnpm, and other build tools.
