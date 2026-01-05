@@ -53,8 +53,7 @@
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "catalog:prod",
 		"@orama/orama": "catalog:prod",
-		"defu": "catalog:prod",
-		"zod": "catalog:prod"
+		"defu": "catalog:prod"
 	},
 	"devDependencies": {
 		"@ai-sdk/provider": "catalog:dev",
@@ -78,12 +77,14 @@
 		"type-fest": "catalog:dev",
 		"typescript": "catalog:dev",
 		"unplugin-unused": "catalog:dev",
-		"vitest": "catalog:dev"
+		"vitest": "catalog:dev",
+		"zod": "catalog:dev"
 	},
 	"peerDependencies": {
 		"@anthropic-ai/sdk": "catalog:peer",
 		"ai": "catalog:peer",
-		"openai": "catalog:peer"
+		"openai": "catalog:peer",
+		"zod": "catalog:peer"
 	},
 	"peerDependenciesMeta": {
 		"@anthropic-ai/sdk": {

@@ -12,7 +12,8 @@
 		"@tanstack/ai": "catalog:examples",
 		"@tanstack/ai-openai": "catalog:examples",
 		"ai": "catalog:peer",
-		"openai": "catalog:peer"
+		"openai": "catalog:peer",
+		"zod": "catalog:dev"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:dev",

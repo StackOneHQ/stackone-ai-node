@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { DEFAULT_BASE_URL } from './consts';
 import { BaseTool } from './tool';
 import type { ExecuteConfig, ExecuteOptions, JsonObject, JsonValue, ToolParameters } from './types';

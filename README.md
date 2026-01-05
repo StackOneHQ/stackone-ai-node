@@ -14,17 +14,19 @@ The StackOne AI SDK provides the `StackOneToolSet` class, which fetches tools dy
 
 ```bash
 # Using npm
-npm install @stackone/ai
+npm install @stackone/ai zod
 
 # Using yarn
-yarn add @stackone/ai
+yarn add @stackone/ai zod
 
 # Using pnpm
-pnpm add @stackone/ai
+pnpm add @stackone/ai zod
 
 # Using bun
-bun add @stackone/ai
+bun add @stackone/ai zod
 ```
+
+> **Note:** `zod` is a peer dependency required for AI SDK integrations and internal schema validation. Version `>=3.25.0 <5` is supported.
 
 ## Usage
 
