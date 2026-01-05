@@ -7,6 +7,7 @@ catalogMode: strict
 catalogs:
   dev:
     '@ai-sdk/openai': ^3.0.2
+    ai: ^6.0.7
     '@fast-check/vitest': ^0.2.0
     '@clack/prompts': ^0.11.0
     '@hono/mcp': ^0.1.4
@@ -45,9 +46,14 @@ enablePrePostScripts: true
 minimumReleaseAge: 1440
 
 minimumReleaseAgeExclude:
+  - '@ai-sdk/gateway'
+  - '@ai-sdk/openai'
+  - '@ai-sdk/provider'
+  - '@ai-sdk/provider-utils'
   - '@anthropic-ai/claude-agent-sdk'
   - '@tanstack/ai'
   - '@tanstack/ai-openai'
+  - ai
 
 onlyBuiltDependencies:
   - esbuild

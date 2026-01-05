@@ -27,6 +27,9 @@ catalogs:
     '@vitest/coverage-v8':
       specifier: ^4.0.15
       version: 4.0.15
+    ai:
+      specifier: ^6.0.7
+      version: 6.0.7
     hono:
       specifier: ^4.9.10
       version: 4.10.7
@@ -136,8 +139,8 @@ importers:
         specifier: catalog:dev
         version: 4.0.15(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
       ai:
-        specifier: catalog:peer
-        version: 6.0.6(zod@4.1.13)
+        specifier: catalog:dev
+        version: 6.0.7(zod@4.1.13)
       hono:
         specifier: catalog:dev
         version: 4.10.7
@@ -228,6 +231,12 @@ packages:
 
   '@ai-sdk/gateway@3.0.5':
     resolution: {integrity: sha512-AtxA1wcoKTHr9uFoC5KZEXqJP4SMW4j3VbcliUECUYssbWbePJ9+b3AaCny1lxf1xhDK9EIyAgBOKhXoQSr9nA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/gateway@3.0.6':
+    resolution: {integrity: sha512-oEpwjM0PIaSUErtZI8Ag+gQ+ZelysRWA96N5ahvOc5e9d7QkKJWF0POWx0nI1qBxvmUSw7ca0sLTVw+J5yn7Tg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1389,6 +1398,12 @@ packages:
 
   ai@6.0.6:
     resolution: {integrity: sha512-LM0eAMWVn3RTj+0X5O1m/8g+7QiTeWG5aN5FsDbdmCkAQHVg93XxLbljFOLzi0NMjuJgf7fKLKmWoPsrdMyqfw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  ai@6.0.7:
+    resolution: {integrity: sha512-kLzSXHdW6cAcb2mFSIfkbfzxYqqjrUnyhrB1sg855qlC+6XkLI8hmwFE8f/4SnjmtcTDOnkIaVjWoO5i5Ir0bw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2576,6 +2591,13 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 4.1.13
 
+  '@ai-sdk/gateway@3.0.6(zod@4.1.13)':
+    dependencies:
+      '@ai-sdk/provider': 3.0.1
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.1.13)
+      '@vercel/oidc': 3.0.5
+      zod: 4.1.13
+
   '@ai-sdk/openai@3.0.2(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 3.0.1
@@ -3380,6 +3402,14 @@ snapshots:
   ai@6.0.6(zod@4.1.13):
     dependencies:
       '@ai-sdk/gateway': 3.0.5(zod@4.1.13)
+      '@ai-sdk/provider': 3.0.1
+      '@ai-sdk/provider-utils': 4.0.2(zod@4.1.13)
+      '@opentelemetry/api': 1.9.0
+      zod: 4.1.13
+
+  ai@6.0.7(zod@4.1.13):
+    dependencies:
+      '@ai-sdk/gateway': 3.0.6(zod@4.1.13)
       '@ai-sdk/provider': 3.0.1
       '@ai-sdk/provider-utils': 4.0.2(zod@4.1.13)
       '@opentelemetry/api': 1.9.0
