@@ -57,8 +57,6 @@
 		"zod": "catalog:prod"
 	},
 	"devDependencies": {
-		"@ai-sdk/provider": "catalog:dev",
-		"@ai-sdk/provider-utils": "catalog:dev",
 		"@fast-check/vitest": "catalog:dev",
 		"@hono/mcp": "catalog:dev",
 		"@types/node": "catalog:dev",

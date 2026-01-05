@@ -9,7 +9,7 @@ export default defineConfig({
 	treeshake: true,
 	dts: {
 		tsgo: true,
-		resolve: [/^@types\//, 'type-fest', 'ai', '@ai-sdk/provider-utils'],
+		resolve: [/^@types\//, 'type-fest', 'ai'],
 	},
 	publint: true,
 	unused: true,

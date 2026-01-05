@@ -1,4 +1,4 @@
-import type { JSONSchema7 as AISDKJSONSchema } from '@ai-sdk/provider';
+import type { JSONSchema7 as AISDKJSONSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
@@ -52,7 +52,9 @@ export class BaseTool {
 						method: this.executeConfig.method,
 						url: this.executeConfig.url,
 						bodyType: this.executeConfig.bodyType,
-						params: this.executeConfig.params.map((param) => ({ ...param })),
+						params: this.executeConfig.params.map((param) => ({
+							...param,
+						})),
 					} satisfies HttpExecuteConfig;
 				case 'rpc':
 					return {
@@ -145,7 +147,9 @@ export class BaseTool {
 				typeof inputParams !== 'object'
 			) {
 				throw new StackOneError(
-					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`,
+					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(
+						inputParams,
+					)}`,
 				);
 			}
 
@@ -257,7 +261,9 @@ export class BaseTool {
 							try {
 								return await this.execute(args as JsonObject);
 							} catch (error) {
-								return `Error executing tool: ${error instanceof Error ? error.message : String(error)}`;
+								return `Error executing tool: ${
+									error instanceof Error ? error.message : String(error)
+								}`;
 							}
 						}
 					: undefined,
@@ -582,7 +588,9 @@ function metaSearchTools(
 				typeof inputParams !== 'object'
 			) {
 				throw new StackOneError(
-					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`,
+					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(
+						inputParams,
+					)}`,
 				);
 			}
 
@@ -712,7 +720,9 @@ function metaExecuteTool(tools: Tools): BaseTool {
 				typeof inputParams !== 'object'
 			) {
 				throw new StackOneError(
-					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`,
+					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(
+						inputParams,
+					)}`,
 				);
 			}
 

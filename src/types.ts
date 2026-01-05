@@ -2,7 +2,7 @@
  * Common type definitions for the StackOne SDK
  */
 
-import type { Tool } from '@ai-sdk/provider-utils';
+import type { Tool } from 'ai';
 import type { ToolSet } from 'ai';
 import type { JsonObject, JsonValue, ValueOf } from 'type-fest';
 
