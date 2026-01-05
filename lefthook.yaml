@@ -21,7 +21,7 @@ pre-push:
     - name: knip
       run: pnpm run lint:knip
     - name: lockfile-sync-check
-      glob: '{package.json,pnpm-workspace.yaml}'
+      glob: '{**/package.json,pnpm-workspace.yaml}'
       run: pnpm install --lockfile-only --frozen-lockfile
     - name: lint-all-on-lockfile-change
       glob: 'pnpm-lock.yaml'
