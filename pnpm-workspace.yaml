@@ -32,7 +32,7 @@ catalogs:
     '@tanstack/ai-openai': ^0.0.3
   peer:
     '@anthropic-ai/sdk': ^0.52.0
-    ai: '>=5.0.0 <7.0.0'
+    ai: '>=5.0.108 <7.0.0'
     openai: ^6.2.0
   prod:
     '@modelcontextprotocol/sdk': ^1.24.3
