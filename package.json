@@ -28,7 +28,9 @@
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.mts",
 	"files": [
-		"!example/*.test.ts",
+		"!examples/*.test.ts",
+		"!src/**/*.test-d.ts",
+		"!src/**/*.test.ts",
 		"LICENSE",
 		"README.md",
 		"dist",
