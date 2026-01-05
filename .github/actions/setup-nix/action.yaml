@@ -9,7 +9,7 @@ runs:
         github_access_token: ${{ github.token }}
 
     - name: Cache Nix store
-      uses: nix-community/cache-nix-action@b426b118b6dc86d6952988d396aa7c6b09776d08 # v7
+      uses: nix-community/cache-nix-action@b426b118b6dc86d6952988d396aa7c6b09776d08 # v7.0.0
       with:
         primary-key: nix-${{ runner.os }}
 
