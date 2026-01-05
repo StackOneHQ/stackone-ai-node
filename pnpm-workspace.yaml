@@ -6,10 +6,10 @@ catalogMode: strict
 
 catalogs:
   dev:
-    '@ai-sdk/openai': ^2.0.80
-    '@ai-sdk/provider': ^2.0.0
+    '@ai-sdk/openai': ^3.0.2
+    '@ai-sdk/provider': ^3.0.1
     '@fast-check/vitest': ^0.2.0
-    '@ai-sdk/provider-utils': ^3.0.18
+    '@ai-sdk/provider-utils': ^4.0.2
     '@clack/prompts': ^0.11.0
     '@hono/mcp': ^0.1.4
     '@types/node': ^22.13.5
@@ -34,7 +34,7 @@ catalogs:
     '@tanstack/ai-openai': ^0.0.3
   peer:
     '@anthropic-ai/sdk': ^0.52.0
-    ai: ^5.0.108
+    ai: ^6.0.6
     openai: ^6.2.0
   prod:
     '@modelcontextprotocol/sdk': ^1.24.3
