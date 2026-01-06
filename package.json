@@ -81,12 +81,16 @@
 		"zod": "catalog:dev"
 	},
 	"peerDependencies": {
+		"@anthropic-ai/claude-agent-sdk": "catalog:peer",
 		"@anthropic-ai/sdk": "catalog:peer",
 		"ai": "catalog:peer",
 		"openai": "catalog:peer",
 		"zod": "catalog:peer"
 	},
 	"peerDependenciesMeta": {
+		"@anthropic-ai/claude-agent-sdk": {
+			"optional": true
+		},
 		"@anthropic-ai/sdk": {
 			"optional": true
 		},

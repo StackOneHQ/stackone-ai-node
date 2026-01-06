@@ -83,6 +83,9 @@ catalogs:
       specifier: ^0.2.0
       version: 0.2.0
   peer:
+    '@anthropic-ai/claude-agent-sdk':
+      specifier: ^0.1.67
+      version: 0.1.67
     '@anthropic-ai/sdk':
       specifier: ^0.52.0
       version: 0.52.0
@@ -107,6 +110,9 @@ importers:
 
   .:
     dependencies:
+      '@anthropic-ai/claude-agent-sdk':
+        specifier: catalog:peer
+        version: 0.1.67(zod@4.1.13)
       '@anthropic-ai/sdk':
         specifier: catalog:peer
         version: 0.52.0
