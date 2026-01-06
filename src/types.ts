@@ -201,3 +201,30 @@ export type AISDKToolDefinition = Tool & {
 export type AISDKToolResult<T extends string = string> = ToolSet & {
 	[K in T]: AISDKToolDefinition;
 };
+
+/**
+ * Claude Agent SDK MCP server configuration returned by toClaudeAgentSdk().
+ * This type represents the MCP server instance that can be passed to the
+ * Claude Agent SDK query() function's mcpServers option.
+ *
+ * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
+ */
+export interface ClaudeAgentSdkMcpServer {
+	type: 'sdk';
+	name: string;
+	instance: unknown;
+}
+
+/**
+ * Options for toClaudeAgentSdk() method
+ */
+export interface ClaudeAgentSdkOptions {
+	/**
+	 * Name of the MCP server. Defaults to 'stackone-tools'.
+	 */
+	serverName?: string;
+	/**
+	 * Version of the MCP server. Defaults to '1.0.0'.
+	 */
+	serverVersion?: string;
+}
