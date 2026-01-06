@@ -281,8 +281,7 @@ npm install @stackone/ai @anthropic-ai/claude-agent-sdk zod  # or: yarn/pnpm/bun
 ```
 
 ```typescript
-import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
-import { z } from "zod";
+import { query } from "@anthropic-ai/claude-agent-sdk";
 import { StackOneToolSet } from "@stackone/ai";
 
 const toolset = new StackOneToolSet({
@@ -290,26 +289,9 @@ const toolset = new StackOneToolSet({
   accountId: "your-account-id",
 });
 
+// Fetch tools and convert to Claude Agent SDK format
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("bamboohr_get_employee");
-
-// Create a Claude Agent SDK tool from the StackOne tool
-const getEmployeeTool = tool(
-  employeeTool.name,
-  employeeTool.description,
-  { id: z.string().describe("The employee ID") },
-  async (args) => {
-    const result = await employeeTool.execute(args);
-    return { content: [{ type: "text", text: JSON.stringify(result) }] };
-  }
-);
-
-// Create an MCP server with the StackOne tool
-const mcpServer = createSdkMcpServer({
-  name: "stackone-tools",
-  version: "1.0.0",
-  tools: [getEmployeeTool],
-});
+const mcpServer = await tools.toClaudeAgentSdk();
 
 // Use with Claude Agent SDK query
 const result = query({
