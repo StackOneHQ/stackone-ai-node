@@ -27,8 +27,6 @@
               # formatting and linting tools
               similarity
               nixfmt-rfc-style
-              typos
-              typos-lsp
 
               # security
               gitleaks
