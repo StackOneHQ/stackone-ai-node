@@ -27,7 +27,7 @@ catalogs:
     typescript: ^5.8.3
     unplugin-unused: ^0.5.4
     vitest: ^4.0.15
-    zod: ^4.1.13
+    zod: ^4.3.0
   examples:
     '@anthropic-ai/claude-agent-sdk': ^0.1.67
     '@tanstack/ai': ^0.2.0
@@ -37,7 +37,7 @@ catalogs:
     '@anthropic-ai/sdk': ^0.52.0
     ai: '>=5.0.108 <7.0.0'
     openai: ^6.2.0
-    zod: '>=3.25.0 <5'
+    zod: '>=4.3.0 <5'
   prod:
     '@modelcontextprotocol/sdk': ^1.24.3
     '@orama/orama': ^3.1.11
