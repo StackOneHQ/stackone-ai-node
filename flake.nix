@@ -3,22 +3,26 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
   outputs =
-    inputs@{ flake-parts, ... }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
+    { nixpkgs, ... }:
+    let
       systems = [
         "x86_64-linux"
         "aarch64-linux"
         "aarch64-darwin"
       ];
-
-      perSystem =
-        { pkgs, ... }:
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+    in
+    {
+      devShells = forAllSystems (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
         {
-          devShells.default = pkgs.mkShell {
+          default = pkgs.mkShell {
             buildInputs = with pkgs; [
               # runtime
               nodejs_24
@@ -42,6 +46,7 @@
               fi
             '';
           };
-        };
+        }
+      );
     };
 }
