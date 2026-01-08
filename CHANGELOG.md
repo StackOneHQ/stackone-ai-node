@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.1.0...v2.2.0) (2026-01-08)
+
+
+### Features
+
+* **tool:** add toClaudeAgentSdk() method for Claude Agent SDK integration [ENG-11770] ([#283](https://github.com/StackOneHQ/stackone-ai-node/issues/283)) ([f02644b](https://github.com/StackOneHQ/stackone-ai-node/commit/f02644b34fe14ff65b01081a1a1f2fb4e1a2c7b4))
+
 ## [2.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.0.9...v2.1.0) (2026-01-05)
 
 
