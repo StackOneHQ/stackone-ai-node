@@ -1,5 +1,6 @@
 import { type JSONSchema7 as AISDKJSONSchema, jsonSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
+import type { McpSdkServerConfigWithInstance } from '@anthropic-ai/claude-agent-sdk';
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
@@ -10,7 +11,6 @@ import { RequestBuilder } from './requestBuilder';
 import type {
 	AISDKToolDefinition,
 	AISDKToolResult,
-	ClaudeAgentSdkMcpServer,
 	ClaudeAgentSdkOptions,
 	ExecuteConfig,
 	ExecuteOptions,
@@ -450,7 +450,9 @@ export class Tools implements Iterable<BaseTool> {
 	 *
 	 * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
 	 */
-	async toClaudeAgentSdk(options: ClaudeAgentSdkOptions = {}): Promise<ClaudeAgentSdkMcpServer> {
+	async toClaudeAgentSdk(
+		options: ClaudeAgentSdkOptions = {},
+	): Promise<McpSdkServerConfigWithInstance> {
 		const { serverName = 'stackone-tools', serverVersion = '1.0.0' } = options;
 
 		// Import the Claude Agent SDK dynamically
@@ -476,12 +478,11 @@ export class Tools implements Iterable<BaseTool> {
 		);
 
 		// Create and return the MCP server
-		// The return type is compatible with McpServerConfig but uses our interface
 		return claudeAgentSdk.createSdkMcpServer({
 			name: serverName,
 			version: serverVersion,
 			tools: sdkTools,
-		}) as ClaudeAgentSdkMcpServer;
+		});
 	}
 
 	/**
