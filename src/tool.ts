@@ -1,4 +1,4 @@
-import type { JSONSchema7 as AISDKJSONSchema } from 'ai';
+import { type JSONSchema7 as AISDKJSONSchema, jsonSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
@@ -24,7 +24,6 @@ import type {
 } from './types';
 
 import { StackOneError } from './utils/error-stackone';
-import { jsonSchemaToZod } from './utils/json-schema-to-zod';
 import { TfidfIndex } from './utils/tfidf-index';
 import { tryImport } from './utils/try-import';
 
@@ -242,13 +241,13 @@ export class BaseTool {
 			args: Record<string, unknown>,
 		) => Promise<{ content: Array<{ type: 'text'; text: string }> }>;
 	}> {
-		const { zodSchema } = await jsonSchemaToZod(this.toJsonSchema());
+		const inputSchema = jsonSchema(this.toJsonSchema());
 		const execute = this.execute.bind(this);
 
 		return {
 			name: this.name,
 			description: this.description,
-			inputSchema: zodSchema,
+			inputSchema,
 			handler: async (args: Record<string, unknown>) => {
 				const result = await execute(args as JsonObject);
 				return {
