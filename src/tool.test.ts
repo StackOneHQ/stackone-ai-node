@@ -171,6 +171,25 @@ describe('StackOneTool', () => {
 		expect(schema.properties?.id.type).toBe('string');
 	});
 
+	it('should convert to Claude Agent SDK tool format', async () => {
+		const tool = createMockTool();
+
+		const claudeTool = await tool.toClaudeAgentSdkTool();
+
+		expect(claudeTool).toBeDefined();
+		expect(claudeTool.name).toBe('test_tool');
+		expect(claudeTool.description).toBe('Test tool');
+		expect(claudeTool.inputSchema).toBeDefined();
+		expect(typeof claudeTool.handler).toBe('function');
+
+		// Test the handler returns content in the expected format
+		const result = await claudeTool.handler({ id: 'test-123' });
+		expect(result).toHaveProperty('content');
+		expect(Array.isArray(result.content)).toBe(true);
+		expect(result.content[0]).toHaveProperty('type', 'text');
+		expect(result.content[0]).toHaveProperty('text');
+	});
+
 	it('should include execution metadata by default in AI SDK conversion', async () => {
 		const tool = createMockTool();
 
@@ -691,6 +710,58 @@ describe('Tools', () => {
 		expect(aiSdkTools.another_tool).toBeDefined();
 		expect(typeof aiSdkTools.test_tool.execute).toBe('function');
 		expect(typeof aiSdkTools.another_tool.execute).toBe('function');
+	});
+
+	it('should convert all tools to Claude Agent SDK MCP server', async () => {
+		const tool1 = createMockTool();
+		const tool2 = new StackOneTool(
+			'another_tool',
+			'Another tool',
+			{
+				type: 'object',
+				properties: { name: { type: 'string' } },
+			},
+			{
+				kind: 'http',
+				method: 'POST',
+				url: 'https://api.example.com/test',
+				bodyType: 'json',
+				params: [
+					{
+						name: 'name',
+						location: ParameterLocation.BODY,
+						type: 'string',
+					},
+				],
+			},
+			{
+				authorization: 'Bearer test_key',
+			},
+		);
+
+		const tools = new Tools([tool1, tool2]);
+
+		const mcpServer = await tools.toClaudeAgentSdk();
+
+		expect(mcpServer).toBeDefined();
+		expect(mcpServer.type).toBe('sdk');
+		expect(mcpServer.name).toBe('stackone-tools');
+		expect(mcpServer.instance).toBeDefined();
+	});
+
+	it('should convert all tools to Claude Agent SDK MCP server with custom options', async () => {
+		const tool1 = createMockTool();
+		const tools = new Tools([tool1]);
+
+		const mcpServer = await tools.toClaudeAgentSdk({
+			serverName: 'my-custom-server',
+			serverVersion: '2.0.0',
+		});
+
+		expect(mcpServer).toBeDefined();
+		expect(mcpServer.type).toBe('sdk');
+		expect(mcpServer.name).toBe('my-custom-server');
+		expect(mcpServer.instance).toBeDefined();
 	});
 
 	it('should be iterable', () => {
