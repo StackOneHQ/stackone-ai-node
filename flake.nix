@@ -22,7 +22,7 @@
           pkgs = nixpkgs.legacyPackages.${system};
         in
         {
-          default = pkgs.mkShell {
+          default = pkgs.mkShellNoCC {
             buildInputs = with pkgs; [
               # runtime
               nodejs_24
