@@ -1,8 +1,8 @@
 ---
 description: Use when writing or running tests. Covers Vitest commands, MSW HTTP mocking, fs-fixture for file system tests. (project)
 alwaysApply: false
-paths: "**/*.test.ts"
-globs: "*.test.ts"
+paths: '**/*.test.ts'
+globs: '*.test.ts'
 ---
 
 # TypeScript Testing with Vitest and MSW
@@ -27,9 +27,9 @@ import { describe, it, expect, vi } from 'vitest';
 
 // ✅ CORRECT - Use globals directly (no import needed)
 describe('MyTest', () => {
-  it('should work', () => {
-    expect(true).toBe(true);
-  });
+	it('should work', () => {
+		expect(true).toBe(true);
+	});
 });
 ```
 
@@ -47,9 +47,9 @@ Add endpoints to `mocks/handlers.ts`:
 import { http, HttpResponse } from 'msw';
 
 export const handlers = [
-  http.get('https://api.example.com/endpoint', () => {
-    return HttpResponse.json({ data: 'mock response' });
-  }),
+	http.get('https://api.example.com/endpoint', () => {
+		return HttpResponse.json({ data: 'mock response' });
+	}),
 ];
 ```
 
@@ -62,12 +62,12 @@ import { http, HttpResponse } from 'msw';
 import { server } from '../../../mocks/node';
 
 it('handles error responses', async () => {
-  server.use(
-    http.get('https://api.example.com/endpoint', () => {
-      return HttpResponse.json({ error: 'Not found' }, { status: 404 });
-    })
-  );
-  // Test implementation
+	server.use(
+		http.get('https://api.example.com/endpoint', () => {
+			return HttpResponse.json({ error: 'Not found' }, { status: 404 });
+		}),
+	);
+	// Test implementation
 });
 ```
 
@@ -79,18 +79,18 @@ Use MSW event listeners to verify requests were made:
 
 ```typescript
 it('makes the expected request', async () => {
-  const recordedRequests: Request[] = [];
-  const listener = ({ request }: { request: Request }) => {
-    recordedRequests.push(request);
-  };
-  server.events.on('request:start', listener);
+	const recordedRequests: Request[] = [];
+	const listener = ({ request }: { request: Request }) => {
+		recordedRequests.push(request);
+	};
+	server.events.on('request:start', listener);
 
-  await someFunction();
+	await someFunction();
 
-  expect(recordedRequests).toHaveLength(1);
-  expect(recordedRequests[0]?.url).toBe('https://api.example.com/endpoint');
+	expect(recordedRequests).toHaveLength(1);
+	expect(recordedRequests[0]?.url).toBe('https://api.example.com/endpoint');
 
-  server.events.removeListener('request:start', listener);
+	server.events.removeListener('request:start', listener);
 });
 ```
 
@@ -108,9 +108,9 @@ For file system tests, use `fs-fixture` with `await using` for automatic cleanup
 import { createFixture } from 'fs-fixture';
 
 it('should save file to disk', async () => {
-  await using fixture = await createFixture();
-  await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
-  expect(await fixture.exists('data.json')).toBe(true);
+	await using fixture = await createFixture();
+	await fixture.writeFile('data.json', JSON.stringify({ test: 'data' }));
+	expect(await fixture.exists('data.json')).toBe(true);
 });
 ```
 

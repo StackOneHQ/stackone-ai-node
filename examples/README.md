@@ -223,14 +223,14 @@ All production examples include proper error handling:
 
 ```typescript
 try {
-  const result = await tool.execute(params);
-  // Handle success
+	const result = await tool.execute(params);
+	// Handle success
 } catch (error) {
-  if (error instanceof StackOneAPIError) {
-    console.error("API Error:", error.statusCode, error.responseBody);
-  } else {
-    console.error("Unexpected error:", error.message);
-  }
+	if (error instanceof StackOneAPIError) {
+		console.error('API Error:', error.statusCode, error.responseBody);
+	} else {
+		console.error('Unexpected error:', error.message);
+	}
 }
 ```
 
@@ -240,13 +240,13 @@ Examples demonstrate different ways to provide account IDs:
 
 ```typescript
 // 1. At toolset initialization
-const toolset = new StackOneToolSet({ accountId: "account_123" });
+const toolset = new StackOneToolSet({ accountId: 'account_123' });
 
 // 2. When getting tools
-const tools = toolset.getStackOneTools("hris_*", "account_123");
+const tools = toolset.getStackOneTools('hris_*', 'account_123');
 
 // 3. Directly on individual tools
-tool.setAccountId("account_123");
+tool.setAccountId('account_123');
 ```
 
 ## Testing Examples

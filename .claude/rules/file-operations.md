@@ -1,8 +1,8 @@
 ---
 description: Use when making HTTP requests. Covers native fetch API patterns and error handling. (project)
 alwaysApply: false
-paths: "**/*.ts"
-globs: "**/*.ts"
+paths: '**/*.ts'
+globs: '**/*.ts'
 ---
 
 # HTTP Request Standards
@@ -17,17 +17,19 @@ Use the native fetch API for HTTP requests. Node.js now includes built-in fetch,
 
 ```typescript
 async function fetchData(url: string): Promise<unknown> {
-  try {
-    const response = await fetch(url);
+	try {
+		const response = await fetch(url);
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} for ${url}`);
-    }
+		if (!response.ok) {
+			throw new Error(`API error: ${response.status} for ${url}`);
+		}
 
-    return await response.json();
-  } catch (error) {
-    throw new Error(`Failed to fetch from ${url}: ${error instanceof Error ? error.message : String(error)}`);
-  }
+		return await response.json();
+	} catch (error) {
+		throw new Error(
+			`Failed to fetch from ${url}: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
 }
 ```
 
@@ -41,7 +43,7 @@ async function fetchData(url: string): Promise<unknown> {
 
    ```typescript
    if (!response.ok) {
-     throw new Error(`API error: ${response.status} for ${url}`);
+   	throw new Error(`API error: ${response.status} for ${url}`);
    }
    ```
 
@@ -65,17 +67,17 @@ async function fetchData(url: string): Promise<unknown> {
 
 ```typescript
 async function getUser(userId: string): Promise<User> {
-  try {
-    const response = await fetch(`https://api.example.com/users/${userId}`);
+	try {
+		const response = await fetch(`https://api.example.com/users/${userId}`);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch user: ${response.status}`);
-    }
+		if (!response.ok) {
+			throw new Error(`Failed to fetch user: ${response.status}`);
+		}
 
-    return await response.json() as User;
-  } catch (error) {
-    throw new Error(`User fetch failed: ${error instanceof Error ? error.message : String(error)}`);
-  }
+		return (await response.json()) as User;
+	} catch (error) {
+		throw new Error(`User fetch failed: ${error instanceof Error ? error.message : String(error)}`);
+	}
 }
 ```
 
@@ -83,23 +85,25 @@ async function getUser(userId: string): Promise<User> {
 
 ```typescript
 async function createUser(data: CreateUserInput): Promise<User> {
-  try {
-    const response = await fetch('https://api.example.com/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+	try {
+		const response = await fetch('https://api.example.com/users', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(data),
+		});
 
-    if (!response.ok) {
-      throw new Error(`Failed to create user: ${response.status}`);
-    }
+		if (!response.ok) {
+			throw new Error(`Failed to create user: ${response.status}`);
+		}
 
-    return await response.json() as User;
-  } catch (error) {
-    throw new Error(`User creation failed: ${error instanceof Error ? error.message : String(error)}`);
-  }
+		return (await response.json()) as User;
+	} catch (error) {
+		throw new Error(
+			`User creation failed: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
 }
 ```
 
@@ -107,21 +111,23 @@ async function createUser(data: CreateUserInput): Promise<User> {
 
 ```typescript
 async function getProtectedData(token: string): Promise<Data> {
-  try {
-    const response = await fetch('https://api.example.com/protected', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+	try {
+		const response = await fetch('https://api.example.com/protected', {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
 
-    if (!response.ok) {
-      throw new Error(`Auth failed: ${response.status}`);
-    }
+		if (!response.ok) {
+			throw new Error(`Auth failed: ${response.status}`);
+		}
 
-    return await response.json() as Data;
-  } catch (error) {
-    throw new Error(`Protected data fetch failed: ${error instanceof Error ? error.message : String(error)}`);
-  }
+		return (await response.json()) as Data;
+	} catch (error) {
+		throw new Error(
+			`Protected data fetch failed: ${error instanceof Error ? error.message : String(error)}`,
+		);
+	}
 }
 ```
 

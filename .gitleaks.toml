@@ -6,6 +6,4 @@ useDefault = true
 
 [allowlist]
 description = "Global allowlist"
-paths = [
-    '''pnpm-lock\.yaml$''',
-]
+paths = ['''pnpm-lock\.yaml$''']

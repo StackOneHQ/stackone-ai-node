@@ -31,15 +31,15 @@ bun add @stackone/ai zod
 ## Usage
 
 ```typescript
-import { StackOneToolSet } from "@stackone/ai";
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("bamboohr_list_employees");
+const employeeTool = tools.getTool('bamboohr_list_employees');
 const employees = await employeeTool.execute();
 ```
 
@@ -58,26 +58,26 @@ or load from a .env file using your preferred environment variable library.
 StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels:
 
 ```typescript
-import { StackOneToolSet } from "@stackone/ai";
+import { StackOneToolSet } from '@stackone/ai';
 
 // Single account - simplest approach
-const toolset = new StackOneToolSet({ accountId: "your-bamboohr-account" });
+const toolset = new StackOneToolSet({ accountId: 'your-bamboohr-account' });
 const tools = await toolset.fetchTools();
 
 // Multiple accounts - returns tools from both integrations
 const multiAccountToolset = new StackOneToolSet();
 const allTools = await multiAccountToolset.fetchTools({
-  accountIds: ["bamboohr-account-123", "workday-account-456"],
+	accountIds: ['bamboohr-account-123', 'workday-account-456'],
 });
 
 // Filter to specific integration when using multiple accounts
 const bamboohrOnly = await multiAccountToolset.fetchTools({
-  accountIds: ["bamboohr-account-123", "workday-account-456"],
-  actions: ["bamboohr_*"], // Only BambooHR tools
+	accountIds: ['bamboohr-account-123', 'workday-account-456'],
+	actions: ['bamboohr_*'], // Only BambooHR tools
 });
 
 // Set directly on a tool instance
-tools.setAccountId("direct-account-id");
+tools.setAccountId('direct-account-id');
 const currentAccountId = tools.getAccountId(); // Get the current account ID
 ```
 
@@ -93,29 +93,29 @@ npm install @stackone/ai openai  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
-import { OpenAI } from "openai";
-import { StackOneToolSet } from "@stackone/ai";
+import { OpenAI } from 'openai';
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 const tools = await toolset.fetchTools();
 
 await openai.chat.completions.create({
-  model: "gpt-5.1",
-  messages: [
-    {
-      role: "system",
-      content: "You are a helpful HR assistant using BambooHR.",
-    },
-    {
-      role: "user",
-      content: "Create a time-off request for employee id cxIQ5764hj2",
-    },
-  ],
-  tools: tools.toOpenAI(),
+	model: 'gpt-5.1',
+	messages: [
+		{
+			role: 'system',
+			content: 'You are a helpful HR assistant using BambooHR.',
+		},
+		{
+			role: 'user',
+			content: 'Create a time-off request for employee id cxIQ5764hj2',
+		},
+	],
+	tools: tools.toOpenAI(),
 });
 ```
 
@@ -131,12 +131,12 @@ npm install @stackone/ai openai  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
-import OpenAI from "openai";
-import { StackOneToolSet } from "@stackone/ai";
+import OpenAI from 'openai';
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 const tools = await toolset.fetchTools();
@@ -144,10 +144,10 @@ const tools = await toolset.fetchTools();
 const openai = new OpenAI();
 
 await openai.responses.create({
-  model: "gpt-5.1",
-  instructions: "You are a helpful HR assistant.",
-  input: "What is the phone number for employee c28xIQ?",
-  tools: tools.toOpenAIResponses(),
+	model: 'gpt-5.1',
+	instructions: 'You are a helpful HR assistant.',
+	input: 'What is the phone number for employee c28xIQ?',
+	tools: tools.toOpenAIResponses(),
 });
 ```
 
@@ -163,12 +163,12 @@ npm install @stackone/ai @anthropic-ai/sdk  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
-import Anthropic from "@anthropic-ai/sdk";
-import { StackOneToolSet } from "@stackone/ai";
+import Anthropic from '@anthropic-ai/sdk';
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 const tools = await toolset.fetchTools();
@@ -176,16 +176,16 @@ const tools = await toolset.fetchTools();
 const anthropic = new Anthropic();
 
 await anthropic.messages.create({
-  model: "claude-haiku-4-5-20241022",
-  max_tokens: 1024,
-  system: "You are a helpful HR assistant.",
-  messages: [
-    {
-      role: "user",
-      content: "What is the phone number for employee c28xIQ?",
-    },
-  ],
-  tools: tools.toAnthropic(),
+	model: 'claude-haiku-4-5-20241022',
+	max_tokens: 1024,
+	system: 'You are a helpful HR assistant.',
+	messages: [
+		{
+			role: 'user',
+			content: 'What is the phone number for employee c28xIQ?',
+		},
+	],
+	tools: tools.toAnthropic(),
 });
 ```
 
@@ -201,21 +201,21 @@ npm install @stackone/ai ai @ai-sdk/openai  # or: yarn/pnpm/bun add
 ```
 
 ```typescript
-import { openai } from "@ai-sdk/openai";
-import { generateText } from "ai";
-import { StackOneToolSet } from "@stackone/ai";
+import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 const tools = await toolset.fetchTools();
 
 await generateText({
-  model: openai("gpt-5.1"),
-  tools: await tools.toAISDK(),
-  maxSteps: 3,
+	model: openai('gpt-5.1'),
+	tools: await tools.toAISDK(),
+	maxSteps: 3,
 });
 ```
 
@@ -231,41 +231,41 @@ npm install @stackone/ai @tanstack/ai @tanstack/ai-openai zod  # or: yarn/pnpm/b
 ```
 
 ```typescript
-import { chat } from "@tanstack/ai";
-import { openai } from "@tanstack/ai-openai";
-import { z } from "zod";
-import { StackOneToolSet } from "@stackone/ai";
+import { chat } from '@tanstack/ai';
+import { openai } from '@tanstack/ai-openai';
+import { z } from 'zod';
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("bamboohr_get_employee");
+const employeeTool = tools.getTool('bamboohr_get_employee');
 
 // TanStack AI requires Zod schemas for tool input validation
 const getEmployeeTool = {
-  name: employeeTool.name,
-  description: employeeTool.description,
-  inputSchema: z.object({
-    id: z.string().describe("The employee ID"),
-  }),
-  execute: async (args: { id: string }) => {
-    return employeeTool.execute(args);
-  },
+	name: employeeTool.name,
+	description: employeeTool.description,
+	inputSchema: z.object({
+		id: z.string().describe('The employee ID'),
+	}),
+	execute: async (args: { id: string }) => {
+		return employeeTool.execute(args);
+	},
 };
 
 const adapter = openai();
 const stream = chat({
-  adapter,
-  model: "gpt-5.1",
-  messages: [{ role: "user", content: "Get employee with id: abc123" }],
-  tools: [getEmployeeTool],
+	adapter,
+	model: 'gpt-5.1',
+	messages: [{ role: 'user', content: 'Get employee with id: abc123' }],
+	tools: [getEmployeeTool],
 });
 
 for await (const chunk of stream) {
-  // Process streaming chunks
+	// Process streaming chunks
 }
 ```
 
@@ -281,12 +281,12 @@ npm install @stackone/ai @anthropic-ai/claude-agent-sdk zod  # or: yarn/pnpm/bun
 ```
 
 ```typescript
-import { query } from "@anthropic-ai/claude-agent-sdk";
-import { StackOneToolSet } from "@stackone/ai";
+import { query } from '@anthropic-ai/claude-agent-sdk';
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
-  accountId: "your-account-id",
+	baseUrl: 'https://api.stackone.com',
+	accountId: 'your-account-id',
 });
 
 // Fetch tools and convert to Claude Agent SDK format
@@ -295,17 +295,17 @@ const mcpServer = await tools.toClaudeAgentSdk();
 
 // Use with Claude Agent SDK query
 const result = query({
-  prompt: "Get the employee with id: abc123",
-  options: {
-    model: "claude-sonnet-4-5-20250929",
-    mcpServers: { "stackone-tools": mcpServer },
-    tools: [], // Disable built-in tools
-    maxTurns: 3,
-  },
+	prompt: 'Get the employee with id: abc123',
+	options: {
+		model: 'claude-sonnet-4-5-20250929',
+		mcpServers: { 'stackone-tools': mcpServer },
+		tools: [], // Disable built-in tools
+		maxTurns: 3,
+	},
 });
 
 for await (const message of result) {
-  // Process streaming messages
+	// Process streaming messages
 }
 ```
 
@@ -321,29 +321,29 @@ You can filter tools by account IDs, providers, and action patterns:
 
 ```typescript
 // Filter by account IDs
-toolset.setAccounts(["account-123", "account-456"]);
+toolset.setAccounts(['account-123', 'account-456']);
 const tools = await toolset.fetchTools();
 // OR
 const tools = await toolset.fetchTools({
-  accountIds: ["account-123", "account-456"],
+	accountIds: ['account-123', 'account-456'],
 });
 
 // Filter by providers
-const tools = await toolset.fetchTools({ providers: ["hibob", "bamboohr"] });
+const tools = await toolset.fetchTools({ providers: ['hibob', 'bamboohr'] });
 
 // Filter by actions with exact match
 const tools = await toolset.fetchTools({
-  actions: ["hibob_list_employees", "hibob_create_employees"],
+	actions: ['hibob_list_employees', 'hibob_create_employees'],
 });
 
 // Filter by actions with glob patterns
-const tools = await toolset.fetchTools({ actions: ["*_list_employees"] });
+const tools = await toolset.fetchTools({ actions: ['*_list_employees'] });
 
 // Combine multiple filters
 const tools = await toolset.fetchTools({
-  accountIds: ["account-123"],
-  providers: ["hibob"],
-  actions: ["*_list_*"],
+	accountIds: ['account-123'],
+	providers: ['hibob'],
+	actions: ['*_list_*'],
 });
 ```
 
@@ -371,10 +371,10 @@ Meta tools provide two core capabilities:
 #### Basic Usage
 
 ```typescript
-import { StackOneToolSet } from "@stackone/ai";
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
+	baseUrl: 'https://api.stackone.com',
 });
 const tools = await toolset.fetchTools();
 
@@ -391,14 +391,14 @@ const aiSdkTools = await metaTools.toAISDK();
 #### Example: Dynamic Tool Discovery with AI SDK
 
 ```typescript
-import { generateText } from "ai";
-import { openai } from "@ai-sdk/openai";
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 
 const { text } = await generateText({
-  model: openai("gpt-5.1"),
-  tools: aiSdkTools,
-  prompt: "Find tools for managing employees and create a time off request",
-  maxSteps: 3, // Allow multiple tool calls
+	model: openai('gpt-5.1'),
+	tools: aiSdkTools,
+	prompt: 'Find tools for managing employees and create a time off request',
+	maxSteps: 3, // Allow multiple tool calls
 });
 ```
 
@@ -406,22 +406,22 @@ const { text } = await generateText({
 
 ```typescript
 // Step 1: Discover relevant tools
-const filterTool = metaTools.getTool("meta_search_tools");
+const filterTool = metaTools.getTool('meta_search_tools');
 const searchResult = await filterTool.execute({
-  query: "employee time off vacation",
-  limit: 5,
-  minScore: 0.3, // Minimum relevance score (0-1)
+	query: 'employee time off vacation',
+	limit: 5,
+	minScore: 0.3, // Minimum relevance score (0-1)
 });
 
 // Step 2: Execute a discovered tool
-const executeTool = metaTools.getTool("meta_execute_tool");
+const executeTool = metaTools.getTool('meta_execute_tool');
 const result = await executeTool.execute({
-  toolName: "bamboohr_create_time_off",
-  params: {
-    employeeId: "emp_123",
-    startDate: "2024-01-15",
-    endDate: "2024-01-19",
-  },
+	toolName: 'bamboohr_create_time_off',
+	params: {
+		employeeId: 'emp_123',
+		startDate: '2024-01-15',
+		endDate: '2024-01-19',
+	},
 });
 ```
 
@@ -430,9 +430,9 @@ const result = await executeTool.execute({
 ### Custom Base URL
 
 ```typescript
-import { StackOneToolSet } from "@stackone/ai";
+import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({ baseUrl: "https://api.example-dev.com" });
+const toolset = new StackOneToolSet({ baseUrl: 'https://api.example-dev.com' });
 ```
 
 ### Testing with dryRun
@@ -440,21 +440,18 @@ const toolset = new StackOneToolSet({ baseUrl: "https://api.example-dev.com" });
 You can use the `dryRun` option to return the api arguments from a tool call without making the actual api call:
 
 ```typescript
-import { StackOneToolSet } from "@stackone/ai";
+import { StackOneToolSet } from '@stackone/ai';
 
 // Initialize the toolset
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
+	baseUrl: 'https://api.stackone.com',
 });
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool("bamboohr_list_employees");
+const employeeTool = tools.getTool('bamboohr_list_employees');
 
 // Use dryRun to see the request details
-const dryRunResult = await employeeTool.execute(
-  { query: { limit: 5 } },
-  { dryRun: true }
-);
+const dryRunResult = await employeeTool.execute({ query: { limit: 5 } }, { dryRun: true });
 
 console.log(dryRunResult);
 // {
@@ -493,15 +490,15 @@ The feedback tool:
 The feedback tool is automatically available when using `StackOneToolSet`:
 
 ```typescript
-import { StackOneToolSet } from "@stackone/ai";
+import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-  baseUrl: "https://api.stackone.com",
+	baseUrl: 'https://api.stackone.com',
 });
 const tools = await toolset.fetchTools();
 
 // The feedback tool is automatically included
-const feedbackTool = tools.getTool("meta_collect_tool_feedback");
+const feedbackTool = tools.getTool('meta_collect_tool_feedback');
 
 // Use with AI agents - they will ask for user consent first
 const openAITools = tools.toOpenAI();
@@ -515,13 +512,13 @@ You can also use the feedback tool directly:
 
 ```typescript
 // Get the feedback tool
-const feedbackTool = tools.getTool("meta_collect_tool_feedback");
+const feedbackTool = tools.getTool('meta_collect_tool_feedback');
 
 // Submit feedback (after getting user consent)
 const result = await feedbackTool.execute({
-  feedback: "The tools worked great! Very easy to use.",
-  account_id: "acc_123456",
-  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
+	feedback: 'The tools worked great! Very easy to use.',
+	account_id: 'acc_123456',
+	tool_names: ['bamboohr_list_employees', 'bamboohr_create_time_off'],
 });
 ```
 
@@ -532,16 +529,16 @@ The feedback tool supports both single and multiple account IDs. When you provid
 ```typescript
 // Single account ID (string)
 await feedbackTool.execute({
-  feedback: "The tools worked great! Very easy to use.",
-  account_id: "acc_123456",
-  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
+	feedback: 'The tools worked great! Very easy to use.',
+	account_id: 'acc_123456',
+	tool_names: ['bamboohr_list_employees', 'bamboohr_create_time_off'],
 });
 
 // Multiple account IDs (array)
 await feedbackTool.execute({
-  feedback: "The tools worked great! Very easy to use.",
-  account_id: ["acc_123456", "acc_789012"],
-  tool_names: ["bamboohr_list_employees", "bamboohr_create_time_off"],
+	feedback: 'The tools worked great! Very easy to use.',
+	account_id: ['acc_123456', 'acc_789012'],
+	tool_names: ['bamboohr_list_employees', 'bamboohr_create_time_off'],
 });
 ```
 
