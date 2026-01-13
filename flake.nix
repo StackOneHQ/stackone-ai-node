@@ -31,6 +31,9 @@
               # formatting and linting tools
               similarity
               nixfmt-rfc-style
+              tsgolint
+              oxlint
+              oxfmt
 
               # security
               gitleaks

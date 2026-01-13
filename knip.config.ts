@@ -12,7 +12,7 @@ export default {
 		},
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
-	ignoreBinaries: ['only-allow'],
+	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint'],
 	ignoreDependencies: ['@typescript/native-preview'],
 	rules: {
 		optionalPeerDependencies: 'off',

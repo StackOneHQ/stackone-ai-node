@@ -13,30 +13,36 @@
 	],
 	"homepage": "https://github.com/StackOneHQ/stackone-ai-node#readme",
 	"bugs": "https://github.com/StackOneHQ/stackone-ai-node/issues",
+	"license": "Apache-2.0",
+	"author": "StackOne",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/StackOneHQ/stackone-ai-node.git"
 	},
-	"author": "StackOne",
-	"license": "Apache-2.0",
+	"files": [
+		"dist",
+		"LICENSE",
+		"README.md",
+		"src",
+		"!examples/*.test.ts",
+		"examples/*.ts",
+		"!src/**/*.test-d.ts",
+		"!src/**/*.test.ts"
+	],
 	"type": "module",
 	"main": "./dist/index.mjs",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.mts",
 	"exports": {
 		".": "./src/index.ts",
 		"./package.json": "./package.json"
 	},
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.mts",
-	"files": [
-		"!examples/*.test.ts",
-		"!src/**/*.test-d.ts",
-		"!src/**/*.test.ts",
-		"LICENSE",
-		"README.md",
-		"dist",
-		"examples/*.ts",
-		"src"
-	],
+	"publishConfig": {
+		"exports": {
+			".": "./dist/index.mjs",
+			"./package.json": "./package.json"
+		}
+	},
 	"scripts": {
 		"build": "tsdown",
 		"format": "pnpm --no-bail --aggregate-output run '/^format:/'",
@@ -69,9 +75,6 @@
 		"lefthook": "catalog:dev",
 		"msw": "catalog:dev",
 		"openai": "catalog:peer",
-		"oxfmt": "catalog:dev",
-		"oxlint": "catalog:dev",
-		"oxlint-tsgolint": "catalog:dev",
 		"publint": "catalog:dev",
 		"tsdown": "catalog:dev",
 		"type-fest": "catalog:dev",
@@ -100,10 +103,6 @@
 			"optional": true
 		}
 	},
-	"packageManager": "pnpm@10.26.0",
-	"engines": {
-		"node": ">=20.19.6"
-	},
 	"devEngines": {
 		"runtime": [
 			{
@@ -113,10 +112,8 @@
 			}
 		]
 	},
-	"publishConfig": {
-		"exports": {
-			".": "./dist/index.mjs",
-			"./package.json": "./package.json"
-		}
-	}
+	"engines": {
+		"node": ">=20.19.6"
+	},
+	"packageManager": "pnpm@10.26.0"
 }
