@@ -30,7 +30,7 @@
 
               # formatting and linting tools
               similarity
-              nixfmt-rfc-style
+              nixfmt
               tsgolint
               oxlint
               oxfmt
