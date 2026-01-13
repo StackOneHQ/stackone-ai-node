@@ -72,7 +72,6 @@
 		"ai": "catalog:dev",
 		"hono": "catalog:dev",
 		"knip": "catalog:dev",
-		"lefthook": "catalog:dev",
 		"msw": "catalog:dev",
 		"openai": "catalog:peer",
 		"publint": "catalog:dev",

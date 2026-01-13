@@ -37,6 +37,9 @@
 
               # security
               gitleaks
+
+              # git hooks
+              lefthook
             ];
 
             shellHook = ''
@@ -47,6 +50,9 @@
                 echo "📦 Installing dependencies..."
                 pnpm install --frozen-lockfile
               fi
+
+              # Install lefthook git hooks
+              lefthook install > /dev/null 2>&1
             '';
           };
         }

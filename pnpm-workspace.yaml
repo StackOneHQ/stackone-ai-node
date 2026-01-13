@@ -16,7 +16,6 @@ catalogs:
     '@vitest/coverage-v8': ^4.0.15
     hono: ^4.9.10
     knip: ^5.72.0
-    lefthook: ^2.0.8
     msw: ^2.10.4
     publint: ^0.3.12
     tsdown: ^0.17.2
@@ -55,7 +54,6 @@ minimumReleaseAgeExclude:
 
 onlyBuiltDependencies:
   - esbuild
-  - lefthook
   - msw
 
 shellEmulator: true
