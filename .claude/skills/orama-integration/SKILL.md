@@ -1,7 +1,7 @@
 ---
 name: orama-integration
 description: Use when integrating with Orama. Links to official docs for search, indexing, answer engine. (project)
-globs: ""
+globs: ''
 alwaysApply: false
 ---
 
