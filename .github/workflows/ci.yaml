@@ -28,6 +28,7 @@ jobs:
         uses: ./.github/actions/setup-nix
         with:
           tools: gitleaks
+          skip-pnpm-install: 'true'
 
       - name: Run Gitleaks
         run: gitleaks detect --source . --config .gitleaks.toml

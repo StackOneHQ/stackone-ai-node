@@ -5,6 +5,10 @@ inputs:
     description: 'Space-separated list of nixpkgs packages to install (e.g., "nodejs_24 pnpm_10 oxlint")'
     required: false
     default: 'nodejs_24 pnpm_10'
+  skip-pnpm-install:
+    description: 'Skip pnpm install step (useful for jobs that do not need node dependencies)'
+    required: false
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -24,5 +28,6 @@ runs:
         nix profile install $packages
 
     - name: Install pnpm dependencies
+      if: inputs.skip-pnpm-install != 'true'
       shell: bash
       run: pnpm install --frozen-lockfile
