@@ -25,7 +25,7 @@ runs:
         for tool in $tools; do
           packages="$packages nixpkgs#$tool"
         done
-        nix profile install $packages
+        nix profile install --inputs-from . $packages
 
     - name: Install pnpm dependencies
       if: inputs.skip-pnpm-install != 'true'
