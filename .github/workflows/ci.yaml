@@ -26,9 +26,11 @@ jobs:
 
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
+        with:
+          tools: gitleaks
 
       - name: Run Gitleaks
-        run: nix develop --command gitleaks detect --source . --config .gitleaks.toml
+        run: gitleaks detect --source . --config .gitleaks.toml
 
   lint:
     runs-on: ubuntu-latest
@@ -37,8 +39,10 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
+        with:
+          tools: nodejs_24 pnpm_10 oxlint oxfmt similarity nixfmt tsgolint
       - name: Run Lint
-        run: nix develop --command pnpm run lint
+        run: pnpm run lint
 
   build-and-test:
     runs-on: ubuntu-latest
@@ -50,10 +54,10 @@ jobs:
         uses: ./.github/actions/setup-nix
 
       - name: Run Build
-        run: nix develop --command pnpm run build
+        run: pnpm run build
 
       - name: Run Tests
-        run: nix develop --command pnpm test
+        run: pnpm test
 
   coverage:
     runs-on: ubuntu-latest
@@ -64,7 +68,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
       - name: Run Tests with Coverage
-        run: nix develop --command pnpm run coverage
+        run: pnpm run coverage
       - name: Create Coverage Badge
         uses: jaywcjlove/coverage-badges-cli@4e8975aa2628e3329126e7eee36724d07ed86fda # v2.2.0
         with:
