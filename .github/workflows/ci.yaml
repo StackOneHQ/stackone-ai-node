@@ -41,7 +41,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
-          tools: nodejs_24 pnpm_10 oxlint oxfmt similarity nixfmt tsgolint
+          tools: nodejs_24 pnpm_10 oxlint oxfmt similarity nixfmt
       - name: Run Lint
         run: pnpm run lint
 

@@ -31,7 +31,6 @@
               # formatting and linting tools
               similarity
               nixfmt
-              tsgolint
               oxlint
               oxfmt
 
