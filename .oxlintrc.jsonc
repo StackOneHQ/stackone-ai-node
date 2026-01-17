@@ -42,6 +42,8 @@
 		"no-empty": "error",
 		// Disallow empty functions
 		"no-empty-function": "error",
+		// Disallow reassigning function parameters
+		"no-param-reassign": "error",
 		// ===================
 		// Override category defaults with custom options
 		// ===================
