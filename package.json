@@ -67,7 +67,6 @@
 		"@fast-check/vitest": "catalog:dev",
 		"@hono/mcp": "catalog:dev",
 		"@types/node": "catalog:dev",
-		"@typescript/native-preview": "catalog:dev",
 		"@vitest/coverage-v8": "catalog:dev",
 		"ai": "catalog:dev",
 		"hono": "catalog:dev",

@@ -27,6 +27,7 @@
               # runtime
               nodejs_24
               pnpm_10
+              typescript-go
 
               # formatting and linting tools
               similarity
