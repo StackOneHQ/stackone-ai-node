@@ -1,5 +1,5 @@
 {
-	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
 	// Enable TypeScript, Unicorn, Oxc, Node, JSDoc, and Import plugins
 	"plugins": ["typescript", "unicorn", "oxc", "node", "jsdoc", "import"],
 	// Environment settings
