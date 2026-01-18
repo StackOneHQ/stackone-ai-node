@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.2.0...v2.2.1) (2026-01-18)
+
+
+### Performance Improvements
+
+* **ci:** switch to nix-quick-install-action for faster CI ([#298](https://github.com/StackOneHQ/stackone-ai-node/issues/298)) ([6e82978](https://github.com/StackOneHQ/stackone-ai-node/commit/6e829783aa00c052d09026fbb51e9229d958cf6f))
+* **ci:** use nix profile install instead of nix develop ([#295](https://github.com/StackOneHQ/stackone-ai-node/issues/295)) ([86bf01d](https://github.com/StackOneHQ/stackone-ai-node/commit/86bf01da9e7832a295b3524c57d98b2eff2daf71))
+
 ## [2.2.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.1.0...v2.2.0) (2026-01-08)
 
 
