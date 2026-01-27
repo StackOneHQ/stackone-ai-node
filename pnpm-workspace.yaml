@@ -57,6 +57,20 @@ onlyBuiltDependencies:
 
 shellEmulator: true
 
+# Security settings (supply chain attack prevention)
+# See: https://pnpm.io/settings
+
+# Blocks lifecycle scripts (postinstall, etc.) from running in dependencies by default
+# Only packages listed in onlyBuiltDependencies can run build scripts
+# Prevents Shai-Hulud-style worm attacks that exploit automatic script execution
+strictDepBuilds: true
+
+# Blocks dependencies from non-registry sources (Git repos, tarball URLs)
+# Prevents PhantomRaven-style attacks that bypass npm scanning
+blockExoticSubdeps: true
+
+# Prevents trust level downgrades between package versions
+# Blocks installations when publisher credentials downgrade from GitHub OIDC to basic auth
 trustPolicy: no-downgrade
 
 trustPolicyExclude:
