@@ -44,6 +44,21 @@ fish -c "<command>"
 2. **Binary not found**: Use `pnpm dlx` instead of `pnpm exec`
 3. **Permission errors**: Check node_modules permissions
 
+## Security Settings
+
+The project uses pnpm security settings to protect against supply chain attacks.
+These are configured in `pnpm-workspace.yaml`:
+
+| Setting | Purpose |
+|---------|---------|
+| `strictDepBuilds: true` | Blocks lifecycle scripts (postinstall, etc.) by default. Only packages in `onlyBuiltDependencies` can run build scripts. |
+| `blockExoticSubdeps: true` | Blocks dependencies from non-registry sources (Git repos, tarball URLs). |
+| `trustPolicy: no-downgrade` | Prevents trust level downgrades between versions (e.g., from GitHub OIDC to basic auth). |
+
+If a new dependency requires build scripts, add it to `onlyBuiltDependencies` in `pnpm-workspace.yaml`.
+
+Reference: https://pnpm.io/settings
+
 ## Publishing & Deployment
 
 When ready to release:
