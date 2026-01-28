@@ -355,18 +355,18 @@ This is especially useful when you want to:
 
 [View full example](examples/fetch-tools.ts)
 
-### Meta Tools (Beta)
+### Utility Tools (Beta)
 
-Meta tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
+Utility tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
 
-> **Beta Feature**: Meta tools are currently in beta and the API may change in future versions.
+> **Beta Feature**: Utility tools are currently in beta and the API may change in future versions.
 
-#### How Meta Tools Work
+#### How Utility Tools Work
 
-Meta tools provide two core capabilities:
+Utility tools provide two core capabilities:
 
-1. **Tool Discovery** (`meta_search_tools`): Search for tools using natural language queries
-2. **Tool Execution** (`meta_execute_tool`): Execute discovered tools dynamically
+1. **Tool Discovery** (`tool_search`): Search for tools using natural language queries
+2. **Tool Execution** (`tool_execute`): Execute discovered tools dynamically
 
 #### Basic Usage
 
@@ -378,14 +378,14 @@ const toolset = new StackOneToolSet({
 });
 const tools = await toolset.fetchTools();
 
-// Get meta tools for dynamic discovery
-const metaTools = await tools.metaTools();
+// Get utility tools for dynamic discovery
+const utilityTools = await tools.utilityTools();
 
 // Use with OpenAI
-const openAITools = metaTools.toOpenAI();
+const openAITools = utilityTools.toOpenAI();
 
 // Use with AI SDK
-const aiSdkTools = await metaTools.toAISDK();
+const aiSdkTools = await utilityTools.toAISDK();
 ```
 
 #### Example: Dynamic Tool Discovery with AI SDK
@@ -406,7 +406,7 @@ const { text } = await generateText({
 
 ```typescript
 // Step 1: Discover relevant tools
-const filterTool = metaTools.getTool('meta_search_tools');
+const filterTool = utilityTools.getTool('tool_search');
 const searchResult = await filterTool.execute({
 	query: 'employee time off vacation',
 	limit: 5,
@@ -414,7 +414,7 @@ const searchResult = await filterTool.execute({
 });
 
 // Step 2: Execute a discovered tool
-const executeTool = metaTools.getTool('meta_execute_tool');
+const executeTool = utilityTools.getTool('tool_execute');
 const result = await executeTool.execute({
 	toolName: 'bamboohr_create_time_off',
 	params: {
@@ -425,7 +425,7 @@ const result = await executeTool.execute({
 });
 ```
 
-[View full example](examples/meta-tools.ts)
+[View full example](examples/utility-tools.ts)
 
 ### Custom Base URL
 
@@ -473,7 +473,7 @@ The `dryRun` option returns an object containing:
 
 ### Feedback Collection Tool
 
-The StackOne AI SDK includes a built-in feedback collection tool (`meta_collect_tool_feedback`) that allows users to provide feedback on their experience with StackOne tools. This tool is automatically included when using `fetchTools()` and helps improve the SDK based on user input.
+The StackOne AI SDK includes a built-in feedback collection tool (`tool_feedback`) that allows users to provide feedback on their experience with StackOne tools. This tool is automatically included when using `fetchTools()` and helps improve the SDK based on user input.
 
 #### How It Works
 
@@ -498,7 +498,7 @@ const toolset = new StackOneToolSet({
 const tools = await toolset.fetchTools();
 
 // The feedback tool is automatically included
-const feedbackTool = tools.getTool('meta_collect_tool_feedback');
+const feedbackTool = tools.getTool('tool_feedback');
 
 // Use with AI agents - they will ask for user consent first
 const openAITools = tools.toOpenAI();
@@ -512,7 +512,7 @@ You can also use the feedback tool directly:
 
 ```typescript
 // Get the feedback tool
-const feedbackTool = tools.getTool('meta_collect_tool_feedback');
+const feedbackTool = tools.getTool('tool_feedback');
 
 // Submit feedback (after getting user consent)
 const result = await feedbackTool.execute({

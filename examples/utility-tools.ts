@@ -1,9 +1,9 @@
 /**
- * This example demonstrates how to use meta tools for dynamic tool discovery and execution.
- * Meta tools allow AI agents to search for relevant tools based on natural language queries
+ * This example demonstrates how to use utility tools for dynamic tool discovery and execution.
+ * Utility tools allow AI agents to search for relevant tools based on natural language queries
  * and execute them dynamically without hardcoding tool names.
  *
- * @beta Meta tools are in beta and may change in future versions
+ * @beta Utility tools are in beta and may change in future versions
  */
 
 import process from 'node:process';
@@ -21,9 +21,9 @@ if (!apiKey) {
 const accountId = 'your-bamboohr-account-id';
 
 /**
- * Example 1: Using meta tools with AI SDK for dynamic tool discovery
+ * Example 1: Using utility tools with AI SDK for dynamic tool discovery
  */
-const metaToolsWithAISDK = async (): Promise<void> => {
+const utilityToolsWithAISDK = async (): Promise<void> => {
 	console.log('🔍 Example 1: Dynamic tool discovery with AI SDK\n');
 
 	// Initialize StackOne toolset
@@ -35,14 +35,14 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 	// Fetch all available tools via MCP
 	const allTools = await toolset.fetchTools();
 
-	// Get meta tools for dynamic discovery and execution
-	const metaTools = await allTools.metaTools();
-	const aiSdkMetaTools = await metaTools.toAISDK();
+	// Get utility tools for dynamic discovery and execution
+	const utilityTools = await allTools.utilityTools();
+	const aiSdkUtilityTools = await utilityTools.toAISDK();
 
-	// Use meta tools to dynamically find and execute relevant tools
+	// Use utility tools to dynamically find and execute relevant tools
 	const { text, toolCalls } = await generateText({
 		model: openai('gpt-5.1'),
-		tools: aiSdkMetaTools,
+		tools: aiSdkUtilityTools,
 		prompt: `I need to create a time off request for an employee.
     First, find the right tool for this task, then use it to create a time off request
     for employee ID "emp_123" from January 15, 2024 to January 19, 2024.`,
@@ -54,9 +54,9 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 };
 
 /**
- * Example 2: Using meta tools with OpenAI for HR assistant
+ * Example 2: Using utility tools with OpenAI for HR assistant
  */
-const metaToolsWithOpenAI = async (): Promise<void> => {
+const utilityToolsWithOpenAI = async (): Promise<void> => {
 	console.log('\n🤖 Example 2: HR Assistant with OpenAI\n');
 
 	const { OpenAI } = await import('openai');
@@ -75,9 +75,9 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 		actions: ['bamboohr_*'],
 	});
 
-	// Get meta tools
-	const metaTools = await bamboohrTools.metaTools();
-	const openAIMetaTools = metaTools.toOpenAI();
+	// Get utility tools
+	const utilityTools = await bamboohrTools.utilityTools();
+	const openAIUtilityTools = utilityTools.toOpenAI();
 
 	// Create an HR assistant that can discover and use tools dynamically
 	const response = await openaiClient.chat.completions.create({
@@ -86,8 +86,8 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 			{
 				role: 'system',
 				content: `You are an HR assistant with access to various HR tools.
-        Use the meta_search_tools to find appropriate tools for user requests,
-        then use meta_execute_tool to execute them.`,
+        Use the tool_search to find appropriate tools for user requests,
+        then use tool_execute to execute them.`,
 			},
 			{
 				role: 'user',
@@ -95,7 +95,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 					'Can you help me find tools for managing employee records and then list current employees?',
 			},
 		],
-		tools: openAIMetaTools,
+		tools: openAIUtilityTools,
 		tool_choice: 'auto',
 	});
 
@@ -113,10 +113,10 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 };
 
 /**
- * Example 3: Direct usage of meta tools without AI
+ * Example 3: Direct usage of utility tools without AI
  */
-const directMetaToolUsage = async (): Promise<void> => {
-	console.log('\n🛠️  Example 3: Direct meta tool usage\n');
+const directUtilityToolUsage = async (): Promise<void> => {
+	console.log('\n🛠️  Example 3: Direct utility tool usage\n');
 
 	// Initialize toolset
 	const toolset = new StackOneToolSet({
@@ -128,12 +128,12 @@ const directMetaToolUsage = async (): Promise<void> => {
 	const allTools = await toolset.fetchTools();
 	console.log(`Total available tools: ${allTools.length}`);
 
-	// Get meta tools
-	const metaTools = await allTools.metaTools();
+	// Get utility tools
+	const utilityTools = await allTools.utilityTools();
 
 	// Step 1: Search for relevant tools
-	const filterTool = metaTools.getTool('meta_search_tools');
-	if (!filterTool) throw new Error('meta_search_tools not found');
+	const filterTool = utilityTools.getTool('tool_search');
+	if (!filterTool) throw new Error('tool_search not found');
 	const searchResult = await filterTool.execute({
 		query: 'employee management create update list',
 		limit: 5,
@@ -152,8 +152,8 @@ const directMetaToolUsage = async (): Promise<void> => {
 
 	// Step 2: Execute one of the found tools
 	if (foundTools.length > 0) {
-		const executeTool = metaTools.getTool('meta_execute_tool');
-		if (!executeTool) throw new Error('meta_execute_tool not found');
+		const executeTool = utilityTools.getTool('tool_execute');
+		if (!executeTool) throw new Error('tool_execute not found');
 		const firstTool = foundTools[0];
 
 		console.log(`\nExecuting ${firstTool.name}...`);
@@ -205,14 +205,14 @@ const dynamicToolRouter = async (): Promise<void> => {
 	// Combine tools
 	const combinedTools = new Tools([...bamboohrTools.toArray(), ...workdayTools.toArray()]);
 
-	// Get meta tools for the combined set
-	const metaTools = await combinedTools.metaTools();
+	// Get utility tools for the combined set
+	const utilityTools = await combinedTools.utilityTools();
 
 	// Create a router function that finds and executes tools based on intent
 	const routeAndExecute = async (intent: string, params: JsonObject = {}) => {
-		const filterTool = metaTools.getTool('meta_search_tools');
-		const executeTool = metaTools.getTool('meta_execute_tool');
-		if (!filterTool || !executeTool) throw new Error('Meta tools not found');
+		const filterTool = utilityTools.getTool('tool_search');
+		const executeTool = utilityTools.getTool('tool_execute');
+		if (!filterTool || !executeTool) throw new Error('Utility tools not found');
 
 		// Find relevant tools
 		const searchResult = await filterTool.execute({
@@ -258,14 +258,14 @@ const main = async () => {
 	try {
 		// Run examples based on environment setup
 		if (process.env.OPENAI_API_KEY) {
-			await metaToolsWithAISDK();
-			await metaToolsWithOpenAI();
+			await utilityToolsWithAISDK();
+			await utilityToolsWithOpenAI();
 		} else {
 			console.log('⚠️  OPENAI_API_KEY not found, skipping AI examples\n');
 		}
 
 		// These examples work without AI
-		await directMetaToolUsage();
+		await directUtilityToolUsage();
 		await dynamicToolRouter();
 	} catch (error) {
 		console.error('Error running examples:', error);
@@ -277,4 +277,4 @@ if (import.meta.main) {
 	await main();
 }
 
-export { metaToolsWithAISDK, metaToolsWithOpenAI, directMetaToolUsage, dynamicToolRouter };
+export { utilityToolsWithAISDK, utilityToolsWithOpenAI, directUtilityToolUsage, dynamicToolRouter };

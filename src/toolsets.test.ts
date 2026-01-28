@@ -276,7 +276,7 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('default_tool_1');
 			expect(toolNames).toContain('default_tool_2');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('uses x-account-id header when fetching tools with accountIds', async () => {
@@ -292,7 +292,7 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('acc1_tool_1');
 			expect(toolNames).toContain('acc1_tool_2');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('uses setAccounts when no accountIds provided in fetchTools', async () => {
@@ -315,7 +315,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc1_tool_2');
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('uses accountIds from constructor when no accountIds provided in fetchTools', async () => {
@@ -336,7 +336,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc1_tool_2');
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('setAccounts overrides constructor accountIds', async () => {
@@ -360,7 +360,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
 			expect(toolNames).toContain('acc3_tool_1');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('overrides setAccounts when accountIds provided in fetchTools', async () => {
@@ -379,7 +379,7 @@ describe('StackOneToolSet', () => {
 			expect(tools.length).toBe(2);
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('acc3_tool_1');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 	});
 
@@ -530,7 +530,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('bamboohr_list_employees');
 			expect(toolNames).toContain('bamboohr_get_employee');
 			expect(toolNames).not.toContain('workday_list_employees');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('filters tools by actions with exact match', async () => {
@@ -550,7 +550,7 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('hibob_list_employees');
 			expect(toolNames).toContain('hibob_create_employees');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('filters tools by actions with glob pattern', async () => {
@@ -571,7 +571,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('workday_list_employees');
 			expect(toolNames).not.toContain('hibob_create_employees');
 			expect(toolNames).not.toContain('bamboohr_get_employee');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('combines accountIds and actions filters', async () => {
@@ -646,7 +646,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('bamboohr_list_employees');
 			expect(toolNames).not.toContain('hibob_create_employees');
 			expect(toolNames).not.toContain('bamboohr_get_employee');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 
 		it('combines all filters: accountIds, providers, and actions', async () => {
@@ -706,7 +706,7 @@ describe('StackOneToolSet', () => {
 			expect(tools.length).toBe(2);
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('hibob_list_employees');
-			expect(toolNames).toContain('meta_collect_tool_feedback');
+			expect(toolNames).toContain('tool_feedback');
 		});
 	});
 });
