@@ -66,7 +66,7 @@ describe('fetch-tools example e2e', () => {
 		expect(toolsByProviders.length).toBeGreaterThan(0);
 		const providerToolNames = toolsByProviders.toArray().map((t) => t.name);
 		expect(
-			providerToolNames.every((name) => name.startsWith('bamboohr_') || name.startsWith('meta_')),
+			providerToolNames.every((name) => name.startsWith('bamboohr_') || name.startsWith('tool_')),
 		).toBe(true);
 
 		// Example 5: Filter by actions with exact match
@@ -85,7 +85,7 @@ describe('fetch-tools example e2e', () => {
 		});
 		const globToolNames = toolsByGlobPattern
 			.toArray()
-			.filter((t) => !t.name.startsWith('meta_'))
+			.filter((t) => !t.name.startsWith('tool_'))
 			.map((t) => t.name);
 		expect(globToolNames).toContain('bamboohr_list_employees');
 

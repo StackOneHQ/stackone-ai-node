@@ -493,17 +493,14 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Return meta tools for tool discovery and execution
+	 * Return utility tools for tool discovery and execution
 	 * @beta This feature is in beta and may change in future versions
 	 * @param hybridAlpha - Weight for BM25 in hybrid search (0-1). If not provided, uses DEFAULT_HYBRID_ALPHA (0.2).
 	 */
-	async metaTools(hybridAlpha = DEFAULT_HYBRID_ALPHA): Promise<Tools> {
+	async utilityTools(hybridAlpha = DEFAULT_HYBRID_ALPHA): Promise<Tools> {
 		const oramaDb = await initializeOramaDb(this.tools);
 		const tfidfIndex = initializeTfidfIndex(this.tools);
-		const baseTools = [
-			metaSearchTools(oramaDb, tfidfIndex, this.tools, hybridAlpha),
-			metaExecuteTool(this),
-		];
+		const baseTools = [toolSearch(oramaDb, tfidfIndex, this.tools, hybridAlpha), toolExecute(this)];
 		const tools = new Tools(baseTools);
 		return tools;
 	}
@@ -548,9 +545,9 @@ export class Tools implements Iterable<BaseTool> {
 }
 
 /**
- * Result from meta_search_tools
+ * Result from tool_search
  */
-export interface MetaToolSearchResult {
+export interface ToolSearchResult {
 	name: string;
 	description: string;
 	parameters: ToolParameters;
@@ -632,13 +629,13 @@ async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
 	return oramaDb;
 }
 
-function metaSearchTools(
+function toolSearch(
 	oramaDb: OramaDb,
 	tfidfIndex: TfidfIndex,
 	allTools: BaseTool[],
 	hybridAlpha = DEFAULT_HYBRID_ALPHA,
 ): BaseTool {
-	const name = 'meta_search_tools' as const;
+	const name = 'tool_search' as const;
 	const description =
 		`Searches for relevant tools based on a natural language query using hybrid BM25 + TF-IDF search (alpha=${hybridAlpha}). This tool should be called first to discover available tools before executing them.` as const;
 	const parameters = {
@@ -745,7 +742,7 @@ function metaSearchTools(
 						score: r.score,
 					};
 				})
-				.filter((t): t is MetaToolSearchResult => t !== null)
+				.filter((t): t is ToolSearchResult => t !== null)
 				.slice(0, limit);
 
 			// Convert to JSON-serialisable format (removes undefined values)
@@ -769,10 +766,10 @@ function clamp01(x: number): number {
 	return x < 0 ? 0 : x > 1 ? 1 : x;
 }
 
-function metaExecuteTool(tools: Tools): BaseTool {
-	const name = 'meta_execute_tool' as const;
+function toolExecute(tools: Tools): BaseTool {
+	const name = 'tool_execute' as const;
 	const description =
-		'Executes a specific tool by name with the provided parameters. Use this after discovering tools with meta_search_tools.' as const;
+		'Executes a specific tool by name with the provided parameters. Use this after discovering tools with tool_search.' as const;
 	const parameters = {
 		type: 'object',
 		properties: {

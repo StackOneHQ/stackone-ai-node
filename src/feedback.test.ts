@@ -18,7 +18,7 @@ interface FeedbackResult {
 	results: FeedbackResultItem[];
 }
 
-describe('meta_collect_tool_feedback', () => {
+describe('tool_feedback', () => {
 	describe('validation tests', () => {
 		it('test_missing_required_fields', async () => {
 			const tool = createFeedbackTool();
@@ -274,7 +274,7 @@ describe('meta_collect_tool_feedback', () => {
 		it('test_tool_integration', async () => {
 			// Test tool properties
 			const tool = createFeedbackTool();
-			expect(tool.name).toBe('meta_collect_tool_feedback');
+			expect(tool.name).toBe('tool_feedback');
 			expect(tool.description).toContain('Collects user feedback');
 			expect(tool.parameters).toBeDefined();
 
@@ -283,7 +283,7 @@ describe('meta_collect_tool_feedback', () => {
 			expect(openaiFormat).toMatchObject({
 				type: 'function',
 				function: {
-					name: 'meta_collect_tool_feedback',
+					name: 'tool_feedback',
 					description: expect.stringContaining('Collects user feedback'),
 					parameters: expect.objectContaining({
 						type: 'object',

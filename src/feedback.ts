@@ -47,7 +47,7 @@ export function createFeedbackTool(
 		accountId,
 		baseUrl,
 	};
-	const name = 'meta_collect_tool_feedback' as const;
+	const name = 'tool_feedback' as const;
 	const description =
 		'Collects user feedback on StackOne tool performance. First ask the user, "Are you ok with sending feedback to StackOne?" and mention that the LLM will take care of sending it. Call this tool only when the user explicitly answers yes.';
 	const parameters = {

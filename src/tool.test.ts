@@ -1,12 +1,12 @@
 import { jsonSchema } from 'ai';
-import { BaseTool, type MetaToolSearchResult, StackOneTool, Tools } from './tool';
+import { BaseTool, type ToolSearchResult, StackOneTool, Tools } from './tool';
 import type { JsonObject } from './types';
 
 /**
- * Type guard for MetaToolSearchResult array from execute result.
- * Used to safely extract tools from meta_search_tools response.
+ * Type guard for ToolSearchResult array from execute result.
+ * Used to safely extract tools from tool_search response.
  */
-function isMetaToolSearchResults(value: unknown): value is MetaToolSearchResult[] {
+function isToolSearchResults(value: unknown): value is ToolSearchResult[] {
 	return (
 		Array.isArray(value) &&
 		value.every(
@@ -21,8 +21,8 @@ function isMetaToolSearchResults(value: unknown): value is MetaToolSearchResult[
 }
 
 /** Extract tools from search result with type safety */
-function getSearchResults(result: JsonObject): MetaToolSearchResult[] {
-	if (!isMetaToolSearchResults(result.tools)) {
+function getSearchResults(result: JsonObject): ToolSearchResult[] {
+	if (!isToolSearchResults(result.tools)) {
 		throw new Error('Invalid tools response');
 	}
 	return result.tools;
@@ -804,7 +804,7 @@ describe('Tools', () => {
 	});
 });
 
-// Create mock tools for meta tools testing
+// Create mock tools for utility tools testing
 const createMockTools = (): BaseTool[] => {
 	const tools: BaseTool[] = [];
 
@@ -955,37 +955,37 @@ const createMockTools = (): BaseTool[] => {
 	return tools;
 };
 
-describe('Meta Search Tools', () => {
+describe('Utility Tools', () => {
 	let tools: Tools;
-	let metaTools: Tools;
+	let utilityTools: Tools;
 
 	beforeEach(async () => {
 		const mockTools = createMockTools();
 		tools = new Tools(mockTools);
-		metaTools = await tools.metaTools(); // default BM25 strategy
+		utilityTools = await tools.utilityTools(); // default BM25 strategy
 	});
 
-	describe('metaTools()', () => {
-		it('should return two meta tools', () => {
-			expect(metaTools.length).toBe(2);
+	describe('utilityTools()', () => {
+		it('should return two utility tools', () => {
+			expect(utilityTools.length).toBe(2);
 		});
 
-		it('should include meta_search_tools', () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+		it('should include tool_search', () => {
+			const filterTool = utilityTools.getTool('tool_search');
 			expect(filterTool).toBeDefined();
-			expect(filterTool?.name).toBe('meta_search_tools');
+			expect(filterTool?.name).toBe('tool_search');
 		});
 
-		it('should include meta_execute_tool', () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+		it('should include tool_execute', () => {
+			const executeTool = utilityTools.getTool('tool_execute');
 			expect(executeTool).toBeDefined();
-			expect(executeTool?.name).toBe('meta_execute_tool');
+			expect(executeTool?.name).toBe('tool_execute');
 		});
 	});
 
-	describe('meta_search_tools', () => {
+	describe('tool_search', () => {
 		it('should find relevant BambooHR tools', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
@@ -1004,7 +1004,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should find time off related tools', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
@@ -1019,7 +1019,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should respect limit parameter', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
@@ -1032,7 +1032,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should filter by minimum score', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
@@ -1045,7 +1045,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should include tool configurations in results', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
@@ -1065,7 +1065,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should handle empty query', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute({
@@ -1078,7 +1078,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should handle string parameters', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			const result = await filterTool.execute(
@@ -1098,9 +1098,9 @@ describe('Meta Search Tools', () => {
 		});
 	});
 
-	describe('meta_execute_tool', () => {
+	describe('tool_execute', () => {
 		it('should execute a tool by name', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute({
@@ -1112,7 +1112,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should handle tools with required parameters', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute({
@@ -1130,7 +1130,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should throw error for non-existent tool', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			await expect(
@@ -1142,7 +1142,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should handle string parameters', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute(
@@ -1162,7 +1162,7 @@ describe('Meta Search Tools', () => {
 		});
 
 		it('should pass through execution options', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			const result = await executeTool.execute({
@@ -1175,32 +1175,32 @@ describe('Meta Search Tools', () => {
 	});
 
 	describe('Error handling', () => {
-		it('should wrap non-StackOneError in meta_search_tools execute', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+		it('should wrap non-StackOneError in tool_search execute', async () => {
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			// Pass invalid params type to trigger JSON.parse error on non-JSON string
 			await expect(filterTool.execute('not valid json')).rejects.toThrow('Error executing tool:');
 		});
 
-		it('should wrap non-StackOneError in meta_execute_tool execute', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+		it('should wrap non-StackOneError in tool_execute execute', async () => {
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			// Pass invalid JSON string to trigger JSON.parse error
 			await expect(executeTool.execute('not valid json')).rejects.toThrow('Error executing tool:');
 		});
 
-		it('should throw StackOneError for invalid params type in meta_search_tools', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
+		it('should throw StackOneError for invalid params type in tool_search', async () => {
+			const filterTool = utilityTools.getTool('tool_search');
 			assert(filterTool, 'filterTool should be defined');
 
 			// @ts-expect-error - intentionally passing invalid type
 			await expect(filterTool.execute(123)).rejects.toThrow('Invalid parameters type');
 		});
 
-		it('should throw StackOneError for invalid params type in meta_execute_tool', async () => {
-			const executeTool = metaTools.getTool('meta_execute_tool');
+		it('should throw StackOneError for invalid params type in tool_execute', async () => {
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(executeTool, 'executeTool should be defined');
 
 			// @ts-expect-error - intentionally passing invalid type
@@ -1208,10 +1208,10 @@ describe('Meta Search Tools', () => {
 		});
 	});
 
-	describe('Integration: meta tools workflow', () => {
+	describe('Integration: utility tools workflow', () => {
 		it('should discover and execute tools in sequence', async () => {
-			const filterTool = metaTools.getTool('meta_search_tools');
-			const executeTool = metaTools.getTool('meta_execute_tool');
+			const filterTool = utilityTools.getTool('tool_search');
+			const executeTool = utilityTools.getTool('tool_execute');
 			assert(filterTool, 'filterTool should be defined');
 			assert(executeTool, 'executeTool should be defined');
 
@@ -1245,18 +1245,18 @@ describe('Meta Search Tools', () => {
 	});
 
 	describe('OpenAI format', () => {
-		it('should convert meta tools to OpenAI format', () => {
-			const openAITools = metaTools.toOpenAI();
+		it('should convert utility tools to OpenAI format', () => {
+			const openAITools = utilityTools.toOpenAI();
 
 			expect(openAITools).toHaveLength(2);
 
-			const filterTool = openAITools.find((t) => t.function.name === 'meta_search_tools');
+			const filterTool = openAITools.find((t) => t.function.name === 'tool_search');
 			expect(filterTool).toBeDefined();
 			expect(filterTool?.function.parameters?.properties).toHaveProperty('query');
 			expect(filterTool?.function.parameters?.properties).toHaveProperty('limit');
 			expect(filterTool?.function.parameters?.properties).toHaveProperty('minScore');
 
-			const executeTool = openAITools.find((t) => t.function.name === 'meta_execute_tool');
+			const executeTool = openAITools.find((t) => t.function.name === 'tool_execute');
 			expect(executeTool).toBeDefined();
 			expect(executeTool?.function.parameters?.properties).toHaveProperty('toolName');
 			expect(executeTool?.function.parameters?.properties).toHaveProperty('params');
@@ -1264,28 +1264,28 @@ describe('Meta Search Tools', () => {
 	});
 
 	describe('AI SDK format', () => {
-		it('should convert meta tools to AI SDK format', async () => {
-			const aiSdkTools = await metaTools.toAISDK();
+		it('should convert utility tools to AI SDK format', async () => {
+			const aiSdkTools = await utilityTools.toAISDK();
 
-			expect(aiSdkTools).toHaveProperty('meta_search_tools');
-			expect(aiSdkTools).toHaveProperty('meta_execute_tool');
+			expect(aiSdkTools).toHaveProperty('tool_search');
+			expect(aiSdkTools).toHaveProperty('tool_execute');
 
-			expect(typeof aiSdkTools.meta_search_tools.execute).toBe('function');
-			expect(typeof aiSdkTools.meta_execute_tool.execute).toBe('function');
+			expect(typeof aiSdkTools.tool_search.execute).toBe('function');
+			expect(typeof aiSdkTools.tool_execute.execute).toBe('function');
 		});
 
 		it('should execute through AI SDK format', async () => {
-			const aiSdkTools = await metaTools.toAISDK();
+			const aiSdkTools = await utilityTools.toAISDK();
 
-			expect(aiSdkTools.meta_search_tools.execute).toBeDefined();
+			expect(aiSdkTools.tool_search.execute).toBeDefined();
 
-			const result = await aiSdkTools.meta_search_tools.execute?.(
+			const result = await aiSdkTools.tool_search.execute?.(
 				{ query: 'workday candidates', limit: 2 },
 				{ toolCallId: 'test-call-1', messages: [] },
 			);
 			expect(result).toBeDefined();
 
-			const toolResults = (result as { tools: MetaToolSearchResult[] }).tools;
+			const toolResults = (result as { tools: ToolSearchResult[] }).tools;
 			expect(Array.isArray(toolResults)).toBe(true);
 
 			const toolNames = toolResults.map((t) => t.name);
@@ -1294,12 +1294,12 @@ describe('Meta Search Tools', () => {
 	});
 });
 
-describe('Meta Search Tools - Hybrid Strategy', () => {
+describe('Utility Tools - Hybrid Strategy', () => {
 	describe('Hybrid BM25 + TF-IDF search', () => {
 		it('should search using hybrid strategy with default alpha', async () => {
 			const tools = new Tools(createMockTools());
-			const metaTools = await tools.metaTools();
-			const searchTool = metaTools.getTool('meta_search_tools');
+			const utilityTools = await tools.utilityTools();
+			const searchTool = utilityTools.getTool('tool_search');
 			assert(searchTool, 'searchTool should be defined');
 
 			const result = await searchTool.execute({
@@ -1315,8 +1315,8 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 
 		it('should search using hybrid strategy with custom alpha', async () => {
 			const tools = new Tools(createMockTools());
-			const metaTools = await tools.metaTools(0.7);
-			const searchTool = metaTools.getTool('meta_search_tools');
+			const utilityTools = await tools.utilityTools(0.7);
+			const searchTool = utilityTools.getTool('tool_search');
 			assert(searchTool, 'searchTool should be defined');
 
 			const result = await searchTool.execute({
@@ -1331,8 +1331,8 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 
 		it('should combine BM25 and TF-IDF scores', async () => {
 			const tools = new Tools(createMockTools());
-			const metaTools = await tools.metaTools(0.5);
-			const searchTool = metaTools.getTool('meta_search_tools');
+			const utilityTools = await tools.utilityTools(0.5);
+			const searchTool = utilityTools.getTool('tool_search');
 			assert(searchTool, 'searchTool should be defined');
 
 			const result = await searchTool.execute({
@@ -1351,8 +1351,8 @@ describe('Meta Search Tools - Hybrid Strategy', () => {
 
 		it('should find relevant tools', async () => {
 			const tools = new Tools(createMockTools());
-			const metaTools = await tools.metaTools();
-			const searchTool = metaTools.getTool('meta_search_tools');
+			const utilityTools = await tools.utilityTools();
+			const searchTool = utilityTools.getTool('tool_search');
 			assert(searchTool, 'searchTool should be defined');
 
 			const result = await searchTool.execute({
