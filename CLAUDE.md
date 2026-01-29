@@ -22,6 +22,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Available Skills
 
-| Skill                 | When to Use                            |
-| --------------------- | -------------------------------------- |
-| **orama-integration** | Integrating with Orama search/indexing |
+| Skill                 | Usage                       | Description                                        |
+| --------------------- | --------------------------- | -------------------------------------------------- |
+| **orama-integration** | N/A                         | Integrating with Orama search/indexing             |
+| **release-please**    | `/release-please <version>` | Trigger a release-please PR for a specific version |
