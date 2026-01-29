@@ -1208,7 +1208,7 @@ describe('Utility Tools', () => {
 		});
 	});
 
-	describe('Integration: meta tools workflow', () => {
+	describe('Integration: utility tools workflow', () => {
 		it('should discover and execute tools in sequence', async () => {
 			const filterTool = utilityTools.getTool('tool_search');
 			const executeTool = utilityTools.getTool('tool_execute');
