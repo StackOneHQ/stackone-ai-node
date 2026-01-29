@@ -804,7 +804,7 @@ describe('Tools', () => {
 	});
 });
 
-// Create mock tools for meta tools testing
+// Create mock tools for utility tools testing
 const createMockTools = (): BaseTool[] => {
 	const tools: BaseTool[] = [];
 
@@ -966,7 +966,7 @@ describe('Utility Tools', () => {
 	});
 
 	describe('utilityTools()', () => {
-		it('should return two meta tools', () => {
+		it('should return two utility tools', () => {
 			expect(utilityTools.length).toBe(2);
 		});
 
@@ -1245,7 +1245,7 @@ describe('Utility Tools', () => {
 	});
 
 	describe('OpenAI format', () => {
-		it('should convert meta tools to OpenAI format', () => {
+		it('should convert utility tools to OpenAI format', () => {
 			const openAITools = utilityTools.toOpenAI();
 
 			expect(openAITools).toHaveLength(2);
@@ -1264,7 +1264,7 @@ describe('Utility Tools', () => {
 	});
 
 	describe('AI SDK format', () => {
-		it('should convert meta tools to AI SDK format', async () => {
+		it('should convert utility tools to AI SDK format', async () => {
 			const aiSdkTools = await utilityTools.toAISDK();
 
 			expect(aiSdkTools).toHaveProperty('tool_search');
