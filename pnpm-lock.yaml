@@ -59,15 +59,18 @@ catalogs:
       specifier: ^0.2.12
       version: 0.2.12
     '@tanstack/ai':
-      specifier: ^0.2.0
-      version: 0.2.0
+      specifier: ^0.3.0
+      version: 0.3.0
     '@tanstack/ai-openai':
-      specifier: ^0.2.0
-      version: 0.2.0
+      specifier: ^0.3.0
+      version: 0.3.0
   peer:
+    '@anthropic-ai/claude-agent-sdk':
+      specifier: ^0.2.12
+      version: 0.2.12
     '@anthropic-ai/sdk':
-      specifier: ^0.71.2
-      version: 0.71.2
+      specifier: ^0.72.1
+      version: 0.72.1
     ai:
       specifier: '>=5.0.108 <7.0.0'
       version: 6.0.7
@@ -94,7 +97,7 @@ importers:
         version: 0.2.12(zod@4.3.5)
       '@anthropic-ai/sdk':
         specifier: catalog:peer
-        version: 0.71.2(zod@4.3.5)
+        version: 0.72.1(zod@4.3.5)
       '@modelcontextprotocol/sdk':
         specifier: catalog:prod
         version: 1.24.3(zod@4.3.5)
@@ -164,7 +167,7 @@ importers:
         version: 0.2.12(zod@4.3.5)
       '@anthropic-ai/sdk':
         specifier: catalog:peer
-        version: 0.71.2(zod@4.3.5)
+        version: 0.72.1(zod@4.3.5)
       '@clack/prompts':
         specifier: catalog:dev
         version: 0.11.0
@@ -173,10 +176,10 @@ importers:
         version: link:..
       '@tanstack/ai':
         specifier: catalog:examples
-        version: 0.2.0
+        version: 0.3.0
       '@tanstack/ai-openai':
         specifier: catalog:examples
-        version: 0.2.0(@tanstack/ai@0.2.0)(zod@4.3.5)
+        version: 0.3.0(@tanstack/ai@0.3.0)(zod@4.3.5)
       ai:
         specifier: catalog:peer
         version: 6.0.7(zod@4.3.5)
@@ -227,8 +230,8 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  '@anthropic-ai/sdk@0.71.2':
-    resolution: {integrity: sha512-TGNDEUuEstk/DKu0/TflXAEt+p+p/WhTlFzEnoosvbaDU2LTjm42igSdlL0VijrKpWejtOKxX0b8A7uc+XiSAQ==}
+  '@anthropic-ai/sdk@0.72.1':
+    resolution: {integrity: sha512-MiUnue7qN7DvLIoYHgkedN2z05mRf2CutBzjXXY2krzOhG2r/rIfISS2uVkNLikgToB5hYIzw+xp2jdOtRkqYQ==}
     hasBin: true
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
@@ -1119,14 +1122,14 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tanstack/ai-openai@0.2.0':
-    resolution: {integrity: sha512-xxDbG2+nqdOXCj4QGiA3y2zxY2DfUw+Hzb7jjUvpWKUiu02atIKFIrmH8ccdjNq1O4K2dh8J9nSK7RP84tSkpQ==}
+  '@tanstack/ai-openai@0.3.0':
+    resolution: {integrity: sha512-ZaMYUiU97LLDhJFbCQgtTVzCitMQSXFe4j1WGsXrz5fPe9ZUqYzMFSJRozONluM+vuI6z02XF2PJPzQldGKbMQ==}
     peerDependencies:
-      '@tanstack/ai': ^0.2.0
+      '@tanstack/ai': ^0.2.2
       zod: ^4.0.0
 
-  '@tanstack/ai@0.2.0':
-    resolution: {integrity: sha512-liGeP7pa7YsgDbUQZOSBHSunWXTQ9FdzDeBGFnDXt9iXF8Fa/GyYu+x2w8IwjK9aWaKLd4CNpULRbzwHP5SzYA==}
+  '@tanstack/ai@0.3.0':
+    resolution: {integrity: sha512-+MmqvLFmM1XvzGzVm2Pwgj8TmN8l3AV5NikDgam+B1HZY0MGdj5Pz7QFFYDEjTmzcFrDSDOAIobxR7Qp2iuKog==}
     engines: {node: '>=18'}
 
   '@tanstack/devtools-event-client@0.4.0':
@@ -1538,6 +1541,9 @@ packages:
 
   get-tsconfig@4.13.0:
     resolution: {integrity: sha512-1VKTZJCwBrvbd+Wn3AOgQP/2Av+TfTCOlE4AcRJE72W1ksZXbAx8PPBR9RzgTeSPzlPMHrbANMH3LbltH73wxQ==}
+
+  get-tsconfig@4.13.1:
+    resolution: {integrity: sha512-EoY1N2xCn44xU6750Sx7OjOIT59FkmstNc3X6y5xpz7D5cBtZRe/3pSlTkDJgqsOk3WwZPkWfonhhUJfttQo3w==}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -2390,7 +2396,7 @@ snapshots:
       '@img/sharp-linuxmusl-x64': 0.33.5
       '@img/sharp-win32-x64': 0.33.5
 
-  '@anthropic-ai/sdk@0.71.2(zod@4.3.5)':
+  '@anthropic-ai/sdk@0.72.1(zod@4.3.5)':
     dependencies:
       json-schema-to-ts: 3.1.1
     optionalDependencies:
@@ -2961,15 +2967,15 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tanstack/ai-openai@0.2.0(@tanstack/ai@0.2.0)(zod@4.3.5)':
+  '@tanstack/ai-openai@0.3.0(@tanstack/ai@0.3.0)(zod@4.3.5)':
     dependencies:
-      '@tanstack/ai': 0.2.0
+      '@tanstack/ai': 0.3.0
       openai: 6.9.1(zod@4.3.5)
       zod: 4.3.5
     transitivePeerDependencies:
       - ws
 
-  '@tanstack/ai@0.2.0':
+  '@tanstack/ai@0.3.0':
     dependencies:
       '@tanstack/devtools-event-client': 0.4.0
       partial-json: 0.1.7
@@ -3438,6 +3444,11 @@ snapshots:
   get-tsconfig@4.13.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
+
+  get-tsconfig@4.13.1:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+    optional: true
 
   glob-parent@5.1.2:
     dependencies:
@@ -3988,7 +3999,7 @@ snapshots:
   tsx@4.21.0:
     dependencies:
       esbuild: 0.27.2
-      get-tsconfig: 4.13.0
+      get-tsconfig: 4.13.1
     optionalDependencies:
       fsevents: 2.3.3
     optional: true
