@@ -63,6 +63,12 @@
               enable = true;
               systems = [ ];
             };
+            agents = {
+              dest = ".agents/skills";
+              structure = "symlink-tree";
+              enable = true;
+              systems = [ ];
+            };
           };
         in
         {

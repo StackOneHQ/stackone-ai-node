@@ -183,6 +183,5 @@ dist
 
 # Agent skills (managed by Nix via agent-skills-nix)
 .claude/skills
-.codex/skills
-.opencode/skills
+.agents/skills
 
