@@ -64,13 +64,13 @@ const tanstackAiIntegration = async (): Promise<void> => {
 		tools: [getEmployeeTool],
 	});
 
-	// Process the stream
+	// Process the stream using AG-UI protocol events
 	let hasToolCall = false;
 	for await (const chunk of stream) {
-		if (chunk.type === 'tool_call') {
+		if (chunk.type === 'TOOL_CALL_START') {
 			hasToolCall = true;
 			assert(
-				chunk.toolCall.function.name === 'bamboohr_get_employee',
+				chunk.toolName === 'bamboohr_get_employee',
 				'Expected tool call to be bamboohr_get_employee',
 			);
 		}
