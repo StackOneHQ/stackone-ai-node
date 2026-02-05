@@ -182,6 +182,6 @@ dist
 !.envrc
 
 # Agent skills (managed by Nix via agent-skills-nix)
-.claude/skills
 .agents/skills
+.claude/skills
 

@@ -56,20 +56,9 @@
           pkgs = nixpkgs.legacyPackages.${system};
           bundle = agentLib.mkBundle { inherit pkgs selection; };
           # Use symlink-tree instead of copy-tree for skills
-          localTargets = {
-            claude = {
-              dest = ".claude/skills";
-              structure = "symlink-tree";
-              enable = true;
-              systems = [ ];
-            };
-            agents = {
-              dest = ".agents/skills";
-              structure = "symlink-tree";
-              enable = true;
-              systems = [ ];
-            };
-          };
+          localTargets = nixpkgs.lib.mapAttrs (
+            _: t: t // { structure = "symlink-tree"; }
+          ) agentLib.defaultLocalTargets;
         in
         {
           default = pkgs.mkShellNoCC {
