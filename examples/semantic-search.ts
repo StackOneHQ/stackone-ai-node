@@ -244,8 +244,9 @@ const exampleUtilityToolsSemantic = async (): Promise<void> => {
 		console.log('  (This searches the full StackOne catalog, not just your linked tools)');
 		console.log();
 		const result = await searchTool.execute({ query: searchQuery, limit: 5 });
-		const toolsData = (result as { tools?: Array<{ name: string; description: string; score: number }> })
-			.tools ?? [];
+		const toolsData =
+			(result as { tools?: Array<{ name: string; description: string; score: number }> }).tools ??
+			[];
 		console.log(`tool_search returned ${toolsData.length} results:`);
 		for (const toolInfo of toolsData) {
 			console.log(`  [${toolInfo.score.toFixed(2)}] ${toolInfo.name}`);

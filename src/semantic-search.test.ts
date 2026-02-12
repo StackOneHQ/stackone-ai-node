@@ -236,9 +236,9 @@ describe('SemanticSearchClient', () => {
 
 describe('normalizeActionName', () => {
 	it('should normalize versioned API names to MCP format', () => {
-		expect(
-			normalizeActionName('calendly_1.0.0_calendly_create_scheduling_link_global'),
-		).toBe('calendly_create_scheduling_link');
+		expect(normalizeActionName('calendly_1.0.0_calendly_create_scheduling_link_global')).toBe(
+			'calendly_create_scheduling_link',
+		);
 	});
 
 	it('should handle multi-segment semver', () => {
@@ -272,10 +272,30 @@ describe('normalizeActionName', () => {
 describe('Tools.getConnectors', () => {
 	it('should return unique connector names', () => {
 		const tools = new Tools([
-			new BaseTool('bamboohr_create_employee', 'desc', { type: 'object', properties: {} }, { kind: 'local' }),
-			new BaseTool('bamboohr_list_employees', 'desc', { type: 'object', properties: {} }, { kind: 'local' }),
-			new BaseTool('hibob_create_employee', 'desc', { type: 'object', properties: {} }, { kind: 'local' }),
-			new BaseTool('slack_send_message', 'desc', { type: 'object', properties: {} }, { kind: 'local' }),
+			new BaseTool(
+				'bamboohr_create_employee',
+				'desc',
+				{ type: 'object', properties: {} },
+				{ kind: 'local' },
+			),
+			new BaseTool(
+				'bamboohr_list_employees',
+				'desc',
+				{ type: 'object', properties: {} },
+				{ kind: 'local' },
+			),
+			new BaseTool(
+				'hibob_create_employee',
+				'desc',
+				{ type: 'object', properties: {} },
+				{ kind: 'local' },
+			),
+			new BaseTool(
+				'slack_send_message',
+				'desc',
+				{ type: 'object', properties: {} },
+				{ kind: 'local' },
+			),
 		]);
 
 		const connectors = tools.getConnectors();
@@ -327,7 +347,7 @@ describe('StackOneToolSet semantic search', () => {
 				semanticResult({
 					action_name: 'workday_1.0.0_workday_create_worker_global',
 					connector_key: 'workday',
-					similarity_score: 0.90,
+					similarity_score: 0.9,
 				}),
 				semanticResult({
 					action_name: 'hibob_1.0.0_hibob_create_employee_global',
@@ -431,7 +451,7 @@ describe('StackOneToolSet semantic search', () => {
 				semanticResult({
 					action_name: 'breathehr_1.0.1_breathehr_list_employees_global',
 					connector_key: 'breathehr',
-					similarity_score: 0.90,
+					similarity_score: 0.9,
 				}),
 				semanticResult({
 					action_name: 'bamboohr_1.0.0_bamboohr_create_employee_global',
@@ -494,7 +514,7 @@ describe('StackOneToolSet semantic search', () => {
 						semanticResult({
 							action_name: 'workday_1.0.0_workday_create_worker_global',
 							connector_key: 'workday',
-							similarity_score: 0.90,
+							similarity_score: 0.9,
 						}),
 						semanticResult({
 							action_name: 'hibob_1.0.0_hibob_create_employee_global',
@@ -505,10 +525,7 @@ describe('StackOneToolSet semantic search', () => {
 
 					// Filter by connector if provided (mimics real API behavior)
 					const results = connector
-						? allResults.filter(
-								(r) =>
-									(r as Record<string, unknown>).connector_key === connector,
-							)
+						? allResults.filter((r) => (r as Record<string, unknown>).connector_key === connector)
 						: allResults;
 
 					return HttpResponse.json({
@@ -555,7 +572,7 @@ describe('StackOneToolSet semantic search', () => {
 				semanticResult({
 					action_name: 'breathehr_1.0.1_breathehr_list_employees_global',
 					connector_key: 'breathehr',
-					similarity_score: 0.90,
+					similarity_score: 0.9,
 				}),
 			]);
 
@@ -746,7 +763,7 @@ describe('utilityTools with semanticClient', () => {
 			semanticResult({
 				action_name: 'breathehr_1.0.1_breathehr_list_employees_global',
 				connector_key: 'breathehr',
-				similarity_score: 0.90,
+				similarity_score: 0.9,
 			}),
 		]);
 

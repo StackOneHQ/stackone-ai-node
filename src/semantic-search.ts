@@ -198,9 +198,7 @@ export class SemanticSearchClient {
 			topK: options?.topK,
 		});
 		const minScore = options?.minScore ?? 0;
-		return response.results
-			.filter((r) => r.similarityScore >= minScore)
-			.map((r) => r.actionName);
+		return response.results.filter((r) => r.similarityScore >= minScore).map((r) => r.actionName);
 	}
 }
 

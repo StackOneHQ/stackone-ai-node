@@ -45,10 +45,30 @@ function mockSemanticSearch(results: Record<string, unknown>[]): void {
 
 describe('semantic-search example e2e', () => {
 	const semanticResults = [
-		semanticResult('calendly_1.0.0_calendly_list_events_global', 'calendly', 0.95, 'List scheduled events from Calendly'),
-		semanticResult('calendly_1.0.0_calendly_cancel_event_global', 'calendly', 0.88, 'Cancel a scheduled event in Calendly'),
-		semanticResult('calendly_1.0.0_calendly_create_scheduling_link_global', 'calendly', 0.82, 'Create a new scheduling link in Calendly'),
-		semanticResult('calendly_1.0.0_calendly_get_event_global', 'calendly', 0.75, 'Get details of a specific event from Calendly'),
+		semanticResult(
+			'calendly_1.0.0_calendly_list_events_global',
+			'calendly',
+			0.95,
+			'List scheduled events from Calendly',
+		),
+		semanticResult(
+			'calendly_1.0.0_calendly_cancel_event_global',
+			'calendly',
+			0.88,
+			'Cancel a scheduled event in Calendly',
+		),
+		semanticResult(
+			'calendly_1.0.0_calendly_create_scheduling_link_global',
+			'calendly',
+			0.82,
+			'Create a new scheduling link in Calendly',
+		),
+		semanticResult(
+			'calendly_1.0.0_calendly_get_event_global',
+			'calendly',
+			0.75,
+			'Get details of a specific event from Calendly',
+		),
 	];
 
 	beforeEach(() => {
@@ -176,7 +196,7 @@ describe('semantic-search example e2e', () => {
 		// Provide multiple API versions of the same action
 		const dupeResults = [
 			semanticResult('calendly_1.0.0_calendly_list_events_global', 'calendly', 0.95),
-			semanticResult('calendly_2.0.0_calendly_list_events_global', 'calendly', 0.90),
+			semanticResult('calendly_2.0.0_calendly_list_events_global', 'calendly', 0.9),
 			semanticResult('calendly_1.0.0_calendly_cancel_event_global', 'calendly', 0.85),
 		];
 		mockSemanticSearch(dupeResults);

@@ -357,15 +357,12 @@ export class StackOneToolSet {
 			// Step 3: Filter results to only available connectors and min_score
 			let filteredResults = response.results.filter(
 				(r) =>
-					availableConnectors.has(r.connectorKey.toLowerCase()) &&
-					r.similarityScore >= minScore,
+					availableConnectors.has(r.connectorKey.toLowerCase()) && r.similarityScore >= minScore,
 			);
 
 			// Step 3b: If not enough results, make per-connector calls for missing connectors
 			if (filteredResults.length < topK && !connector) {
-				const foundConnectors = new Set(
-					filteredResults.map((r) => r.connectorKey.toLowerCase()),
-				);
+				const foundConnectors = new Set(filteredResults.map((r) => r.connectorKey.toLowerCase()));
 				const missingConnectors = new Set(
 					[...availableConnectors].filter((c) => !foundConnectors.has(c)),
 				);
@@ -461,8 +458,7 @@ export class StackOneToolSet {
 				const matchedTools = matchedNames
 					.filter(
 						(name) =>
-							toolMap.has(name) &&
-							filterConnectors.has(name.split('_')[0]?.toLowerCase() ?? ''),
+							toolMap.has(name) && filterConnectors.has(name.split('_')[0]?.toLowerCase() ?? ''),
 					)
 					.map((name) => toolMap.get(name)!)
 					.slice(0, topK);
@@ -527,12 +523,8 @@ export class StackOneToolSet {
 
 			// If not enough results, make per-connector calls for missing connectors
 			if (results.length < topK && !connector) {
-				const foundConnectors = new Set(
-					results.map((r) => r.connectorKey.toLowerCase()),
-				);
-				const missingConnectors = [...connectorSet].filter(
-					(c) => !foundConnectors.has(c),
-				);
+				const foundConnectors = new Set(results.map((r) => r.connectorKey.toLowerCase()));
+				const missingConnectors = [...connectorSet].filter((c) => !foundConnectors.has(c));
 
 				for (const missing of missingConnectors) {
 					if (results.length >= topK) break;
