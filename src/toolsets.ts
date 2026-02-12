@@ -143,7 +143,7 @@ export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountC
 export interface SearchToolsOptions {
 	/** Optional provider/connector filter (e.g., "bamboohr", "slack") */
 	connector?: string;
-	/** Maximum number of tools to return (default: 10) */
+	/** Maximum number of tools to return. If omitted, the backend decides how many results to return. */
 	topK?: number;
 	/** Minimum similarity score threshold 0-1 (default: 0.0) */
 	minScore?: number;
@@ -161,7 +161,7 @@ export interface SearchActionNamesOptions {
 	connector?: string;
 	/** Optional account IDs to scope results to connectors available in those accounts */
 	accountIds?: string[];
-	/** Maximum number of results (default: 10) */
+	/** Maximum number of results. If omitted, the backend decides how many results to return. */
 	topK?: number;
 	/** Minimum similarity score threshold 0-1 (default: 0.0) */
 	minScore?: number;
@@ -336,7 +336,7 @@ export class StackOneToolSet {
 	 * @returns Tools collection with semantically matched tools from linked accounts
 	 */
 	async searchTools(query: string, options?: SearchToolsOptions): Promise<Tools> {
-		const topK = options?.topK ?? 10;
+		const topK = options?.topK;
 		const minScore = options?.minScore ?? 0;
 		const connector = options?.connector;
 		const fallbackToLocal = options?.fallbackToLocal ?? true;
@@ -364,14 +364,14 @@ export class StackOneToolSet {
 			);
 
 			// Step 3b: If not enough results, make per-connector calls for missing connectors
-			if (filteredResults.length < topK && !connector) {
+			if (!connector && (topK == null || filteredResults.length < topK)) {
 				const foundConnectors = new Set(filteredResults.map((r) => r.connectorKey.toLowerCase()));
 				const missingConnectors = new Set(
 					[...availableConnectors].filter((c) => !foundConnectors.has(c)),
 				);
 
 				for (const missing of missingConnectors) {
-					if (filteredResults.length >= topK) break;
+					if (topK != null && filteredResults.length >= topK) break;
 					try {
 						const extra = await this.semanticClient.search(query, {
 							connector: missing,
@@ -383,7 +383,7 @@ export class StackOneToolSet {
 								!filteredResults.some((fr) => fr.actionName === r.actionName)
 							) {
 								filteredResults.push(r);
-								if (filteredResults.length >= topK) break;
+								if (topK != null && filteredResults.length >= topK) break;
 							}
 						}
 					} catch (error) {
@@ -406,7 +406,7 @@ export class StackOneToolSet {
 					deduped.push(r);
 				}
 			}
-			const finalResults = deduped.slice(0, topK);
+			const finalResults = topK != null ? deduped.slice(0, topK) : deduped;
 
 			if (finalResults.length === 0) {
 				return new Tools([]);
@@ -444,9 +444,10 @@ export class StackOneToolSet {
 			const searchTool = utility.getTool('tool_search');
 
 			if (searchTool) {
+				const fallbackLimit = topK != null ? topK * 3 : 100; // Over-fetch to account for connector filtering
 				const result = await searchTool.execute({
 					query,
-					limit: topK * 3, // Over-fetch to account for connector filtering
+					limit: fallbackLimit,
 					minScore,
 				});
 				const matchedNames: string[] = (
@@ -458,14 +459,13 @@ export class StackOneToolSet {
 				const filterConnectors = connector
 					? new Set([connector.toLowerCase()])
 					: availableConnectors;
-				const matchedTools = matchedNames
+				const matched = matchedNames
 					.filter(
 						(name) =>
 							toolMap.has(name) && filterConnectors.has(name.split('_')[0]?.toLowerCase() ?? ''),
 					)
-					.map((name) => toolMap.get(name)!)
-					.slice(0, topK);
-				return new Tools(matchedTools);
+					.map((name) => toolMap.get(name)!);
+				return new Tools(topK != null ? matched.slice(0, topK) : matched);
 			}
 
 			return allTools;
@@ -486,7 +486,7 @@ export class StackOneToolSet {
 		query: string,
 		options?: SearchActionNamesOptions,
 	): Promise<SemanticSearchResult[]> {
-		const topK = options?.topK ?? 10;
+		const topK = options?.topK;
 		const minScore = options?.minScore ?? 0;
 		const connector = options?.connector;
 
@@ -525,12 +525,12 @@ export class StackOneToolSet {
 			results = results.filter((r) => connectorSet.has(r.connectorKey.toLowerCase()));
 
 			// If not enough results, make per-connector calls for missing connectors
-			if (results.length < topK && !connector) {
+			if (!connector && (topK == null || results.length < topK)) {
 				const foundConnectors = new Set(results.map((r) => r.connectorKey.toLowerCase()));
 				const missingConnectors = [...connectorSet].filter((c) => !foundConnectors.has(c));
 
 				for (const missing of missingConnectors) {
-					if (results.length >= topK) break;
+					if (topK != null && results.length >= topK) break;
 					try {
 						const extra = await this.semanticClient.search(query, {
 							connector: missing,
@@ -542,7 +542,7 @@ export class StackOneToolSet {
 								!results.some((er) => er.actionName === r.actionName)
 							) {
 								results.push(r);
-								if (results.length >= topK) break;
+								if (topK != null && results.length >= topK) break;
 							}
 						}
 					} catch (error) {
@@ -572,7 +572,7 @@ export class StackOneToolSet {
 				});
 			}
 		}
-		return normalized.slice(0, topK);
+		return topK != null ? normalized.slice(0, topK) : normalized;
 	}
 
 	/**
