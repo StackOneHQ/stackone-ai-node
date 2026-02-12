@@ -8,6 +8,7 @@ import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
+import { type SemanticSearchClient, normalizeActionName } from './semantic-search';
 import type {
 	AISDKToolDefinition,
 	AISDKToolResult,
@@ -493,16 +494,50 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
+	 * Get unique connector names from all tools.
+	 * Extracts the connector prefix (first segment before '_') from each tool name.
+	 * @returns Set of connector names (lowercase)
+	 * @remarks The Python SDK also exposes a per-tool `.connector` property on each tool.
+	 * This collection-level method covers the same use cases; a per-tool property can be
+	 * added if needed.
+	 */
+	getConnectors(): Set<string> {
+		const connectors = new Set<string>();
+		for (const tool of this.tools) {
+			const connector = tool.name.split('_')[0]?.toLowerCase();
+			if (connector) {
+				connectors.add(connector);
+			}
+		}
+		return connectors;
+	}
+
+	/**
 	 * Return utility tools for tool discovery and execution
 	 * @beta This feature is in beta and may change in future versions
-	 * @param hybridAlpha - Weight for BM25 in hybrid search (0-1). If not provided, uses DEFAULT_HYBRID_ALPHA (0.2).
+	 * @param optionsOrHybridAlpha - Either a number (legacy hybridAlpha) or an options object
 	 */
-	async utilityTools(hybridAlpha = DEFAULT_HYBRID_ALPHA): Promise<Tools> {
-		const oramaDb = await initializeOramaDb(this.tools);
-		const tfidfIndex = initializeTfidfIndex(this.tools);
-		const baseTools = [toolSearch(oramaDb, tfidfIndex, this.tools, hybridAlpha), toolExecute(this)];
-		const tools = new Tools(baseTools);
-		return tools;
+	async utilityTools(
+		optionsOrHybridAlpha?: number | { hybridAlpha?: number; semanticClient?: SemanticSearchClient },
+	): Promise<Tools> {
+		const resolved =
+			typeof optionsOrHybridAlpha === 'number'
+				? { hybridAlpha: optionsOrHybridAlpha, semanticClient: undefined }
+				: {
+						hybridAlpha: optionsOrHybridAlpha?.hybridAlpha ?? DEFAULT_HYBRID_ALPHA,
+						semanticClient: optionsOrHybridAlpha?.semanticClient,
+					};
+
+		const searchToolInstance = resolved.semanticClient
+			? semanticToolSearch(resolved.semanticClient)
+			: await (async (): Promise<BaseTool> => {
+					const oramaDb = await initializeOramaDb(this.tools);
+					const tfidfIndex = initializeTfidfIndex(this.tools);
+					return toolSearch(oramaDb, tfidfIndex, this.tools, resolved.hybridAlpha);
+				})();
+
+		const baseTools = [searchToolInstance, toolExecute(this)];
+		return new Tools(baseTools);
 	}
 
 	/**
@@ -828,6 +863,102 @@ function toolExecute(tools: Tools): BaseTool {
 
 			// Execute the tool with the provided parameters
 			return await toolToExecute.execute(toolParams, options);
+		} catch (error) {
+			if (error instanceof StackOneError) {
+				throw error;
+			}
+			throw new StackOneError(
+				`Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
+			);
+		}
+	};
+	return tool;
+}
+
+/**
+ * Create a semantic search variant of tool_search.
+ * Uses cloud semantic search API instead of local BM25+TF-IDF.
+ */
+function semanticToolSearch(semanticClient: SemanticSearchClient): BaseTool {
+	const name = 'tool_search' as const;
+	const description =
+		'Searches for relevant tools based on a natural language query using semantic vector search. Call this first to discover available tools before executing them.' as const;
+	const parameters = {
+		type: 'object',
+		properties: {
+			query: {
+				type: 'string',
+				description:
+					'Natural language query describing what tools you need (e.g., "onboard a new team member", "request vacation days")',
+			},
+			limit: {
+				type: 'number',
+				description: 'Maximum number of tools to return (default: 5)',
+				default: 5,
+			},
+			minScore: {
+				type: 'number',
+				description: 'Minimum similarity score (0-1) to filter results (default: 0.0)',
+				default: 0.0,
+			},
+			connector: {
+				type: 'string',
+				description: "Optional: filter by connector/provider (e.g., 'bamboohr', 'slack')",
+			},
+		},
+		required: ['query'],
+		// Note: The Python SDK sets `nullable: true` on limit, minScore, and connector.
+		// Omitted here as LLMs can simply omit optional params and defaults handle it.
+	} as const satisfies ToolParameters;
+
+	const executeConfig = {
+		kind: 'local',
+		identifier: name,
+		description: 'local://semantic-tool-search',
+	} as const satisfies LocalExecuteConfig;
+
+	const tool = new BaseTool(name, description, parameters, executeConfig);
+	tool.execute = async (inputParams?: JsonObject | string): Promise<JsonObject> => {
+		try {
+			if (
+				inputParams !== undefined &&
+				typeof inputParams !== 'string' &&
+				typeof inputParams !== 'object'
+			) {
+				throw new StackOneError(
+					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`,
+				);
+			}
+
+			const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
+			const limit = (params.limit as number) || 5;
+			const minScore = (params.minScore as number) ?? 0;
+			const query = (params.query as string) || '';
+			const connector = params.connector as string | undefined;
+
+			const response = await semanticClient.search(query, {
+				connector,
+				topK: limit,
+			});
+
+			const seen = new Set<string>();
+			const toolsData: Array<Record<string, unknown>> = [];
+			for (const r of response.results) {
+				if (r.similarityScore >= minScore) {
+					const normName = normalizeActionName(r.actionName);
+					if (!seen.has(normName)) {
+						seen.add(normName);
+						toolsData.push({
+							name: normName,
+							description: r.description,
+							score: r.similarityScore,
+							connector: r.connectorKey,
+						});
+					}
+				}
+			}
+
+			return JSON.parse(JSON.stringify({ tools: toolsData.slice(0, limit) })) satisfies JsonObject;
 		} catch (error) {
 			if (error instanceof StackOneError) {
 				throw error;
