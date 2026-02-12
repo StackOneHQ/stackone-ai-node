@@ -315,6 +315,7 @@ const exampleOpenAIAgentLoop = async (): Promise<void> => {
 	if (message?.tool_calls) {
 		console.log('Step 3: OpenAI chose to call these tools:');
 		for (const toolCall of message.tool_calls) {
+			if (toolCall.type !== 'function') continue;
 			console.log(`  - ${toolCall.function.name}(${toolCall.function.arguments})`);
 
 			const tool = tools.getTool(toolCall.function.name);
