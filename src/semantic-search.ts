@@ -148,18 +148,16 @@ export class SemanticSearchClient {
 			payload.connector = options.connector;
 		}
 
-		try {
-			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
+		try {
 			const response = await fetch(url, {
 				method: 'POST',
 				headers,
 				body: JSON.stringify(payload),
 				signal: controller.signal,
 			});
-
-			clearTimeout(timeoutId);
 
 			if (!response.ok) {
 				const text = await response.text();
@@ -179,6 +177,8 @@ export class SemanticSearchClient {
 				`Request failed: ${error instanceof Error ? error.message : String(error)}`,
 				{ cause: error },
 			);
+		} finally {
+			clearTimeout(timeoutId);
 		}
 	}
 

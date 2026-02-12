@@ -8,6 +8,7 @@ import { type RpcActionResponse, RpcClient } from './rpc-client';
 import {
 	SemanticSearchClient,
 	SemanticSearchError,
+	type SemanticSearchResponse,
 	type SemanticSearchResult,
 	normalizeActionName,
 } from './semantic-search';
@@ -341,7 +342,7 @@ export class StackOneToolSet {
 		const fallbackToLocal = options?.fallbackToLocal ?? true;
 		const accountIds = options?.accountIds;
 
-		let allTools: Tools;
+		let allTools: Tools | undefined;
 		try {
 			// Step 1: Fetch all tools to get available connectors from linked accounts
 			allTools = await this.fetchTools({ accountIds });
@@ -352,6 +353,8 @@ export class StackOneToolSet {
 			}
 
 			// Step 2: Query semantic search API
+			// topK is intentionally omitted here (matching Python SDK) to let the backend
+			// return its default set; client-side filtering + per-connector fallback handle sizing.
 			const response = await this.semanticClient.search(query, { connector });
 
 			// Step 3: Filter results to only available connectors and min_score
@@ -432,7 +435,7 @@ export class StackOneToolSet {
 			// Note: The Python SDK logs a warning here via logger.warning(). A similar
 			// logging mechanism can be added when a logging strategy is established.
 			// allTools may not be defined if fetchTools failed before semantic search
-			if (!allTools!) {
+			if (!allTools) {
 				throw error;
 			}
 
@@ -498,7 +501,7 @@ export class StackOneToolSet {
 			}
 		}
 
-		let response;
+		let response: SemanticSearchResponse;
 		try {
 			response = await this.semanticClient.search(query, {
 				connector,

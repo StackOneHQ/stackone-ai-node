@@ -504,6 +504,8 @@ export class Tools implements Iterable<BaseTool> {
 	getConnectors(): Set<string> {
 		const connectors = new Set<string>();
 		for (const tool of this.tools) {
+			// Skip internal/utility tools (e.g. tool_search, tool_execute, tool_feedback)
+			if (tool.name.startsWith('tool_')) continue;
 			const connector = tool.name.split('_')[0]?.toLowerCase();
 			if (connector) {
 				connectors.add(connector);
@@ -942,6 +944,8 @@ function semanticToolSearch(semanticClient: SemanticSearchClient): BaseTool {
 			});
 
 			const seen = new Set<string>();
+			// Result shape intentionally omits `parameters` (unlike local tool_search) to match
+			// the Python SDK's create_semantic_tool_search. The semantic API doesn't return schemas.
 			const toolsData: Array<Record<string, unknown>> = [];
 			for (const r of response.results) {
 				if (r.similarityScore >= minScore) {
