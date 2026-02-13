@@ -5,6 +5,13 @@ import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
+import {
+	SemanticSearchClient,
+	SemanticSearchError,
+	type SemanticSearchResponse,
+	type SemanticSearchResult,
+	normalizeActionName,
+} from './semantic-search';
 import { BaseTool, Tools } from './tool';
 import type {
 	ExecuteOptions,
@@ -131,6 +138,36 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountConfig>;
 
 /**
+ * Options for searchTools()
+ */
+export interface SearchToolsOptions {
+	/** Optional provider/connector filter (e.g., "bamboohr", "slack") */
+	connector?: string;
+	/** Maximum number of tools to return. If omitted, the backend decides how many results to return. */
+	topK?: number;
+	/** Minimum similarity score threshold 0-1 (default: 0.0) */
+	minScore?: number;
+	/** Optional account IDs (uses setAccounts() value if not provided) */
+	accountIds?: string[];
+	/** If true, fall back to local BM25+TF-IDF search on API failure (default: true) */
+	fallbackToLocal?: boolean;
+}
+
+/**
+ * Options for searchActionNames()
+ */
+export interface SearchActionNamesOptions {
+	/** Optional provider/connector filter (single connector) */
+	connector?: string;
+	/** Optional account IDs to scope results to connectors available in those accounts */
+	accountIds?: string[];
+	/** Maximum number of results. If omitted, the backend decides how many results to return. */
+	topK?: number;
+	/** Minimum similarity score threshold 0-1 (default: 0.0) */
+	minScore?: number;
+}
+
+/**
  * Options for filtering tools when fetching from MCP
  */
 interface FetchToolsOptions {
@@ -163,6 +200,8 @@ export class StackOneToolSet {
 	private authentication?: AuthenticationConfig;
 	private headers: Record<string, string>;
 	private rpcClient?: RpcClient;
+	private apiKey?: string;
+	private _semanticClient?: SemanticSearchClient;
 
 	/**
 	 * Account ID for StackOne API
@@ -216,6 +255,7 @@ export class StackOneToolSet {
 		this.authentication = authentication;
 		this.headers = configHeaders;
 		this.rpcClient = config?.rpcClient;
+		this.apiKey = apiKey;
 		this.accountId = accountId;
 		this.accountIds = config?.accountIds ?? [];
 
@@ -263,6 +303,276 @@ export class StackOneToolSet {
 	setAccounts(accountIds: string[]): this {
 		this.accountIds = accountIds;
 		return this;
+	}
+
+	/**
+	 * Lazy initialization of semantic search client.
+	 * Configured with the toolset's API key and base URL.
+	 */
+	get semanticClient(): SemanticSearchClient {
+		if (!this._semanticClient) {
+			if (!this.apiKey) {
+				throw new ToolSetConfigError(
+					'API key is required for semantic search. Set STACKONE_API_KEY environment variable or pass apiKey in config.',
+				);
+			}
+			this._semanticClient = new SemanticSearchClient({
+				apiKey: this.apiKey,
+				baseUrl: this.baseUrl,
+			});
+		}
+		return this._semanticClient;
+	}
+
+	/**
+	 * Search for and fetch tools using semantic search.
+	 *
+	 * Uses the StackOne semantic search API to find relevant tools based on natural
+	 * language queries. Optimizes results by filtering to only connectors available
+	 * in linked accounts.
+	 *
+	 * @param query - Natural language description of needed functionality
+	 * @param options - Search options
+	 * @returns Tools collection with semantically matched tools from linked accounts
+	 */
+	async searchTools(query: string, options?: SearchToolsOptions): Promise<Tools> {
+		const topK = options?.topK;
+		const minScore = options?.minScore ?? 0;
+		const connector = options?.connector;
+		const fallbackToLocal = options?.fallbackToLocal ?? true;
+		const accountIds = options?.accountIds;
+
+		let allTools: Tools | undefined;
+		try {
+			// Step 1: Fetch all tools to get available connectors from linked accounts
+			allTools = await this.fetchTools({ accountIds });
+			const availableConnectors = allTools.getConnectors();
+
+			if (availableConnectors.size === 0) {
+				return new Tools([]);
+			}
+
+			// Step 2: Query semantic search API
+			// topK is intentionally omitted here (matching Python SDK) to let the backend
+			// return its default set; client-side filtering + per-connector fallback handle sizing.
+			const response = await this.semanticClient.search(query, { connector });
+
+			// Step 3: Filter results to only available connectors and min_score
+			let filteredResults = response.results.filter(
+				(r) =>
+					availableConnectors.has(r.connectorKey.toLowerCase()) && r.similarityScore >= minScore,
+			);
+
+			// Step 3b: If not enough results, make per-connector calls for missing connectors
+			if (!connector && (topK == null || filteredResults.length < topK)) {
+				const foundConnectors = new Set(filteredResults.map((r) => r.connectorKey.toLowerCase()));
+				const missingConnectors = new Set(
+					[...availableConnectors].filter((c) => !foundConnectors.has(c)),
+				);
+
+				for (const missing of missingConnectors) {
+					if (topK != null && filteredResults.length >= topK) break;
+					try {
+						const extra = await this.semanticClient.search(query, {
+							connector: missing,
+							topK,
+						});
+						for (const r of extra.results) {
+							if (
+								r.similarityScore >= minScore &&
+								!filteredResults.some((fr) => fr.actionName === r.actionName)
+							) {
+								filteredResults.push(r);
+								if (topK != null && filteredResults.length >= topK) break;
+							}
+						}
+					} catch (error) {
+						if (error instanceof SemanticSearchError) continue;
+						throw error;
+					}
+				}
+
+				// Re-sort by score after merging results from multiple calls
+				filteredResults.sort((a, b) => b.similarityScore - a.similarityScore);
+			}
+
+			// Deduplicate by normalized MCP name (keep highest score first, already sorted)
+			const seenNames = new Set<string>();
+			const deduped: SemanticSearchResult[] = [];
+			for (const r of filteredResults) {
+				const norm = normalizeActionName(r.actionName);
+				if (!seenNames.has(norm)) {
+					seenNames.add(norm);
+					deduped.push(r);
+				}
+			}
+			const finalResults = topK != null ? deduped.slice(0, topK) : deduped;
+
+			if (finalResults.length === 0) {
+				return new Tools([]);
+			}
+
+			// Step 4: Get matching tools from already-fetched tools
+			const actionNames = new Set(finalResults.map((r) => normalizeActionName(r.actionName)));
+			const matchedTools = allTools.toArray().filter((t) => actionNames.has(t.name));
+
+			// Sort matched tools by semantic search score order
+			const actionOrder = new Map(
+				finalResults.map((r, i) => [normalizeActionName(r.actionName), i]),
+			);
+			matchedTools.sort(
+				(a, b) =>
+					(actionOrder.get(a.name) ?? Number.POSITIVE_INFINITY) -
+					(actionOrder.get(b.name) ?? Number.POSITIVE_INFINITY),
+			);
+
+			return new Tools(matchedTools);
+		} catch (error) {
+			if (!(error instanceof SemanticSearchError)) throw error;
+			if (!fallbackToLocal) throw error;
+
+			// Fallback to local BM25+TF-IDF search
+			// Note: The Python SDK logs a warning here via logger.warning(). A similar
+			// logging mechanism can be added when a logging strategy is established.
+			// allTools may not be defined if fetchTools failed before semantic search
+			if (!allTools) {
+				throw error;
+			}
+
+			const availableConnectors = allTools.getConnectors();
+			const utility = await allTools.utilityTools();
+			const searchTool = utility.getTool('tool_search');
+
+			if (searchTool) {
+				const fallbackLimit = topK != null ? topK * 3 : 100; // Over-fetch to account for connector filtering
+				const result = await searchTool.execute({
+					query,
+					limit: fallbackLimit,
+					minScore,
+				});
+				const matchedNames: string[] = (
+					(result as { tools?: Array<{ name: string }> }).tools ?? []
+				).map((t) => t.name);
+
+				// Filter by available connectors and preserve relevance order
+				const toolMap = new Map(allTools.toArray().map((t) => [t.name, t]));
+				const filterConnectors = connector
+					? new Set([connector.toLowerCase()])
+					: availableConnectors;
+				const matched = matchedNames
+					.filter(
+						(name) =>
+							toolMap.has(name) && filterConnectors.has(name.split('_')[0]?.toLowerCase() ?? ''),
+					)
+					.map((name) => toolMap.get(name)!);
+				return new Tools(topK != null ? matched.slice(0, topK) : matched);
+			}
+
+			return allTools;
+		}
+	}
+
+	/**
+	 * Search for action names without fetching full tool definitions.
+	 *
+	 * Useful when you need to inspect search results before fetching,
+	 * or when building custom filtering logic.
+	 *
+	 * @param query - Natural language description of needed functionality
+	 * @param options - Search options
+	 * @returns List of SemanticSearchResult with action names, scores, and metadata
+	 */
+	async searchActionNames(
+		query: string,
+		options?: SearchActionNamesOptions,
+	): Promise<SemanticSearchResult[]> {
+		const topK = options?.topK;
+		const minScore = options?.minScore ?? 0;
+		const connector = options?.connector;
+
+		// Resolve available connectors from account_ids
+		let availableConnectors: Set<string> | undefined;
+		const effectiveAccountIds = options?.accountIds ?? this.accountIds;
+		if (effectiveAccountIds.length > 0) {
+			const allTools = await this.fetchTools({ accountIds: effectiveAccountIds });
+			availableConnectors = allTools.getConnectors();
+			if (availableConnectors.size === 0) {
+				return [];
+			}
+		}
+
+		let response: SemanticSearchResponse;
+		try {
+			response = await this.semanticClient.search(query, {
+				connector,
+				topK: availableConnectors ? undefined : topK,
+			});
+		} catch (error) {
+			// Note: The Python SDK logs a warning here. Silent return matches current
+			// SDK conventions; add logging when a strategy is established.
+			if (error instanceof SemanticSearchError) {
+				return [];
+			}
+			throw error;
+		}
+
+		// Filter by min_score
+		let results = response.results.filter((r) => r.similarityScore >= minScore);
+
+		// Filter by available connectors if resolved from accounts
+		if (availableConnectors) {
+			const connectorSet = new Set([...availableConnectors].map((c) => c.toLowerCase()));
+			results = results.filter((r) => connectorSet.has(r.connectorKey.toLowerCase()));
+
+			// If not enough results, make per-connector calls for missing connectors
+			if (!connector && (topK == null || results.length < topK)) {
+				const foundConnectors = new Set(results.map((r) => r.connectorKey.toLowerCase()));
+				const missingConnectors = [...connectorSet].filter((c) => !foundConnectors.has(c));
+
+				for (const missing of missingConnectors) {
+					if (topK != null && results.length >= topK) break;
+					try {
+						const extra = await this.semanticClient.search(query, {
+							connector: missing,
+							topK,
+						});
+						for (const r of extra.results) {
+							if (
+								r.similarityScore >= minScore &&
+								!results.some((er) => er.actionName === r.actionName)
+							) {
+								results.push(r);
+								if (topK != null && results.length >= topK) break;
+							}
+						}
+					} catch (error) {
+						if (error instanceof SemanticSearchError) continue;
+						throw error;
+					}
+				}
+
+				// Re-sort by score after merging
+				results.sort((a, b) => b.similarityScore - a.similarityScore);
+			}
+		}
+
+		// Normalize and deduplicate by MCP name (keep highest score first)
+		const seen = new Set<string>();
+		const normalized: SemanticSearchResult[] = [];
+		for (const r of results) {
+			const normName = normalizeActionName(r.actionName);
+			if (!seen.has(normName)) {
+				seen.add(normName);
+				normalized.push({
+					actionName: normName,
+					connectorKey: r.connectorKey,
+					similarityScore: r.similarityScore,
+					label: r.label,
+					description: r.description,
+				});
+			}
+		}
+		return topK != null ? normalized.slice(0, topK) : normalized;
 	}
 
 	/**

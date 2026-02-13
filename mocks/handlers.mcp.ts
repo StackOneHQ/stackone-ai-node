@@ -4,6 +4,7 @@ import {
 	createMcpApp,
 	defaultMcpTools,
 	exampleBamboohrTools,
+	exampleCalendlyTools,
 	mixedProviderTools,
 } from './mcp-server';
 
@@ -19,6 +20,7 @@ const defaultMcpApp = createMcpApp({
 		// For examples testing
 		'your-bamboohr-account-id': exampleBamboohrTools,
 		'your-stackone-account-id': exampleBamboohrTools,
+		'your-calendly-account-id': exampleCalendlyTools,
 	},
 });
 

@@ -229,6 +229,66 @@ export const exampleBamboohrTools = [
 	},
 ] as const satisfies McpToolDefinition[];
 
+/** Tools for the semantic search example tests (Calendly-themed) */
+export const exampleCalendlyTools = [
+	{
+		name: 'calendly_list_events',
+		description: 'List scheduled events from Calendly',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				status: { type: 'string', description: 'Filter by event status (active, canceled)' },
+				limit: { type: 'number', description: 'Limit the number of results' },
+			},
+		},
+	},
+	{
+		name: 'calendly_create_scheduling_link',
+		description: 'Create a new scheduling link in Calendly',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				event_type: { type: 'string', description: 'The event type UUID' },
+				max_event_count: { type: 'number', description: 'Maximum number of events' },
+			},
+			required: ['event_type'],
+		},
+	},
+	{
+		name: 'calendly_cancel_event',
+		description: 'Cancel a scheduled event in Calendly',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				event_id: { type: 'string', description: 'The event UUID to cancel' },
+				reason: { type: 'string', description: 'Cancellation reason' },
+			},
+			required: ['event_id'],
+		},
+	},
+	{
+		name: 'calendly_get_event',
+		description: 'Get details of a specific event from Calendly',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				event_id: { type: 'string', description: 'The event UUID' },
+			},
+			required: ['event_id'],
+		},
+	},
+	{
+		name: 'calendly_list_event_types',
+		description: 'List available event types from Calendly',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				active: { type: 'boolean', description: 'Filter by active status' },
+			},
+		},
+	},
+] as const satisfies McpToolDefinition[];
+
 export const mixedProviderTools = [
 	{
 		name: 'hibob_list_employees',

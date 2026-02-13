@@ -49,4 +49,33 @@ const aiSdkIntegration = async (): Promise<void> => {
 	assert(text.includes('Michael'), 'Expected employee name to be included in the response');
 };
 
+/**
+ * Semantic search variant: discover tools via natural language, then use
+ * them with the AI SDK. This is the recommended approach when you don't
+ * know the exact tool names upfront.
+ */
+const aiSdkSemanticSearchIntegration = async (): Promise<void> => {
+	const toolset = new StackOneToolSet({
+		accountId,
+		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+	});
+
+	// Discover relevant tools using natural language
+	const tools = await toolset.searchTools('get employee details', { topK: 5 });
+
+	// Convert to AI SDK tools
+	const aiSdkTools = await tools.toAISDK();
+
+	// Use with generateText — the AI SDK handles tool calls automatically
+	const { text } = await generateText({
+		model: openai('gpt-5.1'),
+		tools: aiSdkTools,
+		prompt: 'Get all details about employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+		stopWhen: stepCountIs(3),
+	});
+
+	assert(text.includes('Michael'), 'Expected employee name to be included in the response');
+};
+
 await aiSdkIntegration();
+await aiSdkSemanticSearchIntegration();
