@@ -156,7 +156,7 @@ const exampleSearchTools = async (): Promise<void> => {
 	console.log();
 
 	// Show OpenAI conversion
-	console.log('Step 2: Converting to OpenAI function-calling format...');
+	console.log('Step 2a: Converting to OpenAI function-calling format...');
 	const openaiTools = tools.toOpenAI();
 	console.log(`Created ${openaiTools.length} OpenAI function definitions:`);
 	for (const fn of openaiTools) {
@@ -167,6 +167,17 @@ const exampleSearchTools = async (): Promise<void> => {
 		console.log(
 			`  - ${func.name}(${paramNames.slice(0, 3).join(', ')}${paramNames.length > 3 ? '...' : ''})`,
 		);
+	}
+	console.log();
+
+	// Show AI SDK conversion
+	console.log('Step 2b: Converting to Vercel AI SDK format...');
+	const aiSdkTools = await tools.toAISDK();
+	const aiSdkToolNames = Object.keys(aiSdkTools);
+	console.log(`Created ${aiSdkToolNames.length} AI SDK tool definitions:`);
+	for (const name of aiSdkToolNames) {
+		const tool = aiSdkTools[name];
+		console.log(`  - ${name} (executable: ${typeof tool.execute === 'function'})`);
 	}
 	console.log();
 };
@@ -332,6 +343,70 @@ const exampleOpenAIAgentLoop = async (): Promise<void> => {
 	console.log();
 };
 
+/**
+ * Example 6: Using semantic search with the Vercel AI SDK.
+ *
+ * Demonstrates the full pattern: discover tools via semantic search,
+ * convert them to AI SDK format, and pass them to generateText().
+ */
+const exampleSearchToolsAISDK = async (): Promise<void> => {
+	console.log('='.repeat(60));
+	console.log('Example 6: Semantic search with Vercel AI SDK');
+	console.log('='.repeat(60));
+	console.log();
+
+	let generateText: typeof import('ai').generateText;
+	let stepCountIs: typeof import('ai').stepCountIs;
+	let openai: typeof import('@ai-sdk/openai').openai;
+	try {
+		const aiMod = await import('ai');
+		generateText = aiMod.generateText;
+		stepCountIs = aiMod.stepCountIs;
+		const openaiMod = await import('@ai-sdk/openai');
+		openai = openaiMod.openai;
+	} catch {
+		console.log('Skipped: ai and @ai-sdk/openai libraries not installed.');
+		console.log('Install with: pnpm add ai @ai-sdk/openai');
+		console.log();
+		return;
+	}
+
+	if (!process.env.OPENAI_API_KEY) {
+		console.log('Skipped: Set OPENAI_API_KEY to run this example.');
+		console.log();
+		return;
+	}
+
+	const toolset = new StackOneToolSet({
+		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
+	});
+
+	const query = 'list upcoming events';
+	console.log(`Step 1: Discovering tools for "${query}" via semantic search...`);
+	const tools = await toolset.searchTools(query, { accountIds, topK: 3 });
+	console.log(`Found ${tools.length} tools:`);
+	for (const tool of tools.toArray()) {
+		console.log(`  - ${tool.name}`);
+	}
+	console.log();
+
+	console.log('Step 2: Converting to AI SDK format...');
+	const aiSdkTools = await tools.toAISDK();
+	console.log(`Created ${Object.keys(aiSdkTools).length} AI SDK tool definitions`);
+	console.log();
+
+	console.log('Step 3: Running generateText() with AI SDK...');
+	const { text } = await generateText({
+		model: openai('gpt-4o-mini'),
+		tools: aiSdkTools,
+		prompt: 'Can you show me my upcoming events?',
+		stopWhen: stepCountIs(3),
+	});
+
+	console.log(`AI response: ${text}`);
+	console.log();
+};
+
 // Main execution
 const main = async (): Promise<void> => {
 	console.log();
@@ -362,6 +437,7 @@ const main = async (): Promise<void> => {
 	await exampleSearchToolsWithConnector();
 	await exampleUtilityToolsSemantic();
 	await exampleOpenAIAgentLoop();
+	await exampleSearchToolsAISDK();
 
 	console.log('############################################################');
 	console.log('#   All examples completed!                                 #');
@@ -379,4 +455,5 @@ export {
 	exampleSearchToolsWithConnector,
 	exampleUtilityToolsSemantic,
 	exampleOpenAIAgentLoop,
+	exampleSearchToolsAISDK,
 };

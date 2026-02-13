@@ -785,3 +785,157 @@ describe('utilityTools with semanticClient', () => {
 		expect(result.tools[0].score).toBe(0.95);
 	});
 });
+
+// ─── Semantic search → AI SDK integration ──────────────────────────────────
+
+describe('Semantic search → AI SDK integration', () => {
+	beforeEach(() => {
+		vi.stubEnv('STACKONE_API_KEY', 'test-key');
+	});
+
+	afterEach(() => {
+		vi.unstubAllEnvs();
+	});
+
+	describe('searchTools → toAISDK', () => {
+		it('should convert semantic search results to AI SDK format', async () => {
+			setupMcpTools([bamboohrTool, hibobTool, bamboohrListTool]);
+
+			mockSemanticSearch([
+				semanticResult({
+					action_name: 'bamboohr_1.0.0_bamboohr_create_employee_global',
+					connector_key: 'bamboohr',
+					similarity_score: 0.95,
+					description: 'Creates a new employee in BambooHR',
+				}),
+				semanticResult({
+					action_name: 'hibob_1.0.0_hibob_create_employee_global',
+					connector_key: 'hibob',
+					similarity_score: 0.85,
+					description: 'Creates a new employee in HiBob',
+				}),
+			]);
+
+			const toolset = new StackOneToolSet({ apiKey: 'test-key' });
+			const tools = await toolset.searchTools('create employee', { topK: 5 });
+
+			const aiSdkTools = await tools.toAISDK();
+
+			// Should contain matched tools
+			expect(aiSdkTools).toHaveProperty('bamboohr_create_employee');
+			expect(aiSdkTools).toHaveProperty('hibob_create_employee');
+
+			// Each tool should have correct AI SDK structure
+			const bamboohrAiTool = aiSdkTools.bamboohr_create_employee;
+			expect(bamboohrAiTool.description).toBe('Creates a new employee in BambooHR');
+			expect(bamboohrAiTool.inputSchema).toBeDefined();
+			expect(typeof bamboohrAiTool.execute).toBe('function');
+
+			const hibobAiTool = aiSdkTools.hibob_create_employee;
+			expect(hibobAiTool.description).toBe('Creates a new employee in HiBob');
+			expect(typeof hibobAiTool.execute).toBe('function');
+		});
+
+		it('should produce executable AI SDK tools from semantic search', async () => {
+			setupMcpTools([bamboohrTool]);
+
+			mockSemanticSearch([
+				semanticResult({
+					action_name: 'bamboohr_1.0.0_bamboohr_create_employee_global',
+					connector_key: 'bamboohr',
+					similarity_score: 0.95,
+				}),
+			]);
+
+			const toolset = new StackOneToolSet({ apiKey: 'test-key' });
+			const tools = await toolset.searchTools('create employee', { topK: 5 });
+
+			const aiSdkTools = await tools.toAISDK();
+			const tool = aiSdkTools.bamboohr_create_employee;
+			expect(tool.execute).toBeDefined();
+
+			// Execute through the AI SDK wrapper
+			const result = await tool.execute?.(
+				{ name: 'test' },
+				{ toolCallId: 'test-call-id', messages: [] },
+			);
+			expect(result).toBeDefined();
+		});
+
+		it('should support non-executable mode from semantic search', async () => {
+			setupMcpTools([bamboohrTool]);
+
+			mockSemanticSearch([
+				semanticResult({
+					action_name: 'bamboohr_1.0.0_bamboohr_create_employee_global',
+					connector_key: 'bamboohr',
+					similarity_score: 0.95,
+				}),
+			]);
+
+			const toolset = new StackOneToolSet({ apiKey: 'test-key' });
+			const tools = await toolset.searchTools('create employee');
+
+			const aiSdkTools = await tools.toAISDK({ executable: false });
+
+			expect(aiSdkTools.bamboohr_create_employee).toBeDefined();
+			expect(aiSdkTools.bamboohr_create_employee.execute).toBeUndefined();
+		});
+	});
+
+	describe('utilityTools with semanticClient → toAISDK', () => {
+		it('should convert semantic utility tools to AI SDK format', async () => {
+			const tools = new Tools([
+				new BaseTool('test_tool', 'Test', { type: 'object', properties: {} }, { kind: 'local' }),
+			]);
+
+			const client = new SemanticSearchClient({ apiKey: 'test-key' });
+			const utility = await tools.utilityTools({ semanticClient: client });
+
+			const aiSdkTools = await utility.toAISDK();
+
+			expect(aiSdkTools).toHaveProperty('tool_search');
+			expect(aiSdkTools).toHaveProperty('tool_execute');
+
+			// tool_search should have execute function
+			expect(typeof aiSdkTools.tool_search.execute).toBe('function');
+			expect(aiSdkTools.tool_search.description).toContain('semantic');
+
+			// tool_execute should have execute function
+			expect(typeof aiSdkTools.tool_execute.execute).toBe('function');
+		});
+
+		it('should execute semantic tool_search through AI SDK wrapper', async () => {
+			mockSemanticSearch([
+				semanticResult({
+					action_name: 'bamboohr_1.0.0_bamboohr_create_employee_global',
+					connector_key: 'bamboohr',
+					similarity_score: 0.92,
+					label: 'Create Employee',
+					description: 'Creates a new employee',
+				}),
+			]);
+
+			const tools = new Tools([
+				new BaseTool('test_tool', 'Test', { type: 'object', properties: {} }, { kind: 'local' }),
+			]);
+
+			const client = new SemanticSearchClient({ apiKey: 'test-key' });
+			const utility = await tools.utilityTools({ semanticClient: client });
+
+			const aiSdkTools = await utility.toAISDK();
+
+			// Execute tool_search through AI SDK format
+			const result = await aiSdkTools.tool_search.execute?.(
+				{ query: 'create employee', limit: 5 },
+				{ toolCallId: 'test-call', messages: [] },
+			);
+
+			expect(result).toBeDefined();
+			const searchResult = result as { tools: Array<{ name: string; score: number }> };
+			expect(searchResult.tools).toHaveLength(1);
+			expect(searchResult.tools[0].name).toBe('bamboohr_create_employee');
+			expect(searchResult.tools[0].score).toBe(0.92);
+		});
+	});
+});

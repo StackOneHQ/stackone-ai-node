@@ -192,6 +192,37 @@ describe('semantic-search example e2e', () => {
 		expect(tools!.length).toBeGreaterThan(0);
 	});
 
+	it('searchTools converts to AI SDK format with correct structure', async () => {
+		mockSemanticSearch(semanticResults);
+
+		const toolset = new StackOneToolSet({
+			baseUrl: 'https://api.stackone.com',
+		});
+
+		const tools = await toolset.searchTools('cancel an event', {
+			accountIds: ['your-calendly-account-id'],
+			topK: 5,
+		});
+
+		// Convert to AI SDK format
+		const aiSdkTools = await tools.toAISDK();
+
+		// Should contain calendly tools as keys
+		const toolNames = Object.keys(aiSdkTools);
+		expect(toolNames.length).toBeGreaterThan(0);
+		for (const name of toolNames) {
+			expect(name).toMatch(/^calendly_/);
+		}
+
+		// Each tool should have the expected AI SDK structure
+		for (const name of toolNames) {
+			const tool = aiSdkTools[name];
+			expect(tool.inputSchema).toBeDefined();
+			expect(tool.description).toBeDefined();
+			expect(typeof tool.execute).toBe('function');
+		}
+	});
+
 	it('searchActionNames normalizes and deduplicates action names', async () => {
 		// Provide multiple API versions of the same action
 		const dupeResults = [
