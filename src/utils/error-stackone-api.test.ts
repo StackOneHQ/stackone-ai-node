@@ -1,4 +1,5 @@
 import { USER_AGENT } from '../consts';
+import { TEST_BASE_URL } from '../../mocks/constants';
 import { StackOneAPIError } from './error-stackone-api';
 
 describe('StackOneAPIError', () => {
@@ -70,12 +71,12 @@ describe('StackOneAPIError', () => {
 
 	it('should include endpoint URL when present in message', () => {
 		const error = new StackOneAPIError(
-			'Request failed for https://api.stackone.com/tools/execute',
+			`Request failed for ${TEST_BASE_URL}/tools/execute`,
 			404,
 			{},
 		);
 		const result = error.toString();
-		expect(result).toContain('Endpoint: https://api.stackone.com/tools/execute');
+		expect(result).toContain(`Endpoint: ${TEST_BASE_URL}/tools/execute`);
 	});
 
 	it('should format object requestBody as JSON', () => {

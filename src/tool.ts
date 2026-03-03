@@ -1,12 +1,10 @@
 import { type JSONSchema7 as AISDKJSONSchema, jsonSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import type { McpSdkServerConfigWithInstance } from '@anthropic-ai/claude-agent-sdk';
-import * as orama from '@orama/orama';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
-import { DEFAULT_HYBRID_ALPHA } from './consts';
 import { RequestBuilder } from './requestBuilder';
 import type {
 	AISDKToolDefinition,
@@ -24,7 +22,6 @@ import type {
 } from './types';
 
 import { StackOneError } from './utils/error-stackone';
-import { TfidfIndex } from './utils/tfidf-index';
 import { tryImport } from './utils/try-import';
 
 /**
@@ -122,6 +119,16 @@ export class BaseTool {
 			return currentHeaders;
 		}
 		return { ...this.#headers };
+	}
+
+	/**
+	 * Extract connector/provider prefix from the tool name.
+	 *
+	 * Tool names follow the format `{connector}_{action}_{entity}`,
+	 * e.g. `"bamboohr_list_employees"` → `"bamboohr"`.
+	 */
+	get connector(): string {
+		return this.name.split('_')[0]?.toLowerCase() ?? '';
 	}
 
 	/**
@@ -493,16 +500,28 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Return utility tools for tool discovery and execution
-	 * @beta This feature is in beta and may change in future versions
-	 * @param hybridAlpha - Weight for BM25 in hybrid search (0-1). If not provided, uses DEFAULT_HYBRID_ALPHA (0.2).
+	 * Get unique connector names from all tools.
+	 *
+	 * Extracts the connector/provider prefix from each tool name
+	 * (the first segment before `_`).
+	 *
+	 * @returns Set of connector names (lowercase)
+	 *
+	 * @example
+	 * ```typescript
+	 * const tools = await toolset.fetchTools();
+	 * const connectors = tools.getConnectors();
+	 * // Set { 'bamboohr', 'hibob', 'slack', ... }
+	 * ```
 	 */
-	async utilityTools(hybridAlpha = DEFAULT_HYBRID_ALPHA): Promise<Tools> {
-		const oramaDb = await initializeOramaDb(this.tools);
-		const tfidfIndex = initializeTfidfIndex(this.tools);
-		const baseTools = [toolSearch(oramaDb, tfidfIndex, this.tools, hybridAlpha), toolExecute(this)];
-		const tools = new Tools(baseTools);
-		return tools;
+	getConnectors(): Set<string> {
+		const connectors = new Set<string>();
+		for (const tool of this.tools) {
+			if (tool.connector) {
+				connectors.add(tool.connector);
+			}
+		}
+		return connectors;
 	}
 
 	/**
@@ -544,298 +563,3 @@ export class Tools implements Iterable<BaseTool> {
 	}
 }
 
-/**
- * Result from tool_search
- */
-export interface ToolSearchResult {
-	name: string;
-	description: string;
-	parameters: ToolParameters;
-	score: number;
-}
-
-type OramaDb = ReturnType<typeof orama.create>;
-
-/**
- * Initialize TF-IDF index for tool search
- */
-function initializeTfidfIndex(tools: BaseTool[]): TfidfIndex {
-	const index = new TfidfIndex();
-	const corpus = tools.map((tool) => {
-		// Extract integration from tool name (e.g., 'bamboohr_create_employee' -> 'bamboohr')
-		const parts = tool.name.split('_');
-		const integration = parts[0];
-
-		// Extract action type
-		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
-		const actions = parts.filter((p) => actionTypes.includes(p));
-
-		// Build text corpus for TF-IDF (similar weighting strategy as in tool-calling-evals)
-		const text = [
-			`${tool.name} ${tool.name} ${tool.name}`, // boost name
-			`${integration} ${actions.join(' ')}`,
-			tool.description,
-			parts.join(' '),
-		].join(' ');
-
-		return { id: tool.name, text };
-	});
-
-	index.build(corpus);
-	return index;
-}
-
-/**
- * Initialize Orama database with BM25 algorithm for tool search
- * Using Orama's BM25 scoring algorithm for relevance ranking
- * @see https://docs.orama.com/open-source/usage/create
- * @see https://docs.orama.com/open-source/usage/search/bm25-algorithm/
- */
-async function initializeOramaDb(tools: BaseTool[]): Promise<OramaDb> {
-	// Create Orama database schema with BM25 scoring algorithm
-	// BM25 provides better relevance ranking for natural language queries
-	const oramaDb = orama.create({
-		schema: {
-			name: 'string' as const,
-			description: 'string' as const,
-			integration: 'string' as const,
-			tags: 'string[]' as const,
-		},
-		components: {
-			tokenizer: {
-				stemming: true,
-			},
-		},
-	});
-
-	// Index all tools
-	for (const tool of tools) {
-		// Extract integration from tool name (e.g., 'bamboohr_create_employee' -> 'bamboohr')
-		const parts = tool.name.split('_');
-		const integration = parts[0];
-
-		// Extract action type
-		const actionTypes = ['create', 'update', 'delete', 'get', 'list', 'search'];
-		const actions = parts.filter((p) => actionTypes.includes(p));
-
-		await orama.insert(oramaDb, {
-			name: tool.name,
-			description: tool.description,
-			integration: integration,
-			tags: [...parts, ...actions],
-		});
-	}
-
-	return oramaDb;
-}
-
-function toolSearch(
-	oramaDb: OramaDb,
-	tfidfIndex: TfidfIndex,
-	allTools: BaseTool[],
-	hybridAlpha = DEFAULT_HYBRID_ALPHA,
-): BaseTool {
-	const name = 'tool_search' as const;
-	const description =
-		`Searches for relevant tools based on a natural language query using hybrid BM25 + TF-IDF search (alpha=${hybridAlpha}). This tool should be called first to discover available tools before executing them.` as const;
-	const parameters = {
-		type: 'object',
-		properties: {
-			query: {
-				type: 'string',
-				description:
-					'Natural language query describing what tools you need (e.g., "tools for managing employees", "create time off request")',
-			},
-			limit: {
-				type: 'number',
-				description: 'Maximum number of tools to return (default: 5)',
-				default: 5,
-			},
-			minScore: {
-				type: 'number',
-				description: 'Minimum relevance score (0-1) for results (default: 0.3)',
-				default: 0.3,
-			},
-		},
-		required: ['query'],
-	} as const satisfies ToolParameters;
-
-	const executeConfig = {
-		kind: 'local',
-		identifier: name,
-		description: 'local://get-relevant-tools',
-	} as const satisfies LocalExecuteConfig;
-
-	const tool = new BaseTool(name, description, parameters, executeConfig);
-	tool.execute = async (inputParams?: JsonObject | string): Promise<JsonObject> => {
-		try {
-			// Validate params is either undefined, string, or object
-			if (
-				inputParams !== undefined &&
-				typeof inputParams !== 'string' &&
-				typeof inputParams !== 'object'
-			) {
-				throw new StackOneError(
-					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(
-						inputParams,
-					)}`,
-				);
-			}
-
-			// Convert string params to object
-			const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-			const limit = params.limit || 5;
-			const minScore = params.minScore ?? 0.3;
-			const query = params.query || '';
-
-			// Hybrid: BM25 + TF-IDF fusion
-			const alpha = Math.max(0, Math.min(1, hybridAlpha));
-
-			// Get results from both algorithms
-			const [bm25Results, tfidfResults] = await Promise.all([
-				orama.search(oramaDb, {
-					term: query,
-					limit: Math.max(50, limit),
-				} as Parameters<typeof orama.search>[1]),
-				Promise.resolve(tfidfIndex.search(query, Math.max(50, limit))),
-			]);
-
-			// Build score map
-			const scoreMap = new Map<string, { bm25?: number; tfidf?: number }>();
-
-			for (const hit of bm25Results.hits) {
-				const doc = hit.document as { name: string };
-				scoreMap.set(doc.name, {
-					...scoreMap.get(doc.name),
-					bm25: clamp01(hit.score),
-				});
-			}
-
-			for (const r of tfidfResults) {
-				scoreMap.set(r.id, {
-					...scoreMap.get(r.id),
-					tfidf: clamp01(r.score),
-				});
-			}
-
-			// Fuse scores
-			const fused: Array<{ name: string; score: number }> = [];
-			for (const [name, scores] of scoreMap) {
-				const bm25 = scores.bm25 ?? 0;
-				const tfidf = scores.tfidf ?? 0;
-				const score = alpha * bm25 + (1 - alpha) * tfidf;
-				fused.push({ name, score });
-			}
-
-			fused.sort((a, b) => b.score - a.score);
-
-			const toolConfigs = fused
-				.filter((r) => r.score >= minScore)
-				.map((r) => {
-					const tool = allTools.find((t) => t.name === r.name);
-					if (!tool) return null;
-
-					return {
-						name: tool.name,
-						description: tool.description,
-						parameters: tool.parameters,
-						score: r.score,
-					};
-				})
-				.filter((t): t is ToolSearchResult => t !== null)
-				.slice(0, limit);
-
-			// Convert to JSON-serialisable format (removes undefined values)
-			return JSON.parse(JSON.stringify({ tools: toolConfigs })) satisfies JsonObject;
-		} catch (error) {
-			if (error instanceof StackOneError) {
-				throw error;
-			}
-			throw new StackOneError(
-				`Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
-			);
-		}
-	};
-	return tool;
-}
-
-/**
- * Clamp value to [0, 1]
- */
-function clamp01(x: number): number {
-	return x < 0 ? 0 : x > 1 ? 1 : x;
-}
-
-function toolExecute(tools: Tools): BaseTool {
-	const name = 'tool_execute' as const;
-	const description =
-		'Executes a specific tool by name with the provided parameters. Use this after discovering tools with tool_search.' as const;
-	const parameters = {
-		type: 'object',
-		properties: {
-			toolName: {
-				type: 'string',
-				description: 'Name of the tool to execute',
-			},
-			params: {
-				type: 'object',
-				description: 'Parameters to pass to the tool',
-			},
-		},
-		required: ['toolName', 'params'],
-	} as const satisfies ToolParameters;
-
-	const executeConfig = {
-		kind: 'local',
-		identifier: name,
-		description: 'local://execute-tool',
-	} as const satisfies LocalExecuteConfig;
-
-	// Create the tool instance
-	const tool = new BaseTool(name, description, parameters, executeConfig);
-
-	// Override the execute method to handle tool execution
-	// receives tool name and parameters and executes the tool
-	tool.execute = async (
-		inputParams?: JsonObject | string,
-		options?: ExecuteOptions,
-	): Promise<JsonObject> => {
-		try {
-			// Validate params is either undefined, string, or object
-			if (
-				inputParams !== undefined &&
-				typeof inputParams !== 'string' &&
-				typeof inputParams !== 'object'
-			) {
-				throw new StackOneError(
-					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(
-						inputParams,
-					)}`,
-				);
-			}
-
-			// Convert string params to object
-			const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-
-			// Extract tool name and parameters
-			const { toolName, params: toolParams } = params;
-
-			// Find the tool by name
-			const toolToExecute = tools.getTool(toolName);
-			if (!toolToExecute) {
-				throw new StackOneError(`Tool ${toolName} not found`);
-			}
-
-			// Execute the tool with the provided parameters
-			return await toolToExecute.execute(toolParams, options);
-		} catch (error) {
-			if (error instanceof StackOneError) {
-				throw error;
-			}
-			throw new StackOneError(
-				`Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
-			);
-		}
-	};
-	return tool;
-}

@@ -11,6 +11,7 @@
 
 import { tool, createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
+import { TEST_BASE_URL } from '../mocks/constants';
 import { StackOneToolSet } from '../src';
 
 describe('claude-agent-sdk-integration example e2e', () => {
@@ -25,7 +26,7 @@ describe('claude-agent-sdk-integration example e2e', () => {
 	it('should fetch tools and create Claude Agent SDK tool wrapper', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		// Fetch all tools for this account via MCP
@@ -61,7 +62,7 @@ describe('claude-agent-sdk-integration example e2e', () => {
 	it('should create MCP server with StackOne tools', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		const tools = await toolset.fetchTools();
@@ -99,7 +100,7 @@ describe('claude-agent-sdk-integration example e2e', () => {
 	it('should execute tool handler directly', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		const tools = await toolset.fetchTools();

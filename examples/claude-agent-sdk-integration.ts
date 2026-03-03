@@ -19,15 +19,9 @@ if (!apiKey) {
 	process.exit(1);
 }
 
-// Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
-
 const claudeAgentSdkIntegration = async (): Promise<void> => {
-	// Initialize StackOne
-	const toolset = new StackOneToolSet({
-		accountId,
-		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
-	});
+	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
+	const toolset = new StackOneToolSet();
 
 	// Fetch tools from StackOne and convert to Claude Agent SDK format
 	const tools = await toolset.fetchTools();

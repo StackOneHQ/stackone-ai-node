@@ -6,6 +6,7 @@
 
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/node';
+import { TEST_BASE_URL } from '../mocks/constants';
 import { StackOneToolSet } from '../src';
 
 describe('fetch-tools example e2e', () => {
@@ -20,7 +21,7 @@ describe('fetch-tools example e2e', () => {
 	it('should fetch tools, filter by various criteria, and execute a tool', async () => {
 		// Setup RPC handler for tool execution
 		server.use(
-			http.post('https://api.stackone.com/actions/rpc', async ({ request }) => {
+			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
 				const body: unknown = await request.json();
 				assert(typeof body === 'object' && body !== null);
 				const { action } = body as Record<string, unknown>;
@@ -40,7 +41,7 @@ describe('fetch-tools example e2e', () => {
 		);
 
 		const toolset = new StackOneToolSet({
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		// Example 1: Fetch all tools (without account filter)

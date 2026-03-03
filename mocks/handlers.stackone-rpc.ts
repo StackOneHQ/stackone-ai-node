@@ -1,10 +1,11 @@
 import { http, HttpResponse } from 'msw';
+import { TEST_BASE_URL } from './constants';
 
 /**
  * StackOne Actions RPC endpoint handlers
  */
 export const stackoneRpcHandlers = [
-	http.post('https://api.stackone.com/actions/rpc', async ({ request }) => {
+	http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
 		const authHeader = request.headers.get('Authorization');
 		const accountIdHeader = request.headers.get('x-account-id');
 

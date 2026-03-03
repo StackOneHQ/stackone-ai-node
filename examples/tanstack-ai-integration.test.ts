@@ -9,6 +9,7 @@
  * StackOne tools.
  */
 
+import { TEST_BASE_URL } from '../mocks/constants';
 import { StackOneToolSet } from '../src';
 
 describe('tanstack-ai-integration example e2e', () => {
@@ -24,7 +25,7 @@ describe('tanstack-ai-integration example e2e', () => {
 	it('should fetch tools and convert to TanStack AI format', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		// Fetch all tools for this account via MCP
@@ -51,7 +52,7 @@ describe('tanstack-ai-integration example e2e', () => {
 	it('should execute tool directly', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		const tools = await toolset.fetchTools();

@@ -154,6 +154,25 @@ Shows how to implement human-in-the-loop workflows for validation.
 - **API Calls**: Conditional
 - **Key Features**: Manual approval workflows, UI integration patterns
 
+### Semantic Search
+
+#### [`search-tools.ts`](./search-tools.ts) - Semantic Tool Search
+
+Demonstrates dynamic tool discovery using semantic search. Includes four examples:
+
+1. **Semantic search + AI SDK** — search for tools by natural language query, then use them with `generateText`
+2. **SearchTool for agent loops** — reusable search tool for multi-step agent workflows
+3. **Lightweight action name search** — search action names without fetching full tool definitions
+4. **Local-only search** — BM25+TF-IDF search with no API call to the semantic search endpoint
+
+```bash
+# Run without OpenAI (examples 2-4)
+npx tsx examples/search-tools.ts
+
+# Run all 4 examples
+OPENAI_API_KEY=your-key npx tsx examples/search-tools.ts
+```
+
 ### OpenAPI Toolset Examples
 
 #### [`openapi-toolset.ts`](./openapi-toolset.ts) - OpenAPI Integration

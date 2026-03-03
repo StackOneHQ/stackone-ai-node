@@ -34,7 +34,6 @@ bun add @stackone/ai zod
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -97,7 +96,6 @@ import { OpenAI } from 'openai';
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -135,7 +133,6 @@ import OpenAI from 'openai';
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -167,7 +164,6 @@ import Anthropic from '@anthropic-ai/sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -206,7 +202,6 @@ import { generateText } from 'ai';
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -237,7 +232,6 @@ import { z } from 'zod';
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -285,7 +279,6 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
 const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
 	accountId: 'your-account-id',
 });
 
@@ -355,77 +348,60 @@ This is especially useful when you want to:
 
 [View full example](examples/fetch-tools.ts)
 
-### Utility Tools (Beta)
+### Search Tool
 
-Utility tools enable dynamic tool discovery and execution, allowing AI agents to search for relevant tools based on natural language queries without hardcoding tool names.
-
-> **Beta Feature**: Utility tools are currently in beta and the API may change in future versions.
-
-#### How Utility Tools Work
-
-Utility tools provide two core capabilities:
-
-1. **Tool Discovery** (`tool_search`): Search for tools using natural language queries
-2. **Tool Execution** (`tool_execute`): Execute discovered tools dynamically
+Search for tools using natural language queries. Works with both semantic (cloud) and local BM25+TF-IDF search.
 
 #### Basic Usage
 
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
-});
-const tools = await toolset.fetchTools();
+// Get a callable search tool
+const toolset = new StackOneToolSet({ accountId: 'your-account-id' });
+const searchTool = toolset.getSearchTool();
 
-// Get utility tools for dynamic discovery
-const utilityTools = await tools.utilityTools();
+// Search for relevant tools — returns a Tools collection
+const tools = await searchTool.search('manage employees', { topK: 5 });
 
-// Use with OpenAI
-const openAITools = utilityTools.toOpenAI();
-
-// Use with AI SDK
-const aiSdkTools = await utilityTools.toAISDK();
+// Execute a discovered tool directly
+const listTool = tools.getTool('bamboohr_list_employees');
+const result = await listTool.execute({ query: { limit: 10 } });
 ```
 
-#### Example: Dynamic Tool Discovery with AI SDK
+### Semantic Search
+
+Discover tools using natural language instead of exact names. Queries like "onboard new hire" resolve to the right actions even when the tool is called `bamboohr_create_employee`.
 
 ```typescript
-import { generateText } from 'ai';
-import { openai } from '@ai-sdk/openai';
+import { StackOneToolSet } from '@stackone/ai';
 
-const { text } = await generateText({
-	model: openai('gpt-5.1'),
-	tools: aiSdkTools,
-	prompt: 'Find tools for managing employees and create a time off request',
-	maxSteps: 3, // Allow multiple tool calls
-});
+const toolset = new StackOneToolSet({ accountId: 'your-account-id' });
+
+// Search by intent — returns Tools collection ready for any framework
+const tools = await toolset.searchTools('manage employee records', { topK: 5 });
+const openAITools = tools.toOpenAI();
+
+// Lightweight: inspect results without fetching full tool definitions
+const results = await toolset.searchActionNames('time off requests', { topK: 5 });
 ```
 
-#### Direct Usage Without AI
+#### Search Modes
+
+Control which search backend `searchTools()` uses via the `search` option:
 
 ```typescript
-// Step 1: Discover relevant tools
-const filterTool = utilityTools.getTool('tool_search');
-const searchResult = await filterTool.execute({
-	query: 'employee time off vacation',
-	limit: 5,
-	minScore: 0.3, // Minimum relevance score (0-1)
-});
+// 'auto' (default) — tries semantic search first, falls back to local
+const tools = await toolset.searchTools('manage employees', { search: 'auto' });
 
-// Step 2: Execute a discovered tool
-const executeTool = utilityTools.getTool('tool_execute');
-const result = await executeTool.execute({
-	toolName: 'bamboohr_create_time_off',
-	params: {
-		employeeId: 'emp_123',
-		startDate: '2024-01-15',
-		endDate: '2024-01-19',
-	},
-});
+// 'semantic' — semantic API only, throws if unavailable
+const tools = await toolset.searchTools('manage employees', { search: 'semantic' });
+
+// 'local' — local BM25+TF-IDF only, no semantic API call
+const tools = await toolset.searchTools('manage employees', { search: 'local' });
 ```
 
-[View full example](examples/utility-tools.ts)
+Results are automatically scoped to connectors in your linked accounts. See [Search Tools Example](examples/search-tools.ts) for `SearchTool` (`getSearchTool`) integration, AI SDK, and agent loop patterns.
 
 ### Custom Base URL
 
@@ -443,9 +419,7 @@ You can use the `dryRun` option to return the api arguments from a tool call wit
 import { StackOneToolSet } from '@stackone/ai';
 
 // Initialize the toolset
-const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
-});
+const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
 const employeeTool = tools.getTool('bamboohr_list_employees');
@@ -492,9 +466,7 @@ The feedback tool is automatically available when using `StackOneToolSet`:
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	baseUrl: 'https://api.stackone.com',
-});
+const toolset = new StackOneToolSet();
 const tools = await toolset.fetchTools();
 
 // The feedback tool is automatically included

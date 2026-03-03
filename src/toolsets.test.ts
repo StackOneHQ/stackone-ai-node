@@ -7,10 +7,12 @@
  * - Account filtering
  * - Provider and action filtering
  */
-import { http } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { type McpToolDefinition, createMcpApp } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
-import { StackOneToolSet, ToolSetConfigError } from './toolsets';
+import { TEST_BASE_URL } from '../mocks/constants';
+import { SemanticSearchError } from './semantic-search';
+import { SearchTool, StackOneToolSet, ToolSetConfigError } from './toolsets';
 
 describe('StackOneToolSet', () => {
 	beforeEach(() => {
@@ -226,7 +228,7 @@ describe('StackOneToolSet', () => {
 	describe('fetchTools (MCP integration)', () => {
 		it('creates tools from MCP catalog and wires RPC execution', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -255,7 +257,7 @@ describe('StackOneToolSet', () => {
 	describe('account filtering', () => {
 		it('supports setAccounts() for chaining', () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -266,7 +268,7 @@ describe('StackOneToolSet', () => {
 
 		it('fetches tools without account filtering when no accountIds provided', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -281,7 +283,7 @@ describe('StackOneToolSet', () => {
 
 		it('uses x-account-id header when fetching tools with accountIds', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -297,7 +299,7 @@ describe('StackOneToolSet', () => {
 
 		it('uses setAccounts when no accountIds provided in fetchTools', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -320,7 +322,7 @@ describe('StackOneToolSet', () => {
 
 		it('uses accountIds from constructor when no accountIds provided in fetchTools', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountIds: ['acc1', 'acc2'],
 			});
@@ -341,7 +343,7 @@ describe('StackOneToolSet', () => {
 
 		it('setAccounts overrides constructor accountIds', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountIds: ['acc1'],
 			});
@@ -365,7 +367,7 @@ describe('StackOneToolSet', () => {
 
 		it('overrides setAccounts when accountIds provided in fetchTools', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -386,7 +388,7 @@ describe('StackOneToolSet', () => {
 	describe('tool execution', () => {
 		it('should execute tool with dryRun option', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -397,7 +399,7 @@ describe('StackOneToolSet', () => {
 
 			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
 
-			expect(result.url).toBe('https://api.stackone-dev.com/actions/rpc');
+			expect(result.url).toBe(`${TEST_BASE_URL}/actions/rpc`);
 			expect(result.method).toBe('POST');
 			expect(result.headers).toBeDefined();
 			expect(result.body).toBeDefined();
@@ -406,7 +408,7 @@ describe('StackOneToolSet', () => {
 
 		it('should execute tool with path, query, and headers params', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -435,7 +437,7 @@ describe('StackOneToolSet', () => {
 
 		it('should execute tool with string parameters', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -453,7 +455,7 @@ describe('StackOneToolSet', () => {
 
 		it('should throw StackOneError for invalid parameter type', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -468,7 +470,7 @@ describe('StackOneToolSet', () => {
 
 		it('should wrap non-StackOneError in execute', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -483,7 +485,7 @@ describe('StackOneToolSet', () => {
 
 		it('should include extra params in rpcBody', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
 			});
@@ -514,7 +516,7 @@ describe('StackOneToolSet', () => {
 	describe('provider and action filtering', () => {
 		it('filters tools by providers', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
 			});
@@ -535,7 +537,7 @@ describe('StackOneToolSet', () => {
 
 		it('filters tools by actions with exact match', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
 			});
@@ -555,7 +557,7 @@ describe('StackOneToolSet', () => {
 
 		it('filters tools by actions with glob pattern', async () => {
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
 			});
@@ -623,13 +625,13 @@ describe('StackOneToolSet', () => {
 				},
 			});
 			server.use(
-				http.all('https://api.stackone-dev.com/mcp', async ({ request }) => {
+				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
 					return testMcpApp.fetch(request);
 				}),
 			);
 
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -685,13 +687,13 @@ describe('StackOneToolSet', () => {
 				},
 			});
 			server.use(
-				http.all('https://api.stackone-dev.com/mcp', async ({ request }) => {
+				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
 					return testMcpApp.fetch(request);
 				}),
 			);
 
 			const toolset = new StackOneToolSet({
-				baseUrl: 'https://api.stackone-dev.com',
+				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 			});
 
@@ -707,6 +709,252 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('hibob_list_employees');
 			expect(toolNames).toContain('tool_feedback');
+		});
+	});
+
+	describe('searchTools', () => {
+		it('returns tools from semantic search results', async () => {
+			// Set up MCP with mixed provider tools (hibob, bamboohr, workday)
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			// Mock the semantic search endpoint
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, async ({ request }) => {
+					const body = (await request.json()) as Record<string, unknown>;
+					expect(body.query).toBe('list employees');
+
+					return HttpResponse.json({
+						results: [
+							{
+								action_name: 'hibob_list_employees',
+								connector_key: 'hibob',
+								similarity_score: 0.95,
+								label: 'List Employees',
+								description: 'List employees from HiBob',
+							},
+							{
+								action_name: 'bamboohr_list_employees',
+								connector_key: 'bamboohr',
+								similarity_score: 0.88,
+								label: 'List Employees',
+								description: 'List employees from BambooHR',
+							},
+						],
+						total_count: 2,
+						query: 'list employees',
+						connector_filter: body.connector,
+					});
+				}),
+			);
+
+			const tools = await toolset.searchTools('list employees', { topK: 5 });
+			const toolNames = tools.toArray().map((t) => t.name);
+
+			expect(toolNames).toContain('hibob_list_employees');
+			expect(toolNames).toContain('bamboohr_list_employees');
+		});
+
+		it('falls back to local search in auto mode when semantic fails', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			// Mock semantic search to fail
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return new HttpResponse('Service Unavailable', { status: 503 });
+				}),
+			);
+
+			// Should fall back to local search without throwing
+			const tools = await toolset.searchTools('list employees', {
+				search: 'auto',
+				topK: 5,
+			});
+
+			// Local search should return some results from the mixed provider tools
+			expect(tools.length).toBeGreaterThan(0);
+		});
+
+		it('throws SemanticSearchError in semantic mode when API fails', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			// Mock semantic search to fail
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return new HttpResponse('Internal Server Error', { status: 500 });
+				}),
+			);
+
+			await expect(
+				toolset.searchTools('list employees', { search: 'semantic' }),
+			).rejects.toThrow(SemanticSearchError);
+		});
+
+		it('uses local search mode directly', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			const tools = await toolset.searchTools('list employees', {
+				search: 'local',
+				topK: 3,
+			});
+
+			// Local search should return results without calling semantic API
+			expect(tools.length).toBeGreaterThan(0);
+			const toolNames = tools.toArray().map((t) => t.name);
+			// Should find employee-related tools
+			const hasEmployeeTool = toolNames.some((name) => name.includes('employee'));
+			expect(hasEmployeeTool).toBe(true);
+		});
+
+		it('returns empty tools when no connectors available', async () => {
+			// Use default account (no mixed tools, just default tools without connectors)
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			// test-account only has dummy_action which has a connector prefix "dummy"
+			// but semantic search for "list employees" on dummy connector returns nothing useful
+
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return HttpResponse.json({
+						results: [],
+						total_count: 0,
+						query: 'list employees',
+					});
+				}),
+			);
+
+			const tools = await toolset.searchTools('list employees');
+			// No matching tools from semantic search
+			expect(tools.length).toBe(0);
+		});
+	});
+
+	describe('searchActionNames', () => {
+		it('returns semantic search results with normalized action names', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return HttpResponse.json({
+						results: [
+							{
+								action_name: 'hibob_1.0.0_hibob_list_employees_global',
+								connector_key: 'hibob',
+								similarity_score: 0.95,
+								label: 'List Employees',
+								description: 'List employees',
+							},
+						],
+						total_count: 1,
+						query: 'list employees',
+					});
+				}),
+			);
+
+			const results = await toolset.searchActionNames('list employees');
+
+			expect(results.length).toBeGreaterThan(0);
+			// Action name should be normalized (versioned prefix stripped)
+			expect(results[0].actionName).toBe('hibob_list_employees');
+		});
+
+		it('returns empty array when semantic search fails', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return new HttpResponse('Internal Server Error', { status: 500 });
+				}),
+			);
+
+			const results = await toolset.searchActionNames('list employees');
+			expect(results).toEqual([]);
+		});
+	});
+
+	describe('getSearchTool', () => {
+		it('returns a SearchTool instance', () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			const searchTool = toolset.getSearchTool();
+			expect(searchTool).toBeInstanceOf(SearchTool);
+		});
+
+		it('SearchTool.search delegates to searchTools', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return HttpResponse.json({
+						results: [
+							{
+								action_name: 'hibob_list_employees',
+								connector_key: 'hibob',
+								similarity_score: 0.95,
+								label: 'List Employees',
+								description: 'List employees',
+							},
+						],
+						total_count: 1,
+						query: 'list employees',
+					});
+				}),
+			);
+
+			const searchTool = toolset.getSearchTool();
+			const tools = await searchTool.search('list employees');
+			const toolNames = tools.toArray().map((t) => t.name);
+
+			expect(toolNames).toContain('hibob_list_employees');
+		});
+
+		it('uses configured search mode', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			// Create search tool with local mode
+			const searchTool = toolset.getSearchTool({ search: 'local' });
+
+			// Should not call semantic API at all
+			const tools = await searchTool.search('list employees', { topK: 3 });
+			expect(tools.length).toBeGreaterThan(0);
 		});
 	});
 });

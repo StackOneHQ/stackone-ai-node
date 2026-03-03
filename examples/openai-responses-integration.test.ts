@@ -5,6 +5,7 @@
  */
 
 import OpenAI from 'openai';
+import { TEST_BASE_URL } from '../mocks/constants';
 import { StackOneToolSet } from '../src';
 
 describe('openai-responses-integration example e2e', () => {
@@ -20,6 +21,7 @@ describe('openai-responses-integration example e2e', () => {
 	it('should fetch tools, convert to OpenAI Responses format, and create response with tool calls', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-stackone-account-id',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		// Fetch tools via MCP with action filter

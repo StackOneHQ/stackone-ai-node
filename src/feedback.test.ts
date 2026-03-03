@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/node';
-import { StackOneError } from './utils/error-stackone';
+import { TEST_BASE_URL } from '../mocks/constants';
 import { createFeedbackTool } from './feedback';
+import { StackOneError } from './utils/error-stackone';
 
 interface FeedbackResultItem {
 	account_id: string;
@@ -21,7 +22,7 @@ interface FeedbackResult {
 describe('tool_feedback', () => {
 	describe('validation tests', () => {
 		it('test_missing_required_fields', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 
 			// Test missing account_id
 			await expect(
@@ -40,7 +41,7 @@ describe('tool_feedback', () => {
 		});
 
 		it('test_empty_and_whitespace_validation', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 
 			// Test empty feedback
 			await expect(
@@ -73,7 +74,7 @@ describe('tool_feedback', () => {
 		});
 
 		it('test_multiple_account_ids_validation', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 
 			// Test empty account ID list
 			await expect(
@@ -95,7 +96,7 @@ describe('tool_feedback', () => {
 		});
 
 		it('test_json_string_input', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 			const recordedRequests: Request[] = [];
 			const listener = ({ request }: { request: Request }) => {
 				recordedRequests.push(request);
@@ -124,7 +125,7 @@ describe('tool_feedback', () => {
 
 	describe('execution tests', () => {
 		it('test_single_account_execution', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 			const recordedRequests: Request[] = [];
 			const listener = ({ request }: { request: Request }) => {
 				recordedRequests.push(request);
@@ -138,7 +139,7 @@ describe('tool_feedback', () => {
 			});
 
 			expect(recordedRequests).toHaveLength(1);
-			expect(recordedRequests[0]?.url).toBe('https://api.stackone.com/ai/tool-feedback');
+			expect(recordedRequests[0]?.url).toBe(`${TEST_BASE_URL}/ai/tool-feedback`);
 			expect(recordedRequests[0]?.method).toBe('POST');
 			// TODO: Remove type assertion once createFeedbackTool returns properly typed result instead of JsonDict
 			const feedbackResult = result as unknown as FeedbackResult;
@@ -160,7 +161,7 @@ describe('tool_feedback', () => {
 		});
 
 		it('test_call_method_interface', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 			const recordedRequests: Request[] = [];
 			const listener = ({ request }: { request: Request }) => {
 				recordedRequests.push(request);
@@ -185,11 +186,11 @@ describe('tool_feedback', () => {
 		});
 
 		it('test_api_error_handling', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 
 			// Override the default handler to return an error
 			server.use(
-				http.post('https://api.stackone.com/ai/tool-feedback', () => {
+				http.post(`${TEST_BASE_URL}/ai/tool-feedback`, () => {
 					return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 });
 				}),
 			);
@@ -204,7 +205,7 @@ describe('tool_feedback', () => {
 		});
 
 		it('test_multiple_account_ids_execution', async () => {
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 
 			// Test all accounts succeed
 			const recordedRequests: Request[] = [];
@@ -231,7 +232,7 @@ describe('tool_feedback', () => {
 			// Test mixed success/error scenario
 			let callCount = 0;
 			server.use(
-				http.post('https://api.stackone.com/ai/tool-feedback', () => {
+				http.post(`${TEST_BASE_URL}/ai/tool-feedback`, () => {
 					callCount++;
 					if (callCount === 1) {
 						return HttpResponse.json({ message: 'Success' });
@@ -273,7 +274,7 @@ describe('tool_feedback', () => {
 
 		it('test_tool_integration', async () => {
 			// Test tool properties
-			const tool = createFeedbackTool();
+			const tool = createFeedbackTool(undefined, undefined, TEST_BASE_URL);
 			expect(tool.name).toBe('tool_feedback');
 			expect(tool.description).toContain('Collects user feedback');
 			expect(tool.parameters).toBeDefined();

@@ -1,4 +1,5 @@
 import { http } from 'msw';
+import { TEST_BASE_URL } from './constants';
 import {
 	accountMcpTools,
 	createMcpApp,
@@ -26,10 +27,7 @@ const defaultMcpApp = createMcpApp({
  * MCP Protocol endpoint handlers (delegated to Hono app)
  */
 export const mcpHandlers = [
-	http.all('https://api.stackone.com/mcp', async ({ request }) => {
-		return defaultMcpApp.fetch(request);
-	}),
-	http.all('https://api.stackone-dev.com/mcp', async ({ request }) => {
+	http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
 		return defaultMcpApp.fetch(request);
 	}),
 ];

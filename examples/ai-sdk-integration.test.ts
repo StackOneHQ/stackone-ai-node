@@ -6,6 +6,7 @@
 
 import { openai } from '@ai-sdk/openai';
 import { generateText, stepCountIs } from 'ai';
+import { TEST_BASE_URL } from '../mocks/constants';
 import { StackOneToolSet } from '../src';
 
 describe('ai-sdk-integration example e2e', () => {
@@ -21,7 +22,7 @@ describe('ai-sdk-integration example e2e', () => {
 	it('should fetch tools, convert to AI SDK format, and generate text with tool calls', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		// Fetch all tools for this account via MCP

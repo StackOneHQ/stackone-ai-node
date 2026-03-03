@@ -1,9 +1,11 @@
+import { TEST_BASE_URL } from '../mocks/constants';
 import { RpcClient } from './rpc-client';
 import { stackOneHeadersSchema } from './headers';
 import { StackOneAPIError } from './utils/error-stackone-api';
 
 test('should successfully execute an RPC action', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 
@@ -23,6 +25,7 @@ test('should successfully execute an RPC action', async () => {
 
 test('should send correct payload structure', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 
@@ -48,6 +51,7 @@ test('should send correct payload structure', async () => {
 
 test('should handle list actions with array data', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 
@@ -65,6 +69,7 @@ test('should handle list actions with array data', async () => {
 
 test('should throw StackOneAPIError on server error', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 
@@ -77,6 +82,7 @@ test('should throw StackOneAPIError on server error', async () => {
 
 test('should include request body in error for debugging', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 
@@ -93,6 +99,7 @@ test('should include request body in error for debugging', async () => {
 
 test('should work with only action parameter', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 
@@ -106,6 +113,7 @@ test('should work with only action parameter', async () => {
 
 test('should send x-account-id as HTTP header', async () => {
 	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
 		security: { username: 'test-api-key' },
 	});
 

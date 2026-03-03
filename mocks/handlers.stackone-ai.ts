@@ -1,11 +1,12 @@
 import { http, HttpResponse } from 'msw';
+import { TEST_BASE_URL } from './constants';
 
 /**
  * StackOne AI and Tools endpoint handlers
  */
 export const stackoneAiHandlers = [
 	// StackOne API spec endpoints
-	http.get('https://api.stackone.com/api/v1/:category/openapi.json', ({ params }) => {
+	http.get(`${TEST_BASE_URL}/api/v1/:category/openapi.json`, ({ params }) => {
 		const { category } = params;
 
 		if (category === 'hris') {
@@ -20,7 +21,7 @@ export const stackoneAiHandlers = [
 	}),
 
 	// StackOne AI tool feedback endpoint
-	http.post('https://api.stackone.com/ai/tool-feedback', async ({ request }) => {
+	http.post(`${TEST_BASE_URL}/ai/tool-feedback`, async ({ request }) => {
 		await request.json(); // Validate request body is JSON
 		return HttpResponse.json({
 			message: 'Feedback successfully stored',
@@ -31,7 +32,7 @@ export const stackoneAiHandlers = [
 	}),
 
 	// StackOne fetchTools endpoint for fetch-tools.ts example
-	http.get('https://api.stackone.com/ai/tools', () => {
+	http.get(`${TEST_BASE_URL}/ai/tools`, () => {
 		return HttpResponse.json({
 			tools: [
 				{
@@ -69,11 +70,11 @@ export const stackoneAiHandlers = [
 	}),
 
 	// External OAS spec endpoint for openapi-toolset.ts example
-	http.get('https://api.eu1.stackone.com/oas/hris.json', () => {
+	http.get(`${TEST_BASE_URL}/oas/hris.json`, () => {
 		return HttpResponse.json({
 			openapi: '3.0.0',
 			info: { title: 'StackOne HRIS API', version: '1.0.0' },
-			servers: [{ url: 'https://api.stackone.com' }],
+			servers: [{ url: TEST_BASE_URL }],
 			paths: {
 				'/hris/employees': {
 					get: {

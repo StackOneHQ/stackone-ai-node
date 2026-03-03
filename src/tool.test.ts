@@ -1,32 +1,5 @@
 import { jsonSchema } from 'ai';
-import { BaseTool, type ToolSearchResult, StackOneTool, Tools } from './tool';
-import type { JsonObject } from './types';
-
-/**
- * Type guard for ToolSearchResult array from execute result.
- * Used to safely extract tools from tool_search response.
- */
-function isToolSearchResults(value: unknown): value is ToolSearchResult[] {
-	return (
-		Array.isArray(value) &&
-		value.every(
-			(item) =>
-				typeof item === 'object' &&
-				item !== null &&
-				'name' in item &&
-				'description' in item &&
-				'score' in item,
-		)
-	);
-}
-
-/** Extract tools from search result with type safety */
-function getSearchResults(result: JsonObject): ToolSearchResult[] {
-	if (!isToolSearchResults(result.tools)) {
-		throw new Error('Invalid tools response');
-	}
-	return result.tools;
-}
+import { BaseTool, StackOneTool, Tools } from './tool';
 import {
 	type ExecuteConfig,
 	type JSONSchema,
@@ -804,566 +777,98 @@ describe('Tools', () => {
 	});
 });
 
-// Create mock tools for utility tools testing
-const createMockTools = (): BaseTool[] => {
-	const tools: BaseTool[] = [];
-
-	// HRIS tools
-	tools.push(
-		new BaseTool(
-			'bamboohr_create_employee',
-			'Create a new employee record in the HRIS system',
-			{
-				type: 'object',
-				properties: {
-					name: { type: 'string', description: 'Employee name' },
-					email: { type: 'string', description: 'Employee email' },
-				},
-				required: ['name', 'email'],
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/hris/employees',
-				bodyType: 'json',
-				params: [],
-			},
-		),
-	);
-
-	tools.push(
-		new BaseTool(
+describe('BaseTool.connector', () => {
+	it('should extract connector prefix from tool name', () => {
+		const tool = new BaseTool(
 			'bamboohr_list_employees',
-			'List all employees in the HRIS system',
-			{
-				type: 'object',
-				properties: {
-					limit: { type: 'number', description: 'Number of employees to return' },
-				},
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://api.example.com/hris/employees',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'limit',
-						location: ParameterLocation.QUERY,
-						type: 'number',
-					},
-				],
-			},
-		),
-	);
-
-	tools.push(
-		new BaseTool(
-			'bamboohr_create_time_off',
-			'Create a time off request for an employee',
-			{
-				type: 'object',
-				properties: {
-					employeeId: { type: 'string', description: 'Employee ID' },
-					startDate: { type: 'string', description: 'Start date of time off' },
-					endDate: { type: 'string', description: 'End date of time off' },
-				},
-				required: ['employeeId', 'startDate', 'endDate'],
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/hris/time-off',
-				bodyType: 'json',
-				params: [],
-			},
-		),
-	);
-
-	// ATS tools
-	tools.push(
-		new BaseTool(
-			'workday_create_candidate',
-			'Create a new candidate in the ATS',
-			{
-				type: 'object',
-				properties: {
-					name: { type: 'string', description: 'Candidate name' },
-					email: { type: 'string', description: 'Candidate email' },
-				},
-				required: ['name', 'email'],
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/ats/candidates',
-				bodyType: 'json',
-				params: [],
-			},
-		),
-	);
-
-	tools.push(
-		new BaseTool(
-			'workday_list_candidates',
-			'List all candidates in the ATS',
-			{
-				type: 'object',
-				properties: {
-					status: { type: 'string', description: 'Filter by candidate status' },
-				},
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://api.example.com/ats/candidates',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'status',
-						location: ParameterLocation.QUERY,
-						type: 'string',
-					},
-				],
-			},
-		),
-	);
-
-	// CRM tools
-	tools.push(
-		new BaseTool(
-			'salesforce_create_contact',
-			'Create a new contact in the CRM',
-			{
-				type: 'object',
-				properties: {
-					name: { type: 'string', description: 'Contact name' },
-					company: { type: 'string', description: 'Company name' },
-				},
-				required: ['name'],
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/crm/contacts',
-				bodyType: 'json',
-				params: [],
-			},
-		),
-	);
-
-	return tools;
-};
-
-describe('Utility Tools', () => {
-	let tools: Tools;
-	let utilityTools: Tools;
-
-	beforeEach(async () => {
-		const mockTools = createMockTools();
-		tools = new Tools(mockTools);
-		utilityTools = await tools.utilityTools(); // default BM25 strategy
+			'List employees',
+			{ type: 'object', properties: {} },
+			{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
+		);
+		expect(tool.connector).toBe('bamboohr');
 	});
 
-	describe('utilityTools()', () => {
-		it('should return two utility tools', () => {
-			expect(utilityTools.length).toBe(2);
-		});
-
-		it('should include tool_search', () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			expect(filterTool).toBeDefined();
-			expect(filterTool?.name).toBe('tool_search');
-		});
-
-		it('should include tool_execute', () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			expect(executeTool).toBeDefined();
-			expect(executeTool?.name).toBe('tool_execute');
-		});
+	it('should return the name itself for single-segment names', () => {
+		const tool = new BaseTool(
+			'bamboohr',
+			'BambooHR',
+			{ type: 'object', properties: {} },
+			{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
+		);
+		expect(tool.connector).toBe('bamboohr');
 	});
 
-	describe('tool_search', () => {
-		it('should find relevant BambooHR tools', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute({
-				query: 'manage employees in bamboohr',
-				limit: 5,
-			});
-
-			expect(result.tools).toBeDefined();
-			expect(Array.isArray(result.tools)).toBe(true);
-
-			const toolResults = getSearchResults(result);
-			const toolNames = toolResults.map((t) => t.name);
-
-			expect(toolNames).toContain('bamboohr_create_employee');
-			expect(toolNames).toContain('bamboohr_list_employees');
-		});
-
-		it('should find time off related tools', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute({
-				query: 'time off request vacation leave',
-				limit: 3,
-			});
-
-			const toolResults = getSearchResults(result);
-			const toolNames = toolResults.map((t) => t.name);
-
-			expect(toolNames).toContain('bamboohr_create_time_off');
-		});
-
-		it('should respect limit parameter', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute({
-				query: 'create',
-				limit: 2,
-			});
-
-			const toolResults = getSearchResults(result);
-			expect(toolResults.length).toBeLessThanOrEqual(2);
-		});
-
-		it('should filter by minimum score', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute({
-				query: 'xyz123 nonexistent',
-				minScore: 0.8,
-			});
-
-			const toolResults = getSearchResults(result);
-			expect(toolResults.length).toBe(0);
-		});
-
-		it('should include tool configurations in results', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute({
-				query: 'create employee',
-				limit: 1,
-			});
-
-			const toolResults = getSearchResults(result);
-			expect(toolResults.length).toBeGreaterThan(0);
-
-			const firstTool = toolResults[0];
-			expect(firstTool).toHaveProperty('name');
-			expect(firstTool).toHaveProperty('description');
-			expect(firstTool).toHaveProperty('parameters');
-			expect(firstTool).toHaveProperty('score');
-			expect(typeof firstTool.score).toBe('number');
-		});
-
-		it('should handle empty query', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute({
-				query: '',
-				limit: 5,
-			});
-
-			expect(result.tools).toBeDefined();
-			expect(Array.isArray(result.tools)).toBe(true);
-		});
-
-		it('should handle string parameters', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			const result = await filterTool.execute(
-				JSON.stringify({
-					query: 'candidates',
-					limit: 3,
-				}),
-			);
-
-			const toolResults = getSearchResults(result);
-			const toolNames = toolResults.map((t) => t.name);
-
-			const hasCandidateTool = toolNames.some(
-				(name) => name === 'workday_create_candidate' || name === 'workday_list_candidates',
-			);
-			expect(hasCandidateTool).toBe(true);
-		});
+	it('should return empty string for empty name', () => {
+		const tool = new BaseTool(
+			'',
+			'Empty',
+			{ type: 'object', properties: {} },
+			{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
+		);
+		expect(tool.connector).toBe('');
 	});
 
-	describe('tool_execute', () => {
-		it('should execute a tool by name', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			const result = await executeTool.execute({
-				toolName: 'bamboohr_list_employees',
-				params: { limit: 10 },
-			});
-
-			expect(result).toEqual({ limit: 10 });
-		});
-
-		it('should handle tools with required parameters', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			const result = await executeTool.execute({
-				toolName: 'bamboohr_create_employee',
-				params: {
-					name: 'John Doe',
-					email: 'john@example.com',
-				},
-			});
-
-			expect(result).toEqual({
-				name: 'John Doe',
-				email: 'john@example.com',
-			});
-		});
-
-		it('should throw error for non-existent tool', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			await expect(
-				executeTool.execute({
-					toolName: 'nonexistent_tool',
-					params: {},
-				}),
-			).rejects.toThrow('Tool nonexistent_tool not found');
-		});
-
-		it('should handle string parameters', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			const result = await executeTool.execute(
-				JSON.stringify({
-					toolName: 'salesforce_create_contact',
-					params: {
-						name: 'Jane Smith',
-						company: 'Acme Corp',
-					},
-				}),
-			);
-
-			expect(result).toEqual({
-				name: 'Jane Smith',
-				company: 'Acme Corp',
-			});
-		});
-
-		it('should pass through execution options', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			const result = await executeTool.execute({
-				toolName: 'workday_list_candidates',
-				params: { status: 'active' },
-			});
-
-			expect(result).toEqual({ status: 'active' });
-		});
-	});
-
-	describe('Error handling', () => {
-		it('should wrap non-StackOneError in tool_search execute', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			// Pass invalid params type to trigger JSON.parse error on non-JSON string
-			await expect(filterTool.execute('not valid json')).rejects.toThrow('Error executing tool:');
-		});
-
-		it('should wrap non-StackOneError in tool_execute execute', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			// Pass invalid JSON string to trigger JSON.parse error
-			await expect(executeTool.execute('not valid json')).rejects.toThrow('Error executing tool:');
-		});
-
-		it('should throw StackOneError for invalid params type in tool_search', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			assert(filterTool, 'filterTool should be defined');
-
-			// @ts-expect-error - intentionally passing invalid type
-			await expect(filterTool.execute(123)).rejects.toThrow('Invalid parameters type');
-		});
-
-		it('should throw StackOneError for invalid params type in tool_execute', async () => {
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(executeTool, 'executeTool should be defined');
-
-			// @ts-expect-error - intentionally passing invalid type
-			await expect(executeTool.execute(true)).rejects.toThrow('Invalid parameters type');
-		});
-	});
-
-	describe('Integration: utility tools workflow', () => {
-		it('should discover and execute tools in sequence', async () => {
-			const filterTool = utilityTools.getTool('tool_search');
-			const executeTool = utilityTools.getTool('tool_execute');
-			assert(filterTool, 'filterTool should be defined');
-			assert(executeTool, 'executeTool should be defined');
-
-			// Step 1: Discover relevant tools
-			const searchResult = await filterTool.execute({
-				query: 'create new employee in HR system',
-				limit: 3,
-			});
-
-			const toolResults = getSearchResults(searchResult);
-			expect(toolResults.length).toBeGreaterThan(0);
-
-			// Find the create employee tool
-			const createEmployeeTool = toolResults.find((t) => t.name === 'bamboohr_create_employee');
-			assert(createEmployeeTool, 'createEmployeeTool should be defined');
-
-			// Step 2: Execute the discovered tool
-			const executeResult = await executeTool.execute({
-				toolName: createEmployeeTool.name,
-				params: {
-					name: 'Alice Johnson',
-					email: 'alice@example.com',
-				},
-			});
-
-			expect(executeResult).toEqual({
-				name: 'Alice Johnson',
-				email: 'alice@example.com',
-			});
-		});
-	});
-
-	describe('OpenAI format', () => {
-		it('should convert utility tools to OpenAI format', () => {
-			const openAITools = utilityTools.toOpenAI();
-
-			expect(openAITools).toHaveLength(2);
-
-			const filterTool = openAITools.find((t) => t.function.name === 'tool_search');
-			expect(filterTool).toBeDefined();
-			expect(filterTool?.function.parameters?.properties).toHaveProperty('query');
-			expect(filterTool?.function.parameters?.properties).toHaveProperty('limit');
-			expect(filterTool?.function.parameters?.properties).toHaveProperty('minScore');
-
-			const executeTool = openAITools.find((t) => t.function.name === 'tool_execute');
-			expect(executeTool).toBeDefined();
-			expect(executeTool?.function.parameters?.properties).toHaveProperty('toolName');
-			expect(executeTool?.function.parameters?.properties).toHaveProperty('params');
-		});
-	});
-
-	describe('AI SDK format', () => {
-		it('should convert utility tools to AI SDK format', async () => {
-			const aiSdkTools = await utilityTools.toAISDK();
-
-			expect(aiSdkTools).toHaveProperty('tool_search');
-			expect(aiSdkTools).toHaveProperty('tool_execute');
-
-			expect(typeof aiSdkTools.tool_search.execute).toBe('function');
-			expect(typeof aiSdkTools.tool_execute.execute).toBe('function');
-		});
-
-		it('should execute through AI SDK format', async () => {
-			const aiSdkTools = await utilityTools.toAISDK();
-
-			expect(aiSdkTools.tool_search.execute).toBeDefined();
-
-			const result = await aiSdkTools.tool_search.execute?.(
-				{ query: 'workday candidates', limit: 2 },
-				{ toolCallId: 'test-call-1', messages: [] },
-			);
-			expect(result).toBeDefined();
-
-			const toolResults = (result as { tools: ToolSearchResult[] }).tools;
-			expect(Array.isArray(toolResults)).toBe(true);
-
-			const toolNames = toolResults.map((t) => t.name);
-			expect(toolNames).toContain('workday_create_candidate');
-		});
+	it('should return lowercase connector', () => {
+		const tool = new BaseTool(
+			'BambooHR_create_employee',
+			'Create employee',
+			{ type: 'object', properties: {} },
+			{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
+		);
+		expect(tool.connector).toBe('bamboohr');
 	});
 });
 
-describe('Utility Tools - Hybrid Strategy', () => {
-	describe('Hybrid BM25 + TF-IDF search', () => {
-		it('should search using hybrid strategy with default alpha', async () => {
-			const tools = new Tools(createMockTools());
-			const utilityTools = await tools.utilityTools();
-			const searchTool = utilityTools.getTool('tool_search');
-			assert(searchTool, 'searchTool should be defined');
+describe('Tools.getConnectors', () => {
+	it('should return unique connector names from tool names', () => {
+		const tools = new Tools([
+			new BaseTool(
+				'bamboohr_create_employee',
+				'Create employee',
+				{ type: 'object', properties: {} },
+				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
+			),
+			new BaseTool(
+				'bamboohr_list_employees',
+				'List employees',
+				{ type: 'object', properties: {} },
+				{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
+			),
+			new BaseTool(
+				'hibob_create_employee',
+				'Create employee',
+				{ type: 'object', properties: {} },
+				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
+			),
+			new BaseTool(
+				'slack_send_message',
+				'Send message',
+				{ type: 'object', properties: {} },
+				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
+			),
+		]);
 
-			const result = await searchTool.execute({
-				query: 'manage employees',
-				limit: 5,
-			});
+		const connectors = tools.getConnectors();
+		expect(connectors).toEqual(new Set(['bamboohr', 'hibob', 'slack']));
+	});
 
-			expect(result.tools).toBeDefined();
-			expect(Array.isArray(result.tools)).toBe(true);
-			const toolResults = getSearchResults(result);
-			expect(toolResults.length).toBeGreaterThan(0);
-		});
+	it('should return empty set for empty tools', () => {
+		const tools = new Tools([]);
+		expect(tools.getConnectors()).toEqual(new Set());
+	});
 
-		it('should search using hybrid strategy with custom alpha', async () => {
-			const tools = new Tools(createMockTools());
-			const utilityTools = await tools.utilityTools(0.7);
-			const searchTool = utilityTools.getTool('tool_search');
-			assert(searchTool, 'searchTool should be defined');
+	it('should return lowercase connector names', () => {
+		const tools = new Tools([
+			new BaseTool(
+				'BambooHR_create_employee',
+				'Create employee',
+				{ type: 'object', properties: {} },
+				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
+			),
+		]);
 
-			const result = await searchTool.execute({
-				query: 'create candidate',
-				limit: 3,
-			});
-
-			const toolResults = getSearchResults(result);
-			const toolNames = toolResults.map((t) => t.name);
-			expect(toolNames).toContain('workday_create_candidate');
-		});
-
-		it('should combine BM25 and TF-IDF scores', async () => {
-			const tools = new Tools(createMockTools());
-			const utilityTools = await tools.utilityTools(0.5);
-			const searchTool = utilityTools.getTool('tool_search');
-			assert(searchTool, 'searchTool should be defined');
-
-			const result = await searchTool.execute({
-				query: 'employee',
-				limit: 10,
-			});
-
-			const toolResults = getSearchResults(result);
-			expect(toolResults.length).toBeGreaterThan(0);
-
-			for (const tool of toolResults) {
-				expect(tool.score).toBeGreaterThanOrEqual(0);
-				expect(tool.score).toBeLessThanOrEqual(1);
-			}
-		});
-
-		it('should find relevant tools', async () => {
-			const tools = new Tools(createMockTools());
-			const utilityTools = await tools.utilityTools();
-			const searchTool = utilityTools.getTool('tool_search');
-			assert(searchTool, 'searchTool should be defined');
-
-			const result = await searchTool.execute({
-				query: 'time off vacation',
-				limit: 3,
-			});
-
-			const toolResults = getSearchResults(result);
-			const toolNames = toolResults.map((t) => t.name);
-			expect(toolNames).toContain('bamboohr_create_time_off');
-		});
+		const connectors = tools.getConnectors();
+		expect(connectors).toEqual(new Set(['bamboohr']));
 	});
 });
 

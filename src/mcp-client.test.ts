@@ -47,7 +47,7 @@ test('createMCPClient provides asyncDispose for cleanup', async () => {
 
 test('createMCPClient can connect and list tools from MCP server', async () => {
 	await using mcpClient = await createMCPClient({
-		baseUrl: 'https://api.stackone-dev.com/mcp',
+		baseUrl: 'http://localhost/mcp',
 		headers: {
 			Authorization: `Basic ${Buffer.from('test-key:').toString('base64')}`,
 			'x-account-id': 'test-account',

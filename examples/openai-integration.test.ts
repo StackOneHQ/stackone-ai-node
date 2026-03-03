@@ -5,6 +5,7 @@
  */
 
 import OpenAI from 'openai';
+import { TEST_BASE_URL } from '../mocks/constants';
 import { StackOneToolSet } from '../src';
 
 describe('openai-integration example e2e', () => {
@@ -20,7 +21,7 @@ describe('openai-integration example e2e', () => {
 	it('should fetch tools, convert to OpenAI format, and create chat completion with tool calls', async () => {
 		const toolset = new StackOneToolSet({
 			accountId: 'your-bamboohr-account-id',
-			baseUrl: 'https://api.stackone.com',
+			baseUrl: TEST_BASE_URL,
 		});
 
 		// Fetch all tools for this account via MCP

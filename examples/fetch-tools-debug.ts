@@ -1,5 +1,5 @@
 /**
- * Interactive CLI Demo
+ * Fetch Tools Debug CLI
  *
  * This example demonstrates how to build an interactive CLI tool using
  * @clack/prompts to dynamically discover and execute StackOne tools.
@@ -11,7 +11,7 @@
  *
  * Run with:
  * ```bash
- * node --env-files=.env examples/interactive-cli.ts
+ * npx tsx examples/fetch-tools-debug.ts
  * ```
  */
 

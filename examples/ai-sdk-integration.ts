@@ -22,15 +22,9 @@ if (!apiKey) {
 	process.exit(1);
 }
 
-// Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-bamboohr-account-id';
-
 const aiSdkIntegration = async (): Promise<void> => {
-	// Initialize StackOne
-	const toolset = new StackOneToolSet({
-		accountId,
-		baseUrl: process.env.STACKONE_BASE_URL ?? 'https://api.stackone.com',
-	});
+	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
+	const toolset = new StackOneToolSet();
 
 	// Fetch all tools for this account via MCP
 	const tools = await toolset.fetchTools();
