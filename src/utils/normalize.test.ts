@@ -2,9 +2,9 @@ import { normalizeActionName } from './normalize';
 
 describe('normalizeActionName', () => {
 	test('strips versioned API name to MCP format', () => {
-		expect(
-			normalizeActionName('calendly_1.0.0_calendly_create_scheduling_link_global'),
-		).toBe('calendly_create_scheduling_link');
+		expect(normalizeActionName('calendly_1.0.0_calendly_create_scheduling_link_global')).toBe(
+			'calendly_create_scheduling_link',
+		);
 	});
 
 	test('handles multi-digit version numbers', () => {

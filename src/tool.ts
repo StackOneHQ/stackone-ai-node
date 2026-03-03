@@ -562,4 +562,3 @@ export class Tools implements Iterable<BaseTool> {
 		this.tools.forEach(callback);
 	}
 }
-

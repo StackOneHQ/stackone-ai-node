@@ -1,6 +1,5 @@
-import { ToolIndex, type ToolSearchResult } from './local-search';
+import { ToolIndex } from './local-search';
 import { BaseTool } from './tool';
-import { ParameterLocation } from './types';
 
 function createMockTools(): BaseTool[] {
 	return [

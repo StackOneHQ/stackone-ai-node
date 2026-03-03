@@ -796,9 +796,9 @@ describe('StackOneToolSet', () => {
 				}),
 			);
 
-			await expect(
-				toolset.searchTools('list employees', { search: 'semantic' }),
-			).rejects.toThrow(SemanticSearchError);
+			await expect(toolset.searchTools('list employees', { search: 'semantic' })).rejects.toThrow(
+				SemanticSearchError,
+			);
 		});
 
 		it('uses local search mode directly', async () => {

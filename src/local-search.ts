@@ -14,13 +14,12 @@
 import * as orama from '@orama/orama';
 import { DEFAULT_HYBRID_ALPHA } from './consts';
 import type { BaseTool } from './tool';
-import type { ToolParameters } from './types';
 import { TfidfIndex } from './utils/tfidf-index';
 
 /**
  * Result from local tool search
  */
-export interface ToolSearchResult {
+interface ToolSearchResult {
 	name: string;
 	description: string;
 	score: number;

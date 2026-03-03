@@ -15,9 +15,7 @@ if (!apiKey) {
 	process.exit(1);
 }
 
-const toolset = new StackOneToolSet({
-
-});
+const toolset = new StackOneToolSet({});
 
 // Example 1: Fetch all tools
 console.log('\n=== Example 1: Fetch all tools ===');

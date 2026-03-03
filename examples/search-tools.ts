@@ -64,11 +64,7 @@ const searchToolWithAgentLoop = async (): Promise<void> => {
 	const searchTool = toolset.getSearchTool({ search: 'auto' });
 
 	// In an agent loop, search for tools as needed
-	const queries = [
-		'create a new employee',
-		'list job candidates',
-		'send a message to a channel',
-	];
+	const queries = ['create a new employee', 'list job candidates', 'send a message to a channel'];
 
 	for (const query of queries) {
 		const tools = await searchTool.search(query, { topK: 3 });

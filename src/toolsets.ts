@@ -495,8 +495,7 @@ export class StackOneToolSet {
 
 			// Sort by score, apply topK
 			allResults.sort((a, b) => b.similarityScore - a.similarityScore);
-			const topResults =
-				options?.topK != null ? allResults.slice(0, options.topK) : allResults;
+			const topResults = options?.topK != null ? allResults.slice(0, options.topK) : allResults;
 
 			if (topResults.length === 0) {
 				return new Tools([]);
@@ -507,9 +506,7 @@ export class StackOneToolSet {
 			const matchedTools = allTools.toArray().filter((t) => actionNames.has(t.name));
 
 			// Sort matched tools by semantic search score order
-			const actionOrder = new Map(
-				topResults.map((r, i) => [normalizeActionName(r.actionName), i]),
-			);
+			const actionOrder = new Map(topResults.map((r, i) => [normalizeActionName(r.actionName), i]));
 			matchedTools.sort(
 				(a, b) =>
 					(actionOrder.get(a.name) ?? Number.POSITIVE_INFINITY) -
@@ -647,11 +644,7 @@ export class StackOneToolSet {
 		}
 
 		const index = new ToolIndex(allTools.toArray());
-		const results = await index.search(
-			query,
-			options?.topK ?? 5,
-			options?.minSimilarity ?? 0.0,
-		);
+		const results = await index.search(query, options?.topK ?? 5, options?.minSimilarity ?? 0.0);
 
 		const matchedNames = results.map((r) => r.name);
 		const toolMap = new Map(allTools.toArray().map((t) => [t.name, t]));
@@ -664,9 +657,7 @@ export class StackOneToolSet {
 			.map((name) => toolMap.get(name)!)
 			.filter((tool) => tool.connector && filterConnectors.has(tool.connector));
 
-		return new Tools(
-			options?.topK != null ? matchedTools.slice(0, options.topK) : matchedTools,
-		);
+		return new Tools(options?.topK != null ? matchedTools.slice(0, options.topK) : matchedTools);
 	}
 
 	/**
