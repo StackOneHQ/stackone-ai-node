@@ -123,6 +123,32 @@ const localSearchOnly = async (): Promise<void> => {
 	}
 };
 
+/**
+ * Example 5: Constructor-level topK vs per-call override
+ */
+const topKConfig = async (): Promise<void> => {
+	console.log('\nExample 5: topK at constructor vs per-call\n');
+
+	// Constructor-level topK — all calls default to returning 3 results
+	const toolset = new StackOneToolSet({ search: { topK: 3 } });
+
+	const query = 'manage employee records';
+	console.log(`Constructor topK=3: searching for "${query}"`);
+	const toolsDefault = await toolset.searchTools(query);
+	console.log(`  Got ${toolsDefault.length} tools (constructor default)`);
+	for (const tool of toolsDefault) {
+		console.log(`    - ${tool.name}`);
+	}
+
+	// Per-call override — this single call returns up to 10 results
+	console.log('\nPer-call topK=10: overriding constructor default');
+	const toolsOverride = await toolset.searchTools(query, { topK: 10 });
+	console.log(`  Got ${toolsOverride.length} tools (per-call override)`);
+	for (const tool of toolsOverride) {
+		console.log(`    - ${tool.name}`);
+	}
+};
+
 // Main execution
 const main = async (): Promise<void> => {
 	try {
@@ -135,6 +161,7 @@ const main = async (): Promise<void> => {
 		await searchToolWithAgentLoop();
 		await searchActionNames();
 		await localSearchOnly();
+		await topKConfig();
 	} catch (error) {
 		console.error('Error running examples:', error);
 	}
