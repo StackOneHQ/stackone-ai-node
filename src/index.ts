@@ -37,5 +37,6 @@ export type {
 	JsonObject,
 	JsonValue,
 	ParameterLocation,
+	SearchConfig,
 	ToolDefinition,
 } from './types';

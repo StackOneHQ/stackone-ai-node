@@ -3,6 +3,10 @@
  * Semantic search allows AI agents to find relevant tools based on natural language queries
  * using StackOne's search API with local BM25+TF-IDF fallback.
  *
+ * Search config can be set at the constructor level via `{ search: SearchConfig }` and
+ * overridden per-call on `searchTools()`. Pass `{ search: null }` to disable search.
+ * SearchConfig: { method?: 'auto' | 'semantic' | 'local', topK?: number, minSimilarity?: number }
+ *
  * @example
  * ```bash
  * # Run with required environment variables:
@@ -27,14 +31,11 @@ if (!apiKey) {
 const searchToolsWithAISDK = async (): Promise<void> => {
 	console.log('Example 1: Semantic tool search with AI SDK\n');
 
-	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
-	const toolset = new StackOneToolSet();
+	// Configure search at the constructor level — applies to all searchTools() calls
+	const toolset = new StackOneToolSet({ search: { method: 'semantic', topK: 5 } });
 
-	// Search for relevant tools using semantic search
-	const tools = await toolset.searchTools('manage employee records and time off', {
-		topK: 5,
-		search: 'auto', // tries semantic API first, falls back to local search
-	});
+	// searchTools() inherits the constructor's search config
+	const tools = await toolset.searchTools('manage employee records and time off');
 
 	console.log(`Found ${tools.length} relevant tools`);
 
@@ -58,9 +59,10 @@ const searchToolsWithAISDK = async (): Promise<void> => {
 const searchToolWithAgentLoop = async (): Promise<void> => {
 	console.log('\nExample 2: SearchTool for agent loops\n');
 
+	// Default constructor — search enabled with method: 'auto'
 	const toolset = new StackOneToolSet();
 
-	// Get a reusable search tool
+	// Per-call options override constructor defaults when needed
 	const searchTool = toolset.getSearchTool({ search: 'auto' });
 
 	// In an agent loop, search for tools as needed
@@ -109,13 +111,11 @@ const searchActionNames = async (): Promise<void> => {
 const localSearchOnly = async (): Promise<void> => {
 	console.log('\nExample 4: Local-only BM25+TF-IDF search\n');
 
-	const toolset = new StackOneToolSet();
+	// Set search method at constructor level — all searchTools() calls use local search
+	const toolset = new StackOneToolSet({ search: { method: 'local', topK: 3 } });
 
-	// Use local search mode (BM25 + TF-IDF, no API call to semantic search endpoint)
-	const tools = await toolset.searchTools('create time off request', {
-		search: 'local',
-		topK: 3,
-	});
+	// searchTools() inherits local search config from the constructor
+	const tools = await toolset.searchTools('create time off request');
 
 	console.log(`Found ${tools.length} tools using local search:`);
 	for (const tool of tools) {

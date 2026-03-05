@@ -17,6 +17,7 @@ import type {
 	JsonObject,
 	JsonSchemaProperties,
 	RpcExecuteConfig,
+	SearchConfig,
 	ToolParameters,
 } from './types';
 import { StackOneError } from './utils/error-stackone';
@@ -129,6 +130,17 @@ type AccountConfig = SimplifyDeep<MergeExclusive<SingleAccountConfig, MultipleAc
 interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	apiKey?: string;
 	strict?: boolean;
+	/**
+	 * Search configuration. Controls default search behavior for `searchTools()`,
+	 * `getSearchTool()`, and `searchActionNames()`.
+	 *
+	 * - Omit or pass `undefined` → search enabled with defaults (`method: 'auto'`)
+	 * - Pass `null` → search disabled
+	 * - Pass `{ method, topK, minSimilarity }` → search enabled with custom defaults
+	 *
+	 * Per-call options always override these defaults.
+	 */
+	search?: SearchConfig | null;
 }
 
 /**
@@ -215,24 +227,27 @@ export interface SearchActionNamesOptions {
  */
 export class SearchTool {
 	private readonly toolset: StackOneToolSet;
-	private readonly defaultSearch: SearchMode;
+	private readonly defaultConfig: SearchConfig;
 
-	constructor(toolset: StackOneToolSet, search: SearchMode = 'auto') {
+	constructor(toolset: StackOneToolSet, config: SearchConfig = {}) {
 		this.toolset = toolset;
-		this.defaultSearch = search;
+		this.defaultConfig = config;
 	}
 
 	/**
 	 * Search for tools using natural language.
 	 *
 	 * @param query - Natural language description of needed functionality
-	 * @param options - Search options (connector, topK, minSimilarity, accountIds, search)
+	 * @param options - Search options (connector, topK, minSimilarity, accountIds, search).
+	 *   Per-call options override the defaults from the constructor config.
 	 * @returns Tools collection with matched tools
 	 */
 	async search(query: string, options?: SearchToolsOptions): Promise<Tools> {
 		return this.toolset.searchTools(query, {
 			...options,
-			search: options?.search ?? this.defaultSearch,
+			search: options?.search ?? this.defaultConfig.method,
+			topK: options?.topK ?? this.defaultConfig.topK,
+			minSimilarity: options?.minSimilarity ?? this.defaultConfig.minSimilarity,
 		});
 	}
 }
@@ -245,6 +260,7 @@ export class StackOneToolSet {
 	private authentication?: AuthenticationConfig;
 	private headers: Record<string, string>;
 	private rpcClient?: RpcClient;
+	private readonly searchConfig: SearchConfig | null;
 
 	/**
 	 * Account ID for StackOne API
@@ -300,6 +316,9 @@ export class StackOneToolSet {
 		this.rpcClient = config?.rpcClient;
 		this.accountId = accountId;
 		this.accountIds = config?.accountIds ?? [];
+
+		// Resolve search config: undefined → defaults, null → disabled, object → custom
+		this.searchConfig = config?.search === null ? null : { method: 'auto', ...config?.search };
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -400,7 +419,17 @@ export class StackOneToolSet {
 	 * ```
 	 */
 	getSearchTool(options?: { search?: SearchMode }): SearchTool {
-		return new SearchTool(this, options?.search ?? 'auto');
+		if (this.searchConfig === null) {
+			throw new ToolSetConfigError(
+				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
+			);
+		}
+
+		const config: SearchConfig = options?.search
+			? { ...this.searchConfig, method: options.search }
+			: this.searchConfig;
+
+		return new SearchTool(this, config);
 	}
 
 	/**
@@ -433,8 +462,18 @@ export class StackOneToolSet {
 	 * ```
 	 */
 	async searchTools(query: string, options?: SearchToolsOptions): Promise<Tools> {
-		const search = options?.search ?? 'auto';
-		const allTools = await this.fetchTools({ accountIds: options?.accountIds });
+		if (this.searchConfig === null) {
+			throw new ToolSetConfigError(
+				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
+			);
+		}
+
+		const search = options?.search ?? this.searchConfig.method ?? 'auto';
+		const topK = options?.topK ?? this.searchConfig.topK;
+		const minSimilarity = options?.minSimilarity ?? this.searchConfig.minSimilarity;
+		const mergedOptions = { ...options, search, topK, minSimilarity };
+
+		const allTools = await this.fetchTools({ accountIds: mergedOptions.accountIds });
 		const availableConnectors = allTools.getConnectors();
 
 		if (availableConnectors.size === 0) {
@@ -443,14 +482,14 @@ export class StackOneToolSet {
 
 		// Local-only search — skip semantic API entirely
 		if (search === 'local') {
-			return this.localSearch(query, allTools, options);
+			return this.localSearch(query, allTools, mergedOptions);
 		}
 
 		try {
 			// Determine which connectors to search
 			let connectorsToSearch: Set<string>;
-			if (options?.connector) {
-				const connectorLower = options.connector.toLowerCase();
+			if (mergedOptions.connector) {
+				const connectorLower = mergedOptions.connector.toLowerCase();
 				connectorsToSearch = availableConnectors.has(connectorLower)
 					? new Set([connectorLower])
 					: new Set();
@@ -468,7 +507,7 @@ export class StackOneToolSet {
 				client = this.getSemanticClient();
 			} catch (error) {
 				if (search === 'auto' && error instanceof ToolSetConfigError) {
-					return this.localSearch(query, allTools, options);
+					return this.localSearch(query, allTools, mergedOptions);
 				}
 				throw error;
 			}
@@ -479,8 +518,8 @@ export class StackOneToolSet {
 				try {
 					const response = await client.search(query, {
 						connector,
-						topK: options?.topK,
-						minSimilarity: options?.minSimilarity,
+						topK: mergedOptions.topK,
+						minSimilarity: mergedOptions.minSimilarity,
 					});
 					return response.results;
 				} catch (error) {
@@ -504,7 +543,7 @@ export class StackOneToolSet {
 
 			// Sort by score, apply topK
 			allResults.sort((a, b) => b.similarityScore - a.similarityScore);
-			const topResults = options?.topK != null ? allResults.slice(0, options.topK) : allResults;
+			const topResults = mergedOptions.topK != null ? allResults.slice(0, mergedOptions.topK) : allResults;
 
 			if (topResults.length === 0) {
 				return new Tools([]);
@@ -530,7 +569,7 @@ export class StackOneToolSet {
 				}
 
 				// Auto mode: silently fall back to local search
-				return this.localSearch(query, allTools, options);
+				return this.localSearch(query, allTools, mergedOptions);
 			}
 			throw error;
 		}
@@ -565,6 +604,15 @@ export class StackOneToolSet {
 		query: string,
 		options?: SearchActionNamesOptions,
 	): Promise<SemanticSearchResult[]> {
+		if (this.searchConfig === null) {
+			throw new ToolSetConfigError(
+				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
+			);
+		}
+
+		const effectiveTopK = options?.topK ?? this.searchConfig.topK;
+		const effectiveMinSimilarity = options?.minSimilarity ?? this.searchConfig.minSimilarity;
+
 		// Resolve available connectors from account IDs
 		let availableConnectors: Set<string> | undefined;
 		const effectiveAccountIds = options?.accountIds || this.accountIds;
@@ -596,8 +644,8 @@ export class StackOneToolSet {
 					try {
 						const response = await client.search(query, {
 							connector,
-							topK: options?.topK,
-							minSimilarity: options?.minSimilarity,
+							topK: effectiveTopK,
+							minSimilarity: effectiveMinSimilarity,
 						});
 						return response.results;
 					} catch {
@@ -613,8 +661,8 @@ export class StackOneToolSet {
 				// No account filtering — single global search
 				const response = await client.search(query, {
 					connector: options?.connector,
-					topK: options?.topK,
-					minSimilarity: options?.minSimilarity,
+					topK: effectiveTopK,
+					minSimilarity: effectiveMinSimilarity,
 				});
 				allResults = response.results;
 			}
@@ -626,7 +674,7 @@ export class StackOneToolSet {
 				actionName: normalizeActionName(r.actionName),
 			}));
 
-			return options?.topK != null ? normalized.slice(0, options.topK) : normalized;
+			return effectiveTopK != null ? normalized.slice(0, effectiveTopK) : normalized;
 		} catch (error) {
 			if (error instanceof SemanticSearchError) {
 				return [];

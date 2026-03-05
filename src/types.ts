@@ -205,6 +205,25 @@ export type AISDKToolResult<T extends string = string> = ToolSet & {
 /**
  * Options for toClaudeAgentSdk() method
  */
+/**
+ * Search configuration for the StackOneToolSet constructor.
+ *
+ * When provided as an object, sets default search options that flow through
+ * to `searchTools()`, `getSearchTool()`, and `searchActionNames()`.
+ * Per-call options override these defaults.
+ *
+ * When set to `null`, search is disabled entirely.
+ * When omitted (`undefined`), defaults to `{ method: 'auto' }`.
+ */
+export interface SearchConfig {
+	/** Search backend to use. Defaults to `'auto'`. */
+	method?: 'auto' | 'semantic' | 'local';
+	/** Maximum number of tools to return. */
+	topK?: number;
+	/** Minimum similarity score threshold 0-1. */
+	minSimilarity?: number;
+}
+
 export interface ClaudeAgentSdkOptions {
 	/**
 	 * Name of the MCP server. Defaults to 'stackone-tools'.
