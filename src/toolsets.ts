@@ -543,7 +543,8 @@ export class StackOneToolSet {
 
 			// Sort by score, apply topK
 			allResults.sort((a, b) => b.similarityScore - a.similarityScore);
-			const topResults = mergedOptions.topK != null ? allResults.slice(0, mergedOptions.topK) : allResults;
+			const topResults =
+				mergedOptions.topK != null ? allResults.slice(0, mergedOptions.topK) : allResults;
 
 			if (topResults.length === 0) {
 				return new Tools([]);
