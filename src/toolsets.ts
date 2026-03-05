@@ -461,8 +461,17 @@ export class StackOneToolSet {
 				connectorsToSearch = availableConnectors;
 			}
 
-			// Search each connector in parallel
-			const client = this.getSemanticClient();
+			// Search each connector in parallel — in auto mode, treat missing
+			// API key as "semantic unavailable" and fall back to local search.
+			let client: SemanticSearchClient;
+			try {
+				client = this.getSemanticClient();
+			} catch (error) {
+				if (search === 'auto' && error instanceof ToolSetConfigError) {
+					return this.localSearch(query, allTools, options);
+				}
+				throw error;
+			}
 			const allResults: SemanticSearchResult[] = [];
 			let lastError: SemanticSearchError | undefined;
 
@@ -520,10 +529,7 @@ export class StackOneToolSet {
 					throw error;
 				}
 
-				// Auto mode: fallback to local search
-				console.warn(
-					`Semantic search failed (${error.message}), falling back to local BM25+TF-IDF search`,
-				);
+				// Auto mode: silently fall back to local search
 				return this.localSearch(query, allTools, options);
 			}
 			throw error;
@@ -623,7 +629,6 @@ export class StackOneToolSet {
 			return options?.topK != null ? normalized.slice(0, options.topK) : normalized;
 		} catch (error) {
 			if (error instanceof SemanticSearchError) {
-				console.warn(`Semantic search failed: ${error.message}`);
 				return [];
 			}
 			throw error;
