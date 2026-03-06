@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.3.0...v2.4.0) (2026-03-06)
+
+
+### Features
+
+* add tool search with semantic, local, and auto search modes   ([#322](https://github.com/StackOneHQ/stackone-ai-node/issues/322)) ([feefdc5](https://github.com/StackOneHQ/stackone-ai-node/commit/feefdc53522286f91e9d0feafc8b15ff17e413bf))
+
 ## [2.3.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.2.0...v2.3.0) (2026-01-29)
 
 
