@@ -84,7 +84,7 @@ export function createSearchTool(toolset: StackOneToolSet, options: MetaToolsOpt
 			tools: results.toArray().map((t) => ({
 				name: t.name,
 				description: t.description,
-				parameters: t.parameters.properties,
+				parameters: t.parameters.properties as unknown as JsonObject,
 			})),
 			total: results.length,
 			query: parsed.query,
