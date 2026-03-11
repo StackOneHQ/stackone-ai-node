@@ -2,6 +2,7 @@ import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import { DEFAULT_BASE_URL } from './consts';
 import { createFeedbackTool } from './feedback';
+import { type MetaToolsOptions, createExecuteTool, createSearchTool } from './meta-tools';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
 import { ToolIndex } from './local-search';
 import { createMCPClient } from './mcp-client';
@@ -430,6 +431,40 @@ export class StackOneToolSet {
 			: this.searchConfig;
 
 		return new SearchTool(this, config);
+	}
+
+	/**
+	 * Get LLM-callable meta tools (tool_search + tool_execute) for agent-driven workflows.
+	 *
+	 * Returns a Tools collection that can be passed directly to any LLM framework.
+	 * The LLM uses tool_search to discover available tools, then tool_execute to run them.
+	 *
+	 * @param options - Options to scope search and execution (account IDs, search mode, etc.)
+	 * @returns Tools collection containing tool_search and tool_execute
+	 *
+	 * @example
+	 * ```typescript
+	 * const toolset = new StackOneToolSet({ accountIds: ['acc-123'] });
+	 * const metaTools = toolset.getMetaTools();
+	 *
+	 * // Pass to any framework
+	 * const result = await generateText({
+	 *   model: openai('gpt-4o'),
+	 *   tools: await metaTools.toAISDK(),
+	 *   prompt: 'Create an employee in BambooHR',
+	 * });
+	 * ```
+	 */
+	getMetaTools(options?: MetaToolsOptions): Tools {
+		if (this.searchConfig === null) {
+			throw new ToolSetConfigError(
+				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
+			);
+		}
+
+		const searchTool = createSearchTool(this, options);
+		const executeTool = createExecuteTool(this, options);
+		return new Tools([searchTool, executeTool]);
 	}
 
 	/**
