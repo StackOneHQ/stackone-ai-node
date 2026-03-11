@@ -16,6 +16,7 @@ import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { StackOneToolSet } from '@stackone/ai';
 import { generateText, stepCountIs } from 'ai';
+import OpenAI from 'openai';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
@@ -68,7 +69,8 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 	console.log('\nSteps taken:');
 	for (const step of steps) {
 		for (const call of step.toolCalls ?? []) {
-			const argsStr = call.args ? JSON.stringify(call.args).slice(0, 100) : '{}';
+			const args = (call as unknown as Record<string, unknown>).args;
+			const argsStr = args ? JSON.stringify(args).slice(0, 100) : '{}';
 			console.log(`  - ${call.toolName}(${argsStr})`);
 		}
 	}
@@ -81,8 +83,6 @@ const metaToolsWithAISDK = async (): Promise<void> => {
  */
 const metaToolsWithOpenAI = async (): Promise<void> => {
 	console.log('\nExample 2: Meta tools with OpenAI Chat Completions\n');
-
-	const { default: OpenAI } = await import('openai');
 
 	const toolset = new StackOneToolSet({
 		search: { method: 'semantic', topK: 3 },

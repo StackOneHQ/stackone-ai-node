@@ -1,7 +1,6 @@
 import { z } from 'zod/v4';
 import { BaseTool } from './tool';
 import type { ExecuteOptions, JsonObject, LocalExecuteConfig, ToolParameters } from './types';
-import { StackOneError } from './utils/error-stackone';
 import { StackOneAPIError } from './utils/error-stackone-api';
 
 import type { SearchMode, StackOneToolSet } from './toolsets';
