@@ -60,7 +60,10 @@ const searchParameters = {
 	required: ['query'],
 } as const satisfies ToolParameters;
 
-export function createSearchTool(toolset: StackOneToolSet, options: MetaToolsOptions = {}): BaseTool {
+export function createSearchTool(
+	toolset: StackOneToolSet,
+	options: MetaToolsOptions = {},
+): BaseTool {
 	const tool = new BaseTool(
 		'tool_search',
 		'Search for available tools by describing what you need. Returns matching tool names, descriptions, and parameter schemas. Use the returned parameter schemas to know exactly what to pass when calling tool_execute.',
@@ -119,7 +122,10 @@ const executeParameters = {
 	required: ['tool_name'],
 } as const satisfies ToolParameters;
 
-export function createExecuteTool(toolset: StackOneToolSet, options: MetaToolsOptions = {}): BaseTool {
+export function createExecuteTool(
+	toolset: StackOneToolSet,
+	options: MetaToolsOptions = {},
+): BaseTool {
 	const tool = new BaseTool(
 		'tool_execute',
 		'Execute a tool by name with the given parameters. Use tool_search first to find available tools. The parameters field must match the parameter schema returned by tool_search. Pass parameters as a nested object matching the schema structure.',

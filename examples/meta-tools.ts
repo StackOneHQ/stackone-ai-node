@@ -48,7 +48,12 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 	const accountIds = accountId ? [accountId] : [];
 	const metaTools = toolset.getMetaTools({ accountIds });
 
-	console.log(`Meta tools: ${metaTools.toArray().map((t) => t.name).join(', ')}`);
+	console.log(
+		`Meta tools: ${metaTools
+			.toArray()
+			.map((t) => t.name)
+			.join(', ')}`,
+	);
 	console.log();
 
 	// Pass to the LLM — it will search for calendly tools, then execute
