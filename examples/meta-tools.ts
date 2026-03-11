@@ -107,8 +107,8 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 	];
 
 	// Agent loop — let the LLM drive search and execution
-	let continueLoop = true;
-	while (continueLoop) {
+	const maxIterations = 10;
+	for (let i = 0; i < maxIterations; i++) {
 		const response = await client.chat.completions.create({
 			model: 'gpt-4o',
 			messages,
@@ -120,7 +120,6 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 
 		if (!choice.message.tool_calls?.length) {
 			console.log('Final response:', choice.message.content);
-			continueLoop = false;
 			break;
 		}
 

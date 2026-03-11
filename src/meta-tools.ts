@@ -71,26 +71,38 @@ export function createSearchTool(
 	);
 
 	tool.execute = async (inputParams?: JsonObject | string): Promise<JsonObject> => {
-		const raw = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-		const parsed = searchInputSchema.parse(raw);
+		try {
+			const raw = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
+			const parsed = searchInputSchema.parse(raw);
 
-		const results = await toolset.searchTools(parsed.query, {
-			connector: parsed.connector ?? options.connector,
-			topK: parsed.top_k ?? options.topK ?? 5,
-			minSimilarity: options.minSimilarity,
-			search: options.search,
-			accountIds: options.accountIds,
-		});
+			const results = await toolset.searchTools(parsed.query, {
+				connector: parsed.connector ?? options.connector,
+				topK: parsed.top_k ?? options.topK,
+				minSimilarity: options.minSimilarity,
+				search: options.search,
+				accountIds: options.accountIds,
+			});
 
-		return {
-			tools: results.toArray().map((t) => ({
-				name: t.name,
-				description: t.description,
-				parameters: t.parameters.properties as unknown as JsonObject,
-			})),
-			total: results.length,
-			query: parsed.query,
-		};
+			return {
+				tools: results.toArray().map((t) => ({
+					name: t.name,
+					description: t.description,
+					parameters: t.parameters.properties as unknown as JsonObject,
+				})),
+				total: results.length,
+				query: parsed.query,
+			};
+		} catch (error) {
+			if (error instanceof StackOneAPIError) {
+				return { error: error.message, status_code: error.statusCode };
+			}
+			if (error instanceof SyntaxError || error instanceof z.ZodError) {
+				return {
+					error: `Invalid input: ${error instanceof z.ZodError ? error.issues.map((i) => i.message).join(', ') : error.message}`,
+				};
+			}
+			throw error;
+		}
 	};
 
 	return tool;
@@ -125,6 +137,8 @@ export function createExecuteTool(
 	toolset: StackOneToolSet,
 	options: MetaToolsOptions = {},
 ): BaseTool {
+	let cachedTools: Awaited<ReturnType<typeof toolset.fetchTools>> | null = null;
+
 	const tool = new BaseTool(
 		'tool_execute',
 		'Execute a tool by name with the given parameters. Use tool_search first to find available tools. The parameters field must match the parameter schema returned by tool_search. Pass parameters as a nested object matching the schema structure.',
@@ -136,27 +150,37 @@ export function createExecuteTool(
 		inputParams?: JsonObject | string,
 		executeOptions?: ExecuteOptions,
 	): Promise<JsonObject> => {
-		const raw = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-		const parsed = executeInputSchema.parse(raw);
-
-		const allTools = await toolset.fetchTools({ accountIds: options.accountIds });
-		const target = allTools.getTool(parsed.tool_name);
-
-		if (!target) {
-			return {
-				error: `Tool "${parsed.tool_name}" not found. Use tool_search to find available tools.`,
-			};
-		}
-
+		let toolName = 'unknown';
 		try {
+			const raw = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
+			const parsed = executeInputSchema.parse(raw);
+			toolName = parsed.tool_name;
+
+			if (!cachedTools) {
+				cachedTools = await toolset.fetchTools({ accountIds: options.accountIds });
+			}
+			const target = cachedTools.getTool(parsed.tool_name);
+
+			if (!target) {
+				return {
+					error: `Tool "${parsed.tool_name}" not found. Use tool_search to find available tools.`,
+				};
+			}
+
 			return await target.execute(parsed.parameters as JsonObject, executeOptions);
 		} catch (error) {
-			// Return API errors to the LLM so it can adjust parameters and retry
 			if (error instanceof StackOneAPIError) {
 				return {
 					error: error.message,
 					status_code: error.statusCode,
-					tool_name: parsed.tool_name,
+					response_body: error.responseBody as JsonObject,
+					tool_name: toolName,
+				};
+			}
+			if (error instanceof SyntaxError || error instanceof z.ZodError) {
+				return {
+					error: `Invalid input: ${error instanceof z.ZodError ? error.issues.map((i) => i.message).join(', ') : error.message}`,
+					tool_name: toolName,
 				};
 			}
 			throw error;
