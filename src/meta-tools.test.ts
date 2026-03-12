@@ -1,4 +1,3 @@
-import { z } from 'zod/v4';
 import { createExecuteTool, createSearchTool } from './meta-tools';
 import { BaseTool, Tools } from './tool';
 import type { ToolParameters } from './types';
@@ -143,13 +142,14 @@ describe('createExecuteTool', () => {
 	});
 
 	it('delegates to fetchTools and executes the target tool', async () => {
+		const executeMock = vi.fn().mockResolvedValue({ result: 'ok' });
 		const mockTarget = new BaseTool(
 			'test_tool',
 			'Test',
 			{ type: 'object', properties: {} },
 			{ kind: 'local', identifier: 'test:target' },
 		);
-		mockTarget.execute = vi.fn().mockResolvedValue({ result: 'ok' });
+		mockTarget.execute = executeMock;
 
 		const { toolset } = createMockToolset({ fetchResults: [mockTarget] });
 		const tool = createExecuteTool(toolset as never);
@@ -157,7 +157,7 @@ describe('createExecuteTool', () => {
 		const result = await tool.execute({ tool_name: 'test_tool', parameters: { id: '123' } });
 
 		expect(result).toEqual({ result: 'ok' });
-		expect(mockTarget.execute).toHaveBeenCalledOnce();
+		expect(executeMock).toHaveBeenCalledOnce();
 	});
 
 	it('returns error when tool not found', async () => {

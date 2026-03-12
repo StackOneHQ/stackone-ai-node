@@ -128,6 +128,10 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 
 		// Execute each tool call
 		for (const toolCall of choice.message.tool_calls) {
+			if (toolCall.type !== 'function') {
+				continue;
+			}
+
 			console.log(`LLM called: ${toolCall.function.name}(${toolCall.function.arguments})`);
 
 			const tool = metaTools.getTool(toolCall.function.name);
