@@ -304,7 +304,10 @@ describe('StackOneToolSet.openai()', () => {
 		const toolset = {
 			fetchTools,
 			getMetaTools,
-			async openai(opts?: { mode?: 'search_and_execute'; accountIds?: string[] }): Promise<unknown[]> {
+			async openai(opts?: {
+				mode?: 'search_and_execute';
+				accountIds?: string[];
+			}): Promise<unknown[]> {
 				const effectiveAccountIds = opts?.accountIds ?? executeConfig?.accountIds;
 
 				if (opts?.mode === 'search_and_execute') {
