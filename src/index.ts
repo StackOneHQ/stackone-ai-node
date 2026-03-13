@@ -16,6 +16,7 @@ export {
 	ToolSetLoadError,
 	type AuthenticationConfig,
 	type BaseToolSetConfig,
+	type ExecuteToolsConfig,
 	type SearchMode,
 	type SearchToolsOptions,
 	type SearchActionNamesOptions,

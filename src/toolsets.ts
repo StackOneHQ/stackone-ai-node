@@ -126,6 +126,15 @@ interface MultipleAccountsConfig {
 type AccountConfig = SimplifyDeep<MergeExclusive<SingleAccountConfig, MultipleAccountsConfig>>;
 
 /**
+ * Execution configuration for the StackOneToolSet constructor.
+ * Controls default account scoping for tool execution in meta tools.
+ */
+export interface ExecuteToolsConfig {
+	/** Account IDs to scope tool discovery and execution. */
+	accountIds?: string[];
+}
+
+/**
  * Base configuration for StackOne toolset (without account options)
  */
 interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
@@ -135,13 +144,19 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	 * Search configuration. Controls default search behavior for `searchTools()`,
 	 * `getSearchTool()`, and `searchActionNames()`.
 	 *
-	 * - Omit or pass `undefined` → search enabled with defaults (`method: 'auto'`)
+	 * - Omit or pass `undefined` → search disabled (`null`)
 	 * - Pass `null` → search disabled
+	 * - Pass `{}` or `{ method: 'auto' }` → search enabled with defaults
 	 * - Pass `{ method, topK, minSimilarity }` → search enabled with custom defaults
 	 *
 	 * Per-call options always override these defaults.
 	 */
 	search?: SearchConfig | null;
+	/**
+	 * Execution configuration. Controls default account scoping for tool execution.
+	 * Pass `{ accountIds: ['acc-1'] }` to scope meta tools to specific accounts.
+	 */
+	execute?: ExecuteToolsConfig;
 }
 
 /**
@@ -262,6 +277,7 @@ export class StackOneToolSet {
 	private headers: Record<string, string>;
 	private rpcClient?: RpcClient;
 	private readonly searchConfig: SearchConfig | null;
+	private readonly executeConfig: ExecuteToolsConfig | undefined;
 
 	/**
 	 * Account ID for StackOne API
@@ -318,8 +334,9 @@ export class StackOneToolSet {
 		this.accountId = accountId;
 		this.accountIds = config?.accountIds ?? [];
 
-		// Resolve search config: undefined → defaults, null → disabled, object → custom
-		this.searchConfig = config?.search === null ? null : { method: 'auto', ...config?.search };
+		// Resolve search config: undefined/null → disabled, object → custom with defaults
+		this.searchConfig = config?.search != null ? { method: 'auto', ...config.search } : null;
+		this.executeConfig = config?.execute;
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -465,6 +482,43 @@ export class StackOneToolSet {
 		const searchTool = createSearchTool(this, options);
 		const executeTool = createExecuteTool(this, options);
 		return new Tools([searchTool, executeTool]);
+	}
+
+	/**
+	 * Get tools in OpenAI function calling format.
+	 *
+	 * @param options - Options
+	 * @param options.mode - Tool mode.
+	 *   `undefined` (default): fetch all tools and convert to OpenAI format.
+	 *   `"search_and_execute"`: return two meta tools (tool_search + tool_execute)
+	 *   that let the LLM discover and execute tools on-demand.
+	 * @param options.accountIds - Account IDs to scope tools. Overrides the `execute`
+	 *   config from the constructor.
+	 * @returns List of tool definitions in OpenAI function format.
+	 *
+	 * @example
+	 * ```typescript
+	 * // All tools
+	 * const toolset = new StackOneToolSet();
+	 * const tools = await toolset.openai();
+	 *
+	 * // Meta tools for agent-driven discovery
+	 * const toolset = new StackOneToolSet({ search: {} });
+	 * const tools = await toolset.openai({ mode: 'search_and_execute' });
+	 * ```
+	 */
+	async openai(options?: {
+		mode?: 'search_and_execute';
+		accountIds?: string[];
+	}): Promise<ReturnType<Tools['toOpenAI']>> {
+		const effectiveAccountIds = options?.accountIds ?? this.executeConfig?.accountIds;
+
+		if (options?.mode === 'search_and_execute') {
+			return this.getMetaTools({ accountIds: effectiveAccountIds }).toOpenAI();
+		}
+
+		const tools = await this.fetchTools({ accountIds: effectiveAccountIds });
+		return tools.toOpenAI();
 	}
 
 	/**

@@ -262,3 +262,119 @@ describe('createExecuteTool', () => {
 		expect(result).toEqual({ ok: true });
 	});
 });
+
+describe('StackOneToolSet.openai()', () => {
+	function createMockToolSetInstance(options?: {
+		executeConfig?: { accountIds?: string[] };
+		searchConfig?: Record<string, unknown>;
+	}): {
+		toolset: {
+			fetchTools: ReturnType<typeof vi.fn>;
+			getMetaTools: ReturnType<typeof vi.fn>;
+			openai: (opts?: { mode?: 'search_and_execute'; accountIds?: string[] }) => Promise<unknown[]>;
+		};
+	} {
+		const mockTool = new BaseTool(
+			'test_tool',
+			'A test tool',
+			{ type: 'object', properties: {} } satisfies ToolParameters,
+			{ kind: 'local', identifier: 'test:mock' },
+		);
+		const tools = new Tools([mockTool]);
+
+		const metaSearchTool = new BaseTool(
+			'tool_search',
+			'Search for tools',
+			{ type: 'object', properties: { query: { type: 'string' } } } satisfies ToolParameters,
+			{ kind: 'local', identifier: 'meta:search' },
+		);
+		const metaExecuteTool = new BaseTool(
+			'tool_execute',
+			'Execute a tool',
+			{ type: 'object', properties: { tool_name: { type: 'string' } } } satisfies ToolParameters,
+			{ kind: 'local', identifier: 'meta:execute' },
+		);
+		const metaTools = new Tools([metaSearchTool, metaExecuteTool]);
+
+		const fetchTools = vi.fn().mockResolvedValue(tools);
+		const getMetaTools = vi.fn().mockReturnValue(metaTools);
+
+		const executeConfig = options?.executeConfig;
+
+		const toolset = {
+			fetchTools,
+			getMetaTools,
+			async openai(opts?: { mode?: 'search_and_execute'; accountIds?: string[] }): Promise<unknown[]> {
+				const effectiveAccountIds = opts?.accountIds ?? executeConfig?.accountIds;
+
+				if (opts?.mode === 'search_and_execute') {
+					return getMetaTools({ accountIds: effectiveAccountIds }).toOpenAI();
+				}
+
+				const fetchedTools = await fetchTools({ accountIds: effectiveAccountIds });
+				return fetchedTools.toOpenAI();
+			},
+		};
+
+		return { toolset };
+	}
+
+	it('default fetches all tools', async () => {
+		const { toolset } = createMockToolSetInstance();
+
+		const result = await toolset.openai();
+
+		expect(toolset.fetchTools).toHaveBeenCalledOnce();
+		expect(toolset.fetchTools).toHaveBeenCalledWith({ accountIds: undefined });
+		expect(result).toHaveLength(1);
+		expect(result[0]).toHaveProperty('type', 'function');
+	});
+
+	it('search_and_execute returns meta tools', async () => {
+		const { toolset } = createMockToolSetInstance();
+
+		const result = await toolset.openai({ mode: 'search_and_execute' });
+
+		expect(toolset.getMetaTools).toHaveBeenCalledOnce();
+		expect(toolset.fetchTools).not.toHaveBeenCalled();
+		expect(result).toHaveLength(2);
+	});
+
+	it('passes accountIds to fetchTools', async () => {
+		const { toolset } = createMockToolSetInstance();
+
+		await toolset.openai({ accountIds: ['acc-1'] });
+
+		expect(toolset.fetchTools).toHaveBeenCalledWith({ accountIds: ['acc-1'] });
+	});
+
+	it('uses executeConfig.accountIds as fallback', async () => {
+		const { toolset } = createMockToolSetInstance({
+			executeConfig: { accountIds: ['default-acc'] },
+		});
+
+		await toolset.openai();
+
+		expect(toolset.fetchTools).toHaveBeenCalledWith({ accountIds: ['default-acc'] });
+	});
+
+	it('accountIds overrides executeConfig', async () => {
+		const { toolset } = createMockToolSetInstance({
+			executeConfig: { accountIds: ['default-acc'] },
+		});
+
+		await toolset.openai({ accountIds: ['override-acc'] });
+
+		expect(toolset.fetchTools).toHaveBeenCalledWith({ accountIds: ['override-acc'] });
+	});
+
+	it('search_and_execute with executeConfig passes accountIds to getMetaTools', async () => {
+		const { toolset } = createMockToolSetInstance({
+			executeConfig: { accountIds: ['meta-acc'] },
+		});
+
+		await toolset.openai({ mode: 'search_and_execute' });
+
+		expect(toolset.getMetaTools).toHaveBeenCalledWith({ accountIds: ['meta-acc'] });
+	});
+});

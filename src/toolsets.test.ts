@@ -719,6 +719,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			// Mock the semantic search endpoint
@@ -763,6 +764,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			// Mock semantic search to fail
@@ -787,6 +789,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			// Mock semantic search to fail
@@ -806,6 +809,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			const tools = await toolset.searchTools('list employees', {
@@ -827,6 +831,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'test-account',
+				search: {},
 			});
 
 			// test-account only has dummy_action which has a connector prefix "dummy"
@@ -854,6 +859,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			server.use(
@@ -886,6 +892,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			server.use(
@@ -904,6 +911,7 @@ describe('StackOneToolSet', () => {
 			const toolset = new StackOneToolSet({
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
+				search: {},
 			});
 
 			const searchTool = toolset.getSearchTool();
@@ -915,6 +923,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			server.use(
@@ -947,6 +956,7 @@ describe('StackOneToolSet', () => {
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
 				accountId: 'mixed',
+				search: {},
 			});
 
 			// Create search tool with local mode
