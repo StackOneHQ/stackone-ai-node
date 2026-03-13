@@ -4,6 +4,7 @@
 
 export { BaseTool, StackOneTool, Tools } from './tool';
 export { createFeedbackTool } from './feedback';
+export { type MetaToolsOptions } from './meta-tools';
 export { StackOneError } from './utils/error-stackone';
 export { StackOneAPIError } from './utils/error-stackone-api';
 
@@ -15,6 +16,7 @@ export {
 	ToolSetLoadError,
 	type AuthenticationConfig,
 	type BaseToolSetConfig,
+	type ExecuteToolsConfig,
 	type SearchMode,
 	type SearchToolsOptions,
 	type SearchActionNamesOptions,
