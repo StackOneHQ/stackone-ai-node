@@ -513,6 +513,79 @@ describe('StackOneToolSet', () => {
 		});
 	});
 
+	describe('defender config', () => {
+		it('should store defender config from constructor', () => {
+			const toolset = new StackOneToolSet({
+				apiKey: 'test-key',
+				defender: { enabled: false },
+			});
+
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.defenderConfig).toEqual({ enabled: false });
+		});
+
+		it('should leave defenderConfig undefined when not provided', () => {
+			const toolset = new StackOneToolSet({ apiKey: 'test-key' });
+
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.defenderConfig).toBeUndefined();
+		});
+
+		it('should include defender_enabled in dryRun payload when defender.enabled is set', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+				defender: { enabled: false },
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody.defender_enabled).toBe(false);
+		});
+
+		it('should omit defender_enabled from dryRun payload when defender config is not set', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody).not.toHaveProperty('defender_enabled');
+		});
+
+		it('should forward defender_enabled in live RPC call when defender.enabled is set', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+				defender: { enabled: true },
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } });
+
+			expect(result).toMatchObject({
+				data: { received: { defender_enabled: true } },
+			});
+		});
+	});
+
 	describe('provider and action filtering', () => {
 		it('filters tools by providers', async () => {
 			const toolset = new StackOneToolSet({

@@ -128,3 +128,50 @@ test('should send x-account-id as HTTP header', async () => {
 		bodyHeader: 'test-account-123',
 	});
 });
+
+test('should forward defender_enabled: true in request payload', async () => {
+	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
+		security: { username: 'test-api-key' },
+	});
+
+	const response = await client.actions.rpcAction({
+		action: 'custom_action',
+		defender_enabled: true,
+	});
+
+	expect(response.data).toMatchObject({
+		received: { defender_enabled: true },
+	});
+});
+
+test('should forward defender_enabled: false in request payload', async () => {
+	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
+		security: { username: 'test-api-key' },
+	});
+
+	const response = await client.actions.rpcAction({
+		action: 'custom_action',
+		defender_enabled: false,
+	});
+
+	expect(response.data).toMatchObject({
+		received: { defender_enabled: false },
+	});
+});
+
+test('should omit defender_enabled from payload when not provided', async () => {
+	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
+		security: { username: 'test-api-key' },
+	});
+
+	const response = await client.actions.rpcAction({
+		action: 'custom_action',
+	});
+
+	expect((response.data as Record<string, unknown>).received).not.toHaveProperty(
+		'defender_enabled',
+	);
+});

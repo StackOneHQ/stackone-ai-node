@@ -166,7 +166,11 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	execute?: ExecuteToolsConfig;
 	/**
 	 * Defender configuration. Controls prompt injection detection behavior.
-	 * Overrides the project-level defender settings for all tool calls made by this toolset.
+	 *
+	 * Currently only `enabled` is applied per-request (mapped to `defender_enabled` in the RPC
+	 * payload). The other fields (`blockHighRisk`, `useTier1Classification`,
+	 * `useTier2Classification`) are defined for forward compatibility and have no effect until
+	 * the backend exposes them as per-request options.
 	 *
 	 * - Omit or pass `undefined` → uses the project defender settings
 	 */
@@ -1262,6 +1266,9 @@ export class StackOneToolSet {
 					const requestPayload = {
 						action: name,
 						body: rpcBody,
+						...(this.defenderConfig?.enabled !== undefined
+							? { defender_enabled: this.defenderConfig.enabled }
+							: {}),
 						headers: actionHeaders,
 						path: pathParams ?? undefined,
 						query: queryParams ?? undefined,
