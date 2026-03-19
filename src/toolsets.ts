@@ -1279,29 +1279,15 @@ export class StackOneToolSet {
 					defender === null
 						? // null → explicitly disable
 						  { defender_enabled: false }
-						: defender !== null &&
-							  'useProjectSettings' in defender &&
-							  defender.useProjectSettings === true
+						: 'useProjectSettings' in defender && defender.useProjectSettings === true
 							? // useProjectSettings: true → send nothing, backend uses project settings
 							  {}
 							: // SDK-level config (default or explicit)
 							  {
-									defender_enabled:
-										defender !== null && !('useProjectSettings' in defender)
-											? (defender.enabled ?? true)
-											: true,
-									block_high_risk:
-										defender !== null && !('useProjectSettings' in defender)
-											? (defender.blockHighRisk ?? false)
-											: false,
-									use_tier1_classification:
-										defender !== null && !('useProjectSettings' in defender)
-											? (defender.useTier1Classification ?? true)
-											: true,
-									use_tier2_classification:
-										defender !== null && !('useProjectSettings' in defender)
-											? (defender.useTier2Classification ?? true)
-											: true,
+									defender_enabled: defender.enabled ?? true,
+									block_high_risk: defender.blockHighRisk ?? false,
+									use_tier1_classification: defender.useTier1Classification ?? true,
+									use_tier2_classification: defender.useTier2Classification ?? true,
 							  };
 
 				if (options?.dryRun) {
