@@ -1,5 +1,7 @@
 # Changelog
 
+StackOne AI SDK provides a unified interface for performing actions on SaaS tools through AI-friendly APIs. It exposes tools dynamically from StackOne's platform, enabling AI agents to interact with HR, CRM, ATS, and other SaaS integrations using a consistent API.
+
 ## [2.4.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.3.0...v2.4.0) (2026-03-06)
 
 
