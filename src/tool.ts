@@ -1,4 +1,4 @@
-import { type JSONSchema7 as AISDKJSONSchema, jsonSchema } from 'ai';
+import type { JSONSchema7 as AISDKJSONSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import type { McpSdkServerConfigWithInstance } from '@anthropic-ai/claude-agent-sdk';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
@@ -248,7 +248,12 @@ export class BaseTool {
 			args: Record<string, unknown>,
 		) => Promise<{ content: Array<{ type: 'text'; text: string }> }>;
 	}> {
-		const inputSchema = jsonSchema(this.toJsonSchema());
+		/** AI SDK is optional dependency, import only when needed */
+		const ai = await tryImport<typeof import('ai')>(
+			'ai',
+			`npm install ai (requires ${peerDependencies.ai})`,
+		);
+		const inputSchema = ai.jsonSchema(this.toJsonSchema());
 		const execute = this.execute.bind(this);
 
 		return {
