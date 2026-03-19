@@ -1,5 +1,11 @@
 # Changelog
 
+All notable changes to the [stackone-ai-node](https://github.com/StackOneHQ/stackone-ai-node) project will be documented in this file.
+
+This project provides the `@stackone/ai` Node.js SDK — a unified interface for performing actions on SaaS tools through AI-friendly APIs, with support for OpenAI, Anthropic, Vercel AI SDK, and the Model Context Protocol (MCP).
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [2.4.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.3.0...v2.4.0) (2026-03-06)
 
 
