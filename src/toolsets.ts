@@ -23,6 +23,7 @@ import type {
 	SearchConfig,
 	ToolParameters,
 } from './types';
+import { DEFAULT_DEFENDER_CONFIG } from './types';
 import { StackOneError } from './utils/error-stackone';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { normalizeActionName } from './utils/normalize';
@@ -165,16 +166,14 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	 */
 	execute?: ExecuteToolsConfig;
 	/**
-	 * Defender configuration. Controls prompt injection detection behavior.
+	 * Defender configuration. Controls prompt injection detection behavior for all tool calls.
 	 *
-	 * Currently only `enabled` is applied per-request (mapped to `defender_enabled` in the RPC
-	 * payload). The other fields (`blockHighRisk`, `useTier1Classification`,
-	 * `useTier2Classification`) are defined for forward compatibility and have no effect until
-	 * the backend exposes them as per-request options.
-	 *
-	 * - Omit or pass `undefined` → uses the project defender settings
+	 * - Omit or pass `undefined` → SDK defaults apply: defender enabled, outputs never blocked
+	 * - Pass `null` → defender explicitly disabled for all tool calls
+	 * - Pass `{ useProjectSettings: true }` → defer to the project settings configured in the dashboard
+	 * - Pass `{ enabled, blockHighRisk, ... }` → explicit SDK-level config, ignores project settings
 	 */
-	defender?: DefenderConfig;
+	defender?: DefenderConfig | null;
 }
 
 /**
@@ -471,7 +470,7 @@ export class StackOneToolSet {
 	private readonly timeout: number;
 	private readonly searchConfig: SearchConfig | null;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
-	private readonly defenderConfig?: DefenderConfig;
+	private readonly defenderConfig: DefenderConfig | null;
 
 	/**
 	 * Account ID for StackOne API
@@ -533,7 +532,20 @@ export class StackOneToolSet {
 		this.searchConfig = config?.search != null ? { method: 'auto', ...config.search } : null;
 		this.executeConfig = config?.execute;
 
-		this.defenderConfig = config?.defender;
+		// Resolve defender config:
+		//   undefined  → SDK defaults (enabled, not blocking)
+		//   null       → explicitly disabled
+		//   object     → validate then store as-is
+		const defenderInput = config?.defender;
+		if (defenderInput != null && 'useProjectSettings' in defenderInput && defenderInput.useProjectSettings === true) {
+			const { useProjectSettings: _, ...rest } = defenderInput as { useProjectSettings: true } & Record<string, unknown>;
+			if (Object.keys(rest).length > 0) {
+				throw new ToolSetConfigError(
+					'Cannot combine useProjectSettings: true with explicit defender options. Use one or the other.',
+				);
+			}
+		}
+		this.defenderConfig = defenderInput === undefined ? DEFAULT_DEFENDER_CONFIG : defenderInput;
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -1262,13 +1274,41 @@ export class StackOneToolSet {
 					rpcBody[key] = value as JsonObject[string];
 				}
 
+				const defender = this.defenderConfig;
+				const defenderFields =
+					defender === null
+						? // null → explicitly disable
+						  { defender_enabled: false }
+						: defender !== null &&
+							  'useProjectSettings' in defender &&
+							  defender.useProjectSettings === true
+							? // useProjectSettings: true → send nothing, backend uses project settings
+							  {}
+							: // SDK-level config (default or explicit)
+							  {
+									defender_enabled:
+										defender !== null && !('useProjectSettings' in defender)
+											? (defender.enabled ?? true)
+											: true,
+									block_high_risk:
+										defender !== null && !('useProjectSettings' in defender)
+											? (defender.blockHighRisk ?? false)
+											: false,
+									use_tier1_classification:
+										defender !== null && !('useProjectSettings' in defender)
+											? (defender.useTier1Classification ?? true)
+											: true,
+									use_tier2_classification:
+										defender !== null && !('useProjectSettings' in defender)
+											? (defender.useTier2Classification ?? true)
+											: true,
+							  };
+
 				if (options?.dryRun) {
 					const requestPayload = {
 						action: name,
 						body: rpcBody,
-						...(this.defenderConfig?.enabled !== undefined
-							? { defender_enabled: this.defenderConfig.enabled }
-							: {}),
+						...defenderFields,
 						headers: actionHeaders,
 						path: pathParams ?? undefined,
 						query: queryParams ?? undefined,
@@ -1286,9 +1326,7 @@ export class StackOneToolSet {
 				const response = await actionsClient.actions.rpcAction({
 					action: name,
 					body: rpcBody,
-					...(this.defenderConfig?.enabled !== undefined
-						? { defender_enabled: this.defenderConfig.enabled }
-						: {}),
+					...defenderFields,
 					headers: actionHeaders,
 					path: pathParams ?? undefined,
 					query: queryParams ?? undefined,

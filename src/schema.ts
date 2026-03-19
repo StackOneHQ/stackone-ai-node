@@ -8,10 +8,13 @@ import { stackOneHeadersSchema } from './headers';
 export const rpcActionRequestSchema = z.object({
 	action: z.string(),
 	body: z.optional(z.record(z.string(), z.unknown())),
+	block_high_risk: z.optional(z.boolean()),
 	defender_enabled: z.optional(z.boolean()),
 	headers: z.optional(stackOneHeadersSchema),
 	path: z.optional(z.record(z.string(), z.unknown())),
 	query: z.optional(z.record(z.string(), z.unknown())),
+	use_tier1_classification: z.optional(z.boolean()),
+	use_tier2_classification: z.optional(z.boolean()),
 });
 
 /**
