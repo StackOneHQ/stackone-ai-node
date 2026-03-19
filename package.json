@@ -56,6 +56,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"prepack": "npm pkg delete scripts.preinstall && pnpm run build",
 		"test": "vitest",
+		"bench": "vitest bench",
 		"coverage": "vitest run --coverage"
 	},
 	"dependencies": {
