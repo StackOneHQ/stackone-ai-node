@@ -234,3 +234,33 @@ export interface ClaudeAgentSdkOptions {
 	 */
 	serverVersion?: string;
 }
+
+/**
+ * Defender configuration for controlling prompt injection detection behavior.
+ * Field names match the canonical `DefenderSettings` from `@stackone/core`.
+ *
+ * Note: only `enabled` is applied per-request via the `defender_enabled` API field.
+ * The remaining fields are included for forward compatibility and documentation.
+ */
+export interface DefenderConfig {
+	/**
+	 * Whether to enable defender. Maps to `defender_enabled` in the RPC request.
+	 * Defaults to the project setting.
+	 */
+	enabled?: boolean;
+	/**
+	 * Whether to block tool execution when a HIGH risk score is detected.
+	 * Defaults to the project setting.
+	 */
+	blockHighRisk?: boolean;
+	/**
+	 * Whether to enable tier 1 pattern-based (regex) detection.
+	 * Defaults to the project setting.
+	 */
+	useTier1Classification?: boolean;
+	/**
+	 * Whether to enable tier 2 ML-based detection.
+	 * Defaults to the project setting.
+	 */
+	useTier2Classification?: boolean;
+}

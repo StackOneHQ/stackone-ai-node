@@ -14,6 +14,7 @@ import {
 } from './semantic-search';
 import { BaseTool, Tools } from './tool';
 import type {
+	DefenderConfig,
 	ExecuteOptions,
 	JsonObject,
 	JsonSchemaProperties,
@@ -163,6 +164,13 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	 * Pass `{ accountIds: ['acc-1'] }` to scope tools to specific accounts.
 	 */
 	execute?: ExecuteToolsConfig;
+	/**
+	 * Defender configuration. Controls prompt injection detection behavior.
+	 * Overrides the project-level defender settings for all tool calls made by this toolset.
+	 *
+	 * - Omit or pass `undefined` → uses the project defender settings
+	 */
+	defender?: DefenderConfig;
 }
 
 /**
@@ -459,6 +467,7 @@ export class StackOneToolSet {
 	private readonly timeout: number;
 	private readonly searchConfig: SearchConfig | null;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
+	private readonly defenderConfig?: DefenderConfig;
 
 	/**
 	 * Account ID for StackOne API
@@ -519,6 +528,8 @@ export class StackOneToolSet {
 		// Resolve search config: undefined/null → disabled, object → custom with defaults
 		this.searchConfig = config?.search != null ? { method: 'auto', ...config.search } : null;
 		this.executeConfig = config?.execute;
+
+		this.defenderConfig = config?.defender;
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -1268,6 +1279,9 @@ export class StackOneToolSet {
 				const response = await actionsClient.actions.rpcAction({
 					action: name,
 					body: rpcBody,
+					...(this.defenderConfig?.enabled !== undefined
+						? { defender_enabled: this.defenderConfig.enabled }
+						: {}),
 					headers: actionHeaders,
 					path: pathParams ?? undefined,
 					query: queryParams ?? undefined,

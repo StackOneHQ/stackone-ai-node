@@ -52,10 +52,13 @@ export class RpcClient {
 			const requestBody = {
 				action: validatedRequest.action,
 				body: validatedRequest.body,
+				...(validatedRequest.defender_enabled !== undefined
+					? { defender_enabled: validatedRequest.defender_enabled }
+					: {}),
 				headers: validatedRequest.headers,
 				path: validatedRequest.path,
 				query: validatedRequest.query,
-			} as const satisfies RpcActionRequest;
+			} satisfies RpcActionRequest;
 
 			// Forward StackOne-specific headers as HTTP headers
 			const requestHeaders = validatedRequest.headers;
