@@ -546,6 +546,14 @@ export class StackOneToolSet {
 			}
 		}
 		this.defenderConfig = defenderInput === undefined ? DEFAULT_DEFENDER_CONFIG : defenderInput;
+		if (defenderInput === undefined) {
+			console.warn(
+				'[StackOneToolSet] No defender config provided. SDK defaults are active and will override any ' +
+					'project-level defender settings. To use your project settings, pass ' +
+					'`defender: { useProjectSettings: true }`. To suppress this warning, pass an explicit ' +
+					'`defender` config.',
+			);
+		}
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
