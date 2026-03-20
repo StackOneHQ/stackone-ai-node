@@ -537,8 +537,14 @@ export class StackOneToolSet {
 		//   null       → explicitly disabled
 		//   object     → validate then store as-is
 		const defenderInput = config?.defender;
-		if (defenderInput != null && 'useProjectSettings' in defenderInput && defenderInput.useProjectSettings === true) {
-			const { useProjectSettings: _, ...rest } = defenderInput as { useProjectSettings: true } & Record<string, unknown>;
+		if (
+			defenderInput != null &&
+			'useProjectSettings' in defenderInput &&
+			defenderInput.useProjectSettings === true
+		) {
+			const { useProjectSettings: _, ...rest } = defenderInput as {
+				useProjectSettings: true;
+			} & Record<string, unknown>;
 			if (Object.keys(rest).length > 0) {
 				throw new ToolSetConfigError(
 					'Cannot combine useProjectSettings: true with explicit defender options. Use one or the other.',
