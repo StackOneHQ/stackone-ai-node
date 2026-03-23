@@ -21,6 +21,12 @@ export const stackoneRpcHandlers = [
 			action?: string;
 			body?: Record<string, unknown>;
 			defender_enabled?: boolean;
+			defender_config?: {
+				enabled?: boolean;
+				block_high_risk?: boolean;
+				use_tier1_classification?: boolean;
+				use_tier2_classification?: boolean;
+			};
 			headers?: Record<string, string>;
 			path?: Record<string, string>;
 			query?: Record<string, string>;
