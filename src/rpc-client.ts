@@ -55,14 +55,8 @@ export class RpcClient {
 				...(validatedRequest.defender_enabled !== undefined && {
 					defender_enabled: validatedRequest.defender_enabled,
 				}),
-				...(validatedRequest.block_high_risk !== undefined && {
-					block_high_risk: validatedRequest.block_high_risk,
-				}),
-				...(validatedRequest.use_tier1_classification !== undefined && {
-					use_tier1_classification: validatedRequest.use_tier1_classification,
-				}),
-				...(validatedRequest.use_tier2_classification !== undefined && {
-					use_tier2_classification: validatedRequest.use_tier2_classification,
+				...(validatedRequest.defender_config !== undefined && {
+					defender_config: validatedRequest.defender_config,
 				}),
 				headers: validatedRequest.headers,
 				path: validatedRequest.path,

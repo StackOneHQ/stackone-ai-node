@@ -2,19 +2,28 @@ import { z } from 'zod/v4-mini';
 import { stackOneHeadersSchema } from './headers';
 
 /**
+ * Zod schema for nested defender configuration sent with each RPC request
+ */
+export const defenderConfigRequestSchema = z.object({
+	enabled: z.optional(z.boolean()),
+	block_high_risk: z.optional(z.boolean()),
+	use_tier1_classification: z.optional(z.boolean()),
+	use_tier2_classification: z.optional(z.boolean()),
+});
+
+/**
  * Zod schema for RPC action request validation
  * @see https://docs.stackone.com/platform/api-reference/actions/make-an-rpc-call-to-an-action
  */
 export const rpcActionRequestSchema = z.object({
 	action: z.string(),
 	body: z.optional(z.record(z.string(), z.unknown())),
-	block_high_risk: z.optional(z.boolean()),
+	/** @deprecated use defender_config instead */
 	defender_enabled: z.optional(z.boolean()),
+	defender_config: z.optional(defenderConfigRequestSchema),
 	headers: z.optional(stackOneHeadersSchema),
 	path: z.optional(z.record(z.string(), z.unknown())),
 	query: z.optional(z.record(z.string(), z.unknown())),
-	use_tier1_classification: z.optional(z.boolean()),
-	use_tier2_classification: z.optional(z.boolean()),
 });
 
 /**

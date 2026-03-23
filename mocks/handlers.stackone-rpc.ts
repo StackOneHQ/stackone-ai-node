@@ -71,12 +71,13 @@ export const stackoneRpcHandlers = [
 			);
 		}
 
-		// Default response for other actions — echo back received fields including defender_enabled
+		// Default response for other actions — echo back received fields
 		return HttpResponse.json({
 			data: {
 				action: body.action,
 				received: {
 					body: body.body,
+					defender_config: body.defender_config,
 					defender_enabled: body.defender_enabled,
 					headers: body.headers,
 					path: body.path,

@@ -1290,21 +1290,32 @@ export class StackOneToolSet {
 
 				const defender = this.defenderConfig;
 				let defenderFields: Partial<{
-					defender_enabled: boolean;
-					block_high_risk: boolean;
-					use_tier1_classification: boolean;
-					use_tier2_classification: boolean;
+					defender_config: {
+						enabled: boolean;
+						block_high_risk: boolean;
+						use_tier1_classification: boolean;
+						use_tier2_classification: boolean;
+					};
 				}> = {};
 				if (defender === null) {
 					// null → explicitly disable
-					defenderFields = { defender_enabled: false };
+					defenderFields = {
+						defender_config: {
+							enabled: false,
+							block_high_risk: false,
+							use_tier1_classification: false,
+							use_tier2_classification: false,
+						},
+					};
 				} else if (!('useProjectSettings' in defender) || !defender.useProjectSettings) {
 					// SDK-level config (default or explicit)
 					defenderFields = {
-						defender_enabled: defender.enabled ?? true,
-						block_high_risk: defender.blockHighRisk ?? false,
-						use_tier1_classification: defender.useTier1Classification ?? true,
-						use_tier2_classification: defender.useTier2Classification ?? true,
+						defender_config: {
+							enabled: defender.enabled ?? true,
+							block_high_risk: defender.blockHighRisk ?? false,
+							use_tier1_classification: defender.useTier1Classification ?? true,
+							use_tier2_classification: defender.useTier2Classification ?? true,
+						},
 					};
 				}
 				// else: useProjectSettings: true → send nothing, backend uses project settings

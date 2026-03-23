@@ -536,7 +536,7 @@ describe('StackOneToolSet', () => {
 			});
 		});
 
-		it('should include defender_enabled in dryRun payload when defender.enabled is set', async () => {
+		it('should include defender_config in dryRun payload when defender.enabled is set', async () => {
 			const toolset = new StackOneToolSet({
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
@@ -551,10 +551,10 @@ describe('StackOneToolSet', () => {
 			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
 
 			const parsedBody = JSON.parse(result.body as string);
-			expect(parsedBody.defender_enabled).toBe(false);
+			expect(parsedBody.defender_config.enabled).toBe(false);
 		});
 
-		it('should include SDK default defender fields in dryRun payload when defender config is not set', async () => {
+		it('should include SDK default defender_config in dryRun payload when defender config is not set', async () => {
 			const toolset = new StackOneToolSet({
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
@@ -568,13 +568,13 @@ describe('StackOneToolSet', () => {
 			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
 
 			const parsedBody = JSON.parse(result.body as string);
-			expect(parsedBody.defender_enabled).toBe(true);
-			expect(parsedBody.block_high_risk).toBe(false);
-			expect(parsedBody.use_tier1_classification).toBe(true);
-			expect(parsedBody.use_tier2_classification).toBe(true);
+			expect(parsedBody.defender_config.enabled).toBe(true);
+			expect(parsedBody.defender_config.block_high_risk).toBe(false);
+			expect(parsedBody.defender_config.use_tier1_classification).toBe(true);
+			expect(parsedBody.defender_config.use_tier2_classification).toBe(true);
 		});
 
-		it('should forward defender_enabled in live RPC call when defender.enabled is set', async () => {
+		it('should forward defender_config in live RPC call when defender.enabled is set', async () => {
 			const toolset = new StackOneToolSet({
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
@@ -589,7 +589,7 @@ describe('StackOneToolSet', () => {
 			const result = await tool.execute({ body: { name: 'test' } });
 
 			expect(result).toMatchObject({
-				data: { received: { defender_enabled: true } },
+				data: { received: { defender_config: { enabled: true } } },
 			});
 		});
 	});
