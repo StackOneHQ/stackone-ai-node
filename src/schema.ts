@@ -4,7 +4,7 @@ import { stackOneHeadersSchema } from './headers';
 /**
  * Zod schema for nested defender configuration sent with each RPC request
  */
-export const defenderConfigRequestSchema = z.object({
+const defenderConfigRequestSchema = z.object({
 	enabled: z.optional(z.boolean()),
 	block_high_risk: z.optional(z.boolean()),
 	use_tier1_classification: z.optional(z.boolean()),
