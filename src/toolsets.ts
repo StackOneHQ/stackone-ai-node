@@ -938,7 +938,7 @@ export class StackOneToolSet {
 				allResults = response.results;
 			}
 
-			// Sort by score — action_id is already in MCP format, no normalization needed
+			// Sort by score — return raw results (consumers can normalize the composite ID if needed)
 			allResults.sort((a, b) => b.similarityScore - a.similarityScore);
 
 			return effectiveTopK != null ? allResults.slice(0, effectiveTopK) : allResults;

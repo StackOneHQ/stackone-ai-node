@@ -145,7 +145,7 @@ export class BaseTool {
 	async execute(inputParams?: JsonObject | string, options?: ExecuteOptions): Promise<JsonObject> {
 		try {
 			if (!this.requestBuilder || this.executeConfig.kind !== 'http') {
-				// Non-HTTP tools provide their own execute override (e.g. RPC, local meta tools).
+				// Non-HTTP tools provide their own execute override (e.g. RPC, local tools).
 				throw new StackOneError(
 					'BaseTool.execute is only available for HTTP-backed tools. Provide a custom execute implementation for non-HTTP tools.',
 				);

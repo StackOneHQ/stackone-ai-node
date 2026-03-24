@@ -13,16 +13,15 @@
  * This is the primary method used when integrating with OpenAI, Anthropic, or AI SDK.
  * The internal flow is:
  *
- * 1. Fetch tools from linked accounts via MCP to discover available connectors
+ * 1. Fetch tools from linked accounts via MCP (provides connectors and tool schemas)
  * 2. Search EACH connector in parallel via the semantic search API (/actions/search)
- * 3. The search API returns results with full `inputSchema` for each action
- * 4. Build executable tools directly from search results (no match-back needed)
- * 5. Deduplicate by actionId, sort by relevance score, apply topK
- * 6. Return Tools sorted by relevance score
+ * 3. Match search results to MCP tool definitions
+ * 4. Deduplicate, sort by relevance score, apply topK
+ * 5. Return Tools sorted by relevance score
  *
  * Key point: only the user's own connectors are searched — no wasted results
- * from connectors the user doesn't have. The search API returns `inputSchema`
- * with each result, so tools can be built directly without a separate fetch.
+ * from connectors the user doesn't have. Tool schemas come from MCP (source
+ * of truth), while the search API provides relevance ranking.
  *
  * If the semantic API is unavailable, the SDK falls back to a local
  * BM25 + TF-IDF hybrid search over the fetched tools (unless
@@ -32,10 +31,9 @@
  * 2. `searchActionNames(query)` — Lightweight discovery
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * Queries the semantic API directly and returns action metadata
- * (actionId, connector, score, description, inputSchema) **without**
- * building full tool objects. Useful for previewing results before
- * committing to a full fetch.
+ * Queries the semantic API directly and returns action IDs with
+ * similarity scores, **without** building full tool objects. Useful
+ * for previewing results before committing to a full fetch.
  *
  * When `accountIds` are provided, each connector is searched in
  * parallel (same as `searchTools`). Without `accountIds`, results
@@ -103,7 +101,7 @@ export interface SemanticSearchOptions {
  * const client = new SemanticSearchClient({ apiKey: 'sk-xxx' });
  * const response = await client.search('create employee', { connector: 'bamboohr', topK: 5 });
  * for (const result of response.results) {
- *   console.log(`${result.actionId}: ${result.similarityScore.toFixed(2)}`);
+ *   console.log(`${result.id}: ${result.similarityScore.toFixed(2)}`);
  * }
  * ```
  */
@@ -146,7 +144,7 @@ export class SemanticSearchClient {
 	 * ```typescript
 	 * const response = await client.search('onboard a new team member', { topK: 5 });
 	 * for (const result of response.results) {
-	 *   console.log(`${result.actionId}: ${result.similarityScore.toFixed(2)}`);
+	 *   console.log(`${result.id}: ${result.similarityScore.toFixed(2)}`);
 	 * }
 	 * ```
 	 */
