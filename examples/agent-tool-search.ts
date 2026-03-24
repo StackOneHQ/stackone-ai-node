@@ -8,7 +8,7 @@
  * @example
  * ```bash
  * # Run with required environment variables:
- * STACKONE_API_KEY=your-key OPENAI_API_KEY=your-key STACKONE_ACCOUNT_ID=your-account npx tsx examples/meta-tools.ts
+ * STACKONE_API_KEY=your-key OPENAI_API_KEY=your-key STACKONE_ACCOUNT_ID=your-account npx tsx examples/agent-tool-search.ts
  * ```
  */
 
