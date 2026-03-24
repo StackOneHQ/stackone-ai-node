@@ -825,9 +825,7 @@ export class StackOneToolSet {
 			// 2. Use MCP tools (already fetched) — schemas come from the source of truth
 			// 3. Filter to only the tools search found, preserving search relevance order
 			const actionOrder = new Map(actionNames.map((name, i) => [name, i]));
-			const matchedTools = allTools
-				.toArray()
-				.filter((t) => seenNames.has(t.name));
+			const matchedTools = allTools.toArray().filter((t) => seenNames.has(t.name));
 			matchedTools.sort(
 				(a, b) =>
 					(actionOrder.get(a.name) ?? Number.POSITIVE_INFINITY) -

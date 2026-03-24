@@ -90,9 +90,7 @@ const searchActionNames = async (): Promise<void> => {
 
 	console.log('Search results:');
 	for (const result of results) {
-		console.log(
-			`  - ${result.id}: score=${result.similarityScore.toFixed(2)}`,
-		);
+		console.log(`  - ${result.id}: score=${result.similarityScore.toFixed(2)}`);
 	}
 
 	// Then fetch specific tools based on the results
