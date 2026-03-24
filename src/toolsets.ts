@@ -347,7 +347,7 @@ export function createSearchTool(toolset: StackOneToolSet, accountIds?: string[]
 
 			const searchConfig = toolset.getSearchConfig() ?? {};
 			const results = await toolset.searchTools(parsed.query, {
-				connector: parsed.connector ?? searchConfig.connector,
+				connector: parsed.connector,
 				topK: parsed.top_k ?? searchConfig.topK,
 				minSimilarity: searchConfig.minSimilarity,
 				search: searchConfig.method,
