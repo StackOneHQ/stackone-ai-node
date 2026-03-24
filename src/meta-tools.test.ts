@@ -1,4 +1,4 @@
-import { createExecuteTool, createSearchTool } from './meta-tools';
+import { createExecuteTool, createSearchTool } from './toolsets';
 import { BaseTool, Tools } from './tool';
 import type { ToolParameters } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
@@ -6,7 +6,11 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 // --- Helpers ---
 
 function createMockToolset(options?: { searchResults?: BaseTool[]; fetchResults?: BaseTool[] }): {
-	toolset: { searchTools: ReturnType<typeof vi.fn>; fetchTools: ReturnType<typeof vi.fn> };
+	toolset: {
+		searchTools: ReturnType<typeof vi.fn>;
+		fetchTools: ReturnType<typeof vi.fn>;
+		getSearchConfig: ReturnType<typeof vi.fn>;
+	};
 } {
 	const mockTool = new BaseTool(
 		'test_tool',
@@ -28,6 +32,7 @@ function createMockToolset(options?: { searchResults?: BaseTool[]; fetchResults?
 		toolset: {
 			searchTools: vi.fn().mockResolvedValue(tools),
 			fetchTools: vi.fn().mockResolvedValue(fetchTools),
+			getSearchConfig: vi.fn().mockReturnValue({ method: 'auto' }),
 		},
 	};
 }
@@ -69,17 +74,13 @@ describe('createSearchTool', () => {
 		expect(tools[0].parameters).toHaveProperty('id');
 	});
 
-	it('passes connector and accountIds from options', async () => {
+	it('passes accountIds to searchTools', async () => {
 		const { toolset } = createMockToolset();
-		const tool = createSearchTool(toolset as never, {
-			connector: 'bamboohr',
-			accountIds: ['acc-1'],
-		});
+		const tool = createSearchTool(toolset as never, ['acc-1']);
 
 		await tool.execute({ query: 'test' });
 
 		const callOpts = toolset.searchTools.mock.calls[0][1];
-		expect(callOpts.connector).toBe('bamboohr');
 		expect(callOpts.accountIds).toEqual(['acc-1']);
 	});
 
@@ -238,7 +239,7 @@ describe('createExecuteTool', () => {
 		mockTarget.execute = vi.fn().mockResolvedValue({ ok: true });
 
 		const { toolset } = createMockToolset({ fetchResults: [mockTarget] });
-		const tool = createExecuteTool(toolset as never, { accountIds: ['acc-1'] });
+		const tool = createExecuteTool(toolset as never, ['acc-1']);
 
 		await tool.execute({ tool_name: 'test_tool' });
 
@@ -270,7 +271,7 @@ describe('StackOneToolSet.openai()', () => {
 	}): {
 		toolset: {
 			fetchTools: ReturnType<typeof vi.fn>;
-			getMetaTools: ReturnType<typeof vi.fn>;
+			buildTools: ReturnType<typeof vi.fn>;
 			openai: (opts?: { mode?: 'search_and_execute'; accountIds?: string[] }) => Promise<unknown[]>;
 		};
 	} {
@@ -294,16 +295,16 @@ describe('StackOneToolSet.openai()', () => {
 			{ type: 'object', properties: { tool_name: { type: 'string' } } } satisfies ToolParameters,
 			{ kind: 'local', identifier: 'meta:execute' },
 		);
-		const metaTools = new Tools([metaSearchTool, metaExecuteTool]);
+		const builtTools = new Tools([metaSearchTool, metaExecuteTool]);
 
 		const fetchTools = vi.fn().mockResolvedValue(tools);
-		const getMetaTools = vi.fn().mockReturnValue(metaTools);
+		const buildTools = vi.fn().mockReturnValue(builtTools);
 
 		const executeConfig = options?.executeConfig;
 
 		const toolset = {
 			fetchTools,
-			getMetaTools,
+			buildTools,
 			async openai(opts?: {
 				mode?: 'search_and_execute';
 				accountIds?: string[];
@@ -311,7 +312,7 @@ describe('StackOneToolSet.openai()', () => {
 				const effectiveAccountIds = opts?.accountIds ?? executeConfig?.accountIds;
 
 				if (opts?.mode === 'search_and_execute') {
-					return getMetaTools({ accountIds: effectiveAccountIds }).toOpenAI();
+					return buildTools(effectiveAccountIds).toOpenAI();
 				}
 
 				const fetchedTools = await fetchTools({ accountIds: effectiveAccountIds });
@@ -333,12 +334,12 @@ describe('StackOneToolSet.openai()', () => {
 		expect(result[0]).toHaveProperty('type', 'function');
 	});
 
-	it('search_and_execute returns meta tools', async () => {
+	it('search_and_execute returns search and execute tools', async () => {
 		const { toolset } = createMockToolSetInstance();
 
 		const result = await toolset.openai({ mode: 'search_and_execute' });
 
-		expect(toolset.getMetaTools).toHaveBeenCalledOnce();
+		expect(toolset.buildTools).toHaveBeenCalledOnce();
 		expect(toolset.fetchTools).not.toHaveBeenCalled();
 		expect(result).toHaveLength(2);
 	});
@@ -371,13 +372,13 @@ describe('StackOneToolSet.openai()', () => {
 		expect(toolset.fetchTools).toHaveBeenCalledWith({ accountIds: ['override-acc'] });
 	});
 
-	it('search_and_execute with executeConfig passes accountIds to getMetaTools', async () => {
+	it('search_and_execute with executeConfig passes accountIds to buildTools', async () => {
 		const { toolset } = createMockToolSetInstance({
 			executeConfig: { accountIds: ['meta-acc'] },
 		});
 
 		await toolset.openai({ mode: 'search_and_execute' });
 
-		expect(toolset.getMetaTools).toHaveBeenCalledWith({ accountIds: ['meta-acc'] });
+		expect(toolset.buildTools).toHaveBeenCalledWith(['meta-acc']);
 	});
 });

@@ -91,13 +91,13 @@ const searchActionNames = async (): Promise<void> => {
 	console.log('Search results:');
 	for (const result of results) {
 		console.log(
-			`  - ${result.actionName} (${result.connectorKey}): score=${result.similarityScore.toFixed(2)}`,
+			`  - ${result.id}: score=${result.similarityScore.toFixed(2)}`,
 		);
 	}
 
 	// Then fetch specific tools based on the results
 	if (results.length > 0) {
-		const topActions = results.filter((r) => r.similarityScore > 0.7).map((r) => r.actionName);
+		const topActions = results.filter((r) => r.similarityScore > 0.7).map((r) => r.id);
 		console.log(`\nFetching tools for top actions: ${topActions.join(', ')}`);
 
 		const tools = await toolset.fetchTools({ actions: topActions });

@@ -1,5 +1,5 @@
 /**
- * This example demonstrates the meta tools pattern (tool_search + tool_execute)
+ * This example demonstrates the search and execute tools pattern (tool_search + tool_execute)
  * for LLM-driven tool discovery and execution.
  *
  * Instead of loading all tools upfront, the LLM autonomously searches for
@@ -32,25 +32,25 @@ if (!process.env.OPENAI_API_KEY) {
 const accountId = process.env.STACKONE_ACCOUNT_ID;
 
 /**
- * Example 1: Meta tools with Vercel AI SDK
+ * Example 1: Search and execute with Vercel AI SDK
  *
  * The LLM receives only tool_search and tool_execute — two small tool definitions
  * regardless of how many tools exist. It searches for what it needs and executes.
  */
-const metaToolsWithAISDK = async (): Promise<void> => {
-	console.log('Example 1: Meta tools with Vercel AI SDK\n');
+const toolsWithAISDK = async (): Promise<void> => {
+	console.log('Example 1: Search and execute with Vercel AI SDK\n');
 
 	const toolset = new StackOneToolSet({
 		search: { method: 'semantic', topK: 3 },
 		...(accountId ? { accountId } : {}),
 	});
 
-	// Get meta tools — returns a Tools collection with tool_search + tool_execute
+	// Get search and execute tools — returns a Tools collection with tool_search + tool_execute
 	const accountIds = accountId ? [accountId] : [];
-	const metaTools = toolset.getMetaTools({ accountIds });
+	const tools = toolset.getTools({ accountIds });
 
 	console.log(
-		`Meta tools: ${metaTools
+		`Search and execute: ${tools
 			.toArray()
 			.map((t) => t.name)
 			.join(', ')}`,
@@ -59,8 +59,8 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 
 	// Pass to the LLM — it will search for calendly tools, then execute
 	const { text, steps } = await generateText({
-		model: openai('gpt-4o'),
-		tools: await metaTools.toAISDK(),
+		model: openai('gpt-5.4'),
+		tools: await tools.toAISDK(),
 		prompt: 'List my upcoming Calendly events for the next week.',
 		stopWhen: stepCountIs(10),
 	});
@@ -77,12 +77,12 @@ const metaToolsWithAISDK = async (): Promise<void> => {
 };
 
 /**
- * Example 2: Meta tools with OpenAI Chat Completions
+ * Example 2: Search and execute with OpenAI Chat Completions
  *
- * Same pattern, different framework. The meta tools convert to any format.
+ * Same pattern, different framework. The search and execute tools convert to any format.
  */
-const metaToolsWithOpenAI = async (): Promise<void> => {
-	console.log('\nExample 2: Meta tools with OpenAI Chat Completions\n');
+const toolsWithOpenAI = async (): Promise<void> => {
+	console.log('\nExample 2: Search and execute with OpenAI Chat Completions\n');
 
 	const toolset = new StackOneToolSet({
 		search: { method: 'semantic', topK: 3 },
@@ -90,8 +90,8 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 	});
 
 	const accountIds = accountId ? [accountId] : [];
-	const metaTools = toolset.getMetaTools({ accountIds });
-	const openaiTools = metaTools.toOpenAI();
+	const tools = toolset.getTools({ accountIds });
+	const openaiTools = tools.toOpenAI();
 
 	const client = new OpenAI();
 	const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
@@ -110,7 +110,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 	const maxIterations = 10;
 	for (let i = 0; i < maxIterations; i++) {
 		const response = await client.chat.completions.create({
-			model: 'gpt-4o',
+			model: 'gpt-5.4',
 			messages,
 			tools: openaiTools,
 			tool_choice: 'auto',
@@ -134,7 +134,7 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 
 			console.log(`LLM called: ${toolCall.function.name}(${toolCall.function.arguments})`);
 
-			const tool = metaTools.getTool(toolCall.function.name);
+			const tool = tools.getTool(toolCall.function.name);
 			if (!tool) {
 				messages.push({
 					role: 'tool',
@@ -157,8 +157,8 @@ const metaToolsWithOpenAI = async (): Promise<void> => {
 // Main execution
 const main = async (): Promise<void> => {
 	try {
-		await metaToolsWithAISDK();
-		await metaToolsWithOpenAI();
+		await toolsWithAISDK();
+		await toolsWithOpenAI();
 	} catch (error) {
 		console.error('Error running examples:', error);
 	}

@@ -731,18 +731,12 @@ describe('StackOneToolSet', () => {
 					return HttpResponse.json({
 						results: [
 							{
-								action_name: 'hibob_list_employees',
-								connector_key: 'hibob',
+								id: 'hibob_1.0.0_hibob_list_employees_global',
 								similarity_score: 0.95,
-								label: 'List Employees',
-								description: 'List employees from HiBob',
 							},
 							{
-								action_name: 'bamboohr_list_employees',
-								connector_key: 'bamboohr',
+								id: 'bamboohr_1.0.0_bamboohr_list_employees_global',
 								similarity_score: 0.88,
-								label: 'List Employees',
-								description: 'List employees from BambooHR',
 							},
 						],
 						total_count: 2,
@@ -867,11 +861,8 @@ describe('StackOneToolSet', () => {
 					return HttpResponse.json({
 						results: [
 							{
-								action_name: 'hibob_1.0.0_hibob_list_employees_global',
-								connector_key: 'hibob',
+								id: 'hibob_1.0.0_hibob_list_employees_global',
 								similarity_score: 0.95,
-								label: 'List Employees',
-								description: 'List employees',
 							},
 						],
 						total_count: 1,
@@ -883,8 +874,7 @@ describe('StackOneToolSet', () => {
 			const results = await toolset.searchActionNames('list employees');
 
 			expect(results.length).toBeGreaterThan(0);
-			// Action name should be normalized (versioned prefix stripped)
-			expect(results[0].actionName).toBe('hibob_list_employees');
+			expect(results[0].id).toBe('hibob_1.0.0_hibob_list_employees_global');
 		});
 
 		it('returns empty array when semantic search fails', async () => {
@@ -931,11 +921,8 @@ describe('StackOneToolSet', () => {
 					return HttpResponse.json({
 						results: [
 							{
-								action_name: 'hibob_list_employees',
-								connector_key: 'hibob',
+								id: 'hibob_1.0.0_hibob_list_employees_global',
 								similarity_score: 0.95,
-								label: 'List Employees',
-								description: 'List employees',
 							},
 						],
 						total_count: 1,

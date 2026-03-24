@@ -32,19 +32,12 @@ describe('SemanticSearchClient', () => {
 					return HttpResponse.json({
 						results: [
 							{
-								action_name: 'bamboohr_create_employee',
-								connector_key: 'bamboohr',
+								id: 'bamboohr_1.0.0_bamboohr_create_employee_global',
 								similarity_score: 0.95,
-								label: 'Create Employee',
-								description: 'Create a new employee in BambooHR',
-								project_id: 'global',
 							},
 							{
-								action_name: 'bamboohr_update_employee',
-								connector_key: 'bamboohr',
+								id: 'bamboohr_1.0.0_bamboohr_update_employee_global',
 								similarity_score: 0.82,
-								label: 'Update Employee',
-								description: 'Update an existing employee',
 							},
 						],
 						total_count: 2,
@@ -61,13 +54,8 @@ describe('SemanticSearchClient', () => {
 			});
 
 			expect(response.results).toHaveLength(2);
-			expect(response.results[0].actionName).toBe('bamboohr_create_employee');
-			expect(response.results[0].connectorKey).toBe('bamboohr');
+			expect(response.results[0].id).toBe('bamboohr_1.0.0_bamboohr_create_employee_global');
 			expect(response.results[0].similarityScore).toBe(0.95);
-			expect(response.results[0].label).toBe('Create Employee');
-			expect(response.results[0].description).toBe('Create a new employee in BambooHR');
-			expect(response.results[0].projectId).toBe('global');
-			expect(response.results[1].projectId).toBe('global'); // default when not provided
 			expect(response.totalCount).toBe(2);
 			expect(response.query).toBe('create employee');
 			expect(response.connectorFilter).toBe('bamboohr');
@@ -173,24 +161,18 @@ describe('SemanticSearchClient', () => {
 	});
 
 	describe('searchActionNames', () => {
-		test('returns just action names', async () => {
+		test('returns just action IDs', async () => {
 			server.use(
 				http.post(`${TEST_BASE_URL}/actions/search`, () => {
 					return HttpResponse.json({
 						results: [
 							{
-								action_name: 'bamboohr_create_employee',
-								connector_key: 'bamboohr',
+								id: 'bamboohr_1.0.0_bamboohr_create_employee_global',
 								similarity_score: 0.95,
-								label: 'Create Employee',
-								description: 'Create a new employee',
 							},
 							{
-								action_name: 'hibob_create_employee',
-								connector_key: 'hibob',
+								id: 'hibob_1.0.0_hibob_create_employee_global',
 								similarity_score: 0.88,
-								label: 'Create Employee',
-								description: 'Create a new employee in HiBob',
 							},
 						],
 						total_count: 2,
@@ -201,7 +183,10 @@ describe('SemanticSearchClient', () => {
 
 			const client = createClient();
 			const names = await client.searchActionNames('create employee');
-			expect(names).toEqual(['bamboohr_create_employee', 'hibob_create_employee']);
+			expect(names).toEqual([
+				'bamboohr_1.0.0_bamboohr_create_employee_global',
+				'hibob_1.0.0_hibob_create_employee_global',
+			]);
 		});
 	});
 });
