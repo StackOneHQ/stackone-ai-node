@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.4.0...v2.5.0) (2026-03-25)
+
+
+### Features
+
+* **search-tools:** LLM-driven search and execute and new API ([#325](https://github.com/StackOneHQ/stackone-ai-node/issues/325)) ([e06602b](https://github.com/StackOneHQ/stackone-ai-node/commit/e06602b5864eae21250209f1088b1a4aeb6b8cec))
+
 ## [2.4.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.3.0...v2.4.0) (2026-03-06)
 
 
