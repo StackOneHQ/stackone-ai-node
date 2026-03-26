@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.5.0...v2.5.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* **search:** fall back to local search when semantic results don't match MCP tools ([#352](https://github.com/StackOneHQ/stackone-ai-node/issues/352)) ([55723cc](https://github.com/StackOneHQ/stackone-ai-node/commit/55723cc0b22956b96ecb7a7bb39fe487f5225207))
+
 ## [2.5.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.4.0...v2.5.0) (2026-03-25)
 
 
