@@ -845,6 +845,66 @@ describe('StackOneToolSet', () => {
 			// No matching tools from semantic search
 			expect(tools.length).toBe(0);
 		});
+
+		it('auto mode falls back to local search when semantic results do not match MCP tools', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+				search: {},
+			});
+
+			// Semantic returns results with IDs that won't match any MCP tool names
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return HttpResponse.json({
+						results: [
+							{
+								id: 'unknown_1.0.0_nonexistent_action_global',
+								similarity_score: 0.95,
+							},
+						],
+						total_count: 1,
+						query: 'list employees',
+					});
+				}),
+			);
+
+			const tools = await toolset.searchTools('list employees');
+
+			// Should fall back to local search and return results (not empty)
+			expect(tools.length).toBeGreaterThan(0);
+		});
+
+		it('semantic mode does not fall back when results do not match MCP tools', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+				search: {},
+			});
+
+			// Semantic returns results with IDs that won't match any MCP tool names
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/search`, () => {
+					return HttpResponse.json({
+						results: [
+							{
+								id: 'unknown_1.0.0_nonexistent_action_global',
+								similarity_score: 0.95,
+							},
+						],
+						total_count: 1,
+						query: 'list employees',
+					});
+				}),
+			);
+
+			const tools = await toolset.searchTools('list employees', { search: 'semantic' });
+
+			// Semantic mode should return empty, not fall back
+			expect(tools.length).toBe(0);
+		});
 	});
 
 	describe('searchActionNames', () => {

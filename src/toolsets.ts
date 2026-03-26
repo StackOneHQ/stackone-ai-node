@@ -832,8 +832,8 @@ export class StackOneToolSet {
 					(actionOrder.get(b.name) ?? Number.POSITIVE_INFINITY),
 			);
 
-			// If semantic returned results but none matched MCP tools, fall back to local search
-			if (topResults.length > 0 && matchedTools.length === 0) {
+			// Auto mode: if semantic returned results but none matched MCP tools, fall back to local
+			if (search === 'auto' && matchedTools.length === 0) {
 				return this.localSearch(query, allTools, mergedOptions);
 			}
 
