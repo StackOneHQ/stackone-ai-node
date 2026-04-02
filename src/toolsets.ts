@@ -332,10 +332,15 @@ const localConfig = (id: string): LocalExecuteConfig => ({
 });
 
 /** @internal */
-export function createSearchTool(toolset: StackOneToolSet, accountIds?: string[]): BaseTool {
+export function createSearchTool(
+	toolset: StackOneToolSet,
+	accountIds?: string[],
+	connectors?: string,
+): BaseTool {
+	const connectorLine = connectors ? ` Available connectors: ${connectors}.` : '';
 	const tool = new BaseTool(
 		'tool_search',
-		'Search for available tools by describing what you need. Returns matching tool names, descriptions, and parameter schemas. Use the returned parameter schemas to know exactly what to pass when calling tool_execute.',
+		`Search for available tools by describing what you need. Returns matching tool names, descriptions, and parameter schemas. Use the returned parameter schemas to know exactly what to pass when calling tool_execute.${connectorLine}`,
 		searchParameters,
 		localConfig('search'),
 	);
@@ -380,12 +385,17 @@ export function createSearchTool(toolset: StackOneToolSet, accountIds?: string[]
 }
 
 /** @internal */
-export function createExecuteTool(toolset: StackOneToolSet, accountIds?: string[]): BaseTool {
+export function createExecuteTool(
+	toolset: StackOneToolSet,
+	accountIds?: string[],
+	connectors?: string,
+): BaseTool {
 	let cachedTools: Awaited<ReturnType<typeof toolset.fetchTools>> | null = null;
 
+	const connectorLine = connectors ? ` Available connectors: ${connectors}.` : '';
 	const tool = new BaseTool(
 		'tool_execute',
-		'Execute a tool by name with the given parameters. Use tool_search first to find available tools. The parameters field must match the parameter schema returned by tool_search. Pass parameters as a nested object matching the schema structure.',
+		`Execute a tool by name with the given parameters. Use tool_search first to find available tools. The parameters field must match the parameter schema returned by tool_search. Pass parameters as a nested object matching the schema structure.${connectorLine}`,
 		executeParameters,
 		localConfig('execute'),
 	);
@@ -632,22 +642,34 @@ export class StackOneToolSet {
 	 * @param options - Options to scope tool discovery
 	 * @returns Tools collection containing tool_search and tool_execute
 	 */
-	getTools(options?: { accountIds?: string[] }): Tools {
+	async getTools(options?: { accountIds?: string[] }): Promise<Tools> {
 		return this.buildTools(options?.accountIds);
 	}
 
 	/**
 	 * Build tool_search + tool_execute tools scoped to this toolset.
 	 */
-	private buildTools(accountIds?: string[]): Tools {
+	private async buildTools(accountIds?: string[]): Promise<Tools> {
 		if (this.searchConfig === null) {
 			throw new ToolSetConfigError(
 				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
 			);
 		}
 
-		const searchTool = createSearchTool(this, accountIds);
-		const executeTool = createExecuteTool(this, accountIds);
+		// Discover available connectors for dynamic descriptions
+		let connectors = '';
+		try {
+			const allTools = await this.fetchTools({ accountIds });
+			const connectorSet = allTools.getConnectors();
+			if (connectorSet.size > 0) {
+				connectors = Array.from(connectorSet).sort().join(', ');
+			}
+		} catch {
+			// Best-effort: if discovery fails, use generic descriptions
+		}
+
+		const searchTool = createSearchTool(this, accountIds, connectors);
+		const executeTool = createExecuteTool(this, accountIds, connectors);
 		return new Tools([searchTool, executeTool]);
 	}
 
@@ -681,7 +703,7 @@ export class StackOneToolSet {
 		const effectiveAccountIds = options?.accountIds ?? this.executeConfig?.accountIds;
 
 		if (options?.mode === 'search_and_execute') {
-			return this.buildTools(effectiveAccountIds).toOpenAI();
+			return (await this.buildTools(effectiveAccountIds)).toOpenAI();
 		}
 
 		const tools = await this.fetchTools({ accountIds: effectiveAccountIds });
