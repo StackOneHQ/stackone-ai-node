@@ -642,30 +642,18 @@ export class StackOneToolSet {
 	 * @param options - Options to scope tool discovery
 	 * @returns Tools collection containing tool_search and tool_execute
 	 */
-	async getTools(options?: { accountIds?: string[] }): Promise<Tools> {
+	getTools(options?: { accountIds?: string[] }): Tools {
 		return this.buildTools(options?.accountIds);
 	}
 
 	/**
 	 * Build tool_search + tool_execute tools scoped to this toolset.
 	 */
-	private async buildTools(accountIds?: string[]): Promise<Tools> {
+	private buildTools(accountIds?: string[], connectors?: string): Tools {
 		if (this.searchConfig === null) {
 			throw new ToolSetConfigError(
 				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
 			);
-		}
-
-		// Discover available connectors for dynamic descriptions
-		let connectors = '';
-		try {
-			const allTools = await this.fetchTools({ accountIds });
-			const connectorSet = allTools.getConnectors();
-			if (connectorSet.size > 0) {
-				connectors = Array.from(connectorSet).sort().join(', ');
-			}
-		} catch {
-			// Best-effort: if discovery fails, use generic descriptions
 		}
 
 		const searchTool = createSearchTool(this, accountIds, connectors);
@@ -703,7 +691,18 @@ export class StackOneToolSet {
 		const effectiveAccountIds = options?.accountIds ?? this.executeConfig?.accountIds;
 
 		if (options?.mode === 'search_and_execute') {
-			return (await this.buildTools(effectiveAccountIds)).toOpenAI();
+			// Discover available connectors for dynamic descriptions
+			let connectors: string | undefined;
+			try {
+				const allTools = await this.fetchTools({ accountIds: effectiveAccountIds });
+				const connectorSet = allTools.getConnectors();
+				if (connectorSet.size > 0) {
+					connectors = Array.from(connectorSet).sort().join(', ');
+				}
+			} catch {
+				// Best-effort: if discovery fails, use generic descriptions
+			}
+			return this.buildTools(effectiveAccountIds, connectors).toOpenAI();
 		}
 
 		const tools = await this.fetchTools({ accountIds: effectiveAccountIds });
