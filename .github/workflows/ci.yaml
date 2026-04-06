@@ -71,7 +71,7 @@ jobs:
       - name: Run Tests with Coverage
         run: pnpm run coverage
       - name: Create Coverage Badge
-        uses: jaywcjlove/coverage-badges-cli@4e8975aa2628e3329126e7eee36724d07ed86fda # v2.2.0
+        uses: jaywcjlove/coverage-badges-cli@998665f7962b1a3935ba8c3e786171a99436e5d1 # v2.3.0
         with:
           source: coverage/coverage-summary.json
           output: coverage/badges.svg
@@ -89,4 +89,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
