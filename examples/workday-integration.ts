@@ -17,8 +17,8 @@ import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 import OpenAI from 'openai';
 
-const apiKey = process.env.STACKONE_API_KEY;
-const accountId = process.env.STACKONE_ACCOUNT_ID;
+const apiKey = process.env.STACKONE_API_KEY ?? '';
+const accountId = process.env.STACKONE_ACCOUNT_ID ?? '';
 
 if (!apiKey) {
 	console.error('Set STACKONE_API_KEY to run this example.');
