@@ -2,7 +2,12 @@
  * Workday integration: timeout and account scoping for slow providers.
  *
  * Workday can take 10-15s to respond. This example shows how to configure
- * timeout and accountIds through the execute config.
+ * timeout for slow providers.
+ *
+ * Prerequisites:
+ *   - STACKONE_API_KEY
+ *   - STACKONE_ACCOUNT_ID (a Workday-connected account)
+ *   - OPENAI_API_KEY
  *
  * Run with:
  *   STACKONE_API_KEY=xxx OPENAI_API_KEY=xxx STACKONE_ACCOUNT_ID=xxx npx tsx examples/workday-integration.ts
@@ -12,13 +17,28 @@ import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 import OpenAI from 'openai';
 
-const accountId = process.env.STACKONE_ACCOUNT_ID ?? '';
+const apiKey = process.env.STACKONE_API_KEY;
+const accountId = process.env.STACKONE_ACCOUNT_ID;
 
-// Timeout and accountIds both live in the execute config
+if (!apiKey) {
+	console.error('Set STACKONE_API_KEY to run this example.');
+	process.exit(1);
+}
+if (!accountId) {
+	console.error('Set STACKONE_ACCOUNT_ID to run this example.');
+	process.exit(1);
+}
+if (!process.env.OPENAI_API_KEY) {
+	console.error('Set OPENAI_API_KEY to run this example.');
+	process.exit(1);
+}
+
+// Timeout for slow providers (Workday can take 10-15s)
 const toolset = new StackOneToolSet({
-	search: { method: 'semantic', topK: 5 },
+	apiKey,
 	accountId,
-	execute: { timeout: 120_000 },
+	search: { method: 'auto', topK: 5 },
+	timeout: 120_000,
 });
 
 const client = new OpenAI();
@@ -41,7 +61,8 @@ async function runAgent(
 		for (const tc of choice.message.tool_calls) {
 			if (tc.type !== 'function') continue;
 			console.log(`  -> ${tc.function.name}(${tc.function.arguments.slice(0, 80)})`);
-			const tool = toolset.getTools({ accountIds: [accountId] }).getTool(tc.function.name);
+			const searchTools = toolset.getTools({ accountIds: [accountId] });
+			const tool = searchTools.getTool(tc.function.name);
 			const result = tool ? await tool.execute(tc.function.arguments) : { error: 'Unknown tool' };
 			messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
 		}
