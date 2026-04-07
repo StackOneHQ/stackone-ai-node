@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.5.1...v2.6.0) (2026-04-07)
+
+
+### Features
+
+* Include available connectors in search/execute tool descriptions ([#355](https://github.com/StackOneHQ/stackone-ai-node/issues/355)) ([9e731c2](https://github.com/StackOneHQ/stackone-ai-node/commit/9e731c29e1525a38de103541e42bbe7b32fca79c))
+
 ## [2.5.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.5.0...v2.5.1) (2026-03-26)
 
 
