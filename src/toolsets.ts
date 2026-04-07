@@ -97,6 +97,8 @@ export interface BaseToolSetConfig {
 	authentication?: AuthenticationConfig;
 	headers?: Record<string, string>;
 	rpcClient?: RpcClient;
+	/** Request timeout in milliseconds. Default: 60000 (60s). */
+	timeout?: number;
 }
 
 /**
@@ -134,6 +136,8 @@ type AccountConfig = SimplifyDeep<MergeExclusive<SingleAccountConfig, MultipleAc
 export interface ExecuteToolsConfig {
 	/** Account IDs to scope tool discovery and execution. */
 	accountIds?: string[];
+	/** Request timeout in milliseconds. Can also be set as a top-level config param which takes precedence. */
+	timeout?: number;
 }
 
 /**
@@ -452,6 +456,7 @@ export class StackOneToolSet {
 	private authentication?: AuthenticationConfig;
 	private headers: Record<string, string>;
 	private rpcClient?: RpcClient;
+	private readonly timeout: number;
 	private readonly searchConfig: SearchConfig | null;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
 
@@ -507,6 +512,7 @@ export class StackOneToolSet {
 		this.authentication = authentication;
 		this.headers = configHeaders;
 		this.rpcClient = config?.rpcClient;
+		this.timeout = config?.timeout ?? config?.execute?.timeout ?? 60_000;
 		this.accountId = accountId;
 		this.accountIds = config?.accountIds ?? [];
 
@@ -643,7 +649,11 @@ export class StackOneToolSet {
 	 * @returns Tools collection containing tool_search and tool_execute
 	 */
 	getTools(options?: { accountIds?: string[] }): Tools {
-		return this.buildTools(options?.accountIds);
+		const accountIds =
+			options?.accountIds ??
+			this.executeConfig?.accountIds ??
+			(this.accountIds.length > 0 ? this.accountIds : undefined);
+		return this.buildTools(accountIds);
 	}
 
 	/**
@@ -1155,6 +1165,7 @@ export class StackOneToolSet {
 				username: apiKey,
 				password,
 			},
+			timeout: this.timeout,
 		});
 
 		return this.rpcClient;

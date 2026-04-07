@@ -23,6 +23,7 @@ export type { RpcActionResponse } from './schema';
 export class RpcClient {
 	private readonly baseUrl: string;
 	private readonly authHeader: string;
+	private readonly timeout: number;
 
 	constructor(config: RpcClientConfig) {
 		const validatedConfig = rpcClientConfigSchema.parse(config);
@@ -30,6 +31,7 @@ export class RpcClient {
 		const username = validatedConfig.security.username;
 		const password = validatedConfig.security.password || '';
 		this.authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
+		this.timeout = validatedConfig.timeout ?? 60_000;
 	}
 
 	/**
@@ -73,13 +75,32 @@ export class RpcClient {
 				...forwardedHeaders,
 			} satisfies Record<string, string>;
 
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: httpHeaders,
-				body: JSON.stringify(requestBody),
-			});
+			const controller = new AbortController();
+			const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-			const responseBody: unknown = await response.json();
+			let response: Response;
+			let responseBody: unknown;
+			try {
+				response = await fetch(url, {
+					method: 'POST',
+					headers: httpHeaders,
+					body: JSON.stringify(requestBody),
+					signal: controller.signal,
+				});
+				responseBody = await response.json();
+			} catch (error) {
+				if (error instanceof Error && error.name === 'AbortError') {
+					throw new StackOneAPIError(
+						`Request timed out after ${this.timeout}ms for ${url}`,
+						0,
+						null,
+						requestBody,
+					);
+				}
+				throw error;
+			} finally {
+				clearTimeout(timeoutId);
+			}
 
 			if (!response.ok) {
 				throw new StackOneAPIError(

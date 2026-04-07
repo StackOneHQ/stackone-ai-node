@@ -56,6 +56,7 @@ export const rpcClientConfigSchema = z.object({
 		username: z.string(),
 		password: z.optional(z.string()),
 	}),
+	timeout: z.optional(z.number()),
 });
 
 /**
