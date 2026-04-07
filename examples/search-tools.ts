@@ -20,7 +20,10 @@ const searchTool = toolset.getSearchTool();
 
 const queries = ['cancel an event', 'list employees', 'send a message'];
 for (const query of queries) {
-	const tools = await searchTool.search(query, { topK: 3, accountIds: accountId ? [accountId] : undefined });
+	const tools = await searchTool.search(query, {
+		topK: 3,
+		accountIds: accountId ? [accountId] : undefined,
+	});
 	const names = tools.toArray().map((t) => t.name);
 	console.log(`  "${query}" -> ${names.join(', ') || '(none)'}`);
 }
