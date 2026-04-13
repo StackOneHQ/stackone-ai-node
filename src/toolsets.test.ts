@@ -1014,4 +1014,135 @@ describe('StackOneToolSet', () => {
 			expect(tools.length).toBeGreaterThan(0);
 		});
 	});
+
+	describe('catalog cache', () => {
+		const installMcpSpy = (
+			accountTools: Record<string, McpToolDefinition[]> = {
+				acc1: [
+					{
+						name: 'acc1_tool_1',
+						description: 'acc1 tool 1',
+						inputSchema: { type: 'object', properties: {} },
+					},
+				],
+				acc2: [
+					{
+						name: 'acc2_tool_1',
+						description: 'acc2 tool 1',
+						inputSchema: { type: 'object', properties: {} },
+					},
+				],
+			},
+		) => {
+			const testMcpApp = createMcpApp({ accountTools });
+			const counter = { count: 0 };
+			server.use(
+				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+					counter.count += 1;
+					return testMcpApp.fetch(request);
+				}),
+			);
+			return counter;
+		};
+
+		it('memoizes fetchTools results across repeat calls', async () => {
+			const counter = installMcpSpy();
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			const afterFirst = counter.count;
+			expect(afterFirst).toBeGreaterThan(0);
+
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			expect(counter.count).toBe(afterFirst);
+		});
+
+		it('uses separate cache entries for different account sets', async () => {
+			const counter = installMcpSpy();
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			const afterAcc1 = counter.count;
+
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			expect(counter.count).toBe(afterAcc1);
+
+			await toolset.fetchTools({ accountIds: ['acc2'] });
+			expect(counter.count).toBeGreaterThan(afterAcc1);
+			const afterAcc2 = counter.count;
+
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			expect(counter.count).toBe(afterAcc2);
+		});
+
+		it('account-id ordering does not affect cache hits', async () => {
+			const counter = installMcpSpy();
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			await toolset.fetchTools({ accountIds: ['acc1', 'acc2'] });
+			const afterFirst = counter.count;
+			expect(afterFirst).toBeGreaterThan(0);
+
+			// Reordered list should hit the cache — no new MCP traffic.
+			await toolset.fetchTools({ accountIds: ['acc2', 'acc1'] });
+			expect(counter.count).toBe(afterFirst);
+		});
+
+		it('clearCatalogCache forces a refetch', async () => {
+			const counter = installMcpSpy();
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			const afterFirst = counter.count;
+
+			toolset.clearCatalogCache();
+			await toolset.fetchTools({ accountIds: ['acc1'] });
+			expect(counter.count).toBeGreaterThan(afterFirst);
+		});
+
+		it('setAccounts invalidates the cache', async () => {
+			const counter = installMcpSpy();
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountIds: ['acc1'],
+			});
+
+			await toolset.fetchTools();
+			await toolset.fetchTools();
+			const afterAcc1 = counter.count;
+
+			toolset.setAccounts(['acc2']);
+			await toolset.fetchTools();
+			expect(counter.count).toBeGreaterThan(afterAcc1);
+		});
+
+		it('reuses the same Tools instance on cache hit (identity)', async () => {
+			installMcpSpy();
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			const first = await toolset.fetchTools({ accountIds: ['acc1'] });
+			const second = await toolset.fetchTools({ accountIds: ['acc1'] });
+
+			// Identity reuse means the toolIndex cache's reference-equality check
+			// in localSearch can hit across search calls.
+			expect(second).toBe(first);
+		});
+	});
 });
