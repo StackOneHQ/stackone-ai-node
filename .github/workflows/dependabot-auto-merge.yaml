@@ -18,12 +18,12 @@ jobs:
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.5.0
+        uses: dependabot/fetch-metadata@ffa630c65fa7e0ecfa0625b5ceda64399aea1b36 # v3.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Wait for CI to pass
-        uses: lewagon/wait-on-check-action@74049309dfeff245fe8009a0137eacf28136cb3c # v1.5.0
+        uses: lewagon/wait-on-check-action@78dd4dd5d9b337c14c3c81f79e53bf7d222435c1 # v1.6.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           running-workflow-name: Dependabot auto-merge
