@@ -35,7 +35,7 @@ function parseArgs(): number {
 }
 
 async function bench(
-	fn: () => Promise<void>,
+	fn: () => Promise<unknown>,
 	n: number,
 ): Promise<{ cold: number; warmAvg: number }> {
 	const times: number[] = [];
@@ -132,4 +132,4 @@ async function main(): Promise<void> {
 	console.log('Speedup = cold / warm_avg — shows the benefit of caching.\n');
 }
 
-main();
+void main();
