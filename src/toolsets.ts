@@ -552,7 +552,8 @@ export class StackOneToolSet {
 				);
 			}
 		}
-		this.defenderConfig = defenderInput === undefined ? DEFAULT_DEFENDER_CONFIG : defenderInput;
+		this.defenderConfig =
+			defenderInput === undefined ? { ...DEFAULT_DEFENDER_CONFIG } : defenderInput;
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
