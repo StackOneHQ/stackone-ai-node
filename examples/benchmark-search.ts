@@ -16,7 +16,13 @@
 import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 
-const QUERIES = ['list events', 'cancel a meeting', 'send a message', 'get current user', 'list employees'];
+const QUERIES = [
+	'list events',
+	'cancel a meeting',
+	'send a message',
+	'get current user',
+	'list employees',
+];
 
 function parseArgs(): number {
 	const idx = process.argv.indexOf('--iterations');
@@ -28,7 +34,10 @@ function parseArgs(): number {
 	return 100;
 }
 
-async function bench(fn: () => Promise<void>, n: number): Promise<{ cold: number; warmAvg: number }> {
+async function bench(
+	fn: () => Promise<void>,
+	n: number,
+): Promise<{ cold: number; warmAvg: number }> {
 	const times: number[] = [];
 	for (let i = 0; i < n; i++) {
 		const start = performance.now();
@@ -37,7 +46,8 @@ async function bench(fn: () => Promise<void>, n: number): Promise<{ cold: number
 	}
 	const cold = times[0];
 	const warmTimes = times.slice(1);
-	const warmAvg = warmTimes.length > 0 ? warmTimes.reduce((a, b) => a + b, 0) / warmTimes.length : cold;
+	const warmAvg =
+		warmTimes.length > 0 ? warmTimes.reduce((a, b) => a + b, 0) / warmTimes.length : cold;
 	return { cold, warmAvg };
 }
 
@@ -60,7 +70,9 @@ async function main(): Promise<void> {
 		process.exit(1);
 	}
 
-	console.log(`Benchmarking with account ${accountId.slice(0, 8)}..., ${iterations} iterations each\n`);
+	console.log(
+		`Benchmarking with account ${accountId.slice(0, 8)}..., ${iterations} iterations each\n`,
+	);
 
 	const ts = new StackOneToolSet({
 		apiKey,
@@ -78,7 +90,9 @@ async function main(): Promise<void> {
 	const fetch = await bench(() => ts.fetchTools(), iterations);
 	const fetchSpeedup = fetch.cold / fetch.warmAvg;
 	results.push({ name: 'fetchTools', ...fetch, speedup: fetchSpeedup });
-	console.log(`       cold=${fmtMs(fetch.cold)}  warm_avg=${fmtMs(fetch.warmAvg)}  speedup=${fetchSpeedup.toFixed(0)}x`);
+	console.log(
+		`       cold=${fmtMs(fetch.cold)}  warm_avg=${fmtMs(fetch.warmAvg)}  speedup=${fetchSpeedup.toFixed(0)}x`,
+	);
 
 	// --- 2. local search (BM25 + TF-IDF) ---
 	console.log(`[2/3] searchTools (local) x${iterations} ...`);
@@ -87,7 +101,9 @@ async function main(): Promise<void> {
 	const local = await bench(() => ts.searchTools(nextQuery(), { search: 'local' }), iterations);
 	const localSpeedup = local.cold / local.warmAvg;
 	results.push({ name: 'search (local/BM25)', ...local, speedup: localSpeedup });
-	console.log(`       cold=${fmtMs(local.cold)}  warm_avg=${fmtMs(local.warmAvg)}  speedup=${localSpeedup.toFixed(0)}x`);
+	console.log(
+		`       cold=${fmtMs(local.cold)}  warm_avg=${fmtMs(local.warmAvg)}  speedup=${localSpeedup.toFixed(0)}x`,
+	);
 
 	// --- 3. semantic search (auto) ---
 	console.log(`[3/3] searchTools (semantic/auto) x${iterations} ...`);
@@ -96,14 +112,20 @@ async function main(): Promise<void> {
 	const semantic = await bench(() => ts.searchTools(nextQuery(), { search: 'auto' }), iterations);
 	const semanticSpeedup = semantic.cold / semantic.warmAvg;
 	results.push({ name: 'search (semantic)', ...semantic, speedup: semanticSpeedup });
-	console.log(`       cold=${fmtMs(semantic.cold)}  warm_avg=${fmtMs(semantic.warmAvg)}  speedup=${semanticSpeedup.toFixed(0)}x`);
+	console.log(
+		`       cold=${fmtMs(semantic.cold)}  warm_avg=${fmtMs(semantic.warmAvg)}  speedup=${semanticSpeedup.toFixed(0)}x`,
+	);
 
 	// --- Summary ---
 	console.log('\n' + '='.repeat(65));
-	console.log(`${'Benchmark'.padEnd(22)} ${'Cold'.padStart(10)} ${'Warm (avg)'.padStart(10)} ${'Speedup'.padStart(10)}`);
+	console.log(
+		`${'Benchmark'.padEnd(22)} ${'Cold'.padStart(10)} ${'Warm (avg)'.padStart(10)} ${'Speedup'.padStart(10)}`,
+	);
 	console.log('-'.repeat(65));
 	for (const r of results) {
-		console.log(`${r.name.padEnd(22)} ${fmtMs(r.cold)} ${fmtMs(r.warmAvg)} ${`${r.speedup.toFixed(0)}x`.padStart(10)}`);
+		console.log(
+			`${r.name.padEnd(22)} ${fmtMs(r.cold)} ${fmtMs(r.warmAvg)} ${`${r.speedup.toFixed(0)}x`.padStart(10)}`,
+		);
 	}
 	console.log('='.repeat(65));
 	console.log(`\nWarm = average of ${iterations - 1} calls after the first (cold) call.`);
