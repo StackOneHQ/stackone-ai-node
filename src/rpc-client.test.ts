@@ -155,7 +155,5 @@ test('should omit defender_config from payload when not provided', async () => {
 		action: 'custom_action',
 	});
 
-	expect((response.data as Record<string, unknown>).received).not.toHaveProperty(
-		'defender_config',
-	);
+	expect((response.data as Record<string, unknown>).received).not.toHaveProperty('defender_config');
 });

@@ -1300,7 +1300,11 @@ export class StackOneToolSet {
 							use_tier2_classification: false,
 						},
 					};
-				} else if (typeof defender !== 'object' || !('useProjectSettings' in defender) || !defender.useProjectSettings) {
+				} else if (
+					typeof defender !== 'object' ||
+					!('useProjectSettings' in defender) ||
+					!defender.useProjectSettings
+				) {
 					// SDK-level config (default or explicit)
 					defenderFields = {
 						defender_config: {
