@@ -1044,8 +1044,8 @@ export class StackOneToolSet {
 
 		const cacheKey = JSON.stringify({
 			accountIds: [...effectiveAccountIds].sort(),
-			providers: options?.providers ? [...options.providers].sort() : null,
-			actions: options?.actions ? [...options.actions].sort() : null,
+			providers: options?.providers?.length ? [...options.providers].sort() : null,
+			actions: options?.actions?.length ? [...options.actions].sort() : null,
 		});
 		const cached = this.catalogCache.get(cacheKey);
 		if (cached) {
