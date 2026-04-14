@@ -539,6 +539,7 @@ export class StackOneToolSet {
 		const defenderInput = config?.defender;
 		if (
 			defenderInput != null &&
+			typeof defenderInput === 'object' &&
 			'useProjectSettings' in defenderInput &&
 			defenderInput.useProjectSettings === true
 		) {
@@ -552,14 +553,6 @@ export class StackOneToolSet {
 			}
 		}
 		this.defenderConfig = defenderInput === undefined ? DEFAULT_DEFENDER_CONFIG : defenderInput;
-		if (defenderInput === undefined) {
-			console.warn(
-				'[StackOneToolSet] No defender config provided. SDK defaults are active and will override any ' +
-					'project-level defender settings. To use your project settings, pass ' +
-					'`defender: { useProjectSettings: true }`. To suppress this warning, pass an explicit ' +
-					'`defender` config.',
-			);
-		}
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -1307,7 +1300,7 @@ export class StackOneToolSet {
 							use_tier2_classification: false,
 						},
 					};
-				} else if (!('useProjectSettings' in defender) || !defender.useProjectSettings) {
+				} else if (typeof defender !== 'object' || !('useProjectSettings' in defender) || !defender.useProjectSettings) {
 					// SDK-level config (default or explicit)
 					defenderFields = {
 						defender_config: {

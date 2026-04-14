@@ -18,8 +18,6 @@ const defenderConfigRequestSchema = z.object({
 export const rpcActionRequestSchema = z.object({
 	action: z.string(),
 	body: z.optional(z.record(z.string(), z.unknown())),
-	/** @deprecated use defender_config instead */
-	defender_enabled: z.optional(z.boolean()),
 	defender_config: z.optional(defenderConfigRequestSchema),
 	headers: z.optional(stackOneHeadersSchema),
 	path: z.optional(z.record(z.string(), z.unknown())),

@@ -20,7 +20,6 @@ export const stackoneRpcHandlers = [
 		const body = (await request.json()) as {
 			action?: string;
 			body?: Record<string, unknown>;
-			defender_enabled?: boolean;
 			defender_config?: {
 				enabled?: boolean;
 				block_high_risk?: boolean;
@@ -84,7 +83,6 @@ export const stackoneRpcHandlers = [
 				received: {
 					body: body.body,
 					defender_config: body.defender_config,
-					defender_enabled: body.defender_enabled,
 					headers: body.headers,
 					path: body.path,
 					query: body.query,

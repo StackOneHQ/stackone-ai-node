@@ -52,9 +52,6 @@ export class RpcClient {
 			const requestBody = {
 				action: validatedRequest.action,
 				body: validatedRequest.body,
-				...(validatedRequest.defender_enabled !== undefined && {
-					defender_enabled: validatedRequest.defender_enabled,
-				}),
 				...(validatedRequest.defender_config !== undefined && {
 					defender_config: validatedRequest.defender_config,
 				}),
