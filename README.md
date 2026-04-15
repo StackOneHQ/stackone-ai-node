@@ -411,6 +411,66 @@ import { StackOneToolSet } from '@stackone/ai';
 const toolset = new StackOneToolSet({ baseUrl: 'https://api.example-dev.com' });
 ```
 
+### Defender
+
+The SDK includes built-in prompt injection protection via [StackOne Defender](https://www.npmjs.com/package/@stackone/defender). It runs on every tool call result before the content reaches your LLM, detecting and sanitizing injection attacks hidden in external data (emails, documents, CRM notes, etc.).
+
+**Defender is enabled by default.** When no `defender` option is passed, the SDK applies these defaults:
+
+| Setting | Default | Description |
+|---|---|---|
+| `enabled` | `true` | Scanning runs on every tool call |
+| `blockHighRisk` | `false` | High/critical content is annotated but not blocked |
+| `useTier1Classification` | `true` | Fast pattern-based detection (~1ms) |
+| `useTier2Classification` | `true` | ML-based detection (~10ms, requires `onnxruntime-node`) |
+
+#### Configuration modes
+
+```typescript
+import { StackOneToolSet } from '@stackone/ai';
+
+// Default — SDK defaults apply (enabled, non-blocking)
+const toolset = new StackOneToolSet({ apiKey: '...' });
+
+// Explicitly disabled — no scanning on any tool call
+const toolset = new StackOneToolSet({
+  apiKey: '...',
+  defender: null,
+});
+
+// Defer to project dashboard settings
+const toolset = new StackOneToolSet({
+  apiKey: '...',
+  defender: { useProjectSettings: true },
+});
+
+// Explicit SDK-level config — block high/critical risk results
+const toolset = new StackOneToolSet({
+  apiKey: '...',
+  defender: {
+    enabled: true,
+    blockHighRisk: true,           // throw on HIGH or CRITICAL risk
+    useTier1Classification: true,  // pattern-based (regex, role markers)
+    useTier2Classification: true,  // ML-based (ONNX model)
+  },
+});
+```
+
+#### Risk levels
+
+Defender assigns a risk level to each scanned result:
+
+| Level | Meaning |
+|---|---|
+| `low` | No threats detected |
+| `medium` | Suspicious patterns detected, role markers stripped |
+| `high` | Injection patterns found, content redacted |
+| `critical` | Severe injection attempt with multiple indicators |
+
+When `blockHighRisk: false` (default), `high` and `critical` results are annotated and returned — the LLM sees the sanitized content. When `blockHighRisk: true`, those results are blocked entirely.
+
+For more detail on how the detection pipeline works, see the [`@stackone/defender`](https://www.npmjs.com/package/@stackone/defender) package.
+
 ### Testing with dryRun
 
 You can use the `dryRun` option to return the api arguments from a tool call without making the actual api call:
