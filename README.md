@@ -417,12 +417,12 @@ The SDK includes built-in prompt injection protection via [StackOne Defender](ht
 
 **Defender is enabled by default.** When no `defender` option is passed, the SDK applies these defaults:
 
-| Setting | Default | Description |
-|---|---|---|
-| `enabled` | `true` | Scanning runs on every tool call |
-| `blockHighRisk` | `false` | High/critical content is annotated but not blocked |
-| `useTier1Classification` | `true` | Fast pattern-based detection (~1ms) |
-| `useTier2Classification` | `true` | ML-based detection (~10ms, requires `onnxruntime-node`) |
+| Setting                  | Default | Description                                             |
+| ------------------------ | ------- | ------------------------------------------------------- |
+| `enabled`                | `true`  | Scanning runs on every tool call                        |
+| `blockHighRisk`          | `false` | High/critical content is annotated but not blocked      |
+| `useTier1Classification` | `true`  | Fast pattern-based detection (~1ms)                     |
+| `useTier2Classification` | `true`  | ML-based detection (~10ms, requires `onnxruntime-node`) |
 
 #### Configuration modes
 
@@ -434,25 +434,25 @@ const toolset = new StackOneToolSet({ apiKey: '...' });
 
 // Explicitly disabled — no scanning on any tool call
 const toolset = new StackOneToolSet({
-  apiKey: '...',
-  defender: null,
+	apiKey: '...',
+	defender: null,
 });
 
 // Defer to project dashboard settings
 const toolset = new StackOneToolSet({
-  apiKey: '...',
-  defender: { useProjectSettings: true },
+	apiKey: '...',
+	defender: { useProjectSettings: true },
 });
 
 // Explicit SDK-level config — block high/critical risk results
 const toolset = new StackOneToolSet({
-  apiKey: '...',
-  defender: {
-    enabled: true,
-    blockHighRisk: true,           // throw on HIGH or CRITICAL risk
-    useTier1Classification: true,  // pattern-based (regex, role markers)
-    useTier2Classification: true,  // ML-based (ONNX model)
-  },
+	apiKey: '...',
+	defender: {
+		enabled: true,
+		blockHighRisk: true, // throw on HIGH or CRITICAL risk
+		useTier1Classification: true, // pattern-based (regex, role markers)
+		useTier2Classification: true, // ML-based (ONNX model)
+	},
 });
 ```
 
@@ -460,12 +460,12 @@ const toolset = new StackOneToolSet({
 
 Defender assigns a risk level to each scanned result:
 
-| Level | Meaning |
-|---|---|
-| `low` | No threats detected |
-| `medium` | Suspicious patterns detected, role markers stripped |
-| `high` | Injection patterns found, content redacted |
-| `critical` | Severe injection attempt with multiple indicators |
+| Level      | Meaning                                             |
+| ---------- | --------------------------------------------------- |
+| `low`      | No threats detected                                 |
+| `medium`   | Suspicious patterns detected, role markers stripped |
+| `high`     | Injection patterns found, content redacted          |
+| `critical` | Severe injection attempt with multiple indicators   |
 
 When `blockHighRisk: false` (default), `high` and `critical` results are annotated and returned — the LLM sees the sanitized content. When `blockHighRisk: true`, those results are blocked entirely.
 
