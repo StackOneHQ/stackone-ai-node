@@ -592,6 +592,8 @@ export class StackOneToolSet {
 	}
 
 	private semanticSearchClient?: SemanticSearchClient;
+	private catalogCache: Map<string, Tools> = new Map();
+	private toolIndexCache?: { tools: Tools; index: ToolIndex };
 
 	/**
 	 * Set account IDs for filtering tools
@@ -600,7 +602,19 @@ export class StackOneToolSet {
 	 */
 	setAccounts(accountIds: string[]): this {
 		this.accountIds = accountIds;
+		this.clearCatalogCache();
 		return this;
+	}
+
+	/**
+	 * Invalidate cached tool catalog and local search index.
+	 *
+	 * Call when linked accounts change outside of {@link setAccounts} or when
+	 * you need to force a fresh fetch from the StackOne MCP endpoint.
+	 */
+	clearCatalogCache(): void {
+		this.catalogCache.clear();
+		this.toolIndexCache = undefined;
 	}
 
 	/**
@@ -1034,7 +1048,10 @@ export class StackOneToolSet {
 			return new Tools([]);
 		}
 
-		const index = new ToolIndex(allTools.toArray());
+		if (!this.toolIndexCache || this.toolIndexCache.tools !== allTools) {
+			this.toolIndexCache = { tools: allTools, index: new ToolIndex(allTools.toArray()) };
+		}
+		const index = this.toolIndexCache.index;
 		const results = await index.search(query, options?.topK ?? 5, options?.minSimilarity ?? 0.0);
 
 		const matchedNames = results.map((r) => r.name);
@@ -1059,6 +1076,16 @@ export class StackOneToolSet {
 	async fetchTools(options?: FetchToolsOptions): Promise<Tools> {
 		// Use account IDs from options, or fall back to instance state
 		const effectiveAccountIds = options?.accountIds || this.accountIds;
+
+		const cacheKey = JSON.stringify({
+			accountIds: [...effectiveAccountIds].sort(),
+			providers: options?.providers?.length ? [...options.providers].sort() : null,
+			actions: options?.actions?.length ? [...options.actions].sort() : null,
+		});
+		const cached = this.catalogCache.get(cacheKey);
+		if (cached) {
+			return cached;
+		}
 
 		// Fetch tools (with account filtering if needed)
 		let tools: Tools;
@@ -1096,6 +1123,7 @@ export class StackOneToolSet {
 		const feedbackTool = createFeedbackTool(undefined, this.accountId, this.baseUrl);
 		const toolsWithFeedback = new Tools([...filteredTools.toArray(), feedbackTool]);
 
+		this.catalogCache.set(cacheKey, toolsWithFeedback);
 		return toolsWithFeedback;
 	}
 
