@@ -6,8 +6,8 @@
 
 import { openai } from '@ai-sdk/openai';
 import { generateText, stepCountIs } from 'ai';
-import { TEST_BASE_URL } from '../mocks/constants';
-import { StackOneToolSet } from '../src';
+import { TEST_BASE_URL } from '../../mocks/constants';
+import { StackOneToolSet } from '../../src';
 
 describe('ai-sdk-integration example e2e', () => {
 	beforeEach(() => {

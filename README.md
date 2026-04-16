@@ -33,12 +33,11 @@ bun add @stackone/ai zod
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool('bamboohr_list_employees');
+const employeeTool = tools.getTool('workday_list_workers');
 const employees = await employeeTool.execute();
 ```
 
@@ -59,20 +58,24 @@ StackOne uses account IDs to identify different integrations. You can specify th
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-// Single account - simplest approach
-const toolset = new StackOneToolSet({ accountId: 'your-bamboohr-account' });
+// Simplest: set STACKONE_ACCOUNT_ID environment variable
+const toolset = new StackOneToolSet();
 const tools = await toolset.fetchTools();
+
+// Explicit single account
+const explicitToolset = new StackOneToolSet({ accountId: 'your-workday-account' });
+const explicitTools = await explicitToolset.fetchTools();
 
 // Multiple accounts - returns tools from both integrations
 const multiAccountToolset = new StackOneToolSet();
 const allTools = await multiAccountToolset.fetchTools({
-	accountIds: ['bamboohr-account-123', 'workday-account-456'],
+	accountIds: ['workday-account-123', 'hibob-account-456'],
 });
 
 // Filter to specific integration when using multiple accounts
-const bamboohrOnly = await multiAccountToolset.fetchTools({
-	accountIds: ['bamboohr-account-123', 'workday-account-456'],
-	actions: ['bamboohr_*'], // Only BambooHR tools
+const workdayOnly = await multiAccountToolset.fetchTools({
+	accountIds: ['workday-account-123', 'hibob-account-456'],
+	actions: ['workday_*'], // Only Workday tools
 });
 
 // Set directly on a tool instance
@@ -95,9 +98,8 @@ npm install @stackone/ai openai  # or: yarn/pnpm/bun add
 import { OpenAI } from 'openai';
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
 
@@ -106,7 +108,7 @@ await openai.chat.completions.create({
 	messages: [
 		{
 			role: 'system',
-			content: 'You are a helpful HR assistant using BambooHR.',
+			content: 'You are a helpful HR assistant using Workday.',
 		},
 		{
 			role: 'user',
@@ -132,9 +134,8 @@ npm install @stackone/ai openai  # or: yarn/pnpm/bun add
 import OpenAI from 'openai';
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
 
@@ -163,9 +164,8 @@ npm install @stackone/ai @anthropic-ai/sdk  # or: yarn/pnpm/bun add
 import Anthropic from '@anthropic-ai/sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
 
@@ -201,9 +201,8 @@ import { openai } from '@ai-sdk/openai';
 import { generateText } from 'ai';
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
 
@@ -219,55 +218,6 @@ await generateText({
 </details>
 
 <details>
-<summary><strong>With TanStack AI</strong></summary>
-
-```bash
-npm install @stackone/ai @tanstack/ai @tanstack/ai-openai zod  # or: yarn/pnpm/bun add
-```
-
-```typescript
-import { chat } from '@tanstack/ai';
-import { openai } from '@tanstack/ai-openai';
-import { z } from 'zod';
-import { StackOneToolSet } from '@stackone/ai';
-
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
-
-const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool('bamboohr_get_employee');
-
-// TanStack AI requires Zod schemas for tool input validation
-const getEmployeeTool = {
-	name: employeeTool.name,
-	description: employeeTool.description,
-	inputSchema: z.object({
-		id: z.string().describe('The employee ID'),
-	}),
-	execute: async (args: { id: string }) => {
-		return employeeTool.execute(args);
-	},
-};
-
-const adapter = openai();
-const stream = chat({
-	adapter,
-	model: 'gpt-5.1',
-	messages: [{ role: 'user', content: 'Get employee with id: abc123' }],
-	tools: [getEmployeeTool],
-});
-
-for await (const chunk of stream) {
-	// Process streaming chunks
-}
-```
-
-[View full example](examples/tanstack-ai-integration.ts)
-
-</details>
-
-<details>
 <summary><strong>With Claude Agent SDK</strong></summary>
 
 ```bash
@@ -278,9 +228,8 @@ npm install @stackone/ai @anthropic-ai/claude-agent-sdk zod  # or: yarn/pnpm/bun
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({
-	accountId: 'your-account-id',
-});
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 // Fetch tools and convert to Claude Agent SDK format
 const tools = await toolset.fetchTools();
@@ -322,7 +271,7 @@ const tools = await toolset.fetchTools({
 });
 
 // Filter by providers
-const tools = await toolset.fetchTools({ providers: ['hibob', 'bamboohr'] });
+const tools = await toolset.fetchTools({ providers: ['hibob', 'workday'] });
 
 // Filter by actions with exact match
 const tools = await toolset.fetchTools({
@@ -346,8 +295,6 @@ This is especially useful when you want to:
 - Focus on specific HR/CRM/ATS providers
 - Get only certain types of operations (e.g., all "list" operations)
 
-[View full example](examples/fetch-tools.ts)
-
 ### Search Tool
 
 Search for tools using natural language queries. Works with both semantic (cloud) and local BM25+TF-IDF search.
@@ -357,26 +304,27 @@ Search for tools using natural language queries. Works with both semantic (cloud
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-// Get a callable search tool
-const toolset = new StackOneToolSet({ accountId: 'your-account-id' });
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 const searchTool = toolset.getSearchTool();
 
 // Search for relevant tools — returns a Tools collection
 const tools = await searchTool.search('manage employees', { topK: 5 });
 
 // Execute a discovered tool directly
-const listTool = tools.getTool('bamboohr_list_employees');
+const listTool = tools.getTool('workday_list_workers');
 const result = await listTool.execute({ query: { limit: 10 } });
 ```
 
 ### Semantic Search
 
-Discover tools using natural language instead of exact names. Queries like "onboard new hire" resolve to the right actions even when the tool is called `bamboohr_create_employee`.
+Discover tools using natural language instead of exact names. Queries like "onboard new hire" resolve to the right actions even when the tool is called `workday_create_employee`.
 
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-const toolset = new StackOneToolSet({ accountId: 'your-account-id' });
+// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+const toolset = new StackOneToolSet();
 
 // Search by intent — returns Tools collection ready for any framework
 const tools = await toolset.searchTools('manage employee records', { topK: 5 });
@@ -422,7 +370,7 @@ import { StackOneToolSet } from '@stackone/ai';
 const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool('bamboohr_list_employees');
+const employeeTool = tools.getTool('workday_list_workers');
 
 // Use dryRun to see the request details
 const dryRunResult = await employeeTool.execute({ query: { limit: 5 } }, { dryRun: true });
@@ -490,7 +438,7 @@ const feedbackTool = tools.getTool('tool_feedback');
 const result = await feedbackTool.execute({
 	feedback: 'The tools worked great! Very easy to use.',
 	account_id: 'acc_123456',
-	tool_names: ['bamboohr_list_employees', 'bamboohr_create_time_off'],
+	tool_names: ['workday_list_workers', 'workday_create_time_off_request'],
 });
 ```
 
@@ -503,14 +451,14 @@ The feedback tool supports both single and multiple account IDs. When you provid
 await feedbackTool.execute({
 	feedback: 'The tools worked great! Very easy to use.',
 	account_id: 'acc_123456',
-	tool_names: ['bamboohr_list_employees', 'bamboohr_create_time_off'],
+	tool_names: ['workday_list_workers', 'workday_create_time_off_request'],
 });
 
 // Multiple account IDs (array)
 await feedbackTool.execute({
 	feedback: 'The tools worked great! Very easy to use.',
 	account_id: ['acc_123456', 'acc_789012'],
-	tool_names: ['bamboohr_list_employees', 'bamboohr_create_time_off'],
+	tool_names: ['workday_list_workers', 'workday_create_time_off_request'],
 });
 ```
 
@@ -548,6 +496,24 @@ When AI agents use this tool, they will:
 5. **Report results**: Show which accounts received the feedback successfully
 
 The tool description includes clear instructions for AI agents to always ask for explicit user consent before submitting feedback.
+
+## Examples
+
+### Running Examples
+
+```bash
+# 1. Set up credentials
+cp .env.example .env
+# Edit .env with your API keys
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Run any example
+pnpm run:example examples/openai-integration.ts
+```
+
+See the [examples/](examples/) directory for the full list.
 
 ## Development Environment
 

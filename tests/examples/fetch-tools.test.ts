@@ -5,9 +5,9 @@
  */
 
 import { http, HttpResponse } from 'msw';
-import { server } from '../mocks/node';
-import { TEST_BASE_URL } from '../mocks/constants';
-import { StackOneToolSet } from '../src';
+import { server } from '../../mocks/node';
+import { TEST_BASE_URL } from '../../mocks/constants';
+import { StackOneToolSet } from '../../src';
 
 describe('fetch-tools example e2e', () => {
 	beforeEach(() => {

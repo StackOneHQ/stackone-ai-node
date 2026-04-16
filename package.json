@@ -24,7 +24,6 @@
 		"LICENSE",
 		"README.md",
 		"src",
-		"!examples/*.test.ts",
 		"examples/*.ts",
 		"!src/**/*.test-d.ts",
 		"!src/**/*.test.ts"
@@ -56,7 +55,8 @@
 		"preinstall": "npx only-allow pnpm",
 		"prepack": "npm pkg delete scripts.preinstall && pnpm run build",
 		"test": "vitest",
-		"coverage": "vitest run --coverage"
+		"coverage": "vitest run --coverage",
+		"run:example": "tsx --env-file .env"
 	},
 	"dependencies": {
 		"@modelcontextprotocol/sdk": "catalog:prod",

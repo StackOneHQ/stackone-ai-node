@@ -11,8 +11,8 @@
 
 import { tool, createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
-import { TEST_BASE_URL } from '../mocks/constants';
-import { StackOneToolSet } from '../src';
+import { TEST_BASE_URL } from '../../mocks/constants';
+import { StackOneToolSet } from '../../src';
 
 describe('claude-agent-sdk-integration example e2e', () => {
 	beforeEach(() => {

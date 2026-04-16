@@ -5,8 +5,8 @@
  */
 
 import OpenAI from 'openai';
-import { TEST_BASE_URL } from '../mocks/constants';
-import { StackOneToolSet } from '../src';
+import { TEST_BASE_URL } from '../../mocks/constants';
+import { StackOneToolSet } from '../../src';
 
 describe('openai-responses-integration example e2e', () => {
 	beforeEach(() => {
