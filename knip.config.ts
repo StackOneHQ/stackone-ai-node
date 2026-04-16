@@ -7,13 +7,13 @@ export default {
 			project: ['src/**/*.ts', 'mocks/**/*.ts'],
 		},
 		examples: {
-			entry: ['*.ts', '*.test.ts'],
+			entry: ['*.ts'],
 			project: ['*.ts'],
 		},
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
-	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint'],
-	ignoreDependencies: ['@typescript/native-preview'],
+	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx'],
+	ignoreDependencies: [],
 	rules: {
 		optionalPeerDependencies: 'off',
 		devDependencies: 'warn',
