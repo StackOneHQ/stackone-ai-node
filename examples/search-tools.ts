@@ -135,7 +135,7 @@ async function searchAndExecute(): Promise<void> {
 	});
 
 	// getTools() returns tool_search + tool_execute as a Tools collection
-	const tools = toolset.getTools({ accountIds: [accountId] });
+	const tools = toolset.getTools({ accountIds: [accountId as string] });
 	console.log('  Tools provided to model: tool_search, tool_execute');
 
 	const { text, steps } = await generateText({

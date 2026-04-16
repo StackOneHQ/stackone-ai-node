@@ -53,8 +53,10 @@ const openaiIntegration = async (): Promise<void> => {
 	console.log(`Tool calls made: ${toolCalls.length}`);
 
 	for (const toolCall of toolCalls) {
-		console.log(`  Tool: ${toolCall.function.name}`);
-		console.log(`  Arguments: ${toolCall.function.arguments}`);
+		if ('function' in toolCall) {
+			console.log(`  Tool: ${toolCall.function.name}`);
+			console.log(`  Arguments: ${toolCall.function.arguments}`);
+		}
 	}
 };
 
