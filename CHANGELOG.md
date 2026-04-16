@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.7.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.6.0...v2.7.0) (2026-04-14)
+
+
+### Features
+
+* **search-optimization:** cache fetchTools results and ToolIndex across calls ([#359](https://github.com/StackOneHQ/stackone-ai-node/issues/359)) ([91acc15](https://github.com/StackOneHQ/stackone-ai-node/commit/91acc1571f81b65a97a9c90e1c4095bb17b22ca9))
+
 ## [2.6.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.5.1...v2.6.0) (2026-04-07)
 
 
