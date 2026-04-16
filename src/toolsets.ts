@@ -459,6 +459,37 @@ export function createExecuteTool(
 	return tool;
 }
 
+/** Wire-format defender config sent to the backend RPC action. */
+interface DefenderApiConfig {
+	enabled: boolean;
+	block_high_risk: boolean;
+	use_tier1_classification: boolean;
+	use_tier2_classification: boolean;
+}
+
+/**
+ * Map SDK DefenderConfig to the wire-format sent in the RPC body.
+ *
+ * - `null` → explicitly disabled (all fields false)
+ * - `{ useProjectSettings: true }` → empty object (backend uses project settings)
+ * - SDK config → merge with defaults
+ */
+function buildDefenderFields(
+	config: DefenderConfig | null,
+): { defender_config: DefenderApiConfig } | Record<string, never> {
+	if (config !== null && 'useProjectSettings' in config && config.useProjectSettings) {
+		return {};
+	}
+	return {
+		defender_config: {
+			enabled: config?.enabled ?? config !== null,
+			block_high_risk: config?.blockHighRisk ?? false,
+			use_tier1_classification: config?.useTier1Classification ?? config !== null,
+			use_tier2_classification: config?.useTier2Classification ?? config !== null,
+		},
+	};
+}
+
 /**
  * Class for loading StackOne tools via MCP
  */
@@ -471,6 +502,7 @@ export class StackOneToolSet {
 	private readonly searchConfig: SearchConfig | null;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
 	private readonly defenderConfig: DefenderConfig | null;
+	private readonly defenderFields: { defender_config: DefenderApiConfig } | Record<string, never>;
 
 	/**
 	 * Account ID for StackOne API
@@ -554,6 +586,7 @@ export class StackOneToolSet {
 		}
 		this.defenderConfig =
 			defenderInput === undefined ? { ...DEFAULT_DEFENDER_CONFIG } : defenderInput;
+		this.defenderFields = buildDefenderFields(this.defenderConfig);
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -1310,47 +1343,11 @@ export class StackOneToolSet {
 					rpcBody[key] = value as JsonObject[string];
 				}
 
-				const defender = this.defenderConfig;
-				let defenderFields: Partial<{
-					defender_config: {
-						enabled: boolean;
-						block_high_risk: boolean;
-						use_tier1_classification: boolean;
-						use_tier2_classification: boolean;
-					};
-				}> = {};
-				if (defender === null) {
-					// null → explicitly disable
-					defenderFields = {
-						defender_config: {
-							enabled: false,
-							block_high_risk: false,
-							use_tier1_classification: false,
-							use_tier2_classification: false,
-						},
-					};
-				} else if (
-					typeof defender !== 'object' ||
-					!('useProjectSettings' in defender) ||
-					!defender.useProjectSettings
-				) {
-					// SDK-level config (default or explicit)
-					defenderFields = {
-						defender_config: {
-							enabled: defender.enabled ?? true,
-							block_high_risk: defender.blockHighRisk ?? false,
-							use_tier1_classification: defender.useTier1Classification ?? true,
-							use_tier2_classification: defender.useTier2Classification ?? true,
-						},
-					};
-				}
-				// else: useProjectSettings: true → send nothing, backend uses project settings
-
 				if (options?.dryRun) {
 					const requestPayload = {
 						action: name,
 						body: rpcBody,
-						...defenderFields,
+						...this.defenderFields,
 						headers: actionHeaders,
 						path: pathParams ?? undefined,
 						query: queryParams ?? undefined,
@@ -1368,7 +1365,7 @@ export class StackOneToolSet {
 				const response = await actionsClient.actions.rpcAction({
 					action: name,
 					body: rpcBody,
-					...defenderFields,
+					...this.defenderFields,
 					headers: actionHeaders,
 					path: pathParams ?? undefined,
 					query: queryParams ?? undefined,
