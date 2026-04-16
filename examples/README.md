@@ -76,9 +76,9 @@ Walks through every way to configure API keys and account IDs: reading from envi
 
 ## Environment Variables
 
-| Variable | Required | Used By |
-|---|---|---|
-| `STACKONE_API_KEY` | Yes | All examples |
-| `STACKONE_ACCOUNT_ID` | Recommended | All examples (read automatically by `new StackOneToolSet()`) |
-| `OPENAI_API_KEY` | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts`, `search-tools.ts` (section 5) |
-| `ANTHROPIC_API_KEY` | For Anthropic examples | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts` |
+| Variable              | Required                     | Used By                                                                                                            |
+| --------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `STACKONE_API_KEY`    | Yes                          | All examples                                                                                                       |
+| `STACKONE_ACCOUNT_ID` | Recommended                  | All examples (read automatically by `new StackOneToolSet()`)                                                       |
+| `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts`, `search-tools.ts` (section 5) |
+| `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                                                      |
