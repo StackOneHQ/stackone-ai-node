@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.7.0...v2.8.0) (2026-04-20)
+
+
+### Features
+
+* **examples:** streamline examples, relocate tests, standardize auth, migrate to Workday ([#361](https://github.com/StackOneHQ/stackone-ai-node/issues/361)) ([6539be3](https://github.com/StackOneHQ/stackone-ai-node/commit/6539be3bb82f0ef2e464454e76de2777d393f011))
+
 ## [2.7.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.6.0...v2.7.0) (2026-04-14)
 
 
