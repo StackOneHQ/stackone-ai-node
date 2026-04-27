@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.8.0...v2.8.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **toolsets:** prevent x-account-id leak across concurrent fetchTools ([#367](https://github.com/StackOneHQ/stackone-ai-node/issues/367)) ([600b792](https://github.com/StackOneHQ/stackone-ai-node/commit/600b792f78d001d8ce05f6a89d8708ac3118b9d7))
+
 ## [2.8.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.7.0...v2.8.0) (2026-04-20)
 
 
