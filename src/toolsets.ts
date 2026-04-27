@@ -1053,24 +1053,14 @@ export class StackOneToolSet {
 		}
 
 		// Fetch tools (with account filtering if needed)
+		// Headers are threaded as parameters per request — never mutate this.headers,
+		// since concurrent callers would clobber each other's x-account-id.
 		let tools: Tools;
 		if (effectiveAccountIds.length > 0) {
 			const toolsPromises = effectiveAccountIds.map(async (accountId) => {
-				const headers = { 'x-account-id': accountId };
-				const mergedHeaders = { ...this.headers, ...headers };
-
-				// Create a temporary toolset instance with the account-specific headers
-				const tempHeaders = mergedHeaders;
-				const originalHeaders = this.headers;
-				this.headers = tempHeaders;
-
-				try {
-					const tools = await this.fetchToolsFromMcp();
-					return tools.toArray();
-				} finally {
-					// Restore original headers
-					this.headers = originalHeaders;
-				}
+				const requestHeaders = { ...this.headers, 'x-account-id': accountId };
+				const accountTools = await this.fetchToolsFromMcp(requestHeaders);
+				return accountTools.toArray();
 			});
 
 			const toolArrays = await Promise.all(toolsPromises);
@@ -1078,7 +1068,7 @@ export class StackOneToolSet {
 			tools = new Tools(allTools);
 		} else {
 			// No account filtering - fetch all tools
-			tools = await this.fetchToolsFromMcp();
+			tools = await this.fetchToolsFromMcp(this.headers);
 		}
 
 		// Apply provider and action filters
@@ -1093,16 +1083,18 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * Fetch tool definitions from MCP
+	 * Fetch tool definitions from MCP using the given request headers.
+	 * Headers are passed in (not read from this.headers) so concurrent callers
+	 * can each scope their request to a different x-account-id safely.
 	 */
-	private async fetchToolsFromMcp(): Promise<Tools> {
+	private async fetchToolsFromMcp(requestHeaders: Record<string, string>): Promise<Tools> {
 		if (!this.baseUrl) {
 			throw new ToolSetConfigError('baseUrl is required to fetch MCP tools');
 		}
 
 		await using clients = await createMCPClient({
 			baseUrl: `${this.baseUrl}/mcp`,
-			headers: this.headers,
+			headers: requestHeaders,
 		});
 
 		await clients.client.connect(clients.transport);
@@ -1115,6 +1107,7 @@ export class StackOneToolSet {
 				name,
 				description,
 				inputSchema,
+				headers: requestHeaders,
 			});
 		});
 
@@ -1204,11 +1197,13 @@ export class StackOneToolSet {
 		name,
 		description,
 		inputSchema,
+		headers,
 	}: {
 		actionsClient: RpcClient;
 		name: string;
 		description?: string;
 		inputSchema: ToolInputSchema;
+		headers: Record<string, string>;
 	}): BaseTool {
 		const executeConfig = {
 			kind: 'rpc',
@@ -1235,7 +1230,7 @@ export class StackOneToolSet {
 			description ?? '',
 			toolParameters,
 			executeConfig,
-			this.headers,
+			headers,
 		).setExposeExecutionMetadata(false);
 
 		tool.execute = async (
