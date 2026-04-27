@@ -234,3 +234,42 @@ export interface ClaudeAgentSdkOptions {
 	 */
 	serverVersion?: string;
 }
+
+/**
+ * Defender configuration for controlling prompt injection detection behavior.
+ * Field names match the canonical `DefenderSettings` from `@stackone/core`.
+ *
+ * Three modes:
+ * - `{ useProjectSettings: true }` — defer to whatever is configured in the project dashboard.
+ *   No other fields may be set alongside this (TypeScript enforces it; a runtime error is also thrown).
+ * - An explicit config object (or omitting `defender` entirely) — the SDK owns the defender
+ *   settings and sends them with every RPC call, ignoring any project-level config.
+ * - `null` passed as the `defender` option — defender is explicitly disabled for all tool calls.
+ */
+export type DefenderConfig =
+	| { useProjectSettings: true }
+	| {
+			useProjectSettings?: false;
+			/** Whether to run defender at all. Default: `true`. */
+			enabled?: boolean;
+			/**
+			 * Whether to block tool execution when a HIGH risk score is detected.
+			 * Default: `false` (scan and annotate, but do not block).
+			 */
+			blockHighRisk?: boolean;
+			/** Whether to enable tier 1 pattern-based (regex) detection. Default: `true`. */
+			useTier1Classification?: boolean;
+			/** Whether to enable tier 2 ML-based detection. Default: `true`. */
+			useTier2Classification?: boolean;
+	  };
+
+/**
+ * SDK-level defender defaults applied when no explicit `defender` config is passed.
+ * Defender is enabled but outputs are never blocked — scans run and results are annotated only.
+ */
+export const DEFAULT_DEFENDER_CONFIG = {
+	enabled: true,
+	blockHighRisk: false,
+	useTier1Classification: true,
+	useTier2Classification: true,
+} as const;

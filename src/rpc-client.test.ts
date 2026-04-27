@@ -128,3 +128,32 @@ test('should send x-account-id as HTTP header', async () => {
 		bodyHeader: 'test-account-123',
 	});
 });
+
+test('should forward defender_config in request payload', async () => {
+	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
+		security: { username: 'test-api-key' },
+	});
+
+	const response = await client.actions.rpcAction({
+		action: 'custom_action',
+		defender_config: { enabled: true, block_high_risk: false },
+	});
+
+	expect(response.data).toMatchObject({
+		received: { defender_config: { enabled: true, block_high_risk: false } },
+	});
+});
+
+test('should omit defender_config from payload when not provided', async () => {
+	const client = new RpcClient({
+		serverURL: TEST_BASE_URL,
+		security: { username: 'test-api-key' },
+	});
+
+	const response = await client.actions.rpcAction({
+		action: 'custom_action',
+	});
+
+	expect((response.data as Record<string, unknown>).received).not.toHaveProperty('defender_config');
+});

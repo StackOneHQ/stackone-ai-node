@@ -20,6 +20,12 @@ export const stackoneRpcHandlers = [
 		const body = (await request.json()) as {
 			action?: string;
 			body?: Record<string, unknown>;
+			defender_config?: {
+				enabled?: boolean;
+				block_high_risk?: boolean;
+				use_tier1_classification?: boolean;
+				use_tier2_classification?: boolean;
+			};
 			headers?: Record<string, string>;
 			path?: Record<string, string>;
 			query?: Record<string, string>;
@@ -70,12 +76,13 @@ export const stackoneRpcHandlers = [
 			);
 		}
 
-		// Default response for other actions
+		// Default response for other actions — echo back received fields
 		return HttpResponse.json({
 			data: {
 				action: body.action,
 				received: {
 					body: body.body,
+					defender_config: body.defender_config,
 					headers: body.headers,
 					path: body.path,
 					query: body.query,

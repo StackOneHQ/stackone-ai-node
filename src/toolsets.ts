@@ -14,6 +14,7 @@ import {
 } from './semantic-search';
 import { BaseTool, Tools } from './tool';
 import type {
+	DefenderConfig,
 	ExecuteOptions,
 	JsonObject,
 	JsonSchemaProperties,
@@ -22,6 +23,7 @@ import type {
 	SearchConfig,
 	ToolParameters,
 } from './types';
+import { DEFAULT_DEFENDER_CONFIG } from './types';
 import { StackOneError } from './utils/error-stackone';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { normalizeActionName } from './utils/normalize';
@@ -163,6 +165,15 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	 * Pass `{ accountIds: ['acc-1'] }` to scope tools to specific accounts.
 	 */
 	execute?: ExecuteToolsConfig;
+	/**
+	 * Defender configuration. Controls prompt injection detection behavior for all tool calls.
+	 *
+	 * - Omit or pass `undefined` → SDK defaults apply: defender enabled, outputs never blocked
+	 * - Pass `null` → defender explicitly disabled for all tool calls
+	 * - Pass `{ useProjectSettings: true }` → defer to the project settings configured in the dashboard
+	 * - Pass `{ enabled, blockHighRisk, ... }` → explicit SDK-level config, ignores project settings
+	 */
+	defender?: DefenderConfig | null;
 }
 
 /**
@@ -448,6 +459,37 @@ export function createExecuteTool(
 	return tool;
 }
 
+/** Wire-format defender config sent to the backend RPC action. */
+interface DefenderApiConfig {
+	enabled: boolean;
+	block_high_risk: boolean;
+	use_tier1_classification: boolean;
+	use_tier2_classification: boolean;
+}
+
+/**
+ * Map SDK DefenderConfig to the wire-format sent in the RPC body.
+ *
+ * - `null` → explicitly disabled (all fields false)
+ * - `{ useProjectSettings: true }` → empty object (backend uses project settings)
+ * - SDK config → merge with defaults
+ */
+function buildDefenderFields(
+	config: DefenderConfig | null,
+): { defender_config: DefenderApiConfig } | Record<string, never> {
+	if (config !== null && 'useProjectSettings' in config && config.useProjectSettings) {
+		return {};
+	}
+	return {
+		defender_config: {
+			enabled: config?.enabled ?? config !== null,
+			block_high_risk: config?.blockHighRisk ?? false,
+			use_tier1_classification: config?.useTier1Classification ?? config !== null,
+			use_tier2_classification: config?.useTier2Classification ?? config !== null,
+		},
+	};
+}
+
 /**
  * Class for loading StackOne tools via MCP
  */
@@ -459,6 +501,8 @@ export class StackOneToolSet {
 	private readonly timeout: number;
 	private readonly searchConfig: SearchConfig | null;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
+	private readonly defenderConfig: DefenderConfig | null;
+	private readonly defenderFields: { defender_config: DefenderApiConfig } | Record<string, never>;
 
 	/**
 	 * Account ID for StackOne API
@@ -519,6 +563,30 @@ export class StackOneToolSet {
 		// Resolve search config: undefined/null → disabled, object → custom with defaults
 		this.searchConfig = config?.search != null ? { method: 'auto', ...config.search } : null;
 		this.executeConfig = config?.execute;
+
+		// Resolve defender config:
+		//   undefined  → SDK defaults (enabled, not blocking)
+		//   null       → explicitly disabled
+		//   object     → validate then store as-is
+		const defenderInput = config?.defender;
+		if (
+			defenderInput != null &&
+			typeof defenderInput === 'object' &&
+			'useProjectSettings' in defenderInput &&
+			defenderInput.useProjectSettings === true
+		) {
+			const { useProjectSettings: _, ...rest } = defenderInput as {
+				useProjectSettings: true;
+			} & Record<string, unknown>;
+			if (Object.keys(rest).length > 0) {
+				throw new ToolSetConfigError(
+					'Cannot combine useProjectSettings: true with explicit defender options. Use one or the other.',
+				);
+			}
+		}
+		this.defenderConfig =
+			defenderInput === undefined ? { ...DEFAULT_DEFENDER_CONFIG } : defenderInput;
+		this.defenderFields = buildDefenderFields(this.defenderConfig);
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -1274,6 +1342,7 @@ export class StackOneToolSet {
 					const requestPayload = {
 						action: name,
 						body: rpcBody,
+						...this.defenderFields,
 						headers: actionHeaders,
 						path: pathParams ?? undefined,
 						query: queryParams ?? undefined,
@@ -1291,6 +1360,7 @@ export class StackOneToolSet {
 				const response = await actionsClient.actions.rpcAction({
 					action: name,
 					body: rpcBody,
+					...this.defenderFields,
 					headers: actionHeaders,
 					path: pathParams ?? undefined,
 					query: queryParams ?? undefined,

@@ -30,9 +30,12 @@ export {
 	type SemanticSearchResult,
 } from './semantic-search';
 
+export { DEFAULT_DEFENDER_CONFIG } from './types';
+
 export type {
 	AISDKToolDefinition,
 	AISDKToolResult,
+	DefenderConfig,
 	ExecuteConfig,
 	ExecuteOptions,
 	JsonObject,

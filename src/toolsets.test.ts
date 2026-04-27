@@ -560,6 +560,139 @@ describe('StackOneToolSet', () => {
 		});
 	});
 
+	describe('defender config', () => {
+		it('should store defender config from constructor', () => {
+			const toolset = new StackOneToolSet({
+				apiKey: 'test-key',
+				defender: { enabled: false },
+			});
+
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.defenderConfig).toEqual({ enabled: false });
+		});
+
+		it('should set defenderConfig to SDK defaults when not provided', () => {
+			const toolset = new StackOneToolSet({ apiKey: 'test-key' });
+
+			// @ts-expect-error - Accessing private property for testing
+			expect(toolset.defenderConfig).toEqual({
+				enabled: true,
+				blockHighRisk: false,
+				useTier1Classification: true,
+				useTier2Classification: true,
+			});
+		});
+
+		it('should include defender_config in dryRun payload when defender.enabled is set', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+				defender: { enabled: false },
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody.defender_config.enabled).toBe(false);
+		});
+
+		it('should include SDK default defender_config in dryRun payload when defender config is not set', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody.defender_config.enabled).toBe(true);
+			expect(parsedBody.defender_config.block_high_risk).toBe(false);
+			expect(parsedBody.defender_config.use_tier1_classification).toBe(true);
+			expect(parsedBody.defender_config.use_tier2_classification).toBe(true);
+		});
+
+		it('should forward defender_config in live RPC call when defender.enabled is set', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+				defender: { enabled: true },
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } });
+
+			expect(result).toMatchObject({
+				data: { received: { defender_config: { enabled: true } } },
+			});
+		});
+
+		it('should send defender_config with all fields false when defender is null', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+				defender: null,
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody.defender_config).toEqual({
+				enabled: false,
+				block_high_risk: false,
+				use_tier1_classification: false,
+				use_tier2_classification: false,
+			});
+		});
+
+		it('should omit defender_config from payload when useProjectSettings is true', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+				defender: { useProjectSettings: true },
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
+
+			const parsedBody = JSON.parse(result.body as string);
+			expect(parsedBody).not.toHaveProperty('defender_config');
+		});
+
+		it('should throw ToolSetConfigError when useProjectSettings is combined with other defender options', () => {
+			expect(
+				() =>
+					new StackOneToolSet({
+						apiKey: 'test-key',
+						// @ts-expect-error - intentionally testing invalid runtime input
+						defender: { useProjectSettings: true, enabled: true },
+					}),
+			).toThrow(ToolSetConfigError);
+		});
+	});
+
 	describe('provider and action filtering', () => {
 		it('filters tools by providers', async () => {
 			const toolset = new StackOneToolSet({
