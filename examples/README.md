@@ -1,314 +1,84 @@
 # StackOne AI SDK Examples
 
-This directory contains practical examples demonstrating how to use the StackOne AI SDK across different use cases and integrations.
+Practical examples showing how to use the StackOne AI SDK with popular LLM providers and patterns.
 
-## Quick Start
+## Setup
 
-### Clone the repository
-
-```bash
-git clone https://github.com/StackOneHQ/stackone-ai-node.git
-```
-
-### 2. Authentication
-
-Set your StackOne API key as an environment variable:
+Install dependencies:
 
 ```bash
-export STACKONE_API_KEY=your_api_key_here
+pnpm install
 ```
 
-Or create a `.env` file in the project root:
+Set your credentials using either approach:
 
-```env
-STACKONE_API_KEY=your_api_key_here
-```
-
-Optional: Set an OpenAI API key as an environment variable:
+**Option A: Environment variables (shell)**
 
 ```bash
-export OPENAI_API_KEY=your_api_key_here
+export STACKONE_API_KEY=your-stackone-api-key
+export STACKONE_ACCOUNT_ID=your-account-id
+export OPENAI_API_KEY=your-openai-api-key       # for OpenAI/AI SDK examples
+export ANTHROPIC_API_KEY=your-anthropic-api-key  # for Anthropic examples
 ```
 
-Or create a `.env` file in the project root:
+**Option B: `.env` file**
 
-```env
-OPENAI_API_KEY=your_api_key_here
+```bash
+cp .env.example .env
+# Edit .env with your keys
 ```
-
-### 3. Configure Account IDs
-
-Each example includes a placeholder account ID that you need to replace with your actual StackOne account ID:
-
-```typescript
-// Replace with your actual account ID from StackOne dashboard
-const accountId = 'your-hris-account-id';
-```
-
-You can find your account IDs in the [StackOne dashboard](https://app.stackone.com).
 
 ## Running Examples
 
-### Run Individual Examples
-
 ```bash
-# Run a specific example
-pnpm run examples/ai-sdk-integration.ts
+# Using .env file (loads automatically):
+pnpm run:example examples/openai-integration.ts
 
-# Or with Node.js
-npx tsx examples/ai-sdk-integration.ts
+# Using shell env vars (no .env needed):
+npx tsx examples/openai-integration.ts
 ```
 
-### Run All Examples
+Run mocked E2E tests (no API keys needed):
 
 ```bash
-# Test all examples (from examples directory)
-cd examples && pnpm test
+pnpm test
 ```
 
 ## Examples Overview
 
-### Core Integration Examples
+### [`openai-integration.ts`](./openai-integration.ts) -- OpenAI Chat Completions API
 
-#### [`index.ts`](./index.ts) - Quickstart Guide
+Fetches StackOne tools, converts them with `tools.toOpenAI()`, and sends them to the OpenAI Chat Completions API. Demonstrates the basic tool-call flow: create a completion, inspect the returned tool calls, and log arguments.
 
-Basic example showing how to initialize the toolset and make your first API call.
+### [`openai-responses-integration.ts`](./openai-responses-integration.ts) -- OpenAI Responses API
 
-- **Account ID**: HRIS
-- **API Calls**: Yes
-- **Key Features**: Basic tool usage, employee listing
+Same idea as the Chat Completions example but targets the newer OpenAI Responses API (`openai.responses.create`). Uses `tools.toOpenAIResponses()` for the correct tool format and shows how to filter the response output for function calls.
 
-#### [`interactive-cli.ts`](./interactive-cli.ts) - Interactive CLI Demo
+### [`anthropic-integration.ts`](./anthropic-integration.ts) -- Anthropic Claude
 
-Interactive command-line interface for dynamically discovering and executing StackOne tools using [@clack/prompts](https://github.com/bombshell-dev/clack).
+Converts StackOne tools to Anthropic format with `tools.toAnthropic()` and sends a message to Claude. Shows action-pattern filtering (`*_list_*`, `*_search_*`) to load only relevant tools and iterates over response content blocks to extract tool-use results.
 
-- **Account ID**: User-provided or from environment
-- **API Calls**: Yes (user selects which tool to execute)
-- **Key Features**: Interactive prompts, environment variable fallback, spinner feedback, dynamic tool discovery
+### [`ai-sdk-integration.ts`](./ai-sdk-integration.ts) -- Vercel AI SDK
 
-#### [`ai-sdk-integration.ts`](./ai-sdk-integration.ts) - AI SDK Integration
+Integrates with the Vercel AI SDK via `tools.toAISDK()`. Runs a multi-step agent loop using `generateText` with `stopWhen: stepCountIs(3)`, letting the model autonomously call tools and reason over results.
 
-Demonstrates integration with Vercel's AI SDK for building AI agents.
+### [`claude-agent-sdk-integration.ts`](./claude-agent-sdk-integration.ts) -- Claude Agent SDK
 
-- **Account ID**: HRIS
-- **API Calls**: Via AI agent
-- **Key Features**: AI SDK tools conversion, automated agent workflows
+Converts StackOne tools into an MCP server with `tools.toClaudeAgentSdk()` and passes it to the Claude Agent SDK `query()` function. Streams agent messages and logs tool-use blocks as they arrive.
 
-#### [`openai-integration.ts`](./openai-integration.ts) - OpenAI Integration
+### [`search-tools.ts`](./search-tools.ts) -- Tool Discovery
 
-Shows how to use StackOne tools with OpenAI's function calling.
+Covers five approaches to finding the right tools at runtime: direct fetch with action-pattern filters, semantic (embedding-based) search, local BM25/TF-IDF search, auto search that falls back gracefully, and a search-and-execute mode that hands `tool_search` + `tool_execute` to an LLM agent via the Vercel AI SDK.
 
-- **Account ID**: HRIS
-- **API Calls**: Via OpenAI function calls
-- **Key Features**: OpenAI tools format, function calling
+### [`auth-management.ts`](./auth-management.ts) -- Authentication Patterns
 
-### Configuration Examples
+Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, setting multiple accounts with `setAccounts()`, overriding per-tool collection or per individual tool, and fetching tools for multiple accounts in one call.
 
-#### [`account-id-usage.ts`](./account-id-usage.ts) - Account ID Management
+## Environment Variables
 
-Demonstrates different ways to set and manage account IDs.
-
-- **Account ID**: TEST (multiple)
-- **API Calls**: No (dry run)
-- **Key Features**: Account ID precedence, override patterns
-
-#### [`custom-base-url.ts`](./custom-base-url.ts) - Custom Base URL
-
-Shows how to use custom base URLs for development or self-hosted instances.
-
-- **Account ID**: None
-- **API Calls**: No (dry run)
-- **Key Features**: Custom API endpoints, development setup
-
-#### [`fetch-tools.ts`](./fetch-tools.ts) - Live Catalog Loading
-
-Illustrates how to pull the latest tool catalog from StackOne and execute a tool with the fetched definitions.
-
-- **Account ID**: HRIS
-- **API Calls**: Yes (requires valid credentials)
-- **Key Features**: Catalog refresh, zero local specs, production-style execution
-
-### Advanced Features
-
-#### [`experimental-document-handling.ts`](./experimental-document-handling.ts) - Document Processing
-
-**⚠️ EXPERIMENTAL**: Advanced document handling with schema overrides.
-
-- **Account ID**: HRIS
-- **API Calls**: No (dry run)
-- **Key Features**: Schema transformation, file processing, multi-source documents
-
-#### [`filters.ts`](./filters.ts) - Advanced Filtering
-
-Demonstrates complex filtering and query parameter serialization.
-
-- **Account ID**: TEST
-- **API Calls**: No (dry run)
-- **Key Features**: Deep object serialization, complex filters, proxy parameters
-
-#### [`human-in-the-loop.ts`](./human-in-the-loop.ts) - Human Validation
-
-Shows how to implement human-in-the-loop workflows for validation.
-
-- **Account ID**: HRIS
-- **API Calls**: Conditional
-- **Key Features**: Manual approval workflows, UI integration patterns
-
-### Semantic Search
-
-#### [`search-tools.ts`](./search-tools.ts) - Semantic Tool Search
-
-Demonstrates dynamic tool discovery using semantic search. Includes four examples:
-
-1. **Semantic search + AI SDK** — search for tools by natural language query, then use them with `generateText`
-2. **SearchTool for agent loops** — reusable search tool for multi-step agent workflows
-3. **Lightweight action name search** — search action names without fetching full tool definitions
-4. **Local-only search** — BM25+TF-IDF search with no API call to the semantic search endpoint
-
-```bash
-# Run without OpenAI (examples 2-4)
-npx tsx examples/search-tools.ts
-
-# Run all 4 examples
-OPENAI_API_KEY=your-key npx tsx examples/search-tools.ts
-```
-
-### OpenAPI Toolset Examples
-
-#### [`openapi-toolset.ts`](./openapi-toolset.ts) - OpenAPI Integration
-
-Demonstrates loading and using OpenAPI specifications directly.
-
-- **Account ID**: None
-- **API Calls**: No (dry run)
-- **Key Features**: File loading, URL loading, OpenAPI parsing
-
-### Error Handling
-
-#### [`error-handling.ts`](./error-handling.ts) - Error Management
-
-Comprehensive error handling patterns and best practices.
-
-- **Account ID**: TEST (invalid)
-- **API Calls**: Intentionally failing calls
-- **Key Features**: Error types, validation, graceful degradation
-
-## Example Categories
-
-### 🟢 Production Ready
-
-Examples that are stable and recommended for production use:
-
-- `index.ts`
-- `interactive-cli.ts`
-- `ai-sdk-integration.ts`
-- `openai-integration.ts`
-- `account-id-usage.ts`
-- `custom-base-url.ts`
-- `filters.ts`
-- `error-handling.ts`
-- `openapi-toolset.ts`
-
-### 🟡 Advanced/Experimental
-
-Examples showcasing advanced or experimental features:
-
-- `experimental-document-handling.ts` (⚠️ API may change)
-- `human-in-the-loop.ts`
-
-### 🔵 Beta/Limited Access
-
-Examples requiring special access:
-
-- `planning.ts` (🚧 Closed beta only)
-
-## Common Patterns
-
-### Dry Run for Testing
-
-Most examples support dry run mode to inspect requests without making API calls:
-
-```typescript
-const result = await tool.execute(params, { dryRun: true });
-console.log(result.url); // The URL that would be called
-console.log(result.method); // HTTP method
-console.log(result.headers); // Request headers
-console.log(result.body); // Request body
-```
-
-### Error Handling
-
-All production examples include proper error handling:
-
-```typescript
-try {
-	const result = await tool.execute(params);
-	// Handle success
-} catch (error) {
-	if (error instanceof StackOneAPIError) {
-		console.error('API Error:', error.statusCode, error.responseBody);
-	} else {
-		console.error('Unexpected error:', error.message);
-	}
-}
-```
-
-### Account ID Patterns
-
-Examples demonstrate different ways to provide account IDs:
-
-```typescript
-// 1. At toolset initialization
-const toolset = new StackOneToolSet({ accountId: 'account_123' });
-
-// 2. When getting tools
-const tools = toolset.getStackOneTools('hris_*', 'account_123');
-
-// 3. Directly on individual tools
-tool.setAccountId('account_123');
-```
-
-## Testing Examples
-
-The examples include a comprehensive test suite:
-
-```bash
-# Run all example tests (from examples directory)
-cd examples && pnpm test
-
-# Run with verbose output
-cd examples && pnpm test --verbose
-
-# Run specific test
-cd examples && pnpm test examples.spec.ts
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Authentication Errors**: Ensure `STACKONE_API_KEY` is set correctly
-2. **Account ID Errors**: Update account ID placeholders in the example files with your actual values
-3. **Network Errors**: Check if you're behind a proxy or firewall
-4. **TypeScript Errors**: Ensure you're using compatible Node.js and TypeScript versions
-
-### Getting Help
-
-- Check the [main README](../README.md) for general setup instructions
-- Review the [StackOne documentation](https://docs.stackone.com)
-- Open an issue on GitHub for bug reports or feature requests
-
-## Contributing
-
-When adding new examples:
-
-1. Follow the existing naming convention
-2. Add the example to this README
-3. Include proper error handling
-4. Add TypeScript types
-5. Test with the examples test suite
-6. Use inline placeholder account IDs with clear comments (e.g., `const accountId = 'your-hris-account-id';`)
-
-## License
-
-These examples are part of the StackOne AI SDK and are subject to the same license terms.
+| Variable              | Required                     | Used By                                                                                                            |
+| --------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `STACKONE_API_KEY`    | Yes                          | All examples                                                                                                       |
+| `STACKONE_ACCOUNT_ID` | Recommended                  | All examples (read automatically by `new StackOneToolSet()`)                                                       |
+| `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts`, `search-tools.ts` (section 5) |
+| `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                                                      |

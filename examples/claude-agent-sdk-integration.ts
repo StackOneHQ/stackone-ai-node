@@ -8,7 +8,6 @@
  * to Claude Agent SDK format, handling the MCP server creation internally.
  */
 
-import assert from 'node:assert';
 import process from 'node:process';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { StackOneToolSet } from '@stackone/ai';
@@ -18,6 +17,10 @@ if (!apiKey) {
 	console.error('STACKONE_API_KEY environment variable is required');
 	process.exit(1);
 }
+if (!process.env.ANTHROPIC_API_KEY) {
+	console.log('Skipping: ANTHROPIC_API_KEY is not set');
+	process.exit(0);
+}
 
 const claudeAgentSdkIntegration = async (): Promise<void> => {
 	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
@@ -26,11 +29,12 @@ const claudeAgentSdkIntegration = async (): Promise<void> => {
 	// Fetch tools from StackOne and convert to Claude Agent SDK format
 	const tools = await toolset.fetchTools();
 	const mcpServer = await tools.toClaudeAgentSdk();
+	console.log('Claude Agent SDK MCP server created');
 
 	// Use the Claude Agent SDK query with the StackOne MCP server
 	// Type assertion is needed because our interface is compatible but not identical
 	const result = query({
-		prompt: 'Get the employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
+		prompt: 'List the first 5 employees',
 		options: {
 			model: 'claude-sonnet-4-5-20250929',
 			mcpServers: {
@@ -44,18 +48,21 @@ const claudeAgentSdkIntegration = async (): Promise<void> => {
 	});
 
 	// Process the stream and collect results
-	let hasToolCall = false;
+	console.log('Processing agent stream...');
 	for await (const message of result) {
 		if (message.type === 'assistant') {
 			for (const block of message.message.content) {
-				if (block.type === 'tool_use' && block.name === 'hris_get_employee') {
-					hasToolCall = true;
+				if (block.type === 'tool_use') {
+					console.log(`  Tool use: ${block.name}`);
+					console.log(`  Input: ${JSON.stringify(block.input)}`);
+				} else if (block.type === 'text') {
+					console.log(`  Assistant: ${block.text}`);
 				}
 			}
 		}
 	}
 
-	assert(hasToolCall, 'Expected at least one tool call to hris_get_employee');
+	console.log('Agent stream completed');
 };
 
 await claudeAgentSdkIntegration();

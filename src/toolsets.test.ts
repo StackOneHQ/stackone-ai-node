@@ -383,6 +383,53 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc3_tool_1');
 			expect(toolNames).toContain('tool_feedback');
 		});
+
+		// Regression for issue #365: tools must carry the x-account-id of the
+		// account they were fetched for, even when accounts are fetched
+		// concurrently. The prior implementation mutated this.headers around
+		// async boundaries, so concurrent fetches clobbered each other and
+		// tools were stamped with the wrong account.
+		it('stamps each tool with the x-account-id of its own account under intra-call concurrency', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			const tools = await toolset.fetchTools({ accountIds: ['acc1', 'acc2', 'acc3'] });
+
+			for (const tool of tools.toArray()) {
+				if (tool.name.startsWith('acc1_')) {
+					expect(tool.getHeaders()['x-account-id']).toBe('acc1');
+				} else if (tool.name.startsWith('acc2_')) {
+					expect(tool.getHeaders()['x-account-id']).toBe('acc2');
+				} else if (tool.name.startsWith('acc3_')) {
+					expect(tool.getHeaders()['x-account-id']).toBe('acc3');
+				}
+			}
+		});
+
+		it('stamps tools correctly when two fetchTools calls run concurrently on the same instance', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			const [acc1Tools, acc2Tools] = await Promise.all([
+				toolset.fetchTools({ accountIds: ['acc1'] }),
+				toolset.fetchTools({ accountIds: ['acc2'] }),
+			]);
+
+			for (const tool of acc1Tools.toArray()) {
+				if (tool.name.startsWith('acc')) {
+					expect(tool.getHeaders()['x-account-id']).toBe('acc1');
+				}
+			}
+			for (const tool of acc2Tools.toArray()) {
+				if (tool.name.startsWith('acc')) {
+					expect(tool.getHeaders()['x-account-id']).toBe('acc2');
+				}
+			}
+		});
 	});
 
 	describe('tool execution', () => {

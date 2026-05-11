@@ -23,6 +23,13 @@
 		"lib": ["es2022"],
 		"types": ["node", "vitest/globals", "vitest/importMeta"]
 	},
-	"include": ["src/**/*", "scripts/**/*", "mocks/**/*", "vitest.config.ts", "vitest.setup.ts"],
+	"include": [
+		"src/**/*",
+		"scripts/**/*",
+		"mocks/**/*",
+		"tests/**/*",
+		"vitest.config.ts",
+		"vitest.setup.ts"
+	],
 	"exclude": ["node_modules", "dist", "examples"]
 }

@@ -30,8 +30,8 @@ export default defineConfig({
 				extends: true,
 				test: {
 					name: 'examples',
-					root: './examples',
-					include: ['**/*.spec.ts', '**/*.test.ts'],
+					root: '.',
+					include: ['tests/examples/**/*.spec.ts', 'tests/examples/**/*.test.ts'],
 					exclude: ['node_modules', 'dist'],
 				},
 			},

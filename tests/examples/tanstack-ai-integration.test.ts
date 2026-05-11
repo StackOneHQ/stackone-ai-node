@@ -9,8 +9,8 @@
  * StackOne tools.
  */
 
-import { TEST_BASE_URL } from '../mocks/constants';
-import { StackOneToolSet } from '../src';
+import { TEST_BASE_URL } from '../../mocks/constants';
+import { StackOneToolSet } from '../../src';
 
 describe('tanstack-ai-integration example e2e', () => {
 	beforeEach(() => {
