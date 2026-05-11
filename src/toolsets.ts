@@ -467,6 +467,11 @@ interface DefenderApiConfig {
 	use_tier2_classification: boolean;
 }
 
+/** Type guard: discriminate the `useProjectSettings: true` variant of DefenderConfig. */
+function usesProjectSettings(config: DefenderConfig): config is { useProjectSettings: true } {
+	return 'useProjectSettings' in config && config.useProjectSettings === true;
+}
+
 /**
  * Map SDK DefenderConfig to the wire-format sent in the RPC body.
  *
@@ -477,15 +482,25 @@ interface DefenderApiConfig {
 function buildDefenderFields(
 	config: DefenderConfig | null,
 ): { defender_config: DefenderApiConfig } | Record<string, never> {
-	if (config !== null && 'useProjectSettings' in config && config.useProjectSettings) {
+	if (config === null) {
+		return {
+			defender_config: {
+				enabled: false,
+				block_high_risk: false,
+				use_tier1_classification: false,
+				use_tier2_classification: false,
+			},
+		};
+	}
+	if (usesProjectSettings(config)) {
 		return {};
 	}
 	return {
 		defender_config: {
-			enabled: config?.enabled ?? config !== null,
-			block_high_risk: config?.blockHighRisk ?? false,
-			use_tier1_classification: config?.useTier1Classification ?? config !== null,
-			use_tier2_classification: config?.useTier2Classification ?? config !== null,
+			enabled: config.enabled ?? true,
+			block_high_risk: config.blockHighRisk ?? false,
+			use_tier1_classification: config.useTier1Classification ?? true,
+			use_tier2_classification: config.useTier2Classification ?? true,
 		},
 	};
 }
@@ -572,17 +587,12 @@ export class StackOneToolSet {
 		if (
 			defenderInput != null &&
 			typeof defenderInput === 'object' &&
-			'useProjectSettings' in defenderInput &&
-			defenderInput.useProjectSettings === true
+			usesProjectSettings(defenderInput) &&
+			Object.keys(defenderInput).length > 1
 		) {
-			const { useProjectSettings: _, ...rest } = defenderInput as {
-				useProjectSettings: true;
-			} & Record<string, unknown>;
-			if (Object.keys(rest).length > 0) {
-				throw new ToolSetConfigError(
-					'Cannot combine useProjectSettings: true with explicit defender options. Use one or the other.',
-				);
-			}
+			throw new ToolSetConfigError(
+				'Cannot combine useProjectSettings: true with explicit defender options. Use one or the other.',
+			);
 		}
 		this.defenderConfig =
 			defenderInput === undefined ? { ...DEFAULT_DEFENDER_CONFIG } : defenderInput;
