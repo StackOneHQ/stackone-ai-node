@@ -239,12 +239,14 @@ export interface ClaudeAgentSdkOptions {
  * Defender configuration for controlling prompt injection detection behavior.
  * Field names match the canonical `DefenderSettings` from `@stackone/core`.
  *
- * Three modes:
- * - `{ useProjectSettings: true }` — defer to whatever is configured in the project dashboard.
+ * Four modes:
+ * - Omit `defender` entirely (default) — defer to whatever is configured in the project dashboard.
+ *   The SDK sends no `defender_config` in the RPC payload, so the project setting controls behavior.
+ * - `{ useProjectSettings: true }` — same as omitting; provided as a self-documenting opt-in.
  *   No other fields may be set alongside this (TypeScript enforces it; a runtime error is also thrown).
- * - An explicit config object (or omitting `defender` entirely) — the SDK owns the defender
- *   settings and sends them with every RPC call, ignoring any project-level config.
- * - `null` passed as the `defender` option — defender is explicitly disabled for all tool calls.
+ * - An explicit config object — the SDK owns the defender settings and sends them with every
+ *   RPC call, overriding any project-level config.
+ * - `null` — defender is explicitly disabled for all tool calls, overriding the project setting.
  */
 export type DefenderConfig =
 	| { useProjectSettings: true }
@@ -264,8 +266,19 @@ export type DefenderConfig =
 	  };
 
 /**
- * SDK-level defender defaults applied when no explicit `defender` config is passed.
- * Defender is enabled but outputs are never blocked — scans run and results are annotated only.
+ * Reference values for a fully-enabled defender configuration with safe defaults
+ * (scan with both tiers, annotate but never block).
+ *
+ * Spread this into an explicit `defender` config to opt in with one tweak:
+ * ```ts
+ * defender: { ...DEFAULT_DEFENDER_CONFIG, blockHighRisk: true }
+ * ```
+ *
+ * These values are also the per-field fallbacks applied when an explicit `defender`
+ * config object is passed with some fields omitted.
+ *
+ * Note: this is NOT applied when `defender` is omitted entirely — in that case the SDK
+ * defers to the project dashboard setting and sends no `defender_config` in the payload.
  */
 export const DEFAULT_DEFENDER_CONFIG = {
 	enabled: true,

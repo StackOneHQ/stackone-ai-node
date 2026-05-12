@@ -168,10 +168,10 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	/**
 	 * Defender configuration. Controls prompt injection detection behavior for all tool calls.
 	 *
-	 * - Omit or pass `undefined` → SDK defaults apply: defender enabled, outputs never blocked
-	 * - Pass `null` → defender explicitly disabled for all tool calls
-	 * - Pass `{ useProjectSettings: true }` → defer to the project settings configured in the dashboard
-	 * - Pass `{ enabled, blockHighRisk, ... }` → explicit SDK-level config, ignores project settings
+	 * - Omit or pass `undefined` (default) → defer to the project dashboard setting
+	 * - Pass `{ useProjectSettings: true }` → same as omitting; explicit form of the default
+	 * - Pass `{ enabled, blockHighRisk, ... }` → explicit SDK-level config, overrides project settings
+	 * - Pass `null` → defender explicitly disabled, overrides project settings
 	 */
 	defender?: DefenderConfig | null;
 }
@@ -475,9 +475,9 @@ function usesProjectSettings(config: DefenderConfig): config is { useProjectSett
 /**
  * Map SDK DefenderConfig to the wire-format sent in the RPC body.
  *
- * - `null` → explicitly disabled (all fields false)
- * - `{ useProjectSettings: true }` → empty object (backend uses project settings)
- * - SDK config → merge with defaults
+ * - `null` → explicitly disabled (all fields false, overrides project setting)
+ * - `{ useProjectSettings: true }` → empty object (omitted from payload, project setting controls)
+ * - explicit object → wire format with missing fields filled from `DEFAULT_DEFENDER_CONFIG`
  */
 function buildDefenderFields(
 	config: DefenderConfig | null,
@@ -497,10 +497,12 @@ function buildDefenderFields(
 	}
 	return {
 		defender_config: {
-			enabled: config.enabled ?? true,
-			block_high_risk: config.blockHighRisk ?? false,
-			use_tier1_classification: config.useTier1Classification ?? true,
-			use_tier2_classification: config.useTier2Classification ?? true,
+			enabled: config.enabled ?? DEFAULT_DEFENDER_CONFIG.enabled,
+			block_high_risk: config.blockHighRisk ?? DEFAULT_DEFENDER_CONFIG.blockHighRisk,
+			use_tier1_classification:
+				config.useTier1Classification ?? DEFAULT_DEFENDER_CONFIG.useTier1Classification,
+			use_tier2_classification:
+				config.useTier2Classification ?? DEFAULT_DEFENDER_CONFIG.useTier2Classification,
 		},
 	};
 }
@@ -580,8 +582,8 @@ export class StackOneToolSet {
 		this.executeConfig = config?.execute;
 
 		// Resolve defender config:
-		//   undefined  → SDK defaults (enabled, not blocking)
-		//   null       → explicitly disabled
+		//   undefined  → defer to project dashboard setting (normalized to { useProjectSettings: true })
+		//   null       → explicitly disabled (overrides project setting)
 		//   object     → validate then store as-is
 		const defenderInput = config?.defender;
 		if (
@@ -595,7 +597,7 @@ export class StackOneToolSet {
 			);
 		}
 		this.defenderConfig =
-			defenderInput === undefined ? { ...DEFAULT_DEFENDER_CONFIG } : defenderInput;
+			defenderInput === undefined ? { useProjectSettings: true } : defenderInput;
 		this.defenderFields = buildDefenderFields(this.defenderConfig);
 
 		// Set Authentication headers if provided

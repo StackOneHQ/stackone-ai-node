@@ -363,36 +363,44 @@ const toolset = new StackOneToolSet({ baseUrl: 'https://api.example-dev.com' });
 
 The SDK includes built-in prompt injection protection via [StackOne Defender](https://www.npmjs.com/package/@stackone/defender). It runs on every tool call result before the content reaches your LLM, detecting and sanitizing injection attacks hidden in external data (emails, documents, CRM notes, etc.).
 
-**Defender is enabled by default.** When no `defender` option is passed, the SDK applies these defaults:
+**By default, the SDK defers to your project's dashboard defender setting.** Pass an explicit `defender` config to override the project setting per toolset.
 
-| Setting                  | Default | Description                                             |
-| ------------------------ | ------- | ------------------------------------------------------- |
-| `enabled`                | `true`  | Scanning runs on every tool call                        |
-| `blockHighRisk`          | `false` | High/critical content is annotated but not blocked      |
-| `useTier1Classification` | `true`  | Fast pattern-based detection (~1ms)                     |
-| `useTier2Classification` | `true`  | ML-based detection (~10ms, requires `onnxruntime-node`) |
+| `defender` option                 | Effective behavior                                        |
+| --------------------------------- | --------------------------------------------------------- |
+| omitted _(default)_               | Project dashboard setting controls — SDK adds nothing     |
+| `{ useProjectSettings: true }`    | Same as omitting; explicit, self-documenting form         |
+| `{ enabled, blockHighRisk, ... }` | SDK-level config wins, overrides the project setting      |
+| `null`                            | Defender forcibly disabled, overrides the project setting |
+
+When passing an explicit object, missing fields fall back to `DEFAULT_DEFENDER_CONFIG` (exported from `@stackone/ai`): `enabled: true`, `blockHighRisk: false`, both tiers on.
 
 #### Configuration modes
 
 ```typescript
-import { StackOneToolSet } from '@stackone/ai';
+import { StackOneToolSet, DEFAULT_DEFENDER_CONFIG } from '@stackone/ai';
 
-// Default — SDK defaults apply (enabled, non-blocking)
+// Default — defer to project dashboard setting
 const toolset = new StackOneToolSet({ apiKey: '...' });
 
-// Explicitly disabled — no scanning on any tool call
-const toolset = new StackOneToolSet({
-	apiKey: '...',
-	defender: null,
-});
-
-// Defer to project dashboard settings
+// Same as default, explicit form
 const toolset = new StackOneToolSet({
 	apiKey: '...',
 	defender: { useProjectSettings: true },
 });
 
-// Explicit SDK-level config — block high/critical risk results
+// Explicitly disabled — overrides any project setting
+const toolset = new StackOneToolSet({
+	apiKey: '...',
+	defender: null,
+});
+
+// Opt in with safe defaults, but block on HIGH/CRITICAL — overrides project setting
+const toolset = new StackOneToolSet({
+	apiKey: '...',
+	defender: { ...DEFAULT_DEFENDER_CONFIG, blockHighRisk: true },
+});
+
+// Fully explicit SDK-level config
 const toolset = new StackOneToolSet({
 	apiKey: '...',
 	defender: {

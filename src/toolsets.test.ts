@@ -571,16 +571,11 @@ describe('StackOneToolSet', () => {
 			expect(toolset.defenderConfig).toEqual({ enabled: false });
 		});
 
-		it('should set defenderConfig to SDK defaults when not provided', () => {
+		it('should normalize omitted defender to useProjectSettings: true', () => {
 			const toolset = new StackOneToolSet({ apiKey: 'test-key' });
 
 			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.defenderConfig).toEqual({
-				enabled: true,
-				blockHighRisk: false,
-				useTier1Classification: true,
-				useTier2Classification: true,
-			});
+			expect(toolset.defenderConfig).toEqual({ useProjectSettings: true });
 		});
 
 		it('should include defender_config in dryRun payload when defender.enabled is set', async () => {
@@ -601,7 +596,7 @@ describe('StackOneToolSet', () => {
 			expect(parsedBody.defender_config.enabled).toBe(false);
 		});
 
-		it('should include SDK default defender_config in dryRun payload when defender config is not set', async () => {
+		it('should omit defender_config from dryRun payload when defender config is not set', async () => {
 			const toolset = new StackOneToolSet({
 				baseUrl: TEST_BASE_URL,
 				apiKey: 'test-key',
@@ -615,10 +610,7 @@ describe('StackOneToolSet', () => {
 			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
 
 			const parsedBody = JSON.parse(result.body as string);
-			expect(parsedBody.defender_config.enabled).toBe(true);
-			expect(parsedBody.defender_config.block_high_risk).toBe(false);
-			expect(parsedBody.defender_config.use_tier1_classification).toBe(true);
-			expect(parsedBody.defender_config.use_tier2_classification).toBe(true);
+			expect(parsedBody).not.toHaveProperty('defender_config');
 		});
 
 		it('should forward defender_config in live RPC call when defender.enabled is set', async () => {
