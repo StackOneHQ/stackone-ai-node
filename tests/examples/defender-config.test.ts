@@ -128,4 +128,28 @@ describe('defender-config example e2e', () => {
 				}),
 		).toThrow(ToolSetConfigError);
 	});
+
+	it('surfaces defenderMetadata alongside data in live RPC responses (mode 8)', async () => {
+		const toolset = new StackOneToolSet({
+			baseUrl: TEST_BASE_URL,
+			accountId: 'test-account',
+			defender: { ...DEFAULT_DEFENDER_CONFIG, blockHighRisk: false },
+		});
+
+		const tools = await toolset.fetchTools();
+		const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+		assert(tool, 'dummy_action tool should be defined in mocks');
+
+		const result = await tool.execute({ body: { name: 'test' } });
+		const metadata = (result as { defenderMetadata?: Record<string, unknown> }).defenderMetadata;
+
+		expect(metadata).toBeDefined();
+		assert(metadata, 'defenderMetadata should be defined');
+		expect(metadata.applied).toBe(true);
+		expect(metadata.result).toMatchObject({
+			allowed: true,
+			riskLevel: expect.stringMatching(/^(low|medium|high|critical)$/),
+			fieldsSanitized: expect.any(Array),
+		});
+	});
 });

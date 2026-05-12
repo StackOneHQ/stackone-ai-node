@@ -1,17 +1,26 @@
 /**
  * Defender configuration patterns.
  *
- * Shows the four ways to configure prompt-injection detection on a
- * `StackOneToolSet`, the `defenderMode` getter for inspecting resolved
- * behavior, and the once-per-process warning the SDK emits when it
- * overrides the project dashboard setting.
+ * Sections 1–7 are construction-only: the four configuration modes,
+ * the `defenderMode` getter, the once-per-process override warning,
+ * and the runtime validation error. No API key required.
  *
- * Construction-only — no API key required, no network calls.
+ * Section 8 makes a live RPC call so you can see the defender
+ * annotations the backend returns. It's gated on `STACKONE_API_KEY`
+ * and skips with a friendly message if you don't have one set.
  *
  * Run with:
  *   npx tsx examples/defender-config.ts
+ *
+ * Live section env vars:
+ *   STACKONE_API_KEY      (required to run section 8)
+ *   STACKONE_ACCOUNT_ID   (required for tool execution unless your key has a default account)
+ *   TOOL_NAME             (defaults to gmail_list_messages)
+ *   TOOL_BODY_JSON        (JSON body, defaults to `{}`)
  */
 
+import process from 'node:process';
+import type { JsonObject } from '@stackone/ai';
 import { DEFAULT_DEFENDER_CONFIG, StackOneToolSet, ToolSetConfigError } from '@stackone/ai';
 
 const heading = (label: string): void => {
@@ -98,6 +107,64 @@ const invalidCombo = (): void => {
 	}
 };
 
+// --- 8. Live tool call — inspect defender annotations in the real response ---
+const liveCall = async (): Promise<void> => {
+	heading('8. Live tool call — inspect defender annotations');
+
+	if (!process.env.STACKONE_API_KEY) {
+		console.log('  Skipping — set STACKONE_API_KEY to run this section.');
+		console.log('  Optional: STACKONE_ACCOUNT_ID, TOOL_NAME, TOOL_BODY_JSON.');
+		return;
+	}
+
+	const toolName = process.env.TOOL_NAME ?? 'gmail_list_messages';
+	let body: JsonObject;
+	try {
+		body = JSON.parse(process.env.TOOL_BODY_JSON ?? '{}') as JsonObject;
+	} catch (err) {
+		console.log(`  Invalid TOOL_BODY_JSON: ${(err as Error).message}`);
+		return;
+	}
+
+	const toolset = new StackOneToolSet({
+		defender: { ...DEFAULT_DEFENDER_CONFIG, blockHighRisk: false },
+	});
+
+	console.log(`  Fetching tools and calling ${toolName}...`);
+	const tools = await toolset.fetchTools();
+	const tool = tools.toArray().find((t) => t.name === toolName);
+	if (!tool) {
+		console.log(`  Tool "${toolName}" not in this account.`);
+		return;
+	}
+
+	const result = await tool.execute({ body });
+
+	// The backend surfaces defender annotations alongside the tool data:
+	//
+	//   {
+	//     data: <tool result>,
+	//     defenderMetadata: {
+	//       applied: boolean,                                    // false if defender ran but did nothing
+	//       result: {
+	//         allowed: boolean,                                  // false → backend blocked (with blockHighRisk: true)
+	//         riskLevel: 'low' | 'medium' | 'high' | 'critical',
+	//         fieldsSanitized: string[],
+	//         patternsByField: Record<string, string[]>,
+	//         detections: unknown[],
+	//         tier2SkipReason?: string,                          // only when Tier 2 didn't run (e.g. no strings)
+	//         latencyMs: number,
+	//       }
+	//     }
+	//   }
+	const metadata = (result as { defenderMetadata?: unknown }).defenderMetadata;
+	if (metadata) {
+		console.log('  defenderMetadata:', JSON.stringify(metadata, null, 2));
+	} else {
+		console.log('  (no defenderMetadata in response — defender may not have run)');
+	}
+};
+
 // --- Run all sections ---
 defaultMode();
 explicitProject();
@@ -106,7 +173,6 @@ explicitOptIn();
 repeatedExplicit();
 differentExplicit();
 invalidCombo();
+await liveCall();
 
 console.log('\nDone — defender patterns demonstrated.');
-console.log('Expect three yellow warnings above: one for mode 3, one for mode 4, one for mode 6.');
-console.log('Modes 1, 2, 5 stay silent (deferring to dashboard, or repeat of mode 4).');

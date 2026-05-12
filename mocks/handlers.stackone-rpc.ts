@@ -76,6 +76,21 @@ export const stackoneRpcHandlers = [
 			);
 		}
 
+		// Synthetic defender annotations
+		const defenderMetadata = body.defender_config
+			? {
+					applied: body.defender_config.enabled !== false,
+					result: {
+						allowed: true,
+						riskLevel: 'low',
+						fieldsSanitized: [],
+						patternsByField: {},
+						detections: [],
+						latencyMs: 0,
+					},
+				}
+			: undefined;
+
 		// Default response for other actions — echo back received fields
 		return HttpResponse.json({
 			data: {
@@ -88,6 +103,7 @@ export const stackoneRpcHandlers = [
 					query: body.query,
 				},
 			},
+			...(defenderMetadata ? { defenderMetadata } : {}),
 		});
 	}),
 ];
