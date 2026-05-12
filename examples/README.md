@@ -76,7 +76,7 @@ Walks through every way to configure API keys and account IDs: reading from envi
 
 ### [`defender-config.ts`](./defender-config.ts) -- Defender Configuration
 
-Demonstrates the four ways to configure prompt-injection detection on a `StackOneToolSet`: omit (defer to project dashboard), `{ useProjectSettings: true }` (explicit form of the default), `null` (force off), and explicit config objects. Shows the `defenderMode` getter and the once-per-process warning the SDK emits when it overrides the dashboard. Construction-only — no API key required, no network calls.
+Demonstrates the four ways to configure prompt-injection detection on a `StackOneToolSet`: omit (defer to project dashboard), `{ useProjectSettings: true }` (explicit form of the default), `null` (force off), and explicit config objects. Shows the `defenderMode` getter and the once-per-process warning the SDK emits when it overrides the dashboard. Sections 1–7 are construction-only; section 8 makes a live RPC call when `STACKONE_API_KEY` is set so you can inspect the `defenderMetadata` shape the backend returns.
 
 ## Environment Variables
 
