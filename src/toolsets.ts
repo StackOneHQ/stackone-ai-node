@@ -15,6 +15,7 @@ import {
 import { BaseTool, Tools } from './tool';
 import type {
 	DefenderConfig,
+	DefenderMode,
 	ExecuteOptions,
 	JsonObject,
 	JsonSchemaProperties,
@@ -473,6 +474,58 @@ function usesProjectSettings(config: DefenderConfig): config is { useProjectSett
 }
 
 /**
+ * Shapes already logged this process, keyed by mode + serialized wire payload.
+ * Ensures we surface one warning per distinct override shape, not per construction.
+ */
+const loggedDefenderShapes = new Set<string>();
+
+/**
+ * Test-only: clear the once-per-process dedupe cache for defender override warnings.
+ * @internal
+ */
+export function __resetDefenderInfoLog(): void {
+	loggedDefenderShapes.clear();
+}
+
+/** Wrap text in yellow ANSI, only when stderr is a TTY and color isn't suppressed. */
+function colorizeOverrideWarning(text: string): string {
+	if (process.env.NO_COLOR) return text;
+	if (!process.env.FORCE_COLOR && !process.stderr.isTTY) return text;
+	return `\x1b[33m${text}\x1b[0m`;
+}
+
+/**
+ * Warn once when the SDK overrides the project dashboard's defender setting.
+ * Silent for `project` mode (no override) and for repeat constructions with the same shape.
+ */
+function logDefenderOverride(
+	config: DefenderConfig | null,
+	wireFields: { defender_config: DefenderApiConfig } | Record<string, never>,
+): void {
+	if (config === null) {
+		const key = 'disabled';
+		if (loggedDefenderShapes.has(key)) return;
+		loggedDefenderShapes.add(key);
+		console.warn(
+			colorizeOverrideWarning(
+				'Defender forcibly disabled via SDK config; project dashboard setting will be ignored.',
+			),
+		);
+		return;
+	}
+	if (usesProjectSettings(config)) return;
+	const key = `explicit:${JSON.stringify(wireFields)}`;
+	if (loggedDefenderShapes.has(key)) return;
+	loggedDefenderShapes.add(key);
+	const fields = (wireFields as { defender_config: DefenderApiConfig }).defender_config;
+	console.warn(
+		colorizeOverrideWarning(
+			`Defender configured via SDK (enabled=${fields.enabled}, blockHighRisk=${fields.block_high_risk}, useTier1Classification=${fields.use_tier1_classification}, useTier2Classification=${fields.use_tier2_classification}); project dashboard setting will be ignored.`,
+		),
+	);
+}
+
+/**
  * Map SDK DefenderConfig to the wire-format sent in the RPC body.
  *
  * - `null` → explicitly disabled (all fields false, overrides project setting)
@@ -599,6 +652,7 @@ export class StackOneToolSet {
 		this.defenderConfig =
 			defenderInput === undefined ? { useProjectSettings: true } : defenderInput;
 		this.defenderFields = buildDefenderFields(this.defenderConfig);
+		logDefenderOverride(this.defenderConfig, this.defenderFields);
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -639,6 +693,19 @@ export class StackOneToolSet {
 	private semanticSearchClient?: SemanticSearchClient;
 	private catalogCache: Map<string, Tools> = new Map();
 	private toolIndexCache?: { tools: Tools; index: ToolIndex };
+
+	/**
+	 * Resolved defender behavior for this toolset.
+	 *
+	 * - `'project'` — SDK adds no `defender_config` to the RPC payload; the project dashboard controls.
+	 * - `'disabled'` — SDK forces defender off (overrides the dashboard).
+	 * - `'explicit'` — SDK sends an explicit `defender_config` (overrides the dashboard).
+	 */
+	get defenderMode(): DefenderMode {
+		if (this.defenderConfig === null) return 'disabled';
+		if (usesProjectSettings(this.defenderConfig)) return 'project';
+		return 'explicit';
+	}
 
 	/**
 	 * Set account IDs for filtering tools

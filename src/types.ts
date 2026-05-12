@@ -286,3 +286,12 @@ export const DEFAULT_DEFENDER_CONFIG = {
 	useTier1Classification: true,
 	useTier2Classification: true,
 } as const;
+
+/**
+ * Resolved defender behavior on a `StackOneToolSet`.
+ *
+ * - `'project'` — SDK adds no `defender_config` to the RPC payload; the project dashboard controls.
+ * - `'disabled'` — SDK forces defender off, overriding the dashboard.
+ * - `'explicit'` — SDK sends an explicit `defender_config`, overriding the dashboard.
+ */
+export type DefenderMode = 'project' | 'disabled' | 'explicit';

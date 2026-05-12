@@ -36,6 +36,7 @@ export type {
 	AISDKToolDefinition,
 	AISDKToolResult,
 	DefenderConfig,
+	DefenderMode,
 	ExecuteConfig,
 	ExecuteOptions,
 	JsonObject,

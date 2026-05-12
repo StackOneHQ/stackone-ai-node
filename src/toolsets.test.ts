@@ -12,7 +12,12 @@ import { type McpToolDefinition, createMcpApp } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { SemanticSearchError } from './semantic-search';
-import { SearchTool, StackOneToolSet, ToolSetConfigError } from './toolsets';
+import {
+	SearchTool,
+	StackOneToolSet,
+	ToolSetConfigError,
+	__resetDefenderInfoLog,
+} from './toolsets';
 
 describe('StackOneToolSet', () => {
 	beforeEach(() => {
@@ -682,6 +687,83 @@ describe('StackOneToolSet', () => {
 						defender: { useProjectSettings: true, enabled: true },
 					}),
 			).toThrow(ToolSetConfigError);
+		});
+
+		describe('defenderMode getter', () => {
+			it('returns "project" when defender is omitted', () => {
+				const toolset = new StackOneToolSet({ apiKey: 'test-key' });
+				expect(toolset.defenderMode).toBe('project');
+			});
+
+			it('returns "project" when defender is { useProjectSettings: true }', () => {
+				const toolset = new StackOneToolSet({
+					apiKey: 'test-key',
+					defender: { useProjectSettings: true },
+				});
+				expect(toolset.defenderMode).toBe('project');
+			});
+
+			it('returns "disabled" when defender is null', () => {
+				const toolset = new StackOneToolSet({ apiKey: 'test-key', defender: null });
+				expect(toolset.defenderMode).toBe('disabled');
+			});
+
+			it('returns "explicit" when defender is an explicit config object', () => {
+				const toolset = new StackOneToolSet({
+					apiKey: 'test-key',
+					defender: { useTier2Classification: false },
+				});
+				expect(toolset.defenderMode).toBe('explicit');
+			});
+		});
+
+		describe('override info log', () => {
+			beforeEach(() => {
+				__resetDefenderInfoLog();
+			});
+
+			it('logs once for disabled mode and dedupes repeat constructions', () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				new StackOneToolSet({ apiKey: 'test-key', defender: null });
+				new StackOneToolSet({ apiKey: 'test-key', defender: null });
+				const disabledCalls = warnSpy.mock.calls.filter((args) =>
+					String(args[0]).includes('forcibly disabled'),
+				);
+				expect(disabledCalls).toHaveLength(1);
+				warnSpy.mockRestore();
+			});
+
+			it('logs once for an explicit config and dedupes the same shape', () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				new StackOneToolSet({
+					apiKey: 'test-key',
+					defender: { enabled: true, useTier1Classification: false, useTier2Classification: false },
+				});
+				new StackOneToolSet({
+					apiKey: 'test-key',
+					defender: { enabled: true, useTier1Classification: false, useTier2Classification: false },
+				});
+				const explicitCalls = warnSpy.mock.calls.filter((args) =>
+					String(args[0]).includes('configured via SDK'),
+				);
+				expect(explicitCalls).toHaveLength(1);
+				expect(String(explicitCalls[0]?.[0])).toContain('useTier1Classification=false');
+				warnSpy.mockRestore();
+			});
+
+			it('does not log when defender is omitted or useProjectSettings', () => {
+				const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+				new StackOneToolSet({ apiKey: 'test-key' });
+				new StackOneToolSet({
+					apiKey: 'test-key',
+					defender: { useProjectSettings: true },
+				});
+				const defenderCalls = warnSpy.mock.calls.filter((args) =>
+					String(args[0]).toLowerCase().includes('defender'),
+				);
+				expect(defenderCalls).toHaveLength(0);
+				warnSpy.mockRestore();
+			});
 		});
 	});
 

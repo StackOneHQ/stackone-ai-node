@@ -412,6 +412,17 @@ const toolset = new StackOneToolSet({
 });
 ```
 
+#### Inspecting and observing the resolved mode
+
+Use the `defenderMode` getter to check how a toolset will behave at runtime:
+
+```typescript
+const toolset = new StackOneToolSet({ apiKey: '...', defender: null });
+toolset.defenderMode; // 'disabled' | 'explicit' | 'project'
+```
+
+When the SDK overrides the project dashboard (mode `disabled` or `explicit`), it emits a yellow `console.warn` line once per process per distinct override shape so the override is visible at runtime without spamming logs. Pass `NO_COLOR=1` to suppress color, or `FORCE_COLOR=1` to force it when piping output. The `project` mode is silent.
+
 #### Risk levels
 
 Defender assigns a risk level to each scanned result:
@@ -424,6 +435,8 @@ Defender assigns a risk level to each scanned result:
 | `critical` | Severe injection attempt with multiple indicators   |
 
 When `blockHighRisk: false` (default), `high` and `critical` results are annotated and returned — the LLM sees the sanitized content. When `blockHighRisk: true`, those results are blocked entirely.
+
+[View full example](examples/defender-config.ts)
 
 For more detail on how the detection pipeline works, see the [`@stackone/defender`](https://www.npmjs.com/package/@stackone/defender) package.
 
