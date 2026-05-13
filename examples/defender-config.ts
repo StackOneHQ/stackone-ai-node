@@ -10,10 +10,14 @@
  * and skips with a friendly message if you don't have one set.
  *
  * Run with:
- *   npx tsx examples/defender-config.ts
+ *   pnpm run:example examples/defender-config.ts
+ *
+ * Or override the connector and tool for section 8:
+ *   TOOL_NAME=calendly_get_current_user TOOL_BODY_JSON='{}' pnpm run:example examples/defender-config.ts
+ *   TOOL_NAME=hibob_list_employees TOOL_BODY_JSON='{"page_size": 5}' pnpm run:example examples/defender-config.ts
  *
  * Live section env vars:
- *   STACKONE_API_KEY      (required to run section 8)
+ *   STACKONE_API_KEY      (required to run section 8; read from .env via run:example)
  *   STACKONE_ACCOUNT_ID   (required for tool execution unless your key has a default account)
  *   TOOL_NAME             (defaults to gmail_list_messages)
  *   TOOL_BODY_JSON        (JSON body, defaults to `{}`)
