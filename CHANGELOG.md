@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.8.1...v2.9.0) (2026-05-14)
+
+
+### Features
+
+* **ENG-130:** add defender config option to StackOneToolSet ([#328](https://github.com/StackOneHQ/stackone-ai-node/issues/328)) ([f3311b5](https://github.com/StackOneHQ/stackone-ai-node/commit/f3311b51870bfc7416dc7a1bf946073642f65d9b))
+
 ## [2.8.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.8.0...v2.8.1) (2026-04-27)
 
 
