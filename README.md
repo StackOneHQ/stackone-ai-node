@@ -474,6 +474,38 @@ The `dryRun` option returns an object containing:
 - `body`: The request body
 - `mappedParams`: The parameters after mapping and derivation
 
+### File Downloads
+
+Actions that download a file (for example `googledrive_unified_download_file`, `documents_download_file`, or any `*_unified_download_file`) return raw bytes plus metadata instead of parsed JSON. The SDK decides from the response `Content-Type`: JSON media types (`application/json` and `+json` suffixes) are parsed as usual, and anything else is treated as a file download.
+
+Use the exported `isBinaryDownloadResult` type guard to narrow the result — no casts needed:
+
+```typescript
+import { writeFileSync } from 'node:fs';
+import { isBinaryDownloadResult, StackOneToolSet } from '@stackone/ai';
+
+const toolset = new StackOneToolSet();
+const tools = await toolset.fetchTools({ actions: ['googledrive_*'] });
+const download = tools.getTool('googledrive_unified_download_file');
+
+const result = await download.execute({ id: 'file-id' });
+
+if (isBinaryDownloadResult(result)) {
+	// result.content is a Buffer; result.fileName is string | null
+	writeFileSync(result.fileName ?? 'download.bin', result.content);
+}
+```
+
+The download result (typed `BinaryDownloadResult`) contains:
+
+- `content`: `Buffer` — the raw file bytes (not JSON-serializable; see note)
+- `contentType`: `string` — the file's MIME type (e.g. `application/pdf`), or `application/octet-stream`
+- `statusCode`: `number` — HTTP status of the download response
+- `headers`: `Record<string, string>` — the response headers
+- `fileName`: `string | null` — filename from `Content-Disposition` (RFC 5987 `filename*` aware), or `null`
+
+> **Note:** `content` holds raw bytes and is not JSON-serializable. If you forward tool results to an LLM (or anything that re-serializes to JSON), handle or strip the `content` key — for example, base64-encode it on the LLM-facing path.
+
 ### Feedback Collection Tool
 
 The StackOne AI SDK includes a built-in feedback collection tool (`tool_feedback`) that allows users to provide feedback on their experience with StackOne tools. This tool is automatically included when using `fetchTools()` and helps improve the SDK based on user input.
