@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.9.0...v2.9.1) (2026-06-03)
+
+
+### Bug Fixes
+
+* **tools:** handle binary file downloads in tool execution ([#370](https://github.com/StackOneHQ/stackone-ai-node/issues/370)) ([1f18d40](https://github.com/StackOneHQ/stackone-ai-node/commit/1f18d404b5fd81499e1430bc8f472b5c380f3cac))
+
 ## [2.9.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.8.1...v2.9.0) (2026-05-14)
 
 
