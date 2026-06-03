@@ -498,13 +498,13 @@ if (isBinaryDownloadResult(result)) {
 
 The download result (typed `BinaryDownloadResult`) contains:
 
-- `content`: `Buffer` — the raw file bytes (not JSON-serializable; see note)
+- `content`: `Buffer` — the raw file bytes (not a `JsonValue`; see note)
 - `contentType`: `string` — the file's MIME type (e.g. `application/pdf`), or `application/octet-stream`
 - `statusCode`: `number` — HTTP status of the download response
 - `headers`: `Record<string, string>` — the response headers
 - `fileName`: `string | null` — filename from `Content-Disposition` (RFC 5987 `filename*` aware), or `null`
 
-> **Note:** `content` holds raw bytes and is not JSON-serializable. If you forward tool results to an LLM (or anything that re-serializes to JSON), handle or strip the `content` key — for example, base64-encode it on the LLM-facing path.
+> **Note:** `content` is a raw `Buffer`, not a `JsonValue`. `JSON.stringify` turns it into a `{ type: 'Buffer', data: [...] }` byte array (not the file, and potentially huge), so if you forward tool results to an LLM — or anything that re-serializes to JSON — strip or transform the `content` key first (for example, base64-encode it on the LLM-facing path).
 
 ### Feedback Collection Tool
 

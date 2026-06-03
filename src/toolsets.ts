@@ -31,12 +31,13 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 import { normalizeActionName } from './utils/normalize';
 
 /**
- * Converts an RPC action result to JsonObject in a type-safe manner.
+ * Converts an RPC action result to a JsonObject by flattening its top-level properties.
  *
  * RpcActionResponse uses z.passthrough() which preserves additional fields, making it
  * structurally compatible with Record<string, JsonValue>. A BinaryDownloadResult (file
  * download) is flattened the same way - its `content` Buffer rides through under the value
- * cast and is not JSON-serializable (callers re-serializing for an LLM must handle it).
+ * cast, so it is not a `JsonValue` (and JSON-stringifies to an unwieldy byte array); callers
+ * re-serializing for an LLM must handle that key.
  */
 function rpcResponseToJsonObject(response: RpcActionResponse | BinaryDownloadResult): JsonObject {
 	// RpcActionResponse with passthrough() has the shape:

@@ -28,6 +28,8 @@ describe('filenameFromContentDisposition', () => {
 		['inline; filename="my report.docx"', 'my report.docx'],
 		// RFC 5987 extended form is percent-decoded and takes precedence over the plain form.
 		['attachment; filename="fallback.txt"; filename*=UTF-8\'\'na%C3%AFve.txt', 'naïve.txt'],
+		// Malformed percent-encoding must not throw - fall back to the raw (undecoded) value.
+		["attachment; filename*=UTF-8''bad%ZZname", 'bad%ZZname'],
 		['attachment', null],
 		[null, null],
 		['', null],

@@ -50,7 +50,7 @@ export class RpcClient {
 		 * @param request The RPC action request
 		 * @returns The RPC action response matching server's ActionsRpcResponseApiModel, or - for a
 		 *   file-download action served as raw binary - a {@link BinaryDownloadResult} of bytes +
-		 *   metadata. `content` holds the raw bytes and is not JSON-serializable.
+		 *   metadata. `content` is a raw `Buffer` (not a `JsonValue`); handle it before re-serializing.
 		 */
 		rpcAction: async (
 			request: RpcActionRequest,
@@ -100,13 +100,24 @@ export class RpcClient {
 					signal: controller.signal,
 				});
 
-				// A successful non-JSON body is a file download (raw binary served with the file's own
-				// MIME type and a Content-Disposition header) - e.g. a *_unified_download_file action.
-				// Return the bytes plus metadata rather than forcing response.json() (which throws on
-				// binary) or the {data,next} envelope schema below. Error responses keep the JSON path.
+				// A non-JSON body is never the {data,next} envelope. A successful one is a file download
+				// (raw binary with the file's own MIME type + Content-Disposition) - e.g. a
+				// *_unified_download_file action - returned as bytes + metadata. A non-JSON error body
+				// (e.g. an HTML gateway error) is surfaced as a StackOneAPIError rather than letting
+				// response.json() throw a raw SyntaxError. JSON bodies fall through to the parse +
+				// envelope-validation path below.
 				const contentType = response.headers.get('content-type') ?? '';
-				if (response.ok && !isJsonContentType(contentType)) {
-					return await binaryDownloadFromResponse(response);
+				if (!isJsonContentType(contentType)) {
+					if (response.ok) {
+						return await binaryDownloadFromResponse(response);
+					}
+					const errorText = await response.text().catch(() => null);
+					throw new StackOneAPIError(
+						`RPC action failed for ${url}`,
+						response.status,
+						errorText || null,
+						requestBody,
+					);
 				}
 
 				responseBody = await response.json();

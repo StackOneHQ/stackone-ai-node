@@ -257,4 +257,23 @@ describe('binary file downloads', () => {
 		expect(isBinaryDownloadResult(result)).toBe(false);
 		expect(result).toMatchObject({ data: { ok: true } });
 	});
+
+	it('throws StackOneAPIError (not SyntaxError) for a non-JSON error response', async () => {
+		// A gateway/proxy error often returns a non-JSON body (e.g. HTML). The content-type branch
+		// must not let response.json() throw a raw SyntaxError - surface a StackOneAPIError instead.
+		server.use(
+			http.post(
+				`${TEST_BASE_URL}/actions/rpc`,
+				() =>
+					new HttpResponse('<html><body>502 Bad Gateway</body></html>', {
+						status: 502,
+						headers: { 'content-type': 'text/html' },
+					}),
+			),
+		);
+
+		await expect(
+			newClient().actions.rpcAction({ action: 'googledrive_unified_download_file' }),
+		).rejects.toThrow(StackOneAPIError);
+	});
 });

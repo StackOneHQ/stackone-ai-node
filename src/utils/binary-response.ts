@@ -10,8 +10,9 @@
 /**
  * Result of a non-JSON (file-download) response: the raw bytes plus metadata.
  *
- * Note: `content` is a Buffer and is therefore not JSON-serializable. Callers that
- * re-serialize tool results (e.g. for an LLM) must handle this key.
+ * Note: `content` is a raw `Buffer`, not a `JsonValue`. `JSON.stringify` turns a Buffer into a
+ * `{ type: 'Buffer', data: [...] }` byte array (not the file, and potentially huge), so callers
+ * that re-serialize tool results (e.g. for an LLM) should strip or transform this key.
  */
 export interface BinaryDownloadResult {
 	content: Buffer;
@@ -48,7 +49,14 @@ export function filenameFromContentDisposition(value: string | null): string | n
 	}
 	const extended = value.match(/filename\*\s*=\s*[^']*'[^']*'([^;]+)/i);
 	if (extended?.[1]) {
-		return decodeURIComponent(extended[1].trim());
+		const encoded = extended[1].trim();
+		try {
+			return decodeURIComponent(encoded);
+		} catch {
+			// Malformed percent-encoding: fall back to the raw value rather than throwing and
+			// breaking an otherwise-valid download over a bad Content-Disposition header.
+			return encoded;
+		}
 	}
 	const quoted = value.match(/filename\s*=\s*"([^"]*)"/i);
 	if (quoted) {

@@ -320,9 +320,9 @@ export class RequestBuilder {
 	 * For file downloads (any non-JSON Content-Type, e.g. a `*_unified_download_file` action),
 	 * returns a description of the file:
 	 * `{ content: Buffer, contentType: string, statusCode: number, headers: Record<string, string>,
-	 * fileName: string | null }`. Note `content` holds the raw bytes and is therefore not
-	 * JSON-serializable - callers that re-serialize tool results (e.g. for an LLM) must handle
-	 * this key.
+	 * fileName: string | null }`. Note `content` is a raw `Buffer`, not a `JsonValue`: it
+	 * JSON-stringifies to a `{ type: 'Buffer', data: [...] }` byte array, so callers that
+	 * re-serialize tool results (e.g. for an LLM) should strip or transform this key.
 	 */
 	async execute(params: JsonObject, options?: ExecuteOptions): Promise<JsonObject> {
 		// Prepare request parameters
@@ -390,8 +390,8 @@ export class RequestBuilder {
 		}
 
 		// Return the raw bytes plus metadata. `content` is a Buffer, which is not representable in
-		// type-fest's JsonValue and so not JSON-serializable; the double-cast is the documented
-		// escape hatch for returning a non-JSON value from this JsonObject-typed method.
+		// type-fest's JsonValue (and JSON-stringifies to a byte array, not the file); the double-cast
+		// is the documented escape hatch for returning a non-JSON value from this JsonObject method.
 		return (await binaryDownloadFromResponse(response)) as unknown as JsonObject;
 	}
 }
