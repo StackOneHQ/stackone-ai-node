@@ -1,10 +1,22 @@
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { server } from '../mocks/node';
-import { RpcClient } from './rpc-client';
+import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { stackOneHeadersSchema } from './headers';
-import { isBinaryDownloadResult } from './utils/binary-response';
+import { type BinaryDownloadResult, isBinaryDownloadResult } from './utils/binary-response';
 import { StackOneAPIError } from './utils/error-stackone-api';
+
+/**
+ * Narrow an rpcAction result to the JSON envelope, failing the test if the call returned a binary
+ * download instead. rpcAction returns `RpcActionResponse | BinaryDownloadResult`, so the JSON-path
+ * assertions below need the non-binary branch to stay type-safe.
+ */
+function expectJsonResponse(result: RpcActionResponse | BinaryDownloadResult): RpcActionResponse {
+	if (isBinaryDownloadResult(result)) {
+		throw new Error('expected a JSON RPC response, received a binary download');
+	}
+	return result;
+}
 
 test('should successfully execute an RPC action', async () => {
 	const client = new RpcClient({
@@ -12,11 +24,13 @@ test('should successfully execute an RPC action', async () => {
 		security: { username: 'test-api-key' },
 	});
 
-	const response = await client.actions.rpcAction({
-		action: 'bamboohr_get_employee',
-		body: { fields: 'name,email' },
-		path: { id: 'emp-123' },
-	});
+	const response = expectJsonResponse(
+		await client.actions.rpcAction({
+			action: 'bamboohr_get_employee',
+			body: { fields: 'name,email' },
+			path: { id: 'emp-123' },
+		}),
+	);
 
 	// Response matches server's ActionsRpcResponseApiModel structure
 	expect(response).toHaveProperty('data');
@@ -32,13 +46,15 @@ test('should send correct payload structure', async () => {
 		security: { username: 'test-api-key' },
 	});
 
-	const response = await client.actions.rpcAction({
-		action: 'custom_action',
-		body: { key: 'value' },
-		headers: stackOneHeadersSchema.parse({ 'x-custom': 'header' }),
-		path: { id: '123' },
-		query: { filter: 'active' },
-	});
+	const response = expectJsonResponse(
+		await client.actions.rpcAction({
+			action: 'custom_action',
+			body: { key: 'value' },
+			headers: stackOneHeadersSchema.parse({ 'x-custom': 'header' }),
+			path: { id: '123' },
+			query: { filter: 'active' },
+		}),
+	);
 
 	// Response matches server's ActionsRpcResponseApiModel structure
 	expect(response.data).toMatchObject({
@@ -58,9 +74,11 @@ test('should handle list actions with array data', async () => {
 		security: { username: 'test-api-key' },
 	});
 
-	const response = await client.actions.rpcAction({
-		action: 'bamboohr_list_employees',
-	});
+	const response = expectJsonResponse(
+		await client.actions.rpcAction({
+			action: 'bamboohr_list_employees',
+		}),
+	);
 
 	// Response data can be an array (matches RpcActionResponseData union type)
 	expect(Array.isArray(response.data)).toBe(true);
@@ -120,10 +138,12 @@ test('should send x-account-id as HTTP header', async () => {
 		security: { username: 'test-api-key' },
 	});
 
-	const response = await client.actions.rpcAction({
-		action: 'test_account_id_header',
-		headers: stackOneHeadersSchema.parse({ 'x-account-id': 'test-account-123' }),
-	});
+	const response = expectJsonResponse(
+		await client.actions.rpcAction({
+			action: 'test_account_id_header',
+			headers: stackOneHeadersSchema.parse({ 'x-account-id': 'test-account-123' }),
+		}),
+	);
 
 	// Verify x-account-id is sent both as HTTP header and in request body
 	expect(response.data).toMatchObject({
@@ -138,10 +158,12 @@ test('should forward defender_config in request payload', async () => {
 		security: { username: 'test-api-key' },
 	});
 
-	const response = await client.actions.rpcAction({
-		action: 'custom_action',
-		defender_config: { enabled: true, block_high_risk: false },
-	});
+	const response = expectJsonResponse(
+		await client.actions.rpcAction({
+			action: 'custom_action',
+			defender_config: { enabled: true, block_high_risk: false },
+		}),
+	);
 
 	expect(response.data).toMatchObject({
 		received: { defender_config: { enabled: true, block_high_risk: false } },
@@ -154,9 +176,11 @@ test('should omit defender_config from payload when not provided', async () => {
 		security: { username: 'test-api-key' },
 	});
 
-	const response = await client.actions.rpcAction({
-		action: 'custom_action',
-	});
+	const response = expectJsonResponse(
+		await client.actions.rpcAction({
+			action: 'custom_action',
+		}),
+	);
 
 	expect((response.data as Record<string, unknown>).received).not.toHaveProperty('defender_config');
 });

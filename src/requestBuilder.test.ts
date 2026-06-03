@@ -818,7 +818,7 @@ describe('RequestBuilder - binary file downloads', () => {
 		const result = await builder.execute({ id: 'file-123' });
 
 		expect(result.content).toBeInstanceOf(Buffer);
-		expect((result.content as Buffer).equals(Buffer.from(pdfBytes))).toBe(true);
+		expect((result.content as unknown as Buffer).equals(Buffer.from(pdfBytes))).toBe(true);
 		expect(result.contentType).toBe('application/pdf');
 		expect(result.statusCode).toBe(200);
 		expect(result.fileName).toBe('download.pdf');
@@ -841,7 +841,7 @@ describe('RequestBuilder - binary file downloads', () => {
 		const builder = new RequestBuilder(downloadConfig);
 		const result = await builder.execute({ id: 'blob' });
 
-		expect((result.content as Buffer).equals(Buffer.from(blob))).toBe(true);
+		expect((result.content as unknown as Buffer).equals(Buffer.from(blob))).toBe(true);
 		expect(result.contentType).toBe('application/octet-stream');
 		expect(result.fileName).toBeNull();
 	});
@@ -892,7 +892,7 @@ describe('RequestBuilder - binary file downloads', () => {
 		const builder = new RequestBuilder(downloadConfig);
 		const result = await builder.execute({ id: 'no-ct' });
 
-		expect((result.content as Buffer).equals(Buffer.from(blob))).toBe(true);
+		expect((result.content as unknown as Buffer).equals(Buffer.from(blob))).toBe(true);
 		expect(result.contentType).toBe('application/octet-stream');
 		expect(result.fileName).toBeNull();
 	});
