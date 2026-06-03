@@ -1,6 +1,9 @@
+import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
+import { server } from '../mocks/node';
 import { RpcClient } from './rpc-client';
 import { stackOneHeadersSchema } from './headers';
+import { isBinaryDownloadResult } from './utils/binary-response';
 import { StackOneAPIError } from './utils/error-stackone-api';
 
 test('should successfully execute an RPC action', async () => {
@@ -156,4 +159,102 @@ test('should omit defender_config from payload when not provided', async () => {
 	});
 
 	expect((response.data as Record<string, unknown>).received).not.toHaveProperty('defender_config');
+});
+
+/**
+ * Binary file downloads over RPC
+ *
+ * File-download actions (e.g. googledrive_unified_download_file) are served over /actions/rpc
+ * as raw binary with the file's own MIME type and a Content-Disposition header - never the
+ * JSON {data,next} envelope. rpcAction must branch on Content-Type and return the bytes plus
+ * metadata instead of forcing a JSON parse (which throws on binary) or the envelope schema.
+ */
+describe('binary file downloads', () => {
+	const newClient = () =>
+		new RpcClient({ serverURL: TEST_BASE_URL, security: { username: 'test-api-key' } });
+
+	it('returns raw bytes + metadata for a non-JSON (binary) RPC response', async () => {
+		// Leading bytes of a real PDF; the 0xc4 byte is invalid UTF-8 and is exactly what makes
+		// an unconditional response.json() throw on a binary body.
+		const pdfBytes = new Uint8Array([
+			0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, 0x0a, 0x25, 0xc4, 0xe5, 0xf2, 0xe5, 0xeb,
+		]);
+		server.use(
+			http.post(
+				`${TEST_BASE_URL}/actions/rpc`,
+				() =>
+					new HttpResponse(pdfBytes, {
+						status: 200,
+						headers: {
+							'content-type': 'application/pdf',
+							'content-disposition': 'attachment; filename="download.pdf"',
+						},
+					}),
+			),
+		);
+
+		const result = await newClient().actions.rpcAction({
+			action: 'googledrive_unified_download_file',
+			path: { id: 'file-123' },
+			query: { export_format: 'application/pdf' },
+		});
+
+		expect(isBinaryDownloadResult(result)).toBe(true);
+		if (!isBinaryDownloadResult(result)) throw new Error('expected a binary download result');
+		expect(result.content.equals(Buffer.from(pdfBytes))).toBe(true);
+		expect(result.contentType).toBe('application/pdf');
+		expect(result.statusCode).toBe(200);
+		expect(result.fileName).toBe('download.pdf');
+		expect(result.headers['content-type']).toBe('application/pdf');
+	});
+
+	it('returns bytes with fileName null when there is no Content-Disposition', async () => {
+		const blob = new Uint8Array([0x00, 0x01, 0x02, 0xc4, 0xff, 0xfe]);
+		server.use(
+			http.post(
+				`${TEST_BASE_URL}/actions/rpc`,
+				() =>
+					new HttpResponse(blob, {
+						status: 200,
+						headers: { 'content-type': 'application/octet-stream' },
+					}),
+			),
+		);
+
+		const result = await newClient().actions.rpcAction({ action: 'some_unified_download_file' });
+
+		expect(isBinaryDownloadResult(result)).toBe(true);
+		if (!isBinaryDownloadResult(result)) throw new Error('expected a binary download result');
+		expect(result.content.equals(Buffer.from(blob))).toBe(true);
+		expect(result.contentType).toBe('application/octet-stream');
+		expect(result.fileName).toBeNull();
+	});
+
+	it('still parses a normal JSON envelope (regression)', async () => {
+		const result = await newClient().actions.rpcAction({
+			action: 'bamboohr_get_employee',
+			path: { id: 'emp-123' },
+		});
+
+		expect(isBinaryDownloadResult(result)).toBe(false);
+		expect(result).toHaveProperty('data');
+	});
+
+	it('parses JSON when the Content-Type carries a charset parameter', async () => {
+		server.use(
+			http.post(
+				`${TEST_BASE_URL}/actions/rpc`,
+				() =>
+					new HttpResponse('{"data":{"ok":true}}', {
+						status: 200,
+						headers: { 'content-type': 'application/json; charset=utf-8' },
+					}),
+			),
+		);
+
+		const result = await newClient().actions.rpcAction({ action: 'custom_action' });
+
+		expect(isBinaryDownloadResult(result)).toBe(false);
+		expect(result).toMatchObject({ data: { ok: true } });
+	});
 });

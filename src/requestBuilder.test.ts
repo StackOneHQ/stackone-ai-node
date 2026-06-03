@@ -776,3 +776,124 @@ describe('RequestBuilder - Property-Based Tests', () => {
 		});
 	});
 });
+
+/**
+ * Binary file downloads
+ *
+ * File-download actions (e.g. googledrive_unified_download_file) serve raw binary with
+ * the file's own MIME type and a Content-Disposition header - never JSON. The execute()
+ * path must branch on Content-Type and return the bytes plus metadata instead of forcing
+ * a JSON parse (which throws on binary bodies containing non-UTF8 bytes).
+ */
+describe('RequestBuilder - binary file downloads', () => {
+	const downloadConfig = {
+		kind: 'http',
+		method: 'GET',
+		url: 'https://api.example.com/download/{id}',
+		bodyType: 'json',
+		params: [{ name: 'id', location: ParameterLocation.PATH, type: 'string' }],
+	} satisfies HttpExecuteConfig;
+
+	it('returns raw bytes + metadata for a non-JSON (binary) response', async () => {
+		// Leading bytes of a real PDF; the 0xc4 byte is invalid UTF-8 and is exactly what
+		// makes an unconditional response.json() throw on a binary body.
+		const pdfBytes = new Uint8Array([
+			0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34, 0x0a, 0x25, 0xc4, 0xe5, 0xf2, 0xe5, 0xeb,
+		]);
+		server.use(
+			http.get(
+				'https://api.example.com/download/:id',
+				() =>
+					new HttpResponse(pdfBytes, {
+						status: 200,
+						headers: {
+							'content-type': 'application/pdf',
+							'content-disposition': 'attachment; filename="download.pdf"',
+						},
+					}),
+			),
+		);
+
+		const builder = new RequestBuilder(downloadConfig);
+		const result = await builder.execute({ id: 'file-123' });
+
+		expect(result.content).toBeInstanceOf(Buffer);
+		expect((result.content as Buffer).equals(Buffer.from(pdfBytes))).toBe(true);
+		expect(result.contentType).toBe('application/pdf');
+		expect(result.statusCode).toBe(200);
+		expect(result.fileName).toBe('download.pdf');
+		expect((result.headers as Record<string, string>)['content-type']).toBe('application/pdf');
+	});
+
+	it('returns bytes with fileName null when there is no Content-Disposition', async () => {
+		const blob = new Uint8Array([0x00, 0x01, 0x02, 0xc4, 0xff, 0xfe]);
+		server.use(
+			http.get(
+				'https://api.example.com/download/:id',
+				() =>
+					new HttpResponse(blob, {
+						status: 200,
+						headers: { 'content-type': 'application/octet-stream' },
+					}),
+			),
+		);
+
+		const builder = new RequestBuilder(downloadConfig);
+		const result = await builder.execute({ id: 'blob' });
+
+		expect((result.content as Buffer).equals(Buffer.from(blob))).toBe(true);
+		expect(result.contentType).toBe('application/octet-stream');
+		expect(result.fileName).toBeNull();
+	});
+
+	it('still parses a normal JSON response into an object (no content wrapper)', async () => {
+		server.use(
+			http.get('https://api.example.com/download/:id', () =>
+				HttpResponse.json({ id: '123', ok: true }),
+			),
+		);
+
+		const builder = new RequestBuilder(downloadConfig);
+		const result = await builder.execute({ id: 'json' });
+
+		expect(result).toEqual({ id: '123', ok: true });
+		expect(result.content).toBeUndefined();
+	});
+
+	it('parses JSON when the Content-Type carries a charset parameter', async () => {
+		server.use(
+			http.get(
+				'https://api.example.com/download/:id',
+				() =>
+					new HttpResponse('{"ok":true}', {
+						status: 200,
+						headers: { 'content-type': 'application/json; charset=utf-8' },
+					}),
+			),
+		);
+
+		const builder = new RequestBuilder(downloadConfig);
+		const result = await builder.execute({ id: 'json-charset' });
+
+		expect(result).toEqual({ ok: true });
+	});
+
+	it('treats a response with no Content-Type as opaque bytes, not JSON', async () => {
+		// JPEG magic bytes, no content-type. The SDK trusts Content-Type to choose JSON vs
+		// file, so an absent Content-Type returns raw bytes rather than risking a JSON decode.
+		const blob = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
+		server.use(
+			http.get(
+				'https://api.example.com/download/:id',
+				() => new HttpResponse(blob, { status: 200 }),
+			),
+		);
+
+		const builder = new RequestBuilder(downloadConfig);
+		const result = await builder.execute({ id: 'no-ct' });
+
+		expect((result.content as Buffer).equals(Buffer.from(blob))).toBe(true);
+		expect(result.contentType).toBe('application/octet-stream');
+		expect(result.fileName).toBeNull();
+	});
+});

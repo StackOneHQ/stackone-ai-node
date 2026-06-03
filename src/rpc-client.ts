@@ -8,6 +8,11 @@ import {
 	rpcActionResponseSchema,
 	rpcClientConfigSchema,
 } from './schema';
+import {
+	type BinaryDownloadResult,
+	binaryDownloadFromResponse,
+	isJsonContentType,
+} from './utils/binary-response';
 import { StackOneAPIError } from './utils/error-stackone-api';
 
 // Re-export types for consumers and to make types portable
@@ -38,14 +43,18 @@ export class RpcClient {
 	 * Actions namespace containing RPC methods
 	 */
 	readonly actions: {
-		rpcAction: (request: RpcActionRequest) => Promise<RpcActionResponse>;
+		rpcAction: (request: RpcActionRequest) => Promise<RpcActionResponse | BinaryDownloadResult>;
 	} = {
 		/**
 		 * Execute an RPC action
 		 * @param request The RPC action request
-		 * @returns The RPC action response matching server's ActionsRpcResponseApiModel
+		 * @returns The RPC action response matching server's ActionsRpcResponseApiModel, or - for a
+		 *   file-download action served as raw binary - a {@link BinaryDownloadResult} of bytes +
+		 *   metadata. `content` holds the raw bytes and is not JSON-serializable.
 		 */
-		rpcAction: async (request: RpcActionRequest): Promise<RpcActionResponse> => {
+		rpcAction: async (
+			request: RpcActionRequest,
+		): Promise<RpcActionResponse | BinaryDownloadResult> => {
 			const validatedRequest = rpcActionRequestSchema.parse(request);
 			const url = `${this.baseUrl}/actions/rpc`;
 
@@ -90,6 +99,16 @@ export class RpcClient {
 					body: JSON.stringify(requestBody),
 					signal: controller.signal,
 				});
+
+				// A successful non-JSON body is a file download (raw binary served with the file's own
+				// MIME type and a Content-Disposition header) - e.g. a *_unified_download_file action.
+				// Return the bytes plus metadata rather than forcing response.json() (which throws on
+				// binary) or the {data,next} envelope schema below. Error responses keep the JSON path.
+				const contentType = response.headers.get('content-type') ?? '';
+				if (response.ok && !isJsonContentType(contentType)) {
+					return await binaryDownloadFromResponse(response);
+				}
+
 				responseBody = await response.json();
 			} catch (error) {
 				if (error instanceof Error && error.name === 'AbortError') {

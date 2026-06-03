@@ -25,16 +25,20 @@ import type {
 	ToolParameters,
 } from './types';
 import { DEFAULT_DEFENDER_CONFIG } from './types';
+import type { BinaryDownloadResult } from './utils/binary-response';
 import { StackOneError } from './utils/error-stackone';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { normalizeActionName } from './utils/normalize';
 
 /**
- * Converts RpcActionResponse to JsonObject in a type-safe manner.
- * RpcActionResponse uses z.passthrough() which preserves additional fields,
- * making it structurally compatible with Record<string, JsonValue>.
+ * Converts an RPC action result to JsonObject in a type-safe manner.
+ *
+ * RpcActionResponse uses z.passthrough() which preserves additional fields, making it
+ * structurally compatible with Record<string, JsonValue>. A BinaryDownloadResult (file
+ * download) is flattened the same way - its `content` Buffer rides through under the value
+ * cast and is not JSON-serializable (callers re-serializing for an LLM must handle it).
  */
-function rpcResponseToJsonObject(response: RpcActionResponse): JsonObject {
+function rpcResponseToJsonObject(response: RpcActionResponse | BinaryDownloadResult): JsonObject {
 	// RpcActionResponse with passthrough() has the shape:
 	// { next?: string | null, data?: ..., [key: string]: unknown }
 	// We extract all properties into a plain object
