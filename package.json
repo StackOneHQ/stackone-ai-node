@@ -29,16 +29,19 @@
 		"!src/**/*.test.ts"
 	],
 	"type": "module",
-	"main": "./dist/index.mjs",
+	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.mts",
+	"types": "./dist/index.d.cts",
 	"exports": {
 		".": "./src/index.ts",
 		"./package.json": "./package.json"
 	},
 	"publishConfig": {
 		"exports": {
-			".": "./dist/index.mjs",
+			".": {
+				"require": "./dist/index.cjs",
+				"import": "./dist/index.mjs"
+			},
 			"./package.json": "./package.json"
 		}
 	},
