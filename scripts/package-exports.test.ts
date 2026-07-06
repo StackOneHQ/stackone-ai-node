@@ -127,10 +127,9 @@ describe('published package output', () => {
 					// runs from the repository's pnpm context.
 					await execFileAsync('pnpm', ['exec', 'tsc', '-p', consumerDir], { cwd: rootDir });
 				} catch (error) {
-					const execError = (error ?? {}) as { stdout?: unknown; stderr?: unknown };
+					const execError = (error ?? {}) as { stdout?: string; stderr?: string };
 					const details =
-						`${String(execError.stdout ?? '')}${String(execError.stderr ?? '')}`.trim() ||
-						String(error);
+						`${execError.stdout ?? ''}${execError.stderr ?? ''}`.trim() || String(error);
 					throw new Error(`tsc failed for the Node16 consumer fixture:\n${details}`);
 				}
 			} finally {
