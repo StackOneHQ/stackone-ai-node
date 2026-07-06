@@ -36,7 +36,7 @@ const CONSUMER_SOURCE = [
  * consumer project inside `tempDir`, returning the consumer directory.
  *
  * Packing goes through `pnpm pack` because it applies the publishConfig
- * overrides (exports/main/types), producing the same package.json a consumer
+ * override for the exports map, producing the same package.json a consumer
  * gets from the registry. Lifecycle scripts are disabled: the prepack script
  * runs a full build, which must not happen inside the test.
  */
