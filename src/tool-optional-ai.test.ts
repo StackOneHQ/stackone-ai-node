@@ -42,12 +42,7 @@ describe('BaseTool optional ai peer handling', () => {
 		}));
 
 		const { BaseTool } = await import('./tool');
-		const tool = new BaseTool(
-			'test_tool',
-			'Test tool',
-			createParameters(),
-			createExecuteConfig(),
-		);
+		const tool = new BaseTool('test_tool', 'Test tool', createParameters(), createExecuteConfig());
 
 		await expect(tool.toClaudeAgentSdkTool()).rejects.toBeInstanceOf(StackOneError);
 		await expect(tool.toClaudeAgentSdkTool()).rejects.toThrow(
@@ -56,7 +51,10 @@ describe('BaseTool optional ai peer handling', () => {
 	});
 
 	it('keeps the built module free of a top-level ai import', async () => {
-		const builtToolModule = await readFile(new URL('../dist/src/tool.mjs', import.meta.url), 'utf8');
+		const builtToolModule = await readFile(
+			new URL('../dist/src/tool.mjs', import.meta.url),
+			'utf8',
+		);
 
 		expect(builtToolModule).toContain('tryImport("ai"');
 		expect(builtToolModule).not.toMatch(/^\s*import\s+.*['"]ai['"]/m);
