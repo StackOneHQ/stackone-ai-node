@@ -4,13 +4,13 @@ import { mkdir, mkdtemp, readdir, rename, rm, writeFile } from 'node:fs/promises
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 import { publishConfig } from '../package.json';
 
 const execFileAsync = promisify(execFile);
 
-const rootDir = path.resolve(import.meta.dirname, '..');
+const rootDir = fileURLToPath(new URL('..', import.meta.url));
 
 // Typed wider than the current package.json shape so that a malformed exports
 // map surfaces as a test failure rather than a compile error in this file.
