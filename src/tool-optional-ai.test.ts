@@ -1,7 +1,12 @@
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { StackOneError } from './utils/error-stackone';
 import { peerDependencies } from '../package.json';
 import { ParameterLocation, type ExecuteConfig, type ToolParameters } from './types';
+
+const builtToolEsm = new URL('../dist/src/tool.mjs', import.meta.url);
+const builtToolCjs = new URL('../dist/src/tool.cjs', import.meta.url);
+const distReady = existsSync(builtToolEsm) && existsSync(builtToolCjs);
 
 const createExecuteConfig = (): ExecuteConfig => ({
 	kind: 'http',
@@ -50,13 +55,17 @@ describe('BaseTool optional ai peer handling', () => {
 		);
 	});
 
-	it('keeps the built module free of a top-level ai import', async () => {
-		const builtToolModule = await readFile(
-			new URL('../dist/src/tool.mjs', import.meta.url),
-			'utf8',
-		);
+	it.skipIf(!distReady)('keeps the built ESM module free of a top-level ai import', async () => {
+		const builtToolModule = await readFile(builtToolEsm, 'utf8');
 
 		expect(builtToolModule).toContain('tryImport("ai"');
 		expect(builtToolModule).not.toMatch(/^\s*import\s+.*['"]ai['"]/m);
+	});
+
+	it.skipIf(!distReady)('keeps the built CJS module free of a top-level ai require', async () => {
+		const builtToolModule = await readFile(builtToolCjs, 'utf8');
+
+		expect(builtToolModule).toContain('tryImport("ai"');
+		expect(builtToolModule).not.toMatch(/require\(["']ai["']\)/);
 	});
 });
