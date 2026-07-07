@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.9.2](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.9.1...v2.9.2) (2026-07-07)
+
+
+### Bug Fixes
+
+* lazy-load optional ai peer ([#372](https://github.com/StackOneHQ/stackone-ai-node/issues/372)) ([e7e944d](https://github.com/StackOneHQ/stackone-ai-node/commit/e7e944dd83528e5b4b6badfb089c3f403bc81e76))
+* ship dual ESM/CJS output for Node16 consumers ([#373](https://github.com/StackOneHQ/stackone-ai-node/issues/373)) ([b1739b1](https://github.com/StackOneHQ/stackone-ai-node/commit/b1739b14266ce82eb6ee40783f7c5a2dbf0778ec))
+
 ## [2.9.1](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.9.0...v2.9.1) (2026-06-03)
 
 
