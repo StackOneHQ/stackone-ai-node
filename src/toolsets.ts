@@ -2,7 +2,6 @@ import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import { z } from 'zod/v4';
 import { DEFAULT_BASE_URL } from './consts';
-import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
 import { ToolIndex } from './local-search';
 import { createMCPClient } from './mcp-client';
@@ -191,6 +190,9 @@ export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountC
 /**
  * Options for filtering tools when fetching from MCP
  */
+/** Name of the global feedback tool the MCP server exposes on every account. */
+const FEEDBACK_TOOL_NAME = 'submit_feedback';
+
 interface FetchToolsOptions {
 	/**
 	 * Filter tools by account IDs
@@ -211,6 +213,14 @@ interface FetchToolsOptions {
 	 * @example ['*_list_employees', 'hibob_create_employees']
 	 */
 	actions?: string[];
+
+	/**
+	 * Whether to include the global feedback tool (`submit_feedback`), which the StackOne MCP server
+	 * exposes on every account. Enabled by default; it is kept available even when `providers`/`actions`
+	 * filters are applied. Set to `false` to remove it from the returned tools.
+	 * @default true
+	 */
+	feedback?: boolean;
 }
 
 /**
@@ -1198,6 +1208,7 @@ export class StackOneToolSet {
 			accountIds: [...effectiveAccountIds].sort(),
 			providers: options?.providers?.length ? [...options.providers].sort() : null,
 			actions: options?.actions?.length ? [...options.actions].sort() : null,
+			feedback: options?.feedback !== false,
 		});
 		const cached = this.catalogCache.get(cacheKey);
 		if (cached) {
@@ -1226,12 +1237,20 @@ export class StackOneToolSet {
 		// Apply provider and action filters
 		const filteredTools = this.filterTools(tools, options);
 
-		// Add feedback tool
-		const feedbackTool = createFeedbackTool(undefined, this.accountId, this.baseUrl);
-		const toolsWithFeedback = new Tools([...filteredTools.toArray(), feedbackTool]);
+		// `submit_feedback` is a global MCP tool returned once per account fetch. Collapse it to a
+		// single instance, and keep it available regardless of the connector-keyed provider/action
+		// filters — unless the caller explicitly disables feedback.
+		const nonFeedbackTools = filteredTools
+			.toArray()
+			.filter((tool) => tool.name !== FEEDBACK_TOOL_NAME);
+		const feedbackTool = tools.toArray().find((tool) => tool.name === FEEDBACK_TOOL_NAME);
+		const finalTools =
+			options?.feedback === false || !feedbackTool
+				? new Tools(nonFeedbackTools)
+				: new Tools([...nonFeedbackTools, feedbackTool]);
 
-		this.catalogCache.set(cacheKey, toolsWithFeedback);
-		return toolsWithFeedback;
+		this.catalogCache.set(cacheKey, finalTools);
+		return finalTools;
 	}
 
 	/**

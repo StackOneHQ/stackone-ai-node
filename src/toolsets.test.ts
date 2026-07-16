@@ -283,7 +283,7 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('default_tool_1');
 			expect(toolNames).toContain('default_tool_2');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('uses x-account-id header when fetching tools with accountIds', async () => {
@@ -299,7 +299,7 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('acc1_tool_1');
 			expect(toolNames).toContain('acc1_tool_2');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('uses setAccounts when no accountIds provided in fetchTools', async () => {
@@ -322,7 +322,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc1_tool_2');
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('uses accountIds from constructor when no accountIds provided in fetchTools', async () => {
@@ -343,7 +343,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc1_tool_2');
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('setAccounts overrides constructor accountIds', async () => {
@@ -367,7 +367,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('acc2_tool_1');
 			expect(toolNames).toContain('acc2_tool_2');
 			expect(toolNames).toContain('acc3_tool_1');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('overrides setAccounts when accountIds provided in fetchTools', async () => {
@@ -386,7 +386,7 @@ describe('StackOneToolSet', () => {
 			expect(tools.length).toBe(2);
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('acc3_tool_1');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		// Regression for issue #365: tools must carry the x-account-id of the
@@ -786,7 +786,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('bamboohr_list_employees');
 			expect(toolNames).toContain('bamboohr_get_employee');
 			expect(toolNames).not.toContain('workday_list_employees');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('filters tools by actions with exact match', async () => {
@@ -806,7 +806,7 @@ describe('StackOneToolSet', () => {
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('hibob_list_employees');
 			expect(toolNames).toContain('hibob_create_employees');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('filters tools by actions with glob pattern', async () => {
@@ -827,7 +827,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('workday_list_employees');
 			expect(toolNames).not.toContain('hibob_create_employees');
 			expect(toolNames).not.toContain('bamboohr_get_employee');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('combines accountIds and actions filters', async () => {
@@ -902,7 +902,7 @@ describe('StackOneToolSet', () => {
 			expect(toolNames).toContain('bamboohr_list_employees');
 			expect(toolNames).not.toContain('hibob_create_employees');
 			expect(toolNames).not.toContain('bamboohr_get_employee');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
 		});
 
 		it('combines all filters: accountIds, providers, and actions', async () => {
@@ -962,7 +962,57 @@ describe('StackOneToolSet', () => {
 			expect(tools.length).toBe(2);
 			const toolNames = tools.toArray().map((t) => t.name);
 			expect(toolNames).toContain('hibob_list_employees');
-			expect(toolNames).toContain('tool_feedback');
+			expect(toolNames).toContain('submit_feedback');
+		});
+	});
+
+	describe('feedback tool (inherited from MCP)', () => {
+		it('is included by default', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			const tools = await toolset.fetchTools();
+			expect(tools.toArray().map((t) => t.name)).toContain('submit_feedback');
+		});
+
+		it('is excluded when feedback is disabled', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			const tools = await toolset.fetchTools({ feedback: false });
+			expect(tools.toArray().map((t) => t.name)).not.toContain('submit_feedback');
+		});
+
+		it('stays out even when other filters would otherwise keep tools', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'mixed',
+			});
+
+			const tools = await toolset.fetchTools({ providers: ['hibob'], feedback: false });
+			const toolNames = tools.toArray().map((t) => t.name);
+			expect(toolNames).toContain('hibob_list_employees');
+			expect(toolNames).not.toContain('submit_feedback');
+		});
+
+		it('appears exactly once across multiple accounts', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+			});
+
+			const tools = await toolset.fetchTools({ accountIds: ['acc1', 'acc2'] });
+			const feedbackCount = tools
+				.toArray()
+				.filter((t) => t.name === 'submit_feedback').length;
+			expect(feedbackCount).toBe(1);
 		});
 	});
 

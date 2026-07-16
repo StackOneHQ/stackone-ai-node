@@ -63,7 +63,10 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 	app.all('/mcp', async (c) => {
 		// Get account ID from header
 		const accountId = c.req.header('x-account-id') ?? 'default';
-		const tools = accountTools[accountId] ?? accountTools.default ?? [];
+		const accountSpecificTools = accountTools[accountId] ?? accountTools.default ?? [];
+		// The real MCP server registers submit_feedback unconditionally for every account, so mirror
+		// it here — the SDK inherits the feedback tool straight from the MCP catalog.
+		const tools = [...accountSpecificTools, submitFeedbackMcpTool];
 
 		// Create a new MCP server instance per request
 		const mcp = new McpServer({ name: 'test-mcp-server', version: '1.0.0' });
@@ -94,6 +97,26 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 }
 
 // Pre-defined tool sets for common test scenarios
+
+/**
+ * The global feedback tool the real MCP server always registers. Mirrored by the mock so tests
+ * exercise the same "feedback inherited from MCP" path as production.
+ */
+export const submitFeedbackMcpTool = {
+	name: 'submit_feedback',
+	description: 'Record a structured verdict on how well the tools served this session.',
+	inputSchema: {
+		type: 'object',
+		properties: {
+			rating: { type: 'string' },
+			source: { type: 'string' },
+			tool_names: { type: 'array', items: { type: 'string' } },
+			feedback: { type: 'string' },
+			session_id: { type: 'string' },
+		},
+		required: ['rating', 'source', 'tool_names'],
+	},
+} as const satisfies McpToolDefinition;
 
 export const defaultMcpTools = [
 	{
