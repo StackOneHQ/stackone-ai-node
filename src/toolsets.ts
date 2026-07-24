@@ -31,6 +31,16 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 import { normalizeActionName } from './utils/normalize';
 
 /**
+ * Param-style pinned on the /mcp tool-listing URL. The MCP schema and the RPC-execution
+ * unwrap (splitEnvelopeParams) must agree on this, so it is pinned rather than following
+ * the server default — the server default is free to change without breaking the SDK.
+ */
+const MCP_PARAM_STYLE = 'flat_prefixed';
+
+/** Matches a flat_prefixed envelope key: `<location>_<field>` (e.g. `path_id`, `query_limit`). */
+const FLAT_ENVELOPE_KEY_PATTERN = /^(path|query|body|headers)_(.+)$/;
+
+/**
  * Converts an RPC action result to a JsonObject by flattening its top-level properties.
  *
  * RpcActionResponse uses z.passthrough() which preserves additional fields, making it
@@ -1245,7 +1255,7 @@ export class StackOneToolSet {
 		}
 
 		await using clients = await createMCPClient({
-			baseUrl: `${this.baseUrl}/mcp`,
+			baseUrl: `${this.baseUrl}/mcp?param-style=${MCP_PARAM_STYLE}`,
 			headers: requestHeaders,
 		});
 
@@ -1406,21 +1416,14 @@ export class StackOneToolSet {
 				const currentHeaders = tool.getHeaders();
 				const baseHeaders = this.buildActionHeaders(currentHeaders);
 
-				const pathParams = this.extractRecord(parsedParams, 'path');
-				const queryParams = this.extractRecord(parsedParams, 'query');
-				const additionalHeaders = this.extractRecord(parsedParams, 'headers');
-				const extraHeaders = normalizeHeaders(additionalHeaders);
+				const envelope = this.splitEnvelopeParams(parsedParams);
+				const pathParams = envelope.path;
+				const queryParams = envelope.query;
+				const extraHeaders = normalizeHeaders(envelope.headers);
 				// defu merges extraHeaders into baseHeaders, both are already branded types
 				const actionHeaders = defu(extraHeaders, baseHeaders);
 
-				const bodyPayload = this.extractRecord(parsedParams, 'body');
-				const rpcBody: JsonObject = bodyPayload ? { ...bodyPayload } : {};
-				for (const [key, value] of Object.entries(parsedParams)) {
-					if (key === 'body' || key === 'headers' || key === 'path' || key === 'query') {
-						continue;
-					}
-					rpcBody[key] = value as JsonObject[string];
-				}
+				const rpcBody: JsonObject = envelope.body;
 
 				if (options?.dryRun) {
 					const requestPayload = {
@@ -1472,14 +1475,60 @@ export class StackOneToolSet {
 		);
 	}
 
-	private extractRecord(
-		params: JsonObject,
-		key: 'body' | 'headers' | 'path' | 'query',
-	): JsonObject | undefined {
-		const value = params[key];
-		if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-			return value as JsonObject;
+	/**
+	 * Splits LLM-supplied tool arguments into the RPC envelope (path/query/headers/body).
+	 *
+	 * Tools are listed with `?param-style=flat_prefixed`, so keys arrive as `<location>_<field>`
+	 * (for example `path_id`, `query_limit`). The prefix carries the parameter location, so the
+	 * split needs no per-action schema. A bare object-valued `path`/`query`/`headers`/`body` key
+	 * is still bucketed for clients holding a cached nested schema, and any other key falls
+	 * through to the body.
+	 */
+	private splitEnvelopeParams(params: JsonObject): {
+		path?: JsonObject;
+		query?: JsonObject;
+		headers?: JsonObject;
+		body: JsonObject;
+	} {
+		const buckets: Record<'path' | 'query' | 'headers' | 'body', JsonObject> = {
+			path: {},
+			query: {},
+			headers: {},
+			body: {},
+		};
+
+		for (const [key, value] of Object.entries(params)) {
+			const match = key.match(FLAT_ENVELOPE_KEY_PATTERN);
+			if (match) {
+				const bucket = buckets[match[1] as keyof typeof buckets];
+				const field = match[2];
+				if (!(field in bucket)) {
+					bucket[field] = value as JsonObject[string];
+				}
+				continue;
+			}
+			if (
+				(key === 'path' || key === 'query' || key === 'headers' || key === 'body') &&
+				typeof value === 'object' &&
+				value !== null &&
+				!Array.isArray(value)
+			) {
+				const bucket = buckets[key];
+				for (const [field, fieldValue] of Object.entries(value)) {
+					if (!(field in bucket)) {
+						bucket[field] = fieldValue as JsonObject[string];
+					}
+				}
+				continue;
+			}
+			buckets.body[key] = value as JsonObject[string];
 		}
-		return undefined;
+
+		return {
+			path: Object.keys(buckets.path).length > 0 ? buckets.path : undefined,
+			query: Object.keys(buckets.query).length > 0 ? buckets.query : undefined,
+			headers: Object.keys(buckets.headers).length > 0 ? buckets.headers : undefined,
+			body: buckets.body,
+		};
 	}
 }

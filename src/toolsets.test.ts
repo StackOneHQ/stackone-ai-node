@@ -8,7 +8,7 @@
  * - Provider and action filtering
  */
 import { http, HttpResponse } from 'msw';
-import { type McpToolDefinition, createMcpApp } from '../mocks/mcp-server';
+import { type McpToolDefinition, createMcpApp, defaultMcpTools } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { SemanticSearchError } from './semantic-search';
@@ -256,6 +256,28 @@ describe('StackOneToolSet', () => {
 
 			const executableTool = (await tool?.toAISDK())?.dummy_action;
 			expect(executableTool?.execute).toBeDefined();
+		});
+
+		it('pins param-style=flat_prefixed on the MCP listing URL', async () => {
+			let requestedUrl = '';
+			const mcpApp = createMcpApp({ accountTools: { default: defaultMcpTools } });
+			server.use(
+				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+					if (!requestedUrl) {
+						requestedUrl = request.url;
+					}
+					return mcpApp.fetch(request);
+				}),
+			);
+
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+			await toolset.fetchTools();
+
+			expect(new URL(requestedUrl).searchParams.get('param-style')).toBe('flat_prefixed');
 		});
 	});
 
@@ -562,6 +584,34 @@ describe('StackOneToolSet', () => {
 				extraParam: 'extra-value',
 				anotherParam: 123,
 			});
+		});
+
+		it('routes flat_prefixed params into the RPC envelope', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute(
+				{
+					path_id: '123',
+					query_limit: 10,
+					'headers_x-custom': 'value',
+					body_name: 'test',
+				},
+				{ dryRun: true },
+			);
+
+			const payload = JSON.parse(result.body as string);
+			expect(payload.path).toEqual({ id: '123' });
+			expect(payload.query).toEqual({ limit: 10 });
+			expect(payload.body).toEqual({ name: 'test' });
+			expect((result.headers as Record<string, string>)['x-custom']).toBe('value');
 		});
 	});
 
