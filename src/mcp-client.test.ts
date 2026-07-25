@@ -4,6 +4,8 @@
  */
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { version } from '../package.json';
+import { server } from '../mocks/node';
 import { createMCPClient } from './mcp-client';
 
 test('createMCPClient creates client with required options', async () => {
@@ -43,6 +45,29 @@ test('createMCPClient provides asyncDispose for cleanup', async () => {
 
 	expect(clientCloseSpy).toHaveBeenCalledOnce();
 	expect(transportCloseSpy).toHaveBeenCalledOnce();
+});
+
+test('createMCPClient sends a version-bearing User-Agent on MCP requests', async () => {
+	const recordedRequests: Request[] = [];
+	const listener = ({ request }: { request: Request }) => {
+		recordedRequests.push(request);
+	};
+	server.events.on('request:start', listener);
+
+	await using mcpClient = await createMCPClient({
+		baseUrl: 'http://localhost/mcp',
+		headers: {
+			Authorization: `Basic ${Buffer.from('test-key:').toString('base64')}`,
+		},
+	});
+
+	await mcpClient.client.connect(mcpClient.transport);
+	await mcpClient.client.listTools();
+
+	server.events.removeListener('request:start', listener);
+
+	const mcpRequest = recordedRequests.find((request) => request.url.includes('/mcp'));
+	expect(mcpRequest?.headers.get('user-agent')).toBe(`stackone-ai-node/${version}`);
 });
 
 test('createMCPClient can connect and list tools from MCP server', async () => {

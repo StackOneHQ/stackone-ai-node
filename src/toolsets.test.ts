@@ -277,7 +277,7 @@ describe('StackOneToolSet', () => {
 			});
 			await toolset.fetchTools();
 
-			expect(new URL(requestedUrl).searchParams.get('param-style')).toBe('flat_prefixed');
+			expect(requestedUrl).toBe(`${TEST_BASE_URL}/mcp?param-style=flat_prefixed`);
 		});
 	});
 
@@ -612,6 +612,75 @@ describe('StackOneToolSet', () => {
 			expect(payload.query).toEqual({ limit: 10 });
 			expect(payload.body).toEqual({ name: 'test' });
 			expect((result.headers as Record<string, string>)['x-custom']).toBe('value');
+		});
+
+		it('preserves fields named after Object.prototype members', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute(
+				{ body_constructor: 'x', path_toString: 'y', query_valueOf: 'z' },
+				{ dryRun: true },
+			);
+
+			const payload = JSON.parse(result.body as string);
+			expect(payload.body).toEqual({ constructor: 'x' });
+			expect(payload.path).toEqual({ toString: 'y' });
+			expect(payload.query).toEqual({ valueOf: 'z' });
+		});
+
+		it('prefers an explicit flat key over a nested duplicate whatever the key order', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const nestedFirst = await tool.execute(
+				{ path: { id: 'nested' }, path_id: 'flat' },
+				{ dryRun: true },
+			);
+			const flatFirst = await tool.execute(
+				{ path_id: 'flat', path: { id: 'nested' } },
+				{ dryRun: true },
+			);
+
+			expect(JSON.parse(nestedFirst.body as string).path).toEqual({ id: 'flat' });
+			expect(JSON.parse(flatFirst.body as string).path).toEqual({ id: 'flat' });
+		});
+
+		it('drops reserved envelope keys that do not carry an object', async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'test-account',
+			});
+
+			const tools = await toolset.fetchTools();
+			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
+			assert(tool, 'tool should be defined');
+
+			const result = await tool.execute(
+				{ body: 'oops', path: 5, real_field: 'kept' },
+				{ dryRun: true },
+			);
+
+			// `body`/`path` name an envelope, so a non-object value is dropped rather than
+			// leaked into the body payload under its reserved name.
+			const payload = JSON.parse(result.body as string);
+			expect(payload.body).toEqual({ real_field: 'kept' });
+			expect(payload.path).toBeUndefined();
 		});
 	});
 

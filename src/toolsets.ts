@@ -40,6 +40,16 @@ const MCP_PARAM_STYLE = 'flat_prefixed';
 /** Matches a flat_prefixed envelope key: `<location>_<field>` (e.g. `path_id`, `query_limit`). */
 const FLAT_ENVELOPE_KEY_PATTERN = /^(path|query|body|headers)_(.+)$/;
 
+const ENVELOPE_LOCATIONS = ['path', 'query', 'headers', 'body'] as const;
+
+type EnvelopeLocation = (typeof ENVELOPE_LOCATIONS)[number];
+
+const isEnvelopeLocation = (key: string): key is EnvelopeLocation =>
+	(ENVELOPE_LOCATIONS as readonly string[]).includes(key);
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
  * Converts an RPC action result to a JsonObject by flattening its top-level properties.
  *
@@ -1490,45 +1500,60 @@ export class StackOneToolSet {
 		headers?: JsonObject;
 		body: JsonObject;
 	} {
-		const buckets: Record<'path' | 'query' | 'headers' | 'body', JsonObject> = {
-			path: {},
-			query: {},
-			headers: {},
-			body: {},
+		// Null-prototype buckets so API fields named after Object.prototype members
+		// (`constructor`, `toString`, `__proto__`) are stored as ordinary own properties
+		// instead of colliding with the prototype chain and being dropped.
+		const buckets: Record<EnvelopeLocation, JsonObject> = {
+			path: Object.create(null),
+			query: Object.create(null),
+			headers: Object.create(null),
+			body: Object.create(null),
 		};
 
-		for (const [key, value] of Object.entries(params)) {
+		// Keeps whichever value reaches a field first, so the pass order below is what decides
+		// precedence rather than the order the caller happened to supply keys in.
+		const assignField = (bucket: JsonObject, field: string, value: unknown): void => {
+			if (!Object.hasOwn(bucket, field)) {
+				bucket[field] = value as JsonObject[string];
+			}
+		};
+
+		const entries = Object.entries(params);
+
+		// First pass: explicit flat_prefixed keys. Applied before anything else so a prefixed
+		// key always wins over the same field carried in a nested envelope or as a bare key.
+		for (const [key, value] of entries) {
 			const match = key.match(FLAT_ENVELOPE_KEY_PATTERN);
 			if (match) {
-				const bucket = buckets[match[1] as keyof typeof buckets];
-				const field = match[2];
-				if (!(field in bucket)) {
-					bucket[field] = value as JsonObject[string];
-				}
+				assignField(buckets[match[1] as EnvelopeLocation], match[2], value);
+			}
+		}
+
+		// Second pass: nested envelopes from clients on a cached schema, then bare body fields.
+		for (const [key, value] of entries) {
+			if (FLAT_ENVELOPE_KEY_PATTERN.test(key)) {
 				continue;
 			}
-			if (
-				(key === 'path' || key === 'query' || key === 'headers' || key === 'body') &&
-				typeof value === 'object' &&
-				value !== null &&
-				!Array.isArray(value)
-			) {
-				const bucket = buckets[key];
-				for (const [field, fieldValue] of Object.entries(value)) {
-					if (!(field in bucket)) {
-						bucket[field] = fieldValue as JsonObject[string];
+			if (isEnvelopeLocation(key)) {
+				// Reserved keys name an envelope, never a body field. A non-object value cannot
+				// be bucketed, so it is dropped rather than leaked into the body under its
+				// reserved name.
+				if (isPlainObject(value)) {
+					for (const [field, fieldValue] of Object.entries(value)) {
+						assignField(buckets[key], field, fieldValue);
 					}
 				}
 				continue;
 			}
-			buckets.body[key] = value as JsonObject[string];
+			assignField(buckets.body, key, value);
 		}
 
+		// Spread onto ordinary objects so downstream JSON and schema handling sees plain records.
 		return {
-			path: Object.keys(buckets.path).length > 0 ? buckets.path : undefined,
-			query: Object.keys(buckets.query).length > 0 ? buckets.query : undefined,
-			headers: Object.keys(buckets.headers).length > 0 ? buckets.headers : undefined,
-			body: buckets.body,
+			path: Object.keys(buckets.path).length > 0 ? { ...buckets.path } : undefined,
+			query: Object.keys(buckets.query).length > 0 ? { ...buckets.query } : undefined,
+			headers: Object.keys(buckets.headers).length > 0 ? { ...buckets.headers } : undefined,
+			body: { ...buckets.body },
 		};
 	}
 }
