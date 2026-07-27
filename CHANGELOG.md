@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.9.2...v2.10.0) (2026-07-27)
+
+
+### Features
+
+* **ENG-733:** support flat_prefixed MCP param style ([#376](https://github.com/StackOneHQ/stackone-ai-node/issues/376)) ([8957a57](https://github.com/StackOneHQ/stackone-ai-node/commit/8957a576aabad93784929f31336f1c2b9de2ba4d))
+
 ## [2.9.2](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.9.1...v2.9.2) (2026-07-07)
 
 
