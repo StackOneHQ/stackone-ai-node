@@ -122,7 +122,7 @@ async function searchAndExecute(): Promise<void> {
 	console.log('\n=== 5. Search & Execute (Vercel AI SDK) ===\n');
 
 	// Dynamic imports — these are optional peer dependencies
-	const [{ openai }, { generateText, isStepCount }] = await Promise.all([
+	const [{ openai }, { generateText, stepCountIs }] = await Promise.all([
 		import('@ai-sdk/openai'),
 		import('ai'),
 	]);
@@ -142,7 +142,7 @@ async function searchAndExecute(): Promise<void> {
 		model: openai('gpt-5.1'),
 		tools: await tools.toAISDK(),
 		prompt: 'List employees and return a short summary.',
-		stopWhen: isStepCount(5),
+		stopWhen: stepCountIs(5),
 	});
 
 	console.log(`  Model completed in ${steps.length} step(s)`);

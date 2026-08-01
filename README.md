@@ -200,7 +200,7 @@ npm install @stackone/ai ai @ai-sdk/openai  # or: yarn/pnpm/bun add
 
 ```typescript
 import { openai } from '@ai-sdk/openai';
-import { generateText, isStepCount } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
@@ -211,7 +211,7 @@ const tools = await toolset.fetchTools();
 await generateText({
   model: openai('gpt-5.1'),
   tools: await tools.toAISDK(),
-  stopWhen: isStepCount(3),
+  stopWhen: stepCountIs(3),
 });
 ```
 
