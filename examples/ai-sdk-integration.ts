@@ -2,18 +2,19 @@
  * This example shows how to use StackOne tools with the AI SDK.
  *
  * The AI SDK provides an agent-like pattern through the `stopWhen` parameter
- * with `stepCountIs()`. This creates a multi-step tool loop where the model
+ * with `isStepCount()`. This creates a multi-step tool loop where the model
  * can autonomously call tools and reason over results until the stop condition
  * is met.
  *
- * In AI SDK v6+, you can use the `ToolLoopAgent` class for more explicit
- * agent functionality.
+ * Compatible with AI SDK v5–v7 (`ai` peer `>=5.0.108 <8.0.0`). AI SDK v7
+ * requires Node.js 22+. You can also use the `ToolLoopAgent` class for more
+ * explicit agent functionality.
  */
 
 import process from 'node:process';
 import { openai } from '@ai-sdk/openai';
 import { StackOneToolSet } from '@stackone/ai';
-import { generateText, stepCountIs } from 'ai';
+import { generateText, isStepCount } from 'ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
 if (!apiKey) {
@@ -43,7 +44,7 @@ const aiSdkIntegration = async (): Promise<void> => {
 		model: openai('gpt-5.1'),
 		tools: aiSdkTools,
 		prompt: 'List the first 5 employees',
-		stopWhen: stepCountIs(3),
+		stopWhen: isStepCount(3),
 	});
 
 	console.log(`AI response: ${text}`);

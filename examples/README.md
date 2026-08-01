@@ -60,7 +60,7 @@ Converts StackOne tools to Anthropic format with `tools.toAnthropic()` and sends
 
 ### [`ai-sdk-integration.ts`](./ai-sdk-integration.ts) -- Vercel AI SDK
 
-Integrates with the Vercel AI SDK via `tools.toAISDK()`. Runs a multi-step agent loop using `generateText` with `stopWhen: stepCountIs(3)`, letting the model autonomously call tools and reason over results.
+Integrates with the Vercel AI SDK via `tools.toAISDK()`. Runs a multi-step agent loop using `generateText` with `stopWhen: isStepCount(3)`, letting the model autonomously call tools and reason over results. Compatible with AI SDK v5–v7; AI SDK v7 requires Node.js 22+.
 
 ### [`claude-agent-sdk-integration.ts`](./claude-agent-sdk-integration.ts) -- Claude Agent SDK
 

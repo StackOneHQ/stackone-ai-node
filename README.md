@@ -196,9 +196,11 @@ await anthropic.messages.create({
 npm install @stackone/ai ai @ai-sdk/openai  # or: yarn/pnpm/bun add
 ```
 
+> Supports AI SDK v5–v7 (`ai` `>=5.0.108 <8.0.0`). AI SDK v7 requires Node.js 22+.
+
 ```typescript
 import { openai } from '@ai-sdk/openai';
-import { generateText } from 'ai';
+import { generateText, isStepCount } from 'ai';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
@@ -207,9 +209,9 @@ const toolset = new StackOneToolSet();
 const tools = await toolset.fetchTools();
 
 await generateText({
-	model: openai('gpt-5.1'),
-	tools: await tools.toAISDK(),
-	maxSteps: 3,
+  model: openai('gpt-5.1'),
+  tools: await tools.toAISDK(),
+  stopWhen: isStepCount(3),
 });
 ```
 

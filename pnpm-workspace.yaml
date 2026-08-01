@@ -6,8 +6,8 @@ catalogMode: strict
 
 catalogs:
   dev:
-    '@ai-sdk/openai': ^3.0.2
-    ai: ^6.0.7
+    '@ai-sdk/openai': ^4.0.27
+    ai: ^7.0.47
     '@fast-check/vitest': ^0.2.0
     '@clack/prompts': ^0.11.0
     '@hono/mcp': ^0.1.4
@@ -29,7 +29,7 @@ catalogs:
   peer:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
     '@anthropic-ai/sdk': ^0.72.1
-    ai: '>=5.0.108 <7.0.0'
+    ai: '>=5.0.108 <8.0.0'
     openai: ^6.2.0
     zod: '>=3.25.0 <5'
   prod:

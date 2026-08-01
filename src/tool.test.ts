@@ -249,7 +249,7 @@ describe('StackOneTool', () => {
 
 		const result = await aiSdkTool.test_tool.execute?.(
 			{ id: '123' },
-			{ toolCallId: 'test-tool-call-id', messages: [] },
+			{ toolCallId: 'test-tool-call-id', messages: [], context: undefined },
 		);
 		expect(result).toEqual({ id: '123', name: 'Test' });
 	});
@@ -263,7 +263,7 @@ describe('StackOneTool', () => {
 		// 'invalid' id returns 400 error via MSW handler
 		const result = await aiSdkTool.test_tool.execute?.(
 			{ id: 'invalid' },
-			{ toolCallId: 'test-tool-call-id', messages: [] },
+			{ toolCallId: 'test-tool-call-id', messages: [], context: undefined },
 		);
 		expect(result).toMatch(/Error executing tool:/);
 	});
