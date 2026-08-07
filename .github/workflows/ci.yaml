@@ -60,6 +60,44 @@ jobs:
       - name: Run Tests
         run: pnpm test
 
+  # The `ai` peer range spans three majors whose tool types differ, so the
+  # single build-and-test job above only ever proves the version pinned in the
+  # dev catalog. This job checks the rest of the declared range.
+  #
+  # Versions are pinned rather than ranged: newer v5/v6 patches resolve
+  # transitive packages that this repo's `trustPolicy: no-downgrade` rejects,
+  # which would fail CI for reasons unrelated to the code under test.
+  ai-peer-range:
+    name: ai-peer-range (${{ matrix.ai }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ai:
+          - 5.0.108 # lower bound of the peer range
+          - 6.0.7 # last v6 the dev catalog shipped
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+        with:
+          skip-pnpm-install: 'true'
+
+      # `--filter .` keeps the examples workspace out of resolution; it pulls a
+      # dependency that `blockExoticSubdeps` rejects on any lockfile update.
+      - name: Install with ai@${{ matrix.ai }}
+        run: |
+          sed -i -E "/^  dev:/,/^  [a-z]+:/ s|^    ai: .*|    ai: '${{ matrix.ai }}'|" pnpm-workspace.yaml
+          grep -nE "^    ai: " pnpm-workspace.yaml
+          pnpm install --no-frozen-lockfile --filter .
+
+      # Type errors are the failure mode here, and vitest type-checks the suite
+      # via the root project's `typecheck` config.
+      - name: Run Tests
+        run: pnpm exec vitest run --project root
+
   coverage:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
