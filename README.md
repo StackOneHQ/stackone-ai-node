@@ -209,9 +209,9 @@ const toolset = new StackOneToolSet();
 const tools = await toolset.fetchTools();
 
 await generateText({
-  model: openai('gpt-5.1'),
-  tools: await tools.toAISDK(),
-  stopWhen: stepCountIs(3),
+	model: openai('gpt-5.1'),
+	tools: await tools.toAISDK(),
+	stopWhen: stepCountIs(3),
 });
 ```
 
