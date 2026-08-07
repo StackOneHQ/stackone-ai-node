@@ -301,7 +301,7 @@ export class BaseTool {
 			execution: executionOption !== false ? executionOption : undefined,
 			execute:
 				(options.executable ?? true)
-					? async (args: Record<string, unknown>, _executionOptions: unknown) => {
+					? async (args: Record<string, unknown>) => {
 							try {
 								return await this.execute(args as JsonObject);
 							} catch (error) {

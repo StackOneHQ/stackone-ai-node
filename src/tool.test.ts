@@ -1,6 +1,7 @@
 import { jsonSchema } from 'ai';
 import { BaseTool, StackOneTool, Tools } from './tool';
 import {
+	type AISDKToolResult,
 	type ExecuteConfig,
 	type JSONSchema,
 	ParameterLocation,
@@ -31,6 +32,23 @@ const createMockTool = (headers?: Record<string, string>): BaseTool => {
 	};
 
 	return new BaseTool(name, description, parameters, executeConfig, headers);
+};
+
+// Calls an AI SDK tool's `execute` through a plain signature rather than the
+// `ai` type. v5/v6 expect `ToolCallOptions`, v7 requires an extra `context`
+// field, and v7's `Tool` is a union whose call signatures reduce to `never`, so
+// a directly typed call site can only ever satisfy one major at a time.
+const executeAISDKTool = (
+	tools: AISDKToolResult,
+	name: string,
+	args: Record<string, unknown>,
+): Promise<unknown> => {
+	const execute = tools[name].execute as unknown as (
+		args: Record<string, unknown>,
+		options?: unknown,
+	) => Promise<unknown>;
+
+	return execute(args, { toolCallId: 'test-tool-call-id', messages: [] });
 };
 
 describe('StackOneTool', () => {
@@ -247,10 +265,7 @@ describe('StackOneTool', () => {
 
 		expect(aiSdkTool.test_tool.execute).toBeDefined();
 
-		const result = await aiSdkTool.test_tool.execute?.(
-			{ id: '123' },
-			{ toolCallId: 'test-tool-call-id', messages: [], context: undefined },
-		);
+		const result = await executeAISDKTool(aiSdkTool, 'test_tool', { id: '123' });
 		expect(result).toEqual({ id: '123', name: 'Test' });
 	});
 
@@ -261,10 +276,7 @@ describe('StackOneTool', () => {
 		expect(aiSdkTool.test_tool.execute).toBeDefined();
 
 		// 'invalid' id returns 400 error via MSW handler
-		const result = await aiSdkTool.test_tool.execute?.(
-			{ id: 'invalid' },
-			{ toolCallId: 'test-tool-call-id', messages: [], context: undefined },
-		);
+		const result = await executeAISDKTool(aiSdkTool, 'test_tool', { id: 'invalid' });
 		expect(result).toMatch(/Error executing tool:/);
 	});
 
