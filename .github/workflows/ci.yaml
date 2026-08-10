@@ -61,12 +61,19 @@ jobs:
         run: pnpm test
 
   # The `ai` peer range spans three majors whose tool types differ, so the
-  # single build-and-test job above only ever proves the version pinned in the
-  # dev catalog. This job checks the rest of the declared range.
+  # single build-and-test job above only ever proves whichever version the dev
+  # catalog pins. This job covers the declared range independently of that pin.
   #
-  # Versions are pinned rather than ranged: newer v5/v6 patches resolve
-  # transitive packages that this repo's `trustPolicy: no-downgrade` rejects,
-  # which would fail CI for reasons unrelated to the code under test.
+  # Every entry is an exact version, not a range. A range resolves to whatever
+  # the lockfile already holds unless the lockfile is deleted, and deleting it
+  # re-resolves every dependency to its newest in-range version, which trips
+  # this repo's `trustPolicy: no-downgrade` on unrelated packages. Each pin is
+  # therefore a boundary worth holding still:
+  #   v5 - the lower bound of the declared peer range
+  #   v6 - the last v6 the dev catalog shipped
+  #   v7 - the major boundary where the AI SDK tool types changed shape
+  # The newest v7 is not covered here; build-and-test covers whatever the dev
+  # catalog pins, which is the only v7 that moves.
   ai-peer-range:
     name: ai-peer-range (${{ matrix.ai }})
     runs-on: ubuntu-latest
@@ -76,6 +83,7 @@ jobs:
         ai:
           - 5.0.108 # lower bound of the peer range
           - 6.0.7 # last v6 the dev catalog shipped
+          - 7.0.0 # first v7, where Tool became a union
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -87,11 +95,21 @@ jobs:
 
       # `--filter .` keeps the examples workspace out of resolution; it pulls a
       # dependency that `blockExoticSubdeps` rejects on any lockfile update.
+      #
+      # Assert the resolved version, not just that the edit looked applied. A
+      # `sed` that stops matching would otherwise leave the catalog untouched
+      # and the job would pass while silently testing the version it was meant
+      # to replace.
       - name: Install with ai@${{ matrix.ai }}
         run: |
           sed -i -E "/^  dev:/,/^  [a-z]+:/ s|^    ai: .*|    ai: '${{ matrix.ai }}'|" pnpm-workspace.yaml
-          grep -nE "^    ai: " pnpm-workspace.yaml
           pnpm install --no-frozen-lockfile --filter .
+          resolved=$(node -p "require('./node_modules/ai/package.json').version")
+          echo "resolved ai@$resolved"
+          if [ "$resolved" != "${{ matrix.ai }}" ]; then
+            echo "::error::expected ai@${{ matrix.ai }} but resolved ai@$resolved"
+            exit 1
+          fi
 
       # Type errors are the failure mode here, and vitest type-checks the suite
       # via the root project's `typecheck` config.
