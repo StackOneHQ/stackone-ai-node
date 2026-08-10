@@ -1,6 +1,9 @@
+import type { generateText } from 'ai';
 import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
 import { BaseTool, Tools } from './tool';
 import type { AISDKToolResult } from './types';
+
+type GenerateTextTools = NonNullable<Parameters<typeof generateText>[0]['tools']>;
 
 const tool = new BaseTool(
 	'test_tool',
@@ -50,4 +53,15 @@ test('Tools.toOpenAI returns ChatCompletionFunctionTool[]', () => {
 test('Tools.toAISDK returns AISDKToolResult', async () => {
 	const result = await tools.toAISDK();
 	assertType<AISDKToolResult>(result);
+});
+
+// The point of the widened `ai` peer range is that this assignment holds on
+// every supported major. v7 reshaped `Tool` into a union, so a regression here
+// would break the primary consumer path rather than just an internal type.
+test('toAISDK result is accepted as generateText tools', async () => {
+	const fromTool = await tool.toAISDK();
+	const fromTools = await tools.toAISDK();
+
+	assertType<GenerateTextTools>(fromTool);
+	assertType<GenerateTextTools>(fromTools);
 });
