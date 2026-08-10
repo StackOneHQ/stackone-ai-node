@@ -8,8 +8,8 @@
  *
  * Compatible with AI SDK v5–v7 (`ai` peer `>=5.0.108 <8.0.0`). Uses
  * `stepCountIs`, which exists in v5/v6 and remains available as an alias in v7.
- * AI SDK v7 requires Node.js 22+. You can also use the `ToolLoopAgent` class
- * for more explicit agent functionality.
+ * AI SDK v7 requires Node.js 22+. On v6+ you can also use the `ToolLoopAgent`
+ * class for more explicit agent functionality; v5 has no such export.
  */
 
 import process from 'node:process';
