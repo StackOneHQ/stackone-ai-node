@@ -3,10 +3,11 @@
  *
  * Tests the setup of StackOne tools with Claude Agent SDK.
  *
- * Note: The Claude Agent SDK spawns a subprocess to run claude-code, which
- * requires the ANTHROPIC_API_KEY environment variable and a running claude-code
- * installation. This test validates the tool setup and MCP server creation,
- * but does not test the actual query execution.
+ * This is the one example NOT executed directly (see tests/examples/run-example.ts
+ * for how the others are). `query()` spawns a claude-code subprocess, which MSW
+ * cannot intercept and which needs a real ANTHROPIC_API_KEY and installation.
+ * So this reimplements the example's setup — tool fetch, tool wrapper, MCP server
+ * creation and handler execution — and stops short of the query call.
  */
 
 import { tool, createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk';

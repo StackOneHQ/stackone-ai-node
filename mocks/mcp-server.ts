@@ -227,6 +227,42 @@ export const exampleBamboohrTools = [
 			required: ['name'],
 		},
 	},
+	// The examples filter on these three action names. Without them the examples
+	// execute against an empty toolset and assert nothing.
+	{
+		name: 'workday_list_workers',
+		description: 'List workers from Workday',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: {
+					type: 'object',
+					properties: {
+						limit: { type: 'number', description: 'Limit the number of results' },
+					},
+				},
+			},
+		},
+	},
+	{
+		name: 'workday_get_worker',
+		description: 'Get a single worker by ID from Workday',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				id: { type: 'string', description: 'The worker ID' },
+			},
+			required: ['id'],
+		},
+	},
+	{
+		name: 'workday_get_current_user',
+		description: 'Get the currently authenticated Workday user',
+		inputSchema: {
+			type: 'object',
+			properties: {},
+		},
+	},
 ] as const satisfies McpToolDefinition[];
 
 export const mixedProviderTools = [

@@ -1,7 +1,8 @@
 /**
- * E2E test for fetch-tools.ts example
+ * E2E coverage for fetching and filtering tools via MCP.
  *
- * Tests the complete flow of fetching and filtering tools via MCP.
+ * There is no `examples/fetch-tools.ts`; this exercises the discovery flow the
+ * other examples build on, against the MCP mock.
  */
 
 import { http, HttpResponse } from 'msw';
@@ -9,7 +10,7 @@ import { server } from '../../mocks/node';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { StackOneToolSet } from '../../src';
 
-describe('fetch-tools example e2e', () => {
+describe('fetch-tools e2e', () => {
 	beforeEach(() => {
 		vi.stubEnv('STACKONE_API_KEY', 'test-key');
 	});
