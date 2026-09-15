@@ -66,10 +66,6 @@ Integrates with the Vercel AI SDK via `tools.toAISDK()`. Runs a multi-step agent
 
 Converts StackOne tools into an MCP server with `tools.toClaudeAgentSdk()` and passes it to the Claude Agent SDK `query()` function. Streams agent messages and logs tool-use blocks as they arrive.
 
-### [`search-tools.ts`](./search-tools.ts) -- Tool Discovery
-
-Covers five approaches to finding the right tools at runtime: direct fetch with action-pattern filters, semantic (embedding-based) search, local BM25/TF-IDF search, auto search that falls back gracefully, and a search-and-execute mode that hands `tool_search` + `tool_execute` to an LLM agent via the Vercel AI SDK.
-
 ### [`auth-management.ts`](./auth-management.ts) -- Authentication Patterns
 
 Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, setting multiple accounts with `setAccounts()`, overriding per-tool collection or per individual tool, and fetching tools for multiple accounts in one call.
@@ -84,5 +80,5 @@ Demonstrates the four ways to configure prompt-injection detection on a `StackOn
 | --------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `STACKONE_API_KEY`    | Yes                          | All examples                                                                                                       |
 | `STACKONE_ACCOUNT_ID` | Recommended                  | All examples (read automatically by `new StackOneToolSet()`)                                                       |
-| `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts`, `search-tools.ts` (section 5) |
+| `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts` |
 | `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                                                      |

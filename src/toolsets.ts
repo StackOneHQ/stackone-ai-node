@@ -4,14 +4,8 @@ import { z } from 'zod/v4';
 import { DEFAULT_BASE_URL } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
-import { ToolIndex } from './local-search';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
-import {
-	SemanticSearchClient,
-	SemanticSearchError,
-	type SemanticSearchResult,
-} from './semantic-search';
 import { BaseTool, Tools } from './tool';
 import type {
 	DefenderConfig,
@@ -21,14 +15,12 @@ import type {
 	JsonSchemaProperties,
 	LocalExecuteConfig,
 	RpcExecuteConfig,
-	SearchConfig,
 	ToolParameters,
 } from './types';
 import { DEFAULT_DEFENDER_CONFIG } from './types';
 import type { BinaryDownloadResult } from './utils/binary-response';
 import { StackOneError } from './utils/error-stackone';
 import { StackOneAPIError } from './utils/error-stackone-api';
-import { normalizeActionName } from './utils/normalize';
 
 /**
  * Param-style pinned on the /mcp tool-listing URL. The MCP schema and the RPC-execution
@@ -175,18 +167,6 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	apiKey?: string;
 	strict?: boolean;
 	/**
-	 * Search configuration. Controls default search behavior for `searchTools()`,
-	 * `getSearchTool()`, and `searchActionNames()`.
-	 *
-	 * - Omit or pass `undefined` → search disabled (`null`)
-	 * - Pass `null` → search disabled
-	 * - Pass `{}` or `{ method: 'auto' }` → search enabled with defaults
-	 * - Pass `{ method, topK, minSimilarity }` → search enabled with custom defaults
-	 *
-	 * Per-call options always override these defaults.
-	 */
-	search?: SearchConfig | null;
-	/**
 	 * Execution configuration. Controls default account scoping for tool execution.
 	 * Pass `{ accountIds: ['acc-1'] }` to scope tools to specific accounts.
 	 */
@@ -231,258 +211,6 @@ interface FetchToolsOptions {
 	 * @example ['*_list_employees', 'hibob_create_employees']
 	 */
 	actions?: string[];
-}
-
-/**
- * Search mode for tool discovery.
- *
- * - `"auto"` (default): try semantic search first, fall back to local BM25+TF-IDF if the API is unavailable
- * - `"semantic"`: use only the semantic search API; throws SemanticSearchError on failure
- * - `"local"`: use only local BM25+TF-IDF search (no API call to the semantic search endpoint)
- */
-export type SearchMode = 'auto' | 'semantic' | 'local';
-
-/**
- * Options for searchTools() and SearchTool
- */
-export interface SearchToolsOptions {
-	/** Optional provider/connector filter (e.g., "bamboohr", "slack") */
-	connector?: string;
-	/** Maximum number of tools to return */
-	topK?: number;
-	/** Minimum similarity score threshold 0-1 */
-	minSimilarity?: number;
-	/** Optional account IDs (uses setAccounts() if not provided) */
-	accountIds?: string[];
-	/** Search backend to use */
-	search?: SearchMode;
-}
-
-/**
- * Options for searchActionNames()
- */
-export interface SearchActionNamesOptions {
-	/** Optional provider/connector filter */
-	connector?: string;
-	/** Optional account IDs to scope results */
-	accountIds?: string[];
-	/** Maximum number of results */
-	topK?: number;
-	/** Minimum similarity score threshold 0-1 */
-	minSimilarity?: number;
-}
-
-/**
- * Callable search tool that wraps StackOneToolSet.searchTools().
- *
- * Designed for agent loops — call `search()` with a query to get Tools back.
- *
- * @example
- * ```typescript
- * const toolset = new StackOneToolSet({ apiKey: 'sk-xxx' });
- * const searchTool = toolset.getSearchTool();
- * const tools = await searchTool.search('manage employee records', { accountIds: ['acc-123'] });
- * ```
- */
-export class SearchTool {
-	private readonly toolset: StackOneToolSet;
-	private readonly defaultConfig: SearchConfig;
-
-	constructor(toolset: StackOneToolSet, config: SearchConfig = {}) {
-		this.toolset = toolset;
-		this.defaultConfig = config;
-	}
-
-	/**
-	 * Search for tools using natural language.
-	 *
-	 * @param query - Natural language description of needed functionality
-	 * @param options - Search options (connector, topK, minSimilarity, accountIds, search).
-	 *   Per-call options override the defaults from the constructor config.
-	 * @returns Tools collection with matched tools
-	 */
-	async search(query: string, options?: SearchToolsOptions): Promise<Tools> {
-		return this.toolset.searchTools(query, {
-			...options,
-			search: options?.search ?? this.defaultConfig.method,
-			topK: options?.topK ?? this.defaultConfig.topK,
-			minSimilarity: options?.minSimilarity ?? this.defaultConfig.minSimilarity,
-		});
-	}
-}
-
-// --- Internal tool_search + tool_execute ---
-
-const searchInputSchema = z.object({
-	query: z
-		.string()
-		.transform((v) => v.trim())
-		.refine((v) => v.length > 0, { message: 'query must be a non-empty string' }),
-	connector: z.string().optional(),
-	top_k: z.number().int().min(1).max(50).optional(),
-});
-
-const searchParameters = {
-	type: 'object',
-	properties: {
-		query: {
-			type: 'string',
-			description:
-				'Natural language description of what you need (e.g. "create an employee", "list time off requests")',
-		},
-		connector: {
-			type: 'string',
-			description: 'Optional connector filter (e.g. "bamboohr", "hibob")',
-		},
-		top_k: {
-			type: 'integer',
-			description: 'Max results to return (1-50, default 5)',
-			minimum: 1,
-			maximum: 50,
-		},
-	},
-	required: ['query'],
-} as const satisfies ToolParameters;
-
-const executeInputSchema = z.object({
-	tool_name: z
-		.string()
-		.transform((v) => v.trim())
-		.refine((v) => v.length > 0, { message: 'tool_name must be a non-empty string' }),
-	parameters: z.record(z.string(), z.unknown()).optional().default({}),
-});
-
-const executeParameters = {
-	type: 'object',
-	properties: {
-		tool_name: {
-			type: 'string',
-			description: 'Exact tool name from tool_search results',
-		},
-		parameters: {
-			type: 'object',
-			description: 'Parameters for the tool. Pass an empty object {} if no parameters are needed.',
-		},
-	},
-	required: ['tool_name'],
-} as const satisfies ToolParameters;
-
-const localConfig = (id: string): LocalExecuteConfig => ({
-	kind: 'local',
-	identifier: `meta:${id}`,
-});
-
-/** @internal */
-export function createSearchTool(
-	toolset: StackOneToolSet,
-	accountIds?: string[],
-	connectors?: string,
-): BaseTool {
-	const connectorLine = connectors ? ` Available connectors: ${connectors}.` : '';
-	const tool = new BaseTool(
-		'tool_search',
-		`Search for available tools by describing what you need. Returns matching tool names, descriptions, and parameter schemas. Use the returned parameter schemas to know exactly what to pass when calling tool_execute.${connectorLine}`,
-		searchParameters,
-		localConfig('search'),
-	);
-
-	tool.execute = async (inputParams?: JsonObject | string): Promise<JsonObject> => {
-		try {
-			const raw = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-			const parsed = searchInputSchema.parse(raw);
-
-			const searchConfig = toolset.getSearchConfig() ?? {};
-			const results = await toolset.searchTools(parsed.query, {
-				connector: parsed.connector,
-				topK: parsed.top_k ?? searchConfig.topK,
-				minSimilarity: searchConfig.minSimilarity,
-				search: searchConfig.method,
-				accountIds,
-			});
-
-			return {
-				tools: results.toArray().map((t) => ({
-					name: t.name,
-					description: t.description,
-					parameters: t.parameters.properties as unknown as JsonObject,
-				})),
-				total: results.length,
-				query: parsed.query,
-			};
-		} catch (error) {
-			if (error instanceof StackOneAPIError) {
-				return { error: error.message, status_code: error.statusCode };
-			}
-			if (error instanceof SyntaxError || error instanceof z.ZodError) {
-				return {
-					error: `Invalid input: ${error instanceof z.ZodError ? error.issues.map((i) => i.message).join(', ') : error.message}`,
-				};
-			}
-			throw error;
-		}
-	};
-
-	return tool;
-}
-
-/** @internal */
-export function createExecuteTool(
-	toolset: StackOneToolSet,
-	accountIds?: string[],
-	connectors?: string,
-): BaseTool {
-	let cachedTools: Awaited<ReturnType<typeof toolset.fetchTools>> | null = null;
-
-	const connectorLine = connectors ? ` Available connectors: ${connectors}.` : '';
-	const tool = new BaseTool(
-		'tool_execute',
-		`Execute a tool by name with the given parameters. Use tool_search first to find available tools. The parameters field must match the parameter schema returned by tool_search. Pass parameters as a nested object matching the schema structure.${connectorLine}`,
-		executeParameters,
-		localConfig('execute'),
-	);
-
-	tool.execute = async (
-		inputParams?: JsonObject | string,
-		executeOptions?: ExecuteOptions,
-	): Promise<JsonObject> => {
-		let toolName = 'unknown';
-		try {
-			const raw = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-			const parsed = executeInputSchema.parse(raw);
-			toolName = parsed.tool_name;
-
-			if (!cachedTools) {
-				cachedTools = await toolset.fetchTools({ accountIds });
-			}
-			const target = cachedTools.getTool(parsed.tool_name);
-
-			if (!target) {
-				return {
-					error: `Tool "${parsed.tool_name}" not found. Use tool_search to find available tools.`,
-				};
-			}
-
-			return await target.execute(parsed.parameters as JsonObject, executeOptions);
-		} catch (error) {
-			if (error instanceof StackOneAPIError) {
-				return {
-					error: error.message,
-					status_code: error.statusCode,
-					response_body: error.responseBody as JsonObject,
-					tool_name: toolName,
-				};
-			}
-			if (error instanceof SyntaxError || error instanceof z.ZodError) {
-				return {
-					error: `Invalid input: ${error instanceof z.ZodError ? error.issues.map((i) => i.message).join(', ') : error.message}`,
-					tool_name: toolName,
-				};
-			}
-			throw error;
-		}
-	};
-
-	return tool;
 }
 
 /** Wire-format defender config sent to the backend RPC action. */
@@ -594,7 +322,6 @@ export class StackOneToolSet {
 	private headers: Record<string, string>;
 	private rpcClient?: RpcClient;
 	private readonly timeout: number;
-	private readonly searchConfig: SearchConfig | null;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
 	private readonly defenderConfig: DefenderConfig | null;
 	private readonly defenderFields: { defender_config: DefenderApiConfig } | Record<string, never>;
@@ -656,7 +383,6 @@ export class StackOneToolSet {
 		this.accountIds = config?.accountIds ?? [];
 
 		// Resolve search config: undefined/null → disabled, object → custom with defaults
-		this.searchConfig = config?.search != null ? { method: 'auto', ...config.search } : null;
 		this.executeConfig = config?.execute;
 
 		// Resolve defender config:
@@ -715,9 +441,7 @@ export class StackOneToolSet {
 		}
 	}
 
-	private semanticSearchClient?: SemanticSearchClient;
 	private catalogCache: Map<string, Tools> = new Map();
-	private toolIndexCache?: { tools: Tools; index: ToolIndex };
 
 	/**
 	 * Resolved defender behavior for this toolset.
@@ -751,29 +475,9 @@ export class StackOneToolSet {
 	 */
 	clearCatalogCache(): void {
 		this.catalogCache.clear();
-		this.toolIndexCache = undefined;
 	}
 
-	/**
-	 * Get or lazily create the semantic search client.
-	 */
-	private getSemanticClient(): SemanticSearchClient {
-		if (!this.semanticSearchClient) {
-			const apiKey = this.getApiKey();
-			this.semanticSearchClient = new SemanticSearchClient({
-				apiKey,
-				baseUrl: this.baseUrl,
-			});
-		}
-		return this.semanticSearchClient;
-	}
 
-	/**
-	 * Get the current search config.
-	 */
-	getSearchConfig(): SearchConfig | null {
-		return this.searchConfig;
-	}
 
 	/**
 	 * Extract the API key from authentication config.
@@ -796,34 +500,6 @@ export class StackOneToolSet {
 		return apiKey;
 	}
 
-	/**
-	 * Get a callable search tool that returns Tools collections.
-	 *
-	 * Returns a SearchTool instance that wraps `searchTools()` for use in agent loops.
-	 *
-	 * @param options - Options including the default search mode
-	 * @returns SearchTool instance
-	 *
-	 * @example
-	 * ```typescript
-	 * const toolset = new StackOneToolSet({ apiKey: 'sk-xxx' });
-	 * const searchTool = toolset.getSearchTool();
-	 * const tools = await searchTool.search('manage employee records', { accountIds: ['acc-123'] });
-	 * ```
-	 */
-	getSearchTool(options?: { search?: SearchMode }): SearchTool {
-		if (this.searchConfig === null) {
-			throw new ToolSetConfigError(
-				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
-			);
-		}
-
-		const config: SearchConfig = options?.search
-			? { ...this.searchConfig, method: options.search }
-			: this.searchConfig;
-
-		return new SearchTool(this, config);
-	}
 
 	/**
 	 * Get tool_search + tool_execute for agent-driven discovery.
@@ -842,20 +518,6 @@ export class StackOneToolSet {
 		return this.buildTools(accountIds);
 	}
 
-	/**
-	 * Build tool_search + tool_execute tools scoped to this toolset.
-	 */
-	private buildTools(accountIds?: string[], connectors?: string): Tools {
-		if (this.searchConfig === null) {
-			throw new ToolSetConfigError(
-				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
-			);
-		}
-
-		const searchTool = createSearchTool(this, accountIds, connectors);
-		const executeTool = createExecuteTool(this, accountIds, connectors);
-		return new Tools([searchTool, executeTool]);
-	}
 
 	/**
 	 * Get tools in OpenAI function calling format.
@@ -905,305 +567,8 @@ export class StackOneToolSet {
 		return tools.toOpenAI();
 	}
 
-	/**
-	 * Search for and fetch tools using semantic or local search.
-	 *
-	 * This method discovers relevant tools based on natural language queries.
-	 *
-	 * @param query - Natural language description of needed functionality
-	 *   (e.g., "create employee", "send a message")
-	 * @param options - Search options
-	 * @returns Tools collection with matched tools from linked accounts
-	 * @throws SemanticSearchError if the API call fails and search is "semantic"
-	 *
-	 * @example
-	 * ```typescript
-	 * // Semantic search (default with local fallback)
-	 * const tools = await toolset.searchTools('manage employee records', { topK: 5 });
-	 *
-	 * // Explicit semantic search
-	 * const tools = await toolset.searchTools('manage employees', { search: 'semantic' });
-	 *
-	 * // Local BM25+TF-IDF search
-	 * const tools = await toolset.searchTools('manage employees', { search: 'local' });
-	 *
-	 * // Filter by connector
-	 * const tools = await toolset.searchTools('create time off request', {
-	 *   connector: 'bamboohr',
-	 *   search: 'semantic',
-	 * });
-	 * ```
-	 */
-	async searchTools(query: string, options?: SearchToolsOptions): Promise<Tools> {
-		if (this.searchConfig === null) {
-			throw new ToolSetConfigError(
-				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
-			);
-		}
 
-		const search = options?.search ?? this.searchConfig.method ?? 'auto';
-		const topK = options?.topK ?? this.searchConfig.topK;
-		const minSimilarity = options?.minSimilarity ?? this.searchConfig.minSimilarity;
-		const mergedOptions = { ...options, search, topK, minSimilarity };
 
-		const allTools = await this.fetchTools({ accountIds: mergedOptions.accountIds });
-		const availableConnectors = allTools.getConnectors();
-
-		if (availableConnectors.size === 0) {
-			return new Tools([]);
-		}
-
-		// Local-only search — skip semantic API entirely
-		if (search === 'local') {
-			return this.localSearch(query, allTools, mergedOptions);
-		}
-
-		try {
-			// Determine which connectors to search
-			let connectorsToSearch: Set<string>;
-			if (mergedOptions.connector) {
-				const connectorLower = mergedOptions.connector.toLowerCase();
-				connectorsToSearch = availableConnectors.has(connectorLower)
-					? new Set([connectorLower])
-					: new Set();
-				if (connectorsToSearch.size === 0) {
-					return new Tools([]);
-				}
-			} else {
-				connectorsToSearch = availableConnectors;
-			}
-
-			// Search each connector in parallel — in auto mode, treat missing
-			// API key as "semantic unavailable" and fall back to local search.
-			let client: SemanticSearchClient;
-			try {
-				client = this.getSemanticClient();
-			} catch (error) {
-				if (search === 'auto' && error instanceof ToolSetConfigError) {
-					return this.localSearch(query, allTools, mergedOptions);
-				}
-				throw error;
-			}
-			const allResults: SemanticSearchResult[] = [];
-			let lastError: SemanticSearchError | undefined;
-
-			const searchPromises = [...connectorsToSearch].map(async (connector) => {
-				try {
-					const response = await client.search(query, {
-						connector,
-						topK: mergedOptions.topK,
-						minSimilarity: mergedOptions.minSimilarity,
-					});
-					return response.results;
-				} catch (error) {
-					if (error instanceof SemanticSearchError) {
-						lastError = error;
-						return [];
-					}
-					throw error;
-				}
-			});
-
-			const resultArrays = await Promise.all(searchPromises);
-			for (const results of resultArrays) {
-				allResults.push(...results);
-			}
-
-			// If ALL connector searches failed, re-raise to trigger fallback
-			if (allResults.length === 0 && lastError) {
-				throw lastError;
-			}
-
-			// Sort by score, apply topK
-			allResults.sort((a, b) => b.similarityScore - a.similarityScore);
-			const topResults =
-				mergedOptions.topK != null ? allResults.slice(0, mergedOptions.topK) : allResults;
-
-			if (topResults.length === 0) {
-				return new Tools([]);
-			}
-
-			// 1. Parse composite IDs to MCP-format action names, deduplicate
-			const seenNames = new Set<string>();
-			const actionNames: string[] = [];
-			for (const result of topResults) {
-				const name = normalizeActionName(result.id);
-				if (seenNames.has(name)) {
-					continue;
-				}
-				seenNames.add(name);
-				actionNames.push(name);
-			}
-
-			if (actionNames.length === 0) {
-				return new Tools([]);
-			}
-
-			// 2. Use MCP tools (already fetched) — schemas come from the source of truth
-			// 3. Filter to only the tools search found, preserving search relevance order
-			const actionOrder = new Map(actionNames.map((name, i) => [name, i]));
-			const matchedTools = allTools.toArray().filter((t) => seenNames.has(t.name));
-			matchedTools.sort(
-				(a, b) =>
-					(actionOrder.get(a.name) ?? Number.POSITIVE_INFINITY) -
-					(actionOrder.get(b.name) ?? Number.POSITIVE_INFINITY),
-			);
-
-			// Auto mode: if semantic returned results but none matched MCP tools, fall back to local
-			if (search === 'auto' && matchedTools.length === 0) {
-				return this.localSearch(query, allTools, mergedOptions);
-			}
-
-			return new Tools(matchedTools);
-		} catch (error) {
-			if (error instanceof SemanticSearchError) {
-				if (search === 'semantic') {
-					throw error;
-				}
-
-				// Auto mode: silently fall back to local search
-				return this.localSearch(query, allTools, mergedOptions);
-			}
-			throw error;
-		}
-	}
-
-	/**
-	 * Search for action names without fetching tools.
-	 *
-	 * Useful when you need to inspect search results before fetching,
-	 * or when building custom filtering logic.
-	 *
-	 * @param query - Natural language description of needed functionality
-	 * @param options - Search options
-	 * @returns List of SemanticSearchResult with action names, scores, and metadata
-	 *
-	 * @example
-	 * ```typescript
-	 * // Lightweight: inspect results before fetching
-	 * const results = await toolset.searchActionNames('manage employees');
-	 * for (const r of results) {
-	 *   console.log(`${r.id}: ${r.similarityScore.toFixed(2)}`);
-	 * }
-	 *
-	 * // Then fetch specific high-scoring actions
-	 * const selected = results
-	 *   .filter(r => r.similarityScore > 0.7)
-	 *   .map(r => r.id);
-	 * const tools = await toolset.fetchTools({ actions: selected });
-	 * ```
-	 */
-	async searchActionNames(
-		query: string,
-		options?: SearchActionNamesOptions,
-	): Promise<SemanticSearchResult[]> {
-		if (this.searchConfig === null) {
-			throw new ToolSetConfigError(
-				'Search is disabled. Initialize StackOneToolSet with a search config to enable.',
-			);
-		}
-
-		const effectiveTopK = options?.topK ?? this.searchConfig.topK;
-		const effectiveMinSimilarity = options?.minSimilarity ?? this.searchConfig.minSimilarity;
-
-		// Resolve available connectors from account IDs
-		let availableConnectors: Set<string> | undefined;
-		const effectiveAccountIds = options?.accountIds || this.accountIds;
-		if (effectiveAccountIds.length > 0) {
-			const allTools = await this.fetchTools({ accountIds: effectiveAccountIds });
-			availableConnectors = allTools.getConnectors();
-			if (availableConnectors.size === 0) {
-				return [];
-			}
-		}
-
-		try {
-			const client = this.getSemanticClient();
-			let allResults: SemanticSearchResult[] = [];
-
-			if (availableConnectors) {
-				// Parallel per-connector search (only user's connectors)
-				let connectorsToSearch: Set<string>;
-				if (options?.connector) {
-					const connectorLower = options.connector.toLowerCase();
-					connectorsToSearch = availableConnectors.has(connectorLower)
-						? new Set([connectorLower])
-						: new Set();
-				} else {
-					connectorsToSearch = availableConnectors;
-				}
-
-				const searchPromises = [...connectorsToSearch].map(async (connector) => {
-					try {
-						const response = await client.search(query, {
-							connector,
-							topK: effectiveTopK,
-							minSimilarity: effectiveMinSimilarity,
-						});
-						return response.results;
-					} catch {
-						return [];
-					}
-				});
-
-				const resultArrays = await Promise.all(searchPromises);
-				for (const results of resultArrays) {
-					allResults.push(...results);
-				}
-			} else {
-				// No account filtering — single global search
-				const response = await client.search(query, {
-					connector: options?.connector,
-					topK: effectiveTopK,
-					minSimilarity: effectiveMinSimilarity,
-				});
-				allResults = response.results;
-			}
-
-			// Sort by score — return raw results (consumers can normalize the composite ID if needed)
-			allResults.sort((a, b) => b.similarityScore - a.similarityScore);
-
-			return effectiveTopK != null ? allResults.slice(0, effectiveTopK) : allResults;
-		} catch (error) {
-			if (error instanceof SemanticSearchError) {
-				return [];
-			}
-			throw error;
-		}
-	}
-
-	/**
-	 * Run local BM25+TF-IDF search over already-fetched tools.
-	 */
-	private async localSearch(
-		query: string,
-		allTools: Tools,
-		options?: Pick<SearchToolsOptions, 'connector' | 'topK' | 'minSimilarity'>,
-	): Promise<Tools> {
-		const availableConnectors = allTools.getConnectors();
-		if (availableConnectors.size === 0) {
-			return new Tools([]);
-		}
-
-		if (!this.toolIndexCache || this.toolIndexCache.tools !== allTools) {
-			this.toolIndexCache = { tools: allTools, index: new ToolIndex(allTools.toArray()) };
-		}
-		const index = this.toolIndexCache.index;
-		const results = await index.search(query, options?.topK ?? 5, options?.minSimilarity ?? 0.0);
-
-		const matchedNames = results.map((r) => r.name);
-		const toolMap = new Map(allTools.toArray().map((t) => [t.name, t]));
-		const filterConnectors = options?.connector
-			? new Set([options.connector.toLowerCase()])
-			: availableConnectors;
-
-		const matchedTools = matchedNames
-			.filter((name) => toolMap.has(name))
-			.map((name) => toolMap.get(name)!)
-			.filter((tool) => tool.connector && filterConnectors.has(tool.connector));
-
-		return new Tools(options?.topK != null ? matchedTools.slice(0, options.topK) : matchedTools);
-	}
 
 	/**
 	 * Fetch tools from MCP with optional filtering

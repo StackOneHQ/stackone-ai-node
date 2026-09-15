@@ -9,7 +9,6 @@ export { StackOneError } from './utils/error-stackone';
 export { StackOneAPIError } from './utils/error-stackone-api';
 
 export {
-	SearchTool,
 	StackOneToolSet,
 	ToolSetConfigError,
 	ToolSetError,
@@ -17,19 +16,8 @@ export {
 	type AuthenticationConfig,
 	type BaseToolSetConfig,
 	type ExecuteToolsConfig,
-	type SearchMode,
-	type SearchToolsOptions,
-	type SearchActionNamesOptions,
 	type StackOneToolSetConfig,
 } from './toolsets';
-
-export {
-	SemanticSearchClient,
-	SemanticSearchError,
-	type SemanticSearchOptions,
-	type SemanticSearchResponse,
-	type SemanticSearchResult,
-} from './semantic-search';
 
 export { DEFAULT_DEFENDER_CONFIG } from './types';
 
@@ -43,6 +31,5 @@ export type {
 	JsonObject,
 	JsonValue,
 	ParameterLocation,
-	SearchConfig,
 	ToolDefinition,
 } from './types';
