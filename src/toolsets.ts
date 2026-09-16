@@ -501,67 +501,26 @@ export class StackOneToolSet {
 	}
 
 
-	/**
-	 * Get tool_search + tool_execute for agent-driven discovery.
-	 *
-	 * Returns a Tools collection with two tools that let the LLM
-	 * discover and execute tools on-demand.
-	 *
-	 * @param options - Options to scope tool discovery
-	 * @returns Tools collection containing tool_search and tool_execute
-	 */
-	getTools(options?: { accountIds?: string[] }): Tools {
-		const accountIds =
-			options?.accountIds ??
-			this.executeConfig?.accountIds ??
-			(this.accountIds.length > 0 ? this.accountIds : undefined);
-		return this.buildTools(accountIds);
-	}
 
 
 	/**
 	 * Get tools in OpenAI function calling format.
 	 *
 	 * @param options - Options
-	 * @param options.mode - Tool mode.
-	 *   `undefined` (default): fetch all tools and convert to OpenAI format.
-	 *   `"search_and_execute"`: return two tools (tool_search + tool_execute)
-	 *   that let the LLM discover and execute tools on-demand.
 	 * @param options.accountIds - Account IDs to scope tools. Overrides the `execute`
 	 *   config from the constructor.
 	 * @returns List of tool definitions in OpenAI function format.
 	 *
 	 * @example
 	 * ```typescript
-	 * // All tools
 	 * const toolset = new StackOneToolSet();
 	 * const tools = await toolset.openai();
-	 *
-	 * // Search and execute for agent-driven discovery
-	 * const toolset = new StackOneToolSet({ search: {} });
-	 * const tools = await toolset.openai({ mode: 'search_and_execute' });
 	 * ```
 	 */
 	async openai(options?: {
-		mode?: 'search_and_execute';
 		accountIds?: string[];
 	}): Promise<ReturnType<Tools['toOpenAI']>> {
 		const effectiveAccountIds = options?.accountIds ?? this.executeConfig?.accountIds;
-
-		if (options?.mode === 'search_and_execute') {
-			// Discover available connectors for dynamic descriptions
-			let connectors: string | undefined;
-			try {
-				const allTools = await this.fetchTools({ accountIds: effectiveAccountIds });
-				const connectorSet = allTools.getConnectors();
-				if (connectorSet.size > 0) {
-					connectors = Array.from(connectorSet).sort().join(', ');
-				}
-			} catch {
-				// Best-effort: if discovery fails, use generic descriptions
-			}
-			return this.buildTools(effectiveAccountIds, connectors).toOpenAI();
-		}
 
 		const tools = await this.fetchTools({ accountIds: effectiveAccountIds });
 		return tools.toOpenAI();

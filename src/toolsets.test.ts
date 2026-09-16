@@ -12,7 +12,6 @@ import { type McpToolDefinition, createMcpApp, defaultMcpTools } from '../mocks/
 import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
 import {
-	SearchTool,
 	StackOneToolSet,
 	ToolSetConfigError,
 	__resetDefenderInfoLog,
