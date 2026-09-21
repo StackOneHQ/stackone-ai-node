@@ -1,73 +1,43 @@
 /**
- * E2E test for openai-integration.ts example
- *
- * Tests the complete flow of using StackOne tools with OpenAI Chat Completions API.
+ * Executes examples/openai-integration.ts.
  */
 
-import OpenAI from 'openai';
-import { TEST_BASE_URL } from '../../mocks/constants';
-import { StackOneToolSet } from '../../src';
+import { runExample, stubExampleEnv } from './run-example';
 
-describe('openai-integration example e2e', () => {
+describe('openai-integration example', () => {
 	beforeEach(() => {
-		vi.stubEnv('STACKONE_API_KEY', 'test-key');
-		vi.stubEnv('OPENAI_API_KEY', 'test-openai-key');
+		stubExampleEnv({ OPENAI_API_KEY: 'test-openai-key' });
 	});
 
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
 
-	it('should fetch tools, convert to OpenAI format, and create chat completion with tool calls', async () => {
-		const toolset = new StackOneToolSet({
-			accountId: 'your-bamboohr-account-id',
-			baseUrl: TEST_BASE_URL,
-		});
+	it('loads tools, calls OpenAI, and reports the tool calls', async () => {
+		const { stdout, exitCode } = await runExample('../../examples/openai-integration.ts');
 
-		// Fetch all tools for this account via MCP
-		const tools = await toolset.fetchTools();
-		const openAITools = tools.toOpenAI();
+		expect(exitCode).toBeUndefined();
 
-		// Verify tools are in OpenAI format
-		expect(Array.isArray(openAITools)).toBe(true);
-		expect(openAITools.length).toBeGreaterThan(0);
-		expect(openAITools[0]).toHaveProperty('type', 'function');
-		expect(openAITools[0]).toHaveProperty('function');
+		// A zero here would mean the action filter matched nothing and the example
+		// sent OpenAI an empty tool list.
+		// 4: 3 workday actions the example filters to, plus the auto-appended tool_feedback.
+		// A bare > 0 check cannot fail here — tool_feedback is appended after
+		// filtering, so even a filter matching nothing still yields one tool.
+		const loaded = stdout.match(/Loaded (\d+) tools for OpenAI/);
+		expect(loaded).not.toBeNull();
+		expect(Number(loaded?.[1])).toBe(4);
 
-		// Initialize OpenAI client
-		const openai = new OpenAI();
+		expect(stdout).toContain('Model returned 1 choice(s)');
+		expect(stdout).toContain('Tool calls made: 1');
+		expect(stdout).toContain('Tool: workday_list_workers');
+	});
 
-		// Create a chat completion with tool calls
-		const response = await openai.chat.completions.create({
-			model: 'gpt-5',
-			messages: [
-				{
-					role: 'system',
-					content: 'You are a helpful assistant that can access BambooHR information.',
-				},
-				{
-					role: 'user',
-					content:
-						'What is the employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA phone number?',
-				},
-			],
-			tools: openAITools,
-		});
+	it('skips cleanly when OPENAI_API_KEY is absent', async () => {
+		vi.stubEnv('OPENAI_API_KEY', '');
 
-		// Verify the response contains tool calls
-		expect(response.choices.length).toBeGreaterThan(0);
+		const { stdout, exitCode } = await runExample('../../examples/openai-integration.ts');
 
-		const choice = response.choices[0];
-		expect(choice.message.tool_calls).toBeDefined();
-		expect(choice.message.tool_calls!.length).toBeGreaterThan(0);
-
-		const toolCall = choice.message.tool_calls![0];
-		assert(toolCall.type === 'function');
-		expect(toolCall.function.name).toBe('bamboohr_get_employee');
-
-		// Parse the arguments to verify they contain the expected fields
-		const args: unknown = JSON.parse(toolCall.function.arguments);
-		assert(typeof args === 'object' && args !== null && 'id' in args);
-		expect(args.id).toBe('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA');
+		expect(exitCode).toBe(0);
+		expect(stdout).toContain('Skipping: OPENAI_API_KEY is not set');
 	});
 });

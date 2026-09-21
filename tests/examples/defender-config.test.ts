@@ -8,9 +8,10 @@
  */
 
 import { TEST_BASE_URL } from '../../mocks/constants';
+import { runExample, stubExampleEnv } from './run-example';
 import { DEFAULT_DEFENDER_CONFIG, StackOneToolSet, ToolSetConfigError } from '../../src';
 
-describe('defender-config example e2e', () => {
+describe('defender-config wire payloads', () => {
 	beforeEach(() => {
 		vi.stubEnv('STACKONE_API_KEY', 'test-key');
 		// Silence override warnings so they don't pollute test output.
@@ -151,5 +152,47 @@ describe('defender-config example e2e', () => {
 			riskLevel: expect.stringMatching(/^(low|medium|high|critical)$/),
 			fieldsSanitized: expect.any(Array),
 		});
+	});
+});
+
+describe('defender-config example', () => {
+	beforeEach(() => {
+		// The example defaults section 8 to gmail_list_messages, which the MCP mock
+		// does not serve; TOOL_NAME is the example's own knob for pointing it elsewhere.
+		stubExampleEnv({ TOOL_NAME: 'workday_list_workers' });
+	});
+
+	afterEach(() => {
+		vi.unstubAllEnvs();
+	});
+
+	it('demonstrates every defender pattern to completion', async () => {
+		const { stdout, exitCode } = await runExample('../../examples/defender-config.ts');
+
+		expect(exitCode).toBeUndefined();
+		expect(stdout).toContain('Done — defender patterns demonstrated.');
+	});
+
+	it('shows both the omitted and the all-false payload shapes', async () => {
+		const { stdout } = await runExample('../../examples/defender-config.ts');
+
+		expect(stdout).toContain('SDK adds no defender_config to the RPC payload.');
+		expect(stdout).toContain('SDK sends defender_config with all fields false.');
+	});
+
+	it('reaches the live section and gets defender metadata back', async () => {
+		const { stdout } = await runExample('../../examples/defender-config.ts');
+
+		// With STACKONE_API_KEY stubbed the example runs section 8 rather than
+		// printing its skip notice.
+		expect(stdout).not.toContain('Skipping — set STACKONE_API_KEY to run this section.');
+		expect(stdout).toContain('defenderMetadata:');
+	});
+
+	it('still rejects an invalid defender combination', async () => {
+		const { stdout } = await runExample('../../examples/defender-config.ts');
+
+		// The example prints this only if the invalid combo failed to throw.
+		expect(stdout).not.toContain('(no throw — unexpected!)');
 	});
 });

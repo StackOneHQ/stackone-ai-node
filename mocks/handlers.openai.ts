@@ -65,6 +65,29 @@ export const openaiHandlers = [
 			});
 		}
 
+		// For openai-responses-integration.ts and search-tools.ts, which prompt with
+		// the same sentence and expect a tool call back.
+		if (hasTools && userMessage.includes('List the first 5 employees')) {
+			return HttpResponse.json({
+				id: 'resp_mock_list',
+				object: 'response',
+				created_at: Date.now(),
+				model: 'gpt-5',
+				status: 'completed',
+				output: [
+					{
+						type: 'function_call',
+						id: 'call_mock_list',
+						call_id: 'call_mock_list',
+						name: 'workday_list_workers',
+						arguments: JSON.stringify({ query: { limit: 5 } }),
+						status: 'completed',
+					},
+				],
+				usage: { input_tokens: 100, output_tokens: 50, total_tokens: 150 },
+			});
+		}
+
 		// For human-in-the-loop.ts
 		if (hasTools && userMessage.includes('Create a new employee')) {
 			return HttpResponse.json({
@@ -147,6 +170,38 @@ export const openaiHandlers = [
 											id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA',
 											fields: 'phone_number',
 										}),
+									},
+								},
+							],
+						},
+						finish_reason: 'tool_calls',
+					},
+				],
+				usage: { prompt_tokens: 100, completion_tokens: 50, total_tokens: 150 },
+			});
+		}
+
+		// For openai-integration.ts, which filters to workday actions and prompts
+		// with this sentence.
+		if (hasTools && userMessage.includes('List the first 5 employees')) {
+			return HttpResponse.json({
+				id: 'chatcmpl-mock-list',
+				object: 'chat.completion',
+				created: Date.now(),
+				model: 'gpt-5',
+				choices: [
+					{
+						index: 0,
+						message: {
+							role: 'assistant',
+							content: null,
+							tool_calls: [
+								{
+									id: 'call_mock_list',
+									type: 'function',
+									function: {
+										name: 'workday_list_workers',
+										arguments: JSON.stringify({ query: { limit: 5 } }),
 									},
 								},
 							],
