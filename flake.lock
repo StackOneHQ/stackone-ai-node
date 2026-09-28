@@ -2,53 +2,31 @@
   "nodes": {
     "agent-skills": {
       "inputs": {
-        "home-manager": "home-manager",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1770218103,
-        "narHash": "sha256-InxSZomi7ajBm+d5dN3Yah5mh7+pTb3iuI3U380sqQ8=",
+        "lastModified": 1790154098,
+        "narHash": "sha256-SviEpvFefXCPOmQ2b41c4ujE7BzWYJ/h8p/HZNxD2B8=",
         "owner": "Kyure-A",
         "repo": "agent-skills-nix",
-        "rev": "2e53d1a4c0fe78d758b99f5df0f79d558498002e",
+        "rev": "dc122af897ab9a685c20ae54c639021619dbbb52",
         "type": "github"
       },
       "original": {
         "owner": "Kyure-A",
         "repo": "agent-skills-nix",
-        "type": "github"
-      }
-    },
-    "home-manager": {
-      "inputs": {
-        "nixpkgs": [
-          "agent-skills",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1766387499,
-        "narHash": "sha256-AjK3/UKDzeXFeYNLVBaJ3+HLE9he1g5UrlNd4/BM3eA=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "527ad07e6625302b648ed3b28c34b62a79bd103e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "home-manager",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1770141374,
-        "narHash": "sha256-yD4K/vRHPwXbJf5CK3JkptBA6nFWUKNX/jlFp2eKEQc=",
+        "lastModified": 1790510107,
+        "narHash": "sha256-EVMNYv7hYDDD9TGVT/hIyTYgpiXA8y3m5xIEIxuGNU0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "41965737c1797c1d83cfb0b644ed0840a6220bd1",
+        "rev": "3181085bfd08663b6b9e60bc7a8395c2aaa741bd",
         "type": "github"
       },
       "original": {
@@ -68,11 +46,11 @@
     "stackone-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1770205107,
-        "narHash": "sha256-gcsL9q6R7cTKoDCUjRKb7ej1QMTFFPWayoJhA5eAQlc=",
+        "lastModified": 1774863507,
+        "narHash": "sha256-rMf1vsAH/Kj0Dn3+1aPulNvM0GzQTYW+Iuw5dXdAVk8=",
         "owner": "StackOneHQ",
         "repo": "skills",
-        "rev": "a1042d7d803ea813b0cd4f3889980aa7d0fa1521",
+        "rev": "8c77e2408b51f27b2e76f3b4179d17a6ef0d4926",
         "type": "github"
       },
       "original": {
