@@ -1,6 +1,5 @@
 import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
-import { z } from 'zod/v4';
 import { DEFAULT_BASE_URL } from './consts';
 import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
@@ -13,14 +12,12 @@ import type {
 	ExecuteOptions,
 	JsonObject,
 	JsonSchemaProperties,
-	LocalExecuteConfig,
 	RpcExecuteConfig,
 	ToolParameters,
 } from './types';
 import { DEFAULT_DEFENDER_CONFIG } from './types';
 import type { BinaryDownloadResult } from './utils/binary-response';
 import { StackOneError } from './utils/error-stackone';
-import { StackOneAPIError } from './utils/error-stackone-api';
 
 /**
  * Param-style pinned on the /mcp tool-listing URL. The MCP schema and the RPC-execution

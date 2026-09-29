@@ -7,7 +7,7 @@
  * - Account filtering
  * - Provider and action filtering
  */
-import { http, HttpResponse } from 'msw';
+import { http } from 'msw';
 import { type McpToolDefinition, createMcpApp, defaultMcpTools } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
