@@ -70,10 +70,6 @@ Converts StackOne tools into an MCP server with `tools.toClaudeAgentSdk()` and p
 
 Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, setting multiple accounts with `setAccounts()`, overriding per-tool collection or per individual tool, and fetching tools for multiple accounts in one call.
 
-### [`defender-config.ts`](./defender-config.ts) -- Defender Configuration
-
-Demonstrates the four ways to configure prompt-injection detection on a `StackOneToolSet`: omit (defer to project dashboard), `{ useProjectSettings: true }` (explicit form of the default), `null` (force off), and explicit config objects. Shows the `defenderMode` getter and the once-per-process warning the SDK emits when it overrides the dashboard. Sections 1–7 are construction-only; section 8 makes a live RPC call when `STACKONE_API_KEY` is set so you can inspect the `defenderMetadata` shape the backend returns.
-
 ## Environment Variables
 
 | Variable              | Required                     | Used By                                                                             |

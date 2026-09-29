@@ -19,13 +19,9 @@ export {
 	type StackOneToolSetConfig,
 } from './toolsets';
 
-export { DEFAULT_DEFENDER_CONFIG } from './types';
-
 export type {
 	AISDKToolDefinition,
 	AISDKToolResult,
-	DefenderConfig,
-	DefenderMode,
 	ExecuteConfig,
 	ExecuteOptions,
 	JsonObject,

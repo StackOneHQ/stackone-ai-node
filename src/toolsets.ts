@@ -7,15 +7,12 @@ import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { BaseTool, Tools } from './tool';
 import type {
-	DefenderConfig,
-	DefenderMode,
 	ExecuteOptions,
 	JsonObject,
 	JsonSchemaProperties,
 	RpcExecuteConfig,
 	ToolParameters,
 } from './types';
-import { DEFAULT_DEFENDER_CONFIG } from './types';
 import type { BinaryDownloadResult } from './utils/binary-response';
 import { StackOneError } from './utils/error-stackone';
 
@@ -168,15 +165,6 @@ interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
 	 * Pass `{ accountIds: ['acc-1'] }` to scope tools to specific accounts.
 	 */
 	execute?: ExecuteToolsConfig;
-	/**
-	 * Defender configuration. Controls prompt injection detection behavior for all tool calls.
-	 *
-	 * - Omit or pass `undefined` (default) → defer to the project dashboard setting
-	 * - Pass `{ useProjectSettings: true }` → same as omitting; explicit form of the default
-	 * - Pass `{ enabled, blockHighRisk, ... }` → explicit SDK-level config, overrides project settings
-	 * - Pass `null` → defender explicitly disabled, overrides project settings
-	 */
-	defender?: DefenderConfig | null;
 }
 
 /**
@@ -210,106 +198,6 @@ interface FetchToolsOptions {
 	actions?: string[];
 }
 
-/** Wire-format defender config sent to the backend RPC action. */
-interface DefenderApiConfig {
-	enabled: boolean;
-	block_high_risk: boolean;
-	use_tier1_classification: boolean;
-	use_tier2_classification: boolean;
-}
-
-/** Type guard: discriminate the `useProjectSettings: true` variant of DefenderConfig. */
-function usesProjectSettings(config: DefenderConfig): config is { useProjectSettings: true } {
-	return 'useProjectSettings' in config && config.useProjectSettings === true;
-}
-
-/**
- * Shapes already logged this process, keyed by mode + serialized wire payload.
- * Ensures we surface one warning per distinct override shape, not per construction.
- */
-const loggedDefenderShapes = new Set<string>();
-
-/**
- * Test-only: clear the once-per-process dedupe cache for defender override warnings.
- * @internal
- */
-export function __resetDefenderInfoLog(): void {
-	loggedDefenderShapes.clear();
-}
-
-/** Wrap text in yellow ANSI, only when stderr is a TTY and color isn't suppressed. */
-function colorizeOverrideWarning(text: string): string {
-	if (process.env.NO_COLOR) return text;
-	if (!process.env.FORCE_COLOR && !process.stderr.isTTY) return text;
-	return `\x1b[33m${text}\x1b[0m`;
-}
-
-/**
- * Warn once when the SDK overrides the project dashboard's defender setting.
- * Silent for `project` mode (no override) and for repeat constructions with the same shape.
- */
-function logDefenderOverride(
-	config: DefenderConfig | null,
-	wireFields: { defender_config: DefenderApiConfig } | Record<string, never>,
-): void {
-	if (config === null) {
-		const key = 'disabled';
-		if (loggedDefenderShapes.has(key)) return;
-		loggedDefenderShapes.add(key);
-		console.warn(
-			colorizeOverrideWarning(
-				'Defender forcibly disabled via SDK config; project dashboard setting will be ignored.',
-			),
-		);
-		return;
-	}
-	if (usesProjectSettings(config)) return;
-	const key = `explicit:${JSON.stringify(wireFields)}`;
-	if (loggedDefenderShapes.has(key)) return;
-	loggedDefenderShapes.add(key);
-	const fields = (wireFields as { defender_config: DefenderApiConfig }).defender_config;
-	console.warn(
-		colorizeOverrideWarning(
-			`Defender configured via SDK (enabled=${fields.enabled}, blockHighRisk=${fields.block_high_risk}, useTier1Classification=${fields.use_tier1_classification}, useTier2Classification=${fields.use_tier2_classification}); project dashboard setting will be ignored.`,
-		),
-	);
-}
-
-/**
- * Map SDK DefenderConfig to the wire-format sent in the RPC body.
- *
- * - `null` → explicitly disabled (all fields false, overrides project setting)
- * - `{ useProjectSettings: true }` → empty object (omitted from payload, project setting controls)
- * - explicit object → wire format with missing fields filled from `DEFAULT_DEFENDER_CONFIG`
- */
-function buildDefenderFields(
-	config: DefenderConfig | null,
-): { defender_config: DefenderApiConfig } | Record<string, never> {
-	if (config === null) {
-		return {
-			defender_config: {
-				enabled: false,
-				block_high_risk: false,
-				use_tier1_classification: false,
-				use_tier2_classification: false,
-			},
-		};
-	}
-	if (usesProjectSettings(config)) {
-		return {};
-	}
-	return {
-		defender_config: {
-			enabled: config.enabled ?? DEFAULT_DEFENDER_CONFIG.enabled,
-			block_high_risk: config.blockHighRisk ?? DEFAULT_DEFENDER_CONFIG.blockHighRisk,
-			use_tier1_classification:
-				config.useTier1Classification ?? DEFAULT_DEFENDER_CONFIG.useTier1Classification,
-			use_tier2_classification:
-				config.useTier2Classification ?? DEFAULT_DEFENDER_CONFIG.useTier2Classification,
-		},
-	};
-}
-
 /**
  * Class for loading StackOne tools via MCP
  */
@@ -320,8 +208,6 @@ export class StackOneToolSet {
 	private rpcClient?: RpcClient;
 	private readonly timeout: number;
 	private readonly executeConfig: ExecuteToolsConfig | undefined;
-	private readonly defenderConfig: DefenderConfig | null;
-	private readonly defenderFields: { defender_config: DefenderApiConfig } | Record<string, never>;
 
 	/**
 	 * Account ID for StackOne API
@@ -382,25 +268,6 @@ export class StackOneToolSet {
 		// Resolve search config: undefined/null → disabled, object → custom with defaults
 		this.executeConfig = config?.execute;
 
-		// Resolve defender config:
-		//   undefined  → defer to project dashboard setting (normalized to { useProjectSettings: true })
-		//   null       → explicitly disabled (overrides project setting)
-		//   object     → validate then store as-is
-		const defenderInput = config?.defender;
-		if (
-			defenderInput != null &&
-			typeof defenderInput === 'object' &&
-			usesProjectSettings(defenderInput) &&
-			Object.keys(defenderInput).length > 1
-		) {
-			throw new ToolSetConfigError(
-				'Cannot combine useProjectSettings: true with explicit defender options. Use one or the other.',
-			);
-		}
-		this.defenderConfig =
-			defenderInput === undefined ? { useProjectSettings: true } : defenderInput;
-		this.defenderFields = buildDefenderFields(this.defenderConfig);
-		logDefenderOverride(this.defenderConfig, this.defenderFields);
 
 		// Set Authentication headers if provided
 		if (this.authentication) {
@@ -439,19 +306,6 @@ export class StackOneToolSet {
 	}
 
 	private catalogCache: Map<string, Tools> = new Map();
-
-	/**
-	 * Resolved defender behavior for this toolset.
-	 *
-	 * - `'project'` — SDK adds no `defender_config` to the RPC payload; the project dashboard controls.
-	 * - `'disabled'` — SDK forces defender off (overrides the dashboard).
-	 * - `'explicit'` — SDK sends an explicit `defender_config` (overrides the dashboard).
-	 */
-	get defenderMode(): DefenderMode {
-		if (this.defenderConfig === null) return 'disabled';
-		if (usesProjectSettings(this.defenderConfig)) return 'project';
-		return 'explicit';
-	}
 
 	/**
 	 * Set account IDs for filtering tools
@@ -750,7 +604,6 @@ export class StackOneToolSet {
 					const requestPayload = {
 						action: name,
 						body: rpcBody,
-						...this.defenderFields,
 						headers: actionHeaders,
 						path: pathParams ?? undefined,
 						query: queryParams ?? undefined,
@@ -768,7 +621,6 @@ export class StackOneToolSet {
 				const response = await actionsClient.actions.rpcAction({
 					action: name,
 					body: rpcBody,
-					...this.defenderFields,
 					headers: actionHeaders,
 					path: pathParams ?? undefined,
 					query: queryParams ?? undefined,
