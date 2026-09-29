@@ -93,15 +93,24 @@ const DECLARED_HEADER_PREFIX = 'headers_';
 /**
  * The header names a served tool schema declares, lower-cased.
  *
- * Under `param-style=flat_prefixed` a header parameter is served as a `headers_<name>`
- * property, so the schema itself is the allowlist. Nothing needs maintaining in the SDK: an
- * action that starts declaring a header works without a release.
+ * The schema itself is the allowlist, in whichever param-style the server served it: a flat
+ * `headers_<name>` property, or a `<name>` under a nested `headers` object. Nothing needs
+ * maintaining in the SDK: an action that starts declaring a header works without a release.
  */
-export function declaredHeaderNames(propertyNames: Iterable<string>): Set<string> {
+export function declaredHeaderNames(properties: Record<string, unknown>): Set<string> {
 	const allowed = new Set<string>();
-	for (const name of propertyNames) {
+	for (const name of Object.keys(properties)) {
 		if (name.startsWith(DECLARED_HEADER_PREFIX)) {
 			allowed.add(name.slice(DECLARED_HEADER_PREFIX.length).toLowerCase());
+		}
+	}
+	const nested = properties.headers;
+	if (typeof nested === 'object' && nested !== null && !Array.isArray(nested)) {
+		const nestedProperties = (nested as { properties?: unknown }).properties;
+		if (typeof nestedProperties === 'object' && nestedProperties !== null) {
+			for (const name of Object.keys(nestedProperties)) {
+				allowed.add(name.toLowerCase());
+			}
 		}
 	}
 	return allowed;

@@ -48,6 +48,8 @@ export interface MockMcpServerOptions {
 	submitFeedback?: boolean;
 	/** Observe every `tools/call` as it arrived, before any schema parsing. */
 	onToolCall?: (call: RecordedToolCall) => void;
+	/** Answer a `tools/call` for these tool names with this literal result, verbatim. */
+	toolResults?: Record<string, CallToolResult>;
 }
 
 /** Mirrors the real `session_id` minted per search, so tests can assert it is carried through. */
@@ -112,6 +114,19 @@ const text = (payload: unknown, isError = false): CallToolResult => ({
 	content: [{ type: 'text', text: JSON.stringify(payload) }],
 });
 
+/**
+ * A success the way the real endpoint answers every action tool, `*_execute_action` and feedback:
+ * `{ isError: false, result }` in `structuredContent`, mirrored as a text part.
+ */
+const wrapped = (result: unknown): CallToolResult => {
+	const structuredContent = { isError: false, result };
+	return {
+		isError: false,
+		content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+		structuredContent,
+	};
+};
+
 const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResult | undefined => {
 	if (name.endsWith('_search_actions')) {
 		return text({
@@ -132,7 +147,7 @@ const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResu
 		if (args.action_id !== 'mock_list_items') {
 			return text({ error: `Unknown action ${String(args.action_id)}`, status_code: 404 }, true);
 		}
-		return text({
+		return wrapped({
 			data: { nodes: [] },
 			echoed_query: args.query ?? null,
 			echoed_session_id: args.session_id ?? null,
@@ -154,7 +169,7 @@ const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResu
  * ```
  */
 export function createMcpApp(options: MockMcpServerOptions): HonoApp {
-	const { accountTools, submitFeedback = false, onToolCall } = options;
+	const { accountTools, submitFeedback = false, onToolCall, toolResults = {} } = options;
 
 	// Create a Hono app that handles MCP protocol
 	const app = new Hono();
@@ -209,14 +224,22 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 			if (!listed.some((tool) => tool.name === name)) {
 				return text({ error: `Unknown tool ${name}`, status_code: 404 }, true);
 			}
+			const literal = toolResults[name];
+			if (literal) {
+				return structuredClone(literal);
+			}
 			if (name === submitFeedbackTool.name) {
-				return text({
+				return wrapped({
 					message: 'Feedback recorded',
 					submitted_at: new Date(0).toISOString(),
 					session_id: args.session_id ?? null,
 				});
 			}
-			return callMetaTool(name, args) ?? text(args);
+			// An action tool echoes what reached it, so a test can see the arguments and account.
+			return (
+				callMetaTool(name, args) ??
+				wrapped({ data: { action: name, account_id: accountId, arguments: args } })
+			);
 		});
 
 		const transport = new StreamableHTTPTransport();

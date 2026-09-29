@@ -1,7 +1,7 @@
 /**
  * Serialise a tool result for a model.
  *
- * A file download carries its bytes as a `Buffer`, which `JSON.stringify` turns into a
+ * A hand-built tool may return bytes as a `Buffer`, which `JSON.stringify` turns into a
  * `{ type: 'Buffer', data: [...] }` byte array — not the file, and potentially enormous. Bytes are
  * base64-encoded instead, and a `bigint` is written as its decimal string rather than throwing.
  * The replacer reads the ORIGINAL value from its holder, because `JSON.stringify` has already

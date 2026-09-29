@@ -57,9 +57,7 @@ describe('search-and-execute example e2e', () => {
 		const [best] = await toolset.search('list recent comments', { topK: 3 });
 		assert(best);
 		expect(await toolset.execute(best.action_id, {}, { sessionId: best.session_id })).toMatchObject(
-			{
-				data: { nodes: [] },
-			},
+			{ isError: false, result: { data: { nodes: [] } } },
 		);
 		await expect(
 			toolset.submitFeedback({ rating: 'positive', toolNames: [best.action_id] }),

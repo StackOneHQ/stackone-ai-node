@@ -69,7 +69,9 @@ describe('normalizeHeaders', () => {
 });
 
 describe('sanitiseHeaders', () => {
-	const allowed = declaredHeaderNames(['headers_x-trace', 'query_limit', 'body_headers_x']);
+	const flat = (...names: string[]) =>
+		Object.fromEntries(names.map((name) => [name, { type: 'string' }]));
+	const allowed = declaredHeaderNames(flat('headers_x-trace', 'query_limit', 'body_headers_x'));
 
 	beforeEach(() => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -78,10 +80,19 @@ describe('sanitiseHeaders', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('builds the allowlist from headers_* properties only, lower-cased', () => {
-		expect(declaredHeaderNames(['headers_X-Trace', 'query_limit', 'body_headers_x'])).toEqual(
+	it('builds the allowlist from flat headers_* properties only, lower-cased', () => {
+		expect(declaredHeaderNames(flat('headers_X-Trace', 'query_limit', 'body_headers_x'))).toEqual(
 			new Set(['x-trace']),
 		);
+	});
+
+	it('builds the allowlist from a nested headers object, lower-cased', () => {
+		expect(
+			declaredHeaderNames({
+				headers: { type: 'object', properties: { 'X-Trace': { type: 'string' } } },
+				body: { type: 'object', properties: { 'x-other': { type: 'string' } } },
+			}),
+		).toEqual(new Set(['x-trace']));
 	});
 
 	it('drops every header the served schema does not declare', () => {

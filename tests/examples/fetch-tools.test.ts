@@ -92,7 +92,11 @@ describe('fetch-tools example e2e', () => {
 		const result = await tool!.execute({
 			query: { limit: 5 },
 		});
-		expect(result.data).toBeDefined();
-		expect(Array.isArray(result.data)).toBe(true);
+		// The mock echoes what reached tools/call, inside the server's { isError, result }.
+		expect(result.isError).toBe(false);
+		expect((result.result as { data: unknown }).data).toMatchObject({
+			action: 'bamboohr_list_employees',
+			arguments: { query: { limit: 5 } },
+		});
 	});
 });

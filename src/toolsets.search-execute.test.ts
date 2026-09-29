@@ -208,8 +208,8 @@ describe('search()', () => {
 		await toolset.fetchTools();
 
 		expect(listMock.mock.calls.map(([request]) => request.endpoint.split('?')[1])).toEqual([
-			'param-style=flat_prefixed&tool-mode=search_execute',
-			'param-style=flat_prefixed',
+			'tool-mode=search_execute',
+			undefined,
 		]);
 	});
 });
@@ -220,7 +220,10 @@ describe('execute()', () => {
 		const toolset = newToolSet();
 		const [hit] = await toolset.search('list items');
 
-		expect(await toolset.execute(hit?.action_id ?? '')).toMatchObject({ data: { nodes: [] } });
+		expect(await toolset.execute(hit?.action_id ?? '')).toMatchObject({
+			isError: false,
+			result: { data: { nodes: [] } },
+		});
 	});
 
 	it('passes the nested envelope through verbatim', async () => {
@@ -231,7 +234,7 @@ describe('execute()', () => {
 
 		const result = await toolset.execute(hit?.action_id ?? '', hit?.example_request as JsonObject);
 
-		expect(result.echoed_query).toEqual({ page_size: 25 });
+		expect((result.result as JsonObject).echoed_query).toEqual({ page_size: 25 });
 	});
 
 	// Contract §5: session_id is forwarded as a top-level argument when given, never otherwise,
@@ -299,23 +302,6 @@ describe('execute()', () => {
 		expect(error).toBeInstanceOf(StackOneAPIError);
 		expect(error.message).toContain('Unknown action mock_not_a_real_action');
 		expect(error.statusCode).toBe(404);
-	});
-
-	it('unwraps the meta tool’s { isError, result } envelope', async () => {
-		fakeMetaTools(['linear_acc1_execute_action'], () => ({
-			isError: false,
-			result: { data: { nodes: [1, 2] } },
-		}));
-		expect(await newToolSet({ accountId: 'acc1' }).execute('linear_list_issues')).toEqual({
-			data: { nodes: [1, 2] },
-		});
-	});
-
-	it('wraps a non-object meta tool result', async () => {
-		fakeMetaTools(['linear_acc1_execute_action'], () => ({ isError: false, result: [1] }));
-		expect(await newToolSet({ accountId: 'acc1' }).execute('linear_list_issues')).toEqual({
-			result: [1],
-		});
 	});
 
 	it('routes an account id containing underscores by identity', async () => {
@@ -397,8 +383,8 @@ describe('submitFeedback()', () => {
 		});
 
 		expect(result).toMatchObject({
-			message: 'Feedback recorded',
-			session_id: MOCK_SEARCH_SESSION_ID,
+			isError: false,
+			result: { message: 'Feedback recorded', session_id: MOCK_SEARCH_SESSION_ID },
 		});
 		expect(calls).toEqual([
 			{

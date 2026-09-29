@@ -1,13 +1,12 @@
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { jsonSchema } from 'ai';
-import { http, HttpResponse } from 'msw';
+import { http } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { type RecordedToolCall, createMcpApp } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
-import { RpcClient } from './rpc-client';
 import { toolParametersFromInputSchema } from './schema';
-import { BaseTool, StackOneMcpTool, StackOneRpcTool, StackOneTool, Tools } from './tool';
+import { BaseTool, StackOneMcpTool, StackOneTool, Tools } from './tool';
 import type { AISDKToolResult, JsonObject, JSONSchema, ToolParameters } from './types';
-import { isBinaryDownloadResult } from './utils/binary-response';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 
@@ -266,74 +265,75 @@ describe('BaseTool', () => {
 	});
 });
 
-describe('StackOneRpcTool', () => {
-	const client = new RpcClient({ baseUrl: TEST_BASE_URL, apiKey: 'test-key', timeout: 5_000 });
-	const rpcTool = (properties: Record<string, JSONSchema>) =>
-		new StackOneRpcTool({
+describe('StackOneMcpTool as an action tool', () => {
+	const calls: RecordedToolCall[] = [];
+	const nestedProperties = {
+		path: { type: 'object', properties: { id: { type: 'string' } } },
+		query: { type: 'object', properties: { expand: { type: 'string' } } },
+		body: { type: 'object', properties: { name: { type: 'string' } } },
+		headers: { type: 'object', properties: { 'x-trace': { type: 'string' } } },
+	} satisfies Record<string, JSONSchema>;
+	const listed = {
+		name: 'crm_update_contact',
+		description: 'Update a contact',
+		inputSchema: { type: 'object' as const, properties: nestedProperties },
+	};
+	const serve = (toolResults: Record<string, CallToolResult> = {}) => {
+		const app = createMcpApp({
+			accountTools: { acc1: [listed], acc2: [listed] },
+			onToolCall: (call) => calls.push(call),
+			toolResults,
+		});
+		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+	};
+	beforeEach(() => {
+		calls.length = 0;
+		serve();
+	});
+
+	const actionTool = (properties: Record<string, JSONSchema> = nestedProperties) =>
+		new StackOneMcpTool({
 			name: 'crm_update_contact',
 			description: 'Update a contact',
 			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
-			client,
+			endpoint: `${TEST_BASE_URL}/mcp`,
+			apiKey: 'test-key',
 			accountId: 'acc1',
-		});
-	const flatProperties = {
-		path_id: { type: 'string' },
-		query_expand: { type: 'string' },
-		body_name: { type: 'string' },
-		'headers_x-trace': { type: 'string' },
-	} satisfies Record<string, JSONSchema>;
-
-	const captureRpc = (
-		response: () => Response = () => HttpResponse.json({ data: { ok: true } }),
-	) => {
-		const seen: Array<{ headers: Headers; body: Record<string, unknown> }> = [];
-		server.use(
-			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
-				seen.push({
-					headers: request.headers,
-					body: (await request.json()) as Record<string, unknown>,
-				});
-				return response();
-			}),
-		);
-		return seen;
-	};
-
-	it('sends the flat_prefixed arguments as the RPC envelope, scoped to its account', async () => {
-		const seen = captureRpc();
-
-		const result = await rpcTool(flatProperties).execute({
-			path_id: '7',
-			query_expand: 'owner',
-			body_name: 'Ada',
-			'headers_x-trace': 't-1',
+			timeout: 5_000,
 		});
 
-		expect(result).toEqual({ data: { ok: true } });
-		expect(seen[0]?.headers.get('x-account-id')).toBe('acc1');
-		expect(seen[0]?.body).toEqual({
-			action: 'crm_update_contact',
-			body: { name: 'Ada' },
-			headers: { 'x-trace': 't-1', 'x-account-id': 'acc1' },
+	it('sends the arguments verbatim over tools/call, scoped to its account', async () => {
+		const args = {
 			path: { id: '7' },
 			query: { expand: 'owner' },
+			body: { name: 'Ada' },
+			headers: { 'x-trace': 't-1' },
+		};
+
+		const result = await actionTool().execute(args);
+
+		expect(calls).toEqual([
+			{ accountId: 'acc1', toolMode: undefined, name: 'crm_update_contact', arguments: args },
+		]);
+		// As the server wrote it: UCA's { isError: false, result } wrapper included.
+		expect(result).toEqual({
+			isError: false,
+			result: { data: { action: 'crm_update_contact', account_id: 'acc1', arguments: args } },
 		});
+	});
+
+	it('sends flat_prefixed arguments verbatim too', async () => {
+		const args = { path_id: '7', 'headers_x-trace': 't-1' };
+		await actionTool({
+			path_id: { type: 'string' },
+			'headers_x-trace': { type: 'string' },
+		}).execute(args);
+		expect(calls[0]?.arguments).toEqual(args);
 	});
 
 	it('accepts arguments as a JSON string', async () => {
-		const seen = captureRpc();
-		await rpcTool(flatProperties).execute('{"path_id":"7"}');
-		expect(seen[0]?.body.path).toEqual({ id: '7' });
-	});
-
-	it('omits empty path and query, but always sends body and headers', async () => {
-		const seen = captureRpc();
-		await rpcTool(flatProperties).execute();
-		expect(seen[0]?.body).toEqual({
-			action: 'crm_update_contact',
-			body: {},
-			headers: { 'x-account-id': 'acc1' },
-		});
+		await actionTool().execute('{"path":{"id":"7"}}');
+		expect(calls[0]?.arguments).toEqual({ path: { id: '7' } });
 	});
 
 	it.each([
@@ -346,61 +346,21 @@ describe('StackOneRpcTool', () => {
 		['Cookie', 'session=x'],
 	])('drops a model-supplied %j header', async (name, value) => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
-		const seen = captureRpc();
 
-		await rpcTool(flatProperties).execute({ headers: { [name]: value } });
+		await actionTool().execute({ headers: { [name]: value } });
 
-		expect(seen[0]?.body.headers).toEqual({ 'x-account-id': 'acc1' });
-		expect(seen[0]?.headers.get('x-account-id')).toBe('acc1');
-		expect(seen[0]?.headers.get('authorization')).toMatch(/^Basic /);
+		expect(calls[0]?.arguments.headers).toEqual({});
+		expect(calls[0]?.accountId).toBe('acc1');
 		vi.restoreAllMocks();
 	});
 
-	it('drops a declared header carrying CR/LF', async () => {
+	it('keeps a header a nested schema declares, and drops one carrying CR/LF', async () => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
-		const seen = captureRpc();
-		await rpcTool(flatProperties).execute({ 'headers_x-trace': 'a\r\nInjected: 1' });
-		expect(seen[0]?.body.headers).toEqual({ 'x-account-id': 'acc1' });
+		await actionTool().execute({ headers: { 'X-Trace': 'abc', 'X-Other': 'no' } });
+		await actionTool().execute({ headers: { 'x-trace': 'a\r\nInjected: 1' } });
+		expect(calls[0]?.arguments.headers).toEqual({ 'X-Trace': 'abc' });
+		expect(calls[1]?.arguments.headers).toEqual({});
 		vi.restoreAllMocks();
-	});
-
-	it('routes a bare schema field that merely starts with path_ to the body, warning once', async () => {
-		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-		const seen = captureRpc();
-		const tool = rpcTool({ path_to_file: { type: 'string' }, name: { type: 'string' } });
-
-		await tool.execute({ path_to_file: '/tmp/x' });
-		await tool.execute({ path_to_file: '/tmp/y' });
-
-		expect(seen[0]?.body.body).toEqual({ path_to_file: '/tmp/x' });
-		expect(seen[0]?.body).not.toHaveProperty('path');
-		expect(warn).toHaveBeenCalledTimes(1);
-		expect(String(warn.mock.calls[0]?.[0])).toContain('flat-prefix detection is disabled');
-		vi.restoreAllMocks();
-	});
-
-	it('rejects a reserved container given a scalar', async () => {
-		await expect(rpcTool(flatProperties).execute({ query: 'sales' })).rejects.toThrow(
-			/"query" is an envelope container/,
-		);
-	});
-
-	it('describes the request without sending it on dryRun', async () => {
-		const seen = captureRpc();
-		const result = await rpcTool(flatProperties).execute({ path_id: '7' }, { dryRun: true });
-
-		expect(seen).toHaveLength(0);
-		expect(result.url).toBe(`${TEST_BASE_URL}/actions/rpc`);
-		expect(result.method).toBe('POST');
-		expect(result.headers).toMatchObject({ 'x-account-id': 'acc1' });
-		expect(result.headers).not.toHaveProperty('Authorization');
-		expect(JSON.parse(result.body as string)).toEqual({
-			action: 'crm_update_contact',
-			body: {},
-			headers: { 'x-account-id': 'acc1' },
-			path: { id: '7' },
-		});
-		expect(result.mappedParams).toEqual({ path_id: '7' });
 	});
 
 	it.each([
@@ -408,72 +368,73 @@ describe('StackOneRpcTool', () => {
 		['[1, 2, 3]', /must be a JSON object/],
 		['null', /must be a JSON object/],
 	])('rejects arguments %j', async (input, message) => {
-		await expect(rpcTool(flatProperties).execute(input)).rejects.toThrow(message);
+		await expect(actionTool().execute(input)).rejects.toThrow(message);
 	});
 
 	it('rejects a non-object, non-string argument', async () => {
 		// @ts-expect-error - intentionally passing an invalid type
-		await expect(rpcTool(flatProperties).execute(12345)).rejects.toThrow(StackOneError);
+		await expect(actionTool().execute(12345)).rejects.toThrow(StackOneError);
 	});
 
-	it('reports arguments JSON cannot encode as an argument error', async () => {
-		await expect(rpcTool(flatProperties).execute({ body_name: 1n as never })).rejects.toThrow(
-			/could not be encoded as JSON/,
-		);
-	});
-
-	it('surfaces an API rejection with its status, body and the server message', async () => {
-		captureRpc(() =>
-			HttpResponse.json(
-				{ message: 'path.id is missing' },
-				{ status: 400, statusText: 'Bad Request' },
-			),
-		);
-
-		const error = (await rpcTool(flatProperties)
+	it('is refused by the server when it has no account', async () => {
+		const error = (await actionTool()
+			.setAccountId(undefined)
 			.execute({})
 			.catch((caught: unknown) => caught)) as StackOneAPIError;
 
 		expect(error).toBeInstanceOf(StackOneAPIError);
 		expect(error.statusCode).toBe(400);
-		expect(error.message).toBe('400 Bad Request: path.id is missing');
 	});
 
-	it('is refused by the server when it has no account', async () => {
-		const tool = rpcTool({ foo: { type: 'string' } }).setAccountId(undefined);
-		const error = (await tool
-			.execute({ foo: 'bar' })
+	it('returns a file action’s download link as the server sent it', async () => {
+		const link = {
+			download_url: `${TEST_BASE_URL}/actions/download/v1.eu.token`,
+			expires_at: '2026-09-29T12:05:00.000Z',
+			file: { name: 'report.pdf', content_type: 'application/pdf', content_length: 3 },
+		};
+		const structuredContent = { isError: false, result: link };
+		serve({
+			crm_update_contact: {
+				content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+				structuredContent,
+			},
+		});
+
+		expect(await actionTool().execute({})).toEqual({ isError: false, result: link });
+	});
+
+	it('raises with status 501 when the server can issue no download link', async () => {
+		const structuredContent = {
+			isError: true,
+			result: {
+				error: 'This action returned a file, which cannot be delivered in a tool result',
+				status_code: 501,
+			},
+		};
+		serve({
+			crm_update_contact: {
+				isError: true,
+				content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+				structuredContent,
+			},
+		});
+
+		const error = (await actionTool()
+			.execute({})
 			.catch((caught: unknown) => caught)) as StackOneAPIError;
 
-		expect(error.statusCode).toBe(400);
-	});
-
-	it('returns a download with a safe file name', async () => {
-		captureRpc(
-			() =>
-				new HttpResponse(new Uint8Array([1, 2, 3]), {
-					headers: {
-						'content-type': 'application/pdf',
-						'content-disposition': "attachment; filename*=UTF-8''%2e%2e%2fsecret.pdf",
-					},
-				}),
-		);
-
-		const result = await rpcTool(flatProperties).execute({ path_id: 'f' });
-
-		assert(isBinaryDownloadResult(result));
-		expect(result.fileName).toBe('secret.pdf');
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect(error.statusCode).toBe(501);
 	});
 
 	it('can be rebound to another account', async () => {
-		const seen = captureRpc();
-		const tool = rpcTool(flatProperties);
+		const tool = actionTool();
 
 		tool.setAccountId('acc2');
 		await tool.execute({});
 
 		expect(tool.getAccountId()).toBe('acc2');
-		expect(seen[0]?.headers.get('x-account-id')).toBe('acc2');
+		expect(calls[0]?.accountId).toBe('acc2');
 	});
 });
 
@@ -493,7 +454,7 @@ describe('StackOneMcpTool', () => {
 			name: 'mock_acc1_execute_action',
 			description: 'Execute',
 			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
-			endpoint: `${TEST_BASE_URL}/mcp?param-style=flat_prefixed&tool-mode=search_execute`,
+			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
 			apiKey: 'test-key',
 			accountId: 'acc1',
 			timeout: 5_000,
@@ -505,7 +466,10 @@ describe('StackOneMcpTool', () => {
 			query: { page_size: 2 },
 		});
 
-		expect(result).toMatchObject({ data: { nodes: [] }, echoed_query: { page_size: 2 } });
+		expect(result).toMatchObject({
+			isError: false,
+			result: { data: { nodes: [] }, echoed_query: { page_size: 2 } },
+		});
 		expect(calls).toEqual([
 			{
 				accountId: 'acc1',
@@ -714,12 +678,14 @@ describe('Tools.executeOpenAIToolCalls', () => {
 	});
 
 	it('reports malformed arguments the same way', async () => {
-		const tool = new StackOneRpcTool({
+		const tool = new StackOneMcpTool({
 			name: 'linear_list_issues',
 			description: '',
 			parameters: { type: 'object', properties: {} },
-			client: new RpcClient({ baseUrl: TEST_BASE_URL, apiKey: 'k', timeout: 1_000 }),
+			endpoint: `${TEST_BASE_URL}/mcp`,
+			apiKey: 'k',
 			accountId: 'acc1',
+			timeout: 1_000,
 		});
 		const [message] = await new Tools([tool]).executeOpenAIToolCalls([
 			call('linear_list_issues', '{not json'),

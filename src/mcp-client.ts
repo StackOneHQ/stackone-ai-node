@@ -179,8 +179,10 @@ function statusOf(parsed: JsonObject): number {
  * Turn an MCP `tools/call` result into a plain object.
  *
  * Text parts are joined and parsed as JSON; a non-object is wrapped as `{ result }`. With no text
- * at all, `structuredContent` is used. Parts that are not text (images, embedded resources) are
- * kept under `content_parts` rather than silently dropped.
+ * at all, `structuredContent` is used. Either way the result is returned as the server wrote it —
+ * for an action tool that is `{ isError: false, result, defenderMetadata?, policyMetadata? }`.
+ * Parts that are not text (images, embedded resources) are kept under `content_parts` rather than
+ * silently dropped.
  *
  * @throws StackOneAPIError If the result carries `isError`. A failed tool call comes back as an
  *   ordinary response with that flag set, so without this check the error body would be handed
@@ -219,10 +221,12 @@ export function parseToolResult(result: Record<string, unknown>, name: string): 
 		);
 	}
 
+	// A copy, so content_parts below never writes into the caller's structuredContent.
+	const returned = { ...parsed };
 	if (nonText.length > 0) {
-		parsed.content_parts = nonText as unknown as JsonObject[];
+		returned.content_parts = nonText as unknown as JsonObject[];
 	}
-	return parsed;
+	return returned;
 }
 
 /**

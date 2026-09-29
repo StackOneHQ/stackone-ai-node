@@ -6,10 +6,15 @@
 import { createServer, type Server as NetServer, type Socket } from 'node:net';
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
-import { type McpToolDefinition, accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import {
+	type McpToolDefinition,
+	type RecordedToolCall,
+	accountMcpTools,
+	createMcpApp,
+} from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { type McpToolDefinition as ListedTool, listMcpTools } from './mcp-client';
-import { StackOneMcpTool, StackOneRpcTool, type StackOneTool } from './tool';
+import { StackOneMcpTool, type StackOneTool } from './tool';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
@@ -317,12 +322,11 @@ describe('server refusals', () => {
 });
 
 describe('listing', () => {
-	it('pins param-style=flat_prefixed on the MCP listing URL', async () => {
+	// No param-style pin: tools/call arguments are mapped by the server, whichever style it serves.
+	it('lists from the bare MCP endpoint, taking the server’s param-style', async () => {
 		fakeListing(() => []);
 		await newToolSet({ baseUrl: 'https://api.example.com/' }).fetchTools({ accountIds: ['acc1'] });
-		expect(listMock.mock.calls[0]?.[0].endpoint).toBe(
-			'https://api.example.com/mcp?param-style=flat_prefixed',
-		);
+		expect(listMock.mock.calls[0]?.[0].endpoint).toBe('https://api.example.com/mcp');
 	});
 
 	it('passes the timeout to every listing', async () => {
@@ -601,10 +605,10 @@ describe('catalog cache', () => {
 });
 
 describe('tool mode', () => {
-	it('builds RPC tools by default', async () => {
+	it('builds MCP tools by default', async () => {
 		fakeListing(() => [def('t')]);
 		expect((await newToolSet({ accountId: 'acc1' }).fetchTools()).getTool('t')).toBeInstanceOf(
-			StackOneRpcTool,
+			StackOneMcpTool,
 		);
 	});
 
@@ -614,7 +618,7 @@ describe('tool mode', () => {
 
 		expect(tools.getTool('t')).toBeInstanceOf(StackOneMcpTool);
 		expect(listMock.mock.calls[0]?.[0].endpoint).toBe(
-			`${TEST_BASE_URL}/mcp?param-style=flat_prefixed&tool-mode=search_execute`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
 		);
 	});
 
@@ -622,13 +626,13 @@ describe('tool mode', () => {
 		fakeListing(() => [def('t')]);
 		const toolset = newToolSet({ accountId: 'acc1', toolMode: 'search_execute' });
 
-		expect((await toolset.fetchTools({ mode: null })).getTool('t')).toBeInstanceOf(StackOneRpcTool);
+		expect((await toolset.fetchTools({ mode: null })).getTool('t')).toBeInstanceOf(StackOneMcpTool);
 		expect((await toolset.fetchTools({ mode: 'individual' })).getTool('t')).toBeInstanceOf(
-			StackOneRpcTool,
+			StackOneMcpTool,
 		);
 		expect(listMock.mock.calls.map(([request]) => request.endpoint.split('?')[1])).toEqual([
-			'param-style=flat_prefixed',
-			'param-style=flat_prefixed&tool-mode=individual',
+			undefined,
+			'tool-mode=individual',
 		]);
 	});
 });
@@ -689,9 +693,7 @@ describe('stackone_submit_feedback in the catalog', () => {
 			expect(tool).toBeInstanceOf(StackOneMcpTool);
 			expect(
 				await tool?.execute({ rating: 'positive', tool_names: ['acc1_tool_1'] }),
-			).toMatchObject({
-				message: 'Feedback recorded',
-			});
+			).toMatchObject({ isError: false, result: { message: 'Feedback recorded' } });
 			expect(rpcRequests).toEqual([]);
 		},
 	);
@@ -705,34 +707,33 @@ describe('stackone_submit_feedback in the catalog', () => {
 });
 
 describe('execution through fetched tools', () => {
-	it('executes an RPC tool against its account', async () => {
+	it('executes an action tool over tools/call against its account', async () => {
 		const tools = await newToolSet({ accountId: 'your-bamboohr-account-id' }).fetchTools();
 		const result = await tools.getTool('bamboohr_get_employee')?.execute({ id: 'emp-123' });
-		expect(result).toMatchObject({ data: { id: 'emp-123', name: 'Test Employee' } });
+		expect(result).toEqual({
+			isError: false,
+			result: {
+				data: {
+					action: 'bamboohr_get_employee',
+					account_id: 'your-bamboohr-account-id',
+					arguments: { id: 'emp-123' },
+				},
+			},
+		});
 	});
 });
 
 describe('model-supplied headers', () => {
 	const serveTool = (inputSchema: McpToolDefinition['inputSchema']) => {
+		const calls: RecordedToolCall[] = [];
 		const app = createMcpApp({
 			accountTools: {
 				'tenant-a': [{ name: 'crm_list_contacts', description: 'List contacts', inputSchema }],
 			},
+			onToolCall: (call) => calls.push(call),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-	};
-	const captureRpc = () => {
-		const seen: { accountHeader: string | null; body: Record<string, unknown> }[] = [];
-		server.use(
-			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
-				seen.push({
-					accountHeader: request.headers.get('x-account-id'),
-					body: (await request.json()) as Record<string, unknown>,
-				});
-				return HttpResponse.json({ data: {} });
-			}),
-		);
-		return seen;
+		return calls;
 	};
 	const fetchTool = async () => {
 		const tool = (await newToolSet({ accountId: 'tenant-a' }).fetchTools()).getTool(
@@ -742,42 +743,44 @@ describe('model-supplied headers', () => {
 		return tool;
 	};
 
-	// Regression: the envelope headers were merged OVER the tool's own headers, so a
-	// model-supplied x-account-id replaced the account the tool was fetched for — on the
-	// envelope and on the HTTP header the API actually reads.
+	// Regression: the RPC envelope's headers were merged OVER the tool's own, so a model-supplied
+	// x-account-id replaced the account the tool was fetched for. Over tools/call the tenant is
+	// the transport's x-account-id, which the SDK sets; an argument is only ever an argument.
 	it('cannot switch tenant with headers_x-account-id, even when the schema declares it', async () => {
-		serveTool({
+		const calls = serveTool({
 			type: 'object',
 			properties: { 'headers_x-account-id': { type: 'string' }, query_limit: { type: 'number' } },
 		});
-		const seen = captureRpc();
 		const tool = await fetchTool();
 
 		await tool.execute({ 'headers_x-account-id': 'tenant-b', query_limit: 1 });
 
-		expect(seen[0]?.accountHeader).toBe('tenant-a');
-		expect(seen[0]?.body.headers).toMatchObject({ 'x-account-id': 'tenant-a' });
+		expect(calls[0]?.accountId).toBe('tenant-a');
 	});
 
 	it('cannot switch tenant with a nested headers object', async () => {
-		serveTool({ type: 'object', properties: { query_limit: { type: 'number' } } });
-		const seen = captureRpc();
+		const calls = serveTool({
+			type: 'object',
+			properties: { headers: { type: 'object', properties: {} } },
+		});
 		const tool = await fetchTool();
 
 		await tool.execute({ headers: { 'X-Account-Id': 'tenant-b', Authorization: 'Bearer stolen' } });
 
-		expect(seen[0]?.accountHeader).toBe('tenant-a');
-		expect(seen[0]?.body.headers).toEqual({ 'x-account-id': 'tenant-a' });
+		expect(calls[0]?.accountId).toBe('tenant-a');
+		expect(calls[0]?.arguments.headers).toEqual({});
 	});
 
 	it('forwards a header the served schema declares', async () => {
-		serveTool({ type: 'object', properties: { 'headers_x-trace': { type: 'string' } } });
-		const seen = captureRpc();
+		const calls = serveTool({
+			type: 'object',
+			properties: { headers: { type: 'object', properties: { 'x-trace': { type: 'string' } } } },
+		});
 		const tool = await fetchTool();
 
-		await tool.execute({ 'headers_x-trace': 'abc', 'headers_x-other': 'dropped' });
+		await tool.execute({ headers: { 'x-trace': 'abc', 'x-other': 'dropped' } });
 
-		expect(seen[0]?.body.headers).toEqual({ 'x-trace': 'abc', 'x-account-id': 'tenant-a' });
+		expect(calls[0]?.arguments.headers).toEqual({ 'x-trace': 'abc' });
 	});
 });
 

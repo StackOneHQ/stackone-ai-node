@@ -9,10 +9,8 @@ import type {
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
-import { isFlatPrefixedSchema, splitEnvelopeParams, warnBareSchema } from './envelope';
 import { buildRequestHeaders, declaredHeaderNames, sanitiseHeaders } from './headers';
 import { callMcpTool } from './mcp-client';
-import type { RpcActionRequest, RpcClient } from './rpc-client';
 import { cloneJson, foldRootComposition } from './schema';
 import type {
 	AISDKToolDefinition,
@@ -23,7 +21,6 @@ import type {
 	JsonObject,
 	JSONSchema,
 	McpExecuteConfig,
-	RpcExecuteConfig,
 	ToolExecution,
 	ToolParameters,
 } from './types';
@@ -45,9 +42,8 @@ const isPlainObject = (value: unknown): value is JsonObject =>
  * Base class for all tools: a name, a description, the served parameter schema, and conversions
  * to each framework's tool format.
  *
- * `BaseTool` itself cannot execute anything. The tools a {@link StackOneToolSet} returns are
- * {@link StackOneTool}s that execute over the RPC endpoint or MCP `tools/call`; a hand-built
- * tool must override {@link BaseTool.execute}.
+ * `BaseTool` itself cannot execute anything. The tools a {@link StackOneToolSet} returns execute
+ * over MCP `tools/call`; a hand-built tool must override {@link BaseTool.execute}.
  */
 export class BaseTool {
 	name: string;
@@ -346,116 +342,9 @@ export class StackOneTool extends BaseTool {
 }
 
 /**
- * A tool executed over the StackOne actions RPC endpoint — every per-action tool in the
- * `individual` catalog.
- *
- * Arguments are split into the RPC envelope by their `flat_prefixed` location prefix, whether
- * to trust that prefix being decided once from the served schema. Headers are filtered to the
- * ones the schema declares, and the account is always the tool's own.
- */
-export class StackOneRpcTool extends StackOneTool {
-	readonly #client: RpcClient;
-	readonly #declared: ReadonlySet<string>;
-	readonly #flatPrefixed: boolean;
-	readonly #allowedHeaders: ReadonlySet<string>;
-	#warnedBareSchema = false;
-
-	constructor(options: {
-		name: string;
-		description: string;
-		parameters: ToolParameters;
-		client: RpcClient;
-		accountId?: string;
-	}) {
-		const executeConfig = {
-			kind: 'rpc',
-			method: 'POST',
-			url: options.client.url,
-			// Mirrors the StackOne RPC payload layout so metadata/debug stays in sync.
-			payloadKeys: {
-				action: 'action',
-				body: 'body',
-				headers: 'headers',
-				path: 'path',
-				query: 'query',
-			},
-		} as const satisfies RpcExecuteConfig;
-		super(options.name, options.description, options.parameters, executeConfig, options.accountId);
-		this.setExposeExecutionMetadata(false);
-		this.#client = options.client;
-		this.#declared = new Set(Object.keys(options.parameters.properties));
-		this.#flatPrefixed = isFlatPrefixedSchema(this.#declared);
-		this.#allowedHeaders = declaredHeaderNames(this.#declared);
-	}
-
-	/**
-	 * Build the `/actions/rpc` request for these arguments.
-	 */
-	#buildRequest(args: JsonObject): RpcActionRequest {
-		if (!this.#flatPrefixed && !this.#warnedBareSchema) {
-			this.#warnedBareSchema = true;
-			warnBareSchema(this.name);
-		}
-		const envelope = splitEnvelopeParams(args, this.#declared, this.#flatPrefixed);
-		const headers = sanitiseHeaders(envelope.headers, this.#allowedHeaders);
-		// Set last, so nothing a tool call supplies can retarget the request.
-		const accountId = this.getAccountId();
-		if (accountId) {
-			headers['x-account-id'] = accountId;
-		}
-		return {
-			action: this.name,
-			body: envelope.body,
-			headers,
-			...(Object.keys(envelope.path).length > 0 ? { path: envelope.path } : {}),
-			...(Object.keys(envelope.query).length > 0 ? { query: envelope.query } : {}),
-		};
-	}
-
-	/**
-	 * Execute the action.
-	 *
-	 * @returns The parsed JSON response. For a file download (any non-JSON Content-Type), a
-	 *   {@link BinaryDownloadResult} whose `content` is a raw `Buffer` — not JSON-serialisable, so
-	 *   handle it before re-serialising the result for a model.
-	 * @throws StackOneAPIError If the API rejects the request; the message leads with the
-	 *   server's own explanation.
-	 * @throws StackOneError If the arguments are malformed or the request cannot be sent.
-	 */
-	override async execute(
-		inputParams?: JsonObject | string,
-		options?: ExecuteOptions,
-	): Promise<JsonObject> {
-		try {
-			const args = this.parseArguments(inputParams);
-			const request = this.#buildRequest(args);
-			const accountId = this.getAccountId();
-
-			if (options?.dryRun) {
-				const { Authorization: _credential, ...headers } = this.#client.requestHeaders(accountId);
-				return {
-					url: this.#client.url,
-					method: 'POST',
-					headers,
-					body: JSON.stringify(request),
-					mappedParams: args,
-				};
-			}
-
-			return (await this.#client.rpcAction(request, accountId)) as unknown as JsonObject;
-		} catch (error) {
-			if (error instanceof StackOneError) {
-				throw error;
-			}
-			throw new StackOneError(`Error executing RPC action ${this.name}`, { cause: error });
-		}
-	}
-}
-
-/**
- * A tool executed over MCP `tools/call` on the endpoint that listed it: the `search_execute`
- * meta tools, and `stackone_submit_feedback` in every mode. They have no action behind them on
- * `/actions/rpc`.
+ * A tool executed over MCP `tools/call`, on the endpoint and account that listed it. Every tool a
+ * {@link StackOneToolSet} returns is one: per-action tools, the `search_execute` meta tools, and
+ * `stackone_submit_feedback`.
  */
 export class StackOneMcpTool extends StackOneTool {
 	readonly #endpoint: string;
@@ -485,16 +374,19 @@ export class StackOneMcpTool extends StackOneTool {
 		this.#apiKey = options.apiKey;
 		this.#extraHeaders = { ...options.extraHeaders };
 		this.#timeout = options.timeout;
-		this.#allowedHeaders = declaredHeaderNames(Object.keys(options.parameters.properties));
+		this.#allowedHeaders = declaredHeaderNames(options.parameters.properties);
 	}
 
 	/**
 	 * Call the tool.
 	 *
-	 * A `headers` object in the arguments is filtered to what this tool's own schema declares
-	 * under `headers_*` — for the meta tools that is nothing, so every model-supplied header is
-	 * dropped: these arguments are model-controlled, and the envelope is unpacked server-side.
+	 * Arguments are sent as given; the server maps them onto the action. A `headers` object in
+	 * them is filtered to the headers this tool's own schema declares — for the meta tools that is
+	 * nothing, so every model-supplied header is dropped: these arguments are model-controlled.
 	 *
+	 * @returns The result as the server wrote it: for an action tool,
+	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
+	 *   is the server's single-use `download_url`, not the file.
 	 * @throws StackOneAPIError If the result carries `isError`, with the status from its payload,
 	 *   or the endpoint answers with an HTTP error.
 	 * @throws ToolSetLoadError If the endpoint cannot be reached or does not answer in time.

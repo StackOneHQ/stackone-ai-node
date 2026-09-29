@@ -8,7 +8,7 @@ import {
 	mixedProviderTools,
 } from './mcp-server';
 
-/** Every account the default mock knows. `/mcp` and `/actions/rpc` refuse any other with a 404. */
+/** Every account the default mock knows. `/mcp` refuses any other with a 404. */
 export const mockAccountTools = {
 	default: defaultMcpTools,
 	acc1: accountMcpTools.acc1,

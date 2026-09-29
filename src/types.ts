@@ -76,26 +76,8 @@ export type JsonSchemaProperties = Record<string, JSONSchema>;
 export type ToolMode = 'individual' | 'search_execute';
 
 /**
- * Executes over the StackOne actions RPC endpoint (`POST /actions/rpc`). Every per-action tool
- * listed in `individual` mode is one of these.
- */
-export interface RpcExecuteConfig {
-	kind: 'rpc';
-	method: 'POST';
-	url: string;
-	payloadKeys: {
-		action: string;
-		body?: string;
-		headers?: string;
-		path?: string;
-		query?: string;
-	};
-}
-
-/**
- * Executes over MCP `tools/call` on the endpoint that listed it. The search/execute meta tools
- * have no action behind them on `/actions/rpc`; `stackone_submit_feedback` is not a connector
- * action either, so the SDK calls it here even though the server also accepts it over RPC.
+ * Executes over MCP `tools/call`, on the endpoint that listed the tool. Every tool a toolset
+ * returns executes this way.
  */
 export interface McpExecuteConfig {
 	kind: 'mcp';
@@ -115,15 +97,14 @@ interface LocalExecuteConfig {
 /**
  * Discriminated union lets call sites branch on execution style without relying on nullable fields.
  */
-export type ExecuteConfig = RpcExecuteConfig | McpExecuteConfig | LocalExecuteConfig;
+export type ExecuteConfig = McpExecuteConfig | LocalExecuteConfig;
 
 /**
  * Options for executing a tool
  */
 export interface ExecuteOptions {
 	/**
-	 * If true, returns the request the tool would send instead of sending it. Useful for
-	 * checking how arguments are routed into the RPC envelope.
+	 * If true, returns the `tools/call` the tool would send instead of sending it.
 	 */
 	dryRun?: boolean;
 }

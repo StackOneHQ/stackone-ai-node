@@ -170,6 +170,37 @@ describe('parseToolResult', () => {
 		});
 	});
 
+	describe('the server’s success wrapper', () => {
+		const served = (structuredContent: Record<string, unknown>) => ({
+			content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+			structuredContent,
+		});
+
+		// The server wraps every action tool, execute and feedback as { isError: false, result },
+		// with defender and policy metadata beside it. That is returned exactly as written.
+		it('returns { isError: false, result, ...metadata } as the server wrote it', () => {
+			const payload = {
+				isError: false,
+				result: { data: { id: 'e1' } },
+				defenderMetadata: { applied: true },
+				policyMetadata: { decision: 'allow' },
+			};
+			expect(parseToolResult(served(payload), 't')).toEqual(payload);
+		});
+
+		it('returns the same object when the wrapper is only in structuredContent', () => {
+			const payload = { isError: false, result: [1] };
+			expect(parseToolResult({ content: [], structuredContent: payload }, 't')).toEqual(payload);
+		});
+
+		it('never writes content_parts into the caller’s structuredContent', () => {
+			const structuredContent = { ok: true };
+			const image = { type: 'image', data: 'AAAA', mimeType: 'image/png' };
+			parseToolResult({ content: [image], structuredContent }, 't');
+			expect(structuredContent).toEqual({ ok: true });
+		});
+	});
+
 	// A failed tools/call is an ordinary response with isError set. Returning its body as data
 	// would hand the caller an error as though it were a success.
 	it('raises on isError, with the status from the payload', () => {
@@ -221,7 +252,10 @@ describe('callMcpTool', () => {
 			session_id: 's-1',
 		});
 
-		expect(result).toMatchObject({ message: 'Feedback recorded', session_id: 's-1' });
+		expect(result).toMatchObject({
+			isError: false,
+			result: { message: 'Feedback recorded', session_id: 's-1' },
+		});
 	});
 });
 

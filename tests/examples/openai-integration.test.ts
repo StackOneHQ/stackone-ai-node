@@ -75,7 +75,13 @@ describe('openai-integration example e2e', () => {
 		expect(toolMessages).toHaveLength(1);
 		expect(toolMessages[0]).toMatchObject({ role: 'tool', tool_call_id: 'call_mock' });
 		expect(JSON.parse(toolMessages[0]?.content as string)).toMatchObject({
-			data: { id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA', name: 'Test Employee' },
+			isError: false,
+			result: {
+				data: {
+					action: 'bamboohr_get_employee',
+					arguments: { id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA' },
+				},
+			},
 		});
 	});
 });

@@ -4,14 +4,12 @@ import {
 	DEFAULT_TIMEOUT_MS,
 	MAX_CONCURRENCY,
 	MAX_TOP_K,
-	MCP_PARAM_STYLE,
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
 import { type McpToolDefinition, listMcpTools } from './mcp-client';
-import { RpcClient } from './rpc-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
-import { StackOneMcpTool, StackOneRpcTool, type StackOneTool, Tools } from './tool';
+import { StackOneMcpTool, type StackOneTool, Tools } from './tool';
 import type {
 	FeedbackCategory,
 	FeedbackRating,
@@ -80,8 +78,8 @@ interface StackOneToolSetBaseConfig {
 	 */
 	headers?: Record<string, string>;
 	/**
-	 * Request timeout in milliseconds, applied to every MCP call (listing and `tools/call`), to
-	 * RPC execution and to account discovery. Default: 60000 (60s).
+	 * Request timeout in milliseconds, applied to every MCP call (listing and `tools/call`) and to
+	 * account discovery. Default: 60000 (60s).
 	 */
 	timeout?: number;
 	/**
@@ -285,10 +283,9 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
 /**
  * The StackOne toolset: lists the served tool catalog and exposes it to agent frameworks.
  *
- * A thin client over the catalog. Tools are listed from the MCP endpoint, per account, and
- * executed against the actions RPC endpoint (or over MCP `tools/call` for the tools that have no
- * action behind them). Schemas are passed through as served, never rewritten, filtered or
- * invented.
+ * A thin client over the MCP endpoint. Tools are listed from it, per account, and executed over
+ * its `tools/call`; the only other request is `GET /accounts`, to discover accounts. Schemas and
+ * arguments are passed through as served, never rewritten, filtered or invented.
  *
  * An API key is enough: with no account configured, the toolset lists every active account
  * linked to the key.
@@ -301,7 +298,6 @@ export class StackOneToolSet {
 	readonly #toolMode: ToolMode | undefined;
 	readonly #accountId: string | undefined;
 	#accountIds: string[];
-	readonly #rpcClient: RpcClient;
 
 	/**
 	 * The listing per account scope, not the Tools built from it. Tools are mutable
@@ -352,12 +348,6 @@ export class StackOneToolSet {
 		this.#toolMode = config.toolMode;
 		this.#accountId = config.accountId || process.env.STACKONE_ACCOUNT_ID || undefined;
 		this.#accountIds = [...(config.accountIds ?? config.execute?.accountIds ?? [])];
-		this.#rpcClient = new RpcClient({
-			baseUrl: this.#baseUrl,
-			apiKey: this.#apiKey,
-			timeout: this.#timeout,
-			headers: this.#headers,
-		});
 	}
 
 	/**
@@ -526,8 +516,8 @@ export class StackOneToolSet {
 	}
 
 	#endpoint(mode: ToolMode | undefined): string {
-		const endpoint = `${this.#baseUrl.replace(/\/+$/, '')}/mcp?param-style=${MCP_PARAM_STYLE}`;
-		return mode ? `${endpoint}&tool-mode=${mode}` : endpoint;
+		const endpoint = `${this.#baseUrl.replace(/\/+$/, '')}/mcp`;
+		return mode ? `${endpoint}?tool-mode=${mode}` : endpoint;
 	}
 
 	/**
@@ -601,35 +591,21 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * Build an executable tool from a served catalog entry, on a deep copy of its schema.
-	 *
-	 * In `search_execute` mode the served tools are MCP meta tools with no action behind them on
-	 * `/actions/rpc`, so they are executed over `tools/call`. `stackone_submit_feedback` goes over
-	 * `tools/call` in every mode too. The server would also accept it on `/actions/rpc`, but it is
-	 * served over MCP and is not a connector action, so it is called where it was listed.
+	 * Build an executable tool from a served catalog entry, on a deep copy of its schema. Every
+	 * tool — per-action, meta or feedback — executes over `tools/call` on the endpoint and account
+	 * that listed it.
 	 */
-	#createTool(entry: CatalogEntry, mode: ToolMode | undefined): StackOneTool {
+	#createTool(entry: CatalogEntry): StackOneTool {
 		const { definition, accountId, endpoint } = entry;
-		const parameters = toolParametersFromInputSchema(cloneJson(definition.inputSchema));
-		const description = definition.description ?? '';
-		if (mode === 'search_execute' || definition.name === SUBMIT_FEEDBACK_TOOL_NAME) {
-			return new StackOneMcpTool({
-				name: definition.name,
-				description,
-				parameters,
-				endpoint,
-				apiKey: this.#apiKey,
-				accountId,
-				timeout: this.#timeout,
-				extraHeaders: this.#headers,
-			});
-		}
-		return new StackOneRpcTool({
+		return new StackOneMcpTool({
 			name: definition.name,
-			description,
-			parameters,
-			client: this.#rpcClient,
+			description: definition.description ?? '',
+			parameters: toolParametersFromInputSchema(cloneJson(definition.inputSchema)),
+			endpoint,
+			apiKey: this.#apiKey,
 			accountId,
+			timeout: this.#timeout,
+			extraHeaders: this.#headers,
 		});
 	}
 
@@ -665,7 +641,7 @@ export class StackOneToolSet {
 					seenFeedbackTool = true;
 					return first;
 				})
-				.map((entry) => this.#createTool(entry, mode));
+				.map((entry) => this.#createTool(entry));
 
 			if (options.providers?.length) {
 				const providers = options.providers;
@@ -848,16 +824,7 @@ export class StackOneToolSet {
 		}
 		callArguments.action_id = actionId;
 
-		const result = await tool.execute(callArguments);
-		// The meta tool wraps its payload as { isError, result }, but an isError response has
-		// already raised by this point — so the flag could only ever be false, and the wrapper would
-		// just make this return a different shape from tool.execute() for the same action.
-		const keys = Object.keys(result);
-		if (keys.length === 2 && keys.includes('isError') && keys.includes('result')) {
-			const inner = result.result;
-			return isPlainObject(inner) ? inner : { result: inner ?? null };
-		}
-		return result;
+		return tool.execute(callArguments);
 	}
 
 	/**
