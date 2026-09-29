@@ -210,3 +210,25 @@ export type StackOneAccount = JsonObject & {
 	provider?: string;
 	status?: string;
 };
+
+/**
+ * One action a `search()` found. Carries at least `action_id` and `description`, plus whatever
+ * else the server returns for it (`similarity_score`, `input_schema`, `example_request`, …).
+ */
+export type SearchResult = JsonObject & {
+	action_id: string;
+	/**
+	 * The `session_id` of the search that produced this hit, when the server issued one. Pass it
+	 * to `execute()` and `submitFeedback()` to link those calls to this search.
+	 */
+	session_id?: string;
+};
+
+/** The verdict `submitFeedback()` records. */
+export type FeedbackRating = 'positive' | 'negative' | 'neutral';
+
+/** Who produced the feedback. */
+export type FeedbackSource = 'model' | 'user' | 'system';
+
+/** What the feedback is about. */
+export type FeedbackCategory = 'search' | 'execute' | 'defender' | 'connection' | 'general';

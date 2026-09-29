@@ -10,9 +10,12 @@ export { ToolSetConfigError, ToolSetError, ToolSetLoadError } from './utils/erro
 
 export {
 	StackOneToolSet,
+	type ExecuteActionOptions,
 	type ExecuteToolsConfig,
 	type FetchToolsOptions,
+	type SearchOptions,
 	type StackOneToolSetConfig,
+	type SubmitFeedbackOptions,
 } from './toolsets';
 
 export type {
@@ -20,8 +23,12 @@ export type {
 	AISDKToolResult,
 	ExecuteConfig,
 	ExecuteOptions,
+	FeedbackCategory,
+	FeedbackRating,
+	FeedbackSource,
 	JsonObject,
 	JsonValue,
+	SearchResult,
 	StackOneAccount,
 	ToolDefinition,
 	ToolMode,

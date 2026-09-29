@@ -23,10 +23,13 @@ export const MCP_PARAM_STYLE = 'flat_prefixed';
 
 /**
  * The one global tool the MCP endpoint serves, in every tool mode, when feedback is enabled for
- * the project. It is not an action: `/actions/rpc` has never heard of it, so it is only ever
- * executed over MCP `tools/call`.
+ * the project. It is not a connector action; the server also accepts it on `/actions/rpc`, but
+ * the SDK executes it only over MCP `tools/call`, where it is served.
  */
 export const SUBMIT_FEEDBACK_TOOL_NAME = 'stackone_submit_feedback';
 
 /** Upper bound on how many accounts' catalogs (or connectors' searches) run at once. */
 export const MAX_CONCURRENCY = 10;
+
+/** The `*_search_actions` meta tool's served schema caps `top_k` at 50. */
+export const MAX_TOP_K = 50;

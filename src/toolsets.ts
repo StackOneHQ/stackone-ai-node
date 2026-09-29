@@ -3,6 +3,7 @@ import {
 	DEFAULT_BASE_URL,
 	DEFAULT_TIMEOUT_MS,
 	MAX_CONCURRENCY,
+	MAX_TOP_K,
 	MCP_PARAM_STYLE,
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
@@ -11,7 +12,15 @@ import { type McpToolDefinition, listMcpTools } from './mcp-client';
 import { RpcClient } from './rpc-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
 import { StackOneMcpTool, StackOneRpcTool, type StackOneTool, Tools } from './tool';
-import type { StackOneAccount, ToolMode } from './types';
+import type {
+	FeedbackCategory,
+	FeedbackRating,
+	FeedbackSource,
+	JsonObject,
+	SearchResult,
+	StackOneAccount,
+	ToolMode,
+} from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
@@ -124,6 +133,49 @@ export interface FetchToolsOptions {
 	mode?: ToolMode | null;
 }
 
+/**
+ * Options for {@link StackOneToolSet.search}.
+ */
+export interface SearchOptions {
+	/** Maximum results per connector, 1–50. Default: 10. */
+	topK?: number;
+	/** Restrict to these accounts. Defaults to the toolset's accounts, then every active one. */
+	accountIds?: string[];
+}
+
+/**
+ * Options for {@link StackOneToolSet.execute}.
+ */
+export interface ExecuteActionOptions {
+	/**
+	 * The `session_id` a {@link StackOneToolSet.search} hit carries. Passing it links this call to
+	 * that search server-side. Sent only when given.
+	 */
+	sessionId?: string;
+	/** Restrict routing to these accounts. Defaults as for {@link StackOneToolSet.search}. */
+	accountIds?: string[];
+}
+
+/**
+ * Options for {@link StackOneToolSet.submitFeedback}.
+ */
+export interface SubmitFeedbackOptions {
+	/** The verdict: `'positive'`, `'negative'` or `'neutral'`. */
+	rating: FeedbackRating;
+	/** The tools or action ids the feedback is about. */
+	toolNames: string[];
+	/** An optional one-line reason. */
+	feedback?: string;
+	/** What the feedback is about, e.g. `'search'` or `'execute'`. */
+	category?: FeedbackCategory;
+	/** The session to attach the feedback to — the `session_id` of a search hit. */
+	sessionId?: string;
+	/** Who produced the feedback. Default: `'model'`. */
+	source?: FeedbackSource;
+	/** Accounts to list the tool through. Defaults as for {@link StackOneToolSet.fetchTools}. */
+	accountIds?: string[];
+}
+
 /** One served tool, with the account it was listed for. What the catalog cache holds. */
 interface CatalogEntry {
 	definition: McpToolDefinition;
@@ -188,6 +240,32 @@ function matchGlob(value: string, pattern: string): boolean {
 		}
 	}
 	return new RegExp(`^${source}$`, 's').test(value);
+}
+
+const isPlainObject = (value: unknown): value is JsonObject =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * The connector a meta tool belongs to: its name minus the account id and the suffix.
+ *
+ * The account id is stripped by identity, not by splitting on the last underscore. Account ids
+ * are nanoid-shaped and nanoid's alphabet includes `_`, so splitting turned
+ * `mock_acc_1_execute_action` into connector `mock_acc` and made every action on that account
+ * unroutable — with an error blaming the caller's action id.
+ */
+function connectorOf(tool: StackOneTool, suffix: string): string {
+	let stem = tool.name.endsWith(suffix) ? tool.name.slice(0, -suffix.length) : tool.name;
+	const account = tool.getAccountId();
+	if (account && stem.endsWith(`_${account}`)) {
+		stem = stem.slice(0, -(account.length + 1));
+	}
+	return stem.toLowerCase();
+}
+
+/** A search hit's score, or 0 for one without a numeric score, so it sorts last. */
+function scoreOf(action: SearchResult): number {
+	const score = action.similarity_score;
+	return typeof score === 'number' && !Number.isNaN(score) ? score : 0;
 }
 
 const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
@@ -610,6 +688,228 @@ export class StackOneToolSet {
 				cause: error,
 			});
 		}
+	}
+
+	/**
+	 * The server's per-connector meta tools, whatever this toolset's own mode.
+	 *
+	 * The mode is passed down rather than switched on the instance, so a concurrent
+	 * `fetchTools()` can never read the switched mode and cache meta tools under the wrong key.
+	 */
+	async #metaTools(suffix: string, accountIds: string[] | undefined): Promise<StackOneTool[]> {
+		const tools = await this.fetchTools({ accountIds, mode: 'search_execute' });
+		return tools.getStackOneTools().filter((tool) => tool.name.endsWith(suffix));
+	}
+
+	/**
+	 * Find actions matching a natural-language query.
+	 *
+	 * Searches every linked connector and ranks the results together, so a catalog of hundreds of
+	 * tools never has to fit in a model's context. A connector that fails to search is skipped
+	 * with a warning, unless they all fail.
+	 *
+	 * @param query What you want to do, e.g. "list recent comments".
+	 * @returns Actions carrying at least `action_id` and `description`, best first, each with the
+	 *   `session_id` of the search that found it when the server issued one. Pass it to
+	 *   {@link execute} and {@link submitFeedback} to link the calls.
+	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50.
+	 * @throws ToolSetLoadError If every connector fails.
+	 */
+	async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
+		const topK = options.topK === undefined ? 10 : options.topK;
+		// The server rejects anything outside 1..50, but only after a round trip per connector —
+		// and that reads like an outage rather than a typo. Fail here, where the caller can see why.
+		if (typeof topK !== 'number' || !Number.isInteger(topK) || topK < 1 || topK > MAX_TOP_K) {
+			throw new ToolSetConfigError(
+				`topK must be an integer between 1 and ${MAX_TOP_K}, got ${JSON.stringify(topK) ?? String(topK)}`,
+			);
+		}
+		if (typeof query !== 'string') {
+			throw new ToolSetConfigError(`query must be a string, got ${typeof query}`);
+		}
+
+		const tools = await this.#metaTools('_search_actions', options.accountIds);
+		if (tools.length === 0) {
+			return [];
+		}
+
+		const searchOne = async (tool: StackOneTool): Promise<SearchResult[]> => {
+			const found = await tool.execute({ query, top_k: topK });
+			const actions = (Array.isArray(found.actions) ? found.actions : []).filter(
+				(action): action is SearchResult => isPlainObject(action),
+			);
+			// The server returns session_id once per search, beside the actions. Results from every
+			// connector are merged and re-ranked below, so this is the last point at which a hit can
+			// still be traced to the search that produced it.
+			const sessionId = found.session_id;
+			if (typeof sessionId !== 'string' || !sessionId) {
+				return actions;
+			}
+			return actions.map((action) => ({ ...action, session_id: sessionId }));
+		};
+
+		// Fan out the way fetchTools() does: serially, a dozen connectors would cost the sum of
+		// their latencies on the headline call.
+		const settled = await settleWithConcurrency(tools, MAX_CONCURRENCY, searchOne);
+		const results: SearchResult[] = [];
+		const failures: string[] = [];
+		settled.forEach((outcome, index) => {
+			if (outcome.status === 'fulfilled') {
+				results.push(...outcome.value);
+			} else {
+				failures.push(`${tools[index]?.name}: ${describeError(outcome.reason)}`);
+			}
+		});
+		if (failures.length > 0 && results.length === 0) {
+			throw new ToolSetLoadError(`No connector returned results. ${failures.join(' | ')}`);
+		}
+		for (const failure of failures) {
+			warn(`Skipping connector that failed to search — ${failure}`);
+		}
+
+		// Concatenating per-connector results would leave them grouped by connector, so results[0]
+		// would be the best hit of whichever connector answered first rather than the best hit
+		// overall. The server scores every action on the same scale, so rank globally.
+		return results.sort((left, right) => scoreOf(right) - scoreOf(left));
+	}
+
+	/**
+	 * Execute an action by id, as returned by {@link search}.
+	 *
+	 * Always runs through the connector's `*_execute_action` meta tool, so `args` is the nested
+	 * envelope every action's `example_request` shows — `{ query: {...}, path: {...}, body: {...} }`.
+	 * The flat, prefixed form belongs to `fetchTools()` tools, whose own served schema names the
+	 * keys. The connector is the longest one whose name prefixes `actionId`, and `actionId` is
+	 * pinned last, so a model-supplied `action_id` in `args` cannot replace it.
+	 *
+	 * @param actionId The action to run, e.g. `linear_list_issues`.
+	 * @param args The action's arguments.
+	 * @param options.sessionId The `session_id` a search hit carries, to link this call to it.
+	 * @returns The action's result.
+	 * @throws ToolSetConfigError If the arguments are malformed.
+	 * @throws ToolSetLoadError If no linked connector serves the action.
+	 * @throws StackOneAPIError If the action fails.
+	 */
+	async execute(
+		actionId: string,
+		args?: JsonObject,
+		options: ExecuteActionOptions = {},
+	): Promise<JsonObject> {
+		if (typeof actionId !== 'string' || !actionId) {
+			throw new ToolSetConfigError(
+				`actionId must be a non-empty string, got ${JSON.stringify(actionId) ?? String(actionId)}`,
+			);
+		}
+		if (args !== undefined && !isPlainObject(args)) {
+			throw new ToolSetConfigError(
+				`arguments must be a JSON object, got ${Array.isArray(args) ? 'array' : args === null ? 'null' : typeof args}`,
+			);
+		}
+		const { sessionId } = options;
+		if (sessionId !== undefined && (typeof sessionId !== 'string' || !sessionId)) {
+			throw new ToolSetConfigError(
+				`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
+			);
+		}
+
+		const suffix = '_execute_action';
+		const lowered = actionId.toLowerCase();
+		const matches = (await this.#metaTools(suffix, options.accountIds)).filter((tool) =>
+			lowered.startsWith(`${connectorOf(tool, suffix)}_`),
+		);
+		if (matches.length === 0) {
+			throw new ToolSetLoadError(
+				`No connector found for "${actionId}". Use search() to discover valid action ids.`,
+			);
+		}
+
+		// Longest connector wins: with both `browser` and `browser_linkedin` linked, the first
+		// token alone would route every browser_linkedin action to browser.
+		const longest = Math.max(...matches.map((tool) => connectorOf(tool, suffix).length));
+		const finalists = matches.filter((tool) => connectorOf(tool, suffix).length === longest);
+		const [tool] = finalists as [StackOneTool, ...StackOneTool[]];
+		if (finalists.length > 1) {
+			// The same provider linked twice. Picking one silently would run the action against an
+			// account the caller never chose.
+			warn(
+				`"${actionId}" matches ${finalists.length} connectors (${finalists.map((t) => t.name).join(', ')}); using ${tool.name}. Pass accountIds to choose.`,
+			);
+		}
+
+		// action_id LAST, deleted first so it is last in key order too. Spreading the arguments
+		// over it would let a model-supplied "action_id" replace the action the caller pinned — the
+		// exact thing a host app pins it for. session_id only when given: the served schema makes
+		// it an optional string, so an absent key is valid and a null is not.
+		const callArguments: JsonObject = { ...args };
+		delete callArguments.action_id;
+		if (sessionId !== undefined) {
+			delete callArguments.session_id;
+			callArguments.session_id = sessionId;
+		}
+		callArguments.action_id = actionId;
+
+		const result = await tool.execute(callArguments);
+		// The meta tool wraps its payload as { isError, result }, but an isError response has
+		// already raised by this point — so the flag could only ever be false, and the wrapper would
+		// just make this return a different shape from tool.execute() for the same action.
+		const keys = Object.keys(result);
+		if (keys.length === 2 && keys.includes('isError') && keys.includes('result')) {
+			const inner = result.result;
+			return isPlainObject(inner) ? inner : { result: inner ?? null };
+		}
+		return result;
+	}
+
+	/**
+	 * Record a verdict on how well the tools served this session, through the server's
+	 * `stackone_submit_feedback` tool.
+	 *
+	 * The tool is found in the served catalog, never built here: the server serves it only when
+	 * feedback is enabled for the project, and a client-side stand-in would report success for
+	 * feedback that went nowhere. Unset optional fields are omitted, never sent as null.
+	 *
+	 * @example
+	 * ```typescript
+	 * const [hit] = await toolset.search('list recent comments');
+	 * await toolset.execute(hit.action_id, {}, { sessionId: hit.session_id });
+	 * await toolset.submitFeedback({
+	 *   rating: 'positive',
+	 *   toolNames: [hit.action_id],
+	 *   sessionId: hit.session_id,
+	 * });
+	 * ```
+	 *
+	 * @throws ToolSetConfigError If `toolNames` is not a list.
+	 * @throws ToolSetLoadError If feedback is not enabled for this project.
+	 */
+	async submitFeedback(options: SubmitFeedbackOptions): Promise<JsonObject> {
+		const { rating, toolNames, feedback, category, sessionId, source = 'model' } = options;
+		if (typeof (toolNames as unknown) === 'string') {
+			throw new ToolSetConfigError(
+				`toolNames must be an array of tool names, not a string. Did you mean ["${String(toolNames)}"]?`,
+			);
+		}
+		if (!Array.isArray(toolNames)) {
+			throw new ToolSetConfigError('toolNames must be an array of tool names');
+		}
+
+		const tool = (await this.fetchTools({ accountIds: options.accountIds })).getTool(
+			SUBMIT_FEEDBACK_TOOL_NAME,
+		);
+		if (!tool) {
+			throw new ToolSetLoadError(
+				`The server did not serve ${SUBMIT_FEEDBACK_TOOL_NAME}: feedback is not enabled for this project.`,
+			);
+		}
+
+		const args: JsonObject = { rating, tool_names: [...toolNames] };
+		const optional = { feedback, category, session_id: sessionId, source };
+		for (const [key, value] of Object.entries(optional)) {
+			if (value !== undefined && value !== null) {
+				args[key] = value;
+			}
+		}
+		return tool.execute(args);
 	}
 }
 
