@@ -183,11 +183,17 @@ export class BaseTool {
 	 * This is framework-agnostic and can be used with any LLM that accepts JSON Schema
 	 */
 	toJsonSchema(): ObjectJSONSchema {
-		return {
+		const schema: Record<string, unknown> = {
+			...this.parameters,
 			type: 'object',
 			properties: this.parameters.properties,
-			required: this.parameters.required,
 		};
+		if (this.parameters.required && this.parameters.required.length > 0) {
+			schema.required = this.parameters.required;
+		} else {
+			delete schema.required;
+		}
+		return schema as unknown as ObjectJSONSchema;
 	}
 
 	/**

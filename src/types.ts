@@ -159,7 +159,7 @@ export interface ToolExecution {
 /**
  * Schema definition for tool parameters
  */
-export interface ToolParameters {
+export interface ToolParameters extends Record<string, unknown> {
 	type: string;
 	properties: JsonSchemaProperties; // these are the params we will expose to the user/agent in the tool. These might be higher level params.
 	required?: string[]; // list of required parameter names
