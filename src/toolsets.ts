@@ -1,7 +1,11 @@
-import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import { DEFAULT_BASE_URL } from './consts';
-import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
+import {
+	type StackOneHeaders,
+	declaredHeaderNames,
+	sanitiseHeaders,
+	stackOneHeadersSchema,
+} from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
 import { BaseTool, Tools } from './tool';
@@ -557,6 +561,8 @@ export class StackOneToolSet {
 			properties: inputSchema?.properties as JsonSchemaProperties,
 		} satisfies ToolParameters;
 
+		const declaredHeaders = declaredHeaderNames(Object.keys(toolParameters.properties ?? {}));
+
 		const tool = new BaseTool(
 			name,
 			description ?? '',
@@ -589,9 +595,11 @@ export class StackOneToolSet {
 				const envelope = this.splitEnvelopeParams(parsedParams);
 				const pathParams = envelope.path;
 				const queryParams = envelope.query;
-				const extraHeaders = normalizeHeaders(envelope.headers);
-				// defu merges extraHeaders into baseHeaders, both are already branded types
-				const actionHeaders = defu(extraHeaders, baseHeaders);
+				// Model-supplied headers are filtered to the ones the served schema declares, and
+				// the SDK's own headers are applied LAST. Merging the other way round let a tool
+				// call carry `headers_x-account-id` and switch the request to another tenant.
+				const allowedHeaders = sanitiseHeaders(envelope.headers, declaredHeaders);
+				const actionHeaders = stackOneHeadersSchema.parse({ ...allowedHeaders, ...baseHeaders });
 
 				const rpcBody: JsonObject = envelope.body;
 

@@ -5,7 +5,8 @@
  */
 import type { Hono as HonoApp } from 'hono';
 import { StreamableHTTPTransport } from '@hono/mcp';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 
@@ -17,6 +18,7 @@ export interface McpToolDefinition {
 		properties?: Record<string, unknown>;
 		required?: string[];
 		additionalProperties?: boolean;
+		[keyword: string]: unknown;
 	};
 }
 
@@ -65,26 +67,18 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		const accountId = c.req.header('x-account-id') ?? 'default';
 		const tools = accountTools[accountId] ?? accountTools.default ?? [];
 
-		// Create a new MCP server instance per request
-		const mcp = new McpServer({ name: 'test-mcp-server', version: '1.0.0' });
+		// A low-level Server rather than McpServer: McpServer.registerTool expects a Zod shape
+		// and lists a plain JSON Schema as `properties: {}`, so every tool used to reach the SDK
+		// with no parameters at all. The real endpoint serves each schema verbatim.
+		const mcp = new Server({ name: 'test-mcp-server', version: '1.0.0' }, { capabilities: { tools: {} } });
 		const transport = new StreamableHTTPTransport();
 
-		for (const tool of tools) {
-			mcp.registerTool(
-				tool.name,
-				{
-					description: tool.description,
-					// MCP SDK expects Zod-like schema but accepts JSON Schema objects
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- MCP SDK type mismatch
-					inputSchema: tool.inputSchema as any,
-				},
-				async ({ params }: { params: { arguments?: Record<string, unknown> } }) => ({
-					content: [],
-					structuredContent: params.arguments ?? {},
-					_meta: undefined,
-				}),
-			);
-		}
+		mcp.setRequestHandler(ListToolsRequestSchema, () => ({
+			tools: tools.map((tool) => ({ ...tool, inputSchema: structuredClone(tool.inputSchema) })),
+		}));
+		mcp.setRequestHandler(CallToolRequestSchema, (request) => ({
+			content: [{ type: 'text' as const, text: JSON.stringify(request.params.arguments ?? {}) }],
+		}));
 
 		await mcp.connect(transport);
 		return transport.handleRequest(c);

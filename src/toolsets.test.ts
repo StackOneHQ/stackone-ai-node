@@ -7,7 +7,7 @@
  * - Account filtering
  * - Provider and action filtering
  */
-import { http } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { type McpToolDefinition, createMcpApp, defaultMcpTools } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
@@ -599,7 +599,8 @@ describe('StackOneToolSet', () => {
 			expect(payload.path).toEqual({ id: '123' });
 			expect(payload.query).toEqual({ limit: 10 });
 			expect(payload.body).toEqual({ name: 'test' });
-			expect((result.headers as Record<string, string>)['x-custom']).toBe('value');
+			// dummy_action declares no `headers_*` property, so the header is dropped.
+			expect(result.headers as Record<string, string>).not.toHaveProperty('x-custom');
 		});
 
 		it('preserves fields named after Object.prototype members', async () => {
@@ -669,6 +670,78 @@ describe('StackOneToolSet', () => {
 			const payload = JSON.parse(result.body as string);
 			expect(payload.body).toEqual({ real_field: 'kept' });
 			expect(payload.path).toBeUndefined();
+		});
+	});
+
+	describe('model-supplied headers', () => {
+		const serveTool = (inputSchema: McpToolDefinition['inputSchema']) => {
+			const app = createMcpApp({
+				accountTools: {
+					'tenant-a': [{ name: 'crm_list_contacts', description: 'List contacts', inputSchema }],
+				},
+			});
+			server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+		};
+		const captureRpc = () => {
+			const seen: { accountHeader: string | null; body: Record<string, unknown> }[] = [];
+			server.use(
+				http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
+					seen.push({
+						accountHeader: request.headers.get('x-account-id'),
+						body: (await request.json()) as Record<string, unknown>,
+					});
+					return HttpResponse.json({ data: {} });
+				}),
+			);
+			return seen;
+		};
+		const fetchTool = async () => {
+			const toolset = new StackOneToolSet({
+				baseUrl: TEST_BASE_URL,
+				apiKey: 'test-key',
+				accountId: 'tenant-a',
+			});
+			const tool = (await toolset.fetchTools()).getTool('crm_list_contacts');
+			assert(tool, 'tool should be listed');
+			return tool;
+		};
+
+		// Regression: the envelope headers were merged OVER the tool's own headers, so a
+		// model-supplied x-account-id replaced the account the tool was fetched for — on the
+		// envelope and on the HTTP header the API actually reads.
+		it('cannot switch tenant with headers_x-account-id, even when the schema declares it', async () => {
+			serveTool({
+				type: 'object',
+				properties: { 'headers_x-account-id': { type: 'string' }, query_limit: { type: 'number' } },
+			});
+			const seen = captureRpc();
+			const tool = await fetchTool();
+
+			await tool.execute({ 'headers_x-account-id': 'tenant-b', query_limit: 1 });
+
+			expect(seen[0]?.accountHeader).toBe('tenant-a');
+			expect((seen[0]?.body.headers as Record<string, string>)['x-account-id']).toBe('tenant-a');
+		});
+
+		it('cannot switch tenant with a nested headers object', async () => {
+			serveTool({ type: 'object', properties: { query_limit: { type: 'number' } } });
+			const seen = captureRpc();
+			const tool = await fetchTool();
+
+			await tool.execute({ headers: { 'X-Account-Id': 'tenant-b', Authorization: 'Bearer stolen' } });
+
+			expect(seen[0]?.accountHeader).toBe('tenant-a');
+			expect(seen[0]?.body.headers).toEqual({ 'x-account-id': 'tenant-a' });
+		});
+
+		it('forwards a header the served schema declares', async () => {
+			serveTool({ type: 'object', properties: { 'headers_x-trace': { type: 'string' } } });
+			const seen = captureRpc();
+			const tool = await fetchTool();
+
+			await tool.execute({ 'headers_x-trace': 'abc', 'headers_x-other': 'dropped' });
+
+			expect(seen[0]?.body.headers).toEqual({ 'x-trace': 'abc', 'x-account-id': 'tenant-a' });
 		});
 	});
 
