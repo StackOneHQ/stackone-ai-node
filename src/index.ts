@@ -7,11 +7,10 @@ export { isBinaryDownloadResult, type BinaryDownloadResult } from './utils/binar
 export { StackOneError } from './utils/error-stackone';
 export { StackOneAPIError } from './utils/error-stackone-api';
 
+export { ToolSetConfigError, ToolSetError, ToolSetLoadError } from './utils/error-toolset';
+
 export {
 	StackOneToolSet,
-	ToolSetConfigError,
-	ToolSetError,
-	ToolSetLoadError,
 	type AuthenticationConfig,
 	type BaseToolSetConfig,
 	type ExecuteToolsConfig,

@@ -18,6 +18,7 @@ import type {
 } from './types';
 import type { BinaryDownloadResult } from './utils/binary-response';
 import { StackOneError } from './utils/error-stackone';
+import { ToolSetConfigError, ToolSetError } from './utils/error-toolset';
 
 /**
  * Param-style pinned on the /mcp tool-listing URL. The MCP schema and the RPC-execution
@@ -62,36 +63,6 @@ function rpcResponseToJsonObject(response: RpcActionResponse | BinaryDownloadRes
 type ToolInputSchema = Awaited<
 	ReturnType<Awaited<ReturnType<typeof createMCPClient>>['client']['listTools']>
 >['tools'][number]['inputSchema'];
-
-/**
- * Base exception for toolset errors
- */
-export class ToolSetError extends Error {
-	constructor(message: string, options?: ErrorOptions) {
-		super(message, options);
-		this.name = 'ToolSetError';
-	}
-}
-
-/**
- * Raised when there is an error in the toolset configuration
- */
-export class ToolSetConfigError extends ToolSetError {
-	constructor(message: string, options?: ErrorOptions) {
-		super(message, options);
-		this.name = 'ToolSetConfigError';
-	}
-}
-
-/**
- * Raised when there is an error loading tools
- */
-export class ToolSetLoadError extends ToolSetError {
-	constructor(message: string, options?: ErrorOptions) {
-		super(message, options);
-		this.name = 'ToolSetLoadError';
-	}
-}
 
 /**
  * Authentication configuration for toolsets
