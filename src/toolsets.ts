@@ -477,8 +477,6 @@ export class StackOneToolSet {
 		this.catalogCache.clear();
 	}
 
-
-
 	/**
 	 * Extract the API key from authentication config.
 	 */
@@ -500,9 +498,6 @@ export class StackOneToolSet {
 		return apiKey;
 	}
 
-
-
-
 	/**
 	 * Get tools in OpenAI function calling format.
 	 *
@@ -517,17 +512,12 @@ export class StackOneToolSet {
 	 * const tools = await toolset.openai();
 	 * ```
 	 */
-	async openai(options?: {
-		accountIds?: string[];
-	}): Promise<ReturnType<Tools['toOpenAI']>> {
+	async openai(options?: { accountIds?: string[] }): Promise<ReturnType<Tools['toOpenAI']>> {
 		const effectiveAccountIds = options?.accountIds ?? this.executeConfig?.accountIds;
 
 		const tools = await this.fetchTools({ accountIds: effectiveAccountIds });
 		return tools.toOpenAI();
 	}
-
-
-
 
 	/**
 	 * Fetch tools from MCP with optional filtering

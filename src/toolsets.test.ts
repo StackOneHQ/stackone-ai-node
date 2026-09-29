@@ -11,11 +11,7 @@ import { http, HttpResponse } from 'msw';
 import { type McpToolDefinition, createMcpApp, defaultMcpTools } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
-import {
-	StackOneToolSet,
-	ToolSetConfigError,
-	__resetDefenderInfoLog,
-} from './toolsets';
+import { StackOneToolSet, ToolSetConfigError, __resetDefenderInfoLog } from './toolsets';
 
 describe('StackOneToolSet', () => {
 	beforeEach(() => {
