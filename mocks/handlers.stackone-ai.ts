@@ -20,17 +20,6 @@ export const stackoneAiHandlers = [
 		return HttpResponse.json({ error: 'Not found' }, { status: 404 });
 	}),
 
-	// StackOne AI tool feedback endpoint
-	http.post(`${TEST_BASE_URL}/ai/tool-feedback`, async ({ request }) => {
-		await request.json(); // Validate request body is JSON
-		return HttpResponse.json({
-			message: 'Feedback successfully stored',
-			key: 'test-key.json',
-			submitted_at: new Date().toISOString(),
-			trace_id: 'test-trace-id',
-		});
-	}),
-
 	// StackOne fetchTools endpoint for fetch-tools.ts example
 	http.get(`${TEST_BASE_URL}/ai/tools`, () => {
 		return HttpResponse.json({

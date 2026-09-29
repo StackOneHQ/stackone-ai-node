@@ -1,7 +1,6 @@
 import { defu } from 'defu';
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import { DEFAULT_BASE_URL } from './consts';
-import { createFeedbackTool } from './feedback';
 import { type StackOneHeaders, normalizeHeaders, stackOneHeadersSchema } from './headers';
 import { createMCPClient } from './mcp-client';
 import { type RpcActionResponse, RpcClient } from './rpc-client';
@@ -411,12 +410,8 @@ export class StackOneToolSet {
 		// Apply provider and action filters
 		const filteredTools = this.filterTools(tools, options);
 
-		// Add feedback tool
-		const feedbackTool = createFeedbackTool(undefined, this.accountId, this.baseUrl);
-		const toolsWithFeedback = new Tools([...filteredTools.toArray(), feedbackTool]);
-
-		this.catalogCache.set(cacheKey, toolsWithFeedback);
-		return toolsWithFeedback;
+		this.catalogCache.set(cacheKey, filteredTools);
+		return filteredTools;
 	}
 
 	/**
