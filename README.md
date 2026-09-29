@@ -406,7 +406,7 @@ Everything the SDK throws is a `StackOneError`:
 - `ToolSetConfigError` — the toolset was configured, or called, with something it cannot use.
 - `ToolSetLoadError` — the catalog, or the accounts behind it, could not be loaded.
 
-`timeout` (milliseconds, default 60000) bounds every MCP listing and `tools/call`, every RPC call and account discovery.
+`timeout` (milliseconds, default 60000) bounds every MCP listing and `tools/call`, and account discovery.
 
 ### Custom Base URL
 
@@ -418,71 +418,46 @@ const toolset = new StackOneToolSet({ baseUrl: 'https://api.example-dev.com' });
 
 ### Testing with dryRun
 
-You can use the `dryRun` option to return the api arguments from a tool call without making the actual api call:
+You can use the `dryRun` option to see the `tools/call` a tool would send, without sending it:
 
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-// Initialize the toolset
 const toolset = new StackOneToolSet();
 
 const tools = await toolset.fetchTools();
 const employeeTool = tools.getTool('workday_list_workers');
 
-// Use dryRun to see the request details
-const dryRunResult = await employeeTool.execute({ query_limit: 5 }, { dryRun: true });
+const dryRunResult = await employeeTool.execute({ query: { limit: 5 } }, { dryRun: true });
 
 console.log(dryRunResult);
 // {
-//   url: "https://api.stackone.com/actions/rpc",
-//   method: "POST",
-//   headers: { ... },
-//   body: '{"action":"workday_list_workers","body":{},"headers":{...},"query":{"limit":5}}',
-//   mappedParams: { query_limit: 5 }
+//   url: "https://api.stackone.com/mcp",
+//   method: "tools/call",
+//   name: "workday_list_workers",
+//   arguments: { query: { limit: 5 } }
 // }
 ```
 
-The `dryRun` option returns an object containing:
-
-- `url`: The RPC endpoint
-- `method`: The HTTP method
-- `headers`: The HTTP request headers, without `Authorization`
-- `body`: The JSON request body: the arguments split into the RPC envelope
-- `mappedParams`: The arguments as the tool received them
-
 ### File Downloads
 
-Actions that download a file (for example `googledrive_unified_download_file`, `documents_download_file`, or any `*_unified_download_file`) return raw bytes plus metadata instead of parsed JSON. The SDK decides from the response `Content-Type`: JSON media types (`application/json` and `+json` suffixes) are parsed as usual, and anything else is treated as a file download.
-
-Use the exported `isBinaryDownloadResult` type guard to narrow the result — no casts needed:
+Every tool executes over MCP `tools/call`, and a tool returns the server's result exactly as the server wrote it: `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A tool result cannot carry a file, so a file action (for example `googledrive_unified_download_file` or any `*_download_file`) returns a single-use link as its `result`:
 
 ```typescript
-import { writeFileSync } from 'node:fs';
-import { isBinaryDownloadResult, StackOneToolSet } from '@stackone/ai';
-
-const toolset = new StackOneToolSet();
-const tools = await toolset.fetchTools({ actions: ['googledrive_*'] });
-const download = tools.getTool('googledrive_unified_download_file');
-
-const result = await download.execute({ id: 'file-id' });
-
-if (isBinaryDownloadResult(result)) {
-	// result.content is a Buffer; result.fileName is string | null
-	writeFileSync(result.fileName ?? 'download.bin', result.content);
-}
+const response = await tools
+	.getTool('googledrive_unified_download_file')
+	?.execute({ path: { id: 'file-id' } });
+// {
+//   isError: false,
+//   result: {
+//     download_url: "https://api.stackone.com/actions/download/v1.…",
+//     expires_at: "2026-09-29T12:05:00.000Z",
+//     file: { name: "report.pdf", content_type: "application/pdf", content_length: 48213 }
+//   }
+// }
 ```
 
-The download result (typed `BinaryDownloadResult`) contains:
-
-- `content`: `Buffer` — the raw file bytes (not a `JsonValue`; see note)
-- `contentType`: `string` — the file's MIME type (e.g. `application/pdf`), or `application/octet-stream`
-- `statusCode`: `number` — HTTP status of the download response
-- `headers`: `Record<string, string>` — the response headers
-- `fileName`: `string | null` — filename from `Content-Disposition` (RFC 5987 `filename*` aware), reduced to a safe basename, or `null`
-
-The filename comes from whoever uploaded the file to the connected provider, so it is reduced to a bare basename before you see it: path components (`../`, `/`, `\`), drive letters and NTFS stream separators (`:`), control and Unicode format characters are removed, and it is capped at 255 bytes. It is `null` when nothing usable is left.
-
-> **Note:** `content` is a raw `Buffer`, not a `JsonValue`. `JSON.stringify` turns it into a `{ type: 'Buffer', data: [...] }` byte array (not the file, and potentially huge), so if you forward tool results to an LLM — or anything that re-serializes to JSON — strip or transform the `content` key first. `executeOpenAIToolCalls()` and the Claude Agent SDK adapter base64-encode it for you.
+`GET` the `download_url` for the bytes: it needs no credentials, works once, and expires after five minutes. The filename in `file.name` and in the download's `Content-Disposition` is chosen by whoever uploaded the file, so reduce it to a safe basename before writing it to disk. Where no link can be issued, the call raises a `StackOneAPIError` with status `501`.
 
 ## Examples
 
