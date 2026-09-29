@@ -6,7 +6,7 @@ import { server } from '../mocks/node';
 import { RpcClient } from './rpc-client';
 import { toolParametersFromInputSchema } from './schema';
 import { BaseTool, StackOneMcpTool, StackOneRpcTool, StackOneTool, Tools } from './tool';
-import type { AISDKToolResult, JSONSchema, ToolParameters } from './types';
+import type { AISDKToolResult, JsonObject, JSONSchema, ToolParameters } from './types';
 import { isBinaryDownloadResult } from './utils/binary-response';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
@@ -644,5 +644,127 @@ describe('ToolParameters typing', () => {
 	it('accepts a served schema as parameters', () => {
 		const parameters: ToolParameters = toolParametersFromInputSchema(richSchema);
 		expect(parameters.type).toBe('object');
+	});
+});
+
+describe('Tools.executeOpenAIToolCalls', () => {
+	const toolsWith = (behaviour: (args: unknown) => Promise<JsonObject>) => {
+		const tool = localTool('linear_list_issues', {
+			type: 'object',
+			properties: { body_variables: { type: 'object' } },
+		});
+		const seen: unknown[] = [];
+		tool.execute = async (args) => {
+			seen.push(args);
+			return behaviour(args);
+		};
+		return { tools: new Tools([tool]), seen };
+	};
+	const call = (name: string, args = '{}', id = 'call_1') => ({
+		id,
+		type: 'function' as const,
+		function: { name, arguments: args },
+	});
+
+	it('runs each call and pairs its result with the call id', async () => {
+		const { tools, seen } = toolsWith(async () => ({ data: { n: 1 } }));
+
+		const messages = await tools.executeOpenAIToolCalls([
+			call('linear_list_issues', '{"body_variables": {}}'),
+		]);
+
+		expect(messages).toEqual([
+			{ role: 'tool', tool_call_id: 'call_1', content: '{"data":{"n":1}}' },
+		]);
+		expect(seen).toEqual(['{"body_variables": {}}']);
+	});
+
+	it('keeps the order of several calls', async () => {
+		const { tools } = toolsWith(async (args) => ({ echoed: args as string }));
+
+		const messages = await tools.executeOpenAIToolCalls([
+			call('linear_list_issues', '{"a":1}', 'c1'),
+			call('linear_list_issues', '{"a":2}', 'c2'),
+		]);
+
+		expect(messages.map((message) => message.tool_call_id)).toEqual(['c1', 'c2']);
+	});
+
+	it('accepts plain objects without a type and with object arguments', async () => {
+		const { tools, seen } = toolsWith(async () => ({ ok: true }));
+		await tools.executeOpenAIToolCalls([
+			{ id: 'c', function: { name: 'linear_list_issues', arguments: { a: 1 } } },
+		]);
+		expect(seen).toEqual([{ a: 1 }]);
+	});
+
+	it('reports a failed call to the model instead of throwing, with the response body', async () => {
+		const { tools } = toolsWith(async () => {
+			throw new StackOneAPIError('400 Bad Request: path.id is missing', 400, {
+				message: 'path.id is missing',
+			});
+		});
+
+		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
+
+		expect(JSON.parse(message?.content as string)).toEqual({
+			error: '400 Bad Request: path.id is missing',
+			response_body: { message: 'path.id is missing' },
+		});
+	});
+
+	it('reports malformed arguments the same way', async () => {
+		const tool = new StackOneRpcTool({
+			name: 'linear_list_issues',
+			description: '',
+			parameters: { type: 'object', properties: {} },
+			client: new RpcClient({ baseUrl: TEST_BASE_URL, apiKey: 'k', timeout: 1_000 }),
+			accountId: 'acc1',
+		});
+		const [message] = await new Tools([tool]).executeOpenAIToolCalls([
+			call('linear_list_issues', '{not json'),
+		]);
+		expect(JSON.parse(message?.content as string).error).toMatch(/Invalid JSON in arguments/);
+	});
+
+	it('reports an unknown tool rather than throwing', async () => {
+		const { tools } = toolsWith(async () => ({}));
+		const [message] = await tools.executeOpenAIToolCalls([call('invented_tool')]);
+		expect(JSON.parse(message?.content as string)).toEqual({
+			error: 'Unknown tool "invented_tool"',
+		});
+	});
+
+	it('reports a non-function tool call rather than throwing', async () => {
+		const { tools } = toolsWith(async () => ({}));
+		const [message] = await tools.executeOpenAIToolCalls([
+			{ id: 'c', type: 'custom', custom: { name: 'linear_list_issues', input: '' } },
+		]);
+		expect(JSON.parse(message?.content as string)).toEqual({
+			error: 'Unsupported tool call type "custom"',
+		});
+	});
+
+	it('serialises file bytes as base64 instead of a byte array', async () => {
+		const { tools } = toolsWith(async () => ({ content: Buffer.from('%PDF-1.4') as never }));
+		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
+		expect(JSON.parse(message?.content as string)).toEqual({
+			content: Buffer.from('%PDF-1.4').toString('base64'),
+		});
+	});
+
+	it('rethrows an error that is not the SDK’s', async () => {
+		const { tools } = toolsWith(async () => {
+			throw new TypeError('programming error');
+		});
+		await expect(tools.executeOpenAIToolCalls([call('linear_list_issues')])).rejects.toThrow(
+			TypeError,
+		);
+	});
+
+	it('returns no messages for no tool calls', async () => {
+		const { tools } = toolsWith(async () => ({}));
+		expect(await tools.executeOpenAIToolCalls(undefined)).toEqual([]);
+		expect(await tools.executeOpenAIToolCalls(null)).toEqual([]);
 	});
 });

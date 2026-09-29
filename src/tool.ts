@@ -1,7 +1,11 @@
 import type { JSONSchema7 as AISDKJSONSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import type { McpSdkServerConfigWithInstance } from '@anthropic-ai/claude-agent-sdk';
-import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completions';
+import type {
+	ChatCompletionFunctionTool,
+	ChatCompletionMessageToolCall,
+	ChatCompletionToolMessageParam,
+} from 'openai/resources/chat/completions';
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
@@ -23,6 +27,7 @@ import type {
 	ToolExecution,
 	ToolParameters,
 } from './types';
+import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { serializeToolResult } from './utils/serialize';
 import { tryImport } from './utils/try-import';
@@ -524,6 +529,38 @@ export class StackOneMcpTool extends StackOneTool {
 }
 
 /**
+ * A Chat Completions tool call: the `openai` package's own object, or the same shape as a plain
+ * object (for example one read back from storage).
+ */
+type OpenAIToolCall =
+	| ChatCompletionMessageToolCall
+	| {
+			id: string;
+			type?: string;
+			function?: { name: string; arguments?: string | JsonObject | null };
+	  };
+
+/** Pull the id, name and arguments out of a tool call, or say why it cannot be run. */
+function readOpenAIToolCall(call: OpenAIToolCall): {
+	id: string;
+	name: string;
+	args: string | JsonObject;
+	unsupported?: string;
+} {
+	const id = String(call.id ?? '');
+	if (!('function' in call) || !call.function) {
+		return {
+			id,
+			name: '',
+			args: {},
+			unsupported: `Unsupported tool call type "${String(call.type)}"`,
+		};
+	}
+	const { name, arguments: args } = call.function;
+	return { id, name: String(name), args: args || {} };
+}
+
+/**
  * Collection of tools with utility methods
  */
 export class Tools implements Iterable<BaseTool> {
@@ -589,6 +626,54 @@ export class Tools implements Iterable<BaseTool> {
 	 */
 	toOpenAI(): ChatCompletionFunctionTool[] {
 		return this.tools.map((tool) => tool.toOpenAI());
+	}
+
+	/**
+	 * Run a Chat Completions response's tool calls and return the `tool` messages to send back.
+	 *
+	 * The counterpart to {@link toOpenAI}: that turns these tools into what OpenAI accepts, this
+	 * turns what OpenAI returns back into messages for it. Append the assistant message first,
+	 * then these, in order:
+	 *
+	 * ```typescript
+	 * const message = response.choices[0].message;
+	 * messages.push(message, ...(await tools.executeOpenAIToolCalls(message.tool_calls)));
+	 * ```
+	 *
+	 * A failed call does not throw. Its error — with the server's response body, when there is
+	 * one — becomes the tool message's content, so the model can read why and retry. A call to a
+	 * tool that is not in this collection is reported the same way. Calls run one at a time, in
+	 * order. File bytes in a result are base64-encoded.
+	 */
+	async executeOpenAIToolCalls(
+		toolCalls: readonly OpenAIToolCall[] | null | undefined,
+	): Promise<ChatCompletionToolMessageParam[]> {
+		const messages: ChatCompletionToolMessageParam[] = [];
+		for (const call of toolCalls ?? []) {
+			const { id, name, args, unsupported } = readOpenAIToolCall(call);
+			const tool = unsupported ? undefined : this.getTool(name);
+			let result: unknown;
+			if (unsupported) {
+				result = { error: unsupported };
+			} else if (!tool) {
+				result = { error: `Unknown tool "${name}"` };
+			} else {
+				try {
+					result = await tool.execute(args);
+				} catch (error) {
+					if (!(error instanceof StackOneError)) {
+						throw error;
+					}
+					const body = error instanceof StackOneAPIError ? error.responseBody : undefined;
+					result = {
+						error: error.message,
+						...(body != null && body !== '' ? { response_body: body } : {}),
+					};
+				}
+			}
+			messages.push({ role: 'tool', tool_call_id: id, content: serializeToolResult(result) });
+		}
+		return messages;
 	}
 
 	/**
