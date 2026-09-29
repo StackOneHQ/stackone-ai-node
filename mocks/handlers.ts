@@ -1,13 +1,11 @@
-import { exampleApiHandlers } from './handlers.example-api';
 import { mcpHandlers } from './handlers.mcp';
 import { openaiHandlers } from './handlers.openai';
-import { stackoneAiHandlers } from './handlers.stackone-ai';
+import { stackoneAccountsHandlers } from './handlers.stackone-accounts';
 import { stackoneRpcHandlers } from './handlers.stackone-rpc';
 
 export const handlers = [
 	...openaiHandlers,
+	...stackoneAccountsHandlers,
 	...stackoneRpcHandlers,
-	...stackoneAiHandlers,
-	...exampleApiHandlers,
 	...mcpHandlers,
 ];

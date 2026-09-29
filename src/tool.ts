@@ -5,23 +5,26 @@ import type { ChatCompletionFunctionTool } from 'openai/resources/chat/completio
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
-import { RequestBuilder } from './requestBuilder';
+import { isFlatPrefixedSchema, splitEnvelopeParams, warnBareSchema } from './envelope';
+import { buildRequestHeaders, declaredHeaderNames, sanitiseHeaders } from './headers';
+import { callMcpTool } from './mcp-client';
+import type { RpcActionRequest, RpcClient } from './rpc-client';
+import { cloneJson, foldRootComposition } from './schema';
 import type {
 	AISDKToolDefinition,
 	AISDKToolResult,
 	ClaudeAgentSdkOptions,
 	ExecuteConfig,
 	ExecuteOptions,
-	HttpExecuteConfig,
 	JsonObject,
 	JSONSchema,
-	LocalExecuteConfig,
+	McpExecuteConfig,
 	RpcExecuteConfig,
 	ToolExecution,
 	ToolParameters,
 } from './types';
-
 import { StackOneError } from './utils/error-stackone';
+import { serializeToolResult } from './utils/serialize';
 import { tryImport } from './utils/try-import';
 
 /**
@@ -30,105 +33,34 @@ import { tryImport } from './utils/try-import';
  */
 type ObjectJSONSchema = OverrideProperties<JSONSchema, { type: 'object' }>;
 
+const isPlainObject = (value: unknown): value is JsonObject =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
+
 /**
- * Base class for all tools. Provides common functionality for executing API calls
- * and converting to various formats (OpenAI, AI SDK)
+ * Base class for all tools: a name, a description, the served parameter schema, and conversions
+ * to each framework's tool format.
+ *
+ * `BaseTool` itself cannot execute anything. The tools a {@link StackOneToolSet} returns are
+ * {@link StackOneTool}s that execute over the RPC endpoint or MCP `tools/call`; a hand-built
+ * tool must override {@link BaseTool.execute}.
  */
 export class BaseTool {
 	name: string;
 	description: string;
 	parameters: ToolParameters;
 	executeConfig: ExecuteConfig;
-	protected requestBuilder?: RequestBuilder;
 	#exposeExecutionMetadata = true;
-	#headers: Record<string, string>;
-
-	private createExecutionMetadata(): ToolExecution {
-		const config = (() => {
-			switch (this.executeConfig.kind) {
-				case 'http':
-					return {
-						kind: 'http',
-						method: this.executeConfig.method,
-						url: this.executeConfig.url,
-						bodyType: this.executeConfig.bodyType,
-						params: this.executeConfig.params.map((param) => ({
-							...param,
-						})),
-					} satisfies HttpExecuteConfig;
-				case 'rpc':
-					return {
-						kind: 'rpc',
-						method: this.executeConfig.method,
-						url: this.executeConfig.url,
-						payloadKeys: { ...this.executeConfig.payloadKeys },
-					} satisfies RpcExecuteConfig;
-				case 'local':
-					return {
-						kind: 'local',
-						identifier: this.executeConfig.identifier,
-						description: this.executeConfig.description,
-					} satisfies LocalExecuteConfig;
-				default:
-					this.executeConfig satisfies never;
-					throw new StackOneError('Unsupported executeConfig kind');
-			}
-		})();
-
-		return {
-			config,
-			headers: this.getHeaders(),
-		};
-	}
 
 	constructor(
 		name: string,
 		description: string,
 		parameters: ToolParameters,
 		executeConfig: ExecuteConfig,
-		headers?: Record<string, string>,
 	) {
 		this.name = name;
 		this.description = description;
 		this.parameters = parameters;
 		this.executeConfig = executeConfig;
-		this.#headers = { ...headers };
-		if (executeConfig.kind === 'http') {
-			this.requestBuilder = new RequestBuilder(executeConfig, this.#headers);
-		}
-	}
-
-	/**
-	 * Set headers for this tool
-	 */
-	setHeaders(headers: Record<string, string>): BaseTool {
-		this.#headers = { ...this.#headers, ...headers };
-		if (this.requestBuilder) {
-			this.requestBuilder.setHeaders(headers);
-		}
-		return this;
-	}
-
-	/**
-	 * Get the current headers
-	 */
-	getHeaders(): Record<string, string> {
-		if (this.requestBuilder) {
-			const currentHeaders = this.requestBuilder.getHeaders();
-			this.#headers = { ...currentHeaders };
-			return currentHeaders;
-		}
-		return { ...this.#headers };
-	}
-
-	/**
-	 * Extract connector/provider prefix from the tool name.
-	 *
-	 * Tool names follow the format `{connector}_{action}_{entity}`,
-	 * e.g. `"bamboohr_list_employees"` → `"bamboohr"`.
-	 */
-	get connector(): string {
-		return this.name.split('_')[0]?.toLowerCase() ?? '';
 	}
 
 	/**
@@ -140,64 +72,60 @@ export class BaseTool {
 	}
 
 	/**
-	 * Execute the tool with the provided parameters
+	 * Execute the tool with the provided parameters.
+	 *
+	 * @throws StackOneError Always, on a `BaseTool`: override this to make a tool executable.
 	 */
-	async execute(inputParams?: JsonObject | string, options?: ExecuteOptions): Promise<JsonObject> {
-		try {
-			if (!this.requestBuilder || this.executeConfig.kind !== 'http') {
-				// Non-HTTP tools provide their own execute override (e.g. RPC, local tools).
-				throw new StackOneError(
-					'BaseTool.execute is only available for HTTP-backed tools. Provide a custom execute implementation for non-HTTP tools.',
-				);
-			}
-			// Validate params is either undefined, string, or object
-			if (
-				inputParams !== undefined &&
-				typeof inputParams !== 'string' &&
-				typeof inputParams !== 'object'
-			) {
-				throw new StackOneError(
-					`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(
-						inputParams,
-					)}`,
-				);
-			}
-
-			// Convert string params to object
-			const params = typeof inputParams === 'string' ? JSON.parse(inputParams) : inputParams || {};
-
-			// Execute the request directly with parameters
-			return await this.requestBuilder.execute(params, options);
-		} catch (error) {
-			if (error instanceof StackOneError) {
-				throw error;
-			}
-			throw new StackOneError(
-				`Error executing tool: ${error instanceof Error ? error.message : String(error)}`,
-			);
-		}
+	async execute(
+		_inputParams?: JsonObject | string,
+		_options?: ExecuteOptions,
+	): Promise<JsonObject> {
+		throw new StackOneError(
+			`Tool "${this.name}" has no executor. Override execute() to run a hand-built tool.`,
+		);
 	}
 
 	/**
-	 * Convert the tool parameters to a pure JSON Schema format
-	 * This is framework-agnostic and can be used with any LLM that accepts JSON Schema
+	 * The served parameter schema, verbatim, as a fresh deep copy.
+	 *
+	 * Lossless and framework-agnostic: every root keyword the server sent — `$schema`, `$defs`,
+	 * `$ref`, `title`, `additionalProperties`, top-level `oneOf`/`anyOf`/`allOf` — and every
+	 * nested constraint reaches the caller unchanged, with the served `required` list. Use this
+	 * for any framework that accepts JSON Schema; the provider adapters below start from it.
 	 */
 	toJsonSchema(): ObjectJSONSchema {
+		const { required, ...rest } = cloneJson(this.parameters);
 		const schema: Record<string, unknown> = {
-			...this.parameters,
-			type: 'object',
-			properties: this.parameters.properties,
+			...rest,
+			type: rest.type || 'object',
+			properties: rest.properties ?? {},
 		};
-		if (this.parameters.required && this.parameters.required.length > 0) {
-			schema.required = this.parameters.required;
-		} else {
-			delete schema.required;
+		if (Array.isArray(required) && required.length > 0) {
+			schema.required = required;
 		}
-		return schema as unknown as ObjectJSONSchema;
+		return schema as ObjectJSONSchema;
 	}
 
 	/**
-	 * Convert the tool to OpenAI Chat Completions API format
+	 * {@link toJsonSchema}, adjusted for providers that require a plain object at the root.
+	 *
+	 * The OpenAI and Anthropic tool APIs both reject a parameters schema with a top-level
+	 * `oneOf`/`anyOf`/`allOf`; see {@link foldRootComposition} for how it is folded rather than
+	 * lost. Everything else is passed through.
+	 */
+	#toProviderSchema(): ObjectJSONSchema {
+		return foldRootComposition(this.toJsonSchema()) as ObjectJSONSchema;
+	}
+
+	#createExecutionMetadata(): ToolExecution {
+		return { config: cloneJson(this.executeConfig) };
+	}
+
+	/**
+	 * Convert the tool to OpenAI Chat Completions API format.
+	 *
+	 * The schema is {@link toJsonSchema} with any top-level `oneOf`/`anyOf`/`allOf`/`enum`/`not`
+	 * folded into the root, which Chat Completions rejects.
 	 */
 	toOpenAI(): ChatCompletionFunctionTool {
 		return {
@@ -205,26 +133,39 @@ export class BaseTool {
 			function: {
 				name: this.name,
 				description: this.description,
-				parameters: this.toJsonSchema(),
+				parameters: this.#toProviderSchema(),
 			},
 		};
 	}
 
 	/**
-	 * Convert the tool to Anthropic format
+	 * Convert the tool to Anthropic format.
+	 *
+	 * The schema is {@link toJsonSchema} with any top-level `oneOf`/`anyOf`/`allOf` folded into
+	 * the root: the Messages API rejects `input_schema` with a combinator at the top level.
+	 *
 	 * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
 	 */
 	toAnthropic(): AnthropicTool {
 		return {
 			name: this.name,
 			description: this.description,
-			input_schema: this.toJsonSchema(),
+			input_schema: this.#toProviderSchema(),
 		};
 	}
 
 	/**
-	 * Convert the tool to OpenAI Responses API format
+	 * Convert the tool to OpenAI Responses API format.
+	 *
+	 * With `strict` (the default) the root schema is closed with `additionalProperties: false`,
+	 * replacing whatever the server served there. The SDK does not rewrite anything nested:
+	 * OpenAI's strict mode additionally requires every property to be listed in `required` and
+	 * every nested object to be closed, so a served schema with optional fields is rejected by
+	 * OpenAI in strict mode. Pass `{ strict: false }` for those — the served schema then goes
+	 * through unchanged apart from the top-level composition fold.
+	 *
 	 * @see https://platform.openai.com/docs/api-reference/responses
+	 * @see https://platform.openai.com/docs/guides/structured-outputs#supported-schemas
 	 */
 	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool {
 		const { strict = true } = options;
@@ -234,7 +175,7 @@ export class BaseTool {
 			description: this.description,
 			strict,
 			parameters: {
-				...this.toJsonSchema(),
+				...this.#toProviderSchema(),
 				...(strict ? { additionalProperties: false } : {}),
 			},
 		};
@@ -243,6 +184,9 @@ export class BaseTool {
 	/**
 	 * Convert the tool to Claude Agent SDK format.
 	 * Returns a tool definition compatible with the Claude Agent SDK's tool() function.
+	 *
+	 * The schema is the one {@link toAnthropic} uses. Results are handed back as JSON text, with
+	 * file bytes base64-encoded.
 	 *
 	 * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
 	 */
@@ -258,7 +202,7 @@ export class BaseTool {
 			'ai',
 			`npm install ai (requires ${peerDependencies.ai})`,
 		);
-		const inputSchema = ai.jsonSchema(this.toJsonSchema());
+		const inputSchema = ai.jsonSchema(this.#toProviderSchema() as AISDKJSONSchema);
 		const execute = this.execute.bind(this);
 
 		return {
@@ -268,14 +212,20 @@ export class BaseTool {
 			handler: async (args: Record<string, unknown>) => {
 				const result = await execute(args as JsonObject);
 				return {
-					content: [{ type: 'text' as const, text: JSON.stringify(result) }],
+					content: [{ type: 'text' as const, text: serializeToolResult(result) }],
 				};
 			},
 		};
 	}
 
 	/**
-	 * Convert the tool to AI SDK format
+	 * Convert the tool to AI SDK format.
+	 *
+	 * The schema is {@link toJsonSchema} with top-level composition folded (the AI SDK hands it
+	 * to whichever provider you use, and OpenAI and Anthropic both reject it), and with the root
+	 * closed by `additionalProperties: false`, replacing whatever the server served there. This
+	 * matches what the AI SDK's OpenAI provider needs for strict structured outputs; nested
+	 * objects are passed through as served.
 	 */
 	async toAISDK(
 		options: { executable?: boolean; execution?: ToolExecution | false } = {
@@ -283,9 +233,9 @@ export class BaseTool {
 		},
 	): Promise<AISDKToolResult> {
 		const schema = {
-			...this.toJsonSchema(),
+			...this.#toProviderSchema(),
 			additionalProperties: false,
-		} satisfies AISDKJSONSchema;
+		} as AISDKJSONSchema;
 
 		/** AI SDK is optional dependency, import only when needed */
 		const ai = await tryImport<typeof import('ai')>(
@@ -298,7 +248,7 @@ export class BaseTool {
 			options.execution !== undefined
 				? options.execution
 				: this.#exposeExecutionMetadata
-					? this.createExecutionMetadata()
+					? this.#createExecutionMetadata()
 					: false;
 
 		const toolDefinition = {
@@ -326,22 +276,250 @@ export class BaseTool {
 }
 
 /**
- * StackOne-specific tool class with additional functionality
+ * A tool served by StackOne, bound to the account it was listed for.
  */
 export class StackOneTool extends BaseTool {
-	/**
-	 * Get the current account ID
-	 */
-	getAccountId(): string | undefined {
-		return this.getHeaders()['x-account-id'];
+	#accountId: string | undefined;
+
+	constructor(
+		name: string,
+		description: string,
+		parameters: ToolParameters,
+		executeConfig: ExecuteConfig,
+		accountId?: string,
+	) {
+		super(name, description, parameters, executeConfig);
+		this.#accountId = accountId;
 	}
 
 	/**
-	 * Set the account ID for this tool
+	 * Get the account this tool executes against.
 	 */
-	setAccountId(accountId: string): StackOneTool {
-		this.setHeaders({ 'x-account-id': accountId });
+	getAccountId(): string | undefined {
+		return this.#accountId;
+	}
+
+	/**
+	 * Rebind this tool to another account. The tools `fetchTools()` returns are built fresh per
+	 * call, so this never affects another caller's tools.
+	 */
+	setAccountId(accountId: string | undefined): this {
+		this.#accountId = accountId;
 		return this;
+	}
+
+	/**
+	 * Parse tool arguments: a JSON string, an object, or nothing.
+	 *
+	 * @throws StackOneError If the arguments are not a JSON object.
+	 */
+	protected parseArguments(input: JsonObject | string | undefined): JsonObject {
+		if (input === undefined || input === null) {
+			return {};
+		}
+		if (typeof input !== 'string' && typeof input !== 'object') {
+			throw new StackOneError(
+				`Invalid parameters type for "${this.name}". Expected object or string, got ${typeof input}.`,
+			);
+		}
+		let parsed: unknown = input;
+		if (typeof input === 'string') {
+			try {
+				parsed = JSON.parse(input);
+			} catch (error) {
+				throw new StackOneError(
+					`Invalid JSON in arguments for "${this.name}": ${error instanceof Error ? error.message : String(error)}`,
+					{ cause: error },
+				);
+			}
+		}
+		if (!isPlainObject(parsed)) {
+			throw new StackOneError(`Tool arguments for "${this.name}" must be a JSON object`);
+		}
+		return { ...parsed };
+	}
+}
+
+/**
+ * A tool executed over the StackOne actions RPC endpoint — every per-action tool in the
+ * `individual` catalog.
+ *
+ * Arguments are split into the RPC envelope by their `flat_prefixed` location prefix, whether
+ * to trust that prefix being decided once from the served schema. Headers are filtered to the
+ * ones the schema declares, and the account is always the tool's own.
+ */
+export class StackOneRpcTool extends StackOneTool {
+	readonly #client: RpcClient;
+	readonly #declared: ReadonlySet<string>;
+	readonly #flatPrefixed: boolean;
+	readonly #allowedHeaders: ReadonlySet<string>;
+	#warnedBareSchema = false;
+
+	constructor(options: {
+		name: string;
+		description: string;
+		parameters: ToolParameters;
+		client: RpcClient;
+		accountId?: string;
+	}) {
+		const executeConfig = {
+			kind: 'rpc',
+			method: 'POST',
+			url: options.client.url,
+			// Mirrors the StackOne RPC payload layout so metadata/debug stays in sync.
+			payloadKeys: {
+				action: 'action',
+				body: 'body',
+				headers: 'headers',
+				path: 'path',
+				query: 'query',
+			},
+		} as const satisfies RpcExecuteConfig;
+		super(options.name, options.description, options.parameters, executeConfig, options.accountId);
+		this.setExposeExecutionMetadata(false);
+		this.#client = options.client;
+		this.#declared = new Set(Object.keys(options.parameters.properties));
+		this.#flatPrefixed = isFlatPrefixedSchema(this.#declared);
+		this.#allowedHeaders = declaredHeaderNames(this.#declared);
+	}
+
+	/**
+	 * Build the `/actions/rpc` request for these arguments.
+	 */
+	#buildRequest(args: JsonObject): RpcActionRequest {
+		if (!this.#flatPrefixed && !this.#warnedBareSchema) {
+			this.#warnedBareSchema = true;
+			warnBareSchema(this.name);
+		}
+		const envelope = splitEnvelopeParams(args, this.#declared, this.#flatPrefixed);
+		const headers = sanitiseHeaders(envelope.headers, this.#allowedHeaders);
+		// Set last, so nothing a tool call supplies can retarget the request.
+		const accountId = this.getAccountId();
+		if (accountId) {
+			headers['x-account-id'] = accountId;
+		}
+		return {
+			action: this.name,
+			body: envelope.body,
+			headers,
+			...(Object.keys(envelope.path).length > 0 ? { path: envelope.path } : {}),
+			...(Object.keys(envelope.query).length > 0 ? { query: envelope.query } : {}),
+		};
+	}
+
+	/**
+	 * Execute the action.
+	 *
+	 * @returns The parsed JSON response. For a file download (any non-JSON Content-Type), a
+	 *   {@link BinaryDownloadResult} whose `content` is a raw `Buffer` — not JSON-serialisable, so
+	 *   handle it before re-serialising the result for a model.
+	 * @throws StackOneAPIError If the API rejects the request; the message leads with the
+	 *   server's own explanation.
+	 * @throws StackOneError If the arguments are malformed or the request cannot be sent.
+	 */
+	override async execute(
+		inputParams?: JsonObject | string,
+		options?: ExecuteOptions,
+	): Promise<JsonObject> {
+		try {
+			const args = this.parseArguments(inputParams);
+			const request = this.#buildRequest(args);
+			const accountId = this.getAccountId();
+
+			if (options?.dryRun) {
+				const { Authorization: _credential, ...headers } = this.#client.requestHeaders(accountId);
+				return {
+					url: this.#client.url,
+					method: 'POST',
+					headers,
+					body: JSON.stringify(request),
+					mappedParams: args,
+				};
+			}
+
+			return (await this.#client.rpcAction(request, accountId)) as unknown as JsonObject;
+		} catch (error) {
+			if (error instanceof StackOneError) {
+				throw error;
+			}
+			throw new StackOneError(`Error executing RPC action ${this.name}`, { cause: error });
+		}
+	}
+}
+
+/**
+ * A tool executed over MCP `tools/call` on the endpoint that listed it: the `search_execute`
+ * meta tools, and `stackone_submit_feedback` in every mode. They have no action behind them on
+ * `/actions/rpc`.
+ */
+export class StackOneMcpTool extends StackOneTool {
+	readonly #endpoint: string;
+	readonly #apiKey: string;
+	readonly #extraHeaders: Record<string, string>;
+	readonly #timeout: number;
+	readonly #allowedHeaders: ReadonlySet<string>;
+
+	constructor(options: {
+		name: string;
+		description: string;
+		parameters: ToolParameters;
+		endpoint: string;
+		apiKey: string;
+		accountId?: string;
+		timeout: number;
+		extraHeaders?: Record<string, string>;
+	}) {
+		const executeConfig = {
+			kind: 'mcp',
+			url: options.endpoint,
+			toolName: options.name,
+		} as const satisfies McpExecuteConfig;
+		super(options.name, options.description, options.parameters, executeConfig, options.accountId);
+		this.setExposeExecutionMetadata(false);
+		this.#endpoint = options.endpoint;
+		this.#apiKey = options.apiKey;
+		this.#extraHeaders = { ...options.extraHeaders };
+		this.#timeout = options.timeout;
+		this.#allowedHeaders = declaredHeaderNames(Object.keys(options.parameters.properties));
+	}
+
+	/**
+	 * Call the tool.
+	 *
+	 * A `headers` object in the arguments is filtered to what this tool's own schema declares
+	 * under `headers_*` — for the meta tools that is nothing, so every model-supplied header is
+	 * dropped: these arguments are model-controlled, and the envelope is unpacked server-side.
+	 *
+	 * @throws StackOneAPIError If the result carries `isError`, with the status from its payload,
+	 *   or the endpoint answers with an HTTP error.
+	 * @throws ToolSetLoadError If the endpoint cannot be reached or does not answer in time.
+	 */
+	override async execute(
+		inputParams?: JsonObject | string,
+		options?: ExecuteOptions,
+	): Promise<JsonObject> {
+		const parsed = this.parseArguments(inputParams);
+		const args = isPlainObject(parsed.headers)
+			? { ...parsed, headers: sanitiseHeaders(parsed.headers, this.#allowedHeaders) }
+			: parsed;
+
+		if (options?.dryRun) {
+			return { url: this.#endpoint, method: 'tools/call', name: this.name, arguments: args };
+		}
+
+		return callMcpTool(
+			{
+				endpoint: this.#endpoint,
+				headers: buildRequestHeaders({
+					apiKey: this.#apiKey,
+					accountId: this.getAccountId(),
+					extraHeaders: this.#extraHeaders,
+				}),
+				timeout: this.#timeout,
+			},
+			this.name,
+			args,
+		);
 	}
 }
 
@@ -352,7 +530,7 @@ export class Tools implements Iterable<BaseTool> {
 	private tools: BaseTool[];
 
 	constructor(tools: BaseTool[]) {
-		this.tools = tools;
+		this.tools = [...tools];
 	}
 
 	/**
@@ -363,7 +541,7 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Get a tool by name
+	 * Get a tool by name. When two accounts serve the same name, this is the first one listed.
 	 */
 	getTool(name: string): BaseTool | undefined {
 		return this.tools.find((tool) => tool.name === name);
@@ -507,31 +685,6 @@ export class Tools implements Iterable<BaseTool> {
 	 */
 	filter(predicate: (tool: BaseTool) => boolean): Tools {
 		return new Tools(this.tools.filter(predicate));
-	}
-
-	/**
-	 * Get unique connector names from all tools.
-	 *
-	 * Extracts the connector/provider prefix from each tool name
-	 * (the first segment before `_`).
-	 *
-	 * @returns Set of connector names (lowercase)
-	 *
-	 * @example
-	 * ```typescript
-	 * const tools = await toolset.fetchTools();
-	 * const connectors = tools.getConnectors();
-	 * // Set { 'bamboohr', 'hibob', 'slack', ... }
-	 * ```
-	 */
-	getConnectors(): Set<string> {
-		const connectors = new Set<string>();
-		for (const tool of this.tools) {
-			if (tool.connector) {
-				connectors.add(tool.connector);
-			}
-		}
-		return connectors;
 	}
 
 	/**

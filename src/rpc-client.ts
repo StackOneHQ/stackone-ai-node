@@ -1,158 +1,174 @@
-import { DEFAULT_BASE_URL, USER_AGENT } from './consts';
-import { STACKONE_HEADER_KEYS } from './headers';
-import {
-	type RpcActionRequest,
-	type RpcActionResponse,
-	type RpcClientConfig,
-	rpcActionRequestSchema,
-	rpcActionResponseSchema,
-	rpcClientConfigSchema,
-} from './schema';
+import { buildRequestHeaders } from './headers';
+import type { JsonObject } from './types';
 import {
 	type BinaryDownloadResult,
 	binaryDownloadFromResponse,
 	isJsonContentType,
 } from './utils/binary-response';
-import { StackOneAPIError } from './utils/error-stackone-api';
-
-// Re-export types for consumers and to make types portable
-export type { RpcActionResponse } from './schema';
+import { StackOneAPIError, describeApiFailure } from './utils/error-stackone-api';
+import { StackOneError } from './utils/error-stackone';
 
 /**
- * Custom RPC client for StackOne API.
- * Replaces the @stackone/stackone-client-ts dependency.
+ * The `/actions/rpc` request body.
  *
- * @see https://docs.stackone.com/platform/api-reference/actions/list-all-actions-metadata
  * @see https://docs.stackone.com/platform/api-reference/actions/make-an-rpc-call-to-an-action
  */
+export interface RpcActionRequest {
+	action: string;
+	body: JsonObject;
+	headers: Record<string, string>;
+	path?: JsonObject;
+	query?: JsonObject;
+}
+
+/**
+ * A bodyless success (`204`/`205`, or an empty JSON body). Not a file download: returning an
+ * empty `content` with a made-up content type would break any caller that re-serialises results.
+ */
+interface EmptyRpcResult {
+	statusCode: number;
+}
+
+interface RpcClientConfig {
+	baseUrl: string;
+	apiKey: string;
+	/** Request timeout in milliseconds. */
+	timeout: number;
+	/** Extra HTTP headers sent with every request, beneath the SDK's own. */
+	headers?: Record<string, string>;
+}
+
+const readErrorBody = async (response: Response): Promise<unknown> => {
+	const text = await response.text().catch(() => '');
+	if (!text) {
+		return null;
+	}
+	try {
+		return JSON.parse(text) as unknown;
+	} catch {
+		return text;
+	}
+};
+
+/**
+ * Client for the StackOne actions RPC endpoint.
+ *
+ * The account a request runs against is the `x-account-id` HTTP header, set here from the tool's
+ * own account — never read out of the envelope, whose contents are model-supplied.
+ */
 export class RpcClient {
-	private readonly baseUrl: string;
-	private readonly authHeader: string;
-	private readonly timeout: number;
+	readonly url: string;
+	readonly #apiKey: string;
+	readonly #timeout: number;
+	readonly #headers: Record<string, string>;
 
 	constructor(config: RpcClientConfig) {
-		const validatedConfig = rpcClientConfigSchema.parse(config);
-		this.baseUrl = validatedConfig.serverURL || DEFAULT_BASE_URL;
-		const username = validatedConfig.security.username;
-		const password = validatedConfig.security.password || '';
-		this.authHeader = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-		this.timeout = validatedConfig.timeout ?? 60_000;
+		this.url = `${config.baseUrl.replace(/\/+$/, '')}/actions/rpc`;
+		this.#apiKey = config.apiKey;
+		this.#timeout = config.timeout;
+		this.#headers = { ...config.headers };
 	}
 
 	/**
-	 * Actions namespace containing RPC methods
+	 * The HTTP headers a request for `accountId` carries.
 	 */
-	readonly actions: {
-		rpcAction: (request: RpcActionRequest) => Promise<RpcActionResponse | BinaryDownloadResult>;
-	} = {
-		/**
-		 * Execute an RPC action
-		 * @param request The RPC action request
-		 * @returns The RPC action response matching server's ActionsRpcResponseApiModel, or - for a
-		 *   file-download action served as raw binary - a {@link BinaryDownloadResult} of bytes +
-		 *   metadata. `content` is a raw `Buffer` (not a `JsonValue`); handle it before re-serializing.
-		 */
-		rpcAction: async (
-			request: RpcActionRequest,
-		): Promise<RpcActionResponse | BinaryDownloadResult> => {
-			const validatedRequest = rpcActionRequestSchema.parse(request);
-			const url = `${this.baseUrl}/actions/rpc`;
+	requestHeaders(accountId: string | undefined): Record<string, string> {
+		return {
+			'Content-Type': 'application/json',
+			...buildRequestHeaders({ apiKey: this.#apiKey, accountId, extraHeaders: this.#headers }),
+		};
+	}
 
-			const requestBody = {
-				action: validatedRequest.action,
-				body: validatedRequest.body,
-				headers: validatedRequest.headers,
-				path: validatedRequest.path,
-				query: validatedRequest.query,
-			} satisfies RpcActionRequest;
+	/**
+	 * Execute an RPC action.
+	 *
+	 * @returns The parsed JSON response (a non-object body is wrapped as `{ result }`); for a
+	 *   file-download action served as raw binary, a {@link BinaryDownloadResult}; for a bodyless
+	 *   success, `{ statusCode }`.
+	 * @throws StackOneAPIError When the API answers with an error status, or with a JSON content
+	 *   type whose body is not JSON.
+	 * @throws StackOneError When the request cannot be sent or times out.
+	 */
+	async rpcAction(
+		request: RpcActionRequest,
+		accountId: string | undefined,
+	): Promise<JsonObject | BinaryDownloadResult | EmptyRpcResult> {
+		let body: string;
+		try {
+			body = JSON.stringify(request);
+		} catch (error) {
+			// A BigInt or a cycle: an argument problem, reported as one rather than escaping as a
+			// bare TypeError from inside fetch.
+			throw new StackOneError(
+				`Arguments for "${request.action}" could not be encoded as JSON: ${error instanceof Error ? error.message : String(error)}`,
+				{ cause: error },
+			);
+		}
 
-			// Forward StackOne-specific headers as HTTP headers
-			const requestHeaders = validatedRequest.headers;
-			const forwardedHeaders: Record<string, string> = {};
-			if (requestHeaders) {
-				for (const key of STACKONE_HEADER_KEYS) {
-					const value = requestHeaders[key];
-					if (value !== undefined) {
-						forwardedHeaders[key] = value;
-					}
-				}
-			}
-			const httpHeaders = {
-				'Content-Type': 'application/json',
-				Authorization: this.authHeader,
-				'User-Agent': USER_AGENT,
-				...forwardedHeaders,
-			} satisfies Record<string, string>;
-
-			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-			let response: Response;
-			let responseBody: unknown;
-			try {
-				response = await fetch(url, {
-					method: 'POST',
-					headers: httpHeaders,
-					body: JSON.stringify(requestBody),
-					signal: controller.signal,
+		let response: Response;
+		try {
+			response = await fetch(this.url, {
+				method: 'POST',
+				headers: this.requestHeaders(accountId),
+				body,
+				signal: AbortSignal.timeout(this.#timeout),
+			});
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				(error.name === 'TimeoutError' || error.name === 'AbortError')
+			) {
+				throw new StackOneError(`Request to ${this.url} timed out after ${this.#timeout}ms`, {
+					cause: error,
 				});
-
-				// A non-JSON body is never the {data,next} envelope. A successful one is a file download
-				// (raw binary with the file's own MIME type + Content-Disposition) - e.g. a
-				// *_unified_download_file action - returned as bytes + metadata. A non-JSON error body
-				// (e.g. an HTML gateway error) is surfaced as a StackOneAPIError rather than letting
-				// response.json() throw a raw SyntaxError. JSON bodies fall through to the parse +
-				// envelope-validation path below.
-				const contentType = response.headers.get('content-type') ?? '';
-				if (!isJsonContentType(contentType)) {
-					if (response.ok) {
-						return await binaryDownloadFromResponse(response);
-					}
-					const errorText = await response.text().catch(() => null);
-					throw new StackOneAPIError(
-						`RPC action failed for ${url}`,
-						response.status,
-						errorText || null,
-						requestBody,
-					);
-				}
-
-				responseBody = await response.json();
-			} catch (error) {
-				if (error instanceof Error && error.name === 'AbortError') {
-					throw new StackOneAPIError(
-						`Request timed out after ${this.timeout}ms for ${url}`,
-						0,
-						null,
-						requestBody,
-					);
-				}
-				throw error;
-			} finally {
-				clearTimeout(timeoutId);
 			}
+			throw new StackOneError(
+				`Request failed: ${error instanceof Error ? error.message : String(error)}`,
+				{ cause: error },
+			);
+		}
 
-			if (!response.ok) {
-				throw new StackOneAPIError(
-					`RPC action failed for ${url}`,
-					response.status,
-					responseBody,
-					requestBody,
-				);
-			}
+		if (!response.ok) {
+			const errorBody = await readErrorBody(response);
+			throw new StackOneAPIError(
+				describeApiFailure(response.status, response.statusText, errorBody, this.url),
+				response.status,
+				errorBody,
+				request,
+			);
+		}
 
-			const validation = rpcActionResponseSchema.safeParse(responseBody);
+		const contentType = response.headers.get('content-type') ?? '';
+		if (response.status === 204 || response.status === 205) {
+			return { statusCode: response.status };
+		}
+		if (!isJsonContentType(contentType)) {
+			// A non-JSON success is a file download (e.g. a *_download_file action): raw bytes
+			// with the file's own MIME type and a Content-Disposition. A zero-byte body with a
+			// download content type is an empty file, with a filename the caller still needs.
+			return binaryDownloadFromResponse(response);
+		}
 
-			if (!validation.success) {
-				throw new StackOneAPIError(
-					`Invalid RPC action response for ${url}`,
-					response.status,
-					responseBody,
-					requestBody,
-				);
-			}
-
-			return validation.data;
-		},
-	};
+		const text = await response.text();
+		if (!text) {
+			return { statusCode: response.status };
+		}
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(text);
+		} catch (error) {
+			// Not the caller's arguments — the server sent a JSON content type with a body that
+			// is not JSON. Blaming the arguments here sends people to debug the wrong end.
+			throw new StackOneAPIError(
+				`Server sent malformed JSON for "${request.action}": ${error instanceof Error ? error.message : String(error)}`,
+				response.status,
+				text.slice(0, 500),
+				request,
+				{ cause: error },
+			);
+		}
+		return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
+			? (parsed as JsonObject)
+			: { result: parsed as JsonObject[string] };
+	}
 }

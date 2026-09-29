@@ -2,16 +2,10 @@
  * Common type definitions for the StackOne SDK
  */
 
-import type { Tool } from 'ai';
-import type { ToolSet } from 'ai';
-import type { JsonObject, JsonValue, ValueOf } from 'type-fest';
+import type { Tool, ToolSet } from 'ai';
+import type { JsonObject, JsonValue } from 'type-fest';
 
 export type { JsonObject, JsonValue };
-
-/**
- * HTTP headers type
- */
-type Headers = Record<string, string>;
 
 /**
  * JSON Schema type for defining tool input/output schemas as raw JSON Schema objects.
@@ -71,45 +65,23 @@ export interface JSONSchema {
 export type JsonSchemaProperties = Record<string, JSONSchema>;
 
 /**
- * JSON Schema type union
+ * How the MCP endpoint lists tools.
+ *
+ * `'individual'` (the server default) lists one tool per action — hundreds per account.
+ * `'search_execute'` lists two meta tools per connector instead: a `*_search_actions` that ranks
+ * actions for a natural-language query and an `*_execute_action` that runs one by id. The
+ * catalog stays small however many accounts are linked, which is what keeps it inside a model's
+ * context.
  */
-type JsonSchemaType = JSONSchema['type'];
+export type ToolMode = 'individual' | 'search_execute';
 
 /**
- * Valid locations for parameters in requests
+ * Executes over the StackOne actions RPC endpoint (`POST /actions/rpc`). Every per-action tool
+ * listed in `individual` mode is one of these.
  */
-export const ParameterLocation = {
-	HEADER: 'header',
-	QUERY: 'query',
-	PATH: 'path',
-	BODY: 'body',
-} as const satisfies Record<string, string>;
-
-export type ParameterLocation = ValueOf<typeof ParameterLocation>;
-
-/**
- * Configuration for executing a tool against an API endpoint
- */
-interface HttpExecuteParameter {
-	name: string;
-	location: ParameterLocation;
-	type: JsonSchemaType;
-	derivedFrom?: string; // this is the name of the param that this one is derived from.
-}
-
-export type HttpBodyType = 'json' | 'multipart-form' | 'form';
-
-export interface HttpExecuteConfig {
-	kind: 'http';
-	method: string;
-	url: string;
-	bodyType: HttpBodyType;
-	params: HttpExecuteParameter[]; // full list of params used to execute. Comes straight from the OpenAPI spec.
-}
-
 export interface RpcExecuteConfig {
 	kind: 'rpc';
-	method: string;
+	method: 'POST';
 	url: string;
 	payloadKeys: {
 		action: string;
@@ -120,7 +92,21 @@ export interface RpcExecuteConfig {
 	};
 }
 
-export interface LocalExecuteConfig {
+/**
+ * Executes over MCP `tools/call` on the endpoint that listed it. The search/execute meta tools
+ * have no action behind them on `/actions/rpc`; `stackone_submit_feedback` is not a connector
+ * action either, so the SDK calls it here even though the server also accepts it over RPC.
+ */
+export interface McpExecuteConfig {
+	kind: 'mcp';
+	url: string;
+	toolName: string;
+}
+
+/**
+ * A tool whose `execute` is supplied by the caller rather than by the SDK.
+ */
+interface LocalExecuteConfig {
 	kind: 'local';
 	identifier?: string;
 	description?: string;
@@ -129,15 +115,15 @@ export interface LocalExecuteConfig {
 /**
  * Discriminated union lets call sites branch on execution style without relying on nullable fields.
  */
-export type ExecuteConfig = HttpExecuteConfig | RpcExecuteConfig | LocalExecuteConfig;
+export type ExecuteConfig = RpcExecuteConfig | McpExecuteConfig | LocalExecuteConfig;
 
 /**
  * Options for executing a tool
  */
 export interface ExecuteOptions {
 	/**
-	 * If true, returns the request details instead of making the actual API call
-	 * Useful for debugging and testing transformed parameters
+	 * If true, returns the request the tool would send instead of sending it. Useful for
+	 * checking how arguments are routed into the RPC envelope.
 	 */
 	dryRun?: boolean;
 }
@@ -147,22 +133,21 @@ export interface ExecuteOptions {
  */
 export interface ToolExecution {
 	/**
-	 * The raw execution configuration generated from the OpenAPI specification.
+	 * How the tool is executed.
 	 */
 	config: ExecuteConfig;
-	/**
-	 * The headers that will be sent when executing the tool.
-	 */
-	headers: Headers;
 }
 
 /**
- * Schema definition for tool parameters
+ * Schema definition for tool parameters: the served `inputSchema`, verbatim.
+ *
+ * Every root keyword the server sends (`$schema`, `$defs`, `title`, `additionalProperties`,
+ * `oneOf`, …) is kept, so {@link BaseTool.toJsonSchema} can hand a model exactly what was served.
  */
 export interface ToolParameters extends Record<string, unknown> {
 	type: string;
-	properties: JsonSchemaProperties; // these are the params we will expose to the user/agent in the tool. These might be higher level params.
-	required?: string[]; // list of required parameter names
+	properties: JsonSchemaProperties;
+	required?: string[];
 }
 
 /**
@@ -215,3 +200,13 @@ export interface ClaudeAgentSdkOptions {
 	 */
 	serverVersion?: string;
 }
+
+/**
+ * An account linked to the API key, as `GET /accounts` returns it. Only accounts whose `status`
+ * is `'active'` can serve tools.
+ */
+export type StackOneAccount = JsonObject & {
+	id: string;
+	provider?: string;
+	status?: string;
+};

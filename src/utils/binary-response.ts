@@ -2,9 +2,9 @@
  * Shared handling for binary (file-download) HTTP responses.
  *
  * StackOne serves file downloads as raw binary with the file's own MIME type and a
- * Content-Disposition header - never as the usual JSON envelope. Both the HTTP tool path
- * (RequestBuilder) and the RPC tool path (RpcClient) must therefore decide JSON-vs-file by
- * Content-Type and return the bytes plus metadata instead of forcing a JSON parse.
+ * Content-Disposition header - never as the usual JSON envelope. The RPC client must therefore
+ * decide JSON-vs-file by Content-Type and return the bytes plus metadata instead of forcing a
+ * JSON parse.
  */
 
 /**

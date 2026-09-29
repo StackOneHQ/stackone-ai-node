@@ -1,93 +1,22 @@
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
-import { DEFAULT_BASE_URL } from './consts';
 import {
-	type StackOneHeaders,
-	declaredHeaderNames,
-	sanitiseHeaders,
-	stackOneHeadersSchema,
-} from './headers';
-import { createMCPClient } from './mcp-client';
-import { type RpcActionResponse, RpcClient } from './rpc-client';
-import { BaseTool, Tools } from './tool';
-import type {
-	ExecuteOptions,
-	JsonObject,
-	JsonSchemaProperties,
-	RpcExecuteConfig,
-	ToolParameters,
-} from './types';
-import type { BinaryDownloadResult } from './utils/binary-response';
+	DEFAULT_BASE_URL,
+	DEFAULT_TIMEOUT_MS,
+	MAX_CONCURRENCY,
+	MCP_PARAM_STYLE,
+	SUBMIT_FEEDBACK_TOOL_NAME,
+} from './consts';
+import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
+import { type McpToolDefinition, listMcpTools } from './mcp-client';
+import { RpcClient } from './rpc-client';
+import { cloneJson, toolParametersFromInputSchema } from './schema';
+import { StackOneMcpTool, StackOneRpcTool, type StackOneTool, Tools } from './tool';
+import type { StackOneAccount, ToolMode } from './types';
+import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
-import { ToolSetConfigError, ToolSetError } from './utils/error-toolset';
-
-/**
- * Param-style pinned on the /mcp tool-listing URL. The MCP schema and the RPC-execution
- * unwrap (splitEnvelopeParams) must agree on this, so it is pinned rather than following
- * the server default — the server default is free to change without breaking the SDK.
- */
-const MCP_PARAM_STYLE = 'flat_prefixed';
-
-/** Matches a flat_prefixed envelope key: `<location>_<field>` (e.g. `path_id`, `query_limit`). */
-const FLAT_ENVELOPE_KEY_PATTERN = /^(path|query|body|headers)_(.+)$/;
-
-const ENVELOPE_LOCATIONS = ['path', 'query', 'headers', 'body'] as const;
-
-type EnvelopeLocation = (typeof ENVELOPE_LOCATIONS)[number];
-
-const isEnvelopeLocation = (key: string): key is EnvelopeLocation =>
-	(ENVELOPE_LOCATIONS as readonly string[]).includes(key);
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-	typeof value === 'object' && value !== null && !Array.isArray(value);
-
-/**
- * Converts an RPC action result to a JsonObject by flattening its top-level properties.
- *
- * RpcActionResponse uses z.passthrough() which preserves additional fields, making it
- * structurally compatible with Record<string, JsonValue>. A BinaryDownloadResult (file
- * download) is flattened the same way - its `content` Buffer rides through under the value
- * cast, so it is not a `JsonValue` (and JSON-stringifies to an unwieldy byte array); callers
- * re-serializing for an LLM must handle that key.
- */
-function rpcResponseToJsonObject(response: RpcActionResponse | BinaryDownloadResult): JsonObject {
-	// RpcActionResponse with passthrough() has the shape:
-	// { next?: string | null, data?: ..., [key: string]: unknown }
-	// We extract all properties into a plain object
-	const result: JsonObject = {};
-	for (const [key, value] of Object.entries(response)) {
-		result[key] = value as JsonObject[string];
-	}
-	return result;
-}
-
-type ToolInputSchema = Awaited<
-	ReturnType<Awaited<ReturnType<typeof createMCPClient>>['client']['listTools']>
->['tools'][number]['inputSchema'];
-
-/**
- * Authentication configuration for toolsets
- */
-export interface AuthenticationConfig {
-	type: 'basic' | 'bearer';
-	credentials?: {
-		username?: string;
-		password?: string;
-		token?: string;
-	};
-	headers?: Record<string, string>;
-}
-
-/**
- * Base configuration for all toolsets
- */
-export interface BaseToolSetConfig {
-	baseUrl?: string;
-	authentication?: AuthenticationConfig;
-	headers?: Record<string, string>;
-	rpcClient?: RpcClient;
-	/** Request timeout in milliseconds. Default: 60000 (60s). */
-	timeout?: number;
-}
+import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
+import { settleWithConcurrency } from './utils/concurrency';
+import { warn } from './utils/logger';
 
 /**
  * Configuration with a single account ID
@@ -131,14 +60,32 @@ export interface ExecuteToolsConfig {
 /**
  * Base configuration for StackOne toolset (without account options)
  */
-interface StackOneToolSetBaseConfig extends BaseToolSetConfig {
+interface StackOneToolSetBaseConfig {
+	/** API key. Defaults to the `STACKONE_API_KEY` environment variable. */
 	apiKey?: string;
-	strict?: boolean;
+	/** Defaults to `STACKONE_BASE_URL`, then `https://api.stackone.com`. */
+	baseUrl?: string;
+	/**
+	 * Extra HTTP headers sent with every request. `Authorization`, `x-account-id` and
+	 * `User-Agent` are always the SDK's own and cannot be set here.
+	 */
+	headers?: Record<string, string>;
+	/**
+	 * Request timeout in milliseconds, applied to every MCP call (listing and `tools/call`), to
+	 * RPC execution and to account discovery. Default: 60000 (60s).
+	 */
+	timeout?: number;
 	/**
 	 * Execution configuration. Controls default account scoping for tool execution.
 	 * Pass `{ accountIds: ['acc-1'] }` to scope tools to specific accounts.
 	 */
 	execute?: ExecuteToolsConfig;
+	/**
+	 * How the endpoint lists tools. `'search_execute'` returns two meta tools per connector
+	 * instead of one tool per action, keeping the catalog small enough for a model's context.
+	 * Defaults to the server's own default (`'individual'`).
+	 */
+	toolMode?: ToolMode;
 }
 
 /**
@@ -150,16 +97,16 @@ export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountC
 /**
  * Options for filtering tools when fetching from MCP
  */
-interface FetchToolsOptions {
+export interface FetchToolsOptions {
 	/**
-	 * Filter tools by account IDs
-	 * Only tools available on these accounts will be returned
+	 * The accounts to list tools for. Defaults to the toolset's accounts, then its `accountId`,
+	 * then every active account linked to the API key.
 	 */
 	accountIds?: string[];
 
 	/**
-	 * Filter tools by provider names
-	 * Only tools from these providers will be returned
+	 * Filter tools by provider names (case-insensitive, matched as a full prefix of the tool
+	 * name, so `browser_linkedin` matches `browser_linkedin_search_people`).
 	 * @example ['hibob', 'bamboohr']
 	 */
 	providers?: string[];
@@ -170,116 +117,170 @@ interface FetchToolsOptions {
 	 * @example ['*_list_employees', 'hibob_create_employees']
 	 */
 	actions?: string[];
+
+	/**
+	 * Override the toolset's `toolMode` for this call. `null` requests the server default.
+	 */
+	mode?: ToolMode | null;
+}
+
+/** One served tool, with the account it was listed for. What the catalog cache holds. */
+interface CatalogEntry {
+	definition: McpToolDefinition;
+	accountId: string;
+	endpoint: string;
+}
+
+const describeError = (error: unknown): string =>
+	error instanceof Error ? error.message : String(error);
+
+/**
+ * Whether a tool belongs to one of the given providers (case-insensitive).
+ *
+ * Matched as a full prefix rather than on the first underscore-separated token: splitting on
+ * "_" reads `browser_linkedin_search_people` as provider `browser`, so asking for
+ * `browser_linkedin` returned nothing at all — silently, since an empty result is
+ * indistinguishable from a provider with no tools.
+ */
+function matchesProvider(toolName: string, providers: readonly string[]): boolean {
+	const lowered = toolName.toLowerCase();
+	return providers.some((provider) => lowered.startsWith(`${provider.toLowerCase()}_`));
 }
 
 /**
- * Class for loading StackOne tools via MCP
+ * Whether a tool name matches a glob pattern, with the semantics of Python's `fnmatch`: `*` any
+ * run, `?` one character, `[seq]` / `[!seq]` a character class. Everything else is literal.
+ */
+function matchGlob(value: string, pattern: string): boolean {
+	let source = '';
+	for (let index = 0; index < pattern.length; index++) {
+		const char = pattern[index] as string;
+		if (char === '*') {
+			source += '.*';
+		} else if (char === '?') {
+			source += '.';
+		} else if (char === '[') {
+			let end = index + 1;
+			if (pattern[end] === '!') {
+				end++;
+			}
+			if (pattern[end] === ']') {
+				end++;
+			}
+			end = pattern.indexOf(']', end);
+			if (end === -1) {
+				source += '\\[';
+			} else {
+				let body = pattern
+					.slice(index + 1, end)
+					.replaceAll('\\', '\\\\')
+					.replaceAll(']', '\\]');
+				if (body.startsWith('!')) {
+					body = `^${body.slice(1)}`;
+				} else if (body.startsWith('^')) {
+					body = `\\${body}`;
+				}
+				source += `[${body}]`;
+				index = end;
+			}
+		} else {
+			source += char.replace(/[.+^${}()|[\]\\/]/g, '\\$&');
+		}
+	}
+	return new RegExp(`^${source}$`, 's').test(value);
+}
+
+const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
+	if (accountIds === undefined) {
+		return;
+	}
+	if (typeof accountIds === 'string') {
+		throw new ToolSetConfigError(
+			`${parameter} must be an array of account ids, not a string. Did you mean ["${accountIds}"]?`,
+		);
+	}
+	if (!Array.isArray(accountIds) || accountIds.some((id) => typeof id !== 'string')) {
+		throw new ToolSetConfigError(`${parameter} must be an array of account id strings`);
+	}
+};
+
+/**
+ * The StackOne toolset: lists the served tool catalog and exposes it to agent frameworks.
+ *
+ * A thin client over the catalog. Tools are listed from the MCP endpoint, per account, and
+ * executed against the actions RPC endpoint (or over MCP `tools/call` for the tools that have no
+ * action behind them). Schemas are passed through as served, never rewritten, filtered or
+ * invented.
+ *
+ * An API key is enough: with no account configured, the toolset lists every active account
+ * linked to the key.
  */
 export class StackOneToolSet {
-	private baseUrl?: string;
-	private authentication?: AuthenticationConfig;
-	private headers: Record<string, string>;
-	private rpcClient?: RpcClient;
-	private readonly timeout: number;
-	private readonly executeConfig: ExecuteToolsConfig | undefined;
+	readonly #apiKey: string;
+	readonly #baseUrl: string;
+	readonly #headers: Record<string, string>;
+	readonly #timeout: number;
+	readonly #toolMode: ToolMode | undefined;
+	readonly #accountId: string | undefined;
+	#accountIds: string[];
+	readonly #rpcClient: RpcClient;
 
 	/**
-	 * Account ID for StackOne API
+	 * The listing per account scope, not the Tools built from it. Tools are mutable
+	 * (`setAccountId` rebinds one), so handing the same instances back on a cache hit let one
+	 * caller silently rescope every later caller's tools.
 	 */
-	private accountId?: string;
-	private accountIds: string[] = [];
+	readonly #catalogCache = new Map<string, readonly CatalogEntry[]>();
+	#discoveredAccountIds: string[] | undefined;
+	/**
+	 * Bumped by {@link clearCatalogCache}. A listing already in flight when the cache is cleared
+	 * captured the generation it started under, and refuses to write back if it has moved —
+	 * otherwise the stale catalog would land after the clear and be served for the life of the
+	 * process, which is the one thing the clear exists to prevent.
+	 */
+	#cacheGeneration = 0;
 
 	/**
-	 * Initialize StackOne toolset with API key and optional account ID(s)
-	 * @param config Configuration object containing API key and optional account ID(s)
+	 * @throws ToolSetConfigError If no API key is given or found in `STACKONE_API_KEY`, or both
+	 *   `accountId` and `accountIds` are given.
 	 */
-	constructor(config?: StackOneToolSetConfig) {
-		// Validate mutually exclusive account options
-		if (config?.accountId != null && config?.accountIds != null) {
+	constructor(config: StackOneToolSetConfig = {}) {
+		if (config.accountId != null && config.accountIds != null) {
 			throw new ToolSetConfigError(
 				'Cannot provide both accountId and accountIds. Use accountId for a single account or accountIds for multiple accounts.',
 			);
 		}
+		assertAccountIdList(config.accountIds, 'accountIds');
+		assertAccountIdList(config.execute?.accountIds, 'execute.accountIds');
 
-		const apiKey = config?.apiKey || process.env.STACKONE_API_KEY;
-
-		if (!apiKey && config?.strict) {
-			throw new ToolSetConfigError(
-				'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.',
-			);
-		}
-
+		const apiKey = config.apiKey || process.env.STACKONE_API_KEY;
 		if (!apiKey) {
-			console.warn(
-				'No API key provided. Set STACKONE_API_KEY environment variable or pass apiKey in config.',
+			throw new ToolSetConfigError(
+				'API key must be provided either through the apiKey option or the STACKONE_API_KEY environment variable',
 			);
 		}
 
-		const authentication: AuthenticationConfig = {
-			type: 'basic',
-			credentials: {
-				username: apiKey || '',
-				password: '',
-			},
-		};
-
-		const accountId = config?.accountId || process.env.STACKONE_ACCOUNT_ID;
-
-		const configHeaders = {
-			...config?.headers,
-			...(accountId ? { 'x-account-id': accountId } : {}),
-		};
-
-		// Initialize base properties
-		this.baseUrl = config?.baseUrl ?? process.env.STACKONE_BASE_URL ?? DEFAULT_BASE_URL;
-		this.authentication = authentication;
-		this.headers = configHeaders;
-		this.rpcClient = config?.rpcClient;
-		this.timeout = config?.timeout ?? config?.execute?.timeout ?? 60_000;
-		this.accountId = accountId;
-		this.accountIds = config?.accountIds ?? [];
-
-		// Resolve search config: undefined/null → disabled, object → custom with defaults
-		this.executeConfig = config?.execute;
-
-
-		// Set Authentication headers if provided
-		if (this.authentication) {
-			// Only set auth headers if they don't already exist in custom headers
-			const needsAuthHeader = !('Authorization' in this.headers);
-
-			if (needsAuthHeader) {
-				switch (this.authentication.type) {
-					case 'basic':
-						if (this.authentication.credentials?.username) {
-							const username = this.authentication.credentials.username;
-							const password = this.authentication.credentials.password || '';
-							const authString = Buffer.from(`${username}:${password}`).toString('base64');
-							this.headers.Authorization = `Basic ${authString}`;
-						}
-						break;
-					case 'bearer':
-						if (this.authentication.credentials?.token) {
-							this.headers.Authorization = `Bearer ${this.authentication.credentials.token}`;
-						}
-						break;
-
-					default:
-						this.authentication.type satisfies never;
-						throw new ToolSetError(
-							`Unsupported authentication type: ${String(this.authentication.type)}`,
-						);
-				}
-			}
-
-			// Add any additional headers from authentication config, but don't override existing ones
-			if (this.authentication.headers) {
-				this.headers = { ...this.authentication.headers, ...this.headers };
-			}
+		const ignoredHeaders = Object.keys(config.headers ?? {}).filter(isSdkOwnedHeader);
+		if (ignoredHeaders.length > 0) {
+			warn(
+				`Ignoring headers ${ignoredHeaders.map((name) => `"${name}"`).join(', ')}: the SDK sets them itself. Use the apiKey and accountId options instead.`,
+			);
 		}
-	}
 
-	private catalogCache: Map<string, Tools> = new Map();
+		this.#apiKey = apiKey;
+		this.#baseUrl = config.baseUrl ?? process.env.STACKONE_BASE_URL ?? DEFAULT_BASE_URL;
+		this.#headers = { ...config.headers };
+		this.#timeout = config.timeout ?? config.execute?.timeout ?? DEFAULT_TIMEOUT_MS;
+		this.#toolMode = config.toolMode;
+		this.#accountId = config.accountId || process.env.STACKONE_ACCOUNT_ID || undefined;
+		this.#accountIds = [...(config.accountIds ?? config.execute?.accountIds ?? [])];
+		this.#rpcClient = new RpcClient({
+			baseUrl: this.#baseUrl,
+			apiKey: this.#apiKey,
+			timeout: this.#timeout,
+			headers: this.#headers,
+		});
+	}
 
 	/**
 	 * Set account IDs for filtering tools
@@ -287,48 +288,30 @@ export class StackOneToolSet {
 	 * @returns This toolset instance for chaining
 	 */
 	setAccounts(accountIds: string[]): this {
-		this.accountIds = accountIds;
+		assertAccountIdList(accountIds, 'accountIds');
+		this.#accountIds = [...accountIds];
 		this.clearCatalogCache();
 		return this;
 	}
 
 	/**
-	 * Invalidate cached tool catalog and local search index.
+	 * Invalidate the cached tool catalog and discovered accounts.
 	 *
-	 * Call when linked accounts change outside of {@link setAccounts} or when
-	 * you need to force a fresh fetch from the StackOne MCP endpoint.
+	 * Call when linked accounts change outside of {@link setAccounts} or when you need to force a
+	 * fresh fetch from the StackOne MCP endpoint. A listing already in flight will not write its
+	 * result back into the cache.
 	 */
 	clearCatalogCache(): void {
-		this.catalogCache.clear();
-	}
-
-	/**
-	 * Extract the API key from authentication config.
-	 */
-	private getApiKey(): string {
-		const credentials = this.authentication?.credentials ?? {};
-		const apiKeyFromAuth =
-			this.authentication?.type === 'basic'
-				? credentials.username
-				: this.authentication?.type === 'bearer'
-					? credentials.token
-					: credentials.username;
-
-		const apiKey = apiKeyFromAuth || process.env.STACKONE_API_KEY;
-		if (!apiKey) {
-			throw new ToolSetConfigError(
-				'API key is required for semantic search. Provide apiKey in config or set STACKONE_API_KEY environment variable.',
-			);
-		}
-		return apiKey;
+		this.#cacheGeneration += 1;
+		this.#catalogCache.clear();
+		this.#discoveredAccountIds = undefined;
 	}
 
 	/**
 	 * Get tools in OpenAI function calling format.
 	 *
 	 * @param options - Options
-	 * @param options.accountIds - Account IDs to scope tools. Overrides the `execute`
-	 *   config from the constructor.
+	 * @param options.accountIds - Account IDs to scope tools. Defaults to the toolset's accounts.
 	 * @returns List of tool definitions in OpenAI function format.
 	 *
 	 * @example
@@ -338,359 +321,316 @@ export class StackOneToolSet {
 	 * ```
 	 */
 	async openai(options?: { accountIds?: string[] }): Promise<ReturnType<Tools['toOpenAI']>> {
-		const effectiveAccountIds = options?.accountIds ?? this.executeConfig?.accountIds;
-
-		const tools = await this.fetchTools({ accountIds: effectiveAccountIds });
+		const tools = await this.fetchTools({ accountIds: options?.accountIds });
 		return tools.toOpenAI();
 	}
 
 	/**
-	 * Fetch tools from MCP with optional filtering
-	 * @param options Optional filtering options for account IDs, providers, and actions
-	 * @returns Collection of tools matching the filter criteria
-	 */
-	async fetchTools(options?: FetchToolsOptions): Promise<Tools> {
-		// Use account IDs from options, or fall back to instance state
-		const effectiveAccountIds = options?.accountIds || this.accountIds;
-
-		const cacheKey = JSON.stringify({
-			accountIds: [...effectiveAccountIds].sort(),
-			providers: options?.providers?.length ? [...options.providers].sort() : null,
-			actions: options?.actions?.length ? [...options.actions].sort() : null,
-		});
-		const cached = this.catalogCache.get(cacheKey);
-		if (cached) {
-			return cached;
-		}
-
-		// Fetch tools (with account filtering if needed)
-		// Headers are threaded as parameters per request — never mutate this.headers,
-		// since concurrent callers would clobber each other's x-account-id.
-		let tools: Tools;
-		if (effectiveAccountIds.length > 0) {
-			const toolsPromises = effectiveAccountIds.map(async (accountId) => {
-				const requestHeaders = { ...this.headers, 'x-account-id': accountId };
-				const accountTools = await this.fetchToolsFromMcp(requestHeaders);
-				return accountTools.toArray();
-			});
-
-			const toolArrays = await Promise.all(toolsPromises);
-			const allTools = toolArrays.flat();
-			tools = new Tools(allTools);
-		} else {
-			// No account filtering - fetch all tools
-			tools = await this.fetchToolsFromMcp(this.headers);
-		}
-
-		// Apply provider and action filters
-		const filteredTools = this.filterTools(tools, options);
-
-		this.catalogCache.set(cacheKey, filteredTools);
-		return filteredTools;
-	}
-
-	/**
-	 * Fetch tool definitions from MCP using the given request headers.
-	 * Headers are passed in (not read from this.headers) so concurrent callers
-	 * can each scope their request to a different x-account-id safely.
-	 */
-	private async fetchToolsFromMcp(requestHeaders: Record<string, string>): Promise<Tools> {
-		if (!this.baseUrl) {
-			throw new ToolSetConfigError('baseUrl is required to fetch MCP tools');
-		}
-
-		await using clients = await createMCPClient({
-			baseUrl: `${this.baseUrl}/mcp?param-style=${MCP_PARAM_STYLE}`,
-			headers: requestHeaders,
-		});
-
-		await clients.client.connect(clients.transport);
-		const listToolsResult = await clients.client.listTools();
-		const actionsClient = this.getActionsClient();
-
-		const tools = listToolsResult.tools.map(({ name, description, inputSchema }) => {
-			return this.createRpcBackedTool({
-				actionsClient,
-				name,
-				description,
-				inputSchema,
-				headers: requestHeaders,
-			});
-		});
-
-		return new Tools(tools);
-	}
-
-	/**
-	 * Filter tools by providers and actions
-	 * @param tools Tools collection to filter
-	 * @param options Filtering options
-	 * @returns Filtered tools collection
-	 */
-	private filterTools(tools: Tools, options?: FetchToolsOptions): Tools {
-		let filteredTools = tools.toArray();
-
-		// Filter by providers if specified
-		if (options?.providers && options.providers.length > 0) {
-			const providerSet = new Set(options.providers.map((p) => p.toLowerCase()));
-			filteredTools = filteredTools.filter((tool) => {
-				return tool.connector && providerSet.has(tool.connector);
-			});
-		}
-
-		// Filter by actions if specified (with glob support)
-		if (options?.actions && options.actions.length > 0) {
-			filteredTools = filteredTools.filter((tool) =>
-				options.actions?.some((pattern) => this.matchGlob(tool.name, pattern)),
-			);
-		}
-
-		return new Tools(filteredTools);
-	}
-
-	/**
-	 * Check if a string matches a glob pattern
-	 * @param str String to check
-	 * @param pattern Glob pattern
-	 * @returns True if the string matches the pattern
-	 */
-	private matchGlob(str: string, pattern: string): boolean {
-		// Convert glob pattern to regex
-		const regexPattern = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*').replace(/\?/g, '.');
-
-		// Create regex with start and end anchors
-		const regex = new RegExp(`^${regexPattern}$`);
-
-		// Test if the string matches the pattern
-		return regex.test(str);
-	}
-
-	private getActionsClient(): RpcClient {
-		if (this.rpcClient) {
-			return this.rpcClient;
-		}
-
-		const credentials = this.authentication?.credentials ?? {};
-		const apiKeyFromAuth =
-			this.authentication?.type === 'basic'
-				? credentials.username
-				: this.authentication?.type === 'bearer'
-					? credentials.token
-					: credentials.username;
-
-		const apiKey = apiKeyFromAuth || process.env.STACKONE_API_KEY;
-		const password = this.authentication?.type === 'basic' ? (credentials.password ?? '') : '';
-
-		if (!apiKey) {
-			throw new ToolSetConfigError(
-				'StackOne API key is required to create an actions client. Provide rpcClient, configure authentication credentials, or set the STACKONE_API_KEY environment variable.',
-			);
-		}
-
-		this.rpcClient = new RpcClient({
-			serverURL: this.baseUrl,
-			security: {
-				username: apiKey,
-				password,
-			},
-			timeout: this.timeout,
-		});
-
-		return this.rpcClient;
-	}
-
-	private createRpcBackedTool({
-		actionsClient,
-		name,
-		description,
-		inputSchema,
-		headers,
-	}: {
-		actionsClient: RpcClient;
-		name: string;
-		description?: string;
-		inputSchema: ToolInputSchema;
-		headers: Record<string, string>;
-	}): BaseTool {
-		const executeConfig = {
-			kind: 'rpc',
-			method: 'POST',
-			url: `${this.baseUrl}/actions/rpc`,
-			payloadKeys: {
-				action: 'action',
-				body: 'body',
-				headers: 'headers',
-				path: 'path',
-				query: 'query',
-			},
-		} as const satisfies RpcExecuteConfig; // Mirrors StackOne RPC payload layout so metadata/debug stays in sync.
-
-		const toolParameters = {
-			...inputSchema,
-
-			// properties are not well typed in MCP spec
-			properties: inputSchema?.properties as JsonSchemaProperties,
-		} satisfies ToolParameters;
-
-		const declaredHeaders = declaredHeaderNames(Object.keys(toolParameters.properties ?? {}));
-
-		const tool = new BaseTool(
-			name,
-			description ?? '',
-			toolParameters,
-			executeConfig,
-			headers,
-		).setExposeExecutionMetadata(false);
-
-		tool.execute = async (
-			inputParams?: JsonObject | string,
-			options?: ExecuteOptions,
-		): Promise<JsonObject> => {
-			try {
-				if (
-					inputParams !== undefined &&
-					typeof inputParams !== 'object' &&
-					typeof inputParams !== 'string'
-				) {
-					throw new StackOneError(
-						`Invalid parameters type. Expected object or string, got ${typeof inputParams}. Parameters: ${JSON.stringify(inputParams)}`,
-					);
-				}
-
-				const parsedParams =
-					typeof inputParams === 'string' ? JSON.parse(inputParams) : (inputParams ?? {});
-
-				const currentHeaders = tool.getHeaders();
-				const baseHeaders = this.buildActionHeaders(currentHeaders);
-
-				const envelope = this.splitEnvelopeParams(parsedParams);
-				const pathParams = envelope.path;
-				const queryParams = envelope.query;
-				// Model-supplied headers are filtered to the ones the served schema declares, and
-				// the SDK's own headers are applied LAST. Merging the other way round let a tool
-				// call carry `headers_x-account-id` and switch the request to another tenant.
-				const allowedHeaders = sanitiseHeaders(envelope.headers, declaredHeaders);
-				const actionHeaders = stackOneHeadersSchema.parse({ ...allowedHeaders, ...baseHeaders });
-
-				const rpcBody: JsonObject = envelope.body;
-
-				if (options?.dryRun) {
-					const requestPayload = {
-						action: name,
-						body: rpcBody,
-						headers: actionHeaders,
-						path: pathParams ?? undefined,
-						query: queryParams ?? undefined,
-					};
-
-					return {
-						url: executeConfig.url,
-						method: executeConfig.method,
-						headers: actionHeaders,
-						body: JSON.stringify(requestPayload),
-						mappedParams: parsedParams,
-					} satisfies JsonObject;
-				}
-
-				const response = await actionsClient.actions.rpcAction({
-					action: name,
-					body: rpcBody,
-					headers: actionHeaders,
-					path: pathParams ?? undefined,
-					query: queryParams ?? undefined,
-				});
-
-				return rpcResponseToJsonObject(response);
-			} catch (error) {
-				if (error instanceof StackOneError) {
-					throw error;
-				}
-				throw new StackOneError(`Error executing RPC action ${name}`, { cause: error });
-			}
-		};
-
-		return tool;
-	}
-
-	private buildActionHeaders(headers: Record<string, string>): StackOneHeaders {
-		const sanitizedEntries = Object.entries(headers).filter(
-			([key]) => key.toLowerCase() !== 'authorization',
-		);
-
-		return stackOneHeadersSchema.parse(
-			Object.fromEntries(sanitizedEntries.map(([key, value]) => [key, String(value)])),
-		);
-	}
-
-	/**
-	 * Splits LLM-supplied tool arguments into the RPC envelope (path/query/headers/body).
+	 * List the accounts linked to this API key.
 	 *
-	 * Tools are listed with `?param-style=flat_prefixed`, so keys arrive as `<location>_<field>`
-	 * (for example `path_id`, `query_limit`). The prefix carries the parameter location, so the
-	 * split needs no per-action schema. A bare object-valued `path`/`query`/`headers`/`body` key
-	 * is still bucketed for clients holding a cached nested schema, and any other key falls
-	 * through to the body.
+	 * Each entry carries at least `id`, `provider` and `status`. Only accounts with
+	 * `status === 'active'` can serve tools.
+	 *
+	 * @throws StackOneAPIError If the API answers with an error status.
+	 * @throws ToolSetLoadError If the API cannot be reached, or answers with something that is
+	 *   not a JSON list (including a body that is not valid UTF-8).
 	 */
-	private splitEnvelopeParams(params: JsonObject): {
-		path?: JsonObject;
-		query?: JsonObject;
-		headers?: JsonObject;
-		body: JsonObject;
-	} {
-		// Null-prototype buckets so API fields named after Object.prototype members
-		// (`constructor`, `toString`, `__proto__`) are stored as ordinary own properties
-		// instead of colliding with the prototype chain and being dropped.
-		const buckets: Record<EnvelopeLocation, JsonObject> = {
-			path: Object.create(null),
-			query: Object.create(null),
-			headers: Object.create(null),
-			body: Object.create(null),
-		};
-
-		// Keeps whichever value reaches a field first, so the pass order below is what decides
-		// precedence rather than the order the caller happened to supply keys in.
-		const assignField = (bucket: JsonObject, field: string, value: unknown): void => {
-			if (!Object.hasOwn(bucket, field)) {
-				bucket[field] = value as JsonObject[string];
-			}
-		};
-
-		const entries = Object.entries(params);
-
-		// First pass: explicit flat_prefixed keys. Applied before anything else so a prefixed
-		// key always wins over the same field carried in a nested envelope or as a bare key.
-		for (const [key, value] of entries) {
-			const match = key.match(FLAT_ENVELOPE_KEY_PATTERN);
-			if (match) {
-				assignField(buckets[match[1] as EnvelopeLocation], match[2], value);
-			}
+	async fetchAccounts(): Promise<StackOneAccount[]> {
+		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
+		let response: Response;
+		try {
+			response = await fetch(url, {
+				headers: buildRequestHeaders({ apiKey: this.#apiKey, extraHeaders: this.#headers }),
+				signal: AbortSignal.timeout(this.#timeout),
+			});
+		} catch (error) {
+			throw new ToolSetLoadError(`Could not reach ${url}: ${describeError(error)}`, {
+				cause: error,
+			});
 		}
 
-		// Second pass: nested envelopes from clients on a cached schema, then bare body fields.
-		for (const [key, value] of entries) {
-			if (FLAT_ENVELOPE_KEY_PATTERN.test(key)) {
-				continue;
+		let bytes: ArrayBuffer;
+		try {
+			bytes = await response.arrayBuffer();
+		} catch (error) {
+			throw new ToolSetLoadError(
+				`Could not read the response from ${url}: ${describeError(error)}`,
+				{
+					cause: error,
+				},
+			);
+		}
+
+		if (!response.ok) {
+			// Carry the status, so a caller can tell a 401 from a 429.
+			const text = new TextDecoder().decode(bytes).trim();
+			throw new StackOneAPIError(
+				`Listing accounts at ${url} failed with ${response.status} ${response.statusText}: ${text}`,
+				response.status,
+				text,
+			);
+		}
+
+		let body: unknown;
+		try {
+			body = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+		} catch (error) {
+			throw new ToolSetLoadError(`Invalid JSON returned by ${url}: ${describeError(error)}`, {
+				cause: error,
+			});
+		}
+		const accounts =
+			typeof body === 'object' && body !== null && !Array.isArray(body) && 'data' in body
+				? (body as { data: unknown }).data
+				: body;
+		if (!Array.isArray(accounts)) {
+			throw new ToolSetLoadError(
+				`Unexpected /accounts response shape: expected a list, got ${accounts === null ? 'null' : typeof accounts}`,
+			);
+		}
+		return accounts as StackOneAccount[];
+	}
+
+	/**
+	 * The active accounts linked to this API key.
+	 *
+	 * The MCP endpoint requires an `x-account-id` on every request, so an API key on its own is
+	 * not enough to list tools. Rather than make every caller supply one, ask the API which
+	 * accounts the key has.
+	 *
+	 * For organisations with many linked accounts, discovery lists the catalog of every one of
+	 * them: pass explicit `accountIds` to avoid the round trips and the context they cost.
+	 *
+	 * @throws ToolSetConfigError If the key has no accounts, or none are active.
+	 */
+	async #discoverAccountIds(): Promise<string[]> {
+		if (this.#discoveredAccountIds) {
+			return this.#discoveredAccountIds;
+		}
+		const generation = this.#cacheGeneration;
+		const accounts = await this.fetchAccounts();
+		const active = accounts
+			.filter(
+				(account) => account?.status === 'active' && typeof account.id === 'string' && account.id,
+			)
+			.map((account) => account.id);
+		if (active.length === 0) {
+			if (accounts.length === 0) {
+				throw new ToolSetConfigError(
+					'This API key has no linked accounts. Link one in the StackOne dashboard, or pass accountId explicitly.',
+				);
 			}
-			if (isEnvelopeLocation(key)) {
-				// Reserved keys name an envelope, never a body field. A non-object value cannot
-				// be bucketed, so it is dropped rather than leaked into the body under its
-				// reserved name.
-				if (isPlainObject(value)) {
-					for (const [field, fieldValue] of Object.entries(value)) {
-						assignField(buckets[key], field, fieldValue);
+			const listed = accounts
+				.map((account) => `${String(account?.provider)} (${String(account?.status)})`)
+				.join(', ');
+			throw new ToolSetConfigError(
+				`None of this API key's ${accounts.length} linked accounts are active: ${listed}. Re-link them in the StackOne dashboard, or pass accountId explicitly.`,
+			);
+		}
+		if (generation === this.#cacheGeneration) {
+			this.#discoveredAccountIds = active;
+		}
+		return active;
+	}
+
+	async #resolveAccountScope(accountIds: string[] | undefined): Promise<string[]> {
+		assertAccountIdList(accountIds, 'accountIds');
+		let scope = accountIds?.length ? accountIds : this.#accountIds;
+		if (scope.length === 0 && this.#accountId) {
+			scope = [this.#accountId];
+		}
+		if (scope.length === 0) {
+			scope = await this.#discoverAccountIds();
+		}
+		// Sorted and deduplicated: the listing order, and the cache key, must not depend on the
+		// order the caller happened to name the accounts in.
+		return [...new Set(scope)].sort();
+	}
+
+	#endpoint(mode: ToolMode | undefined): string {
+		const endpoint = `${this.#baseUrl.replace(/\/+$/, '')}/mcp?param-style=${MCP_PARAM_STYLE}`;
+		return mode ? `${endpoint}&tool-mode=${mode}` : endpoint;
+	}
+
+	/**
+	 * Keyed on what was fetched, not on how it is filtered: providers and actions narrow the list
+	 * in memory, so they must not force a refetch. The base URL and API key belong in it, so a
+	 * catalog is never served for a host or key other than the one it was listed from.
+	 */
+	#cacheKey(scope: readonly string[], mode: ToolMode | undefined): string {
+		return JSON.stringify([scope, mode ?? null, this.#baseUrl, this.#apiKey]);
+	}
+
+	/**
+	 * List every scoped account's catalog, tolerating accounts that fail.
+	 *
+	 * One unusable account must not cost the caller every other account's tools, so a failing
+	 * account is skipped with a warning — unless every account fails, which is an error rather
+	 * than an empty catalog. A degraded listing is not cached: the warning fires once, and every
+	 * later call would otherwise serve the short list silently for the life of the process.
+	 */
+	async #listCatalog(
+		scope: readonly string[],
+		mode: ToolMode | undefined,
+	): Promise<CatalogEntry[]> {
+		const generation = this.#cacheGeneration;
+		const endpoint = this.#endpoint(mode);
+		const listAccount = async (accountId: string): Promise<CatalogEntry[]> => {
+			const definitions = await listMcpTools({
+				endpoint,
+				headers: buildRequestHeaders({
+					apiKey: this.#apiKey,
+					accountId,
+					extraHeaders: this.#headers,
+				}),
+				timeout: this.#timeout,
+			});
+			return definitions.map((definition) => ({ definition, accountId, endpoint }));
+		};
+
+		const store = (listing: CatalogEntry[]): void => {
+			if (generation === this.#cacheGeneration) {
+				this.#catalogCache.set(this.#cacheKey(scope, mode), listing);
+			}
+		};
+
+		if (scope.length === 1) {
+			const listing = await listAccount(scope[0] as string);
+			store(listing);
+			return listing;
+		}
+
+		const settled = await settleWithConcurrency(scope, MAX_CONCURRENCY, listAccount);
+		const listing: CatalogEntry[] = [];
+		const failures: string[] = [];
+		settled.forEach((outcome, index) => {
+			if (outcome.status === 'fulfilled') {
+				listing.push(...outcome.value);
+			} else {
+				failures.push(`${scope[index]}: ${describeError(outcome.reason)}`);
+			}
+		});
+		if (failures.length > 0 && listing.length === 0) {
+			throw new ToolSetLoadError(`No account returned tools. ${failures.join(' | ')}`);
+		}
+		for (const failure of failures) {
+			warn(`Skipping account that failed to list tools — ${failure}`);
+		}
+		if (failures.length === 0) {
+			store(listing);
+		}
+		return listing;
+	}
+
+	/**
+	 * Build an executable tool from a served catalog entry, on a deep copy of its schema.
+	 *
+	 * In `search_execute` mode the served tools are MCP meta tools with no action behind them on
+	 * `/actions/rpc`, so they are executed over `tools/call`. `stackone_submit_feedback` goes over
+	 * `tools/call` in every mode too. The server would also accept it on `/actions/rpc`, but it is
+	 * served over MCP and is not a connector action, so it is called where it was listed.
+	 */
+	#createTool(entry: CatalogEntry, mode: ToolMode | undefined): StackOneTool {
+		const { definition, accountId, endpoint } = entry;
+		const parameters = toolParametersFromInputSchema(cloneJson(definition.inputSchema));
+		const description = definition.description ?? '';
+		if (mode === 'search_execute' || definition.name === SUBMIT_FEEDBACK_TOOL_NAME) {
+			return new StackOneMcpTool({
+				name: definition.name,
+				description,
+				parameters,
+				endpoint,
+				apiKey: this.#apiKey,
+				accountId,
+				timeout: this.#timeout,
+				extraHeaders: this.#headers,
+			});
+		}
+		return new StackOneRpcTool({
+			name: definition.name,
+			description,
+			parameters,
+			client: this.#rpcClient,
+			accountId,
+		});
+	}
+
+	/**
+	 * Fetch tools with optional filtering by account IDs, providers, and actions.
+	 *
+	 * The listing is cached per account scope and mode; filters are applied in memory, and every
+	 * call builds fresh tool instances, so mutating one caller's tools never affects another's.
+	 *
+	 * `stackone_submit_feedback` is served once per account listing; it is returned once.
+	 *
+	 * @throws ToolSetConfigError If no account is configured and none can be discovered.
+	 * @throws StackOneAPIError If the API refuses a listing (e.g. 412 for a dead account).
+	 * @throws ToolSetLoadError If the catalog cannot be loaded.
+	 */
+	async fetchTools(options: FetchToolsOptions = {}): Promise<Tools> {
+		try {
+			const mode = options.mode === undefined ? this.#toolMode : (options.mode ?? undefined);
+			const scope = await this.#resolveAccountScope(options.accountIds);
+			const listing =
+				this.#catalogCache.get(this.#cacheKey(scope, mode)) ??
+				(await this.#listCatalog(scope, mode));
+
+			let seenFeedbackTool = false;
+			let tools = listing
+				.filter(({ definition }) => {
+					// Global rather than account-scoped, so every account's listing carries an
+					// identical copy. Keep the first.
+					if (definition.name !== SUBMIT_FEEDBACK_TOOL_NAME) {
+						return true;
 					}
-				}
-				continue;
-			}
-			assignField(buckets.body, key, value);
-		}
+					const first = !seenFeedbackTool;
+					seenFeedbackTool = true;
+					return first;
+				})
+				.map((entry) => this.#createTool(entry, mode));
 
-		// Spread onto ordinary objects so downstream JSON and schema handling sees plain records.
-		return {
-			path: Object.keys(buckets.path).length > 0 ? { ...buckets.path } : undefined,
-			query: Object.keys(buckets.query).length > 0 ? { ...buckets.query } : undefined,
-			headers: Object.keys(buckets.headers).length > 0 ? { ...buckets.headers } : undefined,
-			body: { ...buckets.body },
-		};
+			if (options.providers?.length) {
+				const providers = options.providers;
+				tools = tools.filter((tool) => matchesProvider(tool.name, providers));
+			}
+			if (options.actions?.length) {
+				const actions = options.actions;
+				tools = tools.filter((tool) => actions.some((pattern) => matchGlob(tool.name, pattern)));
+			}
+
+			warnOnDuplicateNames(tools);
+			return new Tools(tools);
+		} catch (error) {
+			// StackOneAPIError carries the HTTP status. Re-wrapping it would throw that away, so a
+			// caller could not tell a 401 from a 429.
+			if (error instanceof StackOneError) {
+				throw error;
+			}
+			throw new ToolSetLoadError(`Error fetching tools: ${describeError(error)}`, {
+				cause: error,
+			});
+		}
+	}
+}
+
+/**
+ * Two accounts on one provider serve identically named tools, and `getTool()` returns whichever
+ * was listed first. OpenAI accepts duplicate function names without complaint, so nothing
+ * downstream surfaces it either — the only symptom would be an action running against an
+ * account the caller never chose.
+ */
+function warnOnDuplicateNames(tools: readonly StackOneTool[]): void {
+	const counts = new Map<string, number>();
+	for (const tool of tools) {
+		counts.set(tool.name, (counts.get(tool.name) ?? 0) + 1);
+	}
+	const clashing = [...counts]
+		.filter(([name, count]) => count > 1 && name !== SUBMIT_FEEDBACK_TOOL_NAME)
+		.map(([name]) => name)
+		.sort();
+	if (clashing.length > 0) {
+		warn(
+			`${clashing.length} tool name(s) are served by more than one account (${clashing.slice(0, 5).join(', ')}). getTool() will return the first one listed — pass accountIds to choose.`,
+		);
 	}
 }

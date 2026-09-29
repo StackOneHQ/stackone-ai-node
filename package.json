@@ -62,8 +62,7 @@
 		"run:example": "tsx --env-file .env"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "catalog:prod",
-		"defu": "catalog:prod"
+		"@modelcontextprotocol/sdk": "catalog:prod"
 	},
 	"devDependencies": {
 		"@fast-check/vitest": "catalog:dev",
@@ -86,8 +85,7 @@
 		"@anthropic-ai/claude-agent-sdk": "catalog:peer",
 		"@anthropic-ai/sdk": "catalog:peer",
 		"ai": "catalog:peer",
-		"openai": "catalog:peer",
-		"zod": "catalog:peer"
+		"openai": "catalog:peer"
 	},
 	"peerDependenciesMeta": {
 		"@anthropic-ai/claude-agent-sdk": {

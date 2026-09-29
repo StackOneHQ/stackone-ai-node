@@ -81,9 +81,6 @@ catalogs:
     '@modelcontextprotocol/sdk':
       specifier: ^1.24.3
       version: 1.24.3
-    defu:
-      specifier: ^6.1.4
-      version: 6.1.4
 
 importers:
 
@@ -98,9 +95,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: catalog:prod
         version: 1.24.3(zod@4.3.5)
-      defu:
-        specifier: catalog:prod
-        version: 6.1.4
     devDependencies:
       '@fast-check/vitest':
         specifier: catalog:dev
@@ -1362,9 +1356,6 @@ packages:
     peerDependenciesMeta:
       supports-color:
         optional: true
-
-  defu@6.1.4:
-    resolution: {integrity: sha512-mEQCMmwJu317oSz8CwdIOdwf3xMif1ttiM8LTufzc3g6kR+9Pe236twL8j3IYT1F7GfRgGcW6MWxzZjLIkuHIg==}
 
   depd@2.0.0:
     resolution: {integrity: sha512-g7nH6P6dyDioJogAAGprGpCtVImJhpPk/roCzdb3fIh61/s/nPsfR6onyMwkCAR/OlC3yBC0lESvUoQEAssIrw==}
@@ -3228,8 +3219,6 @@ snapshots:
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
-
-  defu@6.1.4: {}
 
   depd@2.0.0: {}
 

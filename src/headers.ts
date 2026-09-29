@@ -1,32 +1,64 @@
-import { z } from 'zod/v4-mini';
+import { USER_AGENT } from './consts';
 import type { JsonObject } from './types';
 import { warn } from './utils/logger';
 
 /**
- * Known StackOne API header keys that are forwarded as HTTP headers
+ * Header names the SDK owns. They are applied after every other header is merged, so neither a
+ * tool call nor a caller-supplied `headers` option can replace the credential or retarget the
+ * request at another account.
  */
-export const STACKONE_HEADER_KEYS = ['x-account-id'] as const;
+const SDK_OWNED_HEADERS = ['authorization', 'x-account-id', 'user-agent'] as const;
+
+/** Whether a caller-supplied header name is one the SDK owns and will override. */
+export function isSdkOwnedHeader(name: string): boolean {
+	return (SDK_OWNED_HEADERS as readonly string[]).includes(name.trim().toLowerCase());
+}
 
 /**
- * Zod schema for StackOne API headers (branded)
- * These headers are forwarded as HTTP headers in API requests
+ * HTTP Basic credentials for an API key, as every StackOne endpoint expects them.
  */
-export const stackOneHeadersSchema = z.record(z.string(), z.string()).brand<'StackOneHeaders'>();
+function buildAuthHeader(apiKey: string): string {
+	return `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`;
+}
 
 /**
- * Branded type for StackOne API headers
+ * The HTTP headers for a request to StackOne: the caller's extra headers first, then the SDK's
+ * own, so `Authorization`, `x-account-id` and `User-Agent` are always the SDK's.
+ *
+ * Case variants of the owned names are removed before they are set — `fetch` joins
+ * `authorization` and `Authorization` into one comma-separated value rather than letting either
+ * win. With no `accountId`, no `x-account-id` is sent at all.
  */
-export type StackOneHeaders = z.infer<typeof stackOneHeadersSchema>;
+export function buildRequestHeaders(options: {
+	apiKey: string;
+	accountId?: string;
+	extraHeaders?: Record<string, string>;
+}): Record<string, string> {
+	const headers: Record<string, string> = {};
+	for (const [name, value] of Object.entries(options.extraHeaders ?? {})) {
+		if (!isSdkOwnedHeader(name)) {
+			headers[name] = value;
+		}
+	}
+	headers['User-Agent'] = USER_AGENT;
+	headers.Authorization = buildAuthHeader(options.apiKey);
+	if (options.accountId) {
+		headers['x-account-id'] = options.accountId;
+	}
+	return headers;
+}
 
 /**
- * Normalizes header values from JsonObject to StackOneHeaders (branded type)
- * Converts numbers and booleans to strings, and serializes objects to JSON
+ * Normalizes header values from JsonObject to strings.
+ * Converts numbers and booleans to strings, serializes objects to JSON and skips nulls.
  *
  * @param headers - Headers object with JSON value types
- * @returns Normalized headers with string values only (branded type)
+ * @returns Normalized headers with string values only
  */
-export function normalizeHeaders(headers: JsonObject | undefined): StackOneHeaders {
-	if (!headers) return stackOneHeadersSchema.parse({});
+export function normalizeHeaders(headers: JsonObject | undefined): Record<string, string> {
+	if (!headers) {
+		return {};
+	}
 	const result: Record<string, string> = {};
 	for (const [key, value] of Object.entries(headers)) {
 		switch (true) {
@@ -43,7 +75,7 @@ export function normalizeHeaders(headers: JsonObject | undefined): StackOneHeade
 				break;
 		}
 	}
-	return stackOneHeadersSchema.parse(result);
+	return result;
 }
 
 /** An RFC 9110 header field name (`token`). */
@@ -84,7 +116,8 @@ export function declaredHeaderNames(propertyNames: Iterable<string>): Set<string
  * `X-Api-Key`, …) and is wrong the moment one is missed.
  *
  * Names are compared trimmed and case-insensitively: `" x-account-id "` and `"X-ACCOUNT-ID"`
- * are the same header to any server. The value check runs only for a declared header, which
+ * are the same header to any server. `Authorization`, `x-account-id` and `User-Agent` are
+ * refused even when declared, because the SDK sets them itself. The value check runs only for a declared header, which
  * is exactly where a model-supplied value needs it.
  */
 export function sanitiseHeaders(
@@ -94,7 +127,8 @@ export function sanitiseHeaders(
 	const clean: Record<string, string> = {};
 	for (const [key, value] of Object.entries(normalizeHeaders(supplied))) {
 		const name = key.trim();
-		if (!allowed.has(name.toLowerCase())) {
+		// Owned names are refused even when declared: the SDK sets them itself, afterwards.
+		if (!allowed.has(name.toLowerCase()) || isSdkOwnedHeader(name)) {
 			warn(`Dropping header "${name}" from a tool call: no served schema declares it`);
 			continue;
 		}

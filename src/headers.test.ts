@@ -100,9 +100,12 @@ describe('sanitiseHeaders', () => {
 		).toEqual({});
 	});
 
-	it.each([' x-trace', 'X-TRACE\t', 'X-Trace'])('matches %j case- and whitespace-insensitively', (name) => {
-		expect(sanitiseHeaders({ [name]: 'abc' }, allowed)).toEqual({ [name.trim()]: 'abc' });
-	});
+	it.each([' x-trace', 'X-TRACE\t', 'X-Trace'])(
+		'matches %j case- and whitespace-insensitively',
+		(name) => {
+			expect(sanitiseHeaders({ [name]: 'abc' }, allowed)).toEqual({ [name.trim()]: 'abc' });
+		},
+	);
 
 	it.each(['a\r\nEvil: 1', 'trailing\n', 'bad\rvalue', 'nul\u0000byte', 'wide\u0100char'])(
 		'drops a declared header whose value is %j',

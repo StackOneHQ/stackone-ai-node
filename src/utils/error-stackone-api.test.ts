@@ -1,6 +1,6 @@
 import { USER_AGENT } from '../consts';
 import { TEST_BASE_URL } from '../../mocks/constants';
-import { StackOneAPIError } from './error-stackone-api';
+import { StackOneAPIError, describeApiFailure } from './error-stackone-api';
 
 describe('StackOneAPIError', () => {
 	it('should create an error with basic properties', () => {
@@ -11,26 +11,11 @@ describe('StackOneAPIError', () => {
 		expect(error.message).toBe('API failed');
 	});
 
-	it('should append message from responseBody if present', () => {
-		const error = new StackOneAPIError('API failed', 400, {
-			message: 'Invalid request body',
+	it('keeps the message it is given rather than rewriting it', () => {
+		const error = new StackOneAPIError('400 Bad Request: path.id is missing', 400, {
+			message: 'path.id is missing',
 		});
-		expect(error.message).toBe('API failed: Invalid request body');
-	});
-
-	it('should not append message if responseBody.message is not a string', () => {
-		const error = new StackOneAPIError('API failed', 400, { message: 123 });
-		expect(error.message).toBe('API failed');
-	});
-
-	it('should not append message if responseBody.message is empty', () => {
-		const error = new StackOneAPIError('API failed', 400, { message: '' });
-		expect(error.message).toBe('API failed');
-	});
-
-	it('should not append message if responseBody is null', () => {
-		const error = new StackOneAPIError('API failed', 400, null);
-		expect(error.message).toBe('API failed');
+		expect(error.message).toBe('400 Bad Request: path.id is missing');
 	});
 
 	it('should extract provider errors from responseBody', () => {
@@ -205,5 +190,26 @@ describe('StackOneAPIError', () => {
 		});
 		const result = error.toString();
 		expect(result).not.toContain('Provider Endpoint:');
+	});
+});
+
+describe('describeApiFailure', () => {
+	it.each([
+		[{ message: 'path.id is missing', error: 'ignored' }, '400 Bad Request: path.id is missing'],
+		[{ error: 'Invalid ID' }, '400 Bad Request: Invalid ID'],
+		[{ detail: 'Nope' }, '400 Bad Request: Nope'],
+		[{ code: 7 }, '400 Bad Request: {"code":7}'],
+		['  plain text  ', '400 Bad Request: plain text'],
+		[['a'], '400 Bad Request: ["a"]'],
+		[null, '400 Bad Request from https://api.example.com/x'],
+		['', '400 Bad Request from https://api.example.com/x'],
+	])('leads with the server explanation in %j', (body, expected) => {
+		expect(describeApiFailure(400, 'Bad Request', body, 'https://api.example.com/x')).toBe(
+			expected,
+		);
+	});
+
+	it('caps a long text body', () => {
+		expect(describeApiFailure(500, '', 'x'.repeat(900), 'u')).toBe(`500: ${'x'.repeat(500)}`);
 	});
 });

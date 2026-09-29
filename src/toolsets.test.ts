@@ -1,1073 +1,859 @@
 /**
- * StackOneToolSet tests - comprehensive test suite covering:
- * - Initialization and configuration
- * - Authentication (basic, bearer)
- * - Glob and filter matching
- * - MCP fetch integration
- * - Account filtering
- * - Provider and action filtering
+ * StackOneToolSet: configuration, account discovery, catalog listing and caching, filtering,
+ * tool-mode routing and the failure modes of each. Search, execute and feedback live in
+ * toolsets.search-execute.test.ts.
  */
+import { createServer, type Server as NetServer, type Socket } from 'node:net';
 import { http, HttpResponse } from 'msw';
-import { type McpToolDefinition, createMcpApp, defaultMcpTools } from '../mocks/mcp-server';
-import { server } from '../mocks/node';
 import { TEST_BASE_URL } from '../mocks/constants';
+import { type McpToolDefinition, accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import { server } from '../mocks/node';
+import { type McpToolDefinition as ListedTool, listMcpTools } from './mcp-client';
+import { StackOneMcpTool, StackOneRpcTool, type StackOneTool } from './tool';
 import { StackOneToolSet } from './toolsets';
-import { ToolSetConfigError } from './utils/error-toolset';
+import { StackOneAPIError } from './utils/error-stackone-api';
+import { StackOneError } from './utils/error-stackone';
+import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
 
-describe('StackOneToolSet', () => {
-	beforeEach(() => {
-		vi.stubEnv('STACKONE_API_KEY', 'test_key');
+vi.mock('./mcp-client', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('./mcp-client')>();
+	return { ...actual, listMcpTools: vi.fn(actual.listMcpTools) };
+});
+
+const listMock = vi.mocked(listMcpTools);
+const { listMcpTools: realListMcpTools } =
+	await vi.importActual<typeof import('./mcp-client')>('./mcp-client');
+
+type ListRequest = Parameters<typeof listMcpTools>[0];
+const accountOf = (request: ListRequest): string | undefined => request.headers['x-account-id'];
+const def = (name: string, inputSchema: Record<string, unknown> = {}): ListedTool => ({
+	name,
+	description: '',
+	inputSchema,
+});
+/** Replace the MCP listing, as the Python suite monkeypatches `fetch_mcp_tools`. */
+const fakeListing = (listing: (request: ListRequest) => ListedTool[] | Promise<ListedTool[]>) => {
+	listMock.mockImplementation(async (request) => listing(request));
+};
+
+const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {}) =>
+	new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
+const names = (tools: { toArray(): Array<{ name: string }> }) =>
+	tools.toArray().map((tool) => tool.name);
+
+let warnSpy: ReturnType<typeof vi.spyOn>;
+beforeEach(() => {
+	vi.stubEnv('STACKONE_ACCOUNT_ID', '');
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+afterEach(() => {
+	vi.unstubAllEnvs();
+	vi.restoreAllMocks();
+	listMock.mockReset();
+	listMock.mockImplementation(realListMcpTools);
+});
+
+describe('configuration', () => {
+	it('requires an API key', () => {
+		vi.stubEnv('STACKONE_API_KEY', '');
+		expect(() => new StackOneToolSet()).toThrow(ToolSetConfigError);
+		expect(() => new StackOneToolSet()).toThrow(/API key must be provided/);
 	});
 
-	afterEach(() => {
-		vi.unstubAllEnvs();
+	it('reads the API key from STACKONE_API_KEY', async () => {
+		vi.stubEnv('STACKONE_API_KEY', 'test-key');
+		const tools = await new StackOneToolSet({
+			baseUrl: TEST_BASE_URL,
+			accountId: 'acc1',
+		}).fetchTools();
+		expect(tools.length).toBe(2);
 	});
 
-	describe('initialization', () => {
-		it('should initialize with API key from constructor', () => {
-			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
-
-			expect(toolset).toBeDefined();
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.authentication?.credentials?.username).toBe('custom_key');
-		});
-
-		it('should initialize with API key from environment', () => {
-			const toolset = new StackOneToolSet();
-
-			expect(toolset).toBeDefined();
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.authentication?.credentials?.username).toBe('test_key');
-		});
-
-		it('should initialize with custom values', () => {
-			const baseUrl = 'https://api.example.com';
-			const headers = { 'X-Custom-Header': 'test' };
-
-			const toolset = new StackOneToolSet({
-				apiKey: 'custom_key',
-				baseUrl,
-				headers,
-			});
-
-			// @ts-expect-error - Accessing private properties for testing
-			expect(toolset.baseUrl).toBe(baseUrl);
-			// @ts-expect-error - Accessing private properties for testing
-			expect(toolset.headers['X-Custom-Header']).toBe('test');
-		});
-
-		it('should set API key in headers', () => {
-			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.headers.Authorization).toBe('Basic Y3VzdG9tX2tleTo=');
-		});
-
-		it('should set account ID in headers if provided', () => {
-			const toolset = new StackOneToolSet({
-				apiKey: 'custom_key',
-				accountId: 'test_account',
-			});
-
-			// Verify account ID is stored in the headers
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.headers['x-account-id']).toBe('test_account');
-		});
-
-		it('should allow setting account IDs via setAccounts', () => {
-			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
-
-			const result = toolset.setAccounts(['account-1', 'account-2']);
-
-			// Should return this for chaining
-			expect(result).toBe(toolset);
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.accountIds).toEqual(['account-1', 'account-2']);
-		});
-
-		it('should initialize with multiple account IDs from constructor', () => {
-			const toolset = new StackOneToolSet({
-				apiKey: 'custom_key',
-				accountIds: ['account-1', 'account-2', 'account-3'],
-			});
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.accountIds).toEqual(['account-1', 'account-2', 'account-3']);
-		});
-
-		it('should initialize with empty accountIds array when not provided', () => {
-			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.accountIds).toEqual([]);
-		});
-
-		it('should not allow both accountId and accountIds in constructor (type check)', () => {
-			// This test verifies the type system prevents using both accountId and accountIds
-			// The following would be a type error:
-			// new StackOneToolSet({
-			//   apiKey: 'custom_key',
-			//   accountId: 'primary-account',
-			//   accountIds: ['account-1', 'account-2'],
-			// });
-
-			// Valid: only accountId
-			const toolsetSingle = new StackOneToolSet({
-				apiKey: 'custom_key',
-				accountId: 'primary-account',
-			});
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolsetSingle.headers['x-account-id']).toBe('primary-account');
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolsetSingle.accountIds).toEqual([]);
-
-			// Valid: only accountIds
-			const toolsetMultiple = new StackOneToolSet({
-				apiKey: 'custom_key',
-				accountIds: ['account-1', 'account-2'],
-			});
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolsetMultiple.headers['x-account-id']).toBeUndefined();
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolsetMultiple.accountIds).toEqual(['account-1', 'account-2']);
-		});
-
-		it('should throw error when both accountId and accountIds are provided at runtime', () => {
-			// Runtime validation for JavaScript users or when TypeScript is bypassed
-			expect(() => {
-				new StackOneToolSet({
-					apiKey: 'custom_key',
-					accountId: 'primary-account',
-					accountIds: ['account-1', 'account-2'],
-				} as never); // Use 'as never' to bypass TypeScript for runtime test
-			}).toThrow(ToolSetConfigError);
-			expect(() => {
-				new StackOneToolSet({
-					apiKey: 'custom_key',
-					accountId: 'primary-account',
-					accountIds: ['account-1', 'account-2'],
-				} as never);
-			}).toThrow(/Cannot provide both accountId and accountIds/);
-		});
-
-		it('should set baseUrl from config', () => {
-			const toolset = new StackOneToolSet({
-				apiKey: 'custom_key',
-				baseUrl: 'https://api.example.com',
-			});
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.baseUrl).toBe('https://api.example.com');
-		});
+	it('reads the account from STACKONE_ACCOUNT_ID', async () => {
+		vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc3');
+		expect(names(await newToolSet().fetchTools())).toEqual(['acc3_tool_1']);
 	});
 
-	describe('authentication', () => {
-		it('should configure basic auth with API key from constructor', () => {
-			const toolset = new StackOneToolSet({ apiKey: 'custom_key' });
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.authentication).toEqual({
-				type: 'basic',
-				credentials: {
-					username: 'custom_key',
-					password: '',
-				},
-			});
-		});
-
-		it('should configure basic auth with API key from environment', () => {
-			const toolset = new StackOneToolSet();
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.authentication).toEqual({
-				type: 'basic',
-				credentials: {
-					username: 'test_key',
-					password: '',
-				},
-			});
-		});
-
-		it('should throw ToolSetConfigError if no API key is provided and strict mode is enabled', () => {
-			vi.stubEnv('STACKONE_API_KEY', undefined);
-
-			expect(() => {
-				new StackOneToolSet({ strict: true });
-			}).toThrow(ToolSetConfigError);
-		});
-
-		it('should not override custom headers with authentication', () => {
-			const customHeaders = {
-				'Custom-Header': 'test-value',
-				Authorization: 'Bearer custom-token',
-			};
-
-			const toolset = new StackOneToolSet({
-				apiKey: 'custom_key',
-				headers: customHeaders,
-			});
-
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.headers).toEqual(customHeaders);
-		});
-
-		it('should combine authentication and account ID headers', () => {
-			const toolset = new StackOneToolSet({
-				apiKey: 'custom_key',
-				accountId: 'test_account',
-			});
-
-			const expectedAuthValue = `Basic ${Buffer.from('custom_key:').toString('base64')}`;
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.headers.Authorization).toBe(expectedAuthValue);
-			// @ts-expect-error - Accessing private property for testing
-			expect(toolset.headers['x-account-id']).toBe('test_account');
-		});
+	it('refuses both accountId and accountIds', () => {
+		expect(() => newToolSet({ accountId: 'a', accountIds: ['b'] } as never)).toThrow(
+			/Cannot provide both accountId and accountIds/,
+		);
 	});
 
-	describe('fetchTools (MCP integration)', () => {
-		it('creates tools from MCP catalog and wires RPC execution', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			// 1 dummy_action tool
-			expect(tools.length).toBe(1);
-
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			expect(tool).toBeDefined();
-			expect(tool?.name).toBe('dummy_action');
-
-			const aiTools = await tool?.toAISDK({ executable: false });
-			const aiToolDefinition = aiTools?.dummy_action;
-			expect(aiToolDefinition).toBeDefined();
-			expect(aiToolDefinition?.description).toBe('Dummy tool');
-			// @ts-expect-error - jsonSchema is available on Schema wrapper from ai sdk
-			expect(aiToolDefinition?.inputSchema.jsonSchema.properties).toBeDefined();
-			expect(aiToolDefinition?.execution).toBeUndefined();
-
-			const executableTool = (await tool?.toAISDK())?.dummy_action;
-			expect(executableTool?.execute).toBeDefined();
-		});
-
-		it('pins param-style=flat_prefixed on the MCP listing URL', async () => {
-			let requestedUrl = '';
-			const mcpApp = createMcpApp({ accountTools: { default: defaultMcpTools } });
-			server.use(
-				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
-					if (!requestedUrl) {
-						requestedUrl = request.url;
-					}
-					return mcpApp.fetch(request);
-				}),
-			);
-
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-			await toolset.fetchTools();
-
-			expect(requestedUrl).toBe(`${TEST_BASE_URL}/mcp?param-style=flat_prefixed`);
-		});
+	it.each([
+		['accountIds', () => newToolSet({ accountIds: 'acc1' as never })],
+		['setAccounts', () => newToolSet().setAccounts('acc1' as never)],
+		['fetchTools', () => newToolSet().fetchTools({ accountIds: 'acc1' as never })],
+	])('refuses a string where %s expects a list', async (_name, act) => {
+		await expect(async () => act()).rejects.toThrow(/not a string. Did you mean \["acc1"\]\?/);
 	});
 
-	describe('account filtering', () => {
-		it('supports setAccounts() for chaining', () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+	it('returns itself from setAccounts for chaining', () => {
+		const toolset = newToolSet();
+		expect(toolset.setAccounts(['acc1'])).toBe(toolset);
+	});
 
-			// Test chaining
-			const result = toolset.setAccounts(['acc1', 'acc2']);
-			expect(result).toBe(toolset);
+	it('warns that it overrides SDK-owned headers passed in config', () => {
+		newToolSet({ headers: { Authorization: 'Bearer x', 'X-Trace': 't' } });
+		expect(String(warnSpy.mock.calls[0]?.[0])).toContain('"Authorization"');
+	});
+});
+
+describe('account scope', () => {
+	it('lists the given accounts', async () => {
+		const tools = await newToolSet().fetchTools({ accountIds: ['acc1'] });
+		expect(names(tools)).toEqual(['acc1_tool_1', 'acc1_tool_2']);
+	});
+
+	it('lists every given account', async () => {
+		expect((await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2', 'acc3'] })).length).toBe(
+			5,
+		);
+	});
+
+	it('uses setAccounts, the constructor accountIds, execute.accountIds and accountId in turn', async () => {
+		expect(names(await newToolSet().setAccounts(['acc3']).fetchTools())).toEqual(['acc3_tool_1']);
+		expect(names(await newToolSet({ accountIds: ['acc3'] }).fetchTools())).toEqual(['acc3_tool_1']);
+		expect(names(await newToolSet({ execute: { accountIds: ['acc3'] } }).fetchTools())).toEqual([
+			'acc3_tool_1',
+		]);
+		expect(names(await newToolSet({ accountId: 'acc3' }).fetchTools())).toEqual(['acc3_tool_1']);
+	});
+
+	it('lets fetchTools override setAccounts without changing it', async () => {
+		const toolset = newToolSet().setAccounts(['acc1', 'acc2']);
+
+		expect(names(await toolset.fetchTools({ accountIds: ['acc3'] }))).toEqual(['acc3_tool_1']);
+		expect((await toolset.fetchTools()).length).toBe(4);
+	});
+
+	it('lets setAccounts override the constructor accounts', async () => {
+		const toolset = newToolSet({ accountIds: ['acc1'] }).setAccounts(['acc2', 'acc3']);
+		expect(names(await toolset.fetchTools())).toEqual([
+			'acc2_tool_1',
+			'acc2_tool_2',
+			'acc3_tool_1',
+		]);
+	});
+
+	it('binds each tool to the account it was listed for', async () => {
+		const tools = await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2', 'acc3'] });
+		for (const tool of tools.toArray() as StackOneTool[]) {
+			expect(tool.getAccountId()).toBe(tool.name.split('_')[0]);
+		}
+	});
+
+	it('keeps accounts apart when two fetchTools calls run concurrently', async () => {
+		const toolset = newToolSet();
+		const [acc1, acc2] = await Promise.all([
+			toolset.fetchTools({ accountIds: ['acc1'] }),
+			toolset.fetchTools({ accountIds: ['acc2'] }),
+		]);
+
+		expect((acc1.toArray() as StackOneTool[]).map((tool) => tool.getAccountId())).toEqual([
+			'acc1',
+			'acc1',
+		]);
+		expect((acc2.toArray() as StackOneTool[]).map((tool) => tool.getAccountId())).toEqual([
+			'acc2',
+			'acc2',
+		]);
+	});
+});
+
+/**
+ * An API key alone must work: /mcp requires an account, so the SDK finds one. The mock used to
+ * invent an account when the header was absent, so an SDK that never sent one still got a full
+ * catalog — these would all have passed against the SDK that shipped broken.
+ */
+describe('account discovery', () => {
+	it('lists the active accounts when none is configured', async () => {
+		const tools = await newToolSet().fetchTools();
+
+		expect(names(tools)).toEqual(['default_tool_1', 'default_tool_2']);
+		expect(listMock.mock.calls.map(([request]) => accountOf(request))).toEqual(['default']);
+	});
+
+	it('exposes the linked accounts', async () => {
+		const accounts = await newToolSet().fetchAccounts();
+
+		expect(accounts.map((account) => account.id)).toEqual(['default', 'dead']);
+		expect(accounts.filter((account) => account.status === 'active').map((a) => a.id)).toEqual([
+			'default',
+		]);
+	});
+
+	it('discovers once, until the cache is cleared', async () => {
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () => {
+				requests += 1;
+				return HttpResponse.json([{ id: 'acc1', status: 'active' }]);
+			}),
+		);
+		const toolset = newToolSet();
+
+		await toolset.fetchTools();
+		await toolset.fetchTools({ providers: ['acc1'] });
+		expect(requests).toBe(1);
+
+		toolset.clearCatalogCache();
+		await toolset.fetchTools();
+		expect(requests).toBe(2);
+	});
+
+	it('accepts a { data: [...] } wrapper', async () => {
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json({ data: [{ id: 'acc3', status: 'active' }] }),
+			),
+		);
+		expect(names(await newToolSet().fetchTools())).toEqual(['acc3_tool_1']);
+	});
+
+	it('explains a key with no linked accounts', async () => {
+		server.use(http.get(`${TEST_BASE_URL}/accounts`, () => HttpResponse.json([])));
+		await expect(newToolSet().fetchTools()).rejects.toThrow(
+			new ToolSetConfigError(
+				'This API key has no linked accounts. Link one in the StackOne dashboard, or pass accountId explicitly.',
+			),
+		);
+	});
+
+	it('explains a key whose accounts are all inactive', async () => {
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json([{ id: 'x', provider: 'hibob', status: 'error' }]),
+			),
+		);
+		await expect(newToolSet().fetchTools()).rejects.toThrow(
+			/None of this API key's 1 linked accounts are active: hibob \(error\)/,
+		);
+	});
+
+	it('carries the status of a refused /accounts request', async () => {
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json({ message: 'bad key' }, { status: 401, statusText: 'Unauthorized' }),
+			),
+		);
+		const error = (await newToolSet()
+			.fetchAccounts()
+			.catch((caught: unknown) => caught)) as StackOneAPIError;
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect(error.statusCode).toBe(401);
+		expect(error.message).toContain('401 Unauthorized: {"message":"bad key"}');
+	});
+
+	it.each([
+		[
+			'a non-list body',
+			HttpResponse.json({ results: [{ id: 'a' }] }),
+			/Unexpected \/accounts response shape: expected a list, got object/,
+		],
+		[
+			'invalid JSON',
+			new HttpResponse('[{', { headers: { 'content-type': 'application/json' } }),
+			/Invalid JSON returned by/,
+		],
+		[
+			// `["\xff"]` is valid JSON only if the stray byte is silently replaced, so this
+			// fails unless the body is decoded strictly.
+			'invalid UTF-8',
+			new HttpResponse(new Uint8Array([0x5b, 0x22, 0xff, 0x22, 0x5d])),
+			/Invalid JSON returned by/,
+		],
+	])('reports %s as a ToolSetLoadError', async (_name, response, message) => {
+		server.use(http.get(`${TEST_BASE_URL}/accounts`, () => response));
+		const error = await newToolSet()
+			.fetchAccounts()
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetLoadError);
+		expect((error as Error).message).toMatch(message);
+	});
+
+	it('reports an unreachable API as a ToolSetLoadError', async () => {
+		server.use(http.get(`${TEST_BASE_URL}/accounts`, () => HttpResponse.error()));
+		await expect(newToolSet().fetchAccounts()).rejects.toThrow(
+			new RegExp(`^Could not reach ${TEST_BASE_URL}/accounts`),
+		);
+	});
+});
+
+/** The mock refuses what the real API refuses, so a bug here cannot stay green. */
+describe('server refusals', () => {
+	it('refuses an unscoped /mcp request (guards the mock itself)', async () => {
+		const response = await fetch(`${TEST_BASE_URL}/mcp`, {
+			method: 'POST',
+			headers: { Authorization: 'Basic dGVzdC1rZXk6', 'Content-Type': 'application/json' },
+			body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }),
+		});
+		expect(response.status).toBe(400);
+		expect(await response.text()).toContain('x-account-id');
+	});
+
+	it('refuses an unknown account rather than serving a default catalog', async () => {
+		const error = (await newToolSet()
+			.fetchTools({ accountIds: ['no-such-account'] })
+			.catch((caught: unknown) => caught)) as StackOneAPIError;
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect(error.statusCode).toBe(404);
+	});
+
+	it('refuses execution without an account', async () => {
+		const tool = (await newToolSet().fetchTools({ accountIds: ['test-account'] })).getStackOneTool(
+			'dummy_action',
+		);
+		tool.setAccountId(undefined);
+
+		const error = (await tool
+			.execute({ foo: 'bar' })
+			.catch((caught: unknown) => caught)) as StackOneAPIError;
+		expect(error.statusCode).toBe(400);
+	});
+});
+
+describe('listing', () => {
+	it('pins param-style=flat_prefixed on the MCP listing URL', async () => {
+		fakeListing(() => []);
+		await newToolSet({ baseUrl: 'https://api.example.com/' }).fetchTools({ accountIds: ['acc1'] });
+		expect(listMock.mock.calls[0]?.[0].endpoint).toBe(
+			'https://api.example.com/mcp?param-style=flat_prefixed',
+		);
+	});
+
+	it('passes the timeout to every listing', async () => {
+		fakeListing(() => []);
+		await newToolSet({ timeout: 1234 }).fetchTools({ accountIds: ['a', 'b'] });
+		expect(listMock.mock.calls.map(([request]) => request.timeout)).toEqual([1234, 1234]);
+	});
+
+	it('sends caller headers beneath the SDK-owned ones', async () => {
+		fakeListing(() => []);
+		await newToolSet({ headers: { 'X-Trace': 't', 'x-account-id': 'spoofed' } }).fetchTools({
+			accountIds: ['acc1'],
+		});
+		expect(listMock.mock.calls[0]?.[0].headers).toMatchObject({
+			'X-Trace': 't',
+			'x-account-id': 'acc1',
+		});
+		expect(listMock.mock.calls[0]?.[0].headers).not.toHaveProperty('X-Account-Id');
+	});
+
+	it('builds each tool from its served definition', async () => {
+		const tool = (await newToolSet().fetchTools({ accountIds: ['test-account'] })).getTool(
+			'dummy_action',
+		);
+		expect(tool?.description).toBe('Dummy tool');
+		expect(tool?.toJsonSchema()).toEqual(accountMcpTools['test-account'][0].inputSchema);
+	});
+
+	it('runs accounts concurrently, bounded by the slowest', async () => {
+		fakeListing(async (request) => {
+			await new Promise((resolve) => setTimeout(resolve, 150));
+			return [def(`tool_${accountOf(request)}`)];
 		});
 
-		it('fetches tools without account filtering when no accountIds provided', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+		const started = performance.now();
+		await newToolSet().fetchTools({ accountIds: ['a', 'b', 'c', 'd', 'e'] });
 
-			const tools = await toolset.fetchTools();
-			// 2 default tools
-			expect(tools.length).toBe(2);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('default_tool_1');
-			expect(toolNames).toContain('default_tool_2');
+		// Sequential would be 5 × 150ms; give CI generous headroom.
+		expect(performance.now() - started).toBeLessThan(450);
+	});
+
+	it('keeps at most 10 listings in flight', async () => {
+		let inFlight = 0;
+		let peak = 0;
+		fakeListing(async (request) => {
+			inFlight += 1;
+			peak = Math.max(peak, inFlight);
+			await new Promise((resolve) => setTimeout(resolve, 20));
+			inFlight -= 1;
+			return [def(`tool_${accountOf(request)}`)];
 		});
 
-		it('uses x-account-id header when fetching tools with accountIds', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			// Fetch tools for acc1
-			const tools = await toolset.fetchTools({ accountIds: ['acc1'] });
-			// 2 acc1 tools
-			expect(tools.length).toBe(2);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('acc1_tool_1');
-			expect(toolNames).toContain('acc1_tool_2');
+		const tools = await newToolSet().fetchTools({
+			accountIds: Array.from({ length: 25 }, (_, index) => `acc-${index}`),
 		});
 
-		it('uses setAccounts when no accountIds provided in fetchTools', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+		expect(tools.length).toBe(25);
+		expect(peak).toBe(10);
+	});
 
-			// Set accounts using setAccounts
-			toolset.setAccounts(['acc1', 'acc2']);
-
-			// Fetch without accountIds - should use setAccounts
-			const tools = await toolset.fetchTools();
-
-			// Should fetch tools for 2 accounts from setAccounts
-			// acc1 has 2 tools, acc2 has 2 tools
-			expect(tools.length).toBe(4);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('acc1_tool_1');
-			expect(toolNames).toContain('acc1_tool_2');
-			expect(toolNames).toContain('acc2_tool_1');
-			expect(toolNames).toContain('acc2_tool_2');
+	it('orders tools by account, whatever order listings complete in', async () => {
+		fakeListing(async (request) => {
+			const account = accountOf(request) ?? '';
+			await new Promise((resolve) => setTimeout(resolve, account === 'a' ? 30 : 0));
+			return [def(`tool_${account}`)];
 		});
+		expect(names(await newToolSet().fetchTools({ accountIds: ['c', 'a', 'b'] }))).toEqual([
+			'tool_a',
+			'tool_b',
+			'tool_c',
+		]);
+	});
 
-		it('uses accountIds from constructor when no accountIds provided in fetchTools', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountIds: ['acc1', 'acc2'],
-			});
-
-			// Fetch without accountIds - should use constructor accountIds
-			const tools = await toolset.fetchTools();
-
-			// Should fetch tools for 2 accounts from constructor
-			// acc1 has 2 tools, acc2 has 2 tools
-			expect(tools.length).toBe(4);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('acc1_tool_1');
-			expect(toolNames).toContain('acc1_tool_2');
-			expect(toolNames).toContain('acc2_tool_1');
-			expect(toolNames).toContain('acc2_tool_2');
-		});
-
-		it('setAccounts overrides constructor accountIds', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountIds: ['acc1'],
-			});
-
-			// Override with setAccounts
-			toolset.setAccounts(['acc2', 'acc3']);
-
-			// Fetch without accountIds - should use setAccounts, not constructor
-			const tools = await toolset.fetchTools();
-
-			// Should fetch tools for acc2 and acc3 (not acc1)
-			// acc2 has 2 tools, acc3 has 1 tool
-			expect(tools.length).toBe(3);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).not.toContain('acc1_tool_1');
-			expect(toolNames).toContain('acc2_tool_1');
-			expect(toolNames).toContain('acc2_tool_2');
-			expect(toolNames).toContain('acc3_tool_1');
-		});
-
-		it('overrides setAccounts when accountIds provided in fetchTools', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			// Set accounts using setAccounts
-			toolset.setAccounts(['acc1', 'acc2']);
-
-			// Fetch with accountIds - should override setAccounts
-			const tools = await toolset.fetchTools({ accountIds: ['acc3'] });
-
-			// Should fetch tools only for acc3 (ignoring acc1, acc2)
-			expect(tools.length).toBe(1);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('acc3_tool_1');
-		});
-
-		// Regression for issue #365: tools must carry the x-account-id of the
-		// account they were fetched for, even when accounts are fetched
-		// concurrently. The prior implementation mutated this.headers around
-		// async boundaries, so concurrent fetches clobbered each other and
-		// tools were stamped with the wrong account.
-		it('stamps each tool with the x-account-id of its own account under intra-call concurrency', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			const tools = await toolset.fetchTools({ accountIds: ['acc1', 'acc2', 'acc3'] });
-
-			for (const tool of tools.toArray()) {
-				if (tool.name.startsWith('acc1_')) {
-					expect(tool.getHeaders()['x-account-id']).toBe('acc1');
-				} else if (tool.name.startsWith('acc2_')) {
-					expect(tool.getHeaders()['x-account-id']).toBe('acc2');
-				} else if (tool.name.startsWith('acc3_')) {
-					expect(tool.getHeaders()['x-account-id']).toBe('acc3');
-				}
+	it('keeps the healthy accounts when one fails, and says which failed', async () => {
+		fakeListing((request) => {
+			if (accountOf(request) === 'b') {
+				throw new Error('boom');
 			}
+			return [def(`tool_${accountOf(request)}`)];
 		});
 
-		it('stamps tools correctly when two fetchTools calls run concurrently on the same instance', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+		const tools = await newToolSet().fetchTools({ accountIds: ['a', 'b'] });
 
-			const [acc1Tools, acc2Tools] = await Promise.all([
-				toolset.fetchTools({ accountIds: ['acc1'] }),
-				toolset.fetchTools({ accountIds: ['acc2'] }),
-			]);
+		expect(names(tools)).toEqual(['tool_a']);
+		expect(String(warnSpy.mock.calls[0]?.[0])).toMatch(
+			/Skipping account that failed to list tools — b: boom/,
+		);
+	});
 
-			for (const tool of acc1Tools.toArray()) {
-				if (tool.name.startsWith('acc')) {
-					expect(tool.getHeaders()['x-account-id']).toBe('acc1');
-				}
+	it('treats every account failing as a failure, not an empty catalog', async () => {
+		fakeListing((request) => {
+			throw new Error(`boom for ${accountOf(request)}`);
+		});
+		await expect(newToolSet().fetchTools({ accountIds: ['a', 'b'] })).rejects.toThrow(
+			'No account returned tools. a: boom for a | b: boom for b',
+		);
+	});
+
+	it('does not cache a degraded listing', async () => {
+		let failB = true;
+		fakeListing((request) => {
+			if (accountOf(request) === 'b' && failB) {
+				throw new Error('boom');
 			}
-			for (const tool of acc2Tools.toArray()) {
-				if (tool.name.startsWith('acc')) {
-					expect(tool.getHeaders()['x-account-id']).toBe('acc2');
-				}
-			}
+			return [def(`tool_${accountOf(request)}`)];
 		});
+		const toolset = newToolSet();
+
+		expect((await toolset.fetchTools({ accountIds: ['a', 'b'] })).length).toBe(1);
+		failB = false;
+		expect((await toolset.fetchTools({ accountIds: ['a', 'b'] })).length).toBe(2);
 	});
 
-	describe('tool execution', () => {
-		it('should execute tool with dryRun option', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute({ body: { name: 'test' } }, { dryRun: true });
-
-			expect(result.url).toBe(`${TEST_BASE_URL}/actions/rpc`);
-			expect(result.method).toBe('POST');
-			expect(result.headers).toBeDefined();
-			expect(result.body).toBeDefined();
-			expect(result.mappedParams).toEqual({ body: { name: 'test' } });
+	it('passes an SDK error through without re-wrapping it', async () => {
+		fakeListing(() => {
+			throw new ToolSetConfigError('Original config error');
 		});
-
-		it('should execute tool with path, query, and headers params', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute(
-				{
-					body: { name: 'test' },
-					path: { id: '123' },
-					query: { limit: 10 },
-					headers: { 'x-custom': 'value' },
-				},
-				{ dryRun: true },
-			);
-
-			expect(result.mappedParams).toEqual({
-				body: { name: 'test' },
-				path: { id: '123' },
-				query: { limit: 10 },
-				headers: { 'x-custom': 'value' },
-			});
-		});
-
-		it('should execute tool with string parameters', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute(JSON.stringify({ body: { name: 'test' } }), {
-				dryRun: true,
-			});
-
-			expect(result.mappedParams).toEqual({ body: { name: 'test' } });
-		});
-
-		it('should throw StackOneError for invalid parameter type', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			// @ts-expect-error - intentionally passing invalid type
-			await expect(tool.execute(12345)).rejects.toThrow('Invalid parameters type');
-		});
-
-		it('should wrap non-StackOneError in execute', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			// Pass invalid JSON string to trigger JSON.parse error
-			await expect(tool.execute('not valid json')).rejects.toThrow('Error executing RPC action');
-		});
-
-		it('should include extra params in rpcBody', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute(
-				{
-					body: { nested: 'value' },
-					extraParam: 'extra-value',
-					anotherParam: 123,
-				},
-				{ dryRun: true },
-			);
-
-			// The body should include both the nested body and extra params
-			const parsedBody = JSON.parse(result.body as string);
-			expect(parsedBody.body).toEqual({
-				nested: 'value',
-				extraParam: 'extra-value',
-				anotherParam: 123,
-			});
-		});
-
-		it('routes flat_prefixed params into the RPC envelope', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute(
-				{
-					path_id: '123',
-					query_limit: 10,
-					'headers_x-custom': 'value',
-					body_name: 'test',
-				},
-				{ dryRun: true },
-			);
-
-			const payload = JSON.parse(result.body as string);
-			expect(payload.path).toEqual({ id: '123' });
-			expect(payload.query).toEqual({ limit: 10 });
-			expect(payload.body).toEqual({ name: 'test' });
-			// dummy_action declares no `headers_*` property, so the header is dropped.
-			expect(result.headers as Record<string, string>).not.toHaveProperty('x-custom');
-		});
-
-		it('preserves fields named after Object.prototype members', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute(
-				{ body_constructor: 'x', path_toString: 'y', query_valueOf: 'z' },
-				{ dryRun: true },
-			);
-
-			const payload = JSON.parse(result.body as string);
-			expect(payload.body).toEqual({ constructor: 'x' });
-			expect(payload.path).toEqual({ toString: 'y' });
-			expect(payload.query).toEqual({ valueOf: 'z' });
-		});
-
-		it('prefers an explicit flat key over a nested duplicate whatever the key order', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const nestedFirst = await tool.execute(
-				{ path: { id: 'nested' }, path_id: 'flat' },
-				{ dryRun: true },
-			);
-			const flatFirst = await tool.execute(
-				{ path_id: 'flat', path: { id: 'nested' } },
-				{ dryRun: true },
-			);
-
-			expect(JSON.parse(nestedFirst.body as string).path).toEqual({ id: 'flat' });
-			expect(JSON.parse(flatFirst.body as string).path).toEqual({ id: 'flat' });
-		});
-
-		it('drops reserved envelope keys that do not carry an object', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'test-account',
-			});
-
-			const tools = await toolset.fetchTools();
-			const tool = tools.toArray().find((t) => t.name === 'dummy_action');
-			assert(tool, 'tool should be defined');
-
-			const result = await tool.execute(
-				{ body: 'oops', path: 5, real_field: 'kept' },
-				{ dryRun: true },
-			);
-
-			// `body`/`path` name an envelope, so a non-object value is dropped rather than
-			// leaked into the body payload under its reserved name.
-			const payload = JSON.parse(result.body as string);
-			expect(payload.body).toEqual({ real_field: 'kept' });
-			expect(payload.path).toBeUndefined();
-		});
+		await expect(newToolSet({ accountId: 'acc1' }).fetchTools()).rejects.toThrow(
+			new ToolSetConfigError('Original config error'),
+		);
 	});
 
-	describe('model-supplied headers', () => {
-		const serveTool = (inputSchema: McpToolDefinition['inputSchema']) => {
-			const app = createMcpApp({
-				accountTools: {
-					'tenant-a': [{ name: 'crm_list_contacts', description: 'List contacts', inputSchema }],
-				},
-			});
-			server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-		};
-		const captureRpc = () => {
-			const seen: { accountHeader: string | null; body: Record<string, unknown> }[] = [];
-			server.use(
-				http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
-					seen.push({
-						accountHeader: request.headers.get('x-account-id'),
-						body: (await request.json()) as Record<string, unknown>,
-					});
-					return HttpResponse.json({ data: {} });
-				}),
-			);
-			return seen;
-		};
-		const fetchTool = async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'tenant-a',
-			});
-			const tool = (await toolset.fetchTools()).getTool('crm_list_contacts');
-			assert(tool, 'tool should be listed');
-			return tool;
-		};
-
-		// Regression: the envelope headers were merged OVER the tool's own headers, so a
-		// model-supplied x-account-id replaced the account the tool was fetched for — on the
-		// envelope and on the HTTP header the API actually reads.
-		it('cannot switch tenant with headers_x-account-id, even when the schema declares it', async () => {
-			serveTool({
-				type: 'object',
-				properties: { 'headers_x-account-id': { type: 'string' }, query_limit: { type: 'number' } },
-			});
-			const seen = captureRpc();
-			const tool = await fetchTool();
-
-			await tool.execute({ 'headers_x-account-id': 'tenant-b', query_limit: 1 });
-
-			expect(seen[0]?.accountHeader).toBe('tenant-a');
-			expect((seen[0]?.body.headers as Record<string, string>)['x-account-id']).toBe('tenant-a');
+	it('wraps an unexpected error as a ToolSetLoadError', async () => {
+		fakeListing(() => [{ name: 'broken' } as ListedTool]);
+		listMock.mockImplementationOnce(() => {
+			throw new TypeError('unexpected');
 		});
+		await expect(newToolSet({ accountId: 'acc1' }).fetchTools()).rejects.toThrow(
+			new ToolSetLoadError('Error fetching tools: unexpected'),
+		);
+	});
+});
 
-		it('cannot switch tenant with a nested headers object', async () => {
-			serveTool({ type: 'object', properties: { query_limit: { type: 'number' } } });
-			const seen = captureRpc();
-			const tool = await fetchTool();
+describe('filtering', () => {
+	const mixed = () => newToolSet({ accountId: 'mixed' });
 
-			await tool.execute({ headers: { 'X-Account-Id': 'tenant-b', Authorization: 'Bearer stolen' } });
-
-			expect(seen[0]?.accountHeader).toBe('tenant-a');
-			expect(seen[0]?.body.headers).toEqual({ 'x-account-id': 'tenant-a' });
-		});
-
-		it('forwards a header the served schema declares', async () => {
-			serveTool({ type: 'object', properties: { 'headers_x-trace': { type: 'string' } } });
-			const seen = captureRpc();
-			const tool = await fetchTool();
-
-			await tool.execute({ 'headers_x-trace': 'abc', 'headers_x-other': 'dropped' });
-
-			expect(seen[0]?.body.headers).toEqual({ 'x-trace': 'abc', 'x-account-id': 'tenant-a' });
-		});
+	it('filters by provider, case-insensitively', async () => {
+		expect(names(await mixed().fetchTools({ providers: ['HiBob', 'bamboohr'] }))).toEqual([
+			'hibob_list_employees',
+			'hibob_create_employees',
+			'bamboohr_list_employees',
+			'bamboohr_get_employee',
+		]);
 	});
 
-	describe('provider and action filtering', () => {
-		it('filters tools by providers', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'mixed',
-			});
-
-			// Filter by providers
-			const tools = await toolset.fetchTools({ providers: ['hibob', 'bamboohr'] });
-
-			// 4 filtered tools
-			expect(tools.length).toBe(4);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('hibob_list_employees');
-			expect(toolNames).toContain('hibob_create_employees');
-			expect(toolNames).toContain('bamboohr_list_employees');
-			expect(toolNames).toContain('bamboohr_get_employee');
-			expect(toolNames).not.toContain('workday_list_employees');
-		});
-
-		it('filters tools by actions with exact match', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'mixed',
-			});
-
-			// Filter by exact action names
-			const tools = await toolset.fetchTools({
-				actions: ['hibob_list_employees', 'hibob_create_employees'],
-			});
-
-			// 2 filtered tools
-			expect(tools.length).toBe(2);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('hibob_list_employees');
-			expect(toolNames).toContain('hibob_create_employees');
-		});
-
-		it('filters tools by actions with glob pattern', async () => {
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountId: 'mixed',
-			});
-
-			// Filter by glob pattern
-			const tools = await toolset.fetchTools({ actions: ['*_list_employees'] });
-
-			// 3 filtered tools
-			expect(tools.length).toBe(3);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('hibob_list_employees');
-			expect(toolNames).toContain('bamboohr_list_employees');
-			expect(toolNames).toContain('workday_list_employees');
-			expect(toolNames).not.toContain('hibob_create_employees');
-			expect(toolNames).not.toContain('bamboohr_get_employee');
-		});
-
-		it('combines accountIds and actions filters', async () => {
-			const acc1Tools: McpToolDefinition[] = [
-				{
-					name: 'hibob_list_employees',
-					description: 'HiBob List Employees',
-					inputSchema: {
-						type: 'object',
-						properties: { fields: { type: 'string' } },
-					},
-				},
-				{
-					name: 'hibob_create_employees',
-					description: 'HiBob Create Employees',
-					inputSchema: {
-						type: 'object',
-						properties: { name: { type: 'string' } },
-						required: ['name'],
-					},
-				},
-			];
-
-			const acc2Tools: McpToolDefinition[] = [
-				{
-					name: 'bamboohr_list_employees',
-					description: 'BambooHR List Employees',
-					inputSchema: {
-						type: 'object',
-						properties: { fields: { type: 'string' } },
-					},
-				},
-				{
-					name: 'bamboohr_get_employee',
-					description: 'BambooHR Get Employee',
-					inputSchema: {
-						type: 'object',
-						properties: { id: { type: 'string' } },
-						required: ['id'],
-					},
-				},
-			];
-
-			// Override the handler for this specific test
-			const testMcpApp = createMcpApp({
-				accountTools: {
-					acc1: acc1Tools,
-					acc2: acc2Tools,
-				},
-			});
-			server.use(
-				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
-					return testMcpApp.fetch(request);
-				}),
-			);
-
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			// Combine account and action filters
-			const tools = await toolset.fetchTools({
-				accountIds: ['acc1', 'acc2'],
-				actions: ['*_list_employees'],
-			});
-
-			// 2 filtered tools
-			expect(tools.length).toBe(2);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('hibob_list_employees');
-			expect(toolNames).toContain('bamboohr_list_employees');
-			expect(toolNames).not.toContain('hibob_create_employees');
-			expect(toolNames).not.toContain('bamboohr_get_employee');
-		});
-
-		it('combines all filters: accountIds, providers, and actions', async () => {
-			const acc1Tools: McpToolDefinition[] = [
-				{
-					name: 'hibob_list_employees',
-					description: 'HiBob List Employees',
-					inputSchema: {
-						type: 'object',
-						properties: { fields: { type: 'string' } },
-					},
-				},
-				{
-					name: 'hibob_create_employees',
-					description: 'HiBob Create Employees',
-					inputSchema: {
-						type: 'object',
-						properties: { name: { type: 'string' } },
-						required: ['name'],
-					},
-				},
-				{
-					name: 'workday_list_employees',
-					description: 'Workday List Employees',
-					inputSchema: {
-						type: 'object',
-						properties: { fields: { type: 'string' } },
-					},
-				},
-			];
-
-			// Override the handler for this specific test
-			const testMcpApp = createMcpApp({
-				accountTools: {
-					acc1: acc1Tools,
-				},
-			});
-			server.use(
-				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
-					return testMcpApp.fetch(request);
-				}),
-			);
-
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			// Combine all filters
-			const tools = await toolset.fetchTools({
-				accountIds: ['acc1'],
-				providers: ['hibob'],
-				actions: ['*_list_*'],
-			});
-
-			// Should only return hibob_list_employees (matches all filters)
-			expect(tools.length).toBe(1);
-			const toolNames = tools.toArray().map((t) => t.name);
-			expect(toolNames).toContain('hibob_list_employees');
-		});
+	it('matches a provider as a full prefix, not the first token', async () => {
+		fakeListing(() => [def('browser_linkedin_search_people'), def('browser_open_page')]);
+		expect(
+			names(
+				await newToolSet({ accountId: 'acc1' }).fetchTools({ providers: ['browser_linkedin'] }),
+			),
+		).toEqual(['browser_linkedin_search_people']);
 	});
 
-	describe('catalog cache', () => {
-		const installMcpSpy = (
-			accountTools: Record<string, McpToolDefinition[]> = {
-				acc1: [
-					{
-						name: 'acc1_tool_1',
-						description: 'acc1 tool 1',
-						inputSchema: { type: 'object', properties: {} },
-					},
-				],
-				acc2: [
-					{
-						name: 'acc2_tool_1',
-						description: 'acc2 tool 1',
-						inputSchema: { type: 'object', properties: {} },
-					},
-				],
-			},
-		) => {
-			const testMcpApp = createMcpApp({ accountTools });
-			const counter = { count: 0 };
-			server.use(
-				http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
-					counter.count += 1;
-					return testMcpApp.fetch(request);
-				}),
-			);
-			return counter;
-		};
+	it('filters by exact action name', async () => {
+		expect(
+			names(
+				await mixed().fetchTools({ actions: ['hibob_list_employees', 'hibob_create_employees'] }),
+			),
+		).toEqual(['hibob_list_employees', 'hibob_create_employees']);
+	});
 
-		it('memoizes fetchTools results across repeat calls', async () => {
-			const counter = installMcpSpy();
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+	it.each([
+		[
+			['*_list_employees'],
+			['hibob_list_employees', 'bamboohr_list_employees', 'workday_list_employees'],
+		],
+		[['hibob_*'], ['hibob_list_employees', 'hibob_create_employees']],
+		[['[hb]*_get_*'], ['bamboohr_get_employee']],
+		[['[!hb]*'], ['workday_list_employees']],
+		[['hibob_list_employee?'], ['hibob_list_employees']],
+		[['hibob.list*'], []],
+	])('filters by glob %j', async (actions, expected) => {
+		expect(names(await mixed().fetchTools({ actions }))).toEqual(expected);
+	});
 
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			const afterFirst = counter.count;
-			expect(afterFirst).toBeGreaterThan(0);
+	it('combines accounts, providers and actions', async () => {
+		expect(
+			names(await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2'], actions: ['*_tool_1'] })),
+		).toEqual(['acc1_tool_1', 'acc2_tool_1']);
+		expect(
+			names(await mixed().fetchTools({ providers: ['hibob'], actions: ['*_list_*'] })),
+		).toEqual(['hibob_list_employees']);
+	});
+});
 
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			expect(counter.count).toBe(afterFirst);
-		});
+describe('catalog cache', () => {
+	const listingCount = () => listMock.mock.calls.length;
 
-		it('uses separate cache entries for different account sets', async () => {
-			const counter = installMcpSpy();
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+	it('lists once for repeated calls', async () => {
+		const toolset = newToolSet({ accountId: 'acc1' });
+		await toolset.fetchTools();
+		await toolset.fetchTools();
+		await toolset.fetchTools();
+		expect(listingCount()).toBe(1);
+	});
 
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			const afterAcc1 = counter.count;
+	it('keys on the account scope, not its order', async () => {
+		const toolset = newToolSet();
+		await toolset.fetchTools({ accountIds: ['acc1'] });
+		await toolset.fetchTools({ accountIds: ['acc2'] });
+		await toolset.fetchTools({ accountIds: ['acc1'] });
+		expect(listingCount()).toBe(2);
 
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			expect(counter.count).toBe(afterAcc1);
+		await toolset.fetchTools({ accountIds: ['acc1', 'acc2'] });
+		await toolset.fetchTools({ accountIds: ['acc2', 'acc1', 'acc2'] });
+		expect(listingCount()).toBe(4);
+	});
 
-			await toolset.fetchTools({ accountIds: ['acc2'] });
-			expect(counter.count).toBeGreaterThan(afterAcc1);
-			const afterAcc2 = counter.count;
+	it('filters one cached listing without refetching', async () => {
+		const toolset = newToolSet({ accountId: 'mixed' });
+		await toolset.fetchTools();
+		await toolset.fetchTools({ providers: ['hibob'] });
+		await toolset.fetchTools({ actions: ['*_list_*'] });
+		expect(listingCount()).toBe(1);
+	});
 
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			expect(counter.count).toBe(afterAcc2);
-		});
+	it('keys on the tool mode', async () => {
+		const toolset = newToolSet({ accountId: 'acc1' });
+		await toolset.fetchTools();
+		await toolset.fetchTools({ mode: 'search_execute' });
+		await toolset.fetchTools({ mode: 'search_execute' });
+		expect(listingCount()).toBe(2);
+	});
 
-		it('account-id ordering does not affect cache hits', async () => {
-			const counter = installMcpSpy();
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
+	it('is invalidated by clearCatalogCache and setAccounts', async () => {
+		const toolset = newToolSet({ accountIds: ['acc1'] });
+		await toolset.fetchTools();
+		toolset.clearCatalogCache();
+		await toolset.fetchTools();
+		expect(listingCount()).toBe(2);
 
-			await toolset.fetchTools({ accountIds: ['acc1', 'acc2'] });
-			const afterFirst = counter.count;
-			expect(afterFirst).toBeGreaterThan(0);
+		toolset.setAccounts(['acc1']);
+		await toolset.fetchTools();
+		expect(listingCount()).toBe(3);
+	});
 
-			// Reordered list should hit the cache — no new MCP traffic.
-			await toolset.fetchTools({ accountIds: ['acc2', 'acc1'] });
-			expect(counter.count).toBe(afterFirst);
-		});
-
-		it('clearCatalogCache forces a refetch', async () => {
-			const counter = installMcpSpy();
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			const afterFirst = counter.count;
-
+	// A listing already in flight must not land after the clear that cancelled it — otherwise
+	// the stale catalog is written back and served for the life of the process.
+	it('is not repopulated by a listing that was in flight when it was cleared', async () => {
+		const toolset = newToolSet({ accountId: 'acc1' });
+		fakeListing(() => {
 			toolset.clearCatalogCache();
-			await toolset.fetchTools({ accountIds: ['acc1'] });
-			expect(counter.count).toBeGreaterThan(afterFirst);
+			return [def('stale_tool')];
 		});
 
-		it('setAccounts invalidates the cache', async () => {
-			const counter = installMcpSpy();
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-				accountIds: ['acc1'],
-			});
+		await toolset.fetchTools();
+		fakeListing(() => [def('fresh_tool')]);
 
-			await toolset.fetchTools();
-			await toolset.fetchTools();
-			const afterAcc1 = counter.count;
-
-			toolset.setAccounts(['acc2']);
-			await toolset.fetchTools();
-			expect(counter.count).toBeGreaterThan(afterAcc1);
-		});
-
-		it('reuses the same Tools instance on cache hit (identity)', async () => {
-			installMcpSpy();
-			const toolset = new StackOneToolSet({
-				baseUrl: TEST_BASE_URL,
-				apiKey: 'test-key',
-			});
-
-			const first = await toolset.fetchTools({ accountIds: ['acc1'] });
-			const second = await toolset.fetchTools({ accountIds: ['acc1'] });
-
-			// Identity reuse means the toolIndex cache's reference-equality check
-			// in localSearch can hit across search calls.
-			expect(second).toBe(first);
-		});
+		expect(names(await toolset.fetchTools())).toEqual(['fresh_tool']);
 	});
+
+	it('hands every caller fresh tools, so rebinding one never rescopes another', async () => {
+		const toolset = newToolSet({ accountId: 'acc1' });
+		const first = (await toolset.fetchTools()).getStackOneTool('acc1_tool_1');
+		first.setAccountId('someone-else');
+
+		const second = (await toolset.fetchTools()).getStackOneTool('acc1_tool_1');
+
+		expect(second).not.toBe(first);
+		expect(second.getAccountId()).toBe('acc1');
+	});
+
+	it('does not share nested schema between callers', async () => {
+		fakeListing(() => [def('t', { properties: { body_x: { type: 'object', properties: {} } } })]);
+		const toolset = newToolSet({ accountId: 'acc1' });
+
+		const first = (await toolset.fetchTools()).getTool('t');
+		const nested = first?.parameters.properties.body_x?.properties;
+		assert(nested);
+		(nested as Record<string, unknown>).injected = { type: 'string' };
+
+		const second = (await toolset.fetchTools()).getTool('t');
+		expect(second?.parameters.properties.body_x?.properties).toEqual({});
+	});
+});
+
+describe('tool mode', () => {
+	it('builds RPC tools by default', async () => {
+		fakeListing(() => [def('t')]);
+		expect((await newToolSet({ accountId: 'acc1' }).fetchTools()).getTool('t')).toBeInstanceOf(
+			StackOneRpcTool,
+		);
+	});
+
+	it('builds MCP tools under search_execute, and requests it on the URL', async () => {
+		fakeListing(() => [def('t')]);
+		const tools = await newToolSet({ accountId: 'acc1', toolMode: 'search_execute' }).fetchTools();
+
+		expect(tools.getTool('t')).toBeInstanceOf(StackOneMcpTool);
+		expect(listMock.mock.calls[0]?.[0].endpoint).toBe(
+			`${TEST_BASE_URL}/mcp?param-style=flat_prefixed&tool-mode=search_execute`,
+		);
+	});
+
+	it('lets fetchTools override the configured mode, null meaning the server default', async () => {
+		fakeListing(() => [def('t')]);
+		const toolset = newToolSet({ accountId: 'acc1', toolMode: 'search_execute' });
+
+		expect((await toolset.fetchTools({ mode: null })).getTool('t')).toBeInstanceOf(StackOneRpcTool);
+		expect((await toolset.fetchTools({ mode: 'individual' })).getTool('t')).toBeInstanceOf(
+			StackOneRpcTool,
+		);
+		expect(listMock.mock.calls.map(([request]) => request.endpoint.split('?')[1])).toEqual([
+			'param-style=flat_prefixed',
+			'param-style=flat_prefixed&tool-mode=individual',
+		]);
+	});
+});
+
+describe('duplicate tool names', () => {
+	it('warns when two accounts serve the same name', async () => {
+		fakeListing(() => [def('hibob_list_employees'), def('hibob_get_employee')]);
+
+		const tools = await newToolSet().fetchTools({ accountIds: ['a', 'b'] });
+
+		expect(tools.length).toBe(4);
+		expect((tools.getTool('hibob_list_employees') as StackOneTool).getAccountId()).toBe('a');
+		expect(String(warnSpy.mock.calls[0]?.[0])).toContain(
+			'2 tool name(s) are served by more than one account (hibob_get_employee, hibob_list_employees)',
+		);
+	});
+
+	it('stays quiet when names are unique', async () => {
+		await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2'] });
+		expect(warnSpy).not.toHaveBeenCalled();
+	});
+});
+
+describe('stackone_submit_feedback in the catalog', () => {
+	const serveFeedback = (submitFeedback: boolean) => {
+		const rpcRequests: string[] = [];
+		const app = createMcpApp({
+			accountTools: { acc1: accountMcpTools.acc1, acc2: accountMcpTools.acc2 },
+			submitFeedback,
+		});
+		server.use(
+			http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)),
+			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
+				rpcRequests.push(((await request.json()) as { action: string }).action);
+				return HttpResponse.json({ data: {} });
+			}),
+		);
+		return rpcRequests;
+	};
+
+	it('appears once however many accounts list it, without a duplicate warning', async () => {
+		serveFeedback(true);
+
+		const tools = await newToolSet({ accountIds: ['acc1', 'acc2'] }).fetchTools();
+
+		expect(names(tools).filter((name) => name === 'stackone_submit_feedback')).toHaveLength(1);
+		expect(warnSpy).not.toHaveBeenCalled();
+	});
+
+	it.each([undefined, 'search_execute'] as const)(
+		'is an MCP tool executed over tools/call in %s mode, never RPC',
+		async (toolMode) => {
+			const rpcRequests = serveFeedback(true);
+			const tool = (await newToolSet({ accountId: 'acc1', toolMode }).fetchTools()).getTool(
+				'stackone_submit_feedback',
+			);
+
+			expect(tool).toBeInstanceOf(StackOneMcpTool);
+			expect(
+				await tool?.execute({ rating: 'positive', tool_names: ['acc1_tool_1'] }),
+			).toMatchObject({
+				message: 'Feedback recorded',
+			});
+			expect(rpcRequests).toEqual([]);
+		},
+	);
+
+	it('is absent when the server does not serve it — the SDK never invents one', async () => {
+		serveFeedback(false);
+		const tools = await newToolSet({ accountId: 'acc1' }).fetchTools();
+		expect(tools.getTool('stackone_submit_feedback')).toBeUndefined();
+		expect(tools.getTool('tool_feedback')).toBeUndefined();
+	});
+});
+
+describe('execution through fetched tools', () => {
+	it('executes an RPC tool against its account', async () => {
+		const tools = await newToolSet({ accountId: 'your-bamboohr-account-id' }).fetchTools();
+		const result = await tools.getTool('bamboohr_get_employee')?.execute({ id: 'emp-123' });
+		expect(result).toMatchObject({ data: { id: 'emp-123', name: 'Test Employee' } });
+	});
+});
+
+describe('model-supplied headers', () => {
+	const serveTool = (inputSchema: McpToolDefinition['inputSchema']) => {
+		const app = createMcpApp({
+			accountTools: {
+				'tenant-a': [{ name: 'crm_list_contacts', description: 'List contacts', inputSchema }],
+			},
+		});
+		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+	};
+	const captureRpc = () => {
+		const seen: { accountHeader: string | null; body: Record<string, unknown> }[] = [];
+		server.use(
+			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
+				seen.push({
+					accountHeader: request.headers.get('x-account-id'),
+					body: (await request.json()) as Record<string, unknown>,
+				});
+				return HttpResponse.json({ data: {} });
+			}),
+		);
+		return seen;
+	};
+	const fetchTool = async () => {
+		const tool = (await newToolSet({ accountId: 'tenant-a' }).fetchTools()).getTool(
+			'crm_list_contacts',
+		);
+		assert(tool, 'tool should be listed');
+		return tool;
+	};
+
+	// Regression: the envelope headers were merged OVER the tool's own headers, so a
+	// model-supplied x-account-id replaced the account the tool was fetched for — on the
+	// envelope and on the HTTP header the API actually reads.
+	it('cannot switch tenant with headers_x-account-id, even when the schema declares it', async () => {
+		serveTool({
+			type: 'object',
+			properties: { 'headers_x-account-id': { type: 'string' }, query_limit: { type: 'number' } },
+		});
+		const seen = captureRpc();
+		const tool = await fetchTool();
+
+		await tool.execute({ 'headers_x-account-id': 'tenant-b', query_limit: 1 });
+
+		expect(seen[0]?.accountHeader).toBe('tenant-a');
+		expect(seen[0]?.body.headers).toMatchObject({ 'x-account-id': 'tenant-a' });
+	});
+
+	it('cannot switch tenant with a nested headers object', async () => {
+		serveTool({ type: 'object', properties: { query_limit: { type: 'number' } } });
+		const seen = captureRpc();
+		const tool = await fetchTool();
+
+		await tool.execute({ headers: { 'X-Account-Id': 'tenant-b', Authorization: 'Bearer stolen' } });
+
+		expect(seen[0]?.accountHeader).toBe('tenant-a');
+		expect(seen[0]?.body.headers).toEqual({ 'x-account-id': 'tenant-a' });
+	});
+
+	it('forwards a header the served schema declares', async () => {
+		serveTool({ type: 'object', properties: { 'headers_x-trace': { type: 'string' } } });
+		const seen = captureRpc();
+		const tool = await fetchTool();
+
+		await tool.execute({ 'headers_x-trace': 'abc', 'headers_x-other': 'dropped' });
+
+		expect(seen[0]?.body.headers).toEqual({ 'x-trace': 'abc', 'x-account-id': 'tenant-a' });
+	});
+});
+
+describe('openai()', () => {
+	it('returns the catalog in OpenAI function format', async () => {
+		const tools = await newToolSet({ accountId: 'test-account' }).openai();
+
+		expect(tools).toEqual([
+			{
+				type: 'function',
+				function: {
+					name: 'dummy_action',
+					description: 'Dummy tool',
+					parameters: accountMcpTools['test-account'][0].inputSchema,
+				},
+			},
+		]);
+	});
+
+	it('scopes to the given accounts', async () => {
+		const tools = await newToolSet({ accountId: 'test-account' }).openai({ accountIds: ['acc3'] });
+		expect(tools.map((tool) => tool.function.name)).toEqual(['acc3_tool_1']);
+	});
+});
+
+describe('timeouts', () => {
+	let silent: NetServer;
+	const sockets: Socket[] = [];
+	let port = 0;
+
+	beforeAll(async () => {
+		silent = createServer((socket) => sockets.push(socket));
+		await new Promise<void>((resolve) => silent.listen(0, '127.0.0.1', resolve));
+		port = (silent.address() as { port: number }).port;
+	});
+	afterAll(async () => {
+		for (const socket of sockets) {
+			socket.destroy();
+		}
+		await new Promise((resolve) => silent.close(resolve));
+	});
+
+	it('bounds a listing against a host that never answers', async () => {
+		const toolset = new StackOneToolSet({
+			apiKey: 'k',
+			accountId: 'a',
+			baseUrl: `http://127.0.0.1:${port}`,
+			timeout: 300,
+		});
+		const started = Date.now();
+		const error = await toolset.fetchTools().catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetLoadError);
+		expect(Date.now() - started).toBeLessThan(5_000);
+	});
+
+	it('bounds account discovery too', async () => {
+		const toolset = new StackOneToolSet({
+			apiKey: 'k',
+			baseUrl: `http://127.0.0.1:${port}`,
+			timeout: 300,
+		});
+		await expect(toolset.fetchAccounts()).rejects.toThrow(ToolSetLoadError);
+	});
+
+	it('uses execute.timeout when no top-level timeout is given', async () => {
+		fakeListing(() => []);
+		await newToolSet({ accountId: 'acc1', execute: { timeout: 42 } }).fetchTools();
+		expect(listMock.mock.calls[0]?.[0].timeout).toBe(42);
+	});
+});
+
+it('is caught by `instanceof StackOneError`, whatever goes wrong', async () => {
+	vi.stubEnv('STACKONE_API_KEY', '');
+	expect(() => new StackOneToolSet()).toThrow(StackOneError);
+	await expect(newToolSet().fetchTools({ accountIds: ['no-such-account'] })).rejects.toThrow(
+		StackOneError,
+	);
 });

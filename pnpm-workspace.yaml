@@ -31,10 +31,8 @@ catalogs:
     '@anthropic-ai/sdk': ^0.72.1
     ai: '>=5.0.108 <8.0.0'
     openai: ^6.2.0
-    zod: '>=3.25.0 <5'
   prod:
     '@modelcontextprotocol/sdk': ^1.24.3
-    defu: ^6.1.4
 
 enablePrePostScripts: true
 

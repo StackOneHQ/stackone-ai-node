@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from './constants';
+import { mockAccountTools } from './handlers.mcp';
 
 /**
  * StackOne Actions RPC endpoint handlers
@@ -14,6 +15,21 @@ export const stackoneRpcHandlers = [
 			return HttpResponse.json(
 				{ error: 'Unauthorized', message: 'Missing or invalid authorization header' },
 				{ status: 401 },
+			);
+		}
+
+		// Execution is account-scoped too, exactly like /mcp: an unscoped request is refused,
+		// and so is an account the API has never heard of.
+		if (!accountIdHeader) {
+			return HttpResponse.json(
+				{ error: 'Bad Request', message: 'Missing x-account-id header in request' },
+				{ status: 400 },
+			);
+		}
+		if (!Object.hasOwn(mockAccountTools, accountIdHeader)) {
+			return HttpResponse.json(
+				{ error: 'Not Found', message: `Unknown account ${accountIdHeader}` },
+				{ status: 404 },
 			);
 		}
 
