@@ -31,33 +31,46 @@ const openaiIntegration = async (): Promise<void> => {
 	const openai = new OpenAI();
 
 	// Create a chat completion with tool calls
+	const messages: OpenAI.ChatCompletionMessageParam[] = [
+		{
+			role: 'system',
+			content: 'You are a helpful assistant that can access HR information.',
+		},
+		{
+			role: 'user',
+			content: 'List the first 5 employees',
+		},
+	];
 	const response = await openai.chat.completions.create({
 		model: 'gpt-5.1',
-		messages: [
-			{
-				role: 'system',
-				content: 'You are a helpful assistant that can access HR information.',
-			},
-			{
-				role: 'user',
-				content: 'List the first 5 employees',
-			},
-		],
+		messages,
 		tools: openAITools,
 	});
 
-	console.log(`Model returned ${response.choices.length} choice(s)`);
-
-	const choice = response.choices[0];
-	const toolCalls = choice.message.tool_calls ?? [];
+	const message = response.choices[0]?.message;
+	const toolCalls = message?.tool_calls ?? [];
 	console.log(`Tool calls made: ${toolCalls.length}`);
+	if (!message || toolCalls.length === 0) {
+		return;
+	}
 
 	for (const toolCall of toolCalls) {
-		if ('function' in toolCall) {
+		if (toolCall.type === 'function') {
 			console.log(`  Tool: ${toolCall.function.name}`);
 			console.log(`  Arguments: ${toolCall.function.arguments}`);
 		}
 	}
+
+	// Run the tool calls and hand the results back. The assistant turn must come before its tool
+	// results, or OpenAI returns a 400. A failed call becomes a tool message the model can read.
+	messages.push(message, ...(await tools.executeOpenAIToolCalls(toolCalls)));
+
+	const final = await openai.chat.completions.create({
+		model: 'gpt-5.1',
+		messages,
+		tools: openAITools,
+	});
+	console.log(`Answer: ${final.choices[0]?.message.content ?? ''}`);
 };
 
 // Run the example

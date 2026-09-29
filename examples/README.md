@@ -16,7 +16,7 @@ Set your credentials using either approach:
 
 ```bash
 export STACKONE_API_KEY=your-stackone-api-key
-export STACKONE_ACCOUNT_ID=your-account-id
+export STACKONE_ACCOUNT_ID=your-account-id     # optional: accounts are discovered otherwise
 export OPENAI_API_KEY=your-openai-api-key       # for OpenAI/AI SDK examples
 export ANTHROPIC_API_KEY=your-anthropic-api-key  # for Anthropic examples
 ```
@@ -46,9 +46,13 @@ pnpm test
 
 ## Examples Overview
 
+### [`search-and-execute.ts`](./search-and-execute.ts) -- Search and Execute (recommended)
+
+Finds an action in natural language with `toolset.search()` and runs it with `toolset.execute()`, without loading a tool catalog into a model's context. Lists the linked accounts the API key reaches (no account id needed), prints the ranked matches and the best action's `input_schema`, executes it with the hit's `session_id`, and records feedback with `submitFeedback()` when the project has feedback enabled.
+
 ### [`openai-integration.ts`](./openai-integration.ts) -- OpenAI Chat Completions API
 
-Fetches StackOne tools, converts them with `tools.toOpenAI()`, and sends them to the OpenAI Chat Completions API. Demonstrates the basic tool-call flow: create a completion, inspect the returned tool calls, and log arguments.
+Fetches StackOne tools, converts them with `tools.toOpenAI()`, and sends them to the OpenAI Chat Completions API. Demonstrates the full tool-call loop: create a completion, run the returned tool calls with `tools.executeOpenAIToolCalls()`, and send the results back for a final answer.
 
 ### [`openai-responses-integration.ts`](./openai-responses-integration.ts) -- OpenAI Responses API
 
@@ -68,13 +72,13 @@ Converts StackOne tools into an MCP server with `tools.toClaudeAgentSdk()` and p
 
 ### [`auth-management.ts`](./auth-management.ts) -- Authentication Patterns
 
-Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, setting multiple accounts with `setAccounts()`, overriding per-tool collection or per individual tool, and fetching tools for multiple accounts in one call.
+Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, relying on account discovery with just an API key (`fetchAccounts()`), setting multiple accounts with `setAccounts()`, and overriding the account on an individual tool.
 
 ## Environment Variables
 
 | Variable              | Required                     | Used By                                                                             |
 | --------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
 | `STACKONE_API_KEY`    | Yes                          | All examples                                                                        |
-| `STACKONE_ACCOUNT_ID` | Recommended                  | All examples (read automatically by `new StackOneToolSet()`)                        |
+| `STACKONE_ACCOUNT_ID` | Optional                     | All examples (read automatically; without it, accounts are discovered from the key) |
 | `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts` |
 | `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                       |

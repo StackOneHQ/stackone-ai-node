@@ -4,7 +4,9 @@
  * Shows every way to configure API keys and account IDs with the Node SDK.
  *
  * Run with:
- *   STACKONE_API_KEY=xxx STACKONE_ACCOUNT_ID=xxx npx tsx examples/auth-management.ts
+ *   STACKONE_API_KEY=xxx npx tsx examples/auth-management.ts
+ *
+ * STACKONE_ACCOUNT_ID is optional: without it, accounts are discovered from the API key.
  */
 
 import process from 'node:process';
@@ -19,7 +21,7 @@ if (!process.env.STACKONE_API_KEY) {
 const apiKeyFromEnv = async (): Promise<void> => {
 	console.log('=== 1a. API Key from environment ===\n');
 
-	// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env automatically
+	// Reads STACKONE_API_KEY (and STACKONE_ACCOUNT_ID, if set) from env automatically
 	const toolset = new StackOneToolSet();
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools using env API key\n`);
@@ -31,6 +33,18 @@ const apiKeyExplicit = async (): Promise<void> => {
 	const toolset = new StackOneToolSet({ apiKey: process.env.STACKONE_API_KEY });
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools using explicit API key\n`);
+};
+
+// --- 1c. API key alone: accounts are discovered ---
+const apiKeyAlone = async (): Promise<void> => {
+	console.log('=== 1c. API key alone ===\n');
+
+	// With no account configured, the toolset lists the key's active linked accounts itself.
+	const toolset = new StackOneToolSet({ apiKey: process.env.STACKONE_API_KEY });
+	const accounts = await toolset.fetchAccounts();
+	const active = accounts.filter((account) => account.status === 'active');
+	console.log(`  ${accounts.length} linked account(s), ${active.length} active`);
+	console.log(`  Loaded ${(await toolset.fetchTools()).length} tools across them\n`);
 };
 
 // --- 2. Account ID from environment ---
@@ -91,6 +105,7 @@ const perToolOverride = async (): Promise<void> => {
 // --- Run all sections ---
 await apiKeyFromEnv();
 await apiKeyExplicit();
+await apiKeyAlone();
 await accountIdFromEnv();
 await accountIdInConstructor();
 await setAccountsGlobally();

@@ -8,37 +8,47 @@
 
 ## StackOneToolSet
 
-The StackOne AI SDK provides the `StackOneToolSet` class, which fetches tools dynamically from StackOne's MCP (Model Context Protocol) endpoint. This ensures you always have access to the latest tool definitions.
+The StackOne AI SDK provides the `StackOneToolSet` class, a thin client over StackOne's MCP (Model Context Protocol) endpoint. It lists the tools your linked accounts serve and executes them, handing your model each tool's schema exactly as the server served it.
+
+It offers two ways in:
+
+- **`search()` and `execute()`** — find an action in natural language and run it by id. A catalog of hundreds of tools never has to fit in a model's context. This is the recommended way to start.
+- **`fetchTools()`** — list the catalog as tools and hand them to your framework (OpenAI, Anthropic, the AI SDK, the Claude Agent SDK, …).
 
 ## Installation
 
 ```bash
 # Using npm
-npm install @stackone/ai zod
+npm install @stackone/ai
 
 # Using yarn
-yarn add @stackone/ai zod
+yarn add @stackone/ai
 
 # Using pnpm
-pnpm add @stackone/ai zod
+pnpm add @stackone/ai
 
 # Using bun
-bun add @stackone/ai zod
+bun add @stackone/ai
 ```
 
-> **Note:** `zod` is a peer dependency required for AI SDK integrations and internal schema validation. Version `>=3.25.0 <5` is supported.
+Framework packages (`openai`, `@anthropic-ai/sdk`, `ai`, `@anthropic-ai/claude-agent-sdk`) are optional peer dependencies: install the ones you use.
 
 ## Usage
 
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
 
-// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
+// Reads STACKONE_API_KEY from the environment. No account id needed.
 const toolset = new StackOneToolSet();
 
-const tools = await toolset.fetchTools();
-const employeeTool = tools.getTool('workday_list_workers');
-const employees = await employeeTool.execute();
+// Find an action, then run it by id
+const [best] = await toolset.search('list recent comments', { topK: 3 });
+const result = await toolset.execute(best.action_id, { query: { limit: 5 } });
+
+// Or list the catalog as tools for your framework
+const tools = await toolset.fetchTools({ actions: ['*_list_*'] });
+const listTool = tools.getTool('workday_list_workers');
+const workers = await listTool?.execute();
 ```
 
 ### Authentication
@@ -49,11 +59,21 @@ Set the `STACKONE_API_KEY` environment variable:
 export STACKONE_API_KEY=<your-api-key>
 ```
 
-or load from a .env file using your preferred environment variable library.
+or load from a .env file using your preferred environment variable library, or pass `apiKey` to the constructor. The constructor throws a `ToolSetConfigError` when neither is set.
+
+An API key alone is enough. With no account configured, the toolset asks `GET /accounts` which accounts the key is linked to and uses the active ones. `fetchAccounts()` returns that list:
+
+```typescript
+for (const account of await toolset.fetchAccounts()) {
+	console.log(account.id, account.provider, account.status);
+}
+```
+
+> If your organisation has many linked accounts, discovery lists the catalog of every one of them. Pass explicit `accountIds` to avoid the round trips and the model context they cost.
 
 ### Account IDs
 
-StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels:
+StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels (a per-call `accountIds` wins, then `setAccounts()`, then the constructor's `accountIds`, then `accountId` or `STACKONE_ACCOUNT_ID`, then discovery):
 
 ```typescript
 import { StackOneToolSet } from '@stackone/ai';
@@ -78,10 +98,13 @@ const workdayOnly = await multiAccountToolset.fetchTools({
 	actions: ['workday_*'], // Only Workday tools
 });
 
-// Set directly on a tool instance
-tools.setAccountId('direct-account-id');
-const currentAccountId = tools.getAccountId(); // Get the current account ID
+// Rebind a single tool to another account
+const tool = tools.getStackOneTool('workday_list_workers');
+tool.setAccountId('direct-account-id');
+const currentAccountId = tool.getAccountId();
 ```
+
+Every `fetchTools()` call returns fresh tool instances, so rebinding one never affects another caller's tools. When two accounts serve a tool with the same name, `getTool()` returns the first one listed, and the SDK warns.
 
 ## Integrations
 
@@ -101,23 +124,25 @@ import { StackOneToolSet } from '@stackone/ai';
 // Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from environment
 const toolset = new StackOneToolSet();
 
-const tools = await toolset.fetchTools();
+const tools = await toolset.fetchTools({ actions: ['workday_*'] });
+const openai = new OpenAI();
 
-await openai.chat.completions.create({
+const messages: OpenAI.ChatCompletionMessageParam[] = [
+	{ role: 'system', content: 'You are a helpful HR assistant using Workday.' },
+	{ role: 'user', content: 'Create a time-off request for employee id cxIQ5764hj2' },
+];
+const response = await openai.chat.completions.create({
 	model: 'gpt-5.1',
-	messages: [
-		{
-			role: 'system',
-			content: 'You are a helpful HR assistant using Workday.',
-		},
-		{
-			role: 'user',
-			content: 'Create a time-off request for employee id cxIQ5764hj2',
-		},
-	],
+	messages,
 	tools: tools.toOpenAI(),
 });
+
+// Run the model's tool calls and send the results back
+const message = response.choices[0].message;
+messages.push(message, ...(await tools.executeOpenAIToolCalls(message.tool_calls)));
 ```
+
+`executeOpenAIToolCalls()` never throws for a failed call: the error, with the server's explanation, becomes the tool message, so the model can correct itself.
 
 [View full example](examples/openai-integration.ts)
 
@@ -259,6 +284,60 @@ for await (const message of result) {
 
 ## Features
 
+### Search and execute
+
+`search()` asks every linked connector for actions matching a natural-language query and ranks the results together, best first. `execute()` runs one by id, through the connector that serves it.
+
+```typescript
+const actions = await toolset.search('create a time-off request', { topK: 5 });
+for (const action of actions) {
+	console.log(action.similarity_score, action.action_id);
+}
+
+const [best] = actions;
+// `input_schema` describes what the action accepts; `example_request` shows the shape
+const result = await toolset.execute(best.action_id, best.example_request, {
+	sessionId: best.session_id,
+});
+```
+
+- `execute()` takes the nested envelope an action's `example_request` shows: `{ path, query, body }`. (Tools from `fetchTools()` take the flat, prefixed arguments their own schema names, such as `path_id`.)
+- The connector is the longest one whose name prefixes the action id, so `browser_linkedin_*` actions are not routed to `browser`.
+- `action_id` is always the one you pass: an `action_id` inside `args` — for example, one a prompt-injected model put there — is ignored.
+- Each hit carries the `session_id` of the search that found it, when the server issued one. Pass it back as `sessionId` to link the calls together.
+- `topK` is 1–50 (default 10). A connector that fails to search is skipped with a warning, unless every connector fails.
+
+[View full example](examples/search-and-execute.ts)
+
+### Feedback
+
+When feedback is enabled for your project, the server serves a `stackone_submit_feedback` tool alongside the others, in every tool mode. A model can call it like any other tool, and `submitFeedback()` calls it for you:
+
+```typescript
+await toolset.submitFeedback({
+	rating: 'negative', // 'positive' | 'negative' | 'neutral'
+	toolNames: [best.action_id],
+	feedback: 'Needed two calls to find the right action',
+	category: 'search', // optional
+	sessionId: best.session_id, // optional: links the feedback to that search
+});
+```
+
+The SDK never builds a feedback tool itself: if the server does not serve it, `submitFeedback()` throws a `ToolSetLoadError` saying feedback is not enabled for the project.
+
+### Tool modes
+
+```typescript
+// One tool per action (the server default)
+const toolset = new StackOneToolSet();
+
+// Two meta tools per connector instead: `*_search_actions` and `*_execute_action`
+const compact = new StackOneToolSet({ toolMode: 'search_execute' });
+const metaTools = await compact.fetchTools();
+```
+
+`search_execute` keeps the catalog small however many accounts are linked, which suits handing the tools to a model directly. A single call can override the mode with `fetchTools({ mode })`.
+
 ### Filtering Tools with fetchTools()
 
 You can filter tools by account IDs, providers, and action patterns:
@@ -272,7 +351,7 @@ const tools = await toolset.fetchTools({
 	accountIds: ['account-123', 'account-456'],
 });
 
-// Filter by providers
+// Filter by providers (a full, case-insensitive prefix of the tool name)
 const tools = await toolset.fetchTools({ providers: ['hibob', 'workday'] });
 
 // Filter by actions with exact match
@@ -280,7 +359,7 @@ const tools = await toolset.fetchTools({
 	actions: ['hibob_list_employees', 'hibob_create_employees'],
 });
 
-// Filter by actions with glob patterns
+// Filter by actions with glob patterns (`*`, `?`, `[seq]`, `[!seq]`)
 const tools = await toolset.fetchTools({ actions: ['*_list_employees'] });
 
 // Combine multiple filters
@@ -296,6 +375,38 @@ This is especially useful when you want to:
 - Limit tools to specific linked accounts
 - Focus on specific HR/CRM/ATS providers
 - Get only certain types of operations (e.g., all "list" operations)
+
+The catalog is cached per account scope and mode, so changing a filter never refetches it. Call `clearCatalogCache()` after linking or unlinking accounts.
+
+### Tool schemas
+
+`tool.toJsonSchema()` is the schema the server served, verbatim — `$schema`, `$defs`, `$ref`, `title`, `additionalProperties`, top-level `oneOf`/`anyOf`/`allOf` and every nested constraint — with the served `required` list. It is a fresh copy each call. The framework adapters start from it and change only what the provider would otherwise reject:
+
+| Adapter                                                 | Adjustment                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `toJsonSchema()`                                        | None: lossless.                                                                                                                                                                                                                                                                                  |
+| `toOpenAI()`, `toAnthropic()`, `toClaudeAgentSdkTool()` | A top-level `oneOf`/`anyOf`/`allOf` is folded into the root: every branch's properties become root properties, and an `allOf` branch's `required` is merged in. OpenAI also rejects a top-level `enum`/`not`, so those are dropped.                                                              |
+| `toOpenAIResponses()`                                   | As above. With `strict` (the default) the root also gets `additionalProperties: false`. OpenAI's strict mode additionally requires every property to be `required` and every nested object closed, which the SDK does not rewrite, so pass `{ strict: false }` for schemas with optional fields. |
+| `toAISDK()`                                             | As `toOpenAI()`, plus `additionalProperties: false` on the root.                                                                                                                                                                                                                                 |
+
+### Headers
+
+A tool call can only send the headers its served schema declares, as `headers_<name>` properties; anything else a model supplies is dropped with a warning. `Authorization`, `x-account-id` and `User-Agent` are always the SDK's own, so no tool call — and no `headers` constructor option — can replace the credential or run a call against another account.
+
+```typescript
+// Extra headers for every request (for example, tracing)
+const toolset = new StackOneToolSet({ headers: { 'X-Request-Source': 'my-agent' } });
+```
+
+### Errors and timeouts
+
+Everything the SDK throws is a `StackOneError`:
+
+- `StackOneAPIError` — the API refused a request. Carries `statusCode` and `responseBody`, and its message leads with the server's own explanation (`400 Bad Request: path.id is missing`). A failed MCP `tools/call` raises one too, with the status from its payload; a dead account surfaces as a `412`.
+- `ToolSetConfigError` — the toolset was configured, or called, with something it cannot use.
+- `ToolSetLoadError` — the catalog, or the accounts behind it, could not be loaded.
+
+`timeout` (milliseconds, default 60000) bounds every MCP listing and `tools/call`, every RPC call and account discovery.
 
 ### Custom Base URL
 
@@ -319,25 +430,25 @@ const tools = await toolset.fetchTools();
 const employeeTool = tools.getTool('workday_list_workers');
 
 // Use dryRun to see the request details
-const dryRunResult = await employeeTool.execute({ query: { limit: 5 } }, { dryRun: true });
+const dryRunResult = await employeeTool.execute({ query_limit: 5 }, { dryRun: true });
 
 console.log(dryRunResult);
 // {
 //   url: "https://api.stackone.com/actions/rpc",
 //   method: "POST",
 //   headers: { ... },
-//   body: "...",
-//   mappedParams: { ... }
+//   body: '{"action":"workday_list_workers","body":{},"headers":{...},"query":{"limit":5}}',
+//   mappedParams: { query_limit: 5 }
 // }
 ```
 
 The `dryRun` option returns an object containing:
 
-- `url`: The full URL with query parameters
+- `url`: The RPC endpoint
 - `method`: The HTTP method
-- `headers`: The request headers
-- `body`: The request body
-- `mappedParams`: The parameters after mapping and derivation
+- `headers`: The HTTP request headers, without `Authorization`
+- `body`: The JSON request body: the arguments split into the RPC envelope
+- `mappedParams`: The arguments as the tool received them
 
 ### File Downloads
 
@@ -367,9 +478,11 @@ The download result (typed `BinaryDownloadResult`) contains:
 - `contentType`: `string` — the file's MIME type (e.g. `application/pdf`), or `application/octet-stream`
 - `statusCode`: `number` — HTTP status of the download response
 - `headers`: `Record<string, string>` — the response headers
-- `fileName`: `string | null` — filename from `Content-Disposition` (RFC 5987 `filename*` aware), or `null`
+- `fileName`: `string | null` — filename from `Content-Disposition` (RFC 5987 `filename*` aware), reduced to a safe basename, or `null`
 
-> **Note:** `content` is a raw `Buffer`, not a `JsonValue`. `JSON.stringify` turns it into a `{ type: 'Buffer', data: [...] }` byte array (not the file, and potentially huge), so if you forward tool results to an LLM — or anything that re-serializes to JSON — strip or transform the `content` key first (for example, base64-encode it on the LLM-facing path).
+The filename comes from whoever uploaded the file to the connected provider, so it is reduced to a bare basename before you see it: path components (`../`, `/`, `\`), drive letters and NTFS stream separators (`:`), control and Unicode format characters are removed, and it is capped at 255 bytes. It is `null` when nothing usable is left.
+
+> **Note:** `content` is a raw `Buffer`, not a `JsonValue`. `JSON.stringify` turns it into a `{ type: 'Buffer', data: [...] }` byte array (not the file, and potentially huge), so if you forward tool results to an LLM — or anything that re-serializes to JSON — strip or transform the `content` key first. `executeOpenAIToolCalls()` and the Claude Agent SDK adapter base64-encode it for you.
 
 ## Examples
 
