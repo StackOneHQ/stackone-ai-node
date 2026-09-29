@@ -62,13 +62,12 @@ const fakeMetaTools = (
 			.map((name): McpToolDefinition => ({ name, description: '', inputSchema: {} })),
 	);
 	const calls: Array<{ tool: string; args: JsonObject }> = [];
-	vi.spyOn(StackOneMcpTool.prototype, 'execute').mockImplementation(async function (
-		this: StackOneMcpTool,
-		args,
-	) {
-		calls.push({ tool: this.name, args: args as JsonObject });
-		return respond(this, args as JsonObject);
-	});
+	vi.spyOn(StackOneMcpTool.prototype, 'execute').mockImplementation(
+		async function (this: StackOneMcpTool, args) {
+			calls.push({ tool: this.name, args: args as JsonObject });
+			return respond(this, args as JsonObject);
+		},
+	);
 	return calls;
 };
 

@@ -38,7 +38,11 @@ describe('search-and-execute example e2e', () => {
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
 		const log = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-		await import('../../examples/search-and-execute');
+		// A computed specifier, so tsc does not follow it: the root project type-checks tests/,
+		// and the example imports '@stackone/ai', which resolves only when the examples
+		// workspace is installed — the ai-peer-range jobs install the root package alone.
+		const example = new URL('../../examples/search-and-execute.ts', import.meta.url).href;
+		await import(/* @vite-ignore */ example);
 
 		const printed = log.mock.calls.map((args) => String(args[0])).join('\n');
 		expect(printed).toContain('default  testprovider  active');
