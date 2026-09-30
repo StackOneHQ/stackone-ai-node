@@ -721,6 +721,12 @@ describe('Tools.executeOpenAIToolCalls', () => {
 		});
 	});
 
+	it('sends "null" for a tool that returns nothing, as the Python SDK does', async () => {
+		const { tools } = toolsWith(async () => undefined as never);
+		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
+		expect(message?.content).toBe('null');
+	});
+
 	it('rethrows an error that is not the SDK’s', async () => {
 		const { tools } = toolsWith(async () => {
 			throw new TypeError('programming error');
