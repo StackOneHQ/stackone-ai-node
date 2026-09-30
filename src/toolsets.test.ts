@@ -207,6 +207,39 @@ describe('account discovery', () => {
 		expect(requests).toBe(2);
 	});
 
+	it('shares one discovery between concurrent calls', async () => {
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () => {
+				requests += 1;
+				return HttpResponse.json([{ id: 'acc1', status: 'active' }]);
+			}),
+		);
+		fakeListing(() => []);
+		const toolset = newToolSet();
+
+		await Promise.all([toolset.search('x'), toolset.fetchTools(), toolset.fetchTools()]);
+
+		expect(requests).toBe(1);
+	});
+
+	it('retries a discovery that failed', async () => {
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () => {
+				requests += 1;
+				return requests === 1
+					? HttpResponse.json({ message: 'busy' }, { status: 503 })
+					: HttpResponse.json([{ id: 'acc1', status: 'active' }]);
+			}),
+		);
+		const toolset = newToolSet();
+
+		await expect(toolset.fetchTools()).rejects.toBeInstanceOf(StackOneAPIError);
+		expect(names(await toolset.fetchTools())).toEqual(['acc1_tool_1', 'acc1_tool_2']);
+		expect(requests).toBe(2);
+	});
+
 	it('accepts a { data: [...] } wrapper', async () => {
 		server.use(
 			http.get(`${TEST_BASE_URL}/accounts`, () =>

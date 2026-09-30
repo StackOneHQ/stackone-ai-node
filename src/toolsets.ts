@@ -309,6 +309,7 @@ export class StackOneToolSet {
 	 */
 	readonly #catalogCache = new Map<string, readonly CatalogEntry[]>();
 	#discoveredAccountIds: string[] | undefined;
+	#discovering: Promise<string[]> | undefined;
 	/**
 	 * Bumped by {@link clearCatalogCache}. A listing already in flight when the cache is cleared
 	 * captured the generation it started under, and refuses to write back if it has moved —
@@ -376,6 +377,7 @@ export class StackOneToolSet {
 		this.#cacheGeneration += 1;
 		this.#catalogCache.clear();
 		this.#discoveredAccountIds = undefined;
+		this.#discovering = undefined;
 	}
 
 	/**
@@ -478,6 +480,20 @@ export class StackOneToolSet {
 		if (this.#discoveredAccountIds) {
 			return this.#discoveredAccountIds;
 		}
+		// Shared while in flight, so concurrent search() and fetchTools() calls on a fresh toolset
+		// make one GET /accounts between them rather than one each.
+		if (!this.#discovering) {
+			const discovering = this.#fetchActiveAccountIds().finally(() => {
+				if (this.#discovering === discovering) {
+					this.#discovering = undefined;
+				}
+			});
+			this.#discovering = discovering;
+		}
+		return this.#discovering;
+	}
+
+	async #fetchActiveAccountIds(): Promise<string[]> {
 		const generation = this.#cacheGeneration;
 		const accounts = await this.fetchAccounts();
 		const active = accounts
