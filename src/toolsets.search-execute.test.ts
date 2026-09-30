@@ -400,7 +400,7 @@ describe('submitFeedback()', () => {
 		expect(calls).toEqual([
 			{
 				accountId: 'acc1',
-				toolMode: undefined,
+				toolMode: 'search_execute',
 				name: 'stackone_submit_feedback',
 				arguments: {
 					rating: 'negative',
@@ -440,6 +440,49 @@ describe('submitFeedback()', () => {
 		});
 
 		expect(calls.map((call) => call.name)).toEqual(['stackone_submit_feedback']);
+	});
+
+	// The tool is global, so one call per account would record the same verdict once per account.
+	it('lists search_execute and calls once, on the first of the given accounts', async () => {
+		const { calls } = serveMock({
+			accountTools: { acc1: [], acc2: [] },
+			submitFeedback: true,
+		});
+
+		await newToolSet({ accountIds: ['acc1'] }).submitFeedback({
+			rating: 'positive',
+			toolNames: ['x'],
+			accountIds: ['acc2', 'acc1'],
+		});
+
+		expect(listMock.mock.calls.map(([request]) => request.endpoint)).toEqual([
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
+		]);
+		expect(calls.map((call) => [call.name, call.accountId, call.toolMode])).toEqual([
+			['stackone_submit_feedback', 'acc2', 'search_execute'],
+		]);
+	});
+
+	it('calls on the first account GET /accounts lists, not the first by id', async () => {
+		const { calls } = serveMock({
+			accountTools: { zeta: [], alpha: [] },
+			submitFeedback: true,
+		});
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json([
+					{ id: 'gone', provider: 'p', status: 'error' },
+					{ id: 'zeta', provider: 'p', status: 'active' },
+					{ id: 'alpha', provider: 'p', status: 'active' },
+				]),
+			),
+		);
+
+		await newToolSet().submitFeedback({ rating: 'positive', toolNames: ['x'] });
+
+		expect(calls.map((call) => [call.name, call.accountId])).toEqual([
+			['stackone_submit_feedback', 'zeta'],
+		]);
 	});
 
 	it('explains that feedback is not enabled when the server does not serve the tool', async () => {

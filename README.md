@@ -323,7 +323,7 @@ await toolset.submitFeedback({
 });
 ```
 
-The SDK never builds a feedback tool itself: if the server does not serve it, `submitFeedback()` throws a `ToolSetLoadError` saying feedback is not enabled for the project.
+`submitFeedback()` makes exactly one call, on the first account: the first of its `accountIds` when given, otherwise the first the toolset is configured with or discovers. The SDK never builds a feedback tool itself: if the server does not serve it, `submitFeedback()` throws a `ToolSetLoadError` saying feedback is not enabled for the project.
 
 ### Tool modes
 

@@ -170,7 +170,10 @@ export interface SubmitFeedbackOptions {
 	sessionId?: string;
 	/** Who produced the feedback. Default: `'model'`. */
 	source?: FeedbackSource;
-	/** Accounts to list the tool through. Defaults as for {@link StackOneToolSet.fetchTools}. */
+	/**
+	 * The feedback is sent through the first of these accounts. Defaults as for
+	 * {@link StackOneToolSet.fetchTools}, in the order given or discovered.
+	 */
 	accountIds?: string[];
 }
 
@@ -501,7 +504,11 @@ export class StackOneToolSet {
 		return active;
 	}
 
-	async #resolveAccountScope(accountIds: string[] | undefined): Promise<string[]> {
+	/**
+	 * The accounts a call is scoped to, in the order they were given: the call's own, then the
+	 * toolset's, then its single account, then every active account in `GET /accounts` order.
+	 */
+	async #accountsInOrder(accountIds: string[] | undefined): Promise<string[]> {
 		assertAccountIdList(accountIds, 'accountIds');
 		let scope = accountIds?.length ? accountIds : this.#accountIds;
 		if (scope.length === 0 && this.#accountId) {
@@ -510,9 +517,13 @@ export class StackOneToolSet {
 		if (scope.length === 0) {
 			scope = await this.#discoverAccountIds();
 		}
+		return scope;
+	}
+
+	async #resolveAccountScope(accountIds: string[] | undefined): Promise<string[]> {
 		// Sorted and deduplicated: the listing order, and the cache key, must not depend on the
 		// order the caller happened to name the accounts in.
-		return [...new Set(scope)].sort();
+		return [...new Set(await this.#accountsInOrder(accountIds))].sort();
 	}
 
 	#endpoint(mode: ToolMode | undefined): string {
@@ -839,6 +850,9 @@ export class StackOneToolSet {
 	 * feedback is enabled for the project, and a client-side stand-in would report success for
 	 * feedback that went nowhere. Unset optional fields are omitted, never sent as null.
 	 *
+	 * Makes exactly one `tools/call`, on the first account: the first of `accountIds` when given,
+	 * otherwise the toolset's first, otherwise the first active account `GET /accounts` lists.
+	 *
 	 * @example
 	 * ```typescript
 	 * const [hit] = await toolset.search('list recent comments');
@@ -864,9 +878,14 @@ export class StackOneToolSet {
 			throw new ToolSetConfigError('toolNames must be an array of tool names');
 		}
 
-		const tool = (await this.fetchTools({ accountIds: options.accountIds })).getTool(
-			SUBMIT_FEEDBACK_TOOL_NAME,
-		);
+		// One account, one tools/call: the tool is global, so every account's copy records the same
+		// feedback, and calling each would record it once per account. The first account, in the
+		// order given, is the one a caller can predict. search_execute lists two meta tools per
+		// connector where individual mode lists every action.
+		const [accountId] = await this.#accountsInOrder(options.accountIds);
+		const tool = (
+			await this.fetchTools({ accountIds: accountId ? [accountId] : [], mode: 'search_execute' })
+		).getTool(SUBMIT_FEEDBACK_TOOL_NAME);
 		if (!tool) {
 			throw new ToolSetLoadError(
 				`The server did not serve ${SUBMIT_FEEDBACK_TOOL_NAME}: feedback is not enabled for this project.`,
