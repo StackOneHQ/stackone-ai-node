@@ -38,8 +38,7 @@ const searchAndExecute = async (): Promise<void> => {
 
 	console.log('\nRanked matches:');
 	for (const action of actions) {
-		const score = typeof action.similarity_score === 'number' ? action.similarity_score : 0;
-		console.log(`  ${score.toFixed(3)}  ${action.action_id}`);
+		console.log(`  ${(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
 	}
 
 	// input_schema is how you find out what an action accepts. Build the call from it and from

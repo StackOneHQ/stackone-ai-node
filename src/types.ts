@@ -193,11 +193,22 @@ export type StackOneAccount = JsonObject & {
 };
 
 /**
- * One action a `search()` found. Carries at least `action_id` and `description`, plus whatever
- * else the server returns for it (`similarity_score`, `input_schema`, `example_request`, …).
+ * One action a `search()` found, as the server returned it: `action_id` always, the fields below
+ * when the server sent them, and anything else it adds.
  */
 export type SearchResult = JsonObject & {
 	action_id: string;
+	/** What the action does. */
+	description?: string;
+	/** How well the action matched the query; results are ranked on it, highest first. */
+	similarity_score?: number;
+	/**
+	 * The JSON Schema of the arguments `execute()` takes for this action. The server omits it for
+	 * an action that takes none.
+	 */
+	input_schema?: JsonObject;
+	/** A copy-and-edit `execute()` call for the action, served alongside `input_schema`. */
+	example_request?: JsonObject;
 	/**
 	 * The `session_id` of the search that produced this hit, when the server issued one. Pass it
 	 * to `execute()` and `submitFeedback()` to link those calls to this search.

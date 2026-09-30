@@ -712,7 +712,7 @@ export class StackOneToolSet {
 	 * with a warning, unless they all fail.
 	 *
 	 * @param query What you want to do, e.g. "list recent comments".
-	 * @returns Actions carrying at least `action_id` and `description`, best first, each with the
+	 * @returns Actions carrying at least `action_id`, best first, each with the
 	 *   `session_id` of the search that found it when the server issued one. Pass it to
 	 *   {@link execute} and {@link submitFeedback} to link the calls.
 	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50.
