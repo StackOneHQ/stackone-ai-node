@@ -650,6 +650,20 @@ describe('duplicate tool names', () => {
 		);
 	});
 
+	// Listing order is by account id, whatever order the caller named them in, so which duplicate
+	// getTool() returns is predictable.
+	it('returns the first listed duplicate from getTool(), by account id', async () => {
+		fakeListing(() => [def('hibob_list_employees')]);
+
+		const tools = await newToolSet().fetchTools({ accountIds: ['b', 'a'] });
+
+		expect(tools.toArray().map((tool) => (tool as StackOneTool).getAccountId())).toEqual([
+			'a',
+			'b',
+		]);
+		expect(tools.getTool('hibob_list_employees')).toBe(tools.toArray()[0]);
+	});
+
 	it('stays quiet when names are unique', async () => {
 		await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2'] });
 		expect(warnSpy).not.toHaveBeenCalled();
