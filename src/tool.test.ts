@@ -481,7 +481,7 @@ describe('StackOneMcpTool', () => {
 	});
 
 	// The meta tools take a `headers` object the server unpacks, and these arguments are
-	// model-controlled. The meta tool's own schema declares no headers_*, so nothing survives.
+	// model-controlled. This schema declares no headers at all, so nothing survives.
 	it('drops every model-supplied header', async () => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -503,7 +503,9 @@ describe('StackOneMcpTool', () => {
 
 	it('keeps a header its own schema declares', async () => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
-		await mcpTool({ 'headers_x-trace': { type: 'string' } }).execute({
+		await mcpTool({
+			headers: { type: 'object', properties: { 'x-trace': { type: 'string' } } },
+		}).execute({
 			action_id: 'mock_list_items',
 			headers: { 'X-Trace': 'abc', 'X-Other': 'no' },
 		});

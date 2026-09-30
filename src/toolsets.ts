@@ -758,6 +758,10 @@ export class StackOneToolSet {
 	 * keys. The connector is the longest one whose name prefixes `actionId`, and `actionId` is
 	 * pinned last, so a model-supplied `action_id` in `args` cannot replace it.
 	 *
+	 * `args.headers` is forwarded to the action: `*_execute_action` serves `headers` as an open
+	 * object, so any header name is declared — except `Authorization`, `x-account-id` and
+	 * `User-Agent`, which the SDK sets itself and drops here with a warning.
+	 *
 	 * @param actionId The action to run, e.g. `linear_list_issues`.
 	 * @param args The action's arguments.
 	 * @param options.sessionId The `session_id` a search hit carries, to link this call to it.

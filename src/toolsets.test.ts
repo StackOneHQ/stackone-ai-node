@@ -745,7 +745,7 @@ describe('model-supplied headers', () => {
 
 	// Regression: the RPC envelope's headers were merged OVER the tool's own, so a model-supplied
 	// x-account-id replaced the account the tool was fetched for. Over tools/call the tenant is
-	// the transport's x-account-id, which the SDK sets; an argument is only ever an argument.
+	// the transport's x-account-id, which the SDK sets; the argument never reaches the server.
 	it('cannot switch tenant with headers_x-account-id, even when the schema declares it', async () => {
 		const calls = serveTool({
 			type: 'object',
@@ -756,6 +756,7 @@ describe('model-supplied headers', () => {
 		await tool.execute({ 'headers_x-account-id': 'tenant-b', query_limit: 1 });
 
 		expect(calls[0]?.accountId).toBe('tenant-a');
+		expect(calls[0]?.arguments).toEqual({ query_limit: 1 });
 	});
 
 	it('cannot switch tenant with a nested headers object', async () => {
@@ -771,6 +772,30 @@ describe('model-supplied headers', () => {
 		expect(calls[0]?.arguments.headers).toEqual({});
 	});
 
+	it('drops a headers_* argument the served schema does not declare', async () => {
+		const calls = serveTool({ type: 'object', properties: { query_limit: { type: 'number' } } });
+		const tool = await fetchTool();
+
+		await tool.execute({ headers_foo: 'bar', query_limit: 1 });
+
+		expect(calls[0]?.arguments).toEqual({ query_limit: 1 });
+		expect(String(warnSpy.mock.calls[0]?.[0])).toContain(
+			'"headers_foo" from a tool call: not declared by the schema',
+		);
+	});
+
+	it('forwards a headers_* argument the served schema declares', async () => {
+		const calls = serveTool({
+			type: 'object',
+			properties: { 'headers_x-trace': { type: 'string' }, query_limit: { type: 'number' } },
+		});
+		const tool = await fetchTool();
+
+		await tool.execute({ 'headers_x-trace': 'abc', query_limit: 1 });
+
+		expect(calls[0]?.arguments).toEqual({ 'headers_x-trace': 'abc', query_limit: 1 });
+	});
+
 	it('forwards a header the served schema declares', async () => {
 		const calls = serveTool({
 			type: 'object',
@@ -781,6 +806,44 @@ describe('model-supplied headers', () => {
 		await tool.execute({ headers: { 'x-trace': 'abc', 'x-other': 'dropped' } });
 
 		expect(calls[0]?.arguments.headers).toEqual({ 'x-trace': 'abc' });
+	});
+
+	it('forwards any header through an open headers object, except the ones the SDK owns', async () => {
+		const calls = serveTool({ type: 'object', properties: { headers: { type: 'object' } } });
+		const tool = await fetchTool();
+
+		await tool.execute({
+			headers: { 'x-custom': 'yes', Authorization: 'Bearer stolen', 'x-account-id': 'tenant-b' },
+		});
+
+		expect(calls[0]?.accountId).toBe('tenant-a');
+		expect(calls[0]?.arguments.headers).toEqual({ 'x-custom': 'yes' });
+		expect(warnSpy.mock.calls.map((args: unknown[]) => String(args[0]))).toEqual([
+			'[@stackone/ai] Dropping header "Authorization" from a tool call: set by the SDK',
+			'[@stackone/ai] Dropping header "x-account-id" from a tool call: set by the SDK',
+		]);
+	});
+
+	it('sends every argument that is not a header argument unchanged', async () => {
+		const calls = serveTool({
+			type: 'object',
+			properties: {
+				query_limit: { type: 'number' },
+				path: { type: 'object' },
+				body: { type: 'object' },
+			},
+		});
+		const tool = await fetchTool();
+		const args = {
+			query_limit: 1,
+			path: { id: 'c1' },
+			body: { headers: { Authorization: 'kept' }, headers_x: 'kept' },
+			x_account_id: 'kept',
+		};
+
+		await tool.execute(args);
+
+		expect(calls[0]?.arguments).toEqual(args);
 	});
 });
 

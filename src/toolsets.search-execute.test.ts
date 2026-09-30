@@ -292,6 +292,18 @@ describe('execute()', () => {
 		expect(calls[0]?.arguments.headers).toEqual({});
 	});
 
+	// *_execute_action serves `headers` as an open object, so a host can pass any header the SDK
+	// does not own through to the action.
+	it('forwards host-set headers the SDK does not own', async () => {
+		const { calls } = serveMock();
+
+		await newToolSet().execute('mock_list_items', {
+			headers: { 'x-custom': 'yes', Authorization: 'Bearer stolen' },
+		});
+
+		expect(calls[0]?.arguments.headers).toEqual({ 'x-custom': 'yes' });
+	});
+
 	it('raises on an isError result rather than returning it as data', async () => {
 		serveMock();
 		const error = (await newToolSet()

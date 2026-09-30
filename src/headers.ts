@@ -1,5 +1,5 @@
 import { USER_AGENT } from './consts';
-import type { JsonObject } from './types';
+import type { JsonObject, JsonValue } from './types';
 import { warn } from './utils/logger';
 
 /**
@@ -8,6 +8,9 @@ import { warn } from './utils/logger';
  * request at another account.
  */
 const SDK_OWNED_HEADERS = ['authorization', 'x-account-id', 'user-agent'] as const;
+
+const isPlainObject = (value: unknown): value is JsonObject =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /** Whether a caller-supplied header name is one the SDK owns and will override. */
 export function isSdkOwnedHeader(name: string): boolean {
@@ -48,6 +51,20 @@ export function buildRequestHeaders(options: {
 	return headers;
 }
 
+/** A header value as a string: scalars stringified, objects serialised, null as absent. */
+function headerText(value: JsonValue | undefined): string | undefined {
+	switch (true) {
+		case value == null:
+			return undefined;
+		case typeof value === 'string':
+			return value;
+		case typeof value === 'number' || typeof value === 'boolean':
+			return String(value);
+		default:
+			return JSON.stringify(value);
+	}
+}
+
 /**
  * Normalizes header values from JsonObject to strings.
  * Converts numbers and booleans to strings, serializes objects to JSON and skips nulls.
@@ -56,23 +73,11 @@ export function buildRequestHeaders(options: {
  * @returns Normalized headers with string values only
  */
 export function normalizeHeaders(headers: JsonObject | undefined): Record<string, string> {
-	if (!headers) {
-		return {};
-	}
 	const result: Record<string, string> = {};
-	for (const [key, value] of Object.entries(headers)) {
-		switch (true) {
-			case value == null:
-				continue;
-			case typeof value === 'string':
-				result[key] = value;
-				break;
-			case typeof value === 'number' || typeof value === 'boolean':
-				result[key] = String(value);
-				break;
-			default:
-				result[key] = JSON.stringify(value);
-				break;
+	for (const [key, value] of Object.entries(headers ?? {})) {
+		const text = headerText(value);
+		if (text !== undefined) {
+			result[key] = text;
 		}
 	}
 	return result;
@@ -88,36 +93,63 @@ const HEADER_NAME_PATTERN = /^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/;
  */
 const HEADER_VALUE_PATTERN = /^[\x20-\x7e\t\x80-\xff]*$/;
 
-const DECLARED_HEADER_PREFIX = 'headers_';
+const FLAT_HEADER_PREFIX = 'headers_';
 
 /**
- * The header names a served tool schema declares, lower-cased.
+ * The header arguments a served tool schema declares.
  *
- * The schema itself is the allowlist, in whichever param-style the server served it: a flat
- * `headers_<name>` property, or a `<name>` under a nested `headers` object. Nothing needs
- * maintaining in the SDK: an action that starts declaring a header works without a release.
+ * The schema itself is the allowlist, in whichever param-style the server served it. Nothing
+ * needs maintaining in the SDK: an action that starts declaring a header works without a release.
  */
-export function declaredHeaderNames(properties: Record<string, unknown>): Set<string> {
-	const allowed = new Set<string>();
-	for (const name of Object.keys(properties)) {
-		if (name.startsWith(DECLARED_HEADER_PREFIX)) {
-			allowed.add(name.slice(DECLARED_HEADER_PREFIX.length).toLowerCase());
-		}
+export interface DeclaredHeaders {
+	/**
+	 * Names declared under the nested `headers` object, lower-cased, or `'any'` when `headers` is
+	 * an object schema with no `properties` — an open map, as on `*_execute_action`.
+	 */
+	nested: ReadonlySet<string> | 'any';
+	/** The top-level `headers_<name>` properties, exactly as served. */
+	flat: ReadonlySet<string>;
+}
+
+/** The header arguments a served tool schema's `properties` declare. */
+export function declaredHeaders(properties: Record<string, unknown>): DeclaredHeaders {
+	const flat = new Set(
+		Object.keys(properties).filter((name) => name.startsWith(FLAT_HEADER_PREFIX)),
+	);
+	const schema = properties.headers;
+	if (!isPlainObject(schema)) {
+		return { nested: new Set(), flat };
 	}
-	const nested = properties.headers;
-	if (typeof nested === 'object' && nested !== null && !Array.isArray(nested)) {
-		const nestedProperties = (nested as { properties?: unknown }).properties;
-		if (typeof nestedProperties === 'object' && nestedProperties !== null) {
-			for (const name of Object.keys(nestedProperties)) {
-				allowed.add(name.toLowerCase());
-			}
-		}
+	if (!('properties' in schema)) {
+		return { nested: schema.type === 'object' ? 'any' : new Set(), flat };
 	}
-	return allowed;
+	const nestedProperties = isPlainObject(schema.properties) ? schema.properties : {};
+	return { nested: new Set(Object.keys(nestedProperties).map((name) => name.toLowerCase())), flat };
 }
 
 /**
- * Keep only the headers the served schema declared, and only with well-formed values.
+ * Why a header argument must not be forwarded, or `undefined` if it may be.
+ *
+ * `Authorization`, `x-account-id` and `User-Agent` are refused even when declared, because the
+ * SDK sets them itself. The value check runs only for a declared header, which is exactly where
+ * a model-supplied value needs it.
+ */
+function refuseHeader(name: string, value: string, declared: boolean): string | undefined {
+	if (isSdkOwnedHeader(name)) {
+		return 'set by the SDK';
+	}
+	if (!declared) {
+		return 'not declared by the schema';
+	}
+	if (!HEADER_NAME_PATTERN.test(name) || !HEADER_VALUE_PATTERN.test(value)) {
+		return 'malformed';
+	}
+	return undefined;
+}
+
+/**
+ * Keep only the entries of a nested `headers` argument the served schema declared, and only with
+ * well-formed values.
  *
  * An allowlist, not a denylist. Tool arguments are model-controlled, so a prompt-injected call
  * reaches this object directly — and a denylist has to enumerate every synonym of "credential"
@@ -125,27 +157,54 @@ export function declaredHeaderNames(properties: Record<string, unknown>): Set<st
  * `X-Api-Key`, …) and is wrong the moment one is missed.
  *
  * Names are compared trimmed and case-insensitively: `" x-account-id "` and `"X-ACCOUNT-ID"`
- * are the same header to any server. `Authorization`, `x-account-id` and `User-Agent` are
- * refused even when declared, because the SDK sets them itself. The value check runs only for a declared header, which
- * is exactly where a model-supplied value needs it.
+ * are the same header to any server.
  */
 export function sanitiseHeaders(
 	supplied: JsonObject | undefined,
-	allowed: ReadonlySet<string>,
+	allowed: ReadonlySet<string> | 'any',
 ): Record<string, string> {
 	const clean: Record<string, string> = {};
 	for (const [key, value] of Object.entries(normalizeHeaders(supplied))) {
 		const name = key.trim();
-		// Owned names are refused even when declared: the SDK sets them itself, afterwards.
-		if (!allowed.has(name.toLowerCase()) || isSdkOwnedHeader(name)) {
-			warn(`Dropping header "${name}" from a tool call: no served schema declares it`);
-			continue;
-		}
-		if (!HEADER_NAME_PATTERN.test(name) || !HEADER_VALUE_PATTERN.test(value)) {
-			warn(`Dropping malformed header "${name}" from a tool call`);
+		const declared = allowed === 'any' || allowed.has(name.toLowerCase());
+		const reason = refuseHeader(name, value, declared);
+		if (reason) {
+			warn(`Dropping header "${name}" from a tool call: ${reason}`);
 			continue;
 		}
 		clean[name] = value;
+	}
+	return clean;
+}
+
+/**
+ * Filter a tool call's header arguments to the ones its served schema declares.
+ *
+ * A header argument is an entry of a top-level `headers` object, or a top-level
+ * `headers_<name>` argument. Every other argument is returned unchanged. A declared
+ * `headers_<name>` keeps its value as given; nested entries are stringified.
+ */
+export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHeaders): JsonObject {
+	const clean: JsonObject = {};
+	for (const [key, value] of Object.entries(args)) {
+		if (key === 'headers' && isPlainObject(value)) {
+			clean.headers = sanitiseHeaders(value, declared.nested);
+			continue;
+		}
+		if (!key.startsWith(FLAT_HEADER_PREFIX)) {
+			clean[key] = value;
+			continue;
+		}
+		const text = headerText(value);
+		if (text === undefined) {
+			continue;
+		}
+		const reason = refuseHeader(key.slice(FLAT_HEADER_PREFIX.length), text, declared.flat.has(key));
+		if (reason) {
+			warn(`Dropping header argument "${key}" from a tool call: ${reason}`);
+			continue;
+		}
+		clean[key] = value;
 	}
 	return clean;
 }

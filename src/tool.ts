@@ -9,7 +9,12 @@ import type {
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
-import { buildRequestHeaders, declaredHeaderNames, sanitiseHeaders } from './headers';
+import {
+	type DeclaredHeaders,
+	buildRequestHeaders,
+	declaredHeaders,
+	sanitiseHeaderArguments,
+} from './headers';
 import { callMcpTool } from './mcp-client';
 import { cloneJson, foldRootComposition } from './schema';
 import type {
@@ -351,7 +356,7 @@ export class StackOneMcpTool extends StackOneTool {
 	readonly #apiKey: string;
 	readonly #extraHeaders: Record<string, string>;
 	readonly #timeout: number;
-	readonly #allowedHeaders: ReadonlySet<string>;
+	readonly #declaredHeaders: DeclaredHeaders;
 
 	constructor(options: {
 		name: string;
@@ -374,15 +379,17 @@ export class StackOneMcpTool extends StackOneTool {
 		this.#apiKey = options.apiKey;
 		this.#extraHeaders = { ...options.extraHeaders };
 		this.#timeout = options.timeout;
-		this.#allowedHeaders = declaredHeaderNames(options.parameters.properties);
+		this.#declaredHeaders = declaredHeaders(options.parameters.properties);
 	}
 
 	/**
 	 * Call the tool.
 	 *
-	 * Arguments are sent as given; the server maps them onto the action. A `headers` object in
-	 * them is filtered to the headers this tool's own schema declares — for the meta tools that is
-	 * nothing, so every model-supplied header is dropped: these arguments are model-controlled.
+	 * Arguments are sent as given; the server maps them onto the action. Header arguments — the
+	 * entries of a `headers` object, and `headers_<name>` arguments — are the exception: these
+	 * arguments are model-controlled, so each is forwarded only if this tool's own schema declares
+	 * it, and `Authorization`, `x-account-id` and `User-Agent` never are. A `headers` property
+	 * served as an object with no `properties`, as on `*_execute_action`, declares every name.
 	 *
 	 * @returns The result as the server wrote it: for an action tool,
 	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
@@ -396,9 +403,7 @@ export class StackOneMcpTool extends StackOneTool {
 		options?: ExecuteOptions,
 	): Promise<JsonObject> {
 		const parsed = this.parseArguments(inputParams);
-		const args = isPlainObject(parsed.headers)
-			? { ...parsed, headers: sanitiseHeaders(parsed.headers, this.#allowedHeaders) }
-			: parsed;
+		const args = sanitiseHeaderArguments(parsed, this.#declaredHeaders);
 
 		if (options?.dryRun) {
 			return { url: this.#endpoint, method: 'tools/call', name: this.name, arguments: args };

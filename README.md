@@ -391,7 +391,9 @@ The catalog is cached per account scope and mode, so changing a filter never ref
 
 ### Headers
 
-A tool call can only send the headers its served schema declares, as `headers_<name>` properties; anything else a model supplies is dropped with a warning. `Authorization`, `x-account-id` and `User-Agent` are always the SDK's own, so no tool call — and no `headers` constructor option — can replace the credential or run a call against another account.
+A tool call's header arguments — the entries of a `headers` object argument, and `headers_<name>` arguments — are forwarded only if the tool's served schema declares them: `<name>` under `properties.headers.properties`, or a `headers_<name>` property. A `headers` property served as an object with no `properties`, as on every `*_execute_action`, declares any name, so `toolset.execute(id, { headers: { 'x-custom': '…' } })` forwards it. Anything undeclared is dropped with a warning; every other argument is sent unchanged.
+
+`Authorization`, `x-account-id` and `User-Agent` are always the SDK's own: they are dropped from header arguments even when declared, and ignored with a warning in the `headers` constructor option, so nothing can replace the credential or run a call against another account.
 
 ```typescript
 // Extra headers for every request (for example, tracing)

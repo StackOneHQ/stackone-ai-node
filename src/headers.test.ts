@@ -1,4 +1,9 @@
-import { declaredHeaderNames, normalizeHeaders, sanitiseHeaders } from './headers';
+import {
+	declaredHeaders,
+	normalizeHeaders,
+	sanitiseHeaderArguments,
+	sanitiseHeaders,
+} from './headers';
 
 describe('normalizeHeaders', () => {
 	it('returns empty object for undefined input', () => {
@@ -68,31 +73,45 @@ describe('normalizeHeaders', () => {
 	});
 });
 
+describe('declaredHeaders', () => {
+	it('reads flat headers_* properties exactly as served, and nothing else', () => {
+		expect(
+			declaredHeaders({
+				'headers_X-Trace': { type: 'string' },
+				query_limit: { type: 'number' },
+				body_headers_x: { type: 'string' },
+			}),
+		).toEqual({ nested: new Set(), flat: new Set(['headers_X-Trace']) });
+	});
+
+	it('reads the nested headers object, lower-cased', () => {
+		expect(
+			declaredHeaders({
+				headers: { type: 'object', properties: { 'X-Trace': { type: 'string' } } },
+				body: { type: 'object', properties: { 'x-other': { type: 'string' } } },
+			}).nested,
+		).toEqual(new Set(['x-trace']));
+	});
+
+	it('treats a headers object schema with no properties as declaring every name', () => {
+		expect(declaredHeaders({ headers: { type: 'object' } }).nested).toBe('any');
+	});
+
+	it('treats empty properties as declaring nothing', () => {
+		expect(declaredHeaders({ headers: { type: 'object', properties: {} } }).nested).toEqual(
+			new Set(),
+		);
+	});
+});
+
 describe('sanitiseHeaders', () => {
-	const flat = (...names: string[]) =>
-		Object.fromEntries(names.map((name) => [name, { type: 'string' }]));
-	const allowed = declaredHeaderNames(flat('headers_x-trace', 'query_limit', 'body_headers_x'));
+	const allowed = new Set(['x-trace']);
 
 	beforeEach(() => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
 	});
 	afterEach(() => {
 		vi.restoreAllMocks();
-	});
-
-	it('builds the allowlist from flat headers_* properties only, lower-cased', () => {
-		expect(declaredHeaderNames(flat('headers_X-Trace', 'query_limit', 'body_headers_x'))).toEqual(
-			new Set(['x-trace']),
-		);
-	});
-
-	it('builds the allowlist from a nested headers object, lower-cased', () => {
-		expect(
-			declaredHeaderNames({
-				headers: { type: 'object', properties: { 'X-Trace': { type: 'string' } } },
-				body: { type: 'object', properties: { 'x-other': { type: 'string' } } },
-			}),
-		).toEqual(new Set(['x-trace']));
 	});
 
 	it('drops every header the served schema does not declare', () => {
@@ -130,8 +149,74 @@ describe('sanitiseHeaders', () => {
 		expect(sanitiseHeaders({ 'x-trace': null }, allowed)).toEqual({});
 	});
 
-	it('warns once per dropped header', () => {
-		sanitiseHeaders({ Authorization: 'x', 'X-Trace': 'bad\n' }, allowed);
-		expect(console.warn).toHaveBeenCalledTimes(2);
+	it('forwards any name under an open schema, except the ones the SDK owns', () => {
+		expect(
+			sanitiseHeaders(
+				{ 'x-custom': 'a', Authorization: 'x', 'X-Account-Id': 'b', 'user-agent': 'c' },
+				'any',
+			),
+		).toEqual({ 'x-custom': 'a' });
+	});
+
+	it('says why each header was dropped', () => {
+		sanitiseHeaders({ Authorization: 'x', 'x-other': 'y', 'X-Trace': 'bad\n' }, allowed);
+		expect(vi.mocked(console.warn).mock.calls.map(([message]) => message)).toEqual([
+			'[@stackone/ai] Dropping header "Authorization" from a tool call: set by the SDK',
+			'[@stackone/ai] Dropping header "x-other" from a tool call: not declared by the schema',
+			'[@stackone/ai] Dropping header "X-Trace" from a tool call: malformed',
+		]);
+	});
+});
+
+describe('sanitiseHeaderArguments', () => {
+	const declared = declaredHeaders({
+		'headers_x-trace': { type: 'string' },
+		'headers_x-account-id': { type: 'string' },
+		headers: { type: 'object', properties: { 'x-nested': { type: 'string' } } },
+	});
+
+	beforeEach(() => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+	});
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it('forwards a declared headers_* argument with its value as given', () => {
+		expect(sanitiseHeaderArguments({ 'headers_x-trace': 7 }, declared)).toEqual({
+			'headers_x-trace': 7,
+		});
+	});
+
+	it('drops an undeclared headers_* argument', () => {
+		expect(sanitiseHeaderArguments({ headers_foo: 'bar' }, declared)).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers_foo" from a tool call: not declared by the schema',
+		);
+	});
+
+	it('drops an SDK-owned headers_* argument even when declared', () => {
+		expect(sanitiseHeaderArguments({ 'headers_x-account-id': 'victim' }, declared)).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers_x-account-id" from a tool call: set by the SDK',
+		);
+	});
+
+	it('filters the nested headers object against its own declared names', () => {
+		expect(
+			sanitiseHeaderArguments({ headers: { 'x-nested': 'a', 'x-trace': 'b' } }, declared),
+		).toEqual({ headers: { 'x-nested': 'a' } });
+	});
+
+	it('passes every other argument through unchanged', () => {
+		const args = {
+			query_limit: 1,
+			body: { headers: { Authorization: 'kept' }, headers_x: 'kept' },
+			path_id: 'x',
+			headers: 'not an object',
+			session_id: 's',
+		};
+		expect(sanitiseHeaderArguments(args, declared)).toEqual(args);
+		expect(console.warn).not.toHaveBeenCalled();
 	});
 });
