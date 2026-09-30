@@ -1,6 +1,6 @@
 import { USER_AGENT } from '../consts';
 import { TEST_BASE_URL } from '../../mocks/constants';
-import { StackOneAPIError, describeApiFailure } from './error-stackone-api';
+import { StackOneAPIError } from './error-stackone-api';
 
 describe('StackOneAPIError', () => {
 	it('should create an error with basic properties', () => {
@@ -190,26 +190,5 @@ describe('StackOneAPIError', () => {
 		});
 		const result = error.toString();
 		expect(result).not.toContain('Provider Endpoint:');
-	});
-});
-
-describe('describeApiFailure', () => {
-	it.each([
-		[{ message: 'path.id is missing', error: 'ignored' }, '400 Bad Request: path.id is missing'],
-		[{ error: 'Invalid ID' }, '400 Bad Request: Invalid ID'],
-		[{ detail: 'Nope' }, '400 Bad Request: Nope'],
-		[{ code: 7 }, '400 Bad Request: {"code":7}'],
-		['  plain text  ', '400 Bad Request: plain text'],
-		[['a'], '400 Bad Request: ["a"]'],
-		[null, '400 Bad Request from https://api.example.com/x'],
-		['', '400 Bad Request from https://api.example.com/x'],
-	])('leads with the server explanation in %j', (body, expected) => {
-		expect(describeApiFailure(400, 'Bad Request', body, 'https://api.example.com/x')).toBe(
-			expected,
-		);
-	});
-
-	it('caps a long text body', () => {
-		expect(describeApiFailure(500, '', 'x'.repeat(900), 'u')).toBe(`500: ${'x'.repeat(500)}`);
 	});
 });

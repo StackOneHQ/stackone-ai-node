@@ -2,33 +2,6 @@ import { USER_AGENT } from '../consts';
 import { StackOneError } from './error-stackone';
 
 /**
- * Lead with the server's own explanation of what went wrong.
- *
- * A bare status ("400 Bad Request") never says which field was wrong, even though the answer is
- * already in hand in the response body. This is the error a user hits on every bad tool call, so
- * it is the one worth making actionable: `400 Bad Request: path.id is missing`.
- */
-export function describeApiFailure(
-	status: number,
-	statusText: string,
-	body: unknown,
-	url: string,
-): string {
-	let detail: string | undefined;
-	if (typeof body === 'object' && body !== null && !Array.isArray(body)) {
-		const record = body as Record<string, unknown>;
-		const key = ['message', 'error', 'detail'].find((name) => typeof record[name] === 'string');
-		detail = key ? (record[key] as string) : JSON.stringify(body);
-	} else if (typeof body === 'string' && body.trim()) {
-		detail = body.trim().slice(0, 500);
-	} else if (body != null && typeof body !== 'string') {
-		detail = JSON.stringify(body);
-	}
-	const heading = `${status} ${statusText}`.trim();
-	return detail ? `${heading}: ${detail}` : `${heading} from ${url}`;
-}
-
-/**
  * Raised when the StackOne API returns an error. Carries the HTTP status and the response
  * body, so a caller can branch on a 412 (a dead account) rather than parse the message.
  */
