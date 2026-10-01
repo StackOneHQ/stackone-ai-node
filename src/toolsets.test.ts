@@ -777,6 +777,21 @@ describe('execution through fetched tools', () => {
 			},
 		});
 	});
+
+	it('runs an action named like a meta tool as an action outside search_execute', async () => {
+		const tools = await newToolSet({ accountId: 'lookalike' }).fetchTools();
+		const result = await tools.getTool('lookalike_execute_action')?.execute({ action_id: 'other' });
+		expect(result).toEqual({
+			isError: false,
+			result: {
+				data: {
+					action: 'lookalike_execute_action',
+					account_id: 'lookalike',
+					arguments: { action_id: 'other' },
+				},
+			},
+		});
+	});
 });
 
 describe('model-supplied headers', () => {

@@ -5,6 +5,7 @@ import {
 	createMcpApp,
 	defaultMcpTools,
 	exampleBamboohrTools,
+	metaLookalikeTools,
 	mixedProviderTools,
 } from './mcp-server';
 
@@ -16,6 +17,7 @@ export const mockAccountTools = {
 	acc3: accountMcpTools.acc3,
 	'test-account': accountMcpTools['test-account'],
 	mixed: mixedProviderTools,
+	lookalike: metaLookalikeTools,
 	// For examples testing
 	'your-bamboohr-account-id': exampleBamboohrTools,
 	'your-stackone-account-id': exampleBamboohrTools,

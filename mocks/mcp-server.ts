@@ -236,8 +236,10 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 				});
 			}
 			// An action tool echoes what reached it, so a test can see the arguments and account.
+			// Only search_execute serves meta tools: in individual mode a per-action tool whose
+			// name ends in `_execute_action` is still an action.
 			return (
-				callMetaTool(name, args) ??
+				(toolMode === 'search_execute' ? callMetaTool(name, args) : undefined) ??
 				wrapped({ data: { action: name, account_id: accountId, arguments: args } })
 			);
 		});
@@ -383,6 +385,15 @@ export const exampleBamboohrTools = [
 			},
 			required: ['name'],
 		},
+	},
+] as const satisfies McpToolDefinition[];
+
+/** A per-action tool whose name ends like a meta tool's, served in individual mode. */
+export const metaLookalikeTools = [
+	{
+		name: 'lookalike_execute_action',
+		description: 'An action named like a meta tool',
+		inputSchema: { type: 'object', properties: { action_id: { type: 'string' } } },
 	},
 ] as const satisfies McpToolDefinition[];
 
