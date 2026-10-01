@@ -148,17 +148,22 @@ describe('fetchWithRetry', () => {
 
 		// Date.parse reads "1.5" and "2026-10-01" as dates, so only a value shaped like an
 		// HTTP-date may reach it. Python reads these the same way.
-		it.each(['soon', '1.5', '1.5e3', '-1', '2026-10-01'])(
-			'backs off as if absent when unreadable (%s)',
-			async (value) => {
-				respondWith(limited({ 'Retry-After': value }), ok);
-				const { delays, timing } = recordedTiming(() => 0);
+		it.each([
+			'soon',
+			'1.5',
+			'1.5e3',
+			'-1',
+			'2026-10-01',
+			'March 1, 2027',
+			'X, 21 Oct 2015 07:28:00 GMT',
+		])('backs off as if absent when unreadable (%s)', async (value) => {
+			respondWith(limited({ 'Retry-After': value }), ok);
+			const { delays, timing } = recordedTiming(() => 0);
 
-				await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, timing);
 
-				expect(delays).toEqual([500]);
-			},
-		);
+			expect(delays).toEqual([500]);
+		});
 	});
 
 	describe('without Retry-After', () => {

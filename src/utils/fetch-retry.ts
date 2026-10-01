@@ -43,9 +43,10 @@ function retryAfterMs(header: string | null): number | undefined {
 	if (/^\d+$/.test(value)) {
 		return Number(value) * 1000;
 	}
-	// An HTTP-date always starts with a day name. Date.parse alone reads "1.5" as a day in
-	// 2001, which would turn an unreadable header into an immediate retry.
-	if (!/^[A-Za-z]/.test(value)) {
+	// All three HTTP-date forms start with a weekday ("Sun,", "Sunday,", "Sun "). Date.parse
+	// alone reads "1.5" or "March 1, 2027" as dates, so anything else falls back to the
+	// backoff, as in Python.
+	if (!/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*[, ]/.test(value)) {
 		return undefined;
 	}
 	const date = Date.parse(value);
