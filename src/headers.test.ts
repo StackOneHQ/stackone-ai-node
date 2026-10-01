@@ -83,7 +83,11 @@ describe('declaredHeaders', () => {
 				query_limit: { type: 'number' },
 				body_headers_x: { type: 'string' },
 			}),
-		).toEqual({ nested: new Set(), flat: new Set(['headers_X-Trace']) });
+		).toEqual({
+			nested: new Set(),
+			flat: new Set(['headers_X-Trace']),
+			ordinaryHeadersField: false,
+		});
 	});
 
 	it('reads the nested headers object, lower-cased', () => {
@@ -238,10 +242,62 @@ describe('sanitiseHeaderArguments', () => {
 			query_limit: 1,
 			body: { headers: { Authorization: 'kept' }, headers_x: 'kept' },
 			path_id: 'x',
-			headers: 'not an object',
 			session_id: 's',
 		};
 		expect(sanitiseHeaderArguments(args, declared)).toEqual(args);
+		expect(console.warn).not.toHaveBeenCalled();
+	});
+
+	it('drops a string headers argument when headers is declared as an object', () => {
+		expect(sanitiseHeaderArguments({ headers: 'not an object' }, declared)).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers" from a tool call: not an object',
+		);
+	});
+
+	it('drops an array headers argument when headers is declared as an object', () => {
+		expect(sanitiseHeaderArguments({ headers: [['x-account-id', 'B']] }, declared)).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers" from a tool call: not an object',
+		);
+	});
+
+	it('drops a non-object headers argument when no headers property is declared at all', () => {
+		const noHeadersSchema = declaredHeaders({ 'headers_x-trace': { type: 'string' } });
+		expect(sanitiseHeaderArguments({ headers: 'x-account-id: B' }, noHeadersSchema)).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers" from a tool call: not an object',
+		);
+	});
+
+	it('forwards a string headers argument unchanged when headers is declared as a string field', () => {
+		const stringHeadersSchema = declaredHeaders({ headers: { type: 'string' } });
+		expect(sanitiseHeaderArguments({ headers: 'x-account-id: B' }, stringHeadersSchema)).toEqual({
+			headers: 'x-account-id: B',
+		});
+		expect(console.warn).not.toHaveBeenCalled();
+	});
+
+	it('drops an array value on a declared flat headers_<name> argument', () => {
+		expect(
+			sanitiseHeaderArguments({ 'headers_x-trace': ['a\r\nx-account-id: B'] }, declared),
+		).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers_x-trace" from a tool call: not a string, number or boolean',
+		);
+	});
+
+	it('drops an object value on a declared flat headers_<name> argument', () => {
+		expect(sanitiseHeaderArguments({ 'headers_x-trace': { nested: 'value' } }, declared)).toEqual(
+			{},
+		);
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers_x-trace" from a tool call: not a string, number or boolean',
+		);
+	});
+
+	it('still drops a null flat headers_<name> argument silently', () => {
+		expect(sanitiseHeaderArguments({ 'headers_x-trace': null }, declared)).toEqual({});
 		expect(console.warn).not.toHaveBeenCalled();
 	});
 });
@@ -254,6 +310,7 @@ describe('an entry named __proto__', () => {
 		const clean = sanitiseHeaderArguments(withProto('"constructor":"c","q":1'), {
 			nested: new Set(),
 			flat: new Set(),
+			ordinaryHeadersField: false,
 		});
 		expect(Object.entries(clean)).toEqual([
 			['__proto__', 'p'],

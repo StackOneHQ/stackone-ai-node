@@ -112,6 +112,13 @@ export interface DeclaredHeaders {
 	nested: ReadonlySet<string> | 'any';
 	/** The top-level `headers_<name>` properties, exactly as served. */
 	flat: ReadonlySet<string>;
+	/**
+	 * Whether the served schema declares a top-level `headers` property as something other than an
+	 * object — an ordinary field that happens to be named `headers`, not a header container. A
+	 * schema with no `headers` property, or one typed `"object"`, is not ordinary: a non-object
+	 * value sent for it is dropped rather than forwarded.
+	 */
+	ordinaryHeadersField: boolean;
 }
 
 /** The header arguments a served tool schema's `properties` declare. */
@@ -120,15 +127,21 @@ export function declaredHeaders(properties: Record<string, unknown>): DeclaredHe
 		Object.keys(properties).filter((name) => name.startsWith(FLAT_HEADER_PREFIX)),
 	);
 	const schema = properties.headers;
+	const ordinaryHeadersField =
+		isPlainObject(schema) && typeof schema.type === 'string' && schema.type !== 'object';
 	if (!isPlainObject(schema)) {
-		return { nested: new Set(), flat };
+		return { nested: new Set(), flat, ordinaryHeadersField };
 	}
 	if (!('properties' in schema)) {
 		const open = schema.type === 'object' && schema.additionalProperties !== false;
-		return { nested: open ? 'any' : new Set(), flat };
+		return { nested: open ? 'any' : new Set(), flat, ordinaryHeadersField };
 	}
 	const nestedProperties = isPlainObject(schema.properties) ? schema.properties : {};
-	return { nested: new Set(Object.keys(nestedProperties).map((name) => name.toLowerCase())), flat };
+	return {
+		nested: new Set(Object.keys(nestedProperties).map((name) => name.toLowerCase())),
+		flat,
+		ordinaryHeadersField,
+	};
 }
 
 /**
@@ -187,16 +200,31 @@ export function sanitiseHeaders(
  * A header argument is an entry of a top-level `headers` object, or a top-level
  * `headers_<name>` argument. Every other argument is returned unchanged. A declared
  * `headers_<name>` keeps its value as given; nested entries are stringified.
+ *
+ * A top-level `headers` argument that isn't a plain object is forwarded unchanged when the
+ * schema declares `headers` as something other than an object (it's an ordinary field that
+ * happens to be named `headers`), and dropped otherwise. A flat `headers_<name>` whose value is
+ * an array or object is dropped too — only a string, number or boolean can be a header value.
  */
 export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHeaders): JsonObject {
 	const clean: JsonObject = {};
 	for (const [key, value] of Object.entries(args)) {
-		if (key === 'headers' && isPlainObject(value)) {
-			clean.headers = sanitiseHeaders(value, declared.nested);
+		if (key === 'headers') {
+			if (isPlainObject(value)) {
+				clean.headers = sanitiseHeaders(value, declared.nested);
+			} else if (declared.ordinaryHeadersField) {
+				setEntry(clean, key, value);
+			} else {
+				warn('Dropping header argument "headers" from a tool call: not an object');
+			}
 			continue;
 		}
 		if (!key.startsWith(FLAT_HEADER_PREFIX)) {
 			setEntry(clean, key, value);
+			continue;
+		}
+		if (isPlainObject(value) || Array.isArray(value)) {
+			warn(`Dropping header argument "${key}" from a tool call: not a string, number or boolean`);
 			continue;
 		}
 		const text = headerText(value);

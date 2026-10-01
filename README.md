@@ -398,6 +398,8 @@ The catalog is cached per account scope and mode, so changing a filter never ref
 
 A tool call's header arguments — the entries of a `headers` object argument, and `headers_<name>` arguments — are forwarded only if the tool's served schema declares them: `<name>` under `properties.headers.properties`, or a `headers_<name>` property. A `headers` property served as an open object — `type: "object"`, no `properties`, and `additionalProperties` not `false` — as on every `*_execute_action`, declares any name, so `toolset.execute(id, { headers: { 'x-custom': '…' } })` forwards it. Anything undeclared is dropped with a warning; every other argument is sent unchanged.
 
+A top-level `headers` argument that isn't a plain object is dropped with a warning, unless the served schema declares `headers` itself as a non-object field (for example `type: "string"`), in which case it's an ordinary argument that happens to be named `headers` and is sent as given. A `headers_<name>` argument is dropped with a warning when its value is an array or object — only a string, number or boolean can be a header value.
+
 `Authorization`, `x-account-id` and `User-Agent` are always the SDK's own: they are dropped from header arguments even when declared, and ignored with a warning in the `headers` constructor option, so nothing can replace the credential or run a call against another account.
 
 ```typescript
