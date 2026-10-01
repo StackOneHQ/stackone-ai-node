@@ -827,8 +827,9 @@ export class StackOneToolSet {
 	 *
 	 * Always runs through the connector's `*_execute_action` meta tool, so `args` is the nested
 	 * envelope every action's `example_request` shows — `{ query: {...}, path: {...}, body: {...} }`.
-	 * The flat, prefixed form belongs to `fetchTools()` tools, whose own served schema names the
-	 * keys. The connector is the longest one whose name prefixes `actionId`, and `actionId` is
+	 * A `fetchTools()` tool takes the keys its own served schema names instead; routing by whether
+	 * an id happened to be in the catalog would make the argument shape depend on something the
+	 * caller cannot see. The connector is the longest one whose name prefixes `actionId`, and `actionId` is
 	 * pinned last, so a model-supplied `action_id` in `args` cannot replace it.
 	 *
 	 * `args.headers` is forwarded to the action: `*_execute_action` serves `headers` as an open

@@ -195,9 +195,11 @@ await toolset.execute('linear_list_comments', { headers: { 'x-request-id': 'abc'
 // 2.x: STACKONE_ACCOUNT_ID picked up implicitly
 const toolset = new StackOneToolSet();
 
-// 3.0
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+// 3.0: `|| undefined`, so a variable that is set but empty means "discover", not an error
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 ```
+
+**An empty account id throws.** `accountId: ''`, or an empty string in `accountIds`, `execute.accountIds`, `setAccounts()` or a call's `accountIds`, now throws `ToolSetConfigError`. In 2.x an empty `accountId` fell back to `STACKONE_ACCOUNT_ID` or discovery; in 3.0 that would silently widen the toolset to every active account. So `accountId: process.env.STACKONE_ACCOUNT_ID` throws when the variable is set but empty (`STACKONE_ACCOUNT_ID=` in a `.env` file, for example): pass `process.env.STACKONE_ACCOUNT_ID || undefined`, as above.
 
 **Listings are merged in sorted account order.** When two accounts serve the same tool name, `getTool()` returns the first one listed — now the one on the lowest account id, where 2.x followed the order you passed. A warning names the clashing tools. Pass `accountIds` to choose the account yourself.
 

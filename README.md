@@ -306,7 +306,7 @@ const result = await toolset.execute(best.action_id, best.example_request, {
 });
 ```
 
-- `execute()` takes the nested envelope an action's `example_request` shows: `{ path, query, body }`. (Tools from `fetchTools()` take the flat, prefixed arguments their own schema names, such as `path_id`.)
+- `execute()` takes the nested envelope an action's `example_request` shows: `{ path, query, body }`. (A `fetchTools()` tool takes the keys its own served schema names instead: read them from `tool.parameters.properties`.)
 - The connector is the longest one whose name prefixes the action id, so `browser_linkedin_*` actions are not routed to `browser`.
 - `action_id` is always the one you pass: an `action_id` inside `args` — for example, one a prompt-injected model put there — is ignored.
 - Each hit carries the `session_id` of the search that found it, when the server issued one. Pass it back as `sessionId` to link the calls together.
@@ -439,7 +439,7 @@ const toolset = new StackOneToolSet();
 const tools = await toolset.fetchTools();
 const employeeTool = tools.getTool('workday_list_workers');
 
-const dryRunResult = await employeeTool.execute({ query: { limit: 5 } }, { dryRun: true });
+const dryRunResult = await employeeTool?.execute({ query: { limit: 5 } }, { dryRun: true });
 
 console.log(dryRunResult);
 // {
