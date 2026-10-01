@@ -281,6 +281,11 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
 	if (!Array.isArray(accountIds) || accountIds.some((id) => typeof id !== 'string')) {
 		throw new ToolSetConfigError(`${parameter} must be an array of account id strings`);
 	}
+	// An empty id would be sent with no x-account-id, so reject it rather than let the server
+	// answer for an account nobody chose.
+	if (accountIds.includes('')) {
+		throw new ToolSetConfigError(`${parameter} must not contain an empty account id`);
+	}
 };
 
 /**
@@ -880,7 +885,7 @@ export class StackOneToolSet {
 	 * });
 	 * ```
 	 *
-	 * @throws ToolSetConfigError If `toolNames` is not a list.
+	 * @throws ToolSetConfigError If `toolNames` is not a list, or `accountIds` holds an empty id.
 	 * @throws ToolSetLoadError If feedback is not enabled for this project.
 	 */
 	async submitFeedback(options: SubmitFeedbackOptions): Promise<JsonObject> {
@@ -898,10 +903,10 @@ export class StackOneToolSet {
 		// feedback, and calling each would record it once per account. The first account, in the
 		// order given, is the one a caller can predict. search_execute lists two meta tools per
 		// connector where individual mode lists every action.
-		const [accountId] = await this.#accountsInOrder(options.accountIds);
-		const tool = (
-			await this.fetchTools({ accountIds: accountId ? [accountId] : [], mode: 'search_execute' })
-		).getTool(SUBMIT_FEEDBACK_TOOL_NAME);
+		const accountIds = (await this.#accountsInOrder(options.accountIds)).slice(0, 1);
+		const tool = (await this.fetchTools({ accountIds, mode: 'search_execute' })).getTool(
+			SUBMIT_FEEDBACK_TOOL_NAME,
+		);
 		if (!tool) {
 			throw new ToolSetLoadError(
 				`The server did not serve ${SUBMIT_FEEDBACK_TOOL_NAME}: feedback is not enabled for this project.`,

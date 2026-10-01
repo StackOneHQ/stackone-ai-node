@@ -497,6 +497,17 @@ describe('submitFeedback()', () => {
 		);
 	});
 
+	it('refuses an empty account id rather than switch to another account', async () => {
+		const { calls } = serveMock({ submitFeedback: true });
+		const error = await newToolSet({ accountId: 'acc1' })
+			.submitFeedback({ rating: 'positive', toolNames: ['a'], accountIds: [''] })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetConfigError);
+		expect((error as Error).message).toBe('accountIds must not contain an empty account id');
+		expect(calls).toEqual([]);
+	});
+
 	it('refuses a string where toolNames expects a list', async () => {
 		await expect(
 			newToolSet({ accountId: 'acc1' }).submitFeedback({

@@ -93,6 +93,15 @@ describe('configuration', () => {
 		await expect(async () => act()).rejects.toThrow(/not a string. Did you mean \["acc1"\]\?/);
 	});
 
+	it.each([
+		['accountIds', () => newToolSet({ accountIds: ['acc1', ''] })],
+		['setAccounts', () => newToolSet().setAccounts([''])],
+		['fetchTools', () => newToolSet().fetchTools({ accountIds: [''] })],
+	])('refuses an empty account id in %s', async (_name, act) => {
+		await expect(async () => act()).rejects.toThrow(ToolSetConfigError);
+		await expect(async () => act()).rejects.toThrow(/must not contain an empty account id/);
+	});
+
 	it('returns itself from setAccounts for chaining', () => {
 		const toolset = newToolSet();
 		expect(toolset.setAccounts(['acc1'])).toBe(toolset);
