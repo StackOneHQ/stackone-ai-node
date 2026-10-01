@@ -10,6 +10,7 @@ import { type RecordedToolCall, accountMcpTools, createMcpApp } from '../mocks/m
 import { server } from '../mocks/node';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';
+import { retryTiming } from './utils/fetch-retry';
 
 const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {}) =>
 	new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
@@ -32,6 +33,8 @@ interface Throttle {
 	times?: number;
 	method?: string;
 	accountId?: string;
+	/** The `Retry-After` each 429 carries. Default: `'0'`. */
+	retryAfter?: string;
 }
 
 /**
@@ -60,12 +63,21 @@ const serveThrottled = (throttle: Throttle) => {
 				(throttle.method === undefined || message?.method === throttle.method) &&
 				(throttle.accountId === undefined || accountId === throttle.accountId);
 			if (matches && attempts.matched++ < (throttle.times ?? Number.POSITIVE_INFINITY)) {
-				return HttpResponse.json(RATE_LIMITED, { status: 429, headers: { 'Retry-After': '0' } });
+				return HttpResponse.json(RATE_LIMITED, {
+					status: 429,
+					headers: { 'Retry-After': throttle.retryAfter ?? '0' },
+				});
 			}
 			return app.fetch(request);
 		}),
 	);
 	return { attempts, calls };
+};
+
+const expectRateLimited = (error: unknown) => {
+	expect(error).toBeInstanceOf(StackOneAPIError);
+	expect((error as StackOneAPIError).statusCode).toBe(429);
+	expect((error as StackOneAPIError).responseBody).toEqual(RATE_LIMITED);
 };
 
 describe('a 429 that clears on retry', () => {
@@ -124,12 +136,6 @@ describe('a 429 that clears on retry', () => {
 });
 
 describe('a 429 that outlasts its retries', () => {
-	const expectRateLimited = (error: unknown) => {
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
-		expect((error as StackOneAPIError).responseBody).toEqual(RATE_LIMITED);
-	};
-
 	it('throws a 429 StackOneAPIError from GET /accounts after exactly 4 attempts', async () => {
 		let requests = 0;
 		server.use(
@@ -225,6 +231,78 @@ describe('a 429 that outlasts its retries', () => {
 
 		expectRateLimited(error);
 		expect(warnings().filter((message) => message.includes('Skipping'))).toEqual([]);
+	});
+});
+
+describe('a 429 whose wait would outlast the timeout', () => {
+	/**
+	 * Replace the retry clock with a fake one that each wait advances, so nothing really waits.
+	 * Returns the waits requested.
+	 */
+	const fakeClock = () => {
+		const clock = { now: 0 };
+		const waits: number[] = [];
+		vi.spyOn(retryTiming, 'now').mockImplementation(() => clock.now);
+		vi.spyOn(retryTiming, 'sleep').mockImplementation(async (ms) => {
+			waits.push(ms);
+			clock.now += ms;
+		});
+		return waits;
+	};
+
+	it('fails a multi-account listing with the 429 instead of timing the account out', async () => {
+		const waits = fakeClock();
+		const { attempts } = serveThrottled({ accountId: 'acc2', retryAfter: '2' });
+
+		const error = await newToolSet({ timeout: 3_000 })
+			.fetchTools({ accountIds: ['acc1', 'acc2'] })
+			.catch((caught: unknown) => caught);
+
+		expectRateLimited(error);
+		// One 2s wait fits in 3s; the second would end at 4s, so the 429 is returned instead.
+		expect(waits).toEqual([2_000]);
+		expect(attempts.matched).toBe(2);
+		expect(warnings().filter((message) => message.includes('Skipping'))).toEqual([]);
+	});
+
+	it('throws the 429 from GET /accounts without waiting', async () => {
+		const waits = fakeClock();
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () => {
+				requests++;
+				return HttpResponse.json(RATE_LIMITED, { status: 429, headers: { 'Retry-After': '3' } });
+			}),
+		);
+
+		const error = await newToolSet({ timeout: 1_000 })
+			.fetchAccounts()
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect(requests).toBe(1);
+		expect(waits).toEqual([]);
+		expect(retryWarnings()).toEqual([]);
+	});
+
+	it('measures the GET /accounts deadline from the first attempt', async () => {
+		const waits = fakeClock();
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () => {
+				requests++;
+				return HttpResponse.json(RATE_LIMITED, { status: 429, headers: { 'Retry-After': '1' } });
+			}),
+		);
+
+		const error = await newToolSet({ timeout: 2_500 })
+			.fetchAccounts()
+			.catch((caught: unknown) => caught);
+
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect(waits).toEqual([1_000, 1_000]);
+		expect(requests).toBe(3);
 	});
 });
 

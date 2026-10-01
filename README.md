@@ -417,7 +417,7 @@ Everything the SDK throws is a `StackOneError`:
 
 ### Rate limits
 
-Every request the SDK makes (`GET /accounts` and every MCP request, `tools/call` included) is retried when the API answers `429 Too Many Requests`: up to 3 more times, waiting for the response's `Retry-After` (capped at 30s), or 1s, 2s, then 4s with jitter when there is none. Each retry logs a warning. A request still rate limited after that throws `StackOneAPIError` with `statusCode` `429`, and fails the whole `fetchTools()` or `search()` call: unlike a dead account, a rate-limited one is never skipped, so you never get a partial catalog. The retries' waits count towards `timeout`.
+Every request the SDK makes (`GET /accounts` and every MCP request, `tools/call` included) is retried when the API answers `429 Too Many Requests`: up to 3 more times, waiting for the response's `Retry-After` (capped at 30s), or 1s, 2s, then 4s with jitter when there is none. Each retry logs a warning. A request still rate limited after that throws `StackOneAPIError` with `statusCode` `429`, and fails the whole `fetchTools()` or `search()` call: unlike a dead account, a rate-limited one is never skipped, so you never get a partial catalog. The retries' waits count towards `timeout`, and a wait that would outlast it is not started: the 429 is thrown at once, so a rate limit never turns into a timeout.
 
 ### Custom Base URL
 

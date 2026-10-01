@@ -10,7 +10,7 @@ import type { JsonObject } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetLoadError } from './utils/error-toolset';
-import { fetchWithRetry } from './utils/fetch-retry';
+import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
 
 /** A tool exactly as the MCP server listed it. */
 export interface McpToolDefinition {
@@ -118,11 +118,12 @@ async function withMcpSession<T>(
 	{ endpoint, headers, timeout }: McpRequest,
 	work: (client: Client) => Promise<T>,
 ): Promise<T> {
+	const expiresAt = retryTiming.now() + timeout;
 	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
 		requestInit: { headers },
 		// Every request the client sends, handshake included, so it never sees a 429 it could
-		// have waited out.
-		fetch: (url, init) => fetchWithRetry(url, init),
+		// have waited out — but never one that would outlast the session's deadline.
+		fetch: (url, init) => fetchWithRetry(url, init, { deadline: expiresAt }),
 	});
 	const client = new Client({ name: 'stackone-ai-node', version });
 	let timer: ReturnType<typeof setTimeout> | undefined;

@@ -24,16 +24,19 @@ const limited =
 		HttpResponse.json(body, { status: 429, headers });
 const ok = () => HttpResponse.json({ ok: true });
 
-/** Timing that records each requested wait instead of waiting. */
+/** Timing that records each requested wait instead of waiting, advancing a fake clock by it. */
 const recordedTiming = (random = () => 0.5) => {
 	const delays: number[] = [];
+	const clock = { now: 0 };
 	return {
 		delays,
 		timing: {
 			sleep: async (ms: number) => {
 				delays.push(ms);
+				clock.now += ms;
 			},
 			random,
+			now: () => clock.now,
 		},
 	};
 };
@@ -51,7 +54,7 @@ describe('fetchWithRetry', () => {
 		const seen = respondWith(limited({ 'Retry-After': '2' }), ok);
 		const { delays, timing } = recordedTiming();
 
-		const response = await fetchWithRetry(url, { method: 'POST', body: '{}' }, timing);
+		const response = await fetchWithRetry(url, { method: 'POST', body: '{}' }, { timing });
 
 		expect(response.status).toBe(200);
 		expect(await response.json()).toEqual({ ok: true });
@@ -72,7 +75,7 @@ describe('fetchWithRetry', () => {
 		);
 		const { delays, timing } = recordedTiming();
 
-		const response = await fetchWithRetry(url, undefined, timing);
+		const response = await fetchWithRetry(url, undefined, { timing });
 
 		expect(response.status).toBe(429);
 		expect(await response.json()).toEqual({ message: 'last' });
@@ -88,7 +91,7 @@ describe('fetchWithRetry', () => {
 		);
 		const { delays, timing } = recordedTiming();
 
-		expect((await fetchWithRetry(url, undefined, timing)).status).toBe(status);
+		expect((await fetchWithRetry(url, undefined, { timing })).status).toBe(status);
 		expect(seen.requests).toBe(1);
 		expect(delays).toEqual([]);
 	});
@@ -98,7 +101,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited({ 'Retry-After': '7' }), ok);
 			const { delays, timing } = recordedTiming();
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toEqual([7000]);
 		});
@@ -109,7 +112,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited({ 'Retry-After': at }), ok);
 			const { delays, timing } = recordedTiming();
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toHaveLength(1);
 			expect(delays[0]).toBeGreaterThan(8_000);
@@ -120,7 +123,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited({ 'Retry-After': new Date(0).toUTCString() }), ok);
 			const { delays, timing } = recordedTiming();
 
-			expect((await fetchWithRetry(url, undefined, timing)).status).toBe(200);
+			expect((await fetchWithRetry(url, undefined, { timing })).status).toBe(200);
 			expect(delays).toEqual([]);
 		});
 
@@ -131,7 +134,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited({ 'Retry-After': value }), ok);
 			const { delays, timing } = recordedTiming();
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toEqual([30_000]);
 		});
@@ -140,7 +143,7 @@ describe('fetchWithRetry', () => {
 			const seen = respondWith(limited({ 'Retry-After': '0' }), ok);
 			const { delays, timing } = recordedTiming();
 
-			expect((await fetchWithRetry(url, undefined, timing)).status).toBe(200);
+			expect((await fetchWithRetry(url, undefined, { timing })).status).toBe(200);
 			expect(seen.requests).toBe(2);
 			expect(delays).toEqual([]);
 			expect(String(warnSpy.mock.calls[0]?.[0])).toContain('retrying in 0ms (attempt 2 of 4)');
@@ -160,7 +163,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited({ 'Retry-After': value }), ok);
 			const { delays, timing } = recordedTiming(() => 0);
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toEqual([500]);
 		});
@@ -171,7 +174,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited());
 			const { delays, timing } = recordedTiming(() => 0);
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toEqual([500, 1000, 2000]);
 		});
@@ -180,7 +183,7 @@ describe('fetchWithRetry', () => {
 			respondWith(limited());
 			const { delays, timing } = recordedTiming(() => 0.999_999);
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toHaveLength(3);
 			[1000, 2000, 4000].forEach((ceiling, index) => {
@@ -193,12 +196,73 @@ describe('fetchWithRetry', () => {
 			respondWith(limited());
 			const { delays, timing } = recordedTiming(Math.random);
 
-			await fetchWithRetry(url, undefined, timing);
+			await fetchWithRetry(url, undefined, { timing });
 
 			[1000, 2000, 4000].forEach((base, index) => {
 				expect(delays[index]).toBeGreaterThanOrEqual(base * 0.5);
 				expect(delays[index]).toBeLessThan(base);
 			});
+		});
+	});
+
+	describe('with a deadline', () => {
+		it('returns the 429 at once when Retry-After would outlast the deadline', async () => {
+			const seen = respondWith(limited({ 'Retry-After': '3' }, { message: 'too long' }), ok);
+			const { delays, timing } = recordedTiming();
+
+			const response = await fetchWithRetry(url, undefined, { deadline: 1_000, timing });
+
+			expect(response.status).toBe(429);
+			expect(await response.json()).toEqual({ message: 'too long' });
+			expect(seen.requests).toBe(1);
+			expect(delays).toEqual([]);
+			expect(warnSpy).not.toHaveBeenCalled();
+		});
+
+		it('counts every earlier wait against the deadline', async () => {
+			const seen = respondWith(limited({ 'Retry-After': '2' }));
+			const { delays, timing } = recordedTiming();
+
+			// Waiting 2s ends at 2s, inside 3s; the next 2s wait would end at 4s, so it is not started.
+			const response = await fetchWithRetry(url, undefined, { deadline: 3_000, timing });
+
+			expect(response.status).toBe(429);
+			expect(seen.requests).toBe(2);
+			expect(delays).toEqual([2_000]);
+		});
+
+		it('applies to the jittered backoff too', async () => {
+			const seen = respondWith(limited());
+			const { delays, timing } = recordedTiming(() => 0);
+
+			// 500ms, then 1000ms fit in 2s; the 2000ms after them would end at 3.5s.
+			const response = await fetchWithRetry(url, undefined, { deadline: 2_000, timing });
+
+			expect(response.status).toBe(429);
+			expect(seen.requests).toBe(3);
+			expect(delays).toEqual([500, 1_000]);
+		});
+
+		it('does not retry a wait that would end exactly at the deadline', async () => {
+			const seen = respondWith(limited({ 'Retry-After': '1' }), ok);
+			const { delays, timing } = recordedTiming();
+
+			const response = await fetchWithRetry(url, undefined, { deadline: 1_000, timing });
+
+			expect(response.status).toBe(429);
+			expect(seen.requests).toBe(1);
+			expect(delays).toEqual([]);
+		});
+
+		it('retries a wait that ends before the deadline', async () => {
+			const seen = respondWith(limited({ 'Retry-After': '1' }), ok);
+			const { delays, timing } = recordedTiming();
+
+			const response = await fetchWithRetry(url, undefined, { deadline: 1_001, timing });
+
+			expect(response.status).toBe(200);
+			expect(seen.requests).toBe(2);
+			expect(delays).toEqual([1_000]);
 		});
 	});
 

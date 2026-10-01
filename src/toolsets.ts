@@ -23,7 +23,7 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
 import { settleWithConcurrency } from './utils/concurrency';
-import { fetchWithRetry } from './utils/fetch-retry';
+import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
 import { warn } from './utils/logger';
 
 /**
@@ -428,10 +428,14 @@ export class StackOneToolSet {
 		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
 		let response: Response;
 		try {
-			response = await fetchWithRetry(url, {
-				headers: buildRequestHeaders({ apiKey: this.#apiKey, extraHeaders: this.#headers }),
-				signal: AbortSignal.timeout(this.#timeout),
-			});
+			response = await fetchWithRetry(
+				url,
+				{
+					headers: buildRequestHeaders({ apiKey: this.#apiKey, extraHeaders: this.#headers }),
+					signal: AbortSignal.timeout(this.#timeout),
+				},
+				{ deadline: retryTiming.now() + this.#timeout },
+			);
 		} catch (error) {
 			throw new ToolSetLoadError(`Could not reach ${url}: ${describeError(error)}`, {
 				cause: error,
@@ -669,8 +673,8 @@ export class StackOneToolSet {
 	 * `stackone_submit_feedback` is served once per account listing; it is returned once.
 	 *
 	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
-	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff. One still rate limited after that fails
-	 * the whole call: an account that fails any other way is skipped with a warning, but a 429
+	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff, unless that wait would outlast the
+	 * `timeout`. One still rate limited after that fails the whole call: an account that fails any other way is skipped with a warning, but a 429
 	 * never yields a partial catalog.
 	 *
 	 * @throws ToolSetConfigError If no account is configured and none can be discovered.
@@ -742,8 +746,9 @@ export class StackOneToolSet {
 	 * with a warning, unless they all fail.
 	 *
 	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
-	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff. One still rate limited after that fails
-	 * the whole search rather than being skipped.
+	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff, unless that wait would outlast the
+	 * `timeout`. One still rate limited after that fails the whole search rather than being
+	 * skipped.
 	 *
 	 * @param query What you want to do, e.g. "list recent comments".
 	 * @returns Actions carrying at least `action_id`, best first, each with the

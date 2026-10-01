@@ -10,6 +10,17 @@ interface RetryTiming {
 	sleep: (ms: number, signal?: AbortSignal | null) => Promise<void>;
 	/** A number in [0, 1), as `Math.random` returns. Drives the backoff jitter. */
 	random: () => number;
+	/** The current time in milliseconds, on the clock a `deadline` is measured on. */
+	now: () => number;
+}
+
+interface RetryOptions {
+	/**
+	 * When the caller's timeout expires, as a {@link RetryTiming.now} time. A retry whose wait
+	 * would not end before it is not attempted: the 429 is returned instead.
+	 */
+	deadline?: number;
+	timing?: RetryTiming;
 }
 
 const sleep = (ms: number, signal?: AbortSignal | null): Promise<void> =>
@@ -29,7 +40,15 @@ const sleep = (ms: number, signal?: AbortSignal | null): Promise<void> =>
 		signal?.addEventListener('abort', onAbort, { once: true });
 	});
 
-const defaultTiming: RetryTiming = { sleep, random: Math.random };
+/**
+ * The timing every retry uses unless given its own. Shared and mutable so tests can replace
+ * the clock and the waits of a whole toolset call, deadline included.
+ */
+export const retryTiming: RetryTiming = {
+	sleep,
+	random: () => Math.random(),
+	now: () => performance.now(),
+};
 
 /**
  * How long the server asked us to wait, in milliseconds: `Retry-After` as delta-seconds or an
@@ -59,13 +78,16 @@ function retryAfterMs(header: string | null): number | undefined {
  * A 429 means the server refused before doing anything, so even a `tools/call` is safe to send
  * again. Each retry waits for the response's `Retry-After` (capped at 30s), or else 1s, 2s, 4s
  * with jitter. Every other status, and the last 429, is handed back as it came: the caller turns
- * it into a `StackOneAPIError` with the server's body. The waits run inside the caller's signal,
- * so a timeout still bounds the whole exchange.
+ * it into a `StackOneAPIError` with the server's body.
+ *
+ * A wait that would not end before `deadline` is not started: the 429 is handed back at once.
+ * Waiting anyway would only let the caller's timeout fire, turning a rate limit — which fails a
+ * multi-account call — into a timeout, which skips one account and returns a partial result.
  */
 export async function fetchWithRetry(
 	input: string | URL,
 	init?: RequestInit,
-	timing: RetryTiming = defaultTiming,
+	{ deadline, timing = retryTiming }: RetryOptions = {},
 ): Promise<Response> {
 	for (let retry = 1; ; retry++) {
 		const response = await fetch(input, init);
@@ -77,6 +99,9 @@ export async function fetchWithRetry(
 			requested === undefined
 				? RATE_LIMIT_BASE_DELAY_MS * 2 ** (retry - 1) * (0.5 + timing.random() * 0.5)
 				: Math.min(requested, RATE_LIMIT_MAX_DELAY_MS);
+		if (deadline !== undefined && timing.now() + delay >= deadline) {
+			return response;
+		}
 		// Discarded unread: only the final 429's body is reported. Not awaited, since a cancel can
 		// wait on a producer that never settles (MSW's, for one), and the retry need not wait.
 		void response.body?.cancel().catch(() => undefined);
