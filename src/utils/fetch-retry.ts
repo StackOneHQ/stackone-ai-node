@@ -43,6 +43,11 @@ function retryAfterMs(header: string | null): number | undefined {
 	if (/^\d+$/.test(value)) {
 		return Number(value) * 1000;
 	}
+	// An HTTP-date always starts with a day name. Date.parse alone reads "1.5" as a day in
+	// 2001, which would turn an unreadable header into an immediate retry.
+	if (!/^[A-Za-z]/.test(value)) {
+		return undefined;
+	}
 	const date = Date.parse(value);
 	return Number.isNaN(date) ? undefined : Math.max(0, date - Date.now());
 }

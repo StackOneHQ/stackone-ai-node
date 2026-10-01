@@ -146,14 +146,19 @@ describe('fetchWithRetry', () => {
 			expect(String(warnSpy.mock.calls[0]?.[0])).toContain('retrying in 0ms (attempt 2 of 4)');
 		});
 
-		it('backs off as if absent when unreadable', async () => {
-			respondWith(limited({ 'Retry-After': 'soon' }), ok);
-			const { delays, timing } = recordedTiming(() => 0);
+		// Date.parse reads "1.5" and "2026-10-01" as dates, so only a value shaped like an
+		// HTTP-date may reach it. Python reads these the same way.
+		it.each(['soon', '1.5', '1.5e3', '-1', '2026-10-01'])(
+			'backs off as if absent when unreadable (%s)',
+			async (value) => {
+				respondWith(limited({ 'Retry-After': value }), ok);
+				const { delays, timing } = recordedTiming(() => 0);
 
-			await fetchWithRetry(url, undefined, timing);
+				await fetchWithRetry(url, undefined, timing);
 
-			expect(delays).toEqual([500]);
-		});
+				expect(delays).toEqual([500]);
+			},
+		);
 	});
 
 	describe('without Retry-After', () => {
