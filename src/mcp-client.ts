@@ -10,6 +10,7 @@ import type { JsonObject } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetLoadError } from './utils/error-toolset';
+import { fetchWithRetry } from './utils/fetch-retry';
 
 /** A tool exactly as the MCP server listed it. */
 export interface McpToolDefinition {
@@ -91,6 +92,21 @@ export function describeMcpFailure(error: unknown, endpoint: string, timeout: nu
 }
 
 /**
+ * Whether an MCP request was still rate limited after its retries: an HTTP 429 from the endpoint.
+ *
+ * Unlike a dead account, this says nothing about one account and everything about the API key,
+ * so a fan-out must fail on it rather than skip the account and return a partial catalog. A
+ * `tools/call` result whose payload reports 429 is not this: the request itself was served.
+ */
+export function isRateLimitFailure(error: unknown): boolean {
+	return (
+		error instanceof StackOneAPIError &&
+		error.statusCode === 429 &&
+		error.cause instanceof StreamableHTTPError
+	);
+}
+
+/**
  * Open an MCP session, run `work` in it and close it, all within one deadline.
  *
  * The MCP client's own defaults are generous and apply per request, so a host that accepts the
@@ -104,6 +120,9 @@ async function withMcpSession<T>(
 ): Promise<T> {
 	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
 		requestInit: { headers },
+		// Every request the client sends, handshake included, so it never sees a 429 it could
+		// have waited out.
+		fetch: (url, init) => fetchWithRetry(url, init),
 	});
 	const client = new Client({ name: 'stackone-ai-node', version });
 	let timer: ReturnType<typeof setTimeout> | undefined;

@@ -7,7 +7,7 @@ import {
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
-import { type McpToolDefinition, listMcpTools } from './mcp-client';
+import { type McpToolDefinition, isRateLimitFailure, listMcpTools } from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
 import { StackOneMcpTool, type StackOneTool, Tools } from './tool';
 import type {
@@ -23,6 +23,7 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
 import { settleWithConcurrency } from './utils/concurrency';
+import { fetchWithRetry } from './utils/fetch-retry';
 import { warn } from './utils/logger';
 
 /**
@@ -418,7 +419,8 @@ export class StackOneToolSet {
 	 * Each entry carries at least `id`, `provider` and `status`. Only accounts with
 	 * `status === 'active'` can serve tools.
 	 *
-	 * @throws StackOneAPIError If the API answers with an error status.
+	 * @throws StackOneAPIError If the API answers with an error status, including a 429 that
+	 *   outlasted its retries.
 	 * @throws ToolSetLoadError If the API cannot be reached, or answers with something that is
 	 *   not a JSON list (including a body that is not valid UTF-8).
 	 */
@@ -426,7 +428,7 @@ export class StackOneToolSet {
 		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
 		let response: Response;
 		try {
-			response = await fetch(url, {
+			response = await fetchWithRetry(url, {
 				headers: buildRequestHeaders({ apiKey: this.#apiKey, extraHeaders: this.#headers }),
 				signal: AbortSignal.timeout(this.#timeout),
 			});
@@ -575,8 +577,11 @@ export class StackOneToolSet {
 	 *
 	 * One unusable account must not cost the caller every other account's tools, so a failing
 	 * account is skipped with a warning — unless every account fails, which is an error rather
-	 * than an empty catalog. A degraded listing is not cached: the warning fires once, and every
-	 * later call would otherwise serve the short list silently for the life of the process.
+	 * than an empty catalog. A 429 that outlasted its retries is not the account's fault but the
+	 * key's, so it fails the whole listing instead: skipping it would hand back a catalog missing
+	 * whichever accounts happened to be throttled. A degraded listing is not cached: the warning
+	 * fires once, and every later call would otherwise serve the short list silently for the life
+	 * of the process.
 	 */
 	async #listCatalog(
 		scope: readonly string[],
@@ -609,7 +614,12 @@ export class StackOneToolSet {
 			return listing;
 		}
 
-		const settled = await settleWithConcurrency(scope, MAX_CONCURRENCY, listAccount);
+		const settled = await settleWithConcurrency(
+			scope,
+			MAX_CONCURRENCY,
+			listAccount,
+			isRateLimitFailure,
+		);
 		const listing: CatalogEntry[] = [];
 		const failures: string[] = [];
 		settled.forEach((outcome, index) => {
@@ -658,8 +668,14 @@ export class StackOneToolSet {
 	 *
 	 * `stackone_submit_feedback` is served once per account listing; it is returned once.
 	 *
+	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
+	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff. One still rate limited after that fails
+	 * the whole call: an account that fails any other way is skipped with a warning, but a 429
+	 * never yields a partial catalog.
+	 *
 	 * @throws ToolSetConfigError If no account is configured and none can be discovered.
-	 * @throws StackOneAPIError If the API refuses a listing (e.g. 412 for a dead account).
+	 * @throws StackOneAPIError If the API refuses a listing (e.g. 412 for a dead account), or
+	 *   still answers 429 after the retries, on any account.
 	 * @throws ToolSetLoadError If the catalog cannot be loaded.
 	 */
 	async fetchTools(options: FetchToolsOptions = {}): Promise<Tools> {
@@ -725,11 +741,16 @@ export class StackOneToolSet {
 	 * tools never has to fit in a model's context. A connector that fails to search is skipped
 	 * with a warning, unless they all fail.
 	 *
+	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
+	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff. One still rate limited after that fails
+	 * the whole search rather than being skipped.
+	 *
 	 * @param query What you want to do, e.g. "list recent comments".
 	 * @returns Actions carrying at least `action_id`, best first, each with the
 	 *   `session_id` of the search that found it when the server issued one. Pass it to
 	 *   {@link execute} and {@link submitFeedback} to link the calls.
 	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50.
+	 * @throws StackOneAPIError With status 429 if a request is still rate limited after retries.
 	 * @throws ToolSetLoadError If every connector fails.
 	 */
 	async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
@@ -767,7 +788,12 @@ export class StackOneToolSet {
 
 		// Fan out the way fetchTools() does: serially, a dozen connectors would cost the sum of
 		// their latencies on the headline call.
-		const settled = await settleWithConcurrency(tools, MAX_CONCURRENCY, searchOne);
+		const settled = await settleWithConcurrency(
+			tools,
+			MAX_CONCURRENCY,
+			searchOne,
+			isRateLimitFailure,
+		);
 		const results: SearchResult[] = [];
 		const failures: string[] = [];
 		settled.forEach((outcome, index) => {

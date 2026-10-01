@@ -25,3 +25,12 @@ export const MAX_CONCURRENCY = 10;
 
 /** The `*_search_actions` meta tool's served schema caps `top_k` at 50. */
 export const MAX_TOP_K = 50;
+
+/** Retries after an HTTP 429, on top of the first attempt: four attempts in all. */
+export const RATE_LIMIT_MAX_RETRIES = 3;
+
+/** Backoff before retry 1 when the 429 carries no `Retry-After`; doubled for each retry after. */
+export const RATE_LIMIT_BASE_DELAY_MS = 1_000;
+
+/** Upper bound on a server-requested `Retry-After` wait. */
+export const RATE_LIMIT_MAX_DELAY_MS = 30_000;
