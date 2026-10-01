@@ -1,5 +1,6 @@
 import { StackOneAPIError } from './error-stackone-api';
 import { StackOneError } from './error-stackone';
+import { ToolArgumentsError } from './error-tool-arguments';
 import { ToolSetConfigError, ToolSetError, ToolSetLoadError } from './error-toolset';
 
 describe('error hierarchy', () => {
@@ -10,6 +11,7 @@ describe('error hierarchy', () => {
 		['ToolSetConfigError', new ToolSetConfigError('x')],
 		['ToolSetLoadError', new ToolSetLoadError('x')],
 		['StackOneAPIError', new StackOneAPIError('x', 500, null)],
+		['ToolArgumentsError', new ToolArgumentsError('x')],
 	])('%s is a StackOneError', (name, error) => {
 		expect(error).toBeInstanceOf(StackOneError);
 		expect(error.name).toBe(name);

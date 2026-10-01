@@ -5,6 +5,7 @@
 export { BaseTool, StackOneTool, Tools } from './tool';
 export { StackOneError } from './utils/error-stackone';
 export { StackOneAPIError } from './utils/error-stackone-api';
+export { ToolArgumentsError } from './utils/error-tool-arguments';
 export { ToolSetConfigError, ToolSetError, ToolSetLoadError } from './utils/error-toolset';
 
 export {
