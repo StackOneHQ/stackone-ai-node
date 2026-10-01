@@ -371,6 +371,23 @@ describe('StackOneMcpTool as an action tool', () => {
 		await expect(actionTool().execute(input)).rejects.toThrow(message);
 	});
 
+	// JSON.stringify, and so the MCP client, would send each of these as null.
+	it.each([
+		['NaN at the top level', { amount: Number.NaN }],
+		['Infinity nested in an object', { body: { name: 'Ada', score: Number.POSITIVE_INFINITY } }],
+		['-Infinity nested in an array', { query: { ids: [1, Number.NEGATIVE_INFINITY] } }],
+	])('rejects %s without calling the server', async (_name, args) => {
+		const error = await actionTool()
+			.execute(args as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneError);
+		expect((error as Error).message).toMatch(
+			/^Arguments for "crm_update_contact" could not be encoded as JSON: Out of range number values are not JSON compliant/,
+		);
+		expect(calls).toEqual([]);
+	});
+
 	it('rejects a non-object, non-string argument', async () => {
 		// @ts-expect-error - intentionally passing an invalid type
 		await expect(actionTool().execute(12345)).rejects.toThrow(StackOneError);

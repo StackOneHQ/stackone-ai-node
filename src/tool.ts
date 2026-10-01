@@ -394,6 +394,7 @@ export class StackOneMcpTool extends StackOneTool {
 	 * @returns The result as the server wrote it: for an action tool,
 	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
 	 *   is the server's single-use `download_url`, not the file.
+	 * @throws StackOneError If the arguments are not a JSON object or cannot be encoded as JSON.
 	 * @throws StackOneAPIError If the result carries `isError`, with the status from its payload,
 	 *   or the endpoint answers with an HTTP error.
 	 * @throws ToolSetLoadError If the endpoint cannot be reached or does not answer in time.
@@ -404,6 +405,7 @@ export class StackOneMcpTool extends StackOneTool {
 	): Promise<JsonObject> {
 		const parsed = this.parseArguments(inputParams);
 		const args = sanitiseHeaderArguments(parsed, this.#declaredHeaders);
+		assertEncodable(this.name, args);
 
 		if (options?.dryRun) {
 			return { url: this.#endpoint, method: 'tools/call', name: this.name, arguments: args };
@@ -421,6 +423,31 @@ export class StackOneMcpTool extends StackOneTool {
 			},
 			this.name,
 			args,
+		);
+	}
+}
+
+/**
+ * Throw if `args` cannot be sent as JSON. NaN and Infinity are not JSON: `JSON.stringify`, and so
+ * the MCP client, would send them as null. A `bigint` or a cycle would otherwise fail deep inside
+ * the MCP client and surface as a transport error. Each is an argument problem.
+ *
+ * @throws StackOneError If any value, however deeply nested, cannot be encoded.
+ */
+function assertEncodable(toolName: string, args: JsonObject): void {
+	try {
+		JSON.stringify(args, (key, value: unknown) => {
+			if (typeof value === 'number' && !Number.isFinite(value)) {
+				throw new TypeError(
+					`Out of range number values are not JSON compliant: ${value}${key ? ` (at ${JSON.stringify(key)})` : ''}`,
+				);
+			}
+			return value;
+		});
+	} catch (error) {
+		throw new StackOneError(
+			`Arguments for "${toolName}" could not be encoded as JSON: ${error instanceof Error ? error.message : String(error)}`,
+			{ cause: error },
 		);
 	}
 }
