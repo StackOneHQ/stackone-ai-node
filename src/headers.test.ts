@@ -126,6 +126,18 @@ describe('declaredHeaders', () => {
 		expect(declaredHeaders({ headers: { type: 'string' } }).nested).toEqual(new Set());
 	});
 
+	it('treats an array type without "object" as an ordinary headers field', () => {
+		expect(declaredHeaders({ headers: { type: ['string', 'null'] } }).ordinaryHeadersField).toBe(
+			true,
+		);
+	});
+
+	it('treats an array type that includes "object" as a header container', () => {
+		expect(declaredHeaders({ headers: { type: ['object', 'null'] } }).ordinaryHeadersField).toBe(
+			false,
+		);
+	});
+
 	it('treats empty properties as declaring nothing', () => {
 		expect(declaredHeaders({ headers: { type: 'object', properties: {} } }).nested).toEqual(
 			new Set(),
@@ -276,6 +288,29 @@ describe('sanitiseHeaderArguments', () => {
 			headers: 'x-account-id: B',
 		});
 		expect(console.warn).not.toHaveBeenCalled();
+	});
+
+	it('forwards a string headers argument unchanged when headers is declared as ["string", "null"]', () => {
+		const nullableStringHeadersSchema = declaredHeaders({ headers: { type: ['string', 'null'] } });
+		expect(
+			sanitiseHeaderArguments({ headers: 'x-account-id: B' }, nullableStringHeadersSchema),
+		).toEqual({ headers: 'x-account-id: B' });
+		expect(console.warn).not.toHaveBeenCalled();
+	});
+
+	it('sanitises an object headers argument, and drops a string one, when headers is declared as ["object", "null"]', () => {
+		const nullableObjectHeadersSchema = declaredHeaders({
+			headers: { type: ['object', 'null'], properties: { 'x-trace': { type: 'string' } } },
+		});
+		expect(
+			sanitiseHeaderArguments({ headers: { 'x-trace': 'abc' } }, nullableObjectHeadersSchema),
+		).toEqual({ headers: { 'x-trace': 'abc' } });
+		expect(
+			sanitiseHeaderArguments({ headers: 'x-account-id: B' }, nullableObjectHeadersSchema),
+		).toEqual({});
+		expect(console.warn).toHaveBeenCalledWith(
+			'[@stackone/ai] Dropping header argument "headers" from a tool call: not an object',
+		);
 	});
 
 	it('drops an array value on a declared flat headers_<name> argument', () => {

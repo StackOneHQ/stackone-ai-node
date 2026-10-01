@@ -114,9 +114,11 @@ export interface DeclaredHeaders {
 	flat: ReadonlySet<string>;
 	/**
 	 * Whether the served schema declares a top-level `headers` property as something other than an
-	 * object — an ordinary field that happens to be named `headers`, not a header container. A
-	 * schema with no `headers` property, or one typed `"object"`, is not ordinary: a non-object
-	 * value sent for it is dropped rather than forwarded.
+	 * object — an ordinary field that happens to be named `headers`, not a header container. True
+	 * when `type` is a non-`"object"` string, or an array of types that doesn't include `"object"`
+	 * (e.g. `["string", "null"]`). A schema with no `headers` property, or one whose `type` is or
+	 * includes `"object"`, is not ordinary: a non-object value sent for it is dropped rather than
+	 * forwarded.
 	 */
 	ordinaryHeadersField: boolean;
 }
@@ -128,7 +130,9 @@ export function declaredHeaders(properties: Record<string, unknown>): DeclaredHe
 	);
 	const schema = properties.headers;
 	const ordinaryHeadersField =
-		isPlainObject(schema) && typeof schema.type === 'string' && schema.type !== 'object';
+		isPlainObject(schema) &&
+		((typeof schema.type === 'string' && schema.type !== 'object') ||
+			(Array.isArray(schema.type) && schema.type.length > 0 && !schema.type.includes('object')));
 	if (!isPlainObject(schema)) {
 		return { nested: new Set(), flat, ordinaryHeadersField };
 	}
