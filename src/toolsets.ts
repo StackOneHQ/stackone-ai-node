@@ -150,9 +150,9 @@ export interface SearchOptions {
 export interface ExecuteActionOptions {
 	/**
 	 * The `session_id` a {@link StackOneToolSet.search} hit carries. Passing it links this call to
-	 * that search server-side. Sent only when given.
+	 * that search server-side. Sent only when given; `null` behaves the same as leaving it unset.
 	 */
-	sessionId?: string;
+	sessionId?: string | null;
 	/** Restrict routing to these accounts. Defaults as for {@link StackOneToolSet.search}. */
 	accountIds?: string[];
 }
@@ -169,8 +169,11 @@ export interface SubmitFeedbackOptions {
 	feedback?: string;
 	/** What the feedback is about, e.g. `'search'` or `'execute'`. */
 	category?: FeedbackCategory;
-	/** The session to attach the feedback to — the `session_id` of a search hit. */
-	sessionId?: string;
+	/**
+	 * The session to attach the feedback to — the `session_id` of a search hit. `null` behaves
+	 * the same as leaving it unset.
+	 */
+	sessionId?: string | null;
 	/** Who produced the feedback. Default: `'model'`. */
 	source?: FeedbackSource;
 	/**
@@ -860,7 +863,7 @@ export class StackOneToolSet {
 			);
 		}
 		const { sessionId } = options;
-		if (sessionId !== undefined && (typeof sessionId !== 'string' || !sessionId)) {
+		if (sessionId != null && (typeof sessionId !== 'string' || !sessionId)) {
 			throw new ToolSetConfigError(
 				`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
 			);
@@ -896,7 +899,7 @@ export class StackOneToolSet {
 		// it an optional string, so an absent key is valid and a null is not.
 		const callArguments: JsonObject = { ...args };
 		delete callArguments.action_id;
-		if (sessionId !== undefined) {
+		if (sessionId != null) {
 			delete callArguments.session_id;
 			callArguments.session_id = sessionId;
 		}
@@ -943,7 +946,7 @@ export class StackOneToolSet {
 		if (!Array.isArray(toolNames)) {
 			throw new ToolSetConfigError('toolNames must be an array of tool names');
 		}
-		if (sessionId !== undefined && (typeof sessionId !== 'string' || !sessionId)) {
+		if (sessionId != null && (typeof sessionId !== 'string' || !sessionId)) {
 			throw new ToolSetConfigError(
 				`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
 			);

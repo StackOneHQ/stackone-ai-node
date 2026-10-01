@@ -280,6 +280,13 @@ describe('execute()', () => {
 		expect(calls[0]?.arguments).toEqual({ action_id: 'mock_list_items' });
 	});
 
+	// `null` means "not given", matching Python's `None`, rather than being sent as a literal null.
+	it('treats a null sessionId as not given', async () => {
+		const { calls } = serveMock();
+		await newToolSet().execute('mock_list_items', {}, { sessionId: null });
+		expect(calls[0]?.arguments).toEqual({ action_id: 'mock_list_items' });
+	});
+
 	it('lets sessionId win over a session_id in the arguments', async () => {
 		const { calls } = serveMock();
 		await newToolSet().execute(
@@ -389,6 +396,11 @@ describe('execute()', () => {
 			() => newToolSet({ accountId: 'acc1' }).execute('x_y', {}, { sessionId: '' }),
 			/sessionId must be a non-empty string/,
 		],
+		[
+			'a numeric sessionId',
+			() => newToolSet({ accountId: 'acc1' }).execute('x_y', {}, { sessionId: 42 as never }),
+			/sessionId must be a non-empty string/,
+		],
 	])('rejects %s before any round trip', async (_name, act, message) => {
 		await expect(act()).rejects.toThrow(message);
 		await expect(act()).rejects.toBeInstanceOf(ToolSetConfigError);
@@ -440,6 +452,19 @@ describe('submitFeedback()', () => {
 			toolNames: ['a'],
 			feedback: undefined,
 			sessionId: undefined,
+		});
+
+		expect(calls[0]?.arguments).toEqual({ rating: 'positive', tool_names: ['a'], source: 'model' });
+	});
+
+	// `null` means "not given", matching Python's `None`, rather than being sent as a literal null.
+	it('treats a null sessionId as not given', async () => {
+		const { calls } = serveMock({ submitFeedback: true });
+
+		await newToolSet({ accountId: 'acc1' }).submitFeedback({
+			rating: 'positive',
+			toolNames: ['a'],
+			sessionId: null,
 		});
 
 		expect(calls[0]?.arguments).toEqual({ rating: 'positive', tool_names: ['a'], source: 'model' });
