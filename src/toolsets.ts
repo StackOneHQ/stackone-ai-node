@@ -325,13 +325,18 @@ export class StackOneToolSet {
 
 	/**
 	 * @throws ToolSetConfigError If no API key is given or found in `STACKONE_API_KEY`, or both
-	 *   `accountId` and `accountIds` are given.
+	 *   `accountId` and `accountIds` are given, or `accountId` is an empty string.
 	 */
 	constructor(config: StackOneToolSetConfig = {}) {
 		if (config.accountId != null && config.accountIds != null) {
 			throw new ToolSetConfigError(
 				'Cannot provide both accountId and accountIds. Use accountId for a single account or accountIds for multiple accounts.',
 			);
+		}
+		// An empty accountId is usually an unset variable, and treating it as unset would silently
+		// widen every call to all active accounts.
+		if (config.accountId === '') {
+			throw new ToolSetConfigError('accountId must not be an empty string');
 		}
 		assertAccountIdList(config.accountIds, 'accountIds');
 		assertAccountIdList(config.execute?.accountIds, 'execute.accountIds');

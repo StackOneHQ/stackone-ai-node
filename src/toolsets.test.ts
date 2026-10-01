@@ -102,6 +102,12 @@ describe('configuration', () => {
 		await expect(async () => act()).rejects.toThrow(/must not contain an empty account id/);
 	});
 
+	it('refuses an empty accountId rather than widening to every account', () => {
+		expect(() => newToolSet({ accountId: '' })).toThrow(
+			new ToolSetConfigError('accountId must not be an empty string'),
+		);
+	});
+
 	it('returns itself from setAccounts for chaining', () => {
 		const toolset = newToolSet();
 		expect(toolset.setAccounts(['acc1'])).toBe(toolset);
