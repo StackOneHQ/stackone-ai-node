@@ -382,6 +382,31 @@ describe('listing', () => {
 		expect(listMock.mock.calls[0]?.[0].endpoint).toBe('https://api.example.com/mcp');
 	});
 
+	it.each([
+		[
+			'the baseUrl option',
+			{ baseUrl: 'https://option.example.com' },
+			'https://env.example.com',
+			'https://option.example.com/mcp',
+		],
+		['STACKONE_BASE_URL', {}, 'https://env.example.com', 'https://env.example.com/mcp'],
+		['the default', {}, undefined, 'https://api.stackone.com/mcp'],
+		[
+			'STACKONE_BASE_URL when baseUrl is empty',
+			{ baseUrl: '' },
+			'https://env.example.com',
+			'https://env.example.com/mcp',
+		],
+		['the default when both are empty', { baseUrl: '' }, '', 'https://api.stackone.com/mcp'],
+	])('lists from %s', async (_name, config, env, endpoint) => {
+		fakeListing(() => []);
+		vi.stubEnv('STACKONE_BASE_URL', env);
+		await new StackOneToolSet({ apiKey: 'test-key', ...config }).fetchTools({
+			accountIds: ['acc1'],
+		});
+		expect(listMock.mock.calls[0]?.[0].endpoint).toBe(endpoint);
+	});
+
 	it('passes the timeout to every listing', async () => {
 		fakeListing(() => []);
 		await newToolSet({ timeout: 1234 }).fetchTools({ accountIds: ['a', 'b'] });

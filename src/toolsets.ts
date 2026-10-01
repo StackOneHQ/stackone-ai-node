@@ -73,7 +73,10 @@ export interface ExecuteToolsConfig {
 interface StackOneToolSetBaseConfig {
 	/** API key. Defaults to the `STACKONE_API_KEY` environment variable. */
 	apiKey?: string;
-	/** Defaults to `STACKONE_BASE_URL`, then `https://api.stackone.com`. */
+	/**
+	 * Defaults to `STACKONE_BASE_URL`, then `https://api.stackone.com`. An empty value counts as
+	 * unset, as in Python, so an empty variable falls through rather than producing hostless URLs.
+	 */
 	baseUrl?: string;
 	/**
 	 * Extra HTTP headers sent with every request. `Authorization`, `x-account-id` and
@@ -365,7 +368,7 @@ export class StackOneToolSet {
 		}
 
 		this.#apiKey = apiKey;
-		this.#baseUrl = config.baseUrl ?? process.env.STACKONE_BASE_URL ?? DEFAULT_BASE_URL;
+		this.#baseUrl = config.baseUrl || process.env.STACKONE_BASE_URL || DEFAULT_BASE_URL;
 		this.#headers = { ...config.headers };
 		this.#timeout = config.timeout ?? config.execute?.timeout ?? DEFAULT_TIMEOUT_MS;
 		this.#toolMode = config.toolMode;
