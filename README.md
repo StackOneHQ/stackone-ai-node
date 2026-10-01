@@ -412,6 +412,7 @@ const toolset = new StackOneToolSet({ headers: { 'X-Request-Source': 'my-agent' 
 Everything the SDK throws is a `StackOneError`:
 
 - `StackOneAPIError` — the API refused a request. Carries `statusCode` and `responseBody`, and its message carries the server's own explanation. A failed MCP `tools/call` raises one too, with the status from its payload and the result's text in the message (`Tool "hibob_get_employee" failed: …`); a dead account surfaces as a `412`.
+- `ToolArgumentsError` — a tool's arguments are unusable: not a JSON object, or not encodable as JSON (a `NaN`, a `bigint`, a `Date`, a circular reference, …). Thrown by `tool.execute()` before any request is made.
 - `ToolSetConfigError` — the toolset was configured, or called, with something it cannot use.
 - `ToolSetLoadError` — the catalog, or the accounts behind it, could not be loaded.
 

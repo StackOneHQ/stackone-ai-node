@@ -95,7 +95,7 @@ const result = await toolset.execute(
 );
 ```
 
-`searchTools()`, `searchActionNames()`, `getSearchTool()`, `getSearchConfig()` and `getTools()` are removed. `search()` returns plain objects carrying `action_id`, plus `description`, `similarity_score`, `input_schema`, `example_request` and `session_id` when the server sends them. `execute()` raises rather than returning `{ error }`: `ToolSetConfigError` before any request when `actionId`, `args` or `sessionId` is malformed, `StackOneError` when the arguments cannot be encoded as JSON (NaN or Infinity, for example), `ToolSetLoadError` when no linked connector serves the action, and `StackOneAPIError` when the action fails, including when the server rejects the arguments.
+`searchTools()`, `searchActionNames()`, `getSearchTool()`, `getSearchConfig()` and `getTools()` are removed. `search()` returns plain objects carrying `action_id`, plus `description`, `similarity_score`, `input_schema`, `example_request` and `session_id` when the server sends them. `execute()` raises rather than returning `{ error }`: `ToolSetConfigError` before any request when `actionId`, `args` or `sessionId` is malformed, `ToolArgumentsError` when the arguments cannot be encoded as JSON (NaN or Infinity, a `Date`, a circular reference, for example), `ToolSetLoadError` when no linked connector serves the action, and `StackOneAPIError` when the action fails, including when the server rejects the arguments.
 
 To give a model the search and execute tools, set the tool mode on the toolset. `openai()` no longer takes `mode`.
 
@@ -165,6 +165,10 @@ await tool.execute({ id: '1' }, { dryRun: true });
 ## Tool arguments and headers
 
 **Arguments are sent as given**, as `tools/call` arguments, except header arguments: each is forwarded only if the tool's schema declares it, and `Authorization`, `x-account-id` and `User-Agent` never are (see below). The SDK no longer splits flat `path_` / `query_` / `body_` keys into an `/actions/rpc` envelope; the server maps them itself.
+
+**Arguments must be JSON values.** `null`, booleans, finite numbers, strings, arrays and plain objects are accepted; a `NaN` or `Infinity`, a `bigint`, a `Date`, `Map`, `Set` or `RegExp`, a function, a symbol, a class instance, a typed array or buffer, or a circular reference, anywhere in the arguments, throws `ToolArgumentsError` naming the path. 2.x let some of these through `JSON.stringify` silently converted (a `Date` to a string, a `Map` to `{}`), which sent the model a value it never supplied. An object property set to `undefined` is still treated as absent; `undefined` inside an array now throws, where 2.x sent it as `null`.
+
+**Integers above 2^53 are not sent exactly.** JavaScript has already rounded them by the time an argument reaches the SDK, where Python's arbitrary-precision integers reach the server exactly.
 
 **`fetchTools()` tools have the server's own argument shape.** 2.x asked the server for the flat, prefixed style (`?param-style=flat_prefixed`). That request is gone, so the argument names are whatever the server serves for your project. Read them from `tool.parameters.properties` rather than hard-coding them:
 
@@ -244,7 +248,7 @@ const tools = (await toolset.fetchTools()).filter(
 
 ## Errors
 
-**Every error the SDK throws is a `StackOneError`.** `ToolSetError`, `ToolSetConfigError` and `ToolSetLoadError` extended `Error` in 2.x; they now extend `StackOneError`, alongside `StackOneAPIError`. If you tell them apart with `instanceof`, check the toolset errors first:
+**Every error the SDK throws is a `StackOneError`.** `ToolSetError`, `ToolSetConfigError` and `ToolSetLoadError` extended `Error` in 2.x; they now extend `StackOneError`, alongside `StackOneAPIError` and the new `ToolArgumentsError` (thrown when a tool's arguments are not a JSON object, or cannot be encoded as JSON — see [Tool arguments and headers](#tool-arguments-and-headers)). If you tell them apart with `instanceof`, check the toolset errors first:
 
 ```typescript
 try {

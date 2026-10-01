@@ -9,6 +9,7 @@ import { BaseTool, StackOneMcpTool, StackOneTool, Tools } from './tool';
 import type { AISDKToolResult, JsonObject, JSONSchema, ToolParameters } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
+import { ToolArgumentsError } from './utils/error-tool-arguments';
 
 // Calls an AI SDK tool's `execute` through a plain signature rather than the
 // `ai` type. v5/v6 expect `ToolCallOptions`, v7 requires an extra `context`
@@ -402,7 +403,77 @@ describe('StackOneMcpTool as an action tool', () => {
 
 	it('rejects a non-object, non-string argument', async () => {
 		// @ts-expect-error - intentionally passing an invalid type
-		await expect(actionTool().execute(12345)).rejects.toThrow(StackOneError);
+		await expect(actionTool().execute(12345)).rejects.toThrow(ToolArgumentsError);
+	});
+
+	it.each([
+		['a Date', new Date()],
+		['a Map', new Map()],
+		['a Set', new Set()],
+	])('rejects %s as the whole arguments object', async (_name, value) => {
+		const error = await actionTool()
+			// @ts-expect-error - intentionally passing a non-plain object
+			.execute(value)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/must be a JSON object/);
+		expect(calls).toEqual([]);
+	});
+
+	// JSON.stringify would silently convert each of these (a Date to a string, a Map or Set to
+	// `{}`) rather than refuse it, which would send the model a value it never supplied.
+	it.each([
+		['a Date', { when: new Date() }, 'a Date'],
+		['a Map', { body: { cache: new Map() } }, 'a Map'],
+		['a Set', { query: { ids: new Set([1, 2]) } }, 'a Set'],
+		['a RegExp', { pattern: /x/ }, 'a RegExp'],
+		['a function', { cb: () => {} }, 'a function'],
+		['a symbol', { tag: Symbol('x') }, 'a symbol'],
+		['a bigint', { amount: 10n }, 'a bigint'],
+		['a Uint8Array', { bytes: new Uint8Array([1]) }, 'binary data'],
+		['a class instance', { contact: new StackOneError('x') }, 'an instance of'],
+	])(
+		'rejects %s nested in the arguments, without calling the server',
+		async (_name, args, hint) => {
+			const error = await actionTool()
+				.execute(args as unknown as JsonObject)
+				.catch((caught: unknown) => caught);
+
+			expect(error).toBeInstanceOf(ToolArgumentsError);
+			expect((error as Error).message).toContain(
+				`Arguments for "crm_update_contact" could not be encoded as JSON: ${hint}`,
+			);
+			expect(calls).toEqual([]);
+		},
+	);
+
+	it('rejects undefined inside an array', async () => {
+		const error = await actionTool()
+			.execute({ query: { ids: [1, undefined, 3] } } as unknown as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/undefined is not a JSON value/);
+		expect(calls).toEqual([]);
+	});
+
+	it('rejects a circular reference', async () => {
+		const body: JsonObject = { name: 'Ada' };
+		body.self = body;
+
+		const error = await actionTool()
+			.execute({ body })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/circular reference/);
+		expect(calls).toEqual([]);
+	});
+
+	it('drops an object property set to undefined, rather than rejecting it', async () => {
+		await actionTool().execute({ path: { id: '1' }, extra: undefined } as unknown as JsonObject);
+		expect(calls[0]?.arguments).toEqual({ path: { id: '1' } });
 	});
 
 	it('is refused by the server when it has no account', async () => {

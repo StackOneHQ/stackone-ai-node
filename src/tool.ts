@@ -31,6 +31,7 @@ import type {
 } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
+import { ToolArgumentsError } from './utils/error-tool-arguments';
 import { serializeToolResult } from './utils/serialize';
 import { tryImport } from './utils/try-import';
 
@@ -40,8 +41,21 @@ import { tryImport } from './utils/try-import';
  */
 type ObjectJSONSchema = OverrideProperties<JSONSchema, { type: 'object' }>;
 
-const isPlainObject = (value: unknown): value is JsonObject =>
-	typeof value === 'object' && value !== null && !Array.isArray(value);
+/**
+ * A JSON object: a non-null, non-array value whose prototype is `Object.prototype` or `null`.
+ *
+ * `typeof value === 'object' && !Array.isArray(value)` alone also accepts a `Date`, `Map`,
+ * `Set`, `RegExp` or class instance — none of which are JSON objects, and some of which
+ * `JSON.stringify` would otherwise convert silently (a `Date` to a string, a `Map` to `{}`)
+ * rather than refuse.
+ */
+const isPlainObject = (value: unknown): value is JsonObject => {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+		return false;
+	}
+	const prototype: unknown = Object.getPrototypeOf(value);
+	return prototype === Object.prototype || prototype === null;
+};
 
 /**
  * Base class for all tools: a name, a description, the served parameter schema, and conversions
@@ -317,14 +331,14 @@ export class StackOneTool extends BaseTool {
 	/**
 	 * Parse tool arguments: a JSON string, an object, or nothing.
 	 *
-	 * @throws StackOneError If the arguments are not a JSON object.
+	 * @throws ToolArgumentsError If the arguments are not a JSON object.
 	 */
 	protected parseArguments(input: JsonObject | string | undefined): JsonObject {
 		if (input === undefined || input === null) {
 			return {};
 		}
 		if (typeof input !== 'string' && typeof input !== 'object') {
-			throw new StackOneError(
+			throw new ToolArgumentsError(
 				`Invalid parameters type for "${this.name}". Expected object or string, got ${typeof input}.`,
 			);
 		}
@@ -333,14 +347,14 @@ export class StackOneTool extends BaseTool {
 			try {
 				parsed = JSON.parse(input);
 			} catch (error) {
-				throw new StackOneError(
+				throw new ToolArgumentsError(
 					`Invalid JSON in arguments for "${this.name}": ${error instanceof Error ? error.message : String(error)}`,
 					{ cause: error },
 				);
 			}
 		}
 		if (!isPlainObject(parsed)) {
-			throw new StackOneError(`Tool arguments for "${this.name}" must be a JSON object`);
+			throw new ToolArgumentsError(`Tool arguments for "${this.name}" must be a JSON object`);
 		}
 		return { ...parsed };
 	}
@@ -396,7 +410,8 @@ export class StackOneMcpTool extends StackOneTool {
 	 *   is the server's single-use `download_url`, not the file. Typed `JsonObject` rather than
 	 *   `ActionResult`, since a `*_search_actions` meta tool returns bare JSON and `dryRun` the
 	 *   call it would send: assert `ActionResult` on an action tool.
-	 * @throws StackOneError If the arguments are not a JSON object or cannot be encoded as JSON.
+	 * @throws ToolArgumentsError If the arguments are not a JSON object or cannot be encoded as
+	 *   JSON.
 	 * @throws StackOneAPIError If the result carries `isError`, with the status from its payload,
 	 *   or the endpoint answers with an HTTP error.
 	 * @throws ToolSetLoadError If the endpoint cannot be reached or does not answer in time.
@@ -430,27 +445,111 @@ export class StackOneMcpTool extends StackOneTool {
 }
 
 /**
- * Throw if `args` cannot be sent as JSON. NaN and Infinity are not JSON: `JSON.stringify`, and so
- * the MCP client, would send them as null. A `bigint` or a cycle would otherwise fail deep inside
- * the MCP client and surface as a transport error. Each is an argument problem.
- *
- * @throws StackOneError If any value, however deeply nested, cannot be encoded.
+ * Describe why `value` is not a JSON value, for the message {@link assertJsonValue} throws.
  */
-function assertEncodable(toolName: string, args: JsonObject): void {
-	try {
-		JSON.stringify(args, (key, value: unknown) => {
-			if (typeof value === 'number' && !Number.isFinite(value)) {
-				throw new TypeError(
-					`Out of range number values are not JSON compliant: ${value}${key ? ` (at ${JSON.stringify(key)})` : ''}`,
+function describeUnencodableType(value: unknown): string {
+	if (typeof value === 'bigint') {
+		return 'a bigint';
+	}
+	if (typeof value === 'symbol') {
+		return 'a symbol';
+	}
+	if (typeof value === 'function') {
+		return 'a function';
+	}
+	if (value instanceof Date) {
+		return 'a Date';
+	}
+	if (value instanceof Map) {
+		return 'a Map';
+	}
+	if (value instanceof Set) {
+		return 'a Set';
+	}
+	if (value instanceof RegExp) {
+		return 'a RegExp';
+	}
+	if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
+		return 'binary data';
+	}
+	return `an instance of ${(value as object).constructor?.name ?? typeof value}`;
+}
+
+/**
+ * Walk `value`, throwing if it, or anything nested inside it, is not a JSON value.
+ *
+ * Only `null`, booleans, finite numbers, strings, arrays and plain objects are JSON values.
+ * `JSON.stringify` quietly converts some of what this refuses — a `Date` to a string, a `Map`
+ * or `Set` to `{}` — rather than refuse it, which would silently send the model a value it
+ * never supplied. `undefined` is dropped, as `JSON.stringify` drops it from an object, but is
+ * refused inside an array, where `JSON.stringify` would send it as `null`.
+ *
+ * @throws ToolArgumentsError If `value` is not a JSON value.
+ */
+function assertJsonValue(value: unknown, path: string, toolName: string, seen: Set<object>): void {
+	if (value === null || typeof value === 'boolean' || typeof value === 'string') {
+		return;
+	}
+	if (typeof value === 'number') {
+		if (!Number.isFinite(value)) {
+			throw new ToolArgumentsError(
+				`Arguments for "${toolName}" could not be encoded as JSON: Out of range number values are not JSON compliant: ${value} (at ${JSON.stringify(path)})`,
+			);
+		}
+		return;
+	}
+	if (Array.isArray(value)) {
+		if (seen.has(value)) {
+			throw new ToolArgumentsError(
+				`Arguments for "${toolName}" could not be encoded as JSON: circular reference (at ${JSON.stringify(path)})`,
+			);
+		}
+		seen.add(value);
+		value.forEach((item, index) => {
+			const itemPath = `${path}[${index}]`;
+			if (item === undefined) {
+				throw new ToolArgumentsError(
+					`Arguments for "${toolName}" could not be encoded as JSON: undefined is not a JSON value (at ${JSON.stringify(itemPath)})`,
 				);
 			}
-			return value;
+			assertJsonValue(item, itemPath, toolName, seen);
 		});
-	} catch (error) {
-		throw new StackOneError(
-			`Arguments for "${toolName}" could not be encoded as JSON: ${error instanceof Error ? error.message : String(error)}`,
-			{ cause: error },
-		);
+		seen.delete(value);
+		return;
+	}
+	if (isPlainObject(value)) {
+		if (seen.has(value)) {
+			throw new ToolArgumentsError(
+				`Arguments for "${toolName}" could not be encoded as JSON: circular reference (at ${JSON.stringify(path)})`,
+			);
+		}
+		seen.add(value);
+		for (const [key, entry] of Object.entries(value)) {
+			// An object property set to undefined is treated as absent, as JSON.stringify treats it.
+			if (entry === undefined) {
+				continue;
+			}
+			assertJsonValue(entry, `${path}.${key}`, toolName, seen);
+		}
+		seen.delete(value);
+		return;
+	}
+	throw new ToolArgumentsError(
+		`Arguments for "${toolName}" could not be encoded as JSON: ${describeUnencodableType(value)} is not a JSON value (at ${JSON.stringify(path)})`,
+	);
+}
+
+/**
+ * Throw if `args` cannot be sent as JSON: see {@link assertJsonValue}.
+ *
+ * @throws ToolArgumentsError If any value, however deeply nested, is not a JSON value.
+ */
+function assertEncodable(toolName: string, args: JsonObject): void {
+	for (const [key, value] of Object.entries(args)) {
+		if (value === undefined) {
+			continue;
+		}
+		assertJsonValue(value, key, toolName, new Set());
 	}
 }
 
