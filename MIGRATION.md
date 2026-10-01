@@ -87,6 +87,7 @@ const names = await toolset.searchActionNames('time off requests', { topK: 5 });
 // 3.0
 const toolset = new StackOneToolSet();
 const [hit] = await toolset.search('list employees', { topK: 5 }); // SearchResult[], best first
+if (!hit) throw new Error('No action matched');
 const result = await toolset.execute(
 	hit.action_id,
 	{ query: { page_size: 25 } }, // the nested form hit.input_schema describes
@@ -94,7 +95,7 @@ const result = await toolset.execute(
 );
 ```
 
-`searchTools()`, `searchActionNames()`, `getSearchTool()`, `getSearchConfig()` and `getTools()` are removed. `search()` returns plain objects carrying `action_id`, plus `description`, `similarity_score`, `input_schema`, `example_request` and `session_id` when the server sends them. `execute()` raises rather than returning `{ error }`: `ToolSetLoadError` when no linked connector serves the action, `StackOneAPIError` when the action fails.
+`searchTools()`, `searchActionNames()`, `getSearchTool()`, `getSearchConfig()` and `getTools()` are removed. `search()` returns plain objects carrying `action_id`, plus `description`, `similarity_score`, `input_schema`, `example_request` and `session_id` when the server sends them. `execute()` raises rather than returning `{ error }`: `ToolSetConfigError` before any request when `actionId`, `args` or `sessionId` is malformed, `StackOneError` when the arguments cannot be encoded as JSON (NaN or Infinity, for example), `ToolSetLoadError` when no linked connector serves the action, and `StackOneAPIError` when the action fails, including when the server rejects the arguments.
 
 To give a model the search and execute tools, set the tool mode on the toolset. `openai()` no longer takes `mode`.
 
@@ -153,7 +154,7 @@ await tool.execute({ id: '1' }, { dryRun: true });
 
 ## Tool arguments and headers
 
-**Arguments are sent exactly as given**, as `tools/call` arguments. The SDK no longer splits flat `path_` / `query_` / `body_` keys into an `/actions/rpc` envelope; the server maps them itself.
+**Arguments are sent as given**, as `tools/call` arguments, except header arguments: each is forwarded only if the tool's schema declares it, and `Authorization`, `x-account-id` and `User-Agent` never are (see below). The SDK no longer splits flat `path_` / `query_` / `body_` keys into an `/actions/rpc` envelope; the server maps them itself.
 
 **`fetchTools()` tools have the server's own argument shape.** 2.x asked the server for the flat, prefixed style (`?param-style=flat_prefixed`). That request is gone, so the argument names are whatever the server serves for your project. Read them from `tool.parameters.properties` rather than hard-coding them:
 
@@ -197,6 +198,7 @@ await feedbackTool.execute({
 
 // 3.0
 const [hit] = await toolset.search('list workers');
+if (!hit) throw new Error('No action matched');
 await toolset.execute(hit.action_id, {}, { sessionId: hit.session_id });
 await toolset.submitFeedback({
 	rating: 'positive',
@@ -288,12 +290,12 @@ const tool = new GetEmployee(
 
 **Tools no longer carry headers.** The `headers` constructor argument, `getHeaders()` and `setHeaders()` are removed from `BaseTool`, and `ToolExecution` — the `execution` metadata `toAISDK()` can attach — no longer has `headers`, so it cannot leak the credential. `StackOneTool`'s fifth constructor argument is now the account id; use `getAccountId()` / `setAccountId()` to read or rebind it.
 
-**`BaseTool#connector` and `Tools#getConnectors()` are removed.** Take the provider from the tool name, or filter with `fetchTools({ providers })`:
+**`BaseTool#connector` and `Tools#getConnectors()` are removed.** Filter by provider with `fetchTools({ providers })`. A provider name can contain `_` (`browser_linkedin`), so do not split the tool name to find it:
 
 ```typescript
 // 2.x
-const connectors = tools.getConnectors();
+const hibobTools = tools.toArray().filter((tool) => tool.connector === 'hibob');
 
 // 3.0
-const connectors = new Set(tools.map((tool) => tool.name.split('_')[0]));
+const hibobTools = await toolset.fetchTools({ providers: ['hibob'] });
 ```

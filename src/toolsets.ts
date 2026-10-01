@@ -877,6 +877,7 @@ export class StackOneToolSet {
 	 * @example
 	 * ```typescript
 	 * const [hit] = await toolset.search('list recent comments');
+	 * if (!hit) throw new Error('No action matched');
 	 * await toolset.execute(hit.action_id, {}, { sessionId: hit.session_id });
 	 * await toolset.submitFeedback({
 	 *   rating: 'positive',
