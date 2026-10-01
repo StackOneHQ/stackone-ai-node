@@ -97,6 +97,29 @@ describe('declaredHeaders', () => {
 		expect(declaredHeaders({ headers: { type: 'object' } }).nested).toBe('any');
 	});
 
+	it('treats an open object schema with additionalProperties as declaring every name', () => {
+		expect(
+			declaredHeaders({ headers: { type: 'object', additionalProperties: true } }).nested,
+		).toBe('any');
+		expect(
+			declaredHeaders({
+				headers: { type: 'object', additionalProperties: { type: 'string' } },
+			}).nested,
+		).toBe('any');
+	});
+
+	it('treats additionalProperties: false with no properties as declaring nothing', () => {
+		expect(
+			declaredHeaders({ headers: { type: 'object', additionalProperties: false } }).nested,
+		).toEqual(new Set());
+	});
+
+	it('treats a headers schema without type: "object" as declaring nothing', () => {
+		expect(declaredHeaders({ headers: {} }).nested).toEqual(new Set());
+		expect(declaredHeaders({ headers: { additionalProperties: true } }).nested).toEqual(new Set());
+		expect(declaredHeaders({ headers: { type: 'string' } }).nested).toEqual(new Set());
+	});
+
 	it('treats empty properties as declaring nothing', () => {
 		expect(declaredHeaders({ headers: { type: 'object', properties: {} } }).nested).toEqual(
 			new Set(),

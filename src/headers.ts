@@ -104,7 +104,9 @@ const FLAT_HEADER_PREFIX = 'headers_';
 export interface DeclaredHeaders {
 	/**
 	 * Names declared under the nested `headers` object, lower-cased, or `'any'` when `headers` is
-	 * an object schema with no `properties` — an open map, as on `*_execute_action`.
+	 * an open map, as on `*_execute_action`: `type: "object"`, no `properties` key, and
+	 * `additionalProperties` anything but `false`. A schema without `type: "object"`, or one that
+	 * closes `additionalProperties` without listing `properties`, declares no names.
 	 */
 	nested: ReadonlySet<string> | 'any';
 	/** The top-level `headers_<name>` properties, exactly as served. */
@@ -121,7 +123,8 @@ export function declaredHeaders(properties: Record<string, unknown>): DeclaredHe
 		return { nested: new Set(), flat };
 	}
 	if (!('properties' in schema)) {
-		return { nested: schema.type === 'object' ? 'any' : new Set(), flat };
+		const open = schema.type === 'object' && schema.additionalProperties !== false;
+		return { nested: open ? 'any' : new Set(), flat };
 	}
 	const nestedProperties = isPlainObject(schema.properties) ? schema.properties : {};
 	return { nested: new Set(Object.keys(nestedProperties).map((name) => name.toLowerCase())), flat };
