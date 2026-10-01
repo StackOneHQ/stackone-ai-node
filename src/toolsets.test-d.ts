@@ -1,6 +1,6 @@
 import { expectTypeOf } from 'vitest';
 import type { StackOneToolSet, StackOneToolSetConfig } from './toolsets';
-import type { JsonObject, SearchResult } from './types';
+import type { ActionResult, JsonObject, JsonValue, SearchResult } from './types';
 
 // Valid configurations - only accountId
 test('StackOneToolSetConfig accepts only accountId', () => {
@@ -52,4 +52,19 @@ test('SearchResult declares the fields the server serves', () => {
 	expectTypeOf<SearchResult['example_request']>().toExtend<
 		Parameters<StackOneToolSet['execute']>[1]
 	>();
+});
+
+// An action's result is the server's wrapper, typed so `result` needs no cast to reach
+test('execute() and submitFeedback() return an ActionResult', () => {
+	expectTypeOf<ReturnType<StackOneToolSet['execute']>>().toEqualTypeOf<Promise<ActionResult>>();
+	expectTypeOf<ReturnType<StackOneToolSet['submitFeedback']>>().toEqualTypeOf<
+		Promise<ActionResult>
+	>();
+	expectTypeOf<ActionResult['isError']>().toEqualTypeOf<false>();
+	expectTypeOf<ActionResult['result']>().toEqualTypeOf<JsonValue>();
+	expectTypeOf<ActionResult['defenderMetadata']>().toEqualTypeOf<JsonObject | undefined>();
+	expectTypeOf<ActionResult['policyMetadata']>().toEqualTypeOf<JsonObject | undefined>();
+	// Keys the server adds are kept, and a result is still a JsonObject.
+	expectTypeOf<{ isError: false; result: null; extra: true }>().toExtend<ActionResult>();
+	expectTypeOf<ActionResult>().toExtend<JsonObject>();
 });

@@ -11,6 +11,7 @@ import { type McpToolDefinition, isRateLimitFailure, listMcpTools } from './mcp-
 import { cloneJson, toolParametersFromInputSchema } from './schema';
 import { StackOneMcpTool, type StackOneTool, Tools } from './tool';
 import type {
+	ActionResult,
 	FeedbackCategory,
 	FeedbackRating,
 	FeedbackSource,
@@ -837,7 +838,7 @@ export class StackOneToolSet {
 	 * @param actionId The action to run, e.g. `linear_list_issues`.
 	 * @param args The action's arguments.
 	 * @param options.sessionId The `session_id` a search hit carries, to link this call to it.
-	 * @returns The action's result.
+	 * @returns The action's result as the server wrote it: `{ isError: false, result, … }`.
 	 * @throws ToolSetConfigError If the arguments are malformed.
 	 * @throws ToolSetLoadError If no linked connector serves the action.
 	 * @throws StackOneAPIError If the action fails.
@@ -846,7 +847,7 @@ export class StackOneToolSet {
 		actionId: string,
 		args?: JsonObject,
 		options: ExecuteActionOptions = {},
-	): Promise<JsonObject> {
+	): Promise<ActionResult> {
 		if (typeof actionId !== 'string' || !actionId) {
 			throw new ToolSetConfigError(
 				`actionId must be a non-empty string, got ${JSON.stringify(actionId) ?? String(actionId)}`,
@@ -900,7 +901,8 @@ export class StackOneToolSet {
 		}
 		callArguments.action_id = actionId;
 
-		return tool.execute(callArguments);
+		// `*_execute_action` answers with the action's result wrapper; see ActionResult.
+		return (await tool.execute(callArguments)) as ActionResult;
 	}
 
 	/**
@@ -930,7 +932,7 @@ export class StackOneToolSet {
 	 *   or `accountIds` holds an empty id.
 	 * @throws ToolSetLoadError If feedback is not enabled for this project.
 	 */
-	async submitFeedback(options: SubmitFeedbackOptions): Promise<JsonObject> {
+	async submitFeedback(options: SubmitFeedbackOptions): Promise<ActionResult> {
 		const { rating, toolNames, feedback, category, sessionId, source = 'model' } = options;
 		if (typeof (toolNames as unknown) === 'string') {
 			throw new ToolSetConfigError(
@@ -967,7 +969,7 @@ export class StackOneToolSet {
 				args[key] = value;
 			}
 		}
-		return tool.execute(args);
+		return (await tool.execute(args)) as ActionResult;
 	}
 }
 

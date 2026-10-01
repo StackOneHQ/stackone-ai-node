@@ -114,16 +114,22 @@ messages.push(message, ...(await tools.executeOpenAIToolCalls(message.tool_calls
 
 ## Results
 
-**Every tool returns the server's result as the server wrote it.** For an action, that is `{ isError: false, result, defenderMetadata?, policyMetadata? }`. Search results are bare JSON. This applies to `tool.execute()` and `toolset.execute()` alike.
+**Every tool returns the server's result as the server wrote it.** For an action, that is `{ isError: false, result, defenderMetadata?, policyMetadata? }`, exported as the `ActionResult` type. Search results are bare JSON. This applies to `tool.execute()` and `toolset.execute()` alike.
+
+`toolset.execute()` and `submitFeedback()` are typed as returning `ActionResult`. `tool.execute()` still returns `JsonObject`, because a tool can be a `*_search_actions` meta tool or a `dryRun`: on an action tool, assert `ActionResult`. Either way `result` is the action's own JSON, typed `JsonValue`, so narrow it to read inside it.
 
 ```typescript
+import type { ActionResult, JsonObject } from '@stackone/ai';
+
 const tool = (await toolset.fetchTools()).getTool('hibob_list_employees');
+if (!tool) throw new Error('hibob_list_employees is not served');
 
 // 2.x
 const employees = (await tool.execute({})).data;
 
 // 3.0
-const employees = (await tool.execute({})).result.data;
+const { result } = (await tool.execute({})) as ActionResult;
+const employees = (result as JsonObject).data;
 ```
 
 A result with `isError` set raises `StackOneAPIError`, with the status from its payload in `statusCode` and the payload in `responseBody`.
@@ -138,8 +144,12 @@ if (isBinaryDownloadResult(result)) {
 }
 
 // 3.0
-const { result: link } = await download.execute({ id: 'file-id' });
-// { download_url, expires_at, file: { name, content_type, content_length } }
+const { result } = (await download.execute({ id: 'file-id' })) as ActionResult;
+const link = result as {
+	download_url: string;
+	expires_at: string;
+	file: { name?: string; content_type?: string; content_length?: number };
+};
 const name = path.basename(link.file.name ?? 'download.bin'); // chosen by the provider: keep only the basename
 writeFileSync(name, Buffer.from(await (await fetch(link.download_url)).arrayBuffer()));
 ```

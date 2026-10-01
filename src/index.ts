@@ -18,6 +18,7 @@ export {
 } from './toolsets';
 
 export type {
+	ActionResult,
 	AISDKToolDefinition,
 	AISDKToolResult,
 	ExecuteConfig,

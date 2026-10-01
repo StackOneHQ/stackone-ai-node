@@ -216,6 +216,24 @@ export type SearchResult = JsonObject & {
 	session_id?: string;
 };
 
+/**
+ * What an action returns: the server's own wrapper, as it wrote it. `toolset.execute()` and
+ * `submitFeedback()` return one; so does `tool.execute()` on an action tool.
+ *
+ * A type for what the server sends, not a check: the SDK returns the result unchanged. A result
+ * with `isError` set never reaches the caller, since it raises `StackOneAPIError` instead. Any
+ * key the server adds beyond these is kept.
+ */
+export type ActionResult = JsonObject & {
+	isError: false;
+	/** The action's output. A file action's is `{ download_url, expires_at, file }`. */
+	result: JsonValue;
+	/** What StackOne Defender checked, when it ran on this call. */
+	defenderMetadata?: JsonObject;
+	/** The policy decision for this call, when a policy applied. */
+	policyMetadata?: JsonObject;
+};
+
 /** The verdict `submitFeedback()` records. */
 export type FeedbackRating = 'positive' | 'negative' | 'neutral';
 

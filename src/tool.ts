@@ -391,9 +391,11 @@ export class StackOneMcpTool extends StackOneTool {
 	 * it, and `Authorization`, `x-account-id` and `User-Agent` never are. A `headers` property
 	 * served as an object with no `properties`, as on `*_execute_action`, declares every name.
 	 *
-	 * @returns The result as the server wrote it: for an action tool,
+	 * @returns The result as the server wrote it: for an action tool, an `ActionResult`,
 	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
-	 *   is the server's single-use `download_url`, not the file.
+	 *   is the server's single-use `download_url`, not the file. Typed `JsonObject` rather than
+	 *   `ActionResult`, since a `*_search_actions` meta tool returns bare JSON and `dryRun` the
+	 *   call it would send: assert `ActionResult` on an action tool.
 	 * @throws StackOneError If the arguments are not a JSON object or cannot be encoded as JSON.
 	 * @throws StackOneAPIError If the result carries `isError`, with the status from its payload,
 	 *   or the endpoint answers with an HTTP error.
