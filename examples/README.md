@@ -16,7 +16,7 @@ Set your credentials using either approach:
 
 ```bash
 export STACKONE_API_KEY=your-stackone-api-key
-export STACKONE_ACCOUNT_ID=your-account-id     # optional: accounts are discovered otherwise
+export STACKONE_ACCOUNT_ID=your-account-id     # optional: the examples pass it as accountId
 export OPENAI_API_KEY=your-openai-api-key       # for OpenAI/AI SDK examples
 export ANTHROPIC_API_KEY=your-anthropic-api-key  # for Anthropic examples
 ```
@@ -79,6 +79,6 @@ Walks through every way to configure API keys and account IDs: reading from envi
 | Variable              | Required                     | Used By                                                                             |
 | --------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
 | `STACKONE_API_KEY`    | Yes                          | All examples                                                                        |
-| `STACKONE_ACCOUNT_ID` | Optional                     | All examples (read automatically; without it, accounts are discovered from the key) |
+| `STACKONE_ACCOUNT_ID` | Optional                     | Read by the examples and passed as `accountId`; without it, accounts are discovered |
 | `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts` |
 | `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                       |

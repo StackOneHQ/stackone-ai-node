@@ -48,7 +48,6 @@ const names = (tools: { toArray(): Array<{ name: string }> }) =>
 
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	vi.stubEnv('STACKONE_ACCOUNT_ID', '');
 	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 afterEach(() => {
@@ -74,9 +73,15 @@ describe('configuration', () => {
 		expect(tools.length).toBe(2);
 	});
 
-	it('reads the account from STACKONE_ACCOUNT_ID', async () => {
+	it('ignores STACKONE_ACCOUNT_ID, so the environment cannot change the account scope', async () => {
 		vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc3');
-		expect(names(await newToolSet().fetchTools())).toEqual(['acc3_tool_1']);
+
+		expect(names(await newToolSet().fetchTools())).toEqual(['default_tool_1', 'default_tool_2']);
+		expect(names(await newToolSet({ accountId: 'acc1' }).fetchTools())).toEqual([
+			'acc1_tool_1',
+			'acc1_tool_2',
+		]);
+		expect(listMock.mock.calls.map(([request]) => accountOf(request))).toEqual(['default', 'acc1']);
 	});
 
 	it('refuses both accountId and accountIds', () => {

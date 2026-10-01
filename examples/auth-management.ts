@@ -6,7 +6,8 @@
  * Run with:
  *   STACKONE_API_KEY=xxx npx tsx examples/auth-management.ts
  *
- * STACKONE_ACCOUNT_ID is optional: without it, accounts are discovered from the API key.
+ * STACKONE_ACCOUNT_ID is optional, and only read by this example: the SDK never reads it. Without
+ * it, accounts are discovered from the API key.
  */
 
 import process from 'node:process';
@@ -21,7 +22,7 @@ if (!process.env.STACKONE_API_KEY) {
 const apiKeyFromEnv = async (): Promise<void> => {
 	console.log('=== 1a. API Key from environment ===\n');
 
-	// Reads STACKONE_API_KEY (and STACKONE_ACCOUNT_ID, if set) from env automatically
+	// Reads STACKONE_API_KEY from env automatically. No account is configured, so it discovers them
 	const toolset = new StackOneToolSet();
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools using env API key\n`);
@@ -51,11 +52,12 @@ const apiKeyAlone = async (): Promise<void> => {
 const accountIdFromEnv = async (): Promise<void> => {
 	console.log('=== 2. Account ID from environment ===\n');
 
-	// The Node SDK reads STACKONE_ACCOUNT_ID from env automatically
+	// The SDK only reads the API key from env; read the account id yourself and pass it.
+	// Unset, it is undefined and the toolset discovers every active account instead.
 	const accountId = process.env.STACKONE_ACCOUNT_ID;
 	console.log(`  STACKONE_ACCOUNT_ID is ${accountId ? 'set' : 'not set'}`);
 
-	const toolset = new StackOneToolSet();
+	const toolset = new StackOneToolSet({ accountId });
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools for account from env\n`);
 };

@@ -31,7 +31,8 @@ import { warn } from './utils/logger';
 interface SingleAccountConfig {
 	/**
 	 * Single account ID for StackOne API operations
-	 * Use this when working with a single account
+	 * Use this when working with a single account. Never read from the environment: with no
+	 * account configured, the toolset uses every active account linked to the API key.
 	 */
 	accountId: string;
 }
@@ -324,6 +325,9 @@ export class StackOneToolSet {
 	#cacheGeneration = 0;
 
 	/**
+	 * Falls back to `STACKONE_API_KEY` and `STACKONE_BASE_URL`, but never reads an account id from
+	 * the environment: `accountId` / `accountIds` must be passed, or every active account is used.
+	 *
 	 * @throws ToolSetConfigError If no API key is given or found in `STACKONE_API_KEY`, or both
 	 *   `accountId` and `accountIds` are given, or `accountId` is an empty string.
 	 */
@@ -360,7 +364,7 @@ export class StackOneToolSet {
 		this.#headers = { ...config.headers };
 		this.#timeout = config.timeout ?? config.execute?.timeout ?? DEFAULT_TIMEOUT_MS;
 		this.#toolMode = config.toolMode;
-		this.#accountId = config.accountId || process.env.STACKONE_ACCOUNT_ID || undefined;
+		this.#accountId = config.accountId;
 		this.#accountIds = [...(config.accountIds ?? config.execute?.accountIds ?? [])];
 	}
 

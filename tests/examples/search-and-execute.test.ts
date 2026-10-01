@@ -19,7 +19,6 @@ import { StackOneToolSet, ToolSetLoadError } from '../../src';
 describe('search-and-execute example e2e', () => {
 	beforeEach(() => {
 		vi.stubEnv('STACKONE_API_KEY', 'test-key');
-		vi.stubEnv('STACKONE_ACCOUNT_ID', '');
 		vi.stubEnv('STACKONE_BASE_URL', TEST_BASE_URL);
 	});
 

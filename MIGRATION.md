@@ -179,6 +179,16 @@ await toolset.execute('linear_list_comments', { headers: { 'x-request-id': 'abc'
 
 **With no account id, the SDK discovers your accounts.** In 2.x, calling `fetchTools()` with no account listed tools without an `x-account-id`, which the API refuses. In 3.0 it asks `GET /accounts` (also available as `toolset.fetchAccounts()`) and lists the catalog of every active account. If you have many accounts, pass `accountId`, `accountIds` or call `setAccounts()` so the SDK does not fetch every catalog.
 
+**`STACKONE_ACCOUNT_ID` is no longer read.** Pass the account id as `accountId` or `accountIds`. Since an unset account now means every active account, an environment variable that set it implicitly could widen or narrow a toolset's scope without the code saying so. `STACKONE_API_KEY` is still read. To keep the variable, read it yourself; unset, it is `undefined` and the toolset discovers your accounts:
+
+```typescript
+// 2.x: STACKONE_ACCOUNT_ID picked up implicitly
+const toolset = new StackOneToolSet();
+
+// 3.0
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+```
+
 **Listings are merged in sorted account order.** When two accounts serve the same tool name, `getTool()` returns the first one listed — now the one on the lowest account id, where 2.x followed the order you passed. A warning names the clashing tools. Pass `accountIds` to choose the account yourself.
 
 **`fetchTools()` returns fresh tool instances on every call**, never the cached `Tools`, so `setAccountId()` on one tool no longer changes what later callers get. An account whose listing fails is skipped with a warning, unless every account fails.

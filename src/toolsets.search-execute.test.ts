@@ -32,7 +32,6 @@ const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {
 
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	vi.stubEnv('STACKONE_ACCOUNT_ID', '');
 	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 afterEach(() => {
