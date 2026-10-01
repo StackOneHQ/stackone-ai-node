@@ -219,7 +219,6 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		mcp.setRequestHandler(CallToolRequestSchema, (request): CallToolResult => {
 			const { name } = request.params;
 			const args = request.params.arguments ?? {};
-			onToolCall?.({ accountId, toolMode, name, arguments: structuredClone(args) });
 
 			if (!listed.some((tool) => tool.name === name)) {
 				return text({ error: `Unknown tool ${name}`, status_code: 404 }, true);
@@ -243,6 +242,21 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 				wrapped({ data: { action: name, account_id: accountId, arguments: args } })
 			);
 		});
+
+		// Recorded from the raw body: the server's schema parsing rebuilds the arguments, and drops
+		// a `__proto__` key on the way, so a call recorded after it is not what was sent.
+		if (onToolCall && c.req.method === 'POST') {
+			const body = (await c.req.raw.clone().json()) as unknown;
+			for (const message of Array.isArray(body) ? body : [body]) {
+				const { method, params } = (message ?? {}) as {
+					method?: string;
+					params?: { name?: string; arguments?: Record<string, unknown> };
+				};
+				if (method === 'tools/call' && typeof params?.name === 'string') {
+					onToolCall({ accountId, toolMode, name: params.name, arguments: params.arguments ?? {} });
+				}
+			}
+		}
 
 		const transport = new StreamableHTTPTransport();
 		await mcp.connect(transport);
