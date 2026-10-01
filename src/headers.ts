@@ -12,6 +12,19 @@ const SDK_OWNED_HEADERS = ['authorization', 'x-account-id', 'user-agent'] as con
 const isPlainObject = (value: unknown): value is JsonObject =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/**
+ * Set `key` on `target` as an own, enumerable property. Plain assignment with the key
+ * `__proto__` replaces the prototype instead, so the entry would vanish from the request.
+ */
+function setEntry<T>(target: Record<string, T>, key: string, value: T): void {
+	Object.defineProperty(target, key, {
+		value,
+		enumerable: true,
+		writable: true,
+		configurable: true,
+	});
+}
+
 /** Whether a caller-supplied header name is one the SDK owns and will override. */
 export function isSdkOwnedHeader(name: string): boolean {
 	return (SDK_OWNED_HEADERS as readonly string[]).includes(name.trim().toLowerCase());
@@ -40,7 +53,7 @@ export function buildRequestHeaders(options: {
 	const headers: Record<string, string> = {};
 	for (const [name, value] of Object.entries(options.extraHeaders ?? {})) {
 		if (!isSdkOwnedHeader(name)) {
-			headers[name] = value;
+			setEntry(headers, name, value);
 		}
 	}
 	headers['User-Agent'] = USER_AGENT;
@@ -77,7 +90,7 @@ export function normalizeHeaders(headers: JsonObject | undefined): Record<string
 	for (const [key, value] of Object.entries(headers ?? {})) {
 		const text = headerText(value);
 		if (text !== undefined) {
-			result[key] = text;
+			setEntry(result, key, text);
 		}
 	}
 	return result;
@@ -175,7 +188,7 @@ export function sanitiseHeaders(
 			warn(`Dropping header "${name}" from a tool call: ${reason}`);
 			continue;
 		}
-		clean[name] = value;
+		setEntry(clean, name, value);
 	}
 	return clean;
 }
@@ -195,7 +208,7 @@ export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHead
 			continue;
 		}
 		if (!key.startsWith(FLAT_HEADER_PREFIX)) {
-			clean[key] = value;
+			setEntry(clean, key, value);
 			continue;
 		}
 		const text = headerText(value);
@@ -207,7 +220,7 @@ export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHead
 			warn(`Dropping header argument "${key}" from a tool call: ${reason}`);
 			continue;
 		}
-		clean[key] = value;
+		setEntry(clean, key, value);
 	}
 	return clean;
 }

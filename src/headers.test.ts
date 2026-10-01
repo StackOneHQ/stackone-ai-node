@@ -1,9 +1,11 @@
 import {
+	buildRequestHeaders,
 	declaredHeaders,
 	normalizeHeaders,
 	sanitiseHeaderArguments,
 	sanitiseHeaders,
 } from './headers';
+import type { JsonObject } from './types';
 
 describe('normalizeHeaders', () => {
 	it('returns empty object for undefined input', () => {
@@ -241,5 +243,43 @@ describe('sanitiseHeaderArguments', () => {
 		};
 		expect(sanitiseHeaderArguments(args, declared)).toEqual(args);
 		expect(console.warn).not.toHaveBeenCalled();
+	});
+});
+
+// Assigning to `__proto__` sets the prototype, so each of these once dropped the entry.
+describe('an entry named __proto__', () => {
+	const withProto = (rest: string) => JSON.parse(`{"__proto__":"p",${rest}}`) as JsonObject;
+
+	it('is kept as an own key by sanitiseHeaderArguments', () => {
+		const clean = sanitiseHeaderArguments(withProto('"constructor":"c","q":1'), {
+			nested: new Set(),
+			flat: new Set(),
+		});
+		expect(Object.entries(clean)).toEqual([
+			['__proto__', 'p'],
+			['constructor', 'c'],
+			['q', 1],
+		]);
+		expect(JSON.stringify(clean)).toBe('{"__proto__":"p","constructor":"c","q":1}');
+	});
+
+	it('is kept by normalizeHeaders and an open sanitiseHeaders', () => {
+		expect(Object.entries(normalizeHeaders(withProto('"x":1')))).toEqual([
+			['__proto__', 'p'],
+			['x', '1'],
+		]);
+		expect(Object.entries(sanitiseHeaders(withProto('"x":"1"'), 'any'))).toEqual([
+			['__proto__', 'p'],
+			['x', '1'],
+		]);
+	});
+
+	it('is kept by buildRequestHeaders', () => {
+		const headers = buildRequestHeaders({
+			apiKey: 'k',
+			extraHeaders: JSON.parse('{"__proto__":"p"}') as Record<string, string>,
+		});
+		expect(Object.hasOwn(headers, '__proto__')).toBe(true);
+		expect(Object.getPrototypeOf(headers)).toBe(Object.prototype);
 	});
 });

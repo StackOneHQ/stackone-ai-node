@@ -322,6 +322,18 @@ describe('StackOneMcpTool as an action tool', () => {
 		});
 	});
 
+	// `clean[key] = value` with the key `__proto__` sets the prototype, so the argument vanished
+	// from the request. Python sends it.
+	it('sends an argument named __proto__ like any other', async () => {
+		await actionTool().execute('{"__proto__":"p","constructor":"c","q":1}');
+
+		expect(Object.entries(calls[0]?.arguments ?? {})).toEqual([
+			['__proto__', 'p'],
+			['constructor', 'c'],
+			['q', 1],
+		]);
+	});
+
 	it('sends flat_prefixed arguments verbatim too', async () => {
 		const args = { path_id: '7', 'headers_x-trace': 't-1' };
 		await actionTool({

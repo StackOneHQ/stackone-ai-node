@@ -256,6 +256,24 @@ describe('execute()', () => {
 		expect(Object.keys(call?.arguments ?? {}).at(-1)).toBe('action_id');
 	});
 
+	it('keeps an argument named __proto__ while pinning action_id and session_id', async () => {
+		const { calls } = serveMock();
+
+		await newToolSet().execute(
+			'mock_list_items',
+			JSON.parse('{"__proto__":"p","constructor":"c","action_id":"other","q":1}') as JsonObject,
+			{ sessionId: 'real' },
+		);
+
+		expect(Object.entries(calls[0]?.arguments ?? {})).toEqual([
+			['__proto__', 'p'],
+			['constructor', 'c'],
+			['q', 1],
+			['session_id', 'real'],
+			['action_id', 'mock_list_items'],
+		]);
+	});
+
 	it('sends no session_id when none is given', async () => {
 		const { calls } = serveMock();
 		await newToolSet().execute('mock_list_items');
