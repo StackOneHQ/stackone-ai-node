@@ -885,7 +885,8 @@ export class StackOneToolSet {
 	 * });
 	 * ```
 	 *
-	 * @throws ToolSetConfigError If `toolNames` is not a list, or `accountIds` holds an empty id.
+	 * @throws ToolSetConfigError If `toolNames` is not a list, `sessionId` is empty or not a string,
+	 *   or `accountIds` holds an empty id.
 	 * @throws ToolSetLoadError If feedback is not enabled for this project.
 	 */
 	async submitFeedback(options: SubmitFeedbackOptions): Promise<JsonObject> {
@@ -897,6 +898,11 @@ export class StackOneToolSet {
 		}
 		if (!Array.isArray(toolNames)) {
 			throw new ToolSetConfigError('toolNames must be an array of tool names');
+		}
+		if (sessionId !== undefined && (typeof sessionId !== 'string' || !sessionId)) {
+			throw new ToolSetConfigError(
+				`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
+			);
 		}
 
 		// One account, one tools/call: the tool is global, so every account's copy records the same

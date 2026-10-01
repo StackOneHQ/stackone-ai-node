@@ -519,6 +519,19 @@ describe('submitFeedback()', () => {
 		);
 	});
 
+	it.each([
+		['an empty string', ''],
+		['a number', 42],
+	])('rejects %s as sessionId, as execute() does, before any round trip', async (_name, bad) => {
+		const error = await newToolSet({ accountId: 'acc1' })
+			.submitFeedback({ rating: 'positive', toolNames: ['a'], sessionId: bad as never })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetConfigError);
+		expect((error as Error).message).toMatch(/sessionId must be a non-empty string/);
+		expect(listMock).not.toHaveBeenCalled();
+	});
+
 	it('links search, execute and feedback with one session id', async () => {
 		const { calls } = serveMock({ submitFeedback: true });
 		const toolset = newToolSet();
