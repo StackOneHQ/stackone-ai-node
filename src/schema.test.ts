@@ -60,6 +60,15 @@ describe('toolParametersFromInputSchema', () => {
 });
 
 describe('foldRootComposition', () => {
+	it('keeps a branch property named __proto__', () => {
+		const schema = JSON.parse(
+			'{"type":"object","anyOf":[{"properties":{"__proto__":{"type":"string"},"q":{"type":"string"}}}]}',
+		) as JSONSchema;
+		const folded = foldRootComposition(schema);
+		expect(Object.keys(folded.properties ?? {})).toEqual(['__proto__', 'q']);
+		expect(Object.getPrototypeOf(folded.properties)).toBe(Object.prototype);
+	});
+
 	it('leaves a schema without root combinators untouched', () => {
 		const schema: JSONSchema = { type: 'object', properties: { a: { type: 'string' } } };
 		expect(foldRootComposition(schema)).toBe(schema);

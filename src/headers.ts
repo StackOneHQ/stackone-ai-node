@@ -1,6 +1,7 @@
 import { USER_AGENT } from './consts';
 import type { JsonObject, JsonValue } from './types';
 import { warn } from './utils/logger';
+import { setEntry } from './utils/set-entry';
 
 /**
  * Header names the SDK owns. They are applied after every other header is merged, so neither a
@@ -11,19 +12,6 @@ const SDK_OWNED_HEADERS = ['authorization', 'x-account-id', 'user-agent'] as con
 
 const isPlainObject = (value: unknown): value is JsonObject =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
-
-/**
- * Set `key` on `target` as an own, enumerable property. Plain assignment with the key
- * `__proto__` replaces the prototype instead, so the entry would vanish from the request.
- */
-function setEntry<T>(target: Record<string, T>, key: string, value: T): void {
-	Object.defineProperty(target, key, {
-		value,
-		enumerable: true,
-		writable: true,
-		configurable: true,
-	});
-}
 
 /** Whether a caller-supplied header name is one the SDK owns and will override. */
 export function isSdkOwnedHeader(name: string): boolean {

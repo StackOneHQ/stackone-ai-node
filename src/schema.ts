@@ -6,6 +6,7 @@
  * outright — and those adjustments are made on a copy, per adapter, never on the tool itself.
  */
 import type { JSONSchema, JsonSchemaProperties, ToolParameters } from './types';
+import { setEntry } from './utils/set-entry';
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -87,7 +88,7 @@ export function foldRootComposition(schema: JSONSchema): JSONSchema {
 			}
 			for (const [name, definition] of Object.entries(branch.properties ?? {})) {
 				if (!Object.hasOwn(properties, name)) {
-					properties[name] = definition;
+					setEntry(properties, name, definition);
 				}
 			}
 			if (keyword === 'allOf') {
