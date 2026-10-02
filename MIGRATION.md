@@ -207,9 +207,9 @@ const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID
 
 **An empty account id throws.** `accountId: ''`, or an empty string in `accountIds`, `execute.accountIds`, `setAccounts()` or a call's `accountIds`, now throws `ToolSetConfigError`. In 2.x an empty `accountId` fell back to `STACKONE_ACCOUNT_ID` or discovery; in 3.0 that would silently widen the toolset to every active account. So `accountId: process.env.STACKONE_ACCOUNT_ID` throws when the variable is set but empty (`STACKONE_ACCOUNT_ID=` in a `.env` file, for example): pass `process.env.STACKONE_ACCOUNT_ID || undefined`, as above.
 
-**Listings are merged in sorted account order.** When two accounts serve the same tool name, `getTool()` returns the first one listed — now the one on the lowest account id, where 2.x followed the order you passed. A warning names the clashing tools. Pass `accountIds` to choose the account yourself.
+**Listings are merged in sorted account order.** When two accounts serve the same tool name, `getTool()` returns the first one listed — now the one on the lowest account id, where 2.x followed the order you passed — and so do `executeOpenAIToolCalls()` and every adapter (`toOpenAI()`, `toAISDK()`, `toClaudeAgentSdk()` and the rest), which build one tool per name. A warning names the clashing tools. Pass `accountIds` to choose the account yourself.
 
-**`fetchTools()` returns fresh tool instances on every call**, never the cached `Tools`, so `setAccountId()` on one tool no longer changes what later callers get. An account whose listing fails is skipped with a warning, unless every account fails.
+**`fetchTools()` returns fresh tool instances on every call**, never the cached `Tools`, so `setAccountId()` on one tool no longer changes what later callers get. An account whose listing fails is skipped with a warning, and left out of the cached catalog for 30 seconds, unless every account fails: then the accounts' shared `StackOneAPIError` is thrown when they all failed with one status, and otherwise a `ToolSetLoadError` with each account's error as its `cause`.
 
 ## Feedback
 

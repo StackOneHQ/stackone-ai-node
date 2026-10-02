@@ -326,10 +326,11 @@ await toolset.submitFeedback({
 	feedback: 'Needed two calls to find the right action',
 	category: 'search', // optional
 	sessionId: best.session_id, // optional: links the feedback to that search
+	actionRunId: 'run_123', // optional: the action run the feedback is about
 });
 ```
 
-`submitFeedback()` makes exactly one call, on the first account: the first of its `accountIds` when given, otherwise the first the toolset is configured with or discovers. The SDK never builds a feedback tool itself: if the server does not serve it, `submitFeedback()` throws a `ToolSetLoadError` saying feedback is not enabled for the project.
+`submitFeedback()` makes exactly one call, on the account with the lowest id among its `accountIds` when given, otherwise among those the toolset is configured with or discovers. The SDK never builds a feedback tool itself: if the server does not serve it, `submitFeedback()` throws a `ToolSetLoadError` saying feedback is not enabled for the project.
 
 ### Tool modes
 

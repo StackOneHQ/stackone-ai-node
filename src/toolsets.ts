@@ -970,10 +970,10 @@ export class StackOneToolSet {
 		const finalists = matches.filter((tool) => connectorOf(tool, suffix).length === longest);
 		const [tool] = finalists as [StackOneTool, ...StackOneTool[]];
 		if (finalists.length > 1) {
-			// The same provider linked twice. Picking one silently would run the action against an
-			// account the caller never chose.
-			warn(
-				`${JSON.stringify(actionId)} matches ${finalists.length} connectors (${finalists.map((t) => t.name).join(', ')}); using ${tool.name}. Pass account ids to choose.`,
+			// The same provider linked twice, which discovery makes common. Picking one would run the
+			// action against an account the caller never chose — another end user's, possibly.
+			throw new ToolSetConfigError(
+				`${JSON.stringify(actionId)} matches ${finalists.length} connectors (${finalists.map((t) => t.name).join(', ')}). Pass account ids to choose — a search hit's account_id names its account.`,
 			);
 		}
 
@@ -1001,8 +1001,8 @@ export class StackOneToolSet {
 	 * feedback is enabled for the project, and a client-side stand-in would report success for
 	 * feedback that went nowhere. Unset optional fields are omitted, never sent as null.
 	 *
-	 * Makes exactly one `tools/call`, on the first account: the first of `accountIds` when given,
-	 * otherwise the toolset's first, otherwise the first active account `GET /accounts` lists.
+	 * Makes exactly one `tools/call`, on the account with the lowest id among those the call is
+	 * scoped to: `accountIds` when given, otherwise the toolset's, otherwise every active one.
 	 *
 	 * @example
 	 * ```typescript
@@ -1021,7 +1021,15 @@ export class StackOneToolSet {
 	 * @throws ToolSetLoadError If feedback is not enabled for this project.
 	 */
 	async submitFeedback(options: SubmitFeedbackOptions): Promise<ActionResult> {
-		const { rating, toolNames, feedback, category, sessionId, source = 'model' } = options;
+		const {
+			rating,
+			toolNames,
+			feedback,
+			category,
+			sessionId,
+			actionRunId,
+			source = 'model',
+		} = options;
 		if (typeof (toolNames as unknown) === 'string') {
 			throw new ToolSetConfigError(
 				`toolNames must be a list of tool names, not a string. Did you mean [${JSON.stringify(toolNames)}]?`,
@@ -1037,10 +1045,10 @@ export class StackOneToolSet {
 		}
 
 		// One account, one tools/call: the tool is global, so every account's copy records the same
-		// feedback, and calling each would record it once per account. The first account, in the
-		// order given, is the one a caller can predict. search_execute lists two meta tools per
-		// connector where individual mode lists every action.
-		const accountIds = (await this.#accountsInOrder(options.accountIds)).slice(0, 1);
+		// feedback, and calling each would record it once per account. The lowest id is the one a
+		// caller can predict, whatever order GET /accounts lists them in. search_execute lists two
+		// meta tools per connector where individual mode lists every action.
+		const accountIds = (await this.#resolveAccountScope(options.accountIds)).slice(0, 1);
 		const tool = (await this.fetchTools({ accountIds, mode: 'search_execute' })).getTool(
 			SUBMIT_FEEDBACK_TOOL_NAME,
 		);
@@ -1051,7 +1059,13 @@ export class StackOneToolSet {
 		}
 
 		const args: JsonObject = { rating, tool_names: [...toolNames] };
-		const optional = { feedback, category, session_id: sessionId, source };
+		const optional = {
+			feedback,
+			category,
+			session_id: sessionId,
+			action_run_id: actionRunId,
+			source,
+		};
 		for (const [key, value] of Object.entries(optional)) {
 			if (value !== undefined && value !== null) {
 				args[key] = value;

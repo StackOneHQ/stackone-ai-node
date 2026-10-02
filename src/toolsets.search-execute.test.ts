@@ -561,7 +561,7 @@ describe('submitFeedback()', () => {
 	});
 
 	// The tool is global, so one call per account would record the same verdict once per account.
-	it('lists search_execute and calls once, on the first of the given accounts', async () => {
+	it('lists search_execute and calls once, on the lowest of the given accounts', async () => {
 		const { calls } = serveMock({
 			accountTools: { acc1: [], acc2: [] },
 			submitFeedback: true,
@@ -577,11 +577,11 @@ describe('submitFeedback()', () => {
 			`${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
 		]);
 		expect(calls.map((call) => [call.name, call.accountId, call.toolMode])).toEqual([
-			['stackone_submit_feedback', 'acc2', 'search_execute'],
+			['stackone_submit_feedback', 'acc1', 'search_execute'],
 		]);
 	});
 
-	it('calls on the first account GET /accounts lists, not the first by id', async () => {
+	it('calls on the lowest account id, not the first GET /accounts lists', async () => {
 		const { calls } = serveMock({
 			accountTools: { zeta: [], alpha: [] },
 			submitFeedback: true,
@@ -599,8 +599,19 @@ describe('submitFeedback()', () => {
 		await newToolSet().submitFeedback({ rating: 'positive', toolNames: ['x'] });
 
 		expect(calls.map((call) => [call.name, call.accountId])).toEqual([
-			['stackone_submit_feedback', 'zeta'],
+			['stackone_submit_feedback', 'alpha'],
 		]);
+	});
+
+	it('sends actionRunId as action_run_id, only when given', async () => {
+		const { calls } = serveMock({ submitFeedback: true });
+		const toolset = newToolSet({ accountId: 'acc1' });
+
+		await toolset.submitFeedback({ rating: 'positive', toolNames: ['a'], actionRunId: 'run-1' });
+		await toolset.submitFeedback({ rating: 'positive', toolNames: ['a'] });
+
+		expect(calls.map((call) => call.arguments.action_run_id)).toEqual(['run-1', undefined]);
+		expect(Object.keys(calls[1]?.arguments ?? {})).not.toContain('action_run_id');
 	});
 
 	it('explains that feedback is not enabled when the server does not serve the tool', async () => {
