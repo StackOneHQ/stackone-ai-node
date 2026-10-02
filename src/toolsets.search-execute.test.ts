@@ -129,7 +129,50 @@ describe('search()', () => {
 			session_id: '',
 		}));
 		const [hit] = await newToolSet({ accountId: 'acc1' }).search('x');
-		expect(hit).toEqual({ action_id: 'a_x' });
+		expect(hit).toEqual({ action_id: 'a_x', account_id: 'acc1' });
+	});
+
+	// Without it, a caller who finds the same action on two accounts cannot choose between them.
+	it('tags every hit with the account that found it, one hit per account', async () => {
+		fakeMetaTools(['linear_acc1_search_actions', 'linear_acc2_search_actions'], (tool) => ({
+			actions: [
+				{
+					action_id: 'linear_list_issues',
+					similarity_score: tool.name.includes('acc1') ? 0.5 : 0.9,
+					account_id: 'spoofed',
+				},
+			],
+		}));
+
+		const hits = await newToolSet({ accountIds: ['acc1', 'acc2'] }).search('x');
+
+		expect(hits).toEqual([
+			{ action_id: 'linear_list_issues', similarity_score: 0.9, account_id: 'acc2' },
+			{ action_id: 'linear_list_issues', similarity_score: 0.5, account_id: 'acc1' },
+		]);
+	});
+
+	// top_k is per connector on the wire; 2.x's topK capped the whole result, and so does this.
+	it('cuts the merged ranking to topK, keeping the best across connectors', async () => {
+		const perConnector: Record<string, JsonObject[]> = {
+			a_acc1_search_actions: [
+				{ action_id: 'a_1', similarity_score: 0.8 },
+				{ action_id: 'a_2', similarity_score: 0.1 },
+			],
+			b_acc1_search_actions: [
+				{ action_id: 'b_1', similarity_score: 0.9 },
+				{ action_id: 'b_2', similarity_score: 0.2 },
+			],
+			c_acc1_search_actions: [{ action_id: 'c_1', similarity_score: 0.7 }],
+		};
+		const calls = fakeMetaTools(Object.keys(perConnector), (tool) => ({
+			actions: perConnector[tool.name] ?? [],
+		}));
+
+		const hits = await newToolSet({ accountId: 'acc1' }).search('x', { topK: 2 });
+
+		expect(hits.map((hit) => hit.action_id)).toEqual(['b_1', 'a_1']);
+		expect(calls.map((call) => call.args.top_k)).toEqual([2, 2, 2]);
 	});
 
 	it('ranks results across connectors rather than concatenating them, tolerating bad scores', async () => {

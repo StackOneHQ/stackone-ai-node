@@ -143,7 +143,7 @@ export interface FetchToolsOptions {
  * Options for {@link StackOneToolSet.search}.
  */
 export interface SearchOptions {
-	/** Maximum results per connector, 1–50. Default: 10. */
+	/** Maximum results, 1–50, across every connector searched. Default: 10. */
 	topK?: number;
 	/**
 	 * Restrict to these accounts. Defaults to the toolset's accounts, then every active one.
@@ -831,9 +831,11 @@ export class StackOneToolSet {
 	 * skipped.
 	 *
 	 * @param query What you want to do, e.g. "list recent comments".
-	 * @returns Actions carrying at least `action_id`, best first, each with the
-	 *   `session_id` of the search that found it when the server issued one. Pass it to
-	 *   {@link execute} and {@link submitFeedback} to link the calls.
+	 * @returns At most `topK` actions, best first across every connector, each carrying
+	 *   `action_id`, the `account_id` of the account whose connector found it, and the
+	 *   `session_id` of the search when the server issued one. The same action linked on two
+	 *   accounts is two hits. Pass `session_id` to {@link execute} and {@link submitFeedback} to
+	 *   link the calls, and `account_id` in `accountIds` to run the action on that account.
 	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50.
 	 * @throws StackOneAPIError With status 429 if a request is still rate limited after retries.
 	 * @throws ToolSetLoadError If every connector fails.
@@ -863,12 +865,15 @@ export class StackOneToolSet {
 			);
 			// The server returns session_id once per search, beside the actions. Results from every
 			// connector are merged and re-ranked below, so this is the last point at which a hit can
-			// still be traced to the search that produced it.
+			// still be traced to the search, and the account, that produced it.
 			const sessionId = found.session_id;
-			if (typeof sessionId !== 'string' || !sessionId) {
-				return actions;
-			}
-			return actions.map((action) => ({ ...action, session_id: sessionId }));
+			const traced = typeof sessionId === 'string' && sessionId ? { session_id: sessionId } : {};
+			const accountId = tool.getAccountId();
+			return actions.map((action) => ({
+				...action,
+				...traced,
+				...(accountId ? { account_id: accountId } : {}),
+			}));
 		};
 
 		// Fan out the way fetchTools() does: serially, a dozen connectors would cost the sum of
@@ -897,8 +902,9 @@ export class StackOneToolSet {
 
 		// Concatenating per-connector results would leave them grouped by connector, so results[0]
 		// would be the best hit of whichever connector answered first rather than the best hit
-		// overall. The server scores every action on the same scale, so rank globally.
-		return results.sort((left, right) => scoreOf(right) - scoreOf(left));
+		// overall. The server scores every action on the same scale, so rank globally, then cut to
+		// topK: each connector was asked for topK, so the merged list can hold many more.
+		return results.sort((left, right) => scoreOf(right) - scoreOf(left)).slice(0, topK);
 	}
 
 	/**
