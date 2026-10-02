@@ -165,6 +165,11 @@ jobs:
           path: sdk-conformance
           persist-credentials: false
 
+      # tests/vectors is a copy of the suite's vectors/ (scripts/sync-vectors.sh), which the unit
+      # tests run. An edit to the copy, or a pin moved without a re-copy, fails here.
+      - name: Vendored vectors match the pinned sdk-conformance
+        run: diff -r sdk/tests/vectors sdk-conformance/vectors
+
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
