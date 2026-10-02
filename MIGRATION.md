@@ -244,7 +244,7 @@ const tools = (await toolset.fetchTools()).filter(
 );
 ```
 
-`submitFeedback()` throws `ToolSetLoadError` when feedback is not enabled.
+`submitFeedback()` throws `ToolSetLoadError` when feedback is not enabled. It calls the tool once, on the lowest account id in scope, and sends `actionRunId` as `action_run_id` when given.
 
 ## Errors
 

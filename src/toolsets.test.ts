@@ -13,12 +13,14 @@ import {
 	createMcpApp,
 } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
+import { FAILED_ACCOUNT_RETRY_MS } from './consts';
 import { type McpToolDefinition as ListedTool, listMcpTools } from './mcp-client';
 import { StackOneMcpTool, type StackOneTool } from './tool';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
+import { retryTiming } from './utils/fetch-retry';
 
 vi.mock('./mcp-client', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('./mcp-client')>();
@@ -522,28 +524,110 @@ describe('listing', () => {
 		);
 	});
 
-	it('treats every account failing as a failure, not an empty catalog', async () => {
+	it('treats every account failing as a failure, not an empty catalog, keeping each cause', async () => {
+		const failures = { a: new Error('boom for a'), b: new StackOneAPIError('gone', 412, null) };
 		fakeListing((request) => {
-			throw new Error(`boom for ${accountOf(request)}`);
+			throw failures[accountOf(request) as 'a' | 'b'];
 		});
-		await expect(newToolSet().fetchTools({ accountIds: ['a', 'b'] })).rejects.toThrow(
-			'No account returned tools. a: boom for a | b: boom for b',
-		);
+
+		const error = await newToolSet()
+			.fetchTools({ accountIds: ['a', 'b'] })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetLoadError);
+		expect((error as Error).message).toBe('No account returned tools. a: boom for a | b: gone');
+		expect((error as Error).cause).toBeInstanceOf(AggregateError);
+		expect(((error as Error).cause as AggregateError).errors).toEqual([failures.a, failures.b]);
 	});
 
-	it('does not cache a degraded listing', async () => {
-		let failB = true;
-		fakeListing((request) => {
-			if (accountOf(request) === 'b' && failB) {
-				throw new Error('boom');
-			}
-			return [def(`tool_${accountOf(request)}`)];
+	// A revoked key is a 401 however many accounts it has, as it is with one.
+	it('rethrows the API error when every account fails with the same status', async () => {
+		const revoked = new StackOneAPIError('revoked', 401, null);
+		fakeListing(() => {
+			throw revoked;
 		});
-		const toolset = newToolSet();
 
-		expect((await toolset.fetchTools({ accountIds: ['a', 'b'] })).length).toBe(1);
-		failB = false;
-		expect((await toolset.fetchTools({ accountIds: ['a', 'b'] })).length).toBe(2);
+		const one = await newToolSet({ accountId: 'a' })
+			.fetchTools()
+			.catch((caught: unknown) => caught);
+		const many = await newToolSet()
+			.fetchTools({ accountIds: ['a', 'b'] })
+			.catch((caught: unknown) => caught);
+
+		expect(one).toBe(revoked);
+		expect(many).toBe(revoked);
+	});
+
+	describe('an account that fails', () => {
+		let now = 0;
+		let failB = true;
+		beforeEach(() => {
+			now = 1_000;
+			failB = true;
+			vi.spyOn(retryTiming, 'now').mockImplementation(() => now);
+			fakeListing((request) => {
+				if (accountOf(request) === 'b' && failB) {
+					throw new Error('boom');
+				}
+				return [def(`tool_${accountOf(request)}`)];
+			});
+		});
+		const listedAccounts = () => listMock.mock.calls.map(([request]) => accountOf(request));
+
+		// Otherwise one broken account costs every call a re-list of every account — and the full
+		// timeout, if it hangs.
+		it('is left out of the cached catalog, without re-listing or re-warning', async () => {
+			const toolset = newToolSet();
+
+			expect(names(await toolset.fetchTools({ accountIds: ['a', 'b'] }))).toEqual(['tool_a']);
+			now += FAILED_ACCOUNT_RETRY_MS - 1;
+			expect(names(await toolset.fetchTools({ accountIds: ['a', 'b'] }))).toEqual(['tool_a']);
+
+			expect(listedAccounts()).toEqual(['a', 'b']);
+			expect(warnSpy).toHaveBeenCalledOnce();
+		});
+
+		it(`is listed again, alone, once ${FAILED_ACCOUNT_RETRY_MS}ms have passed`, async () => {
+			const toolset = newToolSet();
+			await toolset.fetchTools({ accountIds: ['a', 'b'] });
+
+			failB = false;
+			now += FAILED_ACCOUNT_RETRY_MS;
+			expect(names(await toolset.fetchTools({ accountIds: ['b', 'a'] }))).toEqual([
+				'tool_a',
+				'tool_b',
+			]);
+			expect(names(await toolset.fetchTools({ accountIds: ['a', 'b'] }))).toEqual([
+				'tool_a',
+				'tool_b',
+			]);
+			expect(listedAccounts()).toEqual(['a', 'b', 'b']);
+		});
+
+		it('is warned about again when the retry fails too, and waits another period', async () => {
+			const toolset = newToolSet();
+			await toolset.fetchTools({ accountIds: ['a', 'b'] });
+
+			now += FAILED_ACCOUNT_RETRY_MS;
+			expect(names(await toolset.fetchTools({ accountIds: ['a', 'b'] }))).toEqual(['tool_a']);
+			now += FAILED_ACCOUNT_RETRY_MS - 1;
+			await toolset.fetchTools({ accountIds: ['a', 'b'] });
+
+			expect(listedAccounts()).toEqual(['a', 'b', 'b']);
+			expect(warnSpy).toHaveBeenCalledTimes(2);
+		});
+
+		it('is forgotten by clearCatalogCache()', async () => {
+			const toolset = newToolSet();
+			await toolset.fetchTools({ accountIds: ['a', 'b'] });
+
+			failB = false;
+			toolset.clearCatalogCache();
+			expect(names(await toolset.fetchTools({ accountIds: ['a', 'b'] }))).toEqual([
+				'tool_a',
+				'tool_b',
+			]);
+		});
 	});
 
 	it('passes an SDK error through without re-wrapping it', async () => {

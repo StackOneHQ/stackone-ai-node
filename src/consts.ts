@@ -34,3 +34,10 @@ export const RATE_LIMIT_BASE_DELAY_MS = 1_000;
 
 /** Upper bound on a server-requested `Retry-After` wait. */
 export const RATE_LIMIT_MAX_DELAY_MS = 30_000;
+
+/**
+ * How long an account that failed to list tools is left out of a cached catalog before a later
+ * call tries it again. Short, so a re-linked account comes back quickly; long enough that one
+ * broken account does not cost every call a fresh round trip, or a full timeout if it hangs.
+ */
+export const FAILED_ACCOUNT_RETRY_MS = 30_000;

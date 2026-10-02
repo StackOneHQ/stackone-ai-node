@@ -2,6 +2,7 @@ import type { MergeExclusive, SimplifyDeep } from 'type-fest';
 import {
 	DEFAULT_BASE_URL,
 	DEFAULT_TIMEOUT_MS,
+	FAILED_ACCOUNT_RETRY_MS,
 	MAX_CONCURRENCY,
 	MAX_TOP_K,
 	SUBMIT_FEEDBACK_TOOL_NAME,
@@ -201,6 +202,13 @@ interface CatalogEntry {
 	endpoint: string;
 }
 
+/** A cached catalog: each healthy account's listing, and when each failing one last failed. */
+interface CachedCatalog {
+	listings: ReadonlyMap<string, readonly CatalogEntry[]>;
+	/** On {@link retryTiming}'s clock. */
+	failedAt: ReadonlyMap<string, number>;
+}
+
 const describeError = (error: unknown): string =>
 	error instanceof Error ? error.message : String(error);
 
@@ -334,7 +342,7 @@ export class StackOneToolSet {
 	 * (`setAccountId` rebinds one), so handing the same instances back on a cache hit let one
 	 * caller silently rescope every later caller's tools.
 	 */
-	readonly #catalogCache = new Map<string, readonly CatalogEntry[]>();
+	readonly #catalogCache = new Map<string, CachedCatalog>();
 	#discoveredAccountIds: string[] | undefined;
 	#discovering: Promise<string[]> | undefined;
 	/**
@@ -628,20 +636,33 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * List every scoped account's catalog, tolerating accounts that fail.
+	 * The catalog of every scoped account, from the cache where it can be.
 	 *
 	 * One unusable account must not cost the caller every other account's tools, so a failing
-	 * account is skipped with a warning — unless every account fails, which is an error rather
-	 * than an empty catalog. A 429 that outlasted its retries is not the account's fault but the
-	 * key's, so it fails the whole listing instead: skipping it would hand back a catalog missing
-	 * whichever accounts happened to be throttled. A degraded listing is not cached: the warning
-	 * fires once, and every later call would otherwise serve the short list silently for the life
-	 * of the process.
+	 * account is skipped with a warning. The healthy accounts' listings are cached all the same,
+	 * and the failed account is left out — silently — until {@link FAILED_ACCOUNT_RETRY_MS} has
+	 * passed, when the next call lists it again. Not caching at all made every call re-list every
+	 * account, and wait out the full timeout on one that hangs.
+	 *
+	 * A 429 that outlasted its retries is not the account's fault but the key's, so it fails the
+	 * whole listing instead: skipping it would hand back a catalog missing whichever accounts
+	 * happened to be throttled. When every account fails, see {@link allAccountsFailed}.
 	 */
-	async #listCatalog(
-		scope: readonly string[],
-		mode: ToolMode | undefined,
-	): Promise<CatalogEntry[]> {
+	async #catalog(scope: readonly string[], mode: ToolMode | undefined): Promise<CatalogEntry[]> {
+		const key = this.#cacheKey(scope, mode);
+		const cached = this.#catalogCache.get(key);
+		const now = retryTiming.now();
+		const due = cached
+			? [...cached.failedAt]
+					.filter(([, failedAt]) => now - failedAt >= FAILED_ACCOUNT_RETRY_MS)
+					.map(([accountId]) => accountId)
+			: scope;
+		const inScopeOrder = (listings: CachedCatalog['listings']): CatalogEntry[] =>
+			scope.flatMap((accountId) => listings.get(accountId) ?? []);
+		if (cached && due.length === 0) {
+			return inScopeOrder(cached.listings);
+		}
+
 		const generation = this.#cacheGeneration;
 		const endpoint = this.#endpoint(mode);
 		const listAccount = async (accountId: string): Promise<CatalogEntry[]> => {
@@ -656,44 +677,47 @@ export class StackOneToolSet {
 			});
 			return definitions.map((definition) => ({ definition, accountId, endpoint }));
 		};
-
-		const store = (listing: CatalogEntry[]): void => {
+		const store = (catalog: CachedCatalog): void => {
 			if (generation === this.#cacheGeneration) {
-				this.#catalogCache.set(this.#cacheKey(scope, mode), listing);
+				this.#catalogCache.set(key, catalog);
 			}
 		};
 
 		if (scope.length === 1) {
-			const listing = await listAccount(scope[0] as string);
-			store(listing);
-			return listing;
+			const accountId = scope[0] as string;
+			const listings = new Map([[accountId, await listAccount(accountId)]]);
+			store({ listings, failedAt: new Map() });
+			return inScopeOrder(listings);
 		}
 
 		const settled = await settleWithConcurrency(
-			scope,
+			due,
 			MAX_CONCURRENCY,
 			listAccount,
 			isRateLimitFailure,
 		);
-		const listing: CatalogEntry[] = [];
-		const failures: string[] = [];
+		const listings = new Map(cached?.listings);
+		const failedAt = new Map(cached?.failedAt);
+		const failures: [accountId: string, reason: unknown][] = [];
 		settled.forEach((outcome, index) => {
+			const accountId = due[index] as string;
 			if (outcome.status === 'fulfilled') {
-				listing.push(...outcome.value);
+				listings.set(accountId, outcome.value);
+				failedAt.delete(accountId);
 			} else {
-				failures.push(`${scope[index]}: ${describeError(outcome.reason)}`);
+				failures.push([accountId, outcome.reason]);
 			}
 		});
-		if (failures.length > 0 && listing.length === 0) {
-			throw new ToolSetLoadError(`No account returned tools. ${failures.join(' | ')}`);
+		if (listings.size === 0) {
+			throw allAccountsFailed(failures);
 		}
-		for (const failure of failures) {
-			warn(`Skipping account that failed to list tools — ${failure}`);
+		const failedNow = retryTiming.now();
+		for (const [accountId, reason] of failures) {
+			warn(`Skipping account that failed to list tools — ${accountId}: ${describeError(reason)}`);
+			failedAt.set(accountId, failedNow);
 		}
-		if (failures.length === 0) {
-			store(listing);
-		}
-		return listing;
+		store({ listings, failedAt });
+		return inScopeOrder(listings);
 	}
 
 	/**
@@ -725,21 +749,23 @@ export class StackOneToolSet {
 	 *
 	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
 	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff, unless that wait would outlast the
-	 * `timeout`. One still rate limited after that fails the whole call: an account that fails any other way is skipped with a warning, but a 429
-	 * never yields a partial catalog.
+	 * `timeout`. One still rate limited after that — or that times out while waiting to retry —
+	 * fails the whole call: an account that fails any other way is skipped with a warning, and
+	 * left out for the next {@link FAILED_ACCOUNT_RETRY_MS}, but a 429 never yields a partial
+	 * catalog.
 	 *
 	 * @throws ToolSetConfigError If no account is configured and none can be discovered.
-	 * @throws StackOneAPIError If the API refuses a listing (e.g. 412 for a dead account), or
-	 *   still answers 429 after the retries, on any account.
-	 * @throws ToolSetLoadError If the catalog cannot be loaded.
+	 * @throws StackOneAPIError With status 429 if any account is still rate limited after the
+	 *   retries; or with the API's status when every account fails with that same status, so a
+	 *   caller can tell a revoked key's 401 from a 429.
+	 * @throws ToolSetLoadError If the catalog cannot be loaded. When every account fails for
+	 *   differing reasons, its `cause` is an `AggregateError` of each account's error.
 	 */
 	async fetchTools(options: FetchToolsOptions = {}): Promise<Tools> {
 		try {
 			const mode = options.mode === undefined ? this.#toolMode : (options.mode ?? undefined);
 			const scope = await this.#resolveAccountScope(options.accountIds);
-			const listing =
-				this.#catalogCache.get(this.#cacheKey(scope, mode)) ??
-				(await this.#listCatalog(scope, mode));
+			const listing = await this.#catalog(scope, mode);
 
 			let seenFeedbackTool = false;
 			let tools = listing
@@ -1026,10 +1052,33 @@ export class StackOneToolSet {
 }
 
 /**
- * Two accounts on one provider serve identically named tools, and `getTool()` returns whichever
- * was listed first. OpenAI accepts duplicate function names without complaint, so nothing
- * downstream surfaces it either — the only symptom would be an action running against an
- * account the caller never chose.
+ * The error for a listing in which every account failed.
+ *
+ * When they all failed with one HTTP status, that error is rethrown as it came, so a revoked key
+ * is a 401 however many accounts it has, as it is with one. Otherwise the summary keeps every
+ * account's own error as its `cause`.
+ */
+function allAccountsFailed(failures: readonly [accountId: string, reason: unknown][]): Error {
+	const reasons = failures.map(([, reason]) => reason);
+	const [first] = reasons;
+	if (
+		first instanceof StackOneAPIError &&
+		reasons.every(
+			(reason) => reason instanceof StackOneAPIError && reason.statusCode === first.statusCode,
+		)
+	) {
+		return first;
+	}
+	return new ToolSetLoadError(
+		`No account returned tools. ${failures.map(([accountId, reason]) => `${accountId}: ${describeError(reason)}`).join(' | ')}`,
+		{ cause: new AggregateError(reasons, 'Every account failed to list tools') },
+	);
+}
+
+/**
+ * Two accounts on one provider serve identically named tools. Every lookup and adapter keeps the
+ * first one listed — the lowest account id — and drops the rest, so warn that the others are
+ * unreachable by name.
  */
 function warnOnDuplicateNames(tools: readonly StackOneTool[]): void {
 	const counts = new Map<string, number>();

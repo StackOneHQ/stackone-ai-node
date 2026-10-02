@@ -381,7 +381,7 @@ This is especially useful when you want to:
 - Focus on specific HR/CRM/ATS providers
 - Get only certain types of operations (e.g., all "list" operations)
 
-The catalog is cached per account scope and mode, so changing a filter never refetches it. Call `clearCatalogCache()` after linking or unlinking accounts.
+The catalog is cached per account scope and mode, so changing a filter never refetches it. Call `clearCatalogCache()` after linking or unlinking accounts. An account that fails to list tools is skipped with a warning and left out of the cached catalog for 30 seconds, after which the next call lists it again. If every account fails with the same HTTP status (a revoked key's 401, say), that `StackOneAPIError` is thrown; otherwise a `ToolSetLoadError` whose `cause` holds each account's error.
 
 ### Tool schemas
 
