@@ -1042,11 +1042,11 @@
                     "description": "each ignored name as given, in double quotes, joined with \", \", in the order supplied"
                 }
             },
-            "python": "(not emitted: the toolset takes no headers option yet)",
-            "node": "Ignoring headers {names}: the SDK sets them itself. Use the apiKey and accountId options instead.",
+            "python": "Ignoring headers {names}: the SDK sets them itself. Pass the API key and account ids through their own options instead.",
+            "node": "Ignoring headers {names}: the SDK sets them itself. Pass the API key and account ids through their own options instead.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
             "notes": "Emitted once at construction when the toolset's headers option names Authorization, x-account-id or User-Agent (any case, surrounding whitespace ignored). x-end-user-id is allowed in this option and is not warned about. The option's other headers go on every request, GET /accounts included, beneath the SDK's own."
         }
