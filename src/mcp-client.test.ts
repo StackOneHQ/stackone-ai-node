@@ -170,6 +170,26 @@ describe('parseToolResult', () => {
 		});
 	});
 
+	// The shape both SDKs share: every non-text part exactly as served, in order, under
+	// content_parts — not decoded, not described.
+	it('keeps image, audio and resource parts as plain JSON, in order', () => {
+		const image = { type: 'image', data: 'AAAA', mimeType: 'image/png' };
+		const audio = { type: 'audio', data: 'BBBB', mimeType: 'audio/wav' };
+		const resource = {
+			type: 'resource',
+			resource: { uri: 'file:///report.pdf', mimeType: 'application/pdf', blob: 'CCCC' },
+		};
+		const link = { type: 'resource_link', uri: 'file:///a.txt', name: 'a.txt' };
+
+		const parsed = parseToolResult(
+			{ content: [image, { type: 'text', text: '{"a":1}' }, audio, resource, link] },
+			't',
+		);
+
+		expect(parsed).toStrictEqual({ a: 1, content_parts: [image, audio, resource, link] });
+		expect(JSON.parse(JSON.stringify(parsed))).toStrictEqual(parsed);
+	});
+
 	describe('the server’s success wrapper', () => {
 		const served = (structuredContent: Record<string, unknown>) => ({
 			content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
