@@ -15,8 +15,19 @@ if [ ! -d "$source_dir" ]; then
 	echo "$source_dir does not exist" >&2
 	exit 1
 fi
+if ! git -C "$1" rev-parse --git-dir >/dev/null 2>&1; then
+	echo "$1 is not a git checkout" >&2
+	exit 1
+fi
+if [ -n "$(git -C "$1" status --porcelain --ignored -- vectors)" ]; then
+	echo "$source_dir has uncommitted or ignored-untracked changes" >&2
+	exit 1
+fi
 target_dir="$(cd "$(dirname "$0")/.." && pwd)/tests/vectors"
+tmp_dir="$target_dir.tmp"
 
+rm -rf "$tmp_dir"
+cp -R "$source_dir" "$tmp_dir"
 rm -rf "$target_dir"
-cp -R "$source_dir" "$target_dir"
+mv "$tmp_dir" "$target_dir"
 echo "Copied $source_dir to $target_dir"
