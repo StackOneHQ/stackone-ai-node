@@ -270,6 +270,58 @@
             "notes": "Seconds, written as a number: 1s, 0.5s, 60s."
         },
         {
+            "id": "mcp-rate-limit-timeout",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "MCP request to {endpoint} was rate limited (429) and timed out after {timeout}s while retrying",
+            "placeholders": {
+                "endpoint": {
+                    "format": "text",
+                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                },
+                "timeout": {
+                    "format": "seconds",
+                    "description": "the toolset's timeout"
+                }
+            },
+            "python": "MCP request to {endpoint} was rate limited (429) and timed out after {timeout}s while retrying",
+            "node": "MCP request to {endpoint} was rate limited (429) and timed out after {timeout}s while retrying",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised in place of mcp-timeout when the request that timed out was retrying a 429. Its status is 429, so a multi-account call fails with it rather than skipping the account (invariant 14)."
+        },
+        {
+            "id": "accounts-rate-limit-timeout",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "Listing accounts at {url} was rate limited (429) and timed out after {timeout}s while retrying",
+            "placeholders": {
+                "url": {
+                    "format": "text",
+                    "description": "the /accounts URL"
+                },
+                "timeout": {
+                    "format": "seconds",
+                    "description": "the toolset's timeout"
+                }
+            },
+            "python": "Listing accounts at {url} was rate limited (429) and timed out after {timeout}s while retrying",
+            "node": "Listing accounts at {url} was rate limited (429) and timed out after {timeout}s while retrying",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "GET /accounts' counterpart of mcp-rate-limit-timeout; status 429."
+        },
+        {
             "id": "mcp-http-failure",
             "kind": "error",
             "error": {

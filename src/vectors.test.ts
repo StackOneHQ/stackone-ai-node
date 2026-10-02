@@ -6,14 +6,16 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
+import { accountMcpTools, createMcpApp } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { describeMcpFailure, listMcpTools, parseToolResult } from './mcp-client';
 import { toolParametersFromInputSchema } from './schema';
 import { BaseTool, StackOneMcpTool, Tools } from './tool';
 import { StackOneToolSet } from './toolsets';
 import type { JsonObject } from './types';
+import type { StackOneAPIError } from './utils/error-stackone-api';
 import { fetchWithRetry, rateLimitDelayMs, retryAfterMs, waitsForRetry } from './utils/fetch-retry';
 
 vi.mock('./mcp-client', async (importOriginal) => {
@@ -614,6 +616,43 @@ const emitters: Record<
 			},
 			values: { endpoint, timeout: 1.5 },
 		};
+	},
+	'mcp-rate-limit-timeout': async () => {
+		const endpoint = `${TEST_BASE_URL}/mcp`;
+		const timeout = 300;
+		let requests = 0;
+		const app = createMcpApp({ accountTools: accountMcpTools });
+		server.use(
+			http.all(endpoint, async ({ request }) => {
+				if (requests++ === 0) {
+					return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
+				}
+				await delay('infinite');
+				return app.fetch(request);
+			}),
+		);
+		const error = await errorOf(() =>
+			realListMcpTools({ endpoint, headers: { 'x-account-id': 'acc-1' }, timeout }),
+		);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+		return { emitted: { error }, values: { endpoint, timeout: timeout / 1_000 } };
+	},
+	'accounts-rate-limit-timeout': async () => {
+		const url = `${TEST_BASE_URL}/accounts`;
+		const timeout = 300;
+		let requests = 0;
+		server.use(
+			http.get(url, async () => {
+				if (requests++ === 0) {
+					return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
+				}
+				await delay('infinite');
+				return HttpResponse.json([]);
+			}),
+		);
+		const error = await errorOf(() => newToolSet({ timeout }).fetchAccounts());
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+		return { emitted: { error }, values: { url, timeout: timeout / 1_000 } };
 	},
 	'mcp-http-failure': async () => {
 		const endpoint = `${TEST_BASE_URL}/mcp`;
