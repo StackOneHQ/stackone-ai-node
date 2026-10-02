@@ -10,6 +10,7 @@ import { type RecordedToolCall, accountMcpTools, createMcpApp } from '../mocks/m
 import { server } from '../mocks/node';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';
+import { ToolSetLoadError } from './utils/error-toolset';
 import { retryTiming } from './utils/fetch-retry';
 
 const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {}) =>
@@ -360,6 +361,44 @@ describe('a timeout while a 429 is retried', () => {
 		expect(error).toBeInstanceOf(StackOneAPIError);
 		expect((error as StackOneAPIError).statusCode).toBe(429);
 		expect(requests).toBe(2);
+	});
+});
+
+describe('a 429 that clears on retry, followed by an unrelated timeout', () => {
+	// A 429 retried successfully must not taint a later, unrelated timeout in the same session:
+	// that would report an ordinary timeout as a 429, which fails a multi-account call that
+	// should instead have skipped the one slow account.
+	it('reports the later timeout as an ordinary timeout, not a 429', async () => {
+		const app = createMcpApp({ accountTools: accountMcpTools });
+		let initializeAttempts = 0;
+		server.use(
+			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+				const message =
+					request.method === 'POST'
+						? ((await request.clone().json()) as { method?: string })
+						: undefined;
+				if (message?.method === 'initialize' && initializeAttempts++ === 0) {
+					return HttpResponse.json(RATE_LIMITED, {
+						status: 429,
+						headers: { 'Retry-After': '0' },
+					});
+				}
+				if (message?.method === 'tools/list') {
+					await delay('infinite');
+				}
+				return app.fetch(request);
+			}),
+		);
+
+		const error = await newToolSet({ timeout: 300 })
+			.fetchTools({ accountIds: ['acc1'] })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetLoadError);
+		expect(error).not.toBeInstanceOf(StackOneAPIError);
+		expect((error as Error).message).toBe(
+			`MCP request to ${TEST_BASE_URL}/mcp timed out after 0.3s`,
+		);
 	});
 });
 

@@ -129,18 +129,24 @@ async function withMcpSession<T>(
 	work: (client: Client) => Promise<T>,
 ): Promise<T> {
 	const expiresAt = retryTiming.now() + timeout;
+	// Whether the request currently in flight is waiting out a 429, reset at the start of every
+	// request the transport sends: a 429 retried successfully on an earlier request (the
+	// handshake, say) must not make a later, unrelated timeout (on `tools/list`, say) look like
+	// a rate limit too.
 	let rateLimited = false;
 	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
 		requestInit: { headers },
 		// Every request the client sends, handshake included, so it never sees a 429 it could
 		// have waited out — but never one that would outlast the session's deadline.
-		fetch: (url, init) =>
-			fetchWithRetry(url, init, {
+		fetch: (url, init) => {
+			rateLimited = false;
+			return fetchWithRetry(url, init, {
 				deadline: expiresAt,
 				onRetry: () => {
 					rateLimited = true;
 				},
-			}),
+			});
+		},
 	});
 	const client = new Client({ name: 'stackone-ai-node', version });
 	let timer: ReturnType<typeof setTimeout> | undefined;
