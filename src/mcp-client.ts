@@ -77,7 +77,8 @@ export function describeMcpFailure(error: unknown, endpoint: string, timeout: nu
 		error instanceof McpDeadlineError ||
 		(error instanceof McpError && error.code === ErrorCode.RequestTimeout)
 	) {
-		return new ToolSetLoadError(`MCP request to ${endpoint} timed out after ${timeout}ms`, {
+		// In seconds, written as a number (0.5s, 60s), as the Python SDK writes it.
+		return new ToolSetLoadError(`MCP request to ${endpoint} timed out after ${timeout / 1000}s`, {
 			cause: error,
 		});
 	}
@@ -235,7 +236,7 @@ export function parseToolResult(result: Record<string, unknown>, name: string): 
 
 	if (result.isError === true) {
 		throw new StackOneAPIError(
-			`Tool "${name}" failed: ${payload || JSON.stringify(parsed)}`,
+			`Tool ${JSON.stringify(name)} failed: ${payload || JSON.stringify(parsed)}`,
 			statusOf(parsed),
 			parsed,
 		);

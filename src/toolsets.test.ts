@@ -61,7 +61,9 @@ describe('configuration', () => {
 	it('requires an API key', () => {
 		vi.stubEnv('STACKONE_API_KEY', '');
 		expect(() => new StackOneToolSet()).toThrow(ToolSetConfigError);
-		expect(() => new StackOneToolSet()).toThrow(/API key must be provided/);
+		expect(() => new StackOneToolSet()).toThrow(
+			'An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable',
+		);
 	});
 
 	it('reads the API key from STACKONE_API_KEY', async () => {
@@ -95,7 +97,29 @@ describe('configuration', () => {
 		['setAccounts', () => newToolSet().setAccounts('acc1' as never)],
 		['fetchTools', () => newToolSet().fetchTools({ accountIds: 'acc1' as never })],
 	])('refuses a string where %s expects a list', async (_name, act) => {
-		await expect(async () => act()).rejects.toThrow(/not a string. Did you mean \["acc1"\]\?/);
+		await expect(async () => act()).rejects.toThrow(
+			new ToolSetConfigError(
+				'accountIds must be a list of account ids, not a string. Did you mean ["acc1"]?',
+			),
+		);
+	});
+
+	it.each([
+		['accountIds', () => newToolSet({ accountIds: [1] as never })],
+		['setAccounts', () => newToolSet().setAccounts({ id: 'acc1' } as never)],
+		['fetchTools', () => newToolSet().fetchTools({ accountIds: 5 as never })],
+	])('refuses a non-list or non-string ids in %s', async (_name, act) => {
+		await expect(async () => act()).rejects.toThrow(
+			new ToolSetConfigError('accountIds must be a list of account id strings'),
+		);
+	});
+
+	it('treats accountIds: null as not given', async () => {
+		const toolset = newToolSet({ accountIds: null });
+		expect(names(await toolset.setAccounts(null).fetchTools({ accountIds: null }))).toEqual([
+			'default_tool_1',
+			'default_tool_2',
+		]);
 	});
 
 	it.each([
@@ -273,7 +297,7 @@ describe('account discovery', () => {
 		server.use(http.get(`${TEST_BASE_URL}/accounts`, () => HttpResponse.json([])));
 		await expect(newToolSet().fetchTools()).rejects.toThrow(
 			new ToolSetConfigError(
-				'This API key has no linked accounts. Link one in the StackOne dashboard, or pass accountId explicitly.',
+				'This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.',
 			),
 		);
 	});
@@ -308,7 +332,7 @@ describe('account discovery', () => {
 		[
 			'a non-list body',
 			HttpResponse.json({ results: [{ id: 'a' }] }),
-			/Unexpected \/accounts response shape: expected a list, got object/,
+			/^Unexpected \/accounts response shape: expected a list, got object$/,
 		],
 		[
 			'invalid JSON',
@@ -723,8 +747,8 @@ describe('duplicate tool names', () => {
 
 		expect(tools.length).toBe(4);
 		expect((tools.getTool('hibob_list_employees') as StackOneTool).getAccountId()).toBe('a');
-		expect(String(warnSpy.mock.calls[0]?.[0])).toContain(
-			'2 tool name(s) are served by more than one account (hibob_get_employee, hibob_list_employees)',
+		expect(String(warnSpy.mock.calls[0]?.[0])).toBe(
+			'[@stackone/ai] 2 tool name(s) are served by more than one account (hibob_get_employee, hibob_list_employees). Looking a tool up by name returns the first one listed — pass account ids to choose.',
 		);
 	});
 

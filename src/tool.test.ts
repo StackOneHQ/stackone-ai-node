@@ -77,7 +77,9 @@ const simpleTool = () =>
 describe('BaseTool', () => {
 	it('cannot execute on its own', async () => {
 		await expect(simpleTool().execute({ id: '1' })).rejects.toThrow(
-			'Tool "test_tool" has no executor',
+			new StackOneError(
+				'Tool "test_tool" has no executor. Override execute() to run a hand-built tool.',
+			),
 		);
 	});
 
@@ -411,7 +413,9 @@ describe('StackOneMcpTool as an action tool', () => {
 
 	it('rejects a non-object, non-string argument', async () => {
 		// @ts-expect-error - intentionally passing an invalid type
-		await expect(actionTool().execute(12345)).rejects.toThrow(ToolArgumentsError);
+		await expect(actionTool().execute(12345)).rejects.toThrow(
+			new ToolArgumentsError('Tool arguments for "crm_update_contact" must be a JSON object'),
+		);
 	});
 
 	it.each([

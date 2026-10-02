@@ -297,11 +297,11 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
 	}
 	if (typeof accountIds === 'string') {
 		throw new ToolSetConfigError(
-			`${parameter} must be an array of account ids, not a string. Did you mean ["${accountIds}"]?`,
+			`${parameter} must be a list of account ids, not a string. Did you mean [${JSON.stringify(accountIds)}]?`,
 		);
 	}
 	if (!Array.isArray(accountIds) || accountIds.some((id) => typeof id !== 'string')) {
-		throw new ToolSetConfigError(`${parameter} must be an array of account id strings`);
+		throw new ToolSetConfigError(`${parameter} must be a list of account id strings`);
 	}
 	// An empty id would be sent with no x-account-id, so reject it rather than let the server
 	// answer for an account nobody chose.
@@ -369,7 +369,7 @@ export class StackOneToolSet {
 		const apiKey = config.apiKey || process.env.STACKONE_API_KEY;
 		if (!apiKey) {
 			throw new ToolSetConfigError(
-				'API key must be provided either through the apiKey option or the STACKONE_API_KEY environment variable',
+				'An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable',
 			);
 		}
 
@@ -478,7 +478,7 @@ export class StackOneToolSet {
 			// Carry the status, so a caller can tell a 401 from a 429.
 			const text = new TextDecoder().decode(bytes).trim();
 			throw new StackOneAPIError(
-				`Listing accounts at ${url} failed with ${response.status} ${response.statusText}: ${text}`,
+				`${`Listing accounts at ${url} failed with ${response.status} ${response.statusText}`.trimEnd()}: ${text}`,
 				response.status,
 				text,
 			);
@@ -498,7 +498,7 @@ export class StackOneToolSet {
 				: body;
 		if (!Array.isArray(accounts)) {
 			throw new ToolSetLoadError(
-				`Unexpected /accounts response shape: expected a list, got ${accounts === null ? 'null' : typeof accounts}`,
+				`Unexpected /accounts response shape: expected a list, got ${jsonType(accounts)}`,
 			);
 		}
 		return accounts as StackOneAccount[];
@@ -544,14 +544,14 @@ export class StackOneToolSet {
 		if (active.length === 0) {
 			if (accounts.length === 0) {
 				throw new ToolSetConfigError(
-					'This API key has no linked accounts. Link one in the StackOne dashboard, or pass accountId explicitly.',
+					'This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.',
 				);
 			}
 			const listed = accounts
 				.map((account) => `${String(account?.provider)} (${String(account?.status)})`)
 				.join(', ');
 			throw new ToolSetConfigError(
-				`None of this API key's ${accounts.length} linked accounts are active: ${listed}. Re-link them in the StackOne dashboard, or pass accountId explicitly.`,
+				`None of this API key's ${accounts.length} linked accounts are active: ${listed}. Re-link them in the StackOne dashboard, or pass an account id explicitly.`,
 			);
 		}
 		if (generation === this.#cacheGeneration) {
@@ -877,9 +877,7 @@ export class StackOneToolSet {
 			);
 		}
 		if (args !== undefined && !isPlainObject(args)) {
-			throw new ToolSetConfigError(
-				`arguments must be a JSON object, got ${Array.isArray(args) ? 'array' : args === null ? 'null' : typeof args}`,
-			);
+			throw new ToolSetConfigError(`arguments must be a JSON object, got ${jsonType(args)}`);
 		}
 		const { sessionId } = options;
 		if (sessionId != null && (typeof sessionId !== 'string' || !sessionId)) {
@@ -895,7 +893,7 @@ export class StackOneToolSet {
 		);
 		if (matches.length === 0) {
 			throw new ToolSetLoadError(
-				`No connector found for "${actionId}". Use search() to discover valid action ids.`,
+				`No connector found for ${JSON.stringify(actionId)}. Use search() to discover valid action ids.`,
 			);
 		}
 
@@ -908,7 +906,7 @@ export class StackOneToolSet {
 			// The same provider linked twice. Picking one silently would run the action against an
 			// account the caller never chose.
 			warn(
-				`"${actionId}" matches ${finalists.length} connectors (${finalists.map((t) => t.name).join(', ')}); using ${tool.name}. Pass accountIds to choose.`,
+				`${JSON.stringify(actionId)} matches ${finalists.length} connectors (${finalists.map((t) => t.name).join(', ')}); using ${tool.name}. Pass account ids to choose.`,
 			);
 		}
 
@@ -959,7 +957,7 @@ export class StackOneToolSet {
 		const { rating, toolNames, feedback, category, sessionId, source = 'model' } = options;
 		if (typeof (toolNames as unknown) === 'string') {
 			throw new ToolSetConfigError(
-				`toolNames must be an array of tool names, not a string. Did you mean ["${String(toolNames)}"]?`,
+				`toolNames must be a list of tool names, not a string. Did you mean [${JSON.stringify(toolNames)}]?`,
 			);
 		}
 		if (!Array.isArray(toolNames)) {
@@ -1013,7 +1011,7 @@ function warnOnDuplicateNames(tools: readonly StackOneTool[]): void {
 		.sort();
 	if (clashing.length > 0) {
 		warn(
-			`${clashing.length} tool name(s) are served by more than one account (${clashing.slice(0, 5).join(', ')}). getTool() will return the first one listed — pass accountIds to choose.`,
+			`${clashing.length} tool name(s) are served by more than one account (${clashing.slice(0, 5).join(', ')}). Looking a tool up by name returns the first one listed — pass account ids to choose.`,
 		);
 	}
 }

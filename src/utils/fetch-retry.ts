@@ -209,7 +209,7 @@ export async function fetchWithRetry(
 		// wait on a producer that never settles (MSW's, for one), and the retry need not wait.
 		void response.body?.cancel().catch(() => undefined);
 		warn(
-			`Rate limited (429) by ${init?.method ?? 'GET'} ${String(input)}; retrying in ${Math.round(delay)}ms (attempt ${retry + 1} of ${RATE_LIMIT_MAX_RETRIES + 1})`,
+			`${init?.method ?? 'GET'} ${String(input)} was rate limited (429) on attempt ${retry} of ${RATE_LIMIT_MAX_RETRIES + 1}; retrying in ${formatSeconds(delay)}s`,
 		);
 		if (delay > 0) {
 			await timing.sleep(delay, init?.signal);

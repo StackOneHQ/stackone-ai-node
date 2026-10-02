@@ -360,8 +360,8 @@ describe('execute()', () => {
 		await newToolSet({ accountIds: ['acc2', 'acc1'] }).execute('linear_list_issues');
 
 		expect(calls[0]?.tool).toBe('linear_acc1_execute_action');
-		expect(String(warnSpy.mock.calls[0]?.[0])).toContain(
-			'"linear_list_issues" matches 2 connectors (linear_acc1_execute_action, linear_acc2_execute_action)',
+		expect(String(warnSpy.mock.calls[0]?.[0])).toBe(
+			'[@stackone/ai] "linear_list_issues" matches 2 connectors (linear_acc1_execute_action, linear_acc2_execute_action); using linear_acc1_execute_action. Pass account ids to choose.',
 		);
 	});
 
@@ -572,7 +572,9 @@ describe('submitFeedback()', () => {
 				toolNames: 'a' as never,
 			}),
 		).rejects.toThrow(
-			/toolNames must be an array of tool names, not a string. Did you mean \["a"\]\?/,
+			new ToolSetConfigError(
+				'toolNames must be a list of tool names, not a string. Did you mean ["a"]?',
+			),
 		);
 	});
 

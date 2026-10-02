@@ -191,7 +191,7 @@ export function sanitiseHeaders(
 		const declared = allowed === 'any' || allowed.has(name.toLowerCase());
 		const reason = refuseHeader(name, value, declared);
 		if (reason) {
-			warn(`Dropping header "${name}" from a tool call: ${reason}`);
+			warn(`Dropping header ${JSON.stringify(name)} from a tool call: ${reason}`);
 			continue;
 		}
 		setEntry(clean, name, value);
@@ -220,7 +220,7 @@ export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHead
 			} else if (declared.ordinaryHeadersField) {
 				setEntry(clean, key, value);
 			} else {
-				warn('Dropping header argument "headers" from a tool call: not an object');
+				warn(`Dropping header argument ${JSON.stringify(key)} from a tool call: not an object`);
 			}
 			continue;
 		}
@@ -229,7 +229,9 @@ export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHead
 			continue;
 		}
 		if (isPlainObject(value) || Array.isArray(value)) {
-			warn(`Dropping header argument "${key}" from a tool call: not a string, number or boolean`);
+			warn(
+				`Dropping header argument ${JSON.stringify(key)} from a tool call: not a string, number or boolean`,
+			);
 			continue;
 		}
 		const text = headerText(value);
@@ -238,7 +240,7 @@ export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHead
 		}
 		const reason = refuseHeader(key.slice(FLAT_HEADER_PREFIX.length), text, declared.flat.has(key));
 		if (reason) {
-			warn(`Dropping header argument "${key}" from a tool call: ${reason}`);
+			warn(`Dropping header argument ${JSON.stringify(key)} from a tool call: ${reason}`);
 			continue;
 		}
 		setEntry(clean, key, value);

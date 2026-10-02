@@ -61,7 +61,7 @@ describe('fetchWithRetry', () => {
 		expect(seen.requests).toBe(2);
 		expect(delays).toEqual([2000]);
 		expect(warnSpy.mock.calls.map(([message]: unknown[]) => message)).toEqual([
-			`[@stackone/ai] Rate limited (429) by POST ${url}; retrying in 2000ms (attempt 2 of 4)`,
+			`[@stackone/ai] POST ${url} was rate limited (429) on attempt 1 of 4; retrying in 2s`,
 		]);
 	});
 
@@ -146,11 +146,12 @@ describe('fetchWithRetry', () => {
 			expect((await fetchWithRetry(url, undefined, { timing })).status).toBe(200);
 			expect(seen.requests).toBe(2);
 			expect(delays).toEqual([]);
-			expect(String(warnSpy.mock.calls[0]?.[0])).toContain('retrying in 0ms (attempt 2 of 4)');
+			expect(String(warnSpy.mock.calls[0]?.[0])).toBe(
+				`[@stackone/ai] GET ${url} was rate limited (429) on attempt 1 of 4; retrying in 0s`,
+			);
 		});
 
-		// Date.parse reads "1.5" and "2026-10-01" as dates, so only a value shaped like an
-		// HTTP-date may reach it. Python reads these the same way.
+		// Only the three RFC 9110 HTTP-date forms are dates. Python reads these the same way.
 		it.each([
 			'soon',
 			'1.5',

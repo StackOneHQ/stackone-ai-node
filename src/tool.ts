@@ -101,7 +101,7 @@ export class BaseTool {
 		_options?: ExecuteOptions,
 	): Promise<JsonObject> {
 		throw new StackOneError(
-			`Tool "${this.name}" has no executor. Override execute() to run a hand-built tool.`,
+			`Tool ${JSON.stringify(this.name)} has no executor. Override execute() to run a hand-built tool.`,
 		);
 	}
 
@@ -337,24 +337,21 @@ export class StackOneTool extends BaseTool {
 		if (input === undefined || input === null) {
 			return {};
 		}
-		if (typeof input !== 'string' && typeof input !== 'object') {
-			throw new ToolArgumentsError(
-				`Invalid parameters type for "${this.name}". Expected object or string, got ${typeof input}.`,
-			);
-		}
 		let parsed: unknown = input;
 		if (typeof input === 'string') {
 			try {
 				parsed = JSON.parse(input);
 			} catch (error) {
 				throw new ToolArgumentsError(
-					`Invalid JSON in arguments for "${this.name}": ${error instanceof Error ? error.message : String(error)}`,
+					`Invalid JSON in arguments for ${JSON.stringify(this.name)}: ${error instanceof Error ? error.message : String(error)}`,
 					{ cause: error },
 				);
 			}
 		}
 		if (!isPlainObject(parsed)) {
-			throw new ToolArgumentsError(`Tool arguments for "${this.name}" must be a JSON object`);
+			throw new ToolArgumentsError(
+				`Tool arguments for ${JSON.stringify(this.name)} must be a JSON object`,
+			);
 		}
 		return { ...parsed };
 	}
@@ -714,7 +711,7 @@ export class Tools implements Iterable<BaseTool> {
 			if (unsupported) {
 				result = { error: unsupported };
 			} else if (!tool) {
-				result = { error: `Unknown tool "${name}"` };
+				result = { error: `Unknown tool ${JSON.stringify(name)}` };
 			} else {
 				try {
 					result = await tool.execute(args);

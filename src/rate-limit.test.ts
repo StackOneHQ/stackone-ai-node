@@ -100,7 +100,7 @@ describe('a 429 that clears on retry', () => {
 		expect(retryWarnings()).toEqual([
 			expect.stringMatching(
 				new RegExp(
-					`^\\[@stackone/ai\\] Rate limited \\(429\\) by POST ${TEST_BASE_URL}/mcp; retrying in 0ms \\(attempt 2 of 4\\)$`,
+					`^\\[@stackone/ai\\] POST ${TEST_BASE_URL}/mcp was rate limited \\(429\\) on attempt 1 of 4; retrying in 0s$`,
 				),
 			),
 		]);
@@ -130,7 +130,7 @@ describe('a 429 that clears on retry', () => {
 		expect(await newToolSet().fetchAccounts()).toEqual(mockAccounts);
 		expect(requests).toBe(2);
 		expect(retryWarnings()).toEqual([
-			expect.stringContaining(`by GET ${TEST_BASE_URL}/accounts; retrying in 0ms (attempt 2 of 4)`),
+			`[@stackone/ai] GET ${TEST_BASE_URL}/accounts was rate limited (429) on attempt 1 of 4; retrying in 0s`,
 		]);
 	});
 });
@@ -166,9 +166,9 @@ describe('a 429 that outlasts its retries', () => {
 		expectRateLimited(error);
 		expect(attempts.matched).toBe(4);
 		expect(retryWarnings().map((message) => message.match(/attempt \d of 4/)?.[0])).toEqual([
+			'attempt 1 of 4',
 			'attempt 2 of 4',
 			'attempt 3 of 4',
-			'attempt 4 of 4',
 		]);
 	});
 

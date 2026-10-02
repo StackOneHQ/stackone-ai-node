@@ -289,7 +289,9 @@ describe('MCP timeouts', () => {
 		const error = await listMcpTools(silentRequest()).catch((caught: unknown) => caught);
 
 		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toMatch(/timed out after 300ms/);
+		expect((error as Error).message).toBe(
+			`MCP request to http://127.0.0.1:${port}/mcp timed out after 0.3s`,
+		);
 		expect(Date.now() - started).toBeLessThan(5_000);
 	});
 
