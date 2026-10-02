@@ -397,15 +397,48 @@ describe('execute()', () => {
 		expect(calls[0]?.tool).toBe('browser_linkedin_acc2_execute_action');
 	});
 
-	it('warns when the same connector is linked twice, and uses the first', async () => {
+	// Picking one would run the action on an account the caller never chose.
+	it('refuses to choose when the same connector is linked on two accounts', async () => {
 		const calls = fakeMetaTools(['linear_acc1_execute_action', 'linear_acc2_execute_action']);
 
-		await newToolSet({ accountIds: ['acc2', 'acc1'] }).execute('linear_list_issues');
+		const error = await newToolSet({ accountIds: ['acc2', 'acc1'] })
+			.execute('linear_list_issues')
+			.catch((caught: unknown) => caught);
 
-		expect(calls[0]?.tool).toBe('linear_acc1_execute_action');
-		expect(String(warnSpy.mock.calls[0]?.[0])).toBe(
-			'[@stackone/ai] "linear_list_issues" matches 2 connectors (linear_acc1_execute_action, linear_acc2_execute_action); using linear_acc1_execute_action. Pass account ids to choose.',
+		expect(error).toBeInstanceOf(ToolSetConfigError);
+		expect((error as Error).message).toMatch(
+			/^"linear_list_issues" matches 2 connectors \(linear_acc1_execute_action, linear_acc2_execute_action\)/,
 		);
+		expect(calls).toEqual([]);
+	});
+
+	it('routes to the account a search hit names', async () => {
+		const calls = fakeMetaTools(
+			[
+				'linear_acc1_search_actions',
+				'linear_acc2_search_actions',
+				'linear_acc1_execute_action',
+				'linear_acc2_execute_action',
+			],
+			(tool): JsonObject =>
+				tool.name.endsWith('_search_actions')
+					? { actions: [{ action_id: 'linear_list_issues' }] }
+					: { data: {} },
+		);
+		const toolset = newToolSet();
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json([
+					{ id: 'acc1', provider: 'linear', status: 'active' },
+					{ id: 'acc2', provider: 'linear', status: 'active' },
+				]),
+			),
+		);
+
+		const hit = (await toolset.search('x')).find((found) => found.account_id === 'acc2');
+		await toolset.execute('linear_list_issues', {}, { accountIds: [hit?.account_id as string] });
+
+		expect(calls.at(-1)?.tool).toBe('linear_acc2_execute_action');
 	});
 
 	it('matches the connector case-insensitively', async () => {

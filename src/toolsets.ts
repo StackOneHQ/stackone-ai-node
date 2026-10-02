@@ -187,10 +187,11 @@ export interface SubmitFeedbackOptions {
 	sessionId?: string | null;
 	/** Who produced the feedback. Default: `'model'`. */
 	source?: FeedbackSource;
+	/** The action run the feedback is about. Sent as `action_run_id`, only when given. */
+	actionRunId?: string;
 	/**
-	 * The feedback is sent through the first of these accounts. Defaults as for
-	 * {@link StackOneToolSet.fetchTools}, in the order given or discovered. `null` is the same as
-	 * leaving it unset.
+	 * The feedback is sent through the lowest of these account ids. Defaults as for
+	 * {@link StackOneToolSet.fetchTools}. `null` is the same as leaving it unset.
 	 */
 	accountIds?: string[] | null;
 }
@@ -925,7 +926,10 @@ export class StackOneToolSet {
 	 * @param args The action's arguments.
 	 * @param options.sessionId The `session_id` a search hit carries, to link this call to it.
 	 * @returns The action's result as the server wrote it: `{ isError: false, result, … }`.
-	 * @throws ToolSetConfigError If the arguments are malformed.
+	 * @param options.accountIds Restrict routing to these accounts. Pass a search hit's
+	 *   `account_id` to run the action on the account that found it.
+	 * @throws ToolSetConfigError If the arguments are malformed, or the action's connector is
+	 *   linked on more than one account and the call names none.
 	 * @throws ToolSetLoadError If no linked connector serves the action.
 	 * @throws StackOneAPIError If the action fails.
 	 */

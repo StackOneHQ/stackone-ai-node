@@ -86,7 +86,7 @@ const names = await toolset.searchActionNames('time off requests', { topK: 5 });
 
 // 3.0
 const toolset = new StackOneToolSet();
-const [hit] = await toolset.search('list employees', { topK: 5 }); // SearchResult[], best first
+const [hit] = await toolset.search('list employees', { topK: 5 }); // at most 5, best first
 if (!hit) throw new Error('No action matched');
 const result = await toolset.execute(
 	hit.action_id,
@@ -95,7 +95,7 @@ const result = await toolset.execute(
 );
 ```
 
-`searchTools()`, `searchActionNames()`, `getSearchTool()`, `getSearchConfig()` and `getTools()` are removed. `search()` returns plain objects carrying `action_id`, plus `description`, `similarity_score`, `input_schema`, `example_request` and `session_id` when the server sends them. `execute()` raises rather than returning `{ error }`: `ToolSetConfigError` before any request when `actionId`, `args` or `sessionId` is malformed, `ToolArgumentsError` when the arguments cannot be encoded as JSON (NaN or Infinity, a `Date`, a circular reference, for example), `ToolSetLoadError` when no linked connector serves the action, and `StackOneAPIError` when the action fails, including when the server rejects the arguments.
+`searchTools()`, `searchActionNames()`, `getSearchTool()`, `getSearchConfig()` and `getTools()` are removed. `search()` returns plain objects carrying `action_id` and the `account_id` that found it, plus `description`, `similarity_score`, `input_schema`, `example_request` and `session_id` when the server sends them. `topK` caps the whole result, as in 2.x, after ranking across every connector; the same action linked on two accounts is two hits. When an action's connector is linked on more than one account, `execute()` throws `ToolSetConfigError` unless `accountIds` picks one, such as `[hit.account_id]`. `execute()` raises rather than returning `{ error }`: `ToolSetConfigError` before any request when `actionId`, `args` or `sessionId` is malformed, `ToolArgumentsError` when the arguments cannot be encoded as JSON (NaN or Infinity, a `Date`, a circular reference, for example), `ToolSetLoadError` when no linked connector serves the action, and `StackOneAPIError` when the action fails, including when the server rejects the arguments.
 
 To give a model the search and execute tools, set the tool mode on the toolset. `openai()` no longer takes `mode`.
 

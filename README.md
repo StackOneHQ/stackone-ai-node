@@ -310,7 +310,8 @@ const result = await toolset.execute(best.action_id, best.example_request, {
 - The connector is the longest one whose name prefixes the action id, so `browser_linkedin_*` actions are not routed to `browser`.
 - `action_id` is always the one you pass: an `action_id` inside `args` — for example, one a prompt-injected model put there — is ignored.
 - Each hit carries the `session_id` of the search that found it, when the server issued one. Pass it back as `sessionId` to link the calls together.
-- `topK` is 1–50 (default 10). A connector that fails to search is skipped with a warning, unless every connector fails.
+- Each hit carries the `account_id` of the account that found it, and the same action linked on two accounts is two hits. When an action's connector is linked on more than one account, `execute()` throws `ToolSetConfigError` rather than pick one: pass the hit's account as `{ accountIds: [hit.account_id] }`.
+- `topK` (1–50, default 10) caps the whole result, after ranking across every connector. A connector that fails to search is skipped with a warning, unless every connector fails.
 
 [View full example](examples/search-and-execute.ts)
 
