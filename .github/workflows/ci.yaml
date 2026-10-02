@@ -137,10 +137,15 @@ jobs:
             echo "can-skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+  # Runs the full suite, both SDKs side by side, so a change here that the Python SDK does not
+  # match fails here rather than drifting.
   conformance:
     needs: check-secret
     if: needs.check-secret.outputs.can-skip != 'true'
     runs-on: ubuntu-latest
+    env:
+      # Switch to main once StackOneHQ/stackone-ai-python#210 merges.
+      PYTHON_SDK_REF: fix/mcp-submit-feedback
     steps:
       - name: Check conformance token is configured
         env:
@@ -163,6 +168,15 @@ jobs:
           ref: ee0bb06e6d52b1cc41bf173fd2fd236ff387cb60
           token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
           path: sdk-conformance
+          persist-credentials: false
+
+      # Public, so no token.
+      - name: Checkout Python SDK
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: StackOneHQ/stackone-ai-python
+          ref: ${{ env.PYTHON_SDK_REF }}
+          path: stackone-ai-python
           persist-credentials: false
 
       # tests/vectors is a copy of the suite's vectors/ (scripts/sync-vectors.sh), which the unit
@@ -192,6 +206,15 @@ jobs:
         working-directory: sdk
         run: pnpm run build
 
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: "3.13"
+
+      - name: Install Python SDK dependencies
+        working-directory: stackone-ai-python
+        run: uv sync --all-extras --locked
+
       - name: Install conformance dependencies
         working-directory: sdk-conformance
         run: pnpm install --frozen-lockfile
@@ -200,7 +223,8 @@ jobs:
         working-directory: sdk-conformance
         env:
           NODE_SDK_DIST: ${{ github.workspace }}/sdk/dist/index.mjs
-        run: pnpm test:node -- --strict-schema
+          PYTHON_SDK_DIR: ${{ github.workspace }}/stackone-ai-python
+        run: pnpm test -- --strict-schema
 
   # Make this the one required status check. Individually required checks go
   # missing when a job is renamed or a matrix entry is added, and nothing notices.
