@@ -144,8 +144,10 @@ jobs:
     if: needs.check-secret.outputs.can-skip != 'true'
     runs-on: ubuntu-latest
     env:
-      # Switch to main once StackOneHQ/stackone-ai-python#210 merges.
-      PYTHON_SDK_REF: fix/mcp-submit-feedback
+      # Pinned to a commit rather than the branch while StackOneHQ/stackone-ai-python#210 is
+      # open, so this only moves when we bump it deliberately. Switch to a main commit once it
+      # merges.
+      PYTHON_SDK_REF: 54322a3ad5f5bba322cf13d94d2726976e6aaba2
     steps:
       - name: Check conformance token is configured
         env:
