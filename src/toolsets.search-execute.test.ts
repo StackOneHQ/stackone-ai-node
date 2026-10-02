@@ -539,6 +539,21 @@ describe('submitFeedback()', () => {
 		);
 	});
 
+	it('treats accountIds: null as not given in search, execute and submitFeedback', async () => {
+		const { calls } = serveMock({ submitFeedback: true });
+		const toolset = newToolSet({ accountId: 'acc1' });
+
+		await toolset.search('list items', { accountIds: null });
+		await toolset.execute('mock_list_items', {}, { accountIds: null });
+		await toolset.submitFeedback({ rating: 'positive', toolNames: ['a'], accountIds: null });
+
+		expect(calls.map((call) => [call.name, call.accountId])).toEqual([
+			['mock_acc1_search_actions', 'acc1'],
+			['mock_acc1_execute_action', 'acc1'],
+			['stackone_submit_feedback', 'acc1'],
+		]);
+	});
+
 	it('refuses an empty account id rather than switch to another account', async () => {
 		const { calls } = serveMock({ submitFeedback: true });
 		const error = await newToolSet({ accountId: 'acc1' })

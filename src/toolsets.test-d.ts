@@ -39,9 +39,9 @@ test('accountId is typed as string | undefined', () => {
 	expectTypeOf<StackOneToolSetConfig['accountId']>().toEqualTypeOf<string | undefined>();
 });
 
-// Verify accountIds can be string[] or undefined
-test('accountIds is typed as string[] | undefined', () => {
-	expectTypeOf<StackOneToolSetConfig['accountIds']>().toEqualTypeOf<string[] | undefined>();
+// Verify accountIds can be string[], null or undefined
+test('accountIds is typed as string[] | null | undefined', () => {
+	expectTypeOf<StackOneToolSetConfig['accountIds']>().toEqualTypeOf<string[] | null | undefined>();
 });
 
 // A search hit's served fields are typed, so a caller needs no narrowing to read them

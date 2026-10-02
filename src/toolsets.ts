@@ -45,10 +45,11 @@ interface SingleAccountConfig {
 interface MultipleAccountsConfig {
 	/**
 	 * Array of account IDs for filtering tools across multiple accounts
-	 * When provided, tools will be fetched for all specified accounts
+	 * When provided, tools will be fetched for all specified accounts. `null` is the same as
+	 * leaving it unset.
 	 * @example ['account-1', 'account-2']
 	 */
-	accountIds: string[];
+	accountIds: string[] | null;
 }
 
 /**
@@ -61,8 +62,8 @@ type AccountConfig = SimplifyDeep<MergeExclusive<SingleAccountConfig, MultipleAc
  * Controls default account scoping for tool execution in tools.
  */
 export interface ExecuteToolsConfig {
-	/** Account IDs to scope tool discovery and execution. */
-	accountIds?: string[];
+	/** Account IDs to scope tool discovery and execution. `null` is the same as leaving it unset. */
+	accountIds?: string[] | null;
 	/** Request timeout in milliseconds. Can also be set as a top-level config param which takes precedence. */
 	timeout?: number;
 }
@@ -113,9 +114,9 @@ export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountC
 export interface FetchToolsOptions {
 	/**
 	 * The accounts to list tools for. Defaults to the toolset's accounts, then its `accountId`,
-	 * then every active account linked to the API key.
+	 * then every active account linked to the API key. `null` is the same as leaving it unset.
 	 */
-	accountIds?: string[];
+	accountIds?: string[] | null;
 
 	/**
 	 * Filter tools by provider names (case-insensitive, matched as a full prefix of the tool
@@ -143,8 +144,11 @@ export interface FetchToolsOptions {
 export interface SearchOptions {
 	/** Maximum results per connector, 1–50. Default: 10. */
 	topK?: number;
-	/** Restrict to these accounts. Defaults to the toolset's accounts, then every active one. */
-	accountIds?: string[];
+	/**
+	 * Restrict to these accounts. Defaults to the toolset's accounts, then every active one.
+	 * `null` is the same as leaving it unset.
+	 */
+	accountIds?: string[] | null;
 }
 
 /**
@@ -156,8 +160,11 @@ export interface ExecuteActionOptions {
 	 * that search server-side. Sent only when given; `null` behaves the same as leaving it unset.
 	 */
 	sessionId?: string | null;
-	/** Restrict routing to these accounts. Defaults as for {@link StackOneToolSet.search}. */
-	accountIds?: string[];
+	/**
+	 * Restrict routing to these accounts. Defaults as for {@link StackOneToolSet.search}; `null` is
+	 * the same as leaving it unset.
+	 */
+	accountIds?: string[] | null;
 }
 
 /**
@@ -181,9 +188,10 @@ export interface SubmitFeedbackOptions {
 	source?: FeedbackSource;
 	/**
 	 * The feedback is sent through the first of these accounts. Defaults as for
-	 * {@link StackOneToolSet.fetchTools}, in the order given or discovered.
+	 * {@link StackOneToolSet.fetchTools}, in the order given or discovered. `null` is the same as
+	 * leaving it unset.
 	 */
-	accountIds?: string[];
+	accountIds?: string[] | null;
 }
 
 /** One served tool, with the account it was listed for. What the catalog cache holds. */
@@ -278,8 +286,13 @@ function scoreOf(action: SearchResult): number {
 	return typeof score === 'number' && !Number.isNaN(score) ? score : 0;
 }
 
+/** The JSON type of a value, as the messages shared with the Python SDK name it. */
+const jsonType = (value: unknown): string =>
+	value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value;
+
+/** Refuse an account-id list the toolset cannot use. `null`, like `undefined`, is not given. */
 const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
-	if (accountIds === undefined) {
+	if (accountIds == null) {
 		return;
 	}
 	if (typeof accountIds === 'string') {
@@ -378,12 +391,12 @@ export class StackOneToolSet {
 
 	/**
 	 * Set account IDs for filtering tools
-	 * @param accountIds Array of account IDs to filter tools by
+	 * @param accountIds Array of account IDs to filter tools by. `null` clears them, as `[]` does.
 	 * @returns This toolset instance for chaining
 	 */
-	setAccounts(accountIds: string[]): this {
+	setAccounts(accountIds: string[] | null): this {
 		assertAccountIdList(accountIds, 'accountIds');
-		this.#accountIds = [...accountIds];
+		this.#accountIds = [...(accountIds ?? [])];
 		this.clearCatalogCache();
 		return this;
 	}
@@ -415,7 +428,7 @@ export class StackOneToolSet {
 	 * const tools = await toolset.openai();
 	 * ```
 	 */
-	async openai(options?: { accountIds?: string[] }): Promise<ReturnType<Tools['toOpenAI']>> {
+	async openai(options?: { accountIds?: string[] | null }): Promise<ReturnType<Tools['toOpenAI']>> {
 		const tools = await this.fetchTools({ accountIds: options?.accountIds });
 		return tools.toOpenAI();
 	}
@@ -551,7 +564,7 @@ export class StackOneToolSet {
 	 * The accounts a call is scoped to, in the order they were given: the call's own, then the
 	 * toolset's, then its single account, then every active account in `GET /accounts` order.
 	 */
-	async #accountsInOrder(accountIds: string[] | undefined): Promise<string[]> {
+	async #accountsInOrder(accountIds: string[] | null | undefined): Promise<string[]> {
 		assertAccountIdList(accountIds, 'accountIds');
 		let scope = accountIds?.length ? accountIds : this.#accountIds;
 		if (scope.length === 0 && this.#accountId) {
@@ -563,7 +576,7 @@ export class StackOneToolSet {
 		return scope;
 	}
 
-	async #resolveAccountScope(accountIds: string[] | undefined): Promise<string[]> {
+	async #resolveAccountScope(accountIds: string[] | null | undefined): Promise<string[]> {
 		// Sorted and deduplicated: the listing order, and the cache key, must not depend on the
 		// order the caller happened to name the accounts in.
 		return [...new Set(await this.#accountsInOrder(accountIds))].sort();
@@ -740,7 +753,10 @@ export class StackOneToolSet {
 	 * The mode is passed down rather than switched on the instance, so a concurrent
 	 * `fetchTools()` can never read the switched mode and cache meta tools under the wrong key.
 	 */
-	async #metaTools(suffix: string, accountIds: string[] | undefined): Promise<StackOneTool[]> {
+	async #metaTools(
+		suffix: string,
+		accountIds: string[] | null | undefined,
+	): Promise<StackOneTool[]> {
 		const tools = await this.fetchTools({ accountIds, mode: 'search_execute' });
 		return tools.getStackOneTools().filter((tool) => tool.name.endsWith(suffix));
 	}
