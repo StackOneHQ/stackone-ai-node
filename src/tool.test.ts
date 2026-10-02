@@ -1,38 +1,15 @@
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { jsonSchema } from 'ai';
-import { BaseTool, StackOneTool, Tools } from './tool';
-import {
-	type AISDKToolResult,
-	type ExecuteConfig,
-	type JSONSchema,
-	ParameterLocation,
-	type ToolParameters,
-} from './types';
+import { http } from 'msw';
+import { TEST_BASE_URL } from '../mocks/constants';
+import { type RecordedToolCall, createMcpApp } from '../mocks/mcp-server';
+import { server } from '../mocks/node';
+import { toolParametersFromInputSchema } from './schema';
+import { BaseTool, StackOneMcpTool, StackOneTool, Tools } from './tool';
+import type { AISDKToolResult, JsonObject, JSONSchema, ToolParameters } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
-
-// Create a mock tool for testing
-const createMockTool = (headers?: Record<string, string>): BaseTool => {
-	const name = 'test_tool';
-	const description = 'Test tool';
-	const parameters: ToolParameters = {
-		type: 'object',
-		properties: { id: { type: 'string', description: 'ID parameter' } },
-	};
-	const executeConfig: ExecuteConfig = {
-		kind: 'http',
-		method: 'GET',
-		url: 'https://api.example.com/test/{id}',
-		bodyType: 'json',
-		params: [
-			{
-				name: 'id',
-				location: ParameterLocation.PATH,
-				type: 'string',
-			},
-		],
-	};
-
-	return new BaseTool(name, description, parameters, executeConfig, headers);
-};
+import { StackOneError } from './utils/error-stackone';
+import { ToolArgumentsError } from './utils/error-tool-arguments';
 
 // Calls an AI SDK tool's `execute` through a plain signature rather than the
 // `ai` type. v5/v6 expect `ToolCallOptions`, v7 requires an extra `context`
@@ -43,7 +20,7 @@ const executeAISDKTool = (
 	name: string,
 	args: Record<string, unknown>,
 ): Promise<unknown> => {
-	const execute = tools[name].execute as unknown as (
+	const execute = tools[name]?.execute as unknown as (
 		args: Record<string, unknown>,
 		options?: unknown,
 	) => Promise<unknown>;
@@ -51,991 +28,855 @@ const executeAISDKTool = (
 	return execute(args, { toolCallId: 'test-tool-call-id', messages: [] });
 };
 
-describe('StackOneTool', () => {
-	it('should execute with parameters', async () => {
-		const tool = createMockTool();
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
+/** The conformance suite's `rich-schema` fixture: every root keyword a server may send. */
+const richSchema = {
+	$schema: 'https://json-schema.org/draft/2020-12/schema',
+	title: 'Rich Schema Test',
+	type: 'object',
+	additionalProperties: false,
+	$defs: {
+		Money: {
+			type: 'object',
+			properties: { amount: { type: 'number' }, currency: { type: 'string' } },
+			required: ['amount', 'currency'],
+		},
+	},
+	oneOf: [{ required: ['employee_id'] }, { required: ['identifier'] }],
+	properties: {
+		employee_id: { type: 'string', description: 'Employee id', pattern: '^emp_' },
+		start_date: { type: 'string', format: 'date-time', description: 'Start date' },
+		limit: { type: 'integer', minimum: 1, maximum: 100, default: 25 },
+		status: { type: 'string', enum: ['active', 'terminated'] },
+		address: {
+			type: 'object',
+			properties: {
+				line1: { type: 'string' },
+				postcode: { type: 'string', pattern: '[A-Z]{2}[0-9]' },
+			},
+			required: ['line1'],
+		},
+		identifier: {
+			description: 'Either an id or an email',
+			oneOf: [{ type: 'string' }, { type: 'integer' }],
+		},
+		salary: { $ref: '#/$defs/Money' },
+		nullable: { type: 'object', properties: { name: { type: 'string' } }, nullable: false },
+	},
+	required: ['start_date'],
+} as const;
+
+const localTool = (name: string, schema: unknown, description = 'Test tool') =>
+	new BaseTool(name, description, toolParametersFromInputSchema(schema), { kind: 'local' });
+
+const simpleTool = () =>
+	localTool('test_tool', {
+		type: 'object',
+		properties: { id: { type: 'string', description: 'ID' } },
 	});
 
-	it('should execute with string arguments', async () => {
-		const tool = createMockTool();
-		const result = await tool.execute('{"id":"123"}');
-
-		expect(result).toEqual({ id: '123', name: 'Test' });
+describe('BaseTool', () => {
+	it('cannot execute on its own', async () => {
+		await expect(simpleTool().execute({ id: '1' })).rejects.toThrow(
+			new StackOneError(
+				'Tool "test_tool" has no executor. Override execute() to run a hand-built tool.',
+			),
+		);
 	});
 
-	it('should handle API errors', async () => {
-		const tool = createMockTool();
+	describe('toJsonSchema', () => {
+		it('is the served schema, verbatim', () => {
+			expect(localTool('rich', richSchema).toJsonSchema()).toEqual(richSchema);
+		});
 
-		await expect(tool.execute({ id: 'invalid' })).rejects.toSatisfy((error) => {
-			expect(error).toBeInstanceOf(StackOneAPIError);
-			const apiError = error as StackOneAPIError;
-			expect(apiError.statusCode).toBe(400);
-			expect(apiError.responseBody).toEqual({ error: 'Invalid ID' });
-			return true;
+		it('returns a copy a caller cannot mutate back into the tool', () => {
+			const tool = localTool('rich', richSchema);
+			const schema = tool.toJsonSchema();
+			const address = schema.properties?.address?.properties;
+			assert(address);
+			(address as Record<string, unknown>).injected = {};
+			(schema.$defs as Record<string, unknown>).Evil = {};
+
+			expect(tool.toJsonSchema()).toEqual(richSchema);
+		});
+
+		it('omits an empty required list', () => {
+			expect(
+				localTool('t', { type: 'object', properties: {}, required: [] }).toJsonSchema(),
+			).toEqual({
+				type: 'object',
+				properties: {},
+			});
 		});
 	});
 
-	it('should convert to OpenAI Chat Completions API tool format', () => {
-		const tool = createMockTool();
-		const openAIFormat = tool.toOpenAI();
+	/**
+	 * Every adapter must hand the model what the server served. The one exception is a top-level
+	 * `oneOf`/`anyOf`/`allOf`, which the OpenAI and Anthropic tool APIs reject outright, so every
+	 * provider-bound adapter folds it into the root.
+	 */
+	describe('root schema pass-through across every adapter', () => {
+		const tool = localTool('hris_rich_probe', richSchema, 'Rich probe');
+		const { oneOf: _rejected, ...providerRoot } = richSchema;
 
-		expect(openAIFormat.type).toBe('function');
-		expect(openAIFormat.function.name).toBe('test_tool');
-		expect(openAIFormat.function.description).toBe('Test tool');
-		expect(openAIFormat.function.parameters?.type).toBe('object');
-		expect(
-			(
-				openAIFormat.function.parameters as {
-					properties: { id: { type: string } };
-				}
-			).properties.id.type,
-		).toBe('string');
-	});
-
-	it('should convert to Anthropic tool format', () => {
-		const tool = createMockTool();
-		const anthropicFormat = tool.toAnthropic();
-
-		expect(anthropicFormat.name).toBe('test_tool');
-		expect(anthropicFormat.description).toBe('Test tool');
-		expect(anthropicFormat.input_schema.type).toBe('object');
-		const properties = anthropicFormat.input_schema.properties as Record<string, { type: string }>;
-		expect(properties.id).toBeDefined();
-		expect(properties.id.type).toBe('string');
-	});
-
-	it('should convert to OpenAI Responses API tool format', () => {
-		const tool = createMockTool();
-		const responsesFormat = tool.toOpenAIResponses();
-
-		expect(responsesFormat.type).toBe('function');
-		expect(responsesFormat.name).toBe('test_tool');
-		expect(responsesFormat.description).toBe('Test tool');
-		expect(responsesFormat.strict).toBe(true);
-		expect(responsesFormat.parameters?.type).toBe('object');
-		expect(
-			(
-				responsesFormat.parameters as {
-					properties: { id: { type: string } };
-					additionalProperties: boolean;
-				}
-			).properties.id.type,
-		).toBe('string');
-		expect(
-			(responsesFormat.parameters as { additionalProperties: boolean }).additionalProperties,
-		).toBe(false);
-	});
-
-	it('should convert to OpenAI Responses API tool format with strict disabled', () => {
-		const tool = createMockTool();
-		const responsesFormat = tool.toOpenAIResponses({ strict: false });
-
-		expect(responsesFormat.type).toBe('function');
-		expect(responsesFormat.name).toBe('test_tool');
-		expect(responsesFormat.strict).toBe(false);
-		expect(responsesFormat.parameters).toBeDefined();
-		expect(
-			(responsesFormat.parameters as { additionalProperties?: boolean }).additionalProperties,
-		).toBeUndefined();
-	});
-
-	it('should convert to AI SDK tool format', async () => {
-		const tool = createMockTool();
-
-		const aiSdkTool = await tool.toAISDK();
-
-		// Test the basic structure
-		expect(aiSdkTool).toBeDefined();
-		expect(aiSdkTool.test_tool).toBeDefined();
-		expect(typeof aiSdkTool.test_tool.execute).toBe('function');
-		expect(aiSdkTool.test_tool.description).toBe('Test tool');
-		expect(aiSdkTool.test_tool.inputSchema).toBeDefined();
-
-		// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
-		// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
-		const schema = aiSdkTool.test_tool.inputSchema.jsonSchema;
-		expect(schema).toBeDefined();
-		expect(schema.type).toBe('object');
-		expect(schema.properties?.id).toBeDefined();
-		expect(schema.properties?.id.type).toBe('string');
-	});
-
-	it('should convert to Claude Agent SDK tool format', async () => {
-		const tool = createMockTool();
-
-		const claudeTool = await tool.toClaudeAgentSdkTool();
-
-		expect(claudeTool).toBeDefined();
-		expect(claudeTool.name).toBe('test_tool');
-		expect(claudeTool.description).toBe('Test tool');
-		expect(claudeTool.inputSchema).toBeDefined();
-		expect(typeof claudeTool.handler).toBe('function');
-
-		// Test the handler returns content in the expected format
-		const result = await claudeTool.handler({ id: 'test-123' });
-		expect(result).toHaveProperty('content');
-		expect(Array.isArray(result.content)).toBe(true);
-		expect(result.content[0]).toHaveProperty('type', 'text');
-		expect(result.content[0]).toHaveProperty('text');
-	});
-
-	it('should include execution metadata by default in AI SDK conversion', async () => {
-		const tool = createMockTool();
-
-		const aiSdkTool = await tool.toAISDK();
-		const execution = aiSdkTool.test_tool.execution;
-
-		expect(execution).toBeDefined();
-		expect(execution?.config.kind).toBe('http');
-		if (execution?.config.kind === 'http') {
-			expect(execution.config.method).toBe('GET');
-			expect(execution.config.url).toBe('https://api.example.com/test/{id}');
-		}
-		expect(execution?.headers).toEqual({});
-	});
-
-	it('should allow disabling execution metadata exposure for AI SDK conversion', async () => {
-		const tool = createMockTool().setExposeExecutionMetadata(false);
-
-		const aiSdkTool = await tool.toAISDK();
-
-		expect(aiSdkTool.test_tool.execution).toBeUndefined();
-	});
-
-	it('should convert complex parameter types to zod schema', async () => {
-		const complexTool = new BaseTool(
-			'complex_tool',
-			'Complex tool',
-			{
-				type: 'object',
-				properties: {
-					stringParam: { type: 'string', description: 'A string parameter' },
-					numberParam: { type: 'number', description: 'A number parameter' },
-					booleanParam: { type: 'boolean', description: 'A boolean parameter' },
-					arrayParam: {
-						type: 'array',
-						description: 'An array parameter',
-						items: { type: 'string' },
-					},
-					objectParam: {
-						type: 'object',
-						description: 'An object parameter',
-						properties: { nestedString: { type: 'string' } },
-					},
+		const adapters: Array<[string, () => Promise<Record<string, unknown>>]> = [
+			['toOpenAI', async () => tool.toOpenAI().function.parameters as Record<string, unknown>],
+			['toAnthropic', async () => tool.toAnthropic().input_schema as Record<string, unknown>],
+			[
+				'toOpenAIResponses (strict)',
+				async () => tool.toOpenAIResponses().parameters as Record<string, unknown>,
+			],
+			[
+				'toOpenAIResponses (non-strict)',
+				async () => tool.toOpenAIResponses({ strict: false }).parameters as Record<string, unknown>,
+			],
+			[
+				'toAISDK',
+				async () => {
+					const aiTools = await tool.toAISDK({ executable: false });
+					const aiTool = aiTools.hris_rich_probe;
+					assert(aiTool);
+					return (aiTool.inputSchema as { jsonSchema: Record<string, unknown> }).jsonSchema;
 				},
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://example.com/complex',
-				bodyType: 'json',
-				params: [],
+			],
+			[
+				'toClaudeAgentSdkTool',
+				async () =>
+					(
+						(await tool.toClaudeAgentSdkTool()).inputSchema as {
+							jsonSchema: Record<string, unknown>;
+						}
+					).jsonSchema,
+			],
+		];
+
+		it.each(adapters)(
+			'%s keeps $schema, $defs, $ref, title and every property',
+			async (_name, adapt) => {
+				const schema = await adapt();
+
+				expect(schema.$schema).toBe(richSchema.$schema);
+				expect(schema.title).toBe(richSchema.title);
+				expect(schema.$defs).toEqual(richSchema.$defs);
+				expect(schema.properties).toEqual(richSchema.properties);
+				expect(schema.required).toEqual(['start_date']);
+				expect(schema.type).toBe('object');
 			},
 		);
 
-		const aiSdkTool = await complexTool.toAISDK();
+		it.each(adapters)('%s drops the root oneOf the provider would reject', async (_name, adapt) => {
+			const schema = await adapt();
 
-		// Check that the tool is defined
-		expect(aiSdkTool).toBeDefined();
-		expect(aiSdkTool.complex_tool).toBeDefined();
+			for (const keyword of ['oneOf', 'anyOf', 'allOf']) {
+				expect(schema).not.toHaveProperty(keyword);
+			}
+			// The nested union is untouched: only the root is a problem for the provider.
+			expect((schema.properties as Record<string, JSONSchema>).identifier?.oneOf).toEqual([
+				{ type: 'string' },
+				{ type: 'integer' },
+			]);
+		});
 
-		// Check that inputSchema is defined
-		expect(aiSdkTool.complex_tool.inputSchema).toBeDefined();
+		it.each(adapters)('%s is otherwise exactly the served root', async (_name, adapt) => {
+			expect(await adapt()).toEqual(providerRoot);
+		});
 
-		// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
-		// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
-		const schema = aiSdkTool.complex_tool.inputSchema.jsonSchema;
-		expect(schema).toBeDefined();
-		expect(schema.type).toBe('object');
+		it('preserves a served additionalProperties: true except where the adapter closes the root', async () => {
+			const open = localTool('open', { ...richSchema, additionalProperties: true });
 
-		// Check that the properties are defined with correct types
-		expect(schema.properties).toBeDefined();
-		expect(schema.properties?.stringParam.type).toBe('string');
-		expect(schema.properties?.numberParam.type).toBe('number');
-		expect(schema.properties?.booleanParam.type).toBe('boolean');
-		expect(schema.properties?.arrayParam.type).toBe('array');
-		expect(schema.properties?.objectParam.type).toBe('object');
+			expect(open.toJsonSchema().additionalProperties).toBe(true);
+			expect(open.toOpenAI().function.parameters?.additionalProperties).toBe(true);
+			expect(open.toAnthropic().input_schema.additionalProperties).toBe(true);
+			expect(open.toOpenAIResponses({ strict: false }).parameters?.additionalProperties).toBe(true);
+			// Strict Responses and the AI SDK close the root: documented, and pinned here.
+			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(false);
+			const aiTools = await open.toAISDK({ executable: false });
+			const aiTool = aiTools.open;
+			assert(aiTool);
+			expect(
+				(aiTool.inputSchema as { jsonSchema: JSONSchema }).jsonSchema.additionalProperties,
+			).toBe(false);
+		});
+
+		it('closes the root in strict mode without rewriting anything nested', () => {
+			const parameters = tool.toOpenAIResponses().parameters as JSONSchema;
+			expect(parameters.additionalProperties).toBe(false);
+			expect(parameters.properties?.address).toEqual(richSchema.properties.address);
+		});
 	});
 
-	it('should execute AI SDK tool with parameters', async () => {
-		const tool = createMockTool();
-		const aiSdkTool = await tool.toAISDK();
-
-		expect(aiSdkTool.test_tool.execute).toBeDefined();
-
-		const result = await executeAISDKTool(aiSdkTool, 'test_tool', { id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
+	it('converts to the OpenAI Chat Completions shape', () => {
+		expect(simpleTool().toOpenAI()).toEqual({
+			type: 'function',
+			function: {
+				name: 'test_tool',
+				description: 'Test tool',
+				parameters: { type: 'object', properties: { id: { type: 'string', description: 'ID' } } },
+			},
+		});
 	});
 
-	it('should return error message as string when AI SDK tool execution fails', async () => {
-		const tool = createMockTool();
-		const aiSdkTool = await tool.toAISDK();
-
-		expect(aiSdkTool.test_tool.execute).toBeDefined();
-
-		// 'invalid' id returns 400 error via MSW handler
-		const result = await executeAISDKTool(aiSdkTool, 'test_tool', { id: 'invalid' });
-		expect(result).toMatch(/Error executing tool:/);
+	it('converts to the Anthropic shape', () => {
+		expect(simpleTool().toAnthropic()).toEqual({
+			name: 'test_tool',
+			description: 'Test tool',
+			input_schema: { type: 'object', properties: { id: { type: 'string', description: 'ID' } } },
+		});
 	});
 
-	it('should set and get headers', () => {
-		const tool = createMockTool();
+	it('converts to the OpenAI Responses shape, strict by default', () => {
+		const strict = simpleTool().toOpenAIResponses();
+		expect(strict).toMatchObject({ type: 'function', name: 'test_tool', strict: true });
 
-		// Set headers
-		const headers = { 'X-Custom-Header': 'test-value' };
-		tool.setHeaders(headers);
-
-		// Headers should include custom header
-		const updatedHeaders = tool.getHeaders();
-		expect(updatedHeaders['X-Custom-Header']).toBe('test-value');
-
-		// Set additional headers
-		tool.setHeaders({ 'X-Another-Header': 'another-value' });
-
-		// Headers should include all headers
-		const finalHeaders = tool.getHeaders();
-		expect(finalHeaders['X-Custom-Header']).toBe('test-value');
-		expect(finalHeaders['X-Another-Header']).toBe('another-value');
+		const lax = simpleTool().toOpenAIResponses({ strict: false });
+		expect(lax.strict).toBe(false);
+		expect(lax.parameters).not.toHaveProperty('additionalProperties');
 	});
 
-	it('should use basic authentication', async () => {
-		const headers = {
-			Authorization: `Basic ${Buffer.from('testuser:testpass').toString('base64')}`,
-		};
-		const tool = createMockTool(headers);
-
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
+	it('builds an AI SDK tool whose schema the ai package accepts', async () => {
+		const aiTools = await simpleTool().toAISDK();
+		expect(typeof aiTools.test_tool?.execute).toBe('function');
+		expect(jsonSchema(simpleTool().toOpenAI().function.parameters as JSONSchema)).toBeDefined();
 	});
 
-	it('should use bearer authentication', async () => {
-		const headers = {
-			Authorization: 'Bearer test-token',
-		};
-		const tool = createMockTool(headers);
-
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
+	it('returns an AI SDK execution error as a string rather than throwing', async () => {
+		const aiTools = await simpleTool().toAISDK();
+		expect(await executeAISDKTool(aiTools, 'test_tool', { id: '1' })).toMatch(
+			/^Error executing tool: Tool "test_tool" has no executor/,
+		);
 	});
 
-	it('should use api-key authentication', async () => {
-		const apiKey = 'test-api-key';
-		const headers = {
-			Authorization: `Bearer ${apiKey}`,
-		};
-		const tool = createMockTool(headers);
+	it('exposes execution metadata only when asked', async () => {
+		const tool = simpleTool();
+		expect((await tool.toAISDK()).test_tool?.execution).toEqual({ config: { kind: 'local' } });
+		expect((await tool.toAISDK({ execution: false })).test_tool?.execution).toBeUndefined();
+		tool.setExposeExecutionMetadata(false);
+		expect((await tool.toAISDK()).test_tool?.execution).toBeUndefined();
+		expect((await tool.toAISDK({ executable: false })).test_tool?.execute).toBeUndefined();
+	});
 
-		const result = await tool.execute({ id: '123' });
-		expect(result).toEqual({ id: '123', name: 'Test' });
+	it('serialises a Claude Agent SDK result for the model, bytes as base64', async () => {
+		const tool = simpleTool();
+		tool.execute = async () => ({ content: Buffer.from('%PDF') as never, ok: true });
+		const definition = await tool.toClaudeAgentSdkTool();
+
+		const result = await definition.handler({});
+
+		expect(JSON.parse(result.content[0]?.text ?? '')).toEqual({
+			content: Buffer.from('%PDF').toString('base64'),
+			ok: true,
+		});
 	});
 });
 
-describe('BaseTool - additional coverage', () => {
-	it('should throw error when execute is called on non-HTTP tool', async () => {
-		const rpcTool = new BaseTool(
-			'rpc_tool',
-			'RPC tool',
-			{ type: 'object', properties: {} },
-			{
-				kind: 'rpc',
-				method: 'test_method',
-				url: 'https://api.example.com/rpc',
-				payloadKeys: { action: 'action', body: 'body' },
-			},
-		);
-
-		await expect(rpcTool.execute({})).rejects.toThrow(
-			'BaseTool.execute is only available for HTTP-backed tools',
-		);
+describe('StackOneMcpTool as an action tool', () => {
+	const calls: RecordedToolCall[] = [];
+	const nestedProperties = {
+		path: { type: 'object', properties: { id: { type: 'string' } } },
+		query: { type: 'object', properties: { expand: { type: 'string' } } },
+		body: { type: 'object', properties: { name: { type: 'string' } } },
+		headers: { type: 'object', properties: { 'x-trace': { type: 'string' } } },
+	} satisfies Record<string, JSONSchema>;
+	const listed = {
+		name: 'crm_update_contact',
+		description: 'Update a contact',
+		inputSchema: { type: 'object' as const, properties: nestedProperties },
+	};
+	const serve = (toolResults: Record<string, CallToolResult> = {}) => {
+		const app = createMcpApp({
+			accountTools: { acc1: [listed], acc2: [listed] },
+			onToolCall: (call) => calls.push(call),
+			toolResults,
+		});
+		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+	};
+	beforeEach(() => {
+		calls.length = 0;
+		serve();
 	});
 
-	it('should throw error for invalid parameter type', async () => {
-		const tool = createMockTool();
+	const actionTool = (properties: Record<string, JSONSchema> = nestedProperties) =>
+		new StackOneMcpTool({
+			name: 'crm_update_contact',
+			description: 'Update a contact',
+			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
+			endpoint: `${TEST_BASE_URL}/mcp`,
+			apiKey: 'test-key',
+			accountId: 'acc1',
+			timeout: 5_000,
+		});
 
-		// @ts-expect-error - intentionally passing invalid type
-		await expect(tool.execute(12345)).rejects.toThrow('Invalid parameters type');
-	});
-
-	it('should create execution metadata for RPC config in toAISDK', async () => {
-		const rpcTool = new BaseTool(
-			'rpc_tool',
-			'RPC tool',
-			{ type: 'object', properties: {} },
-			{
-				kind: 'rpc',
-				method: 'test_method',
-				url: 'https://api.example.com/rpc',
-				payloadKeys: { action: 'action', body: 'body', headers: 'headers' },
-			},
-		);
-
-		const aiSdkTool = await rpcTool.toAISDK({ executable: false });
-		const execution = aiSdkTool.rpc_tool.execution;
-
-		expect(execution).toBeDefined();
-		expect(execution?.config.kind).toBe('rpc');
-		if (execution?.config.kind === 'rpc') {
-			expect(execution.config.method).toBe('test_method');
-			expect(execution.config.url).toBe('https://api.example.com/rpc');
-			expect(execution.config.payloadKeys).toEqual({
-				action: 'action',
-				body: 'body',
-				headers: 'headers',
-			});
-		}
-	});
-
-	it('should create execution metadata for local config in toAISDK', async () => {
-		const localTool = new BaseTool(
-			'local_tool',
-			'Local tool',
-			{ type: 'object', properties: {} },
-			{
-				kind: 'local',
-				identifier: 'local_test',
-				description: 'local://test',
-			},
-		);
-
-		const aiSdkTool = await localTool.toAISDK({ executable: false });
-		const execution = aiSdkTool.local_tool.execution;
-
-		expect(execution).toBeDefined();
-		expect(execution?.config.kind).toBe('local');
-		if (execution?.config.kind === 'local') {
-			expect(execution.config.identifier).toBe('local_test');
-			expect(execution.config.description).toBe('local://test');
-		}
-	});
-
-	it('should allow providing custom execution metadata in toAISDK', async () => {
-		const tool = createMockTool();
-		const customExecution = {
-			config: {
-				kind: 'http' as const,
-				method: 'POST' as const,
-				url: 'https://custom.example.com',
-				bodyType: 'json' as const,
-				params: [],
-			},
-			headers: { 'X-Custom': 'value' },
+	it('sends the arguments verbatim over tools/call, scoped to its account', async () => {
+		const args = {
+			path: { id: '7' },
+			query: { expand: 'owner' },
+			body: { name: 'Ada' },
+			headers: { 'x-trace': 't-1' },
 		};
 
-		const aiSdkTool = await tool.toAISDK({ execution: customExecution });
-		const execution = aiSdkTool.test_tool.execution;
+		const result = await actionTool().execute(args);
 
-		expect(execution).toBeDefined();
-		expect(execution?.config.kind).toBe('http');
-		if (execution?.config.kind === 'http') {
-			expect(execution.config.url).toBe('https://custom.example.com');
-		}
-		expect(execution?.headers).toEqual({ 'X-Custom': 'value' });
+		expect(calls).toEqual([
+			{ accountId: 'acc1', toolMode: undefined, name: 'crm_update_contact', arguments: args },
+		]);
+		// As the server wrote it: UCA's { isError: false, result } wrapper included.
+		expect(result).toEqual({
+			isError: false,
+			result: { data: { action: 'crm_update_contact', account_id: 'acc1', arguments: args } },
+		});
 	});
 
-	it('should return undefined execution when execution option is false', async () => {
-		const tool = createMockTool();
+	// `clean[key] = value` with the key `__proto__` sets the prototype, so the argument vanished
+	// from the request. Python sends it.
+	it('sends an argument named __proto__ like any other', async () => {
+		await actionTool().execute('{"__proto__":"p","constructor":"c","q":1}');
 
-		const aiSdkTool = await tool.toAISDK({ execution: false });
-		expect(aiSdkTool.test_tool.execution).toBeUndefined();
+		expect(Object.entries(calls[0]?.arguments ?? {})).toEqual([
+			['__proto__', 'p'],
+			['constructor', 'c'],
+			['q', 1],
+		]);
 	});
 
-	it('should return undefined execute when executable option is false', async () => {
-		const tool = createMockTool();
-
-		const aiSdkTool = await tool.toAISDK({ executable: false });
-		expect(aiSdkTool.test_tool.execute).toBeUndefined();
+	it('sends flat_prefixed arguments verbatim too', async () => {
+		const args = { path_id: '7', 'headers_x-trace': 't-1' };
+		await actionTool({
+			path_id: { type: 'string' },
+			'headers_x-trace': { type: 'string' },
+		}).execute(args);
+		expect(calls[0]?.arguments).toEqual(args);
 	});
 
-	it('should get headers from tool without requestBuilder', () => {
-		const rpcTool = new BaseTool(
-			'rpc_tool',
-			'RPC tool',
-			{ type: 'object', properties: {} },
-			{
-				kind: 'rpc',
-				method: 'test_method',
-				url: 'https://api.example.com/rpc',
-				payloadKeys: { action: 'action', body: 'body' },
-			},
-			{ 'X-Custom': 'value' },
+	it('accepts arguments as a JSON string', async () => {
+		await actionTool().execute('{"path":{"id":"7"}}');
+		expect(calls[0]?.arguments).toEqual({ path: { id: '7' } });
+	});
+
+	it.each([
+		['Authorization', 'Bearer stolen'],
+		['authorization', 'Bearer stolen'],
+		['X-Account-Id', 'victim'],
+		[' x-account-id ', 'victim'],
+		['Proxy-Authorization', 'Basic stolen'],
+		['x-stackone-account-id', 'victim'],
+		['Cookie', 'session=x'],
+	])('drops a model-supplied %j header', async (name, value) => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		await actionTool().execute({ headers: { [name]: value } });
+
+		expect(calls[0]?.arguments.headers).toEqual({});
+		expect(calls[0]?.accountId).toBe('acc1');
+		vi.restoreAllMocks();
+	});
+
+	it('keeps a header a nested schema declares, and drops one carrying CR/LF', async () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		await actionTool().execute({ headers: { 'X-Trace': 'abc', 'X-Other': 'no' } });
+		await actionTool().execute({ headers: { 'x-trace': 'a\r\nInjected: 1' } });
+		expect(calls[0]?.arguments.headers).toEqual({ 'X-Trace': 'abc' });
+		expect(calls[1]?.arguments.headers).toEqual({});
+		vi.restoreAllMocks();
+	});
+
+	it.each([
+		['not valid json', /Invalid JSON in arguments/],
+		['[1, 2, 3]', /must be a JSON object/],
+		['null', /must be a JSON object/],
+	])('rejects arguments %j', async (input, message) => {
+		await expect(actionTool().execute(input)).rejects.toThrow(message);
+	});
+
+	it('rejects a non-object, non-string argument', async () => {
+		// @ts-expect-error - intentionally passing an invalid type
+		await expect(actionTool().execute(12345)).rejects.toThrow(
+			new ToolArgumentsError('Tool arguments for "crm_update_contact" must be a JSON object'),
 		);
-
-		expect(rpcTool.getHeaders()).toEqual({ 'X-Custom': 'value' });
 	});
 
-	it('should set headers on tool without requestBuilder', () => {
-		const rpcTool = new BaseTool(
-			'rpc_tool',
-			'RPC tool',
-			{ type: 'object', properties: {} },
-			{
-				kind: 'rpc',
-				method: 'test_method',
-				url: 'https://api.example.com/rpc',
-				payloadKeys: { action: 'action', body: 'body' },
-			},
-		);
+	it.each([
+		['a Date', new Date()],
+		['a Map', new Map()],
+		['a Set', new Set()],
+	])('rejects %s as the whole arguments object', async (_name, value) => {
+		const error = await actionTool()
+			// @ts-expect-error - intentionally passing a non-plain object
+			.execute(value)
+			.catch((caught: unknown) => caught);
 
-		rpcTool.setHeaders({ 'X-New-Header': 'new-value' });
-		expect(rpcTool.getHeaders()).toEqual({ 'X-New-Header': 'new-value' });
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/must be a JSON object/);
+		expect(calls).toEqual([]);
+	});
+
+	// JSON.stringify would silently convert each of these (a Date to a string, a Map or Set to
+	// `{}`) rather than refuse it, which would send the model a value it never supplied.
+	it.each([
+		['a Date', { when: new Date() }, 'a Date'],
+		['a Map', { body: { cache: new Map() } }, 'a Map'],
+		['a Set', { query: { ids: new Set([1, 2]) } }, 'a Set'],
+		['a RegExp', { pattern: /x/ }, 'a RegExp'],
+		['a function', { cb: () => {} }, 'a function'],
+		['a symbol', { tag: Symbol('x') }, 'a symbol'],
+		['a bigint', { amount: 10n }, 'a bigint'],
+		['a Uint8Array', { bytes: new Uint8Array([1]) }, 'binary data'],
+		['a class instance', { contact: new StackOneError('x') }, 'an instance of'],
+	])(
+		'rejects %s nested in the arguments, without calling the server',
+		async (_name, args, hint) => {
+			const error = await actionTool()
+				.execute(args as unknown as JsonObject)
+				.catch((caught: unknown) => caught);
+
+			expect(error).toBeInstanceOf(ToolArgumentsError);
+			expect((error as Error).message).toContain(
+				`Arguments for "crm_update_contact" could not be encoded as JSON: ${hint}`,
+			);
+			expect(calls).toEqual([]);
+		},
+	);
+
+	// What a model emits when a token boundary splits an emoji: not Unicode text, so not UTF-8.
+	it.each([
+		['a lone low surrogate nested in an array', { query: { ids: ['\uDE00x'] } }],
+		['a lone surrogate in a key', { body: { '\uD800': 'x' } }],
+		['a lone surrogate in a top-level key', { '\uDFFF': 'x' }],
+	])('rejects %s without calling the server', async (_name, args) => {
+		const error = await actionTool()
+			.execute(args as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(
+			/^Arguments for "crm_update_contact" could not be encoded as JSON: a (string|key) holding a lone surrogate is not Unicode text/,
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('accepts a surrogate pair', async () => {
+		await actionTool().execute({ name: 'Ada \uD83D\uDE00' });
+		expect(calls).toHaveLength(1);
+	});
+
+	// NaN alone, and in an object, are in the shared vectors.
+	it.each([['{"a": Infinity}'], ['[-Infinity]']])(
+		'rejects the JSON text %s as invalid JSON',
+		async (text) => {
+			const error = await actionTool()
+				.execute(text)
+				.catch((caught: unknown) => caught);
+
+			expect(error).toBeInstanceOf(ToolArgumentsError);
+			expect((error as Error).message).toMatch(
+				/^Invalid JSON in arguments for "crm_update_contact": /,
+			);
+			expect(calls).toEqual([]);
+		},
+	);
+
+	it('rejects undefined inside an array', async () => {
+		const error = await actionTool()
+			.execute({ query: { ids: [1, undefined, 3] } } as unknown as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/undefined is not a JSON value/);
+		expect(calls).toEqual([]);
+	});
+
+	it('rejects a sparse array hole', async () => {
+		const ids: number[] = [1, 2, 3];
+		// eslint-disable-next-line @typescript-eslint/no-array-delete -- deliberately punching a hole
+		delete ids[1];
+		const error = await actionTool()
+			.execute({ query: { ids } } as unknown as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/undefined is not a JSON value/);
+		expect(calls).toEqual([]);
+	});
+
+	it('rejects a circular reference', async () => {
+		const body: JsonObject = { name: 'Ada' };
+		body.self = body;
+
+		const error = await actionTool()
+			.execute({ body })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/circular reference/);
+		expect(calls).toEqual([]);
+	});
+
+	it('drops an object property set to undefined, rather than rejecting it', async () => {
+		await actionTool().execute({ path: { id: '1' }, extra: undefined } as unknown as JsonObject);
+		expect(calls[0]?.arguments).toEqual({ path: { id: '1' } });
+	});
+
+	it('is refused by the server when it has no account', async () => {
+		const error = (await actionTool()
+			.setAccountId(undefined)
+			.execute({})
+			.catch((caught: unknown) => caught)) as StackOneAPIError;
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect(error.statusCode).toBe(400);
+	});
+
+	it('returns a file action’s download link as the server sent it', async () => {
+		const link = {
+			download_url: `${TEST_BASE_URL}/actions/download/v1.eu.token`,
+			expires_at: '2026-09-29T12:05:00.000Z',
+			file: { name: 'report.pdf', content_type: 'application/pdf', content_length: 3 },
+		};
+		const structuredContent = { isError: false, result: link };
+		serve({
+			crm_update_contact: {
+				content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+				structuredContent,
+			},
+		});
+
+		expect(await actionTool().execute({})).toEqual({ isError: false, result: link });
+	});
+
+	it('raises with status 501 when the server can issue no download link', async () => {
+		const structuredContent = {
+			isError: true,
+			result: {
+				error: 'This action returned a file, which cannot be delivered in a tool result',
+				status_code: 501,
+			},
+		};
+		serve({
+			crm_update_contact: {
+				isError: true,
+				content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+				structuredContent,
+			},
+		});
+
+		const error = (await actionTool()
+			.execute({})
+			.catch((caught: unknown) => caught)) as StackOneAPIError;
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect(error.statusCode).toBe(501);
+	});
+
+	it('can be rebound to another account', async () => {
+		const tool = actionTool();
+
+		tool.setAccountId('acc2');
+		await tool.execute({});
+
+		expect(tool.getAccountId()).toBe('acc2');
+		expect(calls[0]?.accountId).toBe('acc2');
+	});
+});
+
+describe('StackOneMcpTool', () => {
+	const calls: RecordedToolCall[] = [];
+	beforeEach(() => {
+		calls.length = 0;
+		const app = createMcpApp({
+			accountTools: { acc1: [] },
+			onToolCall: (call) => calls.push(call),
+		});
+		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+	});
+
+	const mcpTool = (properties: Record<string, JSONSchema> = {}) =>
+		new StackOneMcpTool({
+			name: 'mock_acc1_execute_action',
+			description: 'Execute',
+			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
+			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
+			apiKey: 'test-key',
+			accountId: 'acc1',
+			timeout: 5_000,
+		});
+
+	it('calls the tool over tools/call and returns the parsed result', async () => {
+		const result = await mcpTool().execute({
+			action_id: 'mock_list_items',
+			query: { page_size: 2 },
+		});
+
+		expect(result).toMatchObject({
+			isError: false,
+			result: { data: { nodes: [] }, echoed_query: { page_size: 2 } },
+		});
+		expect(calls).toEqual([
+			{
+				accountId: 'acc1',
+				toolMode: 'search_execute',
+				name: 'mock_acc1_execute_action',
+				arguments: { action_id: 'mock_list_items', query: { page_size: 2 } },
+			},
+		]);
+	});
+
+	// The meta tools take a `headers` object the server unpacks, and these arguments are
+	// model-controlled. This schema declares no headers at all, so nothing survives.
+	it('drops every model-supplied header', async () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		await mcpTool().execute({
+			action_id: 'mock_list_items',
+			headers: {
+				Authorization: 'Bearer stolen',
+				'Proxy-Authorization': 'Basic stolen',
+				'x-account-id': 'victim-account',
+				'x-stackone-account-id': 'victim-account',
+				Cookie: 'session=x',
+				'X-Api-Key': 'stolen',
+			},
+		});
+
+		expect(calls[0]?.arguments.headers).toEqual({});
+		vi.restoreAllMocks();
+	});
+
+	it('keeps a header its own schema declares', async () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		await mcpTool({
+			headers: { type: 'object', properties: { 'x-trace': { type: 'string' } } },
+		}).execute({
+			action_id: 'mock_list_items',
+			headers: { 'X-Trace': 'abc', 'X-Other': 'no' },
+		});
+		expect(calls[0]?.arguments.headers).toEqual({ 'X-Trace': 'abc' });
+		vi.restoreAllMocks();
+	});
+
+	it('raises when the result carries isError', async () => {
+		const error = (await mcpTool()
+			.execute({ action_id: 'mock_not_a_real_action' })
+			.catch((caught: unknown) => caught)) as StackOneAPIError;
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect(error.message).toContain('Unknown action mock_not_a_real_action');
+		expect(error.statusCode).toBe(404);
+	});
+
+	it('describes the call without sending it on dryRun', async () => {
+		const result = await mcpTool().execute({ action_id: 'a' }, { dryRun: true });
+		expect(calls).toHaveLength(0);
+		expect(result).toMatchObject({ method: 'tools/call', arguments: { action_id: 'a' } });
 	});
 });
 
 describe('Tools', () => {
-	it('should get tool by name', () => {
-		const tool = createMockTool();
-		const tools = new Tools([tool]);
+	const named = (name: string) => localTool(name, { type: 'object', properties: {} });
 
-		expect(tools.getTool('test_tool')).toBe(tool);
-		expect(tools.getTool('nonexistent')).toBeUndefined();
+	it('looks tools up by name, first match wins', () => {
+		const first = named('dup');
+		const tools = new Tools([first, named('dup'), named('other')]);
+
+		expect(tools.getTool('dup')).toBe(first);
+		expect(tools.getTool('missing')).toBeUndefined();
+		expect(tools.length).toBe(3);
 	});
 
-	it('should convert all tools to OpenAI format', () => {
-		const tool1 = new BaseTool(
-			'tool1',
-			'Tool 1',
-			{
-				type: 'object',
-				properties: { id: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://api.example.com/test/{id}',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'id',
-						location: ParameterLocation.PATH,
-						type: 'string',
-					},
-				],
-			},
-		);
-
-		const tool2 = new BaseTool(
-			'tool2',
-			'Tool 2',
-			{
-				type: 'object',
-				properties: { id: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://api.example.com/test/{id}',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'id',
-						location: ParameterLocation.PATH,
-						type: 'string',
-					},
-				],
-			},
-			{
-				authorization: 'Bearer test_key',
-			},
-		);
-
-		const tools = new Tools([tool1, tool2]);
-		const openAITools = tools.toOpenAI();
-
-		expect(openAITools).toBeInstanceOf(Array);
-		expect(openAITools.length).toBe(2);
-		expect(openAITools[0].type).toBe('function');
-		expect(openAITools[0].function.name).toBe('tool1');
-		expect(openAITools[1].function.name).toBe('tool2');
+	it('does not alias the array it was built from', () => {
+		const list = [named('a')];
+		const tools = new Tools(list);
+		list.push(named('b'));
+		expect(tools.length).toBe(1);
 	});
 
-	it('should convert all tools to Anthropic format', () => {
-		const tool1 = new BaseTool(
-			'tool1',
-			'Tool 1',
-			{
-				type: 'object',
-				properties: { id: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://api.example.com/test/{id}',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'id',
-						location: ParameterLocation.PATH,
-						type: 'string',
-					},
-				],
-			},
-		);
+	it('filters, maps, iterates and copies', () => {
+		const tools = new Tools([named('a_x'), named('b_x')]);
 
-		const tool2 = new BaseTool(
-			'tool2',
-			'Tool 2',
-			{
-				type: 'object',
-				properties: { name: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/test',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'name',
-						location: ParameterLocation.BODY,
-						type: 'string',
-					},
-				],
-			},
-		);
-
-		const tools = new Tools([tool1, tool2]);
-		const anthropicTools = tools.toAnthropic();
-
-		expect(anthropicTools).toBeInstanceOf(Array);
-		expect(anthropicTools.length).toBe(2);
-		expect(anthropicTools[0].name).toBe('tool1');
-		expect(anthropicTools[0].description).toBe('Tool 1');
-		expect(anthropicTools[0].input_schema.type).toBe('object');
-		expect(anthropicTools[1].name).toBe('tool2');
-		expect(anthropicTools[1].description).toBe('Tool 2');
+		expect(tools.filter((tool) => tool.name.startsWith('a')).map((tool) => tool.name)).toEqual([
+			'a_x',
+		]);
+		expect([...tools].map((tool) => tool.name)).toEqual(['a_x', 'b_x']);
+		const seen: string[] = [];
+		tools.forEach((tool) => seen.push(tool.name));
+		expect(seen).toEqual(['a_x', 'b_x']);
+		expect(tools.toArray()).not.toBe(tools.toArray());
 	});
 
-	it('should convert all tools to OpenAI Responses API tools', () => {
-		const tool1 = new StackOneTool(
-			'tool1',
-			'Tool 1',
-			{
-				type: 'object',
-				properties: { id: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'GET',
-				url: 'https://api.example.com/test/{id}',
-				bodyType: 'json',
-				params: [],
-			},
+	it('tells StackOne tools apart', () => {
+		const stackOneTool = new StackOneTool(
+			's',
+			'',
+			{ type: 'object', properties: {} },
+			{ kind: 'local' },
+			'acc',
 		);
-		const tool2 = new StackOneTool(
-			'tool2',
-			'Tool 2',
-			{
-				type: 'object',
-				properties: { name: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/test',
-				bodyType: 'json',
-				params: [],
-			},
-		);
+		const tools = new Tools([named('plain'), stackOneTool]);
 
-		const tools = new Tools([tool1, tool2]);
-		const responsesTools = tools.toOpenAIResponses();
-
-		expect(responsesTools).toBeInstanceOf(Array);
-		expect(responsesTools.length).toBe(2);
-		expect(responsesTools[0].type).toBe('function');
-		expect(responsesTools[0].name).toBe('tool1');
-		expect(responsesTools[0].strict).toBe(true);
-		expect(responsesTools[1].name).toBe('tool2');
-		expect(responsesTools[1].strict).toBe(true);
+		expect(tools.getStackOneTools()).toEqual([stackOneTool]);
+		expect(tools.getStackOneTool('s').getAccountId()).toBe('acc');
+		expect(() => tools.getStackOneTool('plain')).toThrow(StackOneError);
+		expect(tools.isStackOneTool(stackOneTool)).toBe(true);
 	});
 
-	it('should convert all tools to OpenAI Responses API tools with strict disabled', () => {
-		const tool1 = createMockTool();
-		const tools = new Tools([tool1]);
-		const responsesTools = tools.toOpenAIResponses({ strict: false });
+	it('converts every tool with every adapter', async () => {
+		const tools = new Tools([named('a'), localTool('b', richSchema)]);
 
-		expect(responsesTools[0].strict).toBe(false);
+		expect(tools.toJsonSchema().map((entry) => entry.parameters)).toEqual([
+			{ type: 'object', properties: {} },
+			richSchema,
+		]);
+		expect(tools.toOpenAI().map((tool) => tool.function.name)).toEqual(['a', 'b']);
+		expect(tools.toAnthropic().map((tool) => tool.name)).toEqual(['a', 'b']);
+		expect(tools.toOpenAIResponses({ strict: false }).map((tool) => tool.strict)).toEqual([
+			false,
+			false,
+		]);
+		expect(Object.keys(await tools.toAISDK())).toEqual(['a', 'b']);
 	});
 
-	it('should convert all tools to AI SDK tools', async () => {
-		const tool1 = createMockTool();
-		const tool2 = new StackOneTool(
-			'another_tool',
-			'Another tool',
-			{
-				type: 'object',
-				properties: { name: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/test',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'name',
-						location: ParameterLocation.BODY,
-						type: 'string',
-					},
-				],
-			},
-			{
-				authorization: 'Bearer test_key',
-			},
-		);
-
-		const tools = new Tools([tool1, tool2]);
-
-		const aiSdkTools = await tools.toAISDK();
-
-		expect(Object.keys(aiSdkTools).length).toBe(2);
-		expect(aiSdkTools.test_tool).toBeDefined();
-		expect(aiSdkTools.another_tool).toBeDefined();
-		expect(typeof aiSdkTools.test_tool.execute).toBe('function');
-		expect(typeof aiSdkTools.another_tool.execute).toBe('function');
-	});
-
-	it('should convert all tools to Claude Agent SDK MCP server', async () => {
-		const tool1 = createMockTool();
-		const tool2 = new StackOneTool(
-			'another_tool',
-			'Another tool',
-			{
-				type: 'object',
-				properties: { name: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/test',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'name',
-						location: ParameterLocation.BODY,
-						type: 'string',
-					},
-				],
-			},
-			{
-				authorization: 'Bearer test_key',
-			},
-		);
-
-		const tools = new Tools([tool1, tool2]);
-
-		const mcpServer = await tools.toClaudeAgentSdk();
-
-		expect(mcpServer).toBeDefined();
-		expect(mcpServer.type).toBe('sdk');
-		expect(mcpServer.name).toBe('stackone-tools');
-		expect(mcpServer.instance).toBeDefined();
-	});
-
-	it('should convert all tools to Claude Agent SDK MCP server with custom options', async () => {
-		const tool1 = createMockTool();
-		const tools = new Tools([tool1]);
-
-		const mcpServer = await tools.toClaudeAgentSdk({
-			serverName: 'my-custom-server',
+	it('builds a Claude Agent SDK MCP server', async () => {
+		const mcpServer = await new Tools([named('a')]).toClaudeAgentSdk({
+			serverName: 'custom',
 			serverVersion: '2.0.0',
 		});
 
-		expect(mcpServer).toBeDefined();
 		expect(mcpServer.type).toBe('sdk');
-		expect(mcpServer.name).toBe('my-custom-server');
+		expect(mcpServer.name).toBe('custom');
 		expect(mcpServer.instance).toBeDefined();
 	});
+});
 
-	it('should be iterable', () => {
-		const tool1 = createMockTool();
-		const tool2 = new StackOneTool(
-			'another_tool',
-			'Another tool',
-			{
-				type: 'object',
-				properties: { name: { type: 'string' } },
-			},
-			{
-				kind: 'http',
-				method: 'POST',
-				url: 'https://api.example.com/test',
-				bodyType: 'json',
-				params: [
-					{
-						name: 'name',
-						location: ParameterLocation.BODY,
-						type: 'string',
-					},
-				],
-			},
-			{
-				authorization: 'Bearer test_key',
-			},
-		);
-
-		const tools = new Tools([tool1, tool2]);
-
-		let count = 0;
-		for (const tool of tools) {
-			expect(tool).toBeDefined();
-			expect(tool.name).toBeDefined();
-			count++;
-		}
-
-		expect(count).toBe(2);
+describe('ToolParameters typing', () => {
+	it('accepts a served schema as parameters', () => {
+		const parameters: ToolParameters = toolParametersFromInputSchema(richSchema);
+		expect(parameters.type).toBe('object');
 	});
 });
 
-describe('BaseTool.connector', () => {
-	it('should extract connector prefix from tool name', () => {
-		const tool = new BaseTool(
-			'bamboohr_list_employees',
-			'List employees',
-			{ type: 'object', properties: {} },
-			{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
-		);
-		expect(tool.connector).toBe('bamboohr');
+describe('Tools.executeOpenAIToolCalls', () => {
+	const toolsWith = (behaviour: (args: unknown) => Promise<JsonObject>) => {
+		const tool = localTool('linear_list_issues', {
+			type: 'object',
+			properties: { body_variables: { type: 'object' } },
+		});
+		const seen: unknown[] = [];
+		tool.execute = async (args) => {
+			seen.push(args);
+			return behaviour(args);
+		};
+		return { tools: new Tools([tool]), seen };
+	};
+	const call = (name: string, args = '{}', id = 'call_1') => ({
+		id,
+		type: 'function' as const,
+		function: { name, arguments: args },
 	});
 
-	it('should return the name itself for single-segment names', () => {
-		const tool = new BaseTool(
-			'bamboohr',
-			'BambooHR',
-			{ type: 'object', properties: {} },
-			{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
-		);
-		expect(tool.connector).toBe('bamboohr');
-	});
+	it('runs each call and pairs its result with the call id', async () => {
+		const { tools, seen } = toolsWith(async () => ({ data: { n: 1 } }));
 
-	it('should return empty string for empty name', () => {
-		const tool = new BaseTool(
-			'',
-			'Empty',
-			{ type: 'object', properties: {} },
-			{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
-		);
-		expect(tool.connector).toBe('');
-	});
-
-	it('should return lowercase connector', () => {
-		const tool = new BaseTool(
-			'BambooHR_create_employee',
-			'Create employee',
-			{ type: 'object', properties: {} },
-			{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
-		);
-		expect(tool.connector).toBe('bamboohr');
-	});
-});
-
-describe('Tools.getConnectors', () => {
-	it('should return unique connector names from tool names', () => {
-		const tools = new Tools([
-			new BaseTool(
-				'bamboohr_create_employee',
-				'Create employee',
-				{ type: 'object', properties: {} },
-				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
-			),
-			new BaseTool(
-				'bamboohr_list_employees',
-				'List employees',
-				{ type: 'object', properties: {} },
-				{ kind: 'http', method: 'GET', url: 'https://example.com', bodyType: 'json', params: [] },
-			),
-			new BaseTool(
-				'hibob_create_employee',
-				'Create employee',
-				{ type: 'object', properties: {} },
-				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
-			),
-			new BaseTool(
-				'slack_send_message',
-				'Send message',
-				{ type: 'object', properties: {} },
-				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
-			),
+		const messages = await tools.executeOpenAIToolCalls([
+			call('linear_list_issues', '{"body_variables": {}}'),
 		]);
 
-		const connectors = tools.getConnectors();
-		expect(connectors).toEqual(new Set(['bamboohr', 'hibob', 'slack']));
+		expect(messages).toEqual([
+			{ role: 'tool', tool_call_id: 'call_1', content: '{"data":{"n":1}}' },
+		]);
+		expect(seen).toEqual(['{"body_variables": {}}']);
 	});
 
-	it('should return empty set for empty tools', () => {
-		const tools = new Tools([]);
-		expect(tools.getConnectors()).toEqual(new Set());
-	});
+	it('keeps the order of several calls', async () => {
+		const { tools } = toolsWith(async (args) => ({ echoed: args as string }));
 
-	it('should return lowercase connector names', () => {
-		const tools = new Tools([
-			new BaseTool(
-				'BambooHR_create_employee',
-				'Create employee',
-				{ type: 'object', properties: {} },
-				{ kind: 'http', method: 'POST', url: 'https://example.com', bodyType: 'json', params: [] },
-			),
+		const messages = await tools.executeOpenAIToolCalls([
+			call('linear_list_issues', '{"a":1}', 'c1'),
+			call('linear_list_issues', '{"a":2}', 'c2'),
 		]);
 
-		const connectors = tools.getConnectors();
-		expect(connectors).toEqual(new Set(['bamboohr']));
+		expect(messages.map((message) => message.tool_call_id)).toEqual(['c1', 'c2']);
 	});
-});
 
-describe('Schema Validation', () => {
-	describe('Array Items in Schema', () => {
-		it('should preserve array items when provided', () => {
-			const tool = new StackOneTool(
-				'test_tool',
-				'Test tool',
-				{
-					type: 'object',
-					properties: {
-						arrayWithItems: {
-							type: 'array',
-							description: 'Array with items',
-							items: { type: 'number' },
-						},
-					},
-				},
-				{
-					kind: 'http',
-					method: 'GET',
-					url: 'https://example.com/test',
-					bodyType: 'json',
-					params: [],
-				},
-				{ authorization: 'Bearer test_api_key' },
-			);
+	it('accepts plain objects without a type and with object arguments', async () => {
+		const { tools, seen } = toolsWith(async () => ({ ok: true }));
+		await tools.executeOpenAIToolCalls([
+			{ id: 'c', function: { name: 'linear_list_issues', arguments: { a: 1 } } },
+		]);
+		expect(seen).toEqual([{ a: 1 }]);
+	});
 
-			const parameters = tool.toOpenAI().function.parameters;
-			const properties = parameters?.properties as Record<string, JSONSchema>;
-
-			expect(properties.arrayWithItems.items).toBeDefined();
-			expect((properties.arrayWithItems.items as JSONSchema).type).toBe('number');
+	it('reports a failed call to the model instead of throwing, with the response body', async () => {
+		const { tools } = toolsWith(async () => {
+			throw new StackOneAPIError('400 Bad Request: path.id is missing', 400, {
+				message: 'path.id is missing',
+			});
 		});
 
-		it('should handle nested object structure', () => {
-			const tool = new StackOneTool(
-				'test_tool',
-				'Test tool',
-				{
-					type: 'object',
-					properties: {
-						nestedObject: {
-							type: 'object',
-							properties: {
-								nestedArray: {
-									type: 'array',
-									items: { type: 'string' },
-								},
-							},
-						},
-					},
-				},
-				{
-					kind: 'http',
-					method: 'GET',
-					url: 'https://example.com/test',
-					bodyType: 'json',
-					params: [],
-				},
-				{ authorization: 'Bearer test_api_key' },
-			);
+		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
 
-			const parameters = tool.toOpenAI().function.parameters;
-			expect(parameters).toBeDefined();
-			const properties = parameters?.properties as Record<string, JSONSchema>;
-			const nestedObject = properties.nestedObject;
-
-			expect(nestedObject.type).toBe('object');
-			expect(nestedObject.properties).toBeDefined();
+		expect(JSON.parse(message?.content as string)).toEqual({
+			error: '400 Bad Request: path.id is missing',
+			response_body: { message: 'path.id is missing' },
 		});
 	});
 
-	describe('AI SDK Integration', () => {
-		it('should convert to AI SDK tool format with correct schema structure', async () => {
-			const tool = new StackOneTool(
-				'test_tool',
-				'Test tool with arrays',
-				{
-					type: 'object',
-					properties: {
-						arrayWithItems: { type: 'array', items: { type: 'string' } },
-					},
-				},
-				{
-					kind: 'http',
-					method: 'GET',
-					url: 'https://example.com/test',
-					bodyType: 'json',
-					params: [],
-				},
-				{ authorization: 'Bearer test_api_key' },
-			);
-
-			const aiSdkTool = await tool.toAISDK();
-			const toolObj = aiSdkTool[tool.name];
-
-			expect(toolObj).toBeDefined();
-			expect(typeof toolObj.execute).toBe('function');
-			// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
-			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
-			expect(toolObj.inputSchema.jsonSchema.type).toBe('object');
-
-			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
-			const arrayWithItems = toolObj.inputSchema.jsonSchema.properties?.arrayWithItems;
-			expect(arrayWithItems?.type).toBe('array');
-			expect((arrayWithItems?.items as JSONSchema)?.type).toBe('string');
+	it('reports malformed arguments the same way', async () => {
+		const tool = new StackOneMcpTool({
+			name: 'linear_list_issues',
+			description: '',
+			parameters: { type: 'object', properties: {} },
+			endpoint: `${TEST_BASE_URL}/mcp`,
+			apiKey: 'k',
+			accountId: 'acc1',
+			timeout: 1_000,
 		});
+		const [message] = await new Tools([tool]).executeOpenAIToolCalls([
+			call('linear_list_issues', '{not json'),
+		]);
+		expect(JSON.parse(message?.content as string).error).toMatch(/Invalid JSON in arguments/);
+	});
 
-		it('should handle nested filter object for AI SDK', async () => {
-			const tool = new StackOneTool(
-				'test_nested_arrays',
-				'Test nested arrays',
-				{
-					type: 'object',
-					properties: {
-						filter: {
-							type: 'object',
-							properties: {
-								type_ids: {
-									type: 'array',
-									items: { type: 'string' },
-									description: 'List of type IDs',
-								},
-								status: { type: 'string' },
-							},
-						},
-					},
-				},
-				{
-					kind: 'http',
-					method: 'GET',
-					url: 'https://example.com/test',
-					bodyType: 'json',
-					params: [],
-				},
-				{ authorization: 'Bearer test_api_key' },
-			);
-
-			const parameters = tool.toOpenAI().function.parameters;
-			expect(parameters).toBeDefined();
-			const aiSchema = jsonSchema(parameters as JSONSchema);
-			expect(aiSchema).toBeDefined();
-
-			const aiSdkTool = await tool.toAISDK();
-			// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
-			// @ts-ignore - jsonSchema is available on Schema wrapper from ai sdk
-			const filterProp = aiSdkTool[tool.name].inputSchema.jsonSchema.properties?.filter as
-				| (JSONSchema & { properties: Record<string, JSONSchema> })
-				| undefined;
-
-			expect(filterProp?.type).toBe('object');
-			expect(filterProp?.properties.type_ids.type).toBe('array');
-			expect(filterProp?.properties.type_ids.items).toBeDefined();
+	it('reports an unknown tool rather than throwing', async () => {
+		const { tools } = toolsWith(async () => ({}));
+		const [message] = await tools.executeOpenAIToolCalls([call('invented_tool')]);
+		expect(JSON.parse(message?.content as string)).toEqual({
+			error: 'Unknown tool "invented_tool"',
 		});
+	});
+
+	it('reports a non-function tool call rather than throwing', async () => {
+		const { tools } = toolsWith(async () => ({}));
+		const [message] = await tools.executeOpenAIToolCalls([
+			{ id: 'c', type: 'custom', custom: { name: 'linear_list_issues', input: '' } },
+		]);
+		expect(JSON.parse(message?.content as string)).toEqual({
+			error: 'Unsupported tool call type "custom"',
+		});
+	});
+
+	it('serialises file bytes as base64 instead of a byte array', async () => {
+		const { tools } = toolsWith(async () => ({ content: Buffer.from('%PDF-1.4') as never }));
+		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
+		expect(JSON.parse(message?.content as string)).toEqual({
+			content: Buffer.from('%PDF-1.4').toString('base64'),
+		});
+	});
+
+	it('sends "null" for a tool that returns nothing, as the Python SDK does', async () => {
+		const { tools } = toolsWith(async () => undefined as never);
+		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
+		expect(message?.content).toBe('null');
+	});
+
+	it('rethrows an error that is not the SDK’s', async () => {
+		const { tools } = toolsWith(async () => {
+			throw new TypeError('programming error');
+		});
+		await expect(tools.executeOpenAIToolCalls([call('linear_list_issues')])).rejects.toThrow(
+			TypeError,
+		);
+	});
+
+	it('returns no messages for no tool calls', async () => {
+		const { tools } = toolsWith(async () => ({}));
+		expect(await tools.executeOpenAIToolCalls(undefined)).toEqual([]);
+		expect(await tools.executeOpenAIToolCalls(null)).toEqual([]);
 	});
 });

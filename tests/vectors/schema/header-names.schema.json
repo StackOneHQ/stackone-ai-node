@@ -1,0 +1,109 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/header-names.schema.json",
+    "title": "Nested header name vectors",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        }
+    },
+    "required": ["description", "version", "cases"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "expected": {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "forwarded": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": ["forwarded"],
+                            "additionalProperties": false
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "dropped": {
+                                    "enum": ["set-by-sdk", "malformed"]
+                                }
+                            },
+                            "required": ["dropped"],
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "required": ["id", "description", "name", "expected"],
+            "additionalProperties": false
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                }
+            },
+            "required": ["id", "description", "name", "python", "node"],
+            "additionalProperties": false
+        }
+    }
+}

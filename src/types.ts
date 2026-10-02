@@ -2,16 +2,10 @@
  * Common type definitions for the StackOne SDK
  */
 
-import type { Tool } from 'ai';
-import type { ToolSet } from 'ai';
-import type { JsonObject, JsonValue, ValueOf } from 'type-fest';
+import type { Tool, ToolSet } from 'ai';
+import type { JsonObject, JsonValue } from 'type-fest';
 
 export type { JsonObject, JsonValue };
-
-/**
- * HTTP headers type
- */
-type Headers = Record<string, string>;
 
 /**
  * JSON Schema type for defining tool input/output schemas as raw JSON Schema objects.
@@ -71,56 +65,30 @@ export interface JSONSchema {
 export type JsonSchemaProperties = Record<string, JSONSchema>;
 
 /**
- * JSON Schema type union
+ * How the MCP endpoint lists tools.
+ *
+ * `'individual'` (the server default) lists one tool per action — hundreds per account.
+ * `'search_execute'` lists two meta tools per connector instead: a `*_search_actions` that ranks
+ * actions for a natural-language query and an `*_execute_action` that runs one by id. The
+ * catalog stays small however many accounts are linked, which is what keeps it inside a model's
+ * context.
  */
-type JsonSchemaType = JSONSchema['type'];
+export type ToolMode = 'individual' | 'search_execute';
 
 /**
- * Valid locations for parameters in requests
+ * Executes over MCP `tools/call`, on the endpoint that listed the tool. Every tool a toolset
+ * returns executes this way.
  */
-export const ParameterLocation = {
-	HEADER: 'header',
-	QUERY: 'query',
-	PATH: 'path',
-	BODY: 'body',
-} as const satisfies Record<string, string>;
-
-export type ParameterLocation = ValueOf<typeof ParameterLocation>;
+export interface McpExecuteConfig {
+	kind: 'mcp';
+	url: string;
+	toolName: string;
+}
 
 /**
- * Configuration for executing a tool against an API endpoint
+ * A tool whose `execute` is supplied by the caller rather than by the SDK.
  */
-interface HttpExecuteParameter {
-	name: string;
-	location: ParameterLocation;
-	type: JsonSchemaType;
-	derivedFrom?: string; // this is the name of the param that this one is derived from.
-}
-
-export type HttpBodyType = 'json' | 'multipart-form' | 'form';
-
-export interface HttpExecuteConfig {
-	kind: 'http';
-	method: string;
-	url: string;
-	bodyType: HttpBodyType;
-	params: HttpExecuteParameter[]; // full list of params used to execute. Comes straight from the OpenAPI spec.
-}
-
-export interface RpcExecuteConfig {
-	kind: 'rpc';
-	method: string;
-	url: string;
-	payloadKeys: {
-		action: string;
-		body?: string;
-		headers?: string;
-		path?: string;
-		query?: string;
-	};
-}
-
-export interface LocalExecuteConfig {
+interface LocalExecuteConfig {
 	kind: 'local';
 	identifier?: string;
 	description?: string;
@@ -129,15 +97,14 @@ export interface LocalExecuteConfig {
 /**
  * Discriminated union lets call sites branch on execution style without relying on nullable fields.
  */
-export type ExecuteConfig = HttpExecuteConfig | RpcExecuteConfig | LocalExecuteConfig;
+export type ExecuteConfig = McpExecuteConfig | LocalExecuteConfig;
 
 /**
  * Options for executing a tool
  */
 export interface ExecuteOptions {
 	/**
-	 * If true, returns the request details instead of making the actual API call
-	 * Useful for debugging and testing transformed parameters
+	 * If true, returns the `tools/call` the tool would send instead of sending it.
 	 */
 	dryRun?: boolean;
 }
@@ -147,22 +114,21 @@ export interface ExecuteOptions {
  */
 export interface ToolExecution {
 	/**
-	 * The raw execution configuration generated from the OpenAPI specification.
+	 * How the tool is executed.
 	 */
 	config: ExecuteConfig;
-	/**
-	 * The headers that will be sent when executing the tool.
-	 */
-	headers: Headers;
 }
 
 /**
- * Schema definition for tool parameters
+ * Schema definition for tool parameters: the served `inputSchema`, verbatim.
+ *
+ * Every root keyword the server sends (`$schema`, `$defs`, `title`, `additionalProperties`,
+ * `oneOf`, …) is kept, so {@link BaseTool.toJsonSchema} can hand a model exactly what was served.
  */
-export interface ToolParameters {
+export interface ToolParameters extends Record<string, unknown> {
 	type: string;
-	properties: JsonSchemaProperties; // these are the params we will expose to the user/agent in the tool. These might be higher level params.
-	required?: string[]; // list of required parameter names
+	properties: JsonSchemaProperties;
+	required?: string[];
 }
 
 /**
@@ -205,25 +171,6 @@ export type AISDKToolResult<T extends string = string> = ToolSet & {
 /**
  * Options for toClaudeAgentSdk() method
  */
-/**
- * Search configuration for the StackOneToolSet constructor.
- *
- * When provided as an object, sets default search options that flow through
- * to `searchTools()`, `getSearchTool()`, and `searchActionNames()`.
- * Per-call options override these defaults.
- *
- * When set to `null`, search is disabled entirely.
- * When omitted (`undefined`), defaults to `{ method: 'auto' }`.
- */
-export interface SearchConfig {
-	/** Search backend to use. Defaults to `'auto'`. */
-	method?: 'auto' | 'semantic' | 'local';
-	/** Maximum number of tools to return. */
-	topK?: number;
-	/** Minimum similarity score threshold 0-1. */
-	minSimilarity?: number;
-}
-
 export interface ClaudeAgentSdkOptions {
 	/**
 	 * Name of the MCP server. Defaults to 'stackone-tools'.
@@ -236,62 +183,74 @@ export interface ClaudeAgentSdkOptions {
 }
 
 /**
- * Defender configuration for controlling prompt injection detection behavior.
- * Field names match the canonical `DefenderSettings` from `@stackone/core`.
- *
- * Four modes:
- * - Omit `defender` entirely (default) — defer to whatever is configured in the project dashboard.
- *   The SDK sends no `defender_config` in the RPC payload, so the project setting controls behavior.
- * - `{ useProjectSettings: true }` — same as omitting; provided as a self-documenting opt-in.
- *   No other fields may be set alongside this (TypeScript enforces it; a runtime error is also thrown).
- * - An explicit config object — the SDK owns the defender settings and sends them with every
- *   RPC call, overriding any project-level config.
- * - `null` — defender is explicitly disabled for all tool calls, overriding the project setting.
+ * An account linked to the API key, as `GET /accounts` returns it. Only accounts whose `status`
+ * is `'active'` can serve tools.
  */
-export type DefenderConfig =
-	| { useProjectSettings: true }
-	| {
-			useProjectSettings?: false;
-			/** Whether to run defender at all. Default: `true`. */
-			enabled?: boolean;
-			/**
-			 * Whether to block tool execution when a HIGH risk score is detected.
-			 * Default: `false` (scan and annotate, but do not block).
-			 */
-			blockHighRisk?: boolean;
-			/** Whether to enable tier 1 pattern-based (regex) detection. Default: `true`. */
-			useTier1Classification?: boolean;
-			/** Whether to enable tier 2 ML-based detection. Default: `true`. */
-			useTier2Classification?: boolean;
-	  };
+export type StackOneAccount = JsonObject & {
+	id: string;
+	provider?: string;
+	status?: string;
+	/** Whether the account is shared across end users. */
+	shared?: boolean;
+	/**
+	 * The account's end user. For a non-shared account, the toolset sends it as `x-end-user-id` on
+	 * every MCP request for that account.
+	 */
+	origin_username?: string | null;
+};
 
 /**
- * Reference values for a fully-enabled defender configuration with safe defaults
- * (scan with both tiers, annotate but never block).
- *
- * Spread this into an explicit `defender` config to opt in with one tweak:
- * ```ts
- * defender: { ...DEFAULT_DEFENDER_CONFIG, blockHighRisk: true }
- * ```
- *
- * These values are also the per-field fallbacks applied when an explicit `defender`
- * config object is passed with some fields omitted.
- *
- * Note: this is NOT applied when `defender` is omitted entirely — in that case the SDK
- * defers to the project dashboard setting and sends no `defender_config` in the payload.
+ * One action a `search()` found, as the server returned it: `action_id` always, the fields below
+ * when the server sent them, and anything else it adds.
  */
-export const DEFAULT_DEFENDER_CONFIG = {
-	enabled: true,
-	blockHighRisk: false,
-	useTier1Classification: true,
-	useTier2Classification: true,
-} as const;
+export type SearchResult = JsonObject & {
+	action_id: string;
+	/** What the action does. */
+	description?: string;
+	/** How well the action matched the query; results are ranked on it, highest first. */
+	similarity_score?: number;
+	/**
+	 * The JSON Schema of the arguments `execute()` takes for this action. The server omits it for
+	 * an action that takes none.
+	 */
+	input_schema?: JsonObject;
+	/** A copy-and-edit `execute()` call for the action, served alongside `input_schema`. */
+	example_request?: JsonObject;
+	/**
+	 * The `session_id` of the search that produced this hit, when the server issued one. Pass it
+	 * to `execute()` and `submitFeedback()` to link those calls to this search.
+	 */
+	session_id?: string;
+	/**
+	 * The account whose connector found this hit. The same action linked on two accounts is two
+	 * hits; pass this in `execute()`'s `accountIds` to run the action on this one.
+	 */
+	account_id: string;
+};
 
 /**
- * Resolved defender behavior on a `StackOneToolSet`.
+ * What an action returns: the server's own wrapper, as it wrote it. `toolset.execute()` and
+ * `submitFeedback()` return one; so does `tool.execute()` on an action tool.
  *
- * - `'project'` — SDK adds no `defender_config` to the RPC payload; the project dashboard controls.
- * - `'disabled'` — SDK forces defender off, overriding the dashboard.
- * - `'explicit'` — SDK sends an explicit `defender_config`, overriding the dashboard.
+ * A type for what the server sends, not a check: the SDK returns the result unchanged. A result
+ * with `isError` set never reaches the caller, since it raises `StackOneAPIError` instead. Any
+ * key the server adds beyond these is kept.
  */
-export type DefenderMode = 'project' | 'disabled' | 'explicit';
+export type ActionResult = JsonObject & {
+	isError: false;
+	/** The action's output. A file action's is `{ download_url, expires_at, file }`. */
+	result: JsonValue;
+	/** What StackOne Defender checked, when it ran on this call. */
+	defenderMetadata?: JsonObject;
+	/** The policy decision for this call, when a policy applied. */
+	policyMetadata?: JsonObject;
+};
+
+/** The verdict `submitFeedback()` records. */
+export type FeedbackRating = 'positive' | 'negative' | 'neutral';
+
+/** Who produced the feedback. */
+export type FeedbackSource = 'model' | 'user' | 'system';
+
+/** What the feedback is about. */
+export type FeedbackCategory = 'search' | 'execute' | 'defender' | 'connection' | 'general';

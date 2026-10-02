@@ -1,0 +1,162 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/header-arguments.schema.json",
+    "title": "Header argument vectors (invariant 4)",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "reasons": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        }
+    },
+    "required": ["description", "version", "cases", "reasons"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "warning": {
+            "type": "object",
+            "properties": {
+                "argument": {
+                    "type": "string",
+                    "description": "The top-level argument: `headers`, or `headers_<name>` as supplied."
+                },
+                "header": {
+                    "type": "string",
+                    "description": "For an entry of a `headers` object: its name, trimmed. Present exactly when `argument` is `headers` and the entry, not the whole argument, was dropped."
+                },
+                "reason": {
+                    "enum": [
+                        "set-by-sdk",
+                        "not-declared",
+                        "malformed",
+                        "not-an-object",
+                        "not-a-scalar"
+                    ]
+                }
+            },
+            "required": ["argument", "reason"],
+            "additionalProperties": false,
+            "if": {
+                "properties": {
+                    "argument": {
+                        "const": "headers"
+                    },
+                    "reason": {
+                        "enum": ["set-by-sdk", "not-declared", "malformed"]
+                    }
+                },
+                "required": ["argument", "reason"]
+            },
+            "then": {
+                "required": ["header"]
+            },
+            "else": {
+                "not": {
+                    "required": ["header"]
+                }
+            }
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "schema": {
+                    "type": "object",
+                    "description": "The tool's served inputSchema."
+                },
+                "arguments": {
+                    "type": "object",
+                    "description": "The model's arguments."
+                },
+                "expected_arguments": {
+                    "type": "object",
+                    "description": "The arguments that reach tools/call."
+                },
+                "expected_warnings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/warning"
+                    },
+                    "description": "In argument order."
+                }
+            },
+            "required": [
+                "id",
+                "description",
+                "schema",
+                "arguments",
+                "expected_arguments",
+                "expected_warnings"
+            ],
+            "additionalProperties": false
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "schema": {
+                    "type": "object",
+                    "description": "The tool's served inputSchema."
+                },
+                "arguments": {
+                    "type": "object",
+                    "description": "The model's arguments."
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                }
+            },
+            "required": ["id", "description", "schema", "arguments", "python", "node"],
+            "additionalProperties": false
+        }
+    }
+}

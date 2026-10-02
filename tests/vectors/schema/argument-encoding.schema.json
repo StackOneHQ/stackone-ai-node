@@ -1,0 +1,182 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/argument-encoding.schema.json",
+    "title": "Argument encoding vectors",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "reasons": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        }
+    },
+    "required": ["description", "version", "cases", "reasons"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "value": {
+            "description": "Any JSON value, in which an object with a `$number` key is a marker for a number JSON cannot hold, and nothing else.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/value"
+                    }
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "$number": {
+                            "enum": ["NaN", "Infinity", "-Infinity"]
+                        }
+                    },
+                    "required": ["$number"],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "not": {
+                        "required": ["$number"]
+                    },
+                    "additionalProperties": {
+                        "$ref": "#/$defs/value"
+                    }
+                }
+            ]
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "arguments": {
+                    "$ref": "#/$defs/value"
+                },
+                "arguments_json": {
+                    "type": "string",
+                    "description": "JSON text handed to execute instead of a value."
+                },
+                "expected": {
+                    "oneOf": [
+                        {
+                            "const": "ok"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "const": "ToolArgumentsError"
+                                },
+                                "reason": {
+                                    "enum": [
+                                        "not-finite",
+                                        "invalid-json",
+                                        "not-an-object",
+                                        "unencodable"
+                                    ]
+                                }
+                            },
+                            "required": ["error", "reason"],
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "required": ["id", "description", "expected"],
+            "additionalProperties": false,
+            "oneOf": [
+                {
+                    "required": ["arguments"]
+                },
+                {
+                    "required": ["arguments_json"]
+                }
+            ]
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                },
+                "arguments": {
+                    "$ref": "#/$defs/value"
+                },
+                "arguments_json": {
+                    "type": "string",
+                    "description": "JSON text handed to execute instead of a value."
+                }
+            },
+            "required": ["id", "description", "python", "node"],
+            "additionalProperties": false,
+            "oneOf": [
+                {
+                    "required": ["arguments"]
+                },
+                {
+                    "required": ["arguments_json"]
+                }
+            ]
+        }
+    }
+}

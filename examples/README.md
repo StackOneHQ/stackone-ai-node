@@ -16,7 +16,7 @@ Set your credentials using either approach:
 
 ```bash
 export STACKONE_API_KEY=your-stackone-api-key
-export STACKONE_ACCOUNT_ID=your-account-id
+export STACKONE_ACCOUNT_ID=your-account-id     # optional: the examples pass it as accountId
 export OPENAI_API_KEY=your-openai-api-key       # for OpenAI/AI SDK examples
 export ANTHROPIC_API_KEY=your-anthropic-api-key  # for Anthropic examples
 ```
@@ -46,9 +46,13 @@ pnpm test
 
 ## Examples Overview
 
+### [`search-and-execute.ts`](./search-and-execute.ts) -- Search and Execute (recommended)
+
+Finds an action in natural language with `toolset.search()` and runs it with `toolset.execute()`, without loading a tool catalog into a model's context. Lists the linked accounts the API key reaches (no account id needed), prints the ranked matches and the best action's `input_schema`, executes it with the hit's `session_id`, and records feedback with `submitFeedback()` when the project has feedback enabled.
+
 ### [`openai-integration.ts`](./openai-integration.ts) -- OpenAI Chat Completions API
 
-Fetches StackOne tools, converts them with `tools.toOpenAI()`, and sends them to the OpenAI Chat Completions API. Demonstrates the basic tool-call flow: create a completion, inspect the returned tool calls, and log arguments.
+Fetches StackOne tools, converts them with `tools.toOpenAI()`, and sends them to the OpenAI Chat Completions API. Demonstrates the full tool-call loop: create a completion, run the returned tool calls with `tools.executeOpenAIToolCalls()`, and send the results back for a final answer.
 
 ### [`openai-responses-integration.ts`](./openai-responses-integration.ts) -- OpenAI Responses API
 
@@ -66,23 +70,15 @@ Integrates with the Vercel AI SDK via `tools.toAISDK()`. Runs a multi-step agent
 
 Converts StackOne tools into an MCP server with `tools.toClaudeAgentSdk()` and passes it to the Claude Agent SDK `query()` function. Streams agent messages and logs tool-use blocks as they arrive.
 
-### [`search-tools.ts`](./search-tools.ts) -- Tool Discovery
-
-Covers five approaches to finding the right tools at runtime: direct fetch with action-pattern filters, semantic (embedding-based) search, local BM25/TF-IDF search, auto search that falls back gracefully, and a search-and-execute mode that hands `tool_search` + `tool_execute` to an LLM agent via the Vercel AI SDK.
-
 ### [`auth-management.ts`](./auth-management.ts) -- Authentication Patterns
 
-Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, setting multiple accounts with `setAccounts()`, overriding per-tool collection or per individual tool, and fetching tools for multiple accounts in one call.
-
-### [`defender-config.ts`](./defender-config.ts) -- Defender Configuration
-
-Demonstrates the four ways to configure prompt-injection detection on a `StackOneToolSet`: omit (defer to project dashboard), `{ useProjectSettings: true }` (explicit form of the default), `null` (force off), and explicit config objects. Shows the `defenderMode` getter and the once-per-process warning the SDK emits when it overrides the dashboard. Sections 1–7 are construction-only; section 8 makes a live RPC call when `STACKONE_API_KEY` is set so you can inspect the `defenderMetadata` shape the backend returns.
+Walks through every way to configure API keys and account IDs: reading from environment variables, passing them explicitly to the constructor, relying on account discovery with just an API key (`fetchAccounts()`), setting multiple accounts with `setAccounts()`, and overriding the account on an individual tool.
 
 ## Environment Variables
 
-| Variable              | Required                     | Used By                                                                                                            |
-| --------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `STACKONE_API_KEY`    | Yes                          | All examples                                                                                                       |
-| `STACKONE_ACCOUNT_ID` | Recommended                  | All examples (read automatically by `new StackOneToolSet()`)                                                       |
-| `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts`, `search-tools.ts` (section 5) |
-| `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                                                      |
+| Variable              | Required                     | Used By                                                                             |
+| --------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
+| `STACKONE_API_KEY`    | Yes                          | All examples                                                                        |
+| `STACKONE_ACCOUNT_ID` | Optional                     | Read by the examples and passed as `accountId`; without it, accounts are discovered |
+| `OPENAI_API_KEY`      | For OpenAI / AI SDK examples | `openai-integration.ts`, `openai-responses-integration.ts`, `ai-sdk-integration.ts` |
+| `ANTHROPIC_API_KEY`   | For Anthropic examples       | `anthropic-integration.ts`, `claude-agent-sdk-integration.ts`                       |

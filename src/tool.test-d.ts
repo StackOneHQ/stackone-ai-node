@@ -12,13 +12,7 @@ const tool = new BaseTool(
 		type: 'object',
 		properties: { id: { type: 'string' } },
 	},
-	{
-		kind: 'http',
-		method: 'GET',
-		url: 'https://example.com/test',
-		bodyType: 'json',
-		params: [],
-	},
+	{ kind: 'local' },
 );
 
 const tools = new Tools([tool]);

@@ -1,0 +1,1428 @@
+{
+    "$schema": "./schema/header-arguments.schema.json",
+    "description": "Invariant 4 as data: a tool's served inputSchema, the model's arguments, the arguments that reach tools/call, and the warnings the SDK emits, in argument order. A warning is {argument, header?, reason}: `argument` is the top-level key (`headers` or `headers_<name>`); `header` is the trimmed nested name, for an entry of a `headers` object. `reason` is one of `reasons`; messages.json renders it. `x-end-user-id` is SDK-owned like authorization, x-account-id and user-agent, and dropped unconditionally — whether or not the SDK has an end user id recorded for the call's account (SDK-UCA-CONTRACT.md §9): these cases carry no account context, since the owned-name check runs the same regardless.",
+    "version": 1,
+    "reasons": ["set-by-sdk", "not-declared", "malformed", "not-an-object", "not-a-scalar"],
+    "cases": [
+        {
+            "id": "open-forwards-every-name",
+            "description": "an open headers object (type object, no properties, additionalProperties not false) declares every name",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a",
+                    "X-Other": "b"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a",
+                    "X-Other": "b"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "open-drops-sdk-owned",
+            "description": "an open object still never forwards an SDK-owned name",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "Authorization": "Bearer x",
+                    "x-account-id": "victim",
+                    "User-Agent": "evil/0",
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "Authorization",
+                    "reason": "set-by-sdk"
+                },
+                {
+                    "argument": "headers",
+                    "header": "x-account-id",
+                    "reason": "set-by-sdk"
+                },
+                {
+                    "argument": "headers",
+                    "header": "User-Agent",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "open-additional-properties-true",
+            "description": "additionalProperties: true is open",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "open-additional-properties-schema",
+            "description": "additionalProperties as a schema is open",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "closed-declares-nothing",
+            "description": "a closed object (additionalProperties: false, no properties) declares no names; headers is sent empty",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "additionalProperties": false
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {}
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-custom",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "closed-with-properties",
+            "description": "a closed object with properties declares exactly those",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a",
+                    "x-other": "b"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-other",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "declared-nested",
+            "description": "declared names are forwarded; an undeclared one is not; a declared SDK-owned one is not; a non-header argument is untouched",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "object"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "Authorization": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "path": {
+                    "id": "emp_1"
+                },
+                "headers": {
+                    "x-custom": "a",
+                    "x-other": "b",
+                    "authorization": "Bearer x"
+                }
+            },
+            "expected_arguments": {
+                "path": {
+                    "id": "emp_1"
+                },
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-other",
+                    "reason": "not-declared"
+                },
+                {
+                    "argument": "headers",
+                    "header": "authorization",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "declared-nested-case-insensitive",
+            "description": "nested names are declared case-insensitively, and forwarded as supplied",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "X-Custom": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "declared-nested-trimmed",
+            "description": "a nested name is trimmed before it is looked up and forwarded",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "object"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "Authorization": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    " x-custom\t": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "declared-nested-null-value",
+            "description": "a null nested value is dropped silently",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "object"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "Authorization": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": null
+                }
+            },
+            "expected_arguments": {
+                "headers": {}
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "declared-nested-scalar-value",
+            "description": "a nested scalar is forwarded as its text (see header-values.json)",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "object"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "Authorization": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": 1
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "1"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "nested-empty-object",
+            "description": "an empty headers object is forwarded empty",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path": {
+                        "type": "object"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "Authorization": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {}
+            },
+            "expected_arguments": {
+                "headers": {}
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "properties-not-an-object",
+            "description": "a properties keyword that is not an object declares nothing",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "properties": []
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {}
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-custom",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "untyped-declares-nothing",
+            "description": "an untyped headers schema with no properties declares nothing",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {}
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {}
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-custom",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "untyped-with-properties",
+            "description": "an untyped headers schema with properties declares those",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "properties": {
+                            "x-custom": {}
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "untyped-non-object-dropped",
+            "description": "an untyped headers schema is not an ordinary field: a non-object value is dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {}
+                }
+            },
+            "arguments": {
+                "headers": "abc"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "object-or-null-with-properties",
+            "description": "[\"object\",\"null\"] with properties declares those",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": ["object", "null"],
+                        "properties": {
+                            "x-custom": {}
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a",
+                    "x-other": "b"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-other",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "object-or-null-non-object-dropped",
+            "description": "[\"object\",\"null\"] is still a header container: a non-object value is dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": ["object", "null"]
+                    }
+                }
+            },
+            "arguments": {
+                "headers": "abc"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "string-typed-is-ordinary",
+            "description": "a headers property typed string is an ordinary field: its value is forwarded unchanged",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": "abc"
+            },
+            "expected_arguments": {
+                "headers": "abc"
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "string-typed-array-value-is-ordinary",
+            "description": "an ordinary field's value is forwarded whatever its type",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": ["a"]
+            },
+            "expected_arguments": {
+                "headers": ["a"]
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "string-or-null-is-ordinary",
+            "description": "[\"string\",\"null\"] is an ordinary field",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": ["string", "null"]
+                    }
+                }
+            },
+            "arguments": {
+                "headers": "abc"
+            },
+            "expected_arguments": {
+                "headers": "abc"
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "array-typed-is-ordinary",
+            "description": "a headers property typed array is an ordinary field",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "array"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": [["x-account-id", "B"]]
+            },
+            "expected_arguments": {
+                "headers": [["x-account-id", "B"]]
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "string-typed-object-value-is-ordinary",
+            "description": "a headers property typed \"string\" is an ordinary field whatever the value: an object is forwarded unchanged, not filtered",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "no-headers-schema-object",
+            "description": "with no headers property served, a nested headers object declares nothing",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {}
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "path_id": "e",
+                "headers": {}
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-custom",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "no-headers-schema-non-object",
+            "description": "with no headers property served, a non-object headers value is dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {}
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers": "abc"
+            },
+            "expected_arguments": {
+                "path_id": "e"
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "non-object-string",
+            "description": "a non-object headers argument is dropped entirely, not sent as {}",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": "x-account-id: B"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "non-object-array",
+            "description": "an array of pairs is not an object: dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": [["x-account-id", "B"]]
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "non-object-number",
+            "description": "a number is not an object: dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": 5
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "non-object-boolean",
+            "description": "a boolean is not an object: dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": true
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "non-object-null",
+            "description": "null is not an object: dropped, with a warning",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object"
+                    }
+                }
+            },
+            "arguments": {
+                "headers": null
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "reason": "not-an-object"
+                }
+            ]
+        },
+        {
+            "id": "flat-exact-match",
+            "description": "a flat headers_<name> is declared only by the identical top-level property, and forwarded as given",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers_x-custom": "abc"
+            },
+            "expected_arguments": {
+                "path_id": "e",
+                "headers_x-custom": "abc"
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "flat-case-mismatch",
+            "description": "flat names are matched exactly, not case-insensitively",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_X-Custom": "abc"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_X-Custom",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "flat-undeclared",
+            "description": "an undeclared flat header is dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-other": "abc"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-other",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "flat-number-as-given",
+            "description": "a flat number is forwarded as a number, not stringified",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": 7
+            },
+            "expected_arguments": {
+                "headers_x-custom": 7
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "flat-float-as-given",
+            "description": "a flat float is forwarded as given",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": 1.5
+            },
+            "expected_arguments": {
+                "headers_x-custom": 1.5
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "flat-boolean-as-given",
+            "description": "a flat boolean is forwarded as given",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": true
+            },
+            "expected_arguments": {
+                "headers_x-custom": true
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "flat-empty-string",
+            "description": "an empty flat string is a valid value",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": ""
+            },
+            "expected_arguments": {
+                "headers_x-custom": ""
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "flat-array-dropped",
+            "description": "a flat array is dropped, CRLF and all",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": ["a\r\nx-account-id: B"]
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-custom",
+                    "reason": "not-a-scalar"
+                }
+            ]
+        },
+        {
+            "id": "flat-object-dropped",
+            "description": "a flat object is dropped",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": {
+                    "k": 1
+                }
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-custom",
+                    "reason": "not-a-scalar"
+                }
+            ]
+        },
+        {
+            "id": "flat-array-undeclared-dropped",
+            "description": "the value check comes first: an undeclared flat array is reported as not-a-scalar",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-other": ["a"]
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-other",
+                    "reason": "not-a-scalar"
+                }
+            ]
+        },
+        {
+            "id": "flat-null-dropped-silently",
+            "description": "a flat null is dropped silently, declared or not",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": null,
+                "headers_x-other": null
+            },
+            "expected_arguments": {},
+            "expected_warnings": []
+        },
+        {
+            "id": "flat-owned-declared",
+            "description": "a declared flat SDK-owned header is never forwarded",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_authorization": "Bearer x"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_authorization",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "flat-owned-undeclared",
+            "description": "an owned name is reported as set-by-sdk before declaration is checked, whatever its case or surrounding space",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_X-Account-Id": "victim",
+                "headers_ user-agent": "evil/0"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_X-Account-Id",
+                    "reason": "set-by-sdk"
+                },
+                {
+                    "argument": "headers_ user-agent",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "flat-malformed-value",
+            "description": "a declared flat header with CRLF in its value is malformed",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x-custom": "a\r\nb"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-custom",
+                    "reason": "malformed"
+                }
+            ]
+        },
+        {
+            "id": "flat-malformed-name",
+            "description": "a declared flat header whose name is not a token is malformed",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers_x custom": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_x custom": "a"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_x custom",
+                    "reason": "malformed"
+                }
+            ]
+        },
+        {
+            "id": "flat-empty-name",
+            "description": "a declared headers_ with an empty name is malformed",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers_": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "headers_": "a"
+            },
+            "expected_arguments": {},
+            "expected_warnings": [
+                {
+                    "argument": "headers_",
+                    "reason": "malformed"
+                }
+            ]
+        },
+        {
+            "id": "non-header-arguments-untouched",
+            "description": "only `headers` and the `headers_` prefix are header arguments: Headers, header_x, headers-x and a headers key inside body are not",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-custom": {
+                        "type": "string"
+                    },
+                    "headers_authorization": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "body": {
+                    "headers": {
+                        "authorization": "x"
+                    }
+                },
+                "Headers": {
+                    "authorization": "x"
+                },
+                "header_x": "a",
+                "headers-x": "b",
+                "x_headers_y": 1
+            },
+            "expected_arguments": {
+                "path_id": "e",
+                "body": {
+                    "headers": {
+                        "authorization": "x"
+                    }
+                },
+                "Headers": {
+                    "authorization": "x"
+                },
+                "header_x": "a",
+                "headers-x": "b",
+                "x_headers_y": 1
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "nested-end-user-id-is-owned",
+            "description": "a declared nested x-end-user-id is never forwarded, whatever the schema declares, since it is SDK-owned",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "x-end-user-id": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a",
+                    "x-end-user-id": "evil-user"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-end-user-id",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "flat-end-user-id-is-owned",
+            "description": "a declared flat headers_x-end-user-id is never forwarded, whatever its case or surrounding space",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-end-user-id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers_x-end-user-id": "evil-user"
+            },
+            "expected_arguments": {
+                "path_id": "e"
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-end-user-id",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "flat-and-nested-together",
+            "description": "nested and flat header arguments are filtered independently",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {}
+                        }
+                    },
+                    "headers_x-custom": {}
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                },
+                "headers_x-custom": "b",
+                "headers_x-other": "c"
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                },
+                "headers_x-custom": "b"
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-other",
+                    "reason": "not-declared"
+                }
+            ]
+        },
+        {
+            "id": "object-or-null-open",
+            "description": "headers typed [\"object\",\"null\"] with no properties (and additionalProperties not false) is OPEN, the same as `type: \"object\"`: a type list containing \"object\" declares every name, so x-custom is forwarded.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": ["object", "null"]
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": []
+        },
+        {
+            "id": "empty-type-list",
+            "description": "headers typed [] (an empty list) is an ORDINARY field: the list does not contain \"object\", so headers is not a header container and the string is forwarded unchanged, with no header filtering.",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": []
+                    }
+                }
+            },
+            "arguments": {
+                "headers": "abc"
+            },
+            "expected_arguments": {
+                "headers": "abc"
+            },
+            "expected_warnings": []
+        }
+    ]
+}

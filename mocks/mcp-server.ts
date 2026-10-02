@@ -2,10 +2,18 @@
  * Mock MCP server for testing using Hono's app.request() method.
  * This creates an MCP-compatible handler that can be used with MSW
  * without starting a real HTTP server.
+ *
+ * It refuses what the real endpoint refuses — an unscoped request, an unknown account — so a
+ * client bug that sends no account, or the wrong one, fails here instead of in production.
  */
 import type { Hono as HonoApp } from 'hono';
 import { StreamableHTTPTransport } from '@hono/mcp';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import {
+	CallToolRequestSchema,
+	type CallToolResult,
+	ListToolsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 
@@ -17,36 +25,151 @@ export interface McpToolDefinition {
 		properties?: Record<string, unknown>;
 		required?: string[];
 		additionalProperties?: boolean;
+		[keyword: string]: unknown;
 	};
 }
 
-export interface MockMcpServerOptions {
-	/** Tools available per account ID. Use 'default' for tools when no account header is provided. */
-	accountTools: Record<string, readonly McpToolDefinition[]>;
+/** A `tools/call` exactly as it reached the server. */
+export interface RecordedToolCall {
+	accountId: string;
+	toolMode: string | undefined;
+	name: string;
+	arguments: Record<string, unknown>;
 }
 
+export interface MockMcpServerOptions {
+	/** Tools available per account ID. An account not listed here is refused with a 404. */
+	accountTools: Record<string, readonly McpToolDefinition[]>;
+	/**
+	 * Serve the global `stackone_submit_feedback` tool, in every tool mode, the way the real
+	 * endpoint does when the org flag and project setting are on. Off models a project without
+	 * it: the tool is simply absent, so the SDK has nothing to call.
+	 */
+	submitFeedback?: boolean;
+	/** Observe every `tools/call` as it arrived, before any schema parsing. */
+	onToolCall?: (call: RecordedToolCall) => void;
+	/** Answer a `tools/call` for these tool names with this literal result, verbatim. */
+	toolResults?: Record<string, CallToolResult>;
+}
+
+/** Mirrors the real `session_id` minted per search, so tests can assert it is carried through. */
+export const MOCK_SEARCH_SESSION_ID = 'mock-session-1';
+
+/** The schema the real endpoint serves for its feedback tool, field for field. */
+const submitFeedbackTool = {
+	name: 'stackone_submit_feedback',
+	description: 'Records a structured verdict on how well the tools served this session.',
+	inputSchema: {
+		type: 'object',
+		properties: {
+			rating: { type: 'string', enum: ['positive', 'negative', 'neutral'] },
+			feedback: { type: 'string' },
+			tool_names: { type: 'array', items: { type: 'string' } },
+			source: { type: 'string', enum: ['model', 'user', 'system'], default: 'model' },
+			category: {
+				type: 'string',
+				enum: ['search', 'execute', 'defender', 'connection', 'general'],
+			},
+			session_id: { type: 'string' },
+		},
+		required: ['rating', 'tool_names'],
+	},
+} as const satisfies McpToolDefinition;
+
+/** The two meta tools the real endpoint serves per connector under `tool-mode=search_execute`. */
+const metaTools = (accountId: string): McpToolDefinition[] => [
+	{
+		name: `mock_${accountId}_search_actions`,
+		description: 'Search for available actions in natural language.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: { type: 'string' },
+				top_k: { type: 'integer', minimum: 1, maximum: 50 },
+				session_id: { type: 'string' },
+			},
+			required: ['query'],
+		},
+	},
+	{
+		name: `mock_${accountId}_execute_action`,
+		description: 'Execute an action by its action_id.',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				action_id: { type: 'string' },
+				path: { type: 'object' },
+				query: { type: 'object' },
+				body: { type: 'object' },
+				headers: { type: 'object' },
+				session_id: { type: 'string' },
+			},
+			required: ['action_id'],
+		},
+	},
+];
+
+const text = (payload: unknown, isError = false): CallToolResult => ({
+	isError,
+	content: [{ type: 'text', text: JSON.stringify(payload) }],
+});
+
 /**
- * Creates an MSW handler for mocking MCP protocol requests.
- * Uses Hono's app.request() to handle requests without starting a server.
+ * A success the way the real endpoint answers every action tool, `*_execute_action` and feedback:
+ * `{ isError: false, result }` in `structuredContent`, mirrored as a text part.
+ */
+const wrapped = (result: unknown): CallToolResult => {
+	const structuredContent = { isError: false, result };
+	return {
+		isError: false,
+		content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+		structuredContent,
+	};
+};
+
+const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResult | undefined => {
+	if (name.endsWith('_search_actions')) {
+		return text({
+			session_id: MOCK_SEARCH_SESSION_ID,
+			actions: [
+				{
+					action_id: 'mock_list_items',
+					description: 'List items',
+					similarity_score: 0.8,
+					example_request: { query: { page_size: 25 } },
+				},
+			],
+		});
+	}
+	if (name.endsWith('_execute_action')) {
+		// An unknown action must come back as isError — a normal response with the flag set —
+		// the way the real endpoint reports it.
+		if (args.action_id !== 'mock_list_items') {
+			return text({ error: `Unknown action ${String(args.action_id)}`, status_code: 404 }, true);
+		}
+		return wrapped({
+			data: { nodes: [] },
+			echoed_query: args.query ?? null,
+			echoed_session_id: args.session_id ?? null,
+		});
+	}
+	return undefined;
+};
+
+/**
+ * Creates a Hono app speaking the MCP protocol at `/mcp`, for use from an MSW handler.
  *
  * @example
  * ```ts
  * import { server } from './mocks/node';
- * import { createMcpHandler, defaultMcpTools, accountMcpTools } from './mocks/mcp-server';
+ * import { createMcpApp, accountMcpTools } from './mocks/mcp-server';
  *
- * // In your test setup
- * server.use(
- *   createMcpHandler({
- *     accountTools: {
- *       default: defaultMcpTools,
- *       'account-1': accountMcpTools.acc1,
- *     },
- *   })
- * );
+ * const app = createMcpApp({ accountTools: { acc1: accountMcpTools.acc1 } });
+ * server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
  * ```
  */
 export function createMcpApp(options: MockMcpServerOptions): HonoApp {
-	const { accountTools } = options;
+	const { accountTools, submitFeedback = false, onToolCall, toolResults = {} } = options;
 
 	// Create a Hono app that handles MCP protocol
 	const app = new Hono();
@@ -61,31 +184,81 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 	);
 
 	app.all('/mcp', async (c) => {
-		// Get account ID from header
-		const accountId = c.req.header('x-account-id') ?? 'default';
-		const tools = accountTools[accountId] ?? accountTools.default ?? [];
-
-		// Create a new MCP server instance per request
-		const mcp = new McpServer({ name: 'test-mcp-server', version: '1.0.0' });
-		const transport = new StreamableHTTPTransport();
-
-		for (const tool of tools) {
-			mcp.registerTool(
-				tool.name,
-				{
-					description: tool.description,
-					// MCP SDK expects Zod-like schema but accepts JSON Schema objects
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- MCP SDK type mismatch
-					inputSchema: tool.inputSchema as any,
-				},
-				async ({ params }: { params: { arguments?: Record<string, unknown> } }) => ({
-					content: [],
-					structuredContent: params.arguments ?? {},
-					_meta: undefined,
-				}),
+		// The real endpoint rejects a request with no account. Defaulting here made the mock more
+		// permissive than production and hid a fatal SDK bug: an SDK that never sent the header
+		// still got a full catalog.
+		const accountId = c.req.header('x-account-id') ?? c.req.query('x-account-id');
+		if (!accountId) {
+			return c.json(
+				{ statusCode: 400, message: 'Missing x-account-id header or query parameter in request' },
+				400,
 			);
 		}
+		// No fallback catalog either: serving one for an account that does not exist would hide
+		// any bug that sends a wrong, stale or mangled account id.
+		if (!Object.hasOwn(accountTools, accountId)) {
+			return c.json({ statusCode: 404, message: `Unknown account ${accountId}` }, 404);
+		}
 
+		const toolMode = c.req.query('tool-mode');
+		const listed: McpToolDefinition[] = [
+			...(submitFeedback ? [submitFeedbackTool] : []),
+			...(toolMode === 'search_execute' ? metaTools(accountId) : (accountTools[accountId] ?? [])),
+		];
+
+		// A low-level Server rather than McpServer: McpServer.registerTool expects a Zod shape and
+		// lists a plain JSON Schema as `properties: {}`. The real endpoint serves each schema
+		// verbatim, and so does this.
+		const mcp = new Server(
+			{ name: 'test-mcp-server', version: '1.0.0' },
+			{ capabilities: { tools: {} } },
+		);
+		mcp.setRequestHandler(ListToolsRequestSchema, () => ({
+			tools: listed.map((tool) => ({ ...tool, inputSchema: structuredClone(tool.inputSchema) })),
+		}));
+		mcp.setRequestHandler(CallToolRequestSchema, (request): CallToolResult => {
+			const { name } = request.params;
+			const args = request.params.arguments ?? {};
+
+			if (!listed.some((tool) => tool.name === name)) {
+				return text({ error: `Unknown tool ${name}`, status_code: 404 }, true);
+			}
+			const literal = toolResults[name];
+			if (literal) {
+				return structuredClone(literal);
+			}
+			if (name === submitFeedbackTool.name) {
+				return wrapped({
+					message: 'Feedback recorded',
+					submitted_at: new Date(0).toISOString(),
+					session_id: args.session_id ?? null,
+				});
+			}
+			// An action tool echoes what reached it, so a test can see the arguments and account.
+			// Only search_execute serves meta tools: in individual mode a per-action tool whose
+			// name ends in `_execute_action` is still an action.
+			return (
+				(toolMode === 'search_execute' ? callMetaTool(name, args) : undefined) ??
+				wrapped({ data: { action: name, account_id: accountId, arguments: args } })
+			);
+		});
+
+		// Recorded from the raw body: the server's schema parsing rebuilds the arguments, and drops
+		// a `__proto__` key on the way, so a call recorded after it is not what was sent.
+		if (onToolCall && c.req.method === 'POST') {
+			const body = (await c.req.raw.clone().json()) as unknown;
+			for (const message of Array.isArray(body) ? body : [body]) {
+				const { method, params } = (message ?? {}) as {
+					method?: string;
+					params?: { name?: string; arguments?: Record<string, unknown> };
+				};
+				if (method === 'tools/call' && typeof params?.name === 'string') {
+					onToolCall({ accountId, toolMode, name: params.name, arguments: params.arguments ?? {} });
+				}
+			}
+		}
+
+		const transport = new StreamableHTTPTransport();
 		await mcp.connect(transport);
 		return transport.handleRequest(c);
 	});
@@ -226,6 +399,15 @@ export const exampleBamboohrTools = [
 			},
 			required: ['name'],
 		},
+	},
+] as const satisfies McpToolDefinition[];
+
+/** A per-action tool whose name ends like a meta tool's, served in individual mode. */
+export const metaLookalikeTools = [
+	{
+		name: 'lookalike_execute_action',
+		description: 'An action named like a meta tool',
+		inputSchema: { type: 'object', properties: { action_id: { type: 'string' } } },
 	},
 ] as const satisfies McpToolDefinition[];
 

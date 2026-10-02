@@ -11,26 +11,11 @@ describe('StackOneAPIError', () => {
 		expect(error.message).toBe('API failed');
 	});
 
-	it('should append message from responseBody if present', () => {
-		const error = new StackOneAPIError('API failed', 400, {
-			message: 'Invalid request body',
+	it('keeps the message it is given rather than rewriting it', () => {
+		const error = new StackOneAPIError('400 Bad Request: path.id is missing', 400, {
+			message: 'path.id is missing',
 		});
-		expect(error.message).toBe('API failed: Invalid request body');
-	});
-
-	it('should not append message if responseBody.message is not a string', () => {
-		const error = new StackOneAPIError('API failed', 400, { message: 123 });
-		expect(error.message).toBe('API failed');
-	});
-
-	it('should not append message if responseBody.message is empty', () => {
-		const error = new StackOneAPIError('API failed', 400, { message: '' });
-		expect(error.message).toBe('API failed');
-	});
-
-	it('should not append message if responseBody is null', () => {
-		const error = new StackOneAPIError('API failed', 400, null);
-		expect(error.message).toBe('API failed');
+		expect(error.message).toBe('400 Bad Request: path.id is missing');
 	});
 
 	it('should extract provider errors from responseBody', () => {

@@ -2,7 +2,8 @@ import { USER_AGENT } from '../consts';
 import { StackOneError } from './error-stackone';
 
 /**
- * Raised when the StackOne API returns an error
+ * Raised when the StackOne API returns an error. Carries the HTTP status and the response
+ * body, so a caller can branch on a 412 (a dead account) rather than parse the message.
  */
 export class StackOneAPIError extends StackOneError {
 	statusCode: number;
@@ -17,19 +18,7 @@ export class StackOneAPIError extends StackOneError {
 		requestBody?: unknown,
 		options?: ErrorOptions,
 	) {
-		// Extract the error message from responseBody if it exists
-		let errorMessage = message;
-		if (
-			responseBody &&
-			typeof responseBody === 'object' &&
-			'message' in responseBody &&
-			responseBody.message &&
-			typeof responseBody.message === 'string'
-		) {
-			errorMessage = `${message}: ${responseBody.message}`;
-		}
-
-		super(errorMessage, options);
+		super(message, options);
 		this.name = 'StackOneAPIError';
 		this.statusCode = statusCode;
 		this.responseBody = responseBody;

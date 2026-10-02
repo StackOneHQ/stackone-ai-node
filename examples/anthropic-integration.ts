@@ -17,8 +17,9 @@ if (!process.env.ANTHROPIC_API_KEY) {
 }
 
 const anthropicIntegration = async (): Promise<void> => {
-	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
-	const toolset = new StackOneToolSet();
+	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
+	// without one, the toolset uses every active account linked to the key
+	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 	// Filter for any relevant tools
 	const tools = await toolset.fetchTools({
