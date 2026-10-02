@@ -483,6 +483,19 @@ describe('StackOneMcpTool as an action tool', () => {
 		expect(calls).toEqual([]);
 	});
 
+	it('rejects a sparse array hole', async () => {
+		const ids: number[] = [1, 2, 3];
+		// eslint-disable-next-line @typescript-eslint/no-array-delete -- deliberately punching a hole
+		delete ids[1];
+		const error = await actionTool()
+			.execute({ query: { ids } } as unknown as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(/undefined is not a JSON value/);
+		expect(calls).toEqual([]);
+	});
+
 	it('rejects a circular reference', async () => {
 		const body: JsonObject = { name: 'Ada' };
 		body.self = body;

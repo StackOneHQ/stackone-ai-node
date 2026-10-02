@@ -521,7 +521,8 @@ function assertJsonValue(value: unknown, path: string, toolName: string, seen: S
 			throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
 		}
 		seen.add(value);
-		value.forEach((item, index) => {
+		for (let index = 0; index < value.length; index++) {
+			const item = value[index];
 			const itemPath = `${path}[${index}]`;
 			if (item === undefined) {
 				throw unencodable(
@@ -530,7 +531,7 @@ function assertJsonValue(value: unknown, path: string, toolName: string, seen: S
 				);
 			}
 			assertJsonValue(item, itemPath, toolName, seen);
-		});
+		}
 		seen.delete(value);
 		return;
 	}
