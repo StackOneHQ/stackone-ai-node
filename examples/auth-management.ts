@@ -53,8 +53,8 @@ const accountIdFromEnv = async (): Promise<void> => {
 	console.log('=== 2. Account ID from environment ===\n');
 
 	// The SDK only reads the API key from env; read the account id yourself and pass it.
-	// Unset, it is undefined and the toolset discovers every active account instead.
-	const accountId = process.env.STACKONE_ACCOUNT_ID;
+	// Unset or empty, it is undefined and the toolset discovers every active account instead.
+	const accountId = process.env.STACKONE_ACCOUNT_ID || undefined;
 	console.log(`  STACKONE_ACCOUNT_ID is ${accountId ? 'set' : 'not set'}`);
 
 	const toolset = new StackOneToolSet({ accountId });
@@ -66,7 +66,7 @@ const accountIdFromEnv = async (): Promise<void> => {
 const accountIdInConstructor = async (): Promise<void> => {
 	console.log('=== 3. Account ID in constructor ===\n');
 
-	const accountId = process.env.STACKONE_ACCOUNT_ID ?? 'my-account';
+	const accountId = process.env.STACKONE_ACCOUNT_ID || 'my-account';
 	const toolset = new StackOneToolSet({ accountId });
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools for configured account\n`);
@@ -76,7 +76,7 @@ const accountIdInConstructor = async (): Promise<void> => {
 const setAccountsGlobally = async (): Promise<void> => {
 	console.log('=== 4. setAccounts() — global account list ===\n');
 
-	const accountId = process.env.STACKONE_ACCOUNT_ID ?? 'my-account';
+	const accountId = process.env.STACKONE_ACCOUNT_ID || 'my-account';
 	const toolset = new StackOneToolSet();
 	toolset.setAccounts([accountId]);
 	console.log('  Called setAccounts() with configured account');

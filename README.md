@@ -83,7 +83,7 @@ StackOne uses account IDs to identify different integrations. You can specify th
 import { StackOneToolSet } from '@stackone/ai';
 
 // Single account, read from your own environment variable. Unset means discovery
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 const tools = await toolset.fetchTools();
 
 // Explicit single account
@@ -126,7 +126,7 @@ import { OpenAI } from 'openai';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY from the environment. Without an account id, every active account is used
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 const tools = await toolset.fetchTools({ actions: ['workday_*'] });
 const openai = new OpenAI();
@@ -164,7 +164,7 @@ import OpenAI from 'openai';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY from the environment. Without an account id, every active account is used
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 const tools = await toolset.fetchTools();
 
@@ -194,7 +194,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY from the environment. Without an account id, every active account is used
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 const tools = await toolset.fetchTools();
 
@@ -233,7 +233,7 @@ import { generateText, stepCountIs } from 'ai';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY from the environment. Without an account id, every active account is used
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 const tools = await toolset.fetchTools();
 
@@ -260,7 +260,7 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
 // Reads STACKONE_API_KEY from the environment. Without an account id, every active account is used
-const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 // Fetch tools and convert to Claude Agent SDK format
 const tools = await toolset.fetchTools();

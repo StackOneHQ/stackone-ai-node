@@ -25,7 +25,7 @@ if (!process.env.ANTHROPIC_API_KEY) {
 const claudeAgentSdkIntegration = async (): Promise<void> => {
 	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
 	// without one, the toolset uses every active account linked to the key
-	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID });
+	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 	// Fetch tools from StackOne and convert to Claude Agent SDK format
 	const tools = await toolset.fetchTools();
