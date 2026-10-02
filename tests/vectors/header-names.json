@@ -1,0 +1,383 @@
+{
+    "$schema": "./schema/header-names.schema.json",
+    "description": "How a nested header name — an entry of a top-level `headers` object argument whose served schema is open (`{\"type\": \"object\"}`), with the value \"v\" — is treated. The name is trimmed of what JavaScript's String.prototype.trim() strips, then refused if it is SDK-owned (authorization, x-account-id, user-agent, case-insensitively), then if it is not an RFC 9110 token. A forwarded name is the trimmed one.",
+    "version": 1,
+    "cases": [
+        {
+            "id": "plain",
+            "description": "a plain token",
+            "name": "x-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "mixed-case",
+            "description": "case is kept as supplied",
+            "name": "X-Custom",
+            "expected": {
+                "forwarded": "X-Custom"
+            }
+        },
+        {
+            "id": "token-chars",
+            "description": "every RFC 9110 tchar",
+            "name": "x_c.u!s#t$o%m&'*+^`|~",
+            "expected": {
+                "forwarded": "x_c.u!s#t$o%m&'*+^`|~"
+            }
+        },
+        {
+            "id": "leading-space",
+            "description": "leading space is trimmed",
+            "name": " x-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "trailing-space",
+            "description": "trailing space is trimmed",
+            "name": "x-custom ",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "tab",
+            "description": "tabs are trimmed",
+            "name": "\tx-custom\t",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "newline-ends",
+            "description": "CR and LF at the ends are trimmed",
+            "name": "\nx-custom\r\n",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "vt-ff",
+            "description": "vertical tab and form feed are trimmed",
+            "name": "\u000bx-custom\f",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "nbsp",
+            "description": "U+00A0 NO-BREAK SPACE is JavaScript whitespace: trimmed",
+            "name": "\u00a0x-custom\u00a0",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "bom",
+            "description": "U+FEFF BYTE ORDER MARK is JavaScript whitespace: trimmed",
+            "name": "\ufeffx-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "ogham",
+            "description": "U+1680 OGHAM SPACE MARK is trimmed",
+            "name": "\u1680x-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "en-quad",
+            "description": "U+2000 EN QUAD is trimmed",
+            "name": "\u2000x-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "hair-space",
+            "description": "U+200A HAIR SPACE is trimmed",
+            "name": "x-custom\u200a",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "line-separator",
+            "description": "U+2028 LINE SEPARATOR is a JavaScript line terminator: trimmed",
+            "name": "\u2028x-custom\u2029",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "narrow-nbsp",
+            "description": "U+202F NARROW NO-BREAK SPACE is trimmed",
+            "name": "\u202fx-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "math-space",
+            "description": "U+205F MEDIUM MATHEMATICAL SPACE is trimmed",
+            "name": "\u205fx-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "ideographic-space",
+            "description": "U+3000 IDEOGRAPHIC SPACE is trimmed",
+            "name": "\u3000x-custom",
+            "expected": {
+                "forwarded": "x-custom"
+            }
+        },
+        {
+            "id": "fs",
+            "description": "U+001C is not JavaScript whitespace (Python's str.strip() would strip it): kept, so malformed",
+            "name": "\u001cx-custom",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "gs",
+            "description": "U+001D is not trimmed: malformed",
+            "name": "x-custom\u001d",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "rs",
+            "description": "U+001E is not trimmed: malformed",
+            "name": "\u001ex-custom",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "us",
+            "description": "U+001F is not trimmed: malformed",
+            "name": "x-custom\u001f",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "nel",
+            "description": "U+0085 NEXT LINE is not JavaScript whitespace (str.strip() would strip it): malformed",
+            "name": "\u0085x-custom",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "zwsp",
+            "description": "U+200B ZERO WIDTH SPACE is not whitespace: malformed",
+            "name": "\u200bx-custom",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "non-ascii",
+            "description": "a non-ASCII letter is not a tchar",
+            "name": "x-cüstom",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "non-ascii-cjk",
+            "description": "a CJK character is not a tchar",
+            "name": "x-頭",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "inner-space",
+            "description": "a space inside the name is not trimmed: malformed",
+            "name": "x custom",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "colon",
+            "description": "a colon is not a tchar",
+            "name": "x-custom:",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "empty",
+            "description": "an empty name is malformed",
+            "name": "",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "whitespace-only",
+            "description": "whitespace only trims to empty: malformed",
+            "name": "  ",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "owned-authorization",
+            "description": "SDK-owned",
+            "name": "authorization",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-upper",
+            "description": "SDK-owned, compared case-insensitively",
+            "name": "AUTHORIZATION",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-mixed",
+            "description": "SDK-owned, as usually written",
+            "name": "Authorization",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-account",
+            "description": "SDK-owned tenant selector",
+            "name": "X-Account-Id",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-ua",
+            "description": "SDK-owned client identity",
+            "name": "User-Agent",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-padded",
+            "description": "SDK-owned once trimmed",
+            "name": " authorization ",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-tab",
+            "description": "SDK-owned once trimmed",
+            "name": "\tx-account-id",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-nbsp",
+            "description": "SDK-owned once U+00A0 is trimmed",
+            "name": "\u00a0User-Agent",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-bom",
+            "description": "SDK-owned once the BOM is trimmed",
+            "name": "\ufeffauthorization",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-us-suffix",
+            "description": "U+001F is not trimmed, so this is not the owned name: it is malformed",
+            "name": "authorization\u001f",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "owned-nel",
+            "description": "U+0085 is not trimmed, so this is not the owned name: it is malformed",
+            "name": "\u0085x-account-id",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "owned-dotted-i",
+            "description": "U+0130 lower-cases to i + U+0307, not i: not owned, and malformed",
+            "name": "AUTHORİZATION",
+            "expected": {
+                "dropped": "malformed"
+            }
+        },
+        {
+            "id": "not-owned-similar",
+            "description": "a name that merely starts with an owned one is not owned",
+            "name": "x-account-id-2",
+            "expected": {
+                "forwarded": "x-account-id-2"
+            }
+        },
+        {
+            "id": "proxy-authorization",
+            "description": "only the three names are owned; others are declared by the open schema",
+            "name": "Proxy-Authorization",
+            "expected": {
+                "forwarded": "Proxy-Authorization"
+            }
+        },
+        {
+            "id": "proto-name",
+            "description": "__proto__ is an ordinary header name",
+            "name": "__proto__",
+            "expected": {
+                "forwarded": "__proto__"
+            }
+        },
+        {
+            "id": "constructor-name",
+            "description": "constructor is an ordinary header name",
+            "name": "constructor",
+            "expected": {
+                "forwarded": "constructor"
+            }
+        },
+        {
+            "id": "upper-case",
+            "description": "upper case kept as supplied",
+            "name": "X-CUSTOM",
+            "expected": {
+                "forwarded": "X-CUSTOM"
+            }
+        },
+        {
+            "id": "owned-long-s",
+            "description": "U+017F LATIN SMALL LETTER LONG S. The SDK-owned check lowercases ASCII only, so uſer-agent is never folded to user-agent: it is not owned, and ſ is not a tchar, so it is malformed.",
+            "name": "uſer-agent",
+            "expected": {
+                "dropped": "malformed"
+            }
+        }
+    ]
+}

@@ -1,0 +1,249 @@
+{
+    "$schema": "./schema/argument-encoding.schema.json",
+    "description": "Whether a tool's arguments can be sent: `ok`, or a ToolArgumentsError raised before any request with the given reason. `arguments` is the value handed to the tool's execute; `arguments_json` is JSON text handed instead. `{\"$number\": \"NaN\"}`, \"Infinity\" and \"-Infinity\" stand for the non-finite numbers JSON cannot hold. The tool's schema declares no header arguments, so header filtering plays no part.",
+    "version": 1,
+    "reasons": ["not-finite", "invalid-json", "not-an-object", "unencodable"],
+    "cases": [
+        {
+            "id": "empty-object",
+            "description": "no arguments",
+            "arguments": {},
+            "expected": "ok"
+        },
+        {
+            "id": "nested-empty",
+            "description": "empty containers",
+            "arguments": {
+                "a": {},
+                "b": []
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "scalars",
+            "description": "every JSON scalar",
+            "arguments": {
+                "s": "x",
+                "n": 1,
+                "f": 1.5,
+                "t": true,
+                "z": null
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "deep-nesting",
+            "description": "deep nesting",
+            "arguments": {
+                "a": {
+                    "b": {
+                        "c": {
+                            "d": {
+                                "e": [
+                                    [
+                                        [
+                                            {
+                                                "f": 1
+                                            }
+                                        ]
+                                    ]
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "proto-key-nested",
+            "description": "a __proto__ key one level down is an ordinary key",
+            "arguments": {
+                "body": {
+                    "__proto__": {
+                        "polluted": true
+                    }
+                }
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "proto-key-top",
+            "description": "a top-level __proto__ key is an ordinary key to the SDK (the server's MCP stack drops it, see invariant 3)",
+            "arguments": {
+                "__proto__": {
+                    "polluted": true
+                }
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "constructor-key",
+            "description": "builtin-named keys are ordinary keys",
+            "arguments": {
+                "constructor": "x",
+                "toString": 1,
+                "valueOf": {}
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "nan-top",
+            "description": "NaN is not JSON",
+            "arguments": {
+                "a": {
+                    "$number": "NaN"
+                }
+            },
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-finite"
+            }
+        },
+        {
+            "id": "infinity-nested",
+            "description": "Infinity, however deep, is not JSON",
+            "arguments": {
+                "body": {
+                    "limit": {
+                        "$number": "Infinity"
+                    }
+                }
+            },
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-finite"
+            }
+        },
+        {
+            "id": "neg-infinity-in-array",
+            "description": "-Infinity inside an array is not JSON",
+            "arguments": {
+                "a": [
+                    1,
+                    {
+                        "$number": "-Infinity"
+                    }
+                ]
+            },
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-finite"
+            }
+        },
+        {
+            "id": "big-int",
+            "description": "an integer above 2^53 is still encodable",
+            "arguments": {
+                "a": 12345678901234567890
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "non-ascii",
+            "description": "non-ASCII and astral characters are encodable",
+            "arguments": {
+                "a": "é€🙂"
+            },
+            "expected": "ok"
+        },
+        {
+            "id": "json-text-object",
+            "description": "arguments given as JSON text",
+            "arguments_json": "{\"a\":1}",
+            "expected": "ok"
+        },
+        {
+            "id": "json-text-invalid",
+            "description": "JSON text that does not parse",
+            "arguments_json": "{",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "invalid-json"
+            }
+        },
+        {
+            "id": "json-text-array",
+            "description": "JSON text that is an array",
+            "arguments_json": "[1]",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-an-object"
+            }
+        },
+        {
+            "id": "json-text-string",
+            "description": "JSON text that is a string",
+            "arguments_json": "\"x\"",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-an-object"
+            }
+        },
+        {
+            "id": "json-text-overflow",
+            "description": "1e400 parses as Infinity in both languages, which is not JSON",
+            "arguments_json": "{\"a\": 1e400}",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-finite"
+            }
+        },
+        {
+            "id": "json-text-empty",
+            "description": "empty JSON text does not parse",
+            "arguments_json": "",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "invalid-json"
+            }
+        },
+        {
+            "id": "not-object-array",
+            "description": "an array is not an arguments object",
+            "arguments": [1, 2],
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-an-object"
+            }
+        },
+        {
+            "id": "not-object-number",
+            "description": "a number is not an arguments object",
+            "arguments": 5,
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "not-an-object"
+            }
+        },
+        {
+            "id": "lone-surrogate",
+            "description": "a lone UTF-16 surrogate (what a model emits when a token boundary splits an emoji), anywhere in the arguments, cannot be encoded: it is refused in both SDKs rather than sent as an escaped \\ud800.",
+            "arguments": {
+                "a": "\ud800"
+            },
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "unencodable"
+            }
+        },
+        {
+            "id": "json-text-nan-literal",
+            "description": "JSON text containing a bare NaN is invalid JSON in both SDKs, even though a lenient parser could read it as a number.",
+            "arguments_json": "{\"a\": NaN}",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "invalid-json"
+            }
+        },
+        {
+            "id": "json-text-bare-nan",
+            "description": "the JSON text NaN alone is invalid JSON in both SDKs.",
+            "arguments_json": "NaN",
+            "expected": {
+                "error": "ToolArgumentsError",
+                "reason": "invalid-json"
+            }
+        }
+    ]
+}

@@ -1,0 +1,318 @@
+{
+    "$schema": "./schema/retry-after.schema.json",
+    "description": "How a Retry-After header value reads as seconds from `now`: delta-seconds or an HTTP-date. `expected_seconds` is the RAW value, before the cap: null when the header is absent or unreadable (the caller falls back to its own backoff), 0 for a date in the past. The cap (`max_delay_seconds`) is applied afterwards by the caller, and graded in backoff.json.",
+    "version": 1,
+    "max_delay_seconds": 30,
+    "cases": [
+        {
+            "id": "delta",
+            "description": "delta-seconds",
+            "header": "5",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 5
+        },
+        {
+            "id": "zero",
+            "description": "zero delta-seconds: retry at once",
+            "header": "0",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "leading-zeros",
+            "description": "delta-seconds with leading zeros",
+            "header": "005",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 5
+        },
+        {
+            "id": "large",
+            "description": "20 digits: read as a number, not refused; the cap is applied separately, so this is the raw value",
+            "header": "99999999999999999999",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 100000000000000000000
+        },
+        {
+            "id": "huge",
+            "description": "309 digits overflow to infinity in both languages; the cap then makes it 30s",
+            "header": "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": {
+                "$number": "Infinity"
+            }
+        },
+        {
+            "id": "cap-boundary",
+            "description": "above the cap: recorded raw, the cap is applied separately",
+            "header": "31",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 31
+        },
+        {
+            "id": "imf",
+            "description": "IMF-fixdate (RFC 9110's preferred form), 30s ahead",
+            "header": "Thu, 01 Oct 2026 12:00:30 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 30
+        },
+        {
+            "id": "rfc850",
+            "description": "RFC 850 date, 60s ahead",
+            "header": "Thursday, 01-Oct-26 12:01:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 60
+        },
+        {
+            "id": "imf-past",
+            "description": "IMF-fixdate in the past: retry now",
+            "header": "Sun, 06 Nov 1994 08:49:37 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "imf-now",
+            "description": "IMF-fixdate equal to now: retry now",
+            "header": "Thu, 01 Oct 2026 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "rfc850-past",
+            "description": "RFC 850 date in the past (two-digit year 94 is 1994)",
+            "header": "Sunday, 06-Nov-94 08:49:37 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "asctime-past",
+            "description": "asctime date in the past; in the past in every time zone, so it is 0 wherever it is read",
+            "header": "Sun Nov  6 08:49:37 1994",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "weekday-mismatch",
+            "description": "the weekday does not match the date; it is ignored",
+            "header": "Mon, 01 Oct 2026 12:00:10 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 10
+        },
+        {
+            "id": "lower-weekday",
+            "description": "a lower-case weekday is not an HTTP-date",
+            "header": "thu, 01 Oct 2026 12:00:30 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "two-digit-year-imf",
+            "description": "an IMF-fixdate with a two-digit year (26) is read as 2026",
+            "header": "Thu, 01 Oct 26 12:00:30 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 30
+        },
+        {
+            "id": "rfc850-year-49",
+            "description": "RFC 850 two-digit year 49 is read as 2049 by both",
+            "header": "Friday, 01-Oct-49 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 725846400
+        },
+        {
+            "id": "rfc850-year-70",
+            "description": "RFC 850 two-digit year 70 is read as 1970 by both (RFC 9110's 50-year rule would say 2070: both SDKs agree on 1970 today)",
+            "header": "Wednesday, 01-Oct-70 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "offset-zone",
+            "description": "a numeric zone offset is honoured: 13:00:30 +0100 is 12:00:30 GMT",
+            "header": "Thu, 01 Oct 2026 13:00:30 +0100",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 30
+        },
+        {
+            "id": "day-32",
+            "description": "day 32 is not a date",
+            "header": "Thu, 32 Oct 2026 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "hour-25",
+            "description": "hour 25 is not a time",
+            "header": "Thu, 01 Oct 2026 25:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "year-overflow",
+            "description": "a year too large to represent (20 digits) is unreadable, not an error",
+            "header": "Thu, 01 Oct 99999999999999999999 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "fraction",
+            "description": "not delta-seconds: a fraction",
+            "header": "1.5",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "negative",
+            "description": "not delta-seconds: a sign",
+            "header": "-1",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "plus",
+            "description": "not delta-seconds: a plus sign",
+            "header": "+5",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "exponent",
+            "description": "not delta-seconds: exponent notation",
+            "header": "1.5e3",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "superscript",
+            "description": "not delta-seconds: a Unicode digit that is not ASCII",
+            "header": "²",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "arabic-digit",
+            "description": "not delta-seconds: an Arabic-Indic digit",
+            "header": "٣",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "iso-date",
+            "description": "an ISO 8601 date is not an HTTP-date",
+            "header": "2026-10-01",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "prose-date",
+            "description": "a date that does not start with a weekday is not an HTTP-date, even if a date parser would read it",
+            "header": "March 1, 2027",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "bad-weekday",
+            "description": "an HTTP-date shape whose weekday is not a weekday",
+            "header": "X, 21 Oct 2026 07:28:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "unit",
+            "description": "delta-seconds with a unit",
+            "header": "5 seconds",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "empty",
+            "description": "an empty value",
+            "header": "",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "spaces",
+            "description": "whitespace only",
+            "header": "   ",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "padded",
+            "description": "surrounding spaces are trimmed",
+            "header": " 5 ",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 5
+        },
+        {
+            "id": "tab",
+            "description": "surrounding tabs are trimmed",
+            "header": "\t5\t",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 5
+        },
+        {
+            "id": "absent",
+            "description": "no Retry-After header at all",
+            "header": null,
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "asctime",
+            "description": "asctime date 45s ahead, read as UTC: RFC 9110 says an HTTP-date is always GMT, so a zone-less or asctime date is never read as local time.",
+            "header": "Thu Oct  1 12:00:45 2026",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 45
+        },
+        {
+            "id": "rfc850-year-60",
+            "description": "RFC 850 two-digit year 60 resolves to 2060 (RFC 9110 §5.6.7): 34 years ahead of `now`, not more than 50, so the current century is kept.",
+            "header": "Friday, 01-Oct-60 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 1073001600
+        },
+        {
+            "id": "rfc850-year-76",
+            "description": "RFC 850 two-digit year 76 resolves to 2076: exactly 50 years ahead of `now`, the boundary — not *more than* 50, so it stays in the future.",
+            "header": "Wednesday, 01-Oct-76 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 1577923200
+        },
+        {
+            "id": "rfc850-year-77",
+            "description": "RFC 850 two-digit year 77 would resolve to 2077, 51 years ahead — more than 50 — so RFC 9110 §5.6.7 moves it back a century, to 1977, which is in the past.",
+            "header": "Friday, 01-Oct-77 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 0
+        },
+        {
+            "id": "no-zone",
+            "description": "an IMF-fixdate without its GMT suffix is read as UTC, never local time.",
+            "header": "Thu, 01 Oct 2026 12:00:30",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": 30
+        },
+        {
+            "id": "trailing-garbage",
+            "description": "an IMF-fixdate followed by extra text is unreadable: trailing text after a valid date is refused, not ignored.",
+            "header": "Thu, 01 Oct 2026 12:00:30 GMT garbage",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "feb-30",
+            "description": "30 February is not a calendar date, and is refused rather than rolled over to March.",
+            "header": "Mon, 30 Feb 2026 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "year-10000",
+            "description": "a five-digit year is above 9999, and is refused.",
+            "header": "Fri, 01 Oct 10000 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        }
+    ]
+}

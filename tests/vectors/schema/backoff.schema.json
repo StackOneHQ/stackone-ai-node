@@ -1,0 +1,183 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/backoff.schema.json",
+    "title": "429 backoff and deadline vectors",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "constants": {
+            "type": "object",
+            "properties": {
+                "max_retries": {
+                    "type": "integer"
+                },
+                "max_attempts": {
+                    "type": "integer"
+                },
+                "backoff_seconds": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "jitter": {
+                    "type": "object",
+                    "properties": {
+                        "min": {
+                            "type": "number"
+                        },
+                        "max": {
+                            "type": "number"
+                        },
+                        "max_exclusive": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["min", "max", "max_exclusive"],
+                    "additionalProperties": false
+                },
+                "max_delay_seconds": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "max_retries",
+                "max_attempts",
+                "backoff_seconds",
+                "jitter",
+                "max_delay_seconds"
+            ],
+            "additionalProperties": false
+        },
+        "deadline_cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/deadlineCase"
+            }
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        }
+    },
+    "required": ["description", "version", "cases", "constants", "deadline_cases"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "deadlineCase": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "delay_seconds": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "The wait before the retry, after the cap."
+                },
+                "remaining_seconds": {
+                    "type": "number",
+                    "description": "Time left before the call's deadline; may be negative."
+                },
+                "expected": {
+                    "enum": ["wait", "return-429"]
+                }
+            },
+            "required": ["id", "description", "delay_seconds", "remaining_seconds", "expected"],
+            "additionalProperties": false
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "retry": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 3,
+                    "description": "Which retry the delay precedes, 1-based."
+                },
+                "random": {
+                    "type": "number",
+                    "minimum": 0,
+                    "exclusiveMaximum": 1,
+                    "description": "The injected uniform value in [0, 1)."
+                },
+                "retry_after_seconds": {
+                    "type": ["number", "null"],
+                    "minimum": 0,
+                    "description": "The 429's Retry-After as read (see retry-after.json); null when absent or unreadable."
+                },
+                "expected_delay_seconds": {
+                    "type": "number",
+                    "minimum": 0
+                }
+            },
+            "required": [
+                "id",
+                "description",
+                "retry",
+                "random",
+                "retry_after_seconds",
+                "expected_delay_seconds"
+            ],
+            "additionalProperties": false
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                }
+            },
+            "required": ["id", "description", "python", "node"],
+            "additionalProperties": false
+        }
+    }
+}

@@ -170,7 +170,7 @@ export function retryAfterMs(header: string | null, now: number = Date.now()): n
  * `Retry-After` when readable, else 1s, 2s, 4s jittered by `random()` into [50%, 100%); capped
  * at 30s either way.
  */
-function rateLimitDelayMs(
+export function rateLimitDelayMs(
 	retry: number,
 	retryAfter: number | undefined,
 	random: () => number,
@@ -183,7 +183,7 @@ function rateLimitDelayMs(
  * Whether a retry's wait ends before the deadline, `remaining` milliseconds away. An equal wait
  * does not: the caller's timeout would fire as the retry starts.
  */
-const waitsForRetry = (delay: number, remaining: number): boolean => delay < remaining;
+export const waitsForRetry = (delay: number, remaining: number): boolean => delay < remaining;
 
 /** Seconds rounded half up to two decimals and written as a number: `0`, `0.75`, `1.5`. */
 const formatSeconds = (ms: number): string => String(Math.floor((ms / 1000) * 100 + 0.5) / 100);

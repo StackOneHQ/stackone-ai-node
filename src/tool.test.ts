@@ -386,31 +386,6 @@ describe('StackOneMcpTool as an action tool', () => {
 		await expect(actionTool().execute(input)).rejects.toThrow(message);
 	});
 
-	// JSON.stringify, and so the MCP client, would send each of these as null.
-	it.each([
-		['NaN at the top level', { amount: Number.NaN }, 'NaN'],
-		[
-			'Infinity nested in an object',
-			{ body: { name: 'Ada', score: Number.POSITIVE_INFINITY } },
-			'Infinity',
-		],
-		[
-			'-Infinity nested in an array',
-			{ query: { ids: [1, Number.NEGATIVE_INFINITY] } },
-			'-Infinity',
-		],
-	])('rejects %s without calling the server', async (_name, args, value) => {
-		const error = await actionTool()
-			.execute(args as JsonObject)
-			.catch((caught: unknown) => caught);
-
-		expect(error).toBeInstanceOf(StackOneError);
-		expect((error as Error).message).toBe(
-			`Arguments for "crm_update_contact" could not be encoded as JSON: ${value} is not a JSON number`,
-		);
-		expect(calls).toEqual([]);
-	});
-
 	it('rejects a non-object, non-string argument', async () => {
 		// @ts-expect-error - intentionally passing an invalid type
 		await expect(actionTool().execute(12345)).rejects.toThrow(
@@ -462,7 +437,6 @@ describe('StackOneMcpTool as an action tool', () => {
 
 	// What a model emits when a token boundary splits an emoji: not Unicode text, so not UTF-8.
 	it.each([
-		['a lone high surrogate in a value', { name: 'Ada\uD83D' }],
 		['a lone low surrogate nested in an array', { query: { ids: ['\uDE00x'] } }],
 		['a lone surrogate in a key', { body: { '\uD800': 'x' } }],
 		['a lone surrogate in a top-level key', { '\uDFFF': 'x' }],
@@ -483,7 +457,8 @@ describe('StackOneMcpTool as an action tool', () => {
 		expect(calls).toHaveLength(1);
 	});
 
-	it.each([['{"a": NaN}'], ['NaN'], ['{"a": Infinity}']])(
+	// NaN alone, and in an object, are in the shared vectors.
+	it.each([['{"a": Infinity}'], ['[-Infinity]']])(
 		'rejects the JSON text %s as invalid JSON',
 		async (text) => {
 			const error = await actionTool()

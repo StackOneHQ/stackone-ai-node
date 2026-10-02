@@ -1,0 +1,203 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/messages.schema.json",
+    "title": "Canonical SDK messages",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "prefixes": {
+            "type": "object",
+            "properties": {
+                "node": {
+                    "type": "string"
+                },
+                "python": {
+                    "type": "string"
+                }
+            },
+            "required": ["node", "python"],
+            "additionalProperties": false
+        },
+        "formats": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "reasons": {
+            "type": "object",
+            "properties": {
+                "set-by-sdk": {
+                    "type": "string"
+                },
+                "not-declared": {
+                    "type": "string"
+                },
+                "malformed": {
+                    "type": "string"
+                },
+                "not-an-object": {
+                    "type": "string"
+                },
+                "not-a-scalar": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "set-by-sdk",
+                "not-declared",
+                "malformed",
+                "not-an-object",
+                "not-a-scalar"
+            ],
+            "additionalProperties": false
+        },
+        "messages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/message"
+            }
+        },
+        "unshared": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unshared"
+            }
+        }
+    },
+    "required": [
+        "description",
+        "version",
+        "prefixes",
+        "formats",
+        "reasons",
+        "messages",
+        "unshared"
+    ],
+    "additionalProperties": false,
+    "$defs": {
+        "classes": {
+            "type": "object",
+            "properties": {
+                "python": {
+                    "type": "string"
+                },
+                "node": {
+                    "type": "string"
+                }
+            },
+            "required": ["python", "node"],
+            "additionalProperties": false
+        },
+        "message": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9-]*$"
+                },
+                "kind": {
+                    "enum": ["warning", "error", "tool-result"]
+                },
+                "error": {
+                    "$ref": "#/$defs/classes",
+                    "description": "The class each SDK raises it as."
+                },
+                "template": {
+                    "type": "string",
+                    "description": "The canonical text. `{name}` is a placeholder; no template holds a literal brace."
+                },
+                "placeholders": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "format": {
+                                "enum": [
+                                    "text",
+                                    "json",
+                                    "integer",
+                                    "seconds",
+                                    "seconds-2dp",
+                                    "json-type",
+                                    "reason"
+                                ]
+                            },
+                            "description": {
+                                "type": "string"
+                            }
+                        },
+                        "required": ["format", "description"],
+                        "additionalProperties": false
+                    }
+                },
+                "python": {
+                    "type": "string",
+                    "description": "The Python SDK's text today."
+                },
+                "node": {
+                    "type": "string",
+                    "description": "The Node SDK's text today."
+                },
+                "matches": {
+                    "type": "object",
+                    "properties": {
+                        "python": {
+                            "type": "boolean"
+                        },
+                        "node": {
+                            "type": "boolean"
+                        }
+                    },
+                    "required": ["python", "node"],
+                    "additionalProperties": false
+                },
+                "notes": {
+                    "type": "string"
+                }
+            },
+            "required": ["id", "kind", "template", "placeholders", "python", "node", "matches"],
+            "additionalProperties": false,
+            "if": {
+                "properties": {
+                    "kind": {
+                        "const": "error"
+                    }
+                }
+            },
+            "then": {
+                "required": ["error"]
+            }
+        },
+        "unshared": {
+            "type": "object",
+            "properties": {
+                "sdk": {
+                    "enum": ["python", "node"]
+                },
+                "kind": {
+                    "enum": ["warning", "error", "tool-result"]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "notes": {
+                    "type": "string"
+                }
+            },
+            "required": ["sdk", "kind", "text"],
+            "additionalProperties": false
+        }
+    }
+}

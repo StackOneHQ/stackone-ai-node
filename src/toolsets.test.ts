@@ -105,24 +105,6 @@ describe('configuration', () => {
 	});
 
 	it.each([
-		['accountIds', () => newToolSet({ accountIds: [1] as never })],
-		['setAccounts', () => newToolSet().setAccounts({ id: 'acc1' } as never)],
-		['fetchTools', () => newToolSet().fetchTools({ accountIds: 5 as never })],
-	])('refuses a non-list or non-string ids in %s', async (_name, act) => {
-		await expect(async () => act()).rejects.toThrow(
-			new ToolSetConfigError('accountIds must be a list of account id strings'),
-		);
-	});
-
-	it('treats accountIds: null as not given', async () => {
-		const toolset = newToolSet({ accountIds: null });
-		expect(names(await toolset.setAccounts(null).fetchTools({ accountIds: null }))).toEqual([
-			'default_tool_1',
-			'default_tool_2',
-		]);
-	});
-
-	it.each([
 		['accountIds', () => newToolSet({ accountIds: ['acc1', ''] })],
 		['setAccounts', () => newToolSet().setAccounts([''])],
 		['fetchTools', () => newToolSet().fetchTools({ accountIds: [''] })],

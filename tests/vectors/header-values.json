@@ -1,0 +1,307 @@
+{
+    "$schema": "./schema/header-values.schema.json",
+    "description": "How a nested header value — an entry of a top-level `headers` object argument whose served schema is open (`{\"type\": \"object\"}`), under the declared name `x-probe` — reaches the wire: the string forwarded, or dropped. Values are JSON; `{\"$number\": \"NaN\"}`, `\"Infinity\"` and `\"-Infinity\"` stand for the non-finite numbers JSON cannot hold.",
+    "version": 1,
+    "cases": [
+        {
+            "id": "string",
+            "description": "a string is forwarded as is",
+            "value": "abc",
+            "expected": "abc"
+        },
+        {
+            "id": "empty-string",
+            "description": "an empty string is a valid header value",
+            "value": "",
+            "expected": ""
+        },
+        {
+            "id": "string-with-space",
+            "description": "a space is allowed",
+            "value": "a b",
+            "expected": "a b"
+        },
+        {
+            "id": "string-with-tab",
+            "description": "a tab is allowed",
+            "value": "a\tb",
+            "expected": "a\tb"
+        },
+        {
+            "id": "latin1",
+            "description": "obs-text (U+0080-U+00FF) is allowed",
+            "value": "café",
+            "expected": "café"
+        },
+        {
+            "id": "non-latin1",
+            "description": "a character above U+00FF is malformed",
+            "value": "€",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "emoji",
+            "description": "an astral character is malformed",
+            "value": "🙂",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "crlf",
+            "description": "CRLF would smuggle a second header line: malformed",
+            "value": "a\r\nx-account-id: B",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "lf-trailing",
+            "description": "a trailing LF is malformed (a `$` anchor must not let it through)",
+            "value": "abc\n",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "cr",
+            "description": "a bare CR is malformed",
+            "value": "a\rb",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "nul",
+            "description": "NUL is malformed",
+            "value": "a\u0000b",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "del",
+            "description": "DEL (0x7f) is malformed",
+            "value": "a\u007fb",
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "true",
+            "description": "a boolean as its literal text",
+            "value": true,
+            "expected": "true"
+        },
+        {
+            "id": "false",
+            "description": "a boolean as its literal text",
+            "value": false,
+            "expected": "false"
+        },
+        {
+            "id": "zero",
+            "description": "zero",
+            "value": 0,
+            "expected": "0"
+        },
+        {
+            "id": "int",
+            "description": "an integer",
+            "value": 7,
+            "expected": "7"
+        },
+        {
+            "id": "negative-int",
+            "description": "a negative integer",
+            "value": -3,
+            "expected": "-3"
+        },
+        {
+            "id": "float-integral",
+            "description": "an integral float is written as JavaScript writes it: 1, not 1.0",
+            "value": 1,
+            "expected": "1"
+        },
+        {
+            "id": "float",
+            "description": "a float",
+            "value": 1.5,
+            "expected": "1.5"
+        },
+        {
+            "id": "negative-float",
+            "description": "a negative float",
+            "value": -0.5,
+            "expected": "-0.5"
+        },
+        {
+            "id": "negative-zero",
+            "description": "negative zero is written 0",
+            "value": 0,
+            "expected": "0"
+        },
+        {
+            "id": "exp-small",
+            "description": "below 1e-6, exponent notation, written as JavaScript does",
+            "value": 1e-7,
+            "expected": "1e-7"
+        },
+        {
+            "id": "exp-boundary-small",
+            "description": "1e-6 is still written in full",
+            "value": 1e-6,
+            "expected": "0.000001"
+        },
+        {
+            "id": "exp-large",
+            "description": "from 1e21, exponent notation with an explicit +",
+            "value": 1e21,
+            "expected": "1e+21"
+        },
+        {
+            "id": "exp-boundary-large",
+            "description": "1e20 is still written in full",
+            "value": 1e20,
+            "expected": "100000000000000000000"
+        },
+        {
+            "id": "exp-large-fraction",
+            "description": "a large exponent with a fraction",
+            "value": 1.5e300,
+            "expected": "1.5e+300"
+        },
+        {
+            "id": "float-repr",
+            "description": "the shortest representation that round-trips",
+            "value": 0.30000000000000004,
+            "expected": "0.30000000000000004"
+        },
+        {
+            "id": "safe-int",
+            "description": "the largest integer both languages hold exactly",
+            "value": 9007199254740991,
+            "expected": "9007199254740991"
+        },
+        {
+            "id": "nan",
+            "description": "NaN as its text (a JSON argument cannot hold it; see argument-encoding.json for what else happens)",
+            "value": {
+                "$number": "NaN"
+            },
+            "expected": "NaN"
+        },
+        {
+            "id": "infinity",
+            "description": "Infinity as its text",
+            "value": {
+                "$number": "Infinity"
+            },
+            "expected": "Infinity"
+        },
+        {
+            "id": "neg-infinity",
+            "description": "-Infinity as its text",
+            "value": {
+                "$number": "-Infinity"
+            },
+            "expected": "-Infinity"
+        },
+        {
+            "id": "object",
+            "description": "an object as compact JSON",
+            "value": {
+                "k": 1
+            },
+            "expected": "{\"k\":1}"
+        },
+        {
+            "id": "object-nested",
+            "description": "nested values as compact JSON, numbers as JavaScript writes them",
+            "value": {
+                "a": {
+                    "b": [1, 2, true, null]
+                }
+            },
+            "expected": "{\"a\":{\"b\":[1,2,true,null]}}"
+        },
+        {
+            "id": "object-float",
+            "description": "floats inside JSON as JavaScript writes them",
+            "value": {
+                "x": 1,
+                "y": 1e21
+            },
+            "expected": "{\"x\":1,\"y\":1e+21}"
+        },
+        {
+            "id": "object-non-ascii",
+            "description": "non-ASCII stays unescaped in the JSON text, and is valid obs-text",
+            "value": {
+                "k": "é"
+            },
+            "expected": "{\"k\":\"é\"}"
+        },
+        {
+            "id": "object-euro",
+            "description": "non-ASCII above U+00FF stays unescaped, so the JSON text is malformed as a header",
+            "value": {
+                "k": "€"
+            },
+            "expected": {
+                "dropped": true
+            }
+        },
+        {
+            "id": "object-escapes",
+            "description": "JSON escapes for quote, backslash and newline keep the text on one line",
+            "value": {
+                "k": "a\"b\\c\nd"
+            },
+            "expected": "{\"k\":\"a\\\"b\\\\c\\nd\"}"
+        },
+        {
+            "id": "object-empty",
+            "description": "an empty object",
+            "value": {},
+            "expected": "{}"
+        },
+        {
+            "id": "array",
+            "description": "an array as compact JSON",
+            "value": ["a", "b"],
+            "expected": "[\"a\",\"b\"]"
+        },
+        {
+            "id": "array-empty",
+            "description": "an empty array",
+            "value": [],
+            "expected": "[]"
+        },
+        {
+            "id": "array-mixed",
+            "description": "mixed array values as compact JSON",
+            "value": [true, 1.5, null, "x"],
+            "expected": "[true,1.5,null,\"x\"]"
+        },
+        {
+            "id": "null",
+            "description": "null is dropped silently, with no warning",
+            "value": null,
+            "expected": {
+                "dropped": true
+            }
+        }
+    ],
+    "known_differences": [
+        {
+            "id": "big-int",
+            "description": "an integer above 2^53. Not graded: by the time this value reaches header filtering, the SDK's own JSON parser has already rounded it, so what is forwarded is an artifact of each language's JSON number type, not a choice the header-value rule makes. Python's JSON parser keeps every digit; Node's JSON numbers are doubles, so JSON.parse already rounds it before this code ever sees it.",
+            "value": 12345678901234567890,
+            "python": "12345678901234567890",
+            "node": "12345678901234567000"
+        }
+    ]
+}
