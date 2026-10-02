@@ -1,6 +1,6 @@
 {
     "$schema": "./schema/messages.schema.json",
-    "description": "The canonical wording of every user-facing warning and error message both SDKs emit. `template` is the canonical text; `python` and `node` are each SDK's text today, written with the same placeholders (and `|` between variants), so an SDK can see what changes. A prefix the language adds — Node's `[@stackone/ai] `, Python's logger name — is outside the template. An error's class is in `error`. `matches` says whether an SDK's text is already the canonical one; `notes` say where the text depends on more than the template.",
+    "description": "The canonical wording of every user-facing warning and error message both SDKs emit. `template` is the canonical text; `python` and `node` are each SDK's text today, written with the same placeholders, so an SDK can see what changes. A prefix the language adds — Node's `[@stackone/ai] `, Python's logger name — is outside the template. An error's class is in `error`. `matches` says whether an SDK's text is already the canonical one; `notes` say where the text depends on more than the template.",
     "version": 1,
     "prefixes": {
         "node": "Every warning goes through console.warn, prefixed `[@stackone/ai] ` — outside the template.",

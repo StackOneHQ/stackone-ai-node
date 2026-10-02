@@ -46,7 +46,8 @@ SDKs disagree on today and the contract does not yet settle; none is open right 
 
 - **`id`** is unique within a file and does not change: a test names its cases by it.
 - **`version`** is bumped when an existing case's meaning or expected value changes. Adding a case
-  does not bump it.
+  does not bump it. Versions count from the first release of the vectors: changes made before
+  `feat/feedback-invariant` merges stay at version 1.
 - **`unresolved`** cases are not graded. Each one says what the two SDKs do differently. Once the
   contract settles it, the case moves to `cases` with the agreed value, and the SDK that changes
   fixes its code in the same release. A file only has this array while it has an open case.
