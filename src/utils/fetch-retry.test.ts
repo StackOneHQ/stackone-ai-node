@@ -1,7 +1,7 @@
 import { http, HttpResponse, type JsonBodyType } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { server } from '../../mocks/node';
-import { fetchWithRetry } from './fetch-retry';
+import { fetchWithRetry, retryAfterMs } from './fetch-retry';
 
 const url = `${TEST_BASE_URL}/limited`;
 
@@ -166,6 +166,54 @@ describe('fetchWithRetry', () => {
 			await fetchWithRetry(url, undefined, { timing });
 
 			expect(delays).toEqual([500]);
+		});
+	});
+
+	describe('retryAfterMs', () => {
+		const now = Date.parse('2026-10-01T12:00:00Z');
+
+		// Each form is GMT, whatever the host's time zone: Date.parse read asctime and a
+		// zone-less IMF date as local time.
+		it.each([
+			['IMF-fixdate', 'Thu, 01 Oct 2026 12:00:30 GMT', 30_000],
+			['asctime', 'Thu Oct  1 12:00:45 2026', 45_000],
+			['RFC 850', 'Thursday, 01-Oct-26 12:01:00 GMT', 60_000],
+			['a leap second', 'Thu, 01 Oct 2026 12:00:60 GMT', 60_000],
+			['a mismatched weekday', 'Mon, 01 Oct 2026 12:00:10 GMT', 10_000],
+		])('reads %s', (_form, value, expected) => {
+			expect(retryAfterMs(value, now)).toBe(expected);
+		});
+
+		// RFC 9110 §5.6.7: a two-digit year more than 50 years ahead is in the previous century.
+		it.each([
+			['60', 'Friday, 01-Oct-60 12:00:00 GMT', '2060-10-01T12:00:00Z'],
+			['75', 'Tuesday, 31-Dec-75 23:59:59 GMT', '2075-12-31T23:59:59Z'],
+			['76', 'Thursday, 01-Oct-76 12:00:00 GMT', '1976-10-01T12:00:00Z'],
+		])('reads the RFC 850 year %s against now', (_year, value, expected) => {
+			expect(retryAfterMs(value, Date.parse('2026-01-01T00:00:00Z'))).toBe(
+				Math.max(0, Date.parse(expected) - Date.parse('2026-01-01T00:00:00Z')),
+			);
+		});
+
+		it.each([
+			['a missing zone', 'Thu, 01 Oct 2026 12:00:30'],
+			['trailing text', 'Thu, 01 Oct 2026 12:00:30 GMT garbage'],
+			['30 February', 'Mon, 30 Feb 2026 12:00:00 GMT'],
+			['29 February in a common year', 'Sun, 29 Feb 2026 12:00:00 GMT'],
+			['a five-digit year', 'Fri, 01 Oct 10000 12:00:00 GMT'],
+			['year 0', 'Sat, 01 Jan 0000 12:00:00 GMT'],
+			['a numeric zone', 'Thu, 01 Oct 2026 13:00:30 +0100'],
+			['a two-digit IMF year', 'Thu, 01 Oct 26 12:00:30 GMT'],
+			['second 61', 'Thu, 01 Oct 2026 12:00:61 GMT'],
+			['a lower-case weekday', 'thu, 01 Oct 2026 12:00:30 GMT'],
+		])('refuses %s', (_problem, value) => {
+			expect(retryAfterMs(value, now)).toBeUndefined();
+		});
+
+		it('reads 29 February in a leap year', () => {
+			expect(retryAfterMs('Tue, 29 Feb 2028 00:00:00 GMT', now)).toBe(
+				Date.parse('2028-02-29T00:00:00Z') - now,
+			);
 		});
 	});
 
