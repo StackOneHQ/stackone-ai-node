@@ -50,14 +50,20 @@ export const retryTiming: RetryTiming = {
 	now: () => performance.now(),
 };
 
-// The three HTTP-date forms of RFC 9110 §5.6.7, exactly: case-sensitive, single spaces, GMT only.
+// The three HTTP-date forms of RFC 9110 §5.6.7: case-sensitive, single spaces, nothing after.
 const WEEKDAY = '(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)';
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTH = `(?<month>${MONTHS.join('|')})`;
 const TIME = '(?<hour>\\d{2}):(?<minute>\\d{2}):(?<second>\\d{2})';
 
-/** `Sun, 06 Nov 1994 08:49:37 GMT`: RFC 9110's preferred form. */
-const IMF_FIXDATE = new RegExp(`^${WEEKDAY}, (?<day>\\d{2}) ${MONTH} (?<year>\\d{4}) ${TIME} GMT$`);
+/**
+ * `Sun, 06 Nov 1994 08:49:37 GMT`: RFC 9110's preferred form. As the shared vectors read it, a
+ * two-digit year is read as RFC 850's is, and the zone may be left out (GMT) or written as an
+ * offset (`+0100`).
+ */
+const IMF_FIXDATE = new RegExp(
+	`^${WEEKDAY}, (?<day>\\d{2}) ${MONTH} (?<year>\\d{4}|\\d{2}) ${TIME}(?: (?<zone>GMT|[+-]\\d{4}))?$`,
+);
 /** `Sunday, 06-Nov-94 08:49:37 GMT`: obsolete, with a two-digit year. */
 const RFC850_DATE = new RegExp(
 	`^(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday), (?<day>\\d{2})-${MONTH}-(?<year>\\d{2}) ${TIME} GMT$`,
@@ -101,17 +107,19 @@ function addYears(time: number, years: number): number {
  * Read an RFC 9110 HTTP-date as a time in milliseconds, or undefined if it is not one.
  *
  * Strict, unlike `Date.parse`, which reads a zone-less date in the host's local time, rolls
- * 30 February over to 2 March and accepts trailing text. All three forms are always GMT. The
- * weekday must be present but need not match the date, which is what the date means.
+ * 30 February over to 2 March, reads five-digit years and accepts trailing text. A date with no
+ * zone is GMT. The weekday must be present but need not match the date, which is what the date
+ * means.
  */
 function parseHttpDate(value: string, now: number): number | undefined {
-	const rfc850 = RFC850_DATE.exec(value);
-	const fields = (rfc850 ?? IMF_FIXDATE.exec(value) ?? ASCTIME_DATE.exec(value))?.groups;
-	if (!fields) {
+	const fields = (RFC850_DATE.exec(value) ?? IMF_FIXDATE.exec(value) ?? ASCTIME_DATE.exec(value))
+		?.groups;
+	if (!fields?.year) {
 		return undefined;
 	}
+	const twoDigitYear = fields.year.length === 2;
 	const thisYear = new Date(now).getUTCFullYear();
-	const year = Number(fields.year) + (rfc850 ? thisYear - (thisYear % 100) : 0);
+	const year = Number(fields.year) + (twoDigitYear ? thisYear - (thisYear % 100) : 0);
 	const month = MONTHS.indexOf(fields.month ?? '');
 	const d = Number(fields.day);
 	const h = Number(fields.hour);
@@ -122,7 +130,7 @@ function parseHttpDate(value: string, now: number): number | undefined {
 		return undefined;
 	}
 	let when = utcTime(year, month, d, h, m, s);
-	if (rfc850) {
+	if (twoDigitYear) {
 		// RFC 9110 §5.6.7: a two-digit year more than 50 years ahead is the most recent past year
 		// with those digits.
 		const horizon = addYears(now, 50);
@@ -131,6 +139,11 @@ function parseHttpDate(value: string, now: number): number | undefined {
 		} else if (addYears(when, 100) <= horizon) {
 			when = addYears(when, 100);
 		}
+	}
+	const offset = /^([+-])(\d{2})(\d{2})$/.exec(fields.zone ?? '');
+	if (offset) {
+		const minutes = Number(offset[2]) * 60 + Number(offset[3]);
+		when -= (offset[1] === '-' ? -1 : 1) * minutes * 60_000;
 	}
 	return when;
 }
