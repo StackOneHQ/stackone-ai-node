@@ -641,6 +641,17 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
+	 * The first tool of each name, in order: the one {@link getTool} returns. Every adapter is
+	 * built from these, so a model can never call a tool that a lookup by name would not find —
+	 * an AI SDK record would keep the last, OpenAI would get two functions of one name, and the
+	 * Claude Agent SDK refuses the second outright.
+	 */
+	#uniqueTools(): BaseTool[] {
+		const seen = new Set<string>();
+		return this.tools.filter((tool) => !seen.has(tool.name) && seen.add(tool.name));
+	}
+
+	/**
 	 * Get a StackOne tool by name
 	 */
 	getStackOneTool(name: string): StackOneTool {
@@ -670,7 +681,7 @@ export class Tools implements Iterable<BaseTool> {
 	 * Returns an array of objects with name, description, and schema
 	 */
 	toJsonSchema(): Array<{ name: string; description: string; parameters: JSONSchema }> {
-		return this.tools.map((tool) => ({
+		return this.#uniqueTools().map((tool) => ({
 			name: tool.name,
 			description: tool.description,
 			parameters: tool.toJsonSchema(),
@@ -681,7 +692,7 @@ export class Tools implements Iterable<BaseTool> {
 	 * Convert all tools to OpenAI Chat Completions API format
 	 */
 	toOpenAI(): ChatCompletionFunctionTool[] {
-		return this.tools.map((tool) => tool.toOpenAI());
+		return this.#uniqueTools().map((tool) => tool.toOpenAI());
 	}
 
 	/**
@@ -737,7 +748,7 @@ export class Tools implements Iterable<BaseTool> {
 	 * @see https://docs.anthropic.com/en/docs/build-with-claude/tool-use
 	 */
 	toAnthropic(): AnthropicTool[] {
-		return this.tools.map((tool) => tool.toAnthropic());
+		return this.#uniqueTools().map((tool) => tool.toAnthropic());
 	}
 
 	/**
@@ -745,7 +756,7 @@ export class Tools implements Iterable<BaseTool> {
 	 * @see https://platform.openai.com/docs/api-reference/responses
 	 */
 	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool[] {
-		return this.tools.map((tool) => tool.toOpenAIResponses(options));
+		return this.#uniqueTools().map((tool) => tool.toOpenAIResponses(options));
 	}
 
 	/**
@@ -757,7 +768,7 @@ export class Tools implements Iterable<BaseTool> {
 		},
 	): Promise<AISDKToolResult> {
 		const result: AISDKToolResult = {};
-		for (const tool of this.tools) {
+		for (const tool of this.#uniqueTools()) {
 			Object.assign(result, await tool.toAISDK(options));
 		}
 		return result;
@@ -801,7 +812,7 @@ export class Tools implements Iterable<BaseTool> {
 		// We use type assertions here because the Zod types from our dynamic import
 		// don't perfectly match the Claude Agent SDK's expected types at compile time
 		const sdkTools = await Promise.all(
-			this.tools.map(async (baseTool) => {
+			this.#uniqueTools().map(async (baseTool) => {
 				const toolDef = await baseTool.toClaudeAgentSdkTool();
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic Zod schema types
 				return claudeAgentSdk.tool(

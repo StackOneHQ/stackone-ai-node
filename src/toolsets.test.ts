@@ -854,6 +854,29 @@ describe('duplicate tool names', () => {
 		expect(tools.getTool('hibob_list_employees')).toBe(tools.toArray()[0]);
 	});
 
+	// Every adapter keeps the tool getTool() returns. Left alone, the AI SDK record kept the last,
+	// OpenAI got two functions of one name, and the Claude Agent SDK refused the second.
+	it('builds every adapter from the first listed duplicate only', async () => {
+		fakeListing((request) => [
+			{ name: 'hibob_list_employees', description: `on ${accountOf(request)}`, inputSchema: {} },
+			def(`only_${accountOf(request)}`),
+		]);
+
+		const tools = await newToolSet().fetchTools({ accountIds: ['b', 'a'] });
+
+		const expected = ['hibob_list_employees', 'only_a', 'only_b'];
+		expect(tools.toOpenAI().map((tool) => tool.function.name)).toEqual(expected);
+		expect(tools.toOpenAI()[0]?.function.description).toBe('on a');
+		expect(tools.toAnthropic().map((tool) => tool.name)).toEqual(expected);
+		expect(tools.toOpenAIResponses().map((tool) => tool.name)).toEqual(expected);
+		expect(tools.toJsonSchema().map((tool) => tool.name)).toEqual(expected);
+		const aiSdk = await tools.toAISDK();
+		expect(Object.keys(aiSdk)).toEqual(expected);
+		expect(aiSdk.hibob_list_employees?.description).toBe('on a');
+		await expect(tools.toClaudeAgentSdk()).resolves.toBeDefined();
+		expect(warnSpy).toHaveBeenCalledOnce();
+	});
+
 	it('stays quiet when names are unique', async () => {
 		await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2'] });
 		expect(warnSpy).not.toHaveBeenCalled();
