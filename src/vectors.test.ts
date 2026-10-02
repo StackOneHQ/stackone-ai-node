@@ -8,7 +8,6 @@ import { join } from 'node:path';
 import { ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { delay, http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
-import { accountMcpTools, createMcpApp } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { describeMcpFailure, listMcpTools, parseToolResult } from './mcp-client';
 import { toolParametersFromInputSchema } from './schema';
@@ -621,14 +620,12 @@ const emitters: Record<
 		const endpoint = `${TEST_BASE_URL}/mcp`;
 		const timeout = 300;
 		let requests = 0;
-		const app = createMcpApp({ accountTools: accountMcpTools });
 		server.use(
-			http.all(endpoint, async ({ request }) => {
+			http.all(endpoint, async () => {
 				if (requests++ === 0) {
 					return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
 				}
 				await delay('infinite');
-				return app.fetch(request);
 			}),
 		);
 		const error = await errorOf(() =>
@@ -647,7 +644,6 @@ const emitters: Record<
 					return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
 				}
 				await delay('infinite');
-				return HttpResponse.json([]);
 			}),
 		);
 		const error = await errorOf(() => newToolSet({ timeout }).fetchAccounts());
