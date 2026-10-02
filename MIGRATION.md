@@ -183,7 +183,7 @@ await tool.execute({ body: { variables: { first: 25 } } });
 
 **Header arguments are allowlisted.** A header argument is an entry of a `headers` object argument, or a top-level `headers_<name>` argument. Each one is forwarded only if the tool's schema declares it in the same form: under `headers.properties`, or as a `headers_<name>` property. An open `headers` object — `type: "object"`, no `properties`, and `additionalProperties` not `false` — declares every name; without `type: "object"`, or with `additionalProperties: false` and no `properties`, it declares none. `Authorization`, `x-account-id` and `User-Agent` are never forwarded, even when declared, because the SDK sets them itself. Anything dropped is logged as a warning. Every other argument is sent unchanged.
 
-A top-level `headers` argument is sent as given, whatever its value, when the schema declares `headers` itself as a non-object field — it's an ordinary argument that happens to be named `headers`. Otherwise, a `headers` argument that isn't a plain object is dropped with a warning. A `headers_<name>` argument is dropped with a warning when its value is an array or object.
+A top-level `headers` argument skips header filtering when the schema declares `headers` itself as a non-object field — it's an ordinary argument that happens to be named `headers`, so it is sent as given, subject to the same JSON-value check as every other argument. Otherwise, a `headers` argument that isn't a plain object is dropped with a warning. A `headers_<name>` argument is dropped with a warning when its value is an array or object.
 
 `*_execute_action` serves an open `headers` object, so `toolset.execute()` passes your own headers on to the action, with the exception of those three:
 
