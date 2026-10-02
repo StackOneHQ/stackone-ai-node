@@ -70,7 +70,7 @@
                             "type": "object",
                             "properties": {
                                 "dropped": {
-                                    "enum": ["set-by-sdk", "not-declared", "malformed"]
+                                    "enum": ["set-by-sdk", "malformed"]
                                 }
                             },
                             "required": ["dropped"],

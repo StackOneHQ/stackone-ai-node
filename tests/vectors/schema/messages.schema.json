@@ -178,6 +178,11 @@
             },
             "then": {
                 "required": ["error"]
+            },
+            "else": {
+                "not": {
+                    "required": ["error"]
+                }
             }
         },
         "unshared": {

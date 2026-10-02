@@ -1,6 +1,6 @@
 {
     "$schema": "./schema/retry-after.schema.json",
-    "description": "How a Retry-After header value reads as seconds from `now`: delta-seconds or an HTTP-date. `expected_seconds` is the RAW value, before the cap: null when the header is absent or unreadable (the caller falls back to its own backoff), 0 for a date in the past. The cap (`max_delay_seconds`) is applied afterwards by the caller, and graded in backoff.json.",
+    "description": "How a Retry-After header value reads as seconds from `now`: delta-seconds or an HTTP-date. `expected_seconds` is the RAW value, before the cap: null when the header is absent or unreadable (the caller falls back to its own backoff), 0 for a date in the past. An HTTP-date's second may be 60, a leap second, which reads as the first second of the next minute. The cap (`max_delay_seconds`) is applied afterwards by the caller, and graded in backoff.json.",
     "version": 1,
     "max_delay_seconds": 30,
     "cases": [
@@ -27,10 +27,10 @@
         },
         {
             "id": "large",
-            "description": "20 digits: read as a number, not refused; the cap is applied separately, so this is the raw value",
+            "description": "20 digits: read as a number, not refused; the cap is applied separately, so this is the raw value, compared within the seconds tolerance",
             "header": "99999999999999999999",
             "now": "2026-10-01T12:00:00Z",
-            "expected_seconds": 100000000000000000000
+            "expected_seconds": 99999999999999999999
         },
         {
             "id": "huge",
@@ -275,14 +275,14 @@
         {
             "id": "rfc850-year-76",
             "description": "RFC 850 two-digit year 76 resolves to 2076: exactly 50 years ahead of `now`, the boundary — not *more than* 50, so it stays in the future.",
-            "header": "Wednesday, 01-Oct-76 12:00:00 GMT",
+            "header": "Thursday, 01-Oct-76 12:00:00 GMT",
             "now": "2026-10-01T12:00:00Z",
             "expected_seconds": 1577923200
         },
         {
             "id": "rfc850-year-77",
             "description": "RFC 850 two-digit year 77 would resolve to 2077, 51 years ahead — more than 50 — so RFC 9110 §5.6.7 moves it back a century, to 1977, which is in the past.",
-            "header": "Friday, 01-Oct-77 12:00:00 GMT",
+            "header": "Saturday, 01-Oct-77 12:00:00 GMT",
             "now": "2026-10-01T12:00:00Z",
             "expected_seconds": 0
         },
@@ -311,6 +311,27 @@
             "id": "year-10000",
             "description": "a five-digit year is above 9999, and is refused.",
             "header": "Fri, 01 Oct 10000 12:00:00 GMT",
+            "now": "2026-10-01T12:00:00Z",
+            "expected_seconds": null
+        },
+        {
+            "id": "leap-second",
+            "description": "second 60 is a leap second: readable, and the first second of the next minute, here of the next year",
+            "header": "Thu, 31 Dec 2026 23:59:60 GMT",
+            "now": "2026-12-31T23:59:00Z",
+            "expected_seconds": 60
+        },
+        {
+            "id": "leap-second-year-9999",
+            "description": "a leap second rolls over even past 31 December 9999: the year limit applies to the year as written, so this is 1 January 10000, not unreadable",
+            "header": "Fri, 31 Dec 9999 23:59:60 GMT",
+            "now": "9999-12-31T23:59:00Z",
+            "expected_seconds": 60
+        },
+        {
+            "id": "second-61",
+            "description": "second 61 is not a time, leap second or not",
+            "header": "Thu, 01 Oct 2026 12:00:61 GMT",
             "now": "2026-10-01T12:00:00Z",
             "expected_seconds": null
         }

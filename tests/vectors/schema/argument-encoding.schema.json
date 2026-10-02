@@ -48,6 +48,48 @@
             "type": "string",
             "minLength": 1
         },
+        "value": {
+            "description": "Any JSON value, in which an object with a `$number` key is a marker for a number JSON cannot hold, and nothing else.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/value"
+                    }
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "$number": {
+                            "enum": ["NaN", "Infinity", "-Infinity"]
+                        }
+                    },
+                    "required": ["$number"],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "not": {
+                        "required": ["$number"]
+                    },
+                    "additionalProperties": {
+                        "$ref": "#/$defs/value"
+                    }
+                }
+            ]
+        },
         "case": {
             "type": "object",
             "properties": {
@@ -58,7 +100,7 @@
                     "$ref": "#/$defs/description"
                 },
                 "arguments": {
-                    "description": "Any JSON value; `{\"$number\": …}` markers stand for non-finite numbers."
+                    "$ref": "#/$defs/value"
                 },
                 "arguments_json": {
                     "type": "string",
@@ -118,7 +160,7 @@
                     "description": "What the Node SDK does today."
                 },
                 "arguments": {
-                    "description": "Any JSON value; `{\"$number\": …}` markers stand for non-finite numbers."
+                    "$ref": "#/$defs/value"
                 },
                 "arguments_json": {
                     "type": "string",

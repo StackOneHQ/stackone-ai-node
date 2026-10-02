@@ -50,9 +50,10 @@ SDKs disagree on today and the contract does not yet settle; none is open right 
 - **`unresolved`** cases are not graded. Each one says what the two SDKs do differently. Once the
   contract settles it, the case moves to `cases` with the agreed value, and the SDK that changes
   fixes its code in the same release. A file only has this array while it has an open case.
-- **`known_differences`** cases are not graded either. Each one is settled — the contract has
-  chosen the expected behaviour, and it is in `cases` — but the two SDKs still produce different
-  values for a reason outside the rule being tested, so there is nothing to converge on.
+- **`known_differences`** cases are not graded either. Each one is a settled exception, recorded
+  only in `known_differences` and not also in `cases`: the contract has chosen the behaviour, but
+  the two SDKs still produce different values for a reason outside the rule being tested, so
+  there is nothing to converge on. A file only has this array while it has such a case.
 
 ## Reading the values
 
@@ -76,7 +77,8 @@ SDKs disagree on today and the contract does not yet settle; none is open right 
 
 Each message has an `id`, a `template` with named placeholders (`{endpoint}`, `{attempt}`, …), a
 `format` for each placeholder, and the text each SDK emits today (`python`, `node`). `matches`
-says whether that text is already the canonical one, and `notes` explain the differences. Render
+says whether that text is already the canonical one, and `notes` say where the text depends on
+more than the template. Render
 a template by replacing each placeholder with its value written in the placeholder's format:
 
 | Format | Written as |

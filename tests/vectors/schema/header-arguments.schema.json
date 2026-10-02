@@ -57,7 +57,7 @@
                 },
                 "header": {
                     "type": "string",
-                    "description": "For an entry of a `headers` object: its name, trimmed."
+                    "description": "For an entry of a `headers` object: its name, trimmed. Present exactly when `argument` is `headers` and the entry, not the whole argument, was dropped."
                 },
                 "reason": {
                     "enum": [
@@ -70,7 +70,26 @@
                 }
             },
             "required": ["argument", "reason"],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "if": {
+                "properties": {
+                    "argument": {
+                        "const": "headers"
+                    },
+                    "reason": {
+                        "enum": ["set-by-sdk", "not-declared", "malformed"]
+                    }
+                },
+                "required": ["argument", "reason"]
+            },
+            "then": {
+                "required": ["header"]
+            },
+            "else": {
+                "not": {
+                    "required": ["header"]
+                }
+            }
         },
         "case": {
             "type": "object",

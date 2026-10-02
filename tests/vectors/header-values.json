@@ -122,7 +122,7 @@
         {
             "id": "float-integral",
             "description": "an integral float is written as JavaScript writes it: 1, not 1.0",
-            "value": 1,
+            "value": 1.0,
             "expected": "1"
         },
         {
@@ -140,7 +140,7 @@
         {
             "id": "negative-zero",
             "description": "negative zero is written 0",
-            "value": 0,
+            "value": -0.0,
             "expected": "0"
         },
         {

@@ -626,8 +626,8 @@
             "expected_warnings": []
         },
         {
-            "id": "string-typed-object-value-still-filtered",
-            "description": "the ordinary-field exception covers non-object values only: an object is still filtered, and declares nothing",
+            "id": "string-typed-object-value-is-ordinary",
+            "description": "a headers property typed \"string\" is an ordinary field whatever the value: an object is forwarded unchanged, not filtered",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -642,15 +642,11 @@
                 }
             },
             "expected_arguments": {
-                "headers": {}
-            },
-            "expected_warnings": [
-                {
-                    "argument": "headers",
-                    "header": "x-custom",
-                    "reason": "not-declared"
+                "headers": {
+                    "x-custom": "a"
                 }
-            ]
+            },
+            "expected_warnings": []
         },
         {
             "id": "no-headers-schema-object",

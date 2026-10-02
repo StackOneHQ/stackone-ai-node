@@ -1,6 +1,6 @@
 {
     "$schema": "./schema/messages.schema.json",
-    "description": "The canonical wording of every user-facing warning and error message both SDKs emit. `template` is the canonical text; `python` and `node` are each SDK's text today, written with the same placeholders (and `|` between variants), so an SDK can see what changes. A prefix the language adds — Node's `[@stackone/ai] `, Python's logger name — is outside the template. An error's class is in `error`. `matches` says whether an SDK's text is already the canonical one, reading a value written raw between double quotes as its JSON text — the same for every ordinary value; the notes say where not.",
+    "description": "The canonical wording of every user-facing warning and error message both SDKs emit. `template` is the canonical text; `python` and `node` are each SDK's text today, written with the same placeholders (and `|` between variants), so an SDK can see what changes. A prefix the language adds — Node's `[@stackone/ai] `, Python's logger name — is outside the template. An error's class is in `error`. `matches` says whether an SDK's text is already the canonical one; `notes` say where the text depends on more than the template.",
     "version": 1,
     "prefixes": {
         "node": "Every warning goes through console.warn, prefixed `[@stackone/ai] ` — outside the template.",
@@ -37,13 +37,13 @@
                     "description": "set-by-sdk, not-declared or malformed"
                 }
             },
-            "python": "Dropping header {header!r} from a tool call: it is {reason}  |  Dropping malformed header {header!r} from a tool call",
-            "node": "Dropping header \"{header}\" from a tool call: {reason}",
+            "python": "Dropping header {header} from a tool call: {reason}",
+            "node": "Dropping header {header} from a tool call: {reason}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
-            "notes": "Python quotes with repr ('x'), prefixes the reason with \"it is\", and words malformed differently. Node writes the name raw between double quotes; the canonical form JSON-escapes it, which only differs for a name holding a quote, a backslash or a control character."
+            "notes": "The name is JSON text, so a quote, a backslash or a control character in it is escaped."
         },
         {
             "id": "header-argument-dropped",
@@ -59,13 +59,13 @@
                     "description": "any reason code"
                 }
             },
-            "python": "Dropping header argument {argument!r} from a tool call: it is {reason}  |  … : not a string, number or boolean  |  … 'headers' … : not an object  |  Dropping malformed header argument {argument!r} from a tool call",
-            "node": "Dropping header argument \"{argument}\" from a tool call: {reason}",
+            "python": "Dropping header argument {argument} from a tool call: {reason}",
+            "node": "Dropping header argument {argument} from a tool call: {reason}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
-            "notes": "As header-dropped. Python's not-a-scalar and not-an-object texts already match; its set-by-sdk and not-declared add \"it is\"."
+            "notes": "The argument is JSON text, as the name in header-dropped is."
         },
         {
             "id": "rate-limit-retry",
@@ -93,13 +93,13 @@
                     "description": "the wait before the next attempt"
                 }
             },
-            "python": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; retrying in {delay:.2f}s",
-            "node": "Rate limited (429) by {method} {url}; retrying in {delay_ms}ms (attempt {attempt + 1} of {max_attempts})",
+            "python": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; retrying in {delay}s",
+            "node": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; retrying in {delay}s",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Python's sentence is the clearer one: it names the attempt that failed. Node numbers the attempt about to be made, so the two count one apart. Python pads the delay to two decimals (0.00s); the canonical form writes it as a number (0s, 0.75s)."
+            "notes": "Names the attempt that was answered 429, not the one about to be made."
         },
         {
             "id": "rate-limit-deadline",
@@ -127,13 +127,13 @@
                     "description": "the wait before the next attempt that would pass the deadline"
                 }
             },
-            "python": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; not retrying, because waiting {delay:.2f}s would outlast the request's deadline ({remaining:.2f}s left)",
+            "python": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; not retrying, because waiting {delay}s would pass the deadline",
             "node": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; not retrying, because waiting {delay}s would pass the deadline",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
-            "notes": "Both SDKs now emit this, in the style of rate-limit-retry: when the next wait would not finish before the call's deadline, the SDK raises the 429 it already has instead of sleeping. Python's sentence also names how much of the deadline is left ({remaining:.2f}s); the canonical form drops it, as rate-limit-retry drops Python's two-decimal padding."
+            "notes": "When the next wait would not finish before the call's deadline, the SDK ends the call with the 429 it already has instead of sleeping, and warns this in place of rate-limit-retry."
         },
         {
             "id": "skip-account",
@@ -155,7 +155,7 @@
                 "python": true,
                 "node": true
             },
-            "notes": "Identical; the error part is whichever message the failure carries, so it matches only where that message does."
+            "notes": "The error part is whichever message the failure carries, so the whole text is the same in both SDKs only where that message is."
         },
         {
             "id": "skip-connector",
@@ -192,13 +192,13 @@
                     "description": "up to five of them, sorted, joined by \", \""
                 }
             },
-            "python": "{count} tool name(s) are served by more than one account ({names}). get_tool() will return the first one listed — pass account_ids to choose.",
-            "node": "{count} tool name(s) are served by more than one account ({names}). getTool() will return the first one listed — pass accountIds to choose.",
+            "python": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
+            "node": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Language-neutral wording in place of each SDK's method and parameter names."
+            "notes": "Language-neutral wording: neither SDK's method or parameter names."
         },
         {
             "id": "ambiguous-connector",
@@ -222,11 +222,11 @@
                     "description": "the one used"
                 }
             },
-            "python": "{action_id!r} matches {count} connectors ({tools}); using {tool}. Pass account_ids to choose.",
-            "node": "\"{action_id}\" matches {count} connectors ({tools}); using {tool}. Pass accountIds to choose.",
+            "python": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
+            "node": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             }
         },
         {
@@ -247,13 +247,13 @@
                     "description": "the toolset's timeout"
                 }
             },
-            "python": "MCP request to {endpoint} timed out after {timeout:g}s",
-            "node": "MCP request to {endpoint} timed out after {timeout_ms}ms",
+            "python": "MCP request to {endpoint} timed out after {timeout}s",
+            "node": "MCP request to {endpoint} timed out after {timeout}s",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Seconds, written as a number: 1s, 0.5s, 60s. Python's :g agrees for ordinary values but switches to exponent form below 1e-4 (1e-05s); Node gives milliseconds."
+            "notes": "Seconds, written as a number: 1s, 0.5s, 60s."
         },
         {
             "id": "mcp-http-failure",
@@ -287,7 +287,7 @@
                 "python": true,
                 "node": true
             },
-            "notes": "Identical for every status with a reason phrase. For one without, Node trims the trailing space and Python keeps it; the canonical form trims it."
+            "notes": "For a status with no reason phrase, the space before it is left out too (`failed with 599: …`), as is the `: {body}` suffix for an empty body."
         },
         {
             "id": "mcp-failure",
@@ -349,7 +349,8 @@
             "matches": {
                 "python": true,
                 "node": true
-            }
+            },
+            "notes": "For a status with no reason phrase, Node leaves out the space before the colon and Python keeps it; with an empty body, both keep the trailing `: `. Neither is canonical yet."
         },
         {
             "id": "accounts-unreachable",
@@ -415,13 +416,13 @@
                     "description": "object, string, number, boolean or null"
                 }
             },
-            "python": "Unexpected /accounts response shape: expected a list, got {type(accounts).__name__}",
-            "node": "Unexpected /accounts response shape: expected a list, got {typeof accounts}",
+            "python": "Unexpected /accounts response shape: expected a list, got {json_type}",
+            "node": "Unexpected /accounts response shape: expected a list, got {json_type}",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Python gives its own type name (dict, str, NoneType); Node gives typeof (object, string) and null. The canonical form names the JSON type."
+            "notes": "Names the JSON type, not either language's own type name."
         },
         {
             "id": "no-linked-accounts",
@@ -432,12 +433,13 @@
             },
             "template": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.",
             "placeholders": {},
-            "python": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass account_id explicitly.",
-            "node": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass accountId explicitly.",
+            "python": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.",
+            "node": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.",
             "matches": {
-                "python": false,
-                "node": false
-            }
+                "python": true,
+                "node": true
+            },
+            "notes": "Language-neutral wording: neither SDK's parameter name."
         },
         {
             "id": "no-active-accounts",
@@ -457,11 +459,11 @@
                     "description": "each as \"{provider} ({status})\", joined by \", \""
                 }
             },
-            "python": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass account_id explicitly.",
-            "node": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass accountId explicitly.",
+            "python": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass an account id explicitly.",
+            "node": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass an account id explicitly.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
             "notes": "A missing provider or status is written None by Python and undefined by Node; neither is canonical yet."
         },
@@ -537,12 +539,13 @@
             },
             "template": "An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable",
             "placeholders": {},
-            "python": "API key must be provided either through api_key parameter or STACKONE_API_KEY environment variable",
-            "node": "API key must be provided either through the apiKey option or the STACKONE_API_KEY environment variable",
+            "python": "An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable",
+            "node": "An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable",
             "matches": {
-                "python": false,
-                "node": false
-            }
+                "python": true,
+                "node": true
+            },
+            "notes": "Language-neutral wording: neither SDK's parameter name."
         },
         {
             "id": "empty-account-id",
@@ -564,7 +567,7 @@
                 "python": true,
                 "node": true
             },
-            "notes": "The same once the parameter is named in each SDK's spelling."
+            "notes": "Each SDK names the parameter in its own spelling."
         },
         {
             "id": "account-ids-not-a-list",
@@ -584,11 +587,11 @@
                     "description": "the string given"
                 }
             },
-            "python": "{parameter} must be a list of account ids, not a string. Did you mean [{value!r}]?",
-            "node": "{parameter} must be an array of account ids, not a string. Did you mean [\"{value}\"]?",
+            "python": "{parameter} must be a list of account ids, not a string. Did you mean [{value}]?",
+            "node": "{parameter} must be a list of account ids, not a string. Did you mean [{value}]?",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
             "notes": "\"list\", not \"array\": the language-neutral word. The suggestion is JSON, so it reads the same in both."
         },
@@ -606,13 +609,13 @@
                     "description": "the parameter's name in the SDK's own spelling: account_ids / accountIds"
                 }
             },
-            "python": "{parameter} must be a list of account id strings, got {ids!r}",
-            "node": "{parameter} must be an array of account id strings",
+            "python": "{parameter} must be a list of account id strings",
+            "node": "{parameter} must be a list of account id strings",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Python appends the list it was given, as a Python repr; dropped, since not every value it could hold is JSON."
+            "notes": "The list given is not echoed: not every value it could hold is JSON."
         },
         {
             "id": "account-ids-empty-id",
@@ -653,13 +656,13 @@
                     "description": "the value given"
                 }
             },
-            "python": "{parameter} must be a non-empty string, got {value!r}",
+            "python": "{parameter} must be a non-empty string, got {value}",
             "node": "{parameter} must be a non-empty string, got {value}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
-            "notes": "Node already writes the value as JSON; Python as a repr ('' rather than \"\"). Once null means \"not given\" (scenario execute-null-session-id), null no longer raises this."
+            "notes": "null (None) means the session id was not given, and does not raise this."
         },
         {
             "id": "invalid-action-id",
@@ -679,10 +682,10 @@
                     "description": "the value given"
                 }
             },
-            "python": "{parameter} must be a non-empty string, got {value!r}",
+            "python": "{parameter} must be a non-empty string, got {value}",
             "node": "{parameter} must be a non-empty string, got {value}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             }
         },
@@ -700,13 +703,13 @@
                     "description": "array, string, number, boolean or null"
                 }
             },
-            "python": "arguments must be a JSON object, got {type(arguments).__name__}",
+            "python": "arguments must be a JSON object, got {json_type}",
             "node": "arguments must be a JSON object, got {json_type}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
-            "notes": "Python gives its own type name (list, str); Node already names the JSON type (array, string, null) — no object reaches this message."
+            "notes": "Names the JSON type; no object reaches this message."
         },
         {
             "id": "top-k-out-of-range",
@@ -730,10 +733,10 @@
                     "description": "the value given"
                 }
             },
-            "python": "{parameter} must be an integer between 1 and {max}, got {top_k!r}",
+            "python": "{parameter} must be an integer between 1 and {max}, got {value}",
             "node": "{parameter} must be an integer between 1 and {max}, got {value}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             }
         },
@@ -755,11 +758,11 @@
                     "description": "the string given"
                 }
             },
-            "python": "{parameter} must be a list of tool names, not a string. Did you mean [{value!r}]?",
-            "node": "{parameter} must be an array of tool names, not a string. Did you mean [\"{value}\"]?",
+            "python": "{parameter} must be a list of tool names, not a string. Did you mean [{value}]?",
+            "node": "{parameter} must be a list of tool names, not a string. Did you mean [{value}]?",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             }
         },
         {
@@ -792,13 +795,12 @@
                     "description": "the action id"
                 }
             },
-            "python": "No connector found for \"{action_id}\". Use search() to discover valid action ids.",
-            "node": "No connector found for \"{action_id}\". Use search() to discover valid action ids.",
+            "python": "No connector found for {action_id}. Use search() to discover valid action ids.",
+            "node": "No connector found for {action_id}. Use search() to discover valid action ids.",
             "matches": {
                 "python": true,
                 "node": true
-            },
-            "notes": "Both write the id raw between double quotes, which is its JSON text for any ordinary id."
+            }
         },
         {
             "id": "arguments-not-finite",
@@ -818,13 +820,13 @@
                     "description": "NaN, Infinity or -Infinity"
                 }
             },
-            "python": "Arguments for {tool!r} could not be encoded as JSON: Out of range float values are not JSON compliant: {nan | inf | -inf}",
-            "node": "Arguments for \"{tool}\" could not be encoded as JSON: Out of range number values are not JSON compliant: {value} (at \"{key}\")",
+            "python": "Arguments for {tool} could not be encoded as JSON: {value} is not a JSON number",
+            "node": "Arguments for {tool} could not be encoded as JSON: {value} is not a JSON number",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Both pass on their JSON encoder's wording. The canonical form names the value in JavaScript's spelling and leaves out the location, which Python's encoder does not report."
+            "notes": "The value is in JavaScript's spelling, and the message leaves out where in the arguments it is, which Python's encoder does not report."
         },
         {
             "id": "arguments-not-encodable",
@@ -844,10 +846,10 @@
                     "description": "the SDK's own explanation: a circular reference, a non-JSON type, …"
                 }
             },
-            "python": "Arguments for {tool!r} could not be encoded as JSON: {detail}",
-            "node": "Arguments for \"{tool}\" could not be encoded as JSON: {detail}",
+            "python": "Arguments for {tool} could not be encoded as JSON: {detail}",
+            "node": "Arguments for {tool} could not be encoded as JSON: {detail}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
             "notes": "For every reason but a non-finite number, which has its own message above."
@@ -870,10 +872,10 @@
                     "description": "the JSON parser's own message"
                 }
             },
-            "python": "Invalid JSON in arguments for {tool!r}: {detail}",
-            "node": "Invalid JSON in arguments for \"{tool}\": {detail}",
+            "python": "Invalid JSON in arguments for {tool}: {detail}",
+            "node": "Invalid JSON in arguments for {tool}: {detail}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             }
         },
@@ -891,13 +893,13 @@
                     "description": "the tool's name"
                 }
             },
-            "python": "Tool arguments must be a JSON object",
-            "node": "Tool arguments for \"{tool}\" must be a JSON object  |  Invalid parameters type for \"{tool}\". Expected object or string, got {typeof}.",
+            "python": "Tool arguments for {tool} must be a JSON object",
+            "node": "Tool arguments for {tool} must be a JSON object",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Node's clearer form, naming the tool. Node has a second message for a value that is neither an object nor a string; the canonical form uses this one for both."
+            "notes": "For every value that is not an object, including one that is not a string either."
         },
         {
             "id": "tool-call-failed",
@@ -917,8 +919,8 @@
                     "description": "the result's text, or its structured content as compact JSON"
                 }
             },
-            "python": "Tool \"{tool}\" failed: {detail}",
-            "node": "Tool \"{tool}\" failed: {detail}",
+            "python": "Tool {tool} failed: {detail}",
+            "node": "Tool {tool} failed: {detail}",
             "matches": {
                 "python": true,
                 "node": true
@@ -938,8 +940,8 @@
                     "description": "the tool's name"
                 }
             },
-            "python": "Tool \"{tool}\" has no executor. Override execute() to run a hand-built tool.",
-            "node": "Tool \"{tool}\" has no executor. Override execute() to run a hand-built tool.",
+            "python": "Tool {tool} has no executor. Override execute() to run a hand-built tool.",
+            "node": "Tool {tool} has no executor. Override execute() to run a hand-built tool.",
             "matches": {
                 "python": true,
                 "node": true
@@ -955,10 +957,10 @@
                     "description": "the tool call's function name"
                 }
             },
-            "python": "Unknown tool {name!r}",
-            "node": "Unknown tool \"{name}\"",
+            "python": "Unknown tool {name}",
+            "node": "Unknown tool {name}",
             "matches": {
-                "python": false,
+                "python": true,
                 "node": true
             },
             "notes": "Not raised: the `error` of the tool message execute_openai_tool_calls / executeOpenAIToolCalls returns for a call to a tool not in the collection."

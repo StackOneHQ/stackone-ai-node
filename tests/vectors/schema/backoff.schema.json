@@ -27,9 +27,12 @@
                 },
                 "backoff_seconds": {
                     "type": "array",
+                    "minItems": 3,
                     "items": {
-                        "type": "number"
-                    }
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "description": "The base delay before each retry: retry n uses entry n - 1."
                 },
                 "jitter": {
                     "type": "object",
@@ -93,6 +96,17 @@
             "type": "string",
             "minLength": 1
         },
+        "infinity": {
+            "description": "Positive infinity, which JSON cannot hold, as a marker an SDK decodes before use.",
+            "type": "object",
+            "properties": {
+                "$number": {
+                    "const": "Infinity"
+                }
+            },
+            "required": ["$number"],
+            "additionalProperties": false
+        },
         "deadlineCase": {
             "type": "object",
             "properties": {
@@ -140,9 +154,16 @@
                     "description": "The injected uniform value in [0, 1)."
                 },
                 "retry_after_seconds": {
-                    "type": ["number", "null"],
-                    "minimum": 0,
-                    "description": "The 429's Retry-After as read (see retry-after.json); null when absent or unreadable."
+                    "oneOf": [
+                        {
+                            "type": ["number", "null"],
+                            "minimum": 0
+                        },
+                        {
+                            "$ref": "#/$defs/infinity"
+                        }
+                    ],
+                    "description": "The 429's Retry-After as read (see retry-after.json); null when absent or unreadable. A readable value too large for a float is `{\"$number\": \"Infinity\"}`, as there."
                 },
                 "expected_delay_seconds": {
                     "type": "number",

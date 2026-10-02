@@ -37,7 +37,7 @@
             "description": "A case where the SDKs differ for a reason outside this rule (for example, their JSON parser already produced different values). Not graded."
         }
     },
-    "required": ["description", "version", "cases", "known_differences"],
+    "required": ["description", "version", "cases"],
     "additionalProperties": false,
     "$defs": {
         "id": {
@@ -49,6 +49,48 @@
             "type": "string",
             "minLength": 1
         },
+        "value": {
+            "description": "Any JSON value, in which an object with a `$number` key is a marker for a number JSON cannot hold, and nothing else.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/value"
+                    }
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "$number": {
+                            "enum": ["NaN", "Infinity", "-Infinity"]
+                        }
+                    },
+                    "required": ["$number"],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "not": {
+                        "required": ["$number"]
+                    },
+                    "additionalProperties": {
+                        "$ref": "#/$defs/value"
+                    }
+                }
+            ]
+        },
         "case": {
             "type": "object",
             "properties": {
@@ -59,7 +101,7 @@
                     "$ref": "#/$defs/description"
                 },
                 "value": {
-                    "description": "Any JSON value; `{\"$number\": …}` markers stand for non-finite numbers."
+                    "$ref": "#/$defs/value"
                 },
                 "expected": {
                     "oneOf": [
@@ -94,7 +136,7 @@
                     "$ref": "#/$defs/description"
                 },
                 "value": {
-                    "description": "Any JSON value; `{\"$number\": …}` markers stand for non-finite numbers."
+                    "$ref": "#/$defs/value"
                 },
                 "python": {
                     "description": "What the Python SDK does today."
@@ -117,7 +159,7 @@
                     "$ref": "#/$defs/description"
                 },
                 "value": {
-                    "description": "Any JSON value; `{\"$number\": …}` markers stand for non-finite numbers."
+                    "$ref": "#/$defs/value"
                 },
                 "python": {
                     "description": "What the Python SDK does."
