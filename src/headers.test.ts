@@ -167,3 +167,28 @@ describe('an entry named __proto__', () => {
 		expect(Object.getPrototypeOf(headers)).toBe(Object.prototype);
 	});
 });
+
+describe('buildRequestHeaders with an end user', () => {
+	it('sets x-end-user-id last, replacing every case variant the caller sent', () => {
+		expect(
+			buildRequestHeaders({
+				apiKey: 'k',
+				accountId: 'acc1',
+				endUserId: 'alice',
+				extraHeaders: { 'X-End-User-Id': 'mallory', ' x-end-user-id ': 'eve', 'x-trace': 't' },
+			}),
+		).toEqual({
+			'x-trace': 't',
+			'User-Agent': expect.any(String),
+			Authorization: 'Basic azo=',
+			'x-account-id': 'acc1',
+			'x-end-user-id': 'alice',
+		});
+	});
+
+	it("passes the caller's x-end-user-id through when there is no end user", () => {
+		expect(
+			buildRequestHeaders({ apiKey: 'k', extraHeaders: { 'X-End-User-Id': 'carol' } }),
+		).toMatchObject({ 'X-End-User-Id': 'carol' });
+	});
+});

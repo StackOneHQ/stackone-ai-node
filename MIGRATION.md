@@ -164,7 +164,7 @@ await tool.execute({ id: '1' }, { dryRun: true });
 
 ## Tool arguments and headers
 
-**Arguments are sent as given**, as `tools/call` arguments, except header arguments: each is forwarded only if the tool's schema declares it, and `Authorization`, `x-account-id` and `User-Agent` never are (see below). The SDK no longer splits flat `path_` / `query_` / `body_` keys into an `/actions/rpc` envelope; the server maps them itself.
+**Arguments are sent as given**, as `tools/call` arguments, except header arguments: each is forwarded only if the tool's schema declares it, and `Authorization`, `x-account-id`, `User-Agent` and `x-end-user-id` never are (see below). The SDK no longer splits flat `path_` / `query_` / `body_` keys into an `/actions/rpc` envelope; the server maps them itself.
 
 **Non-header arguments must be JSON values.** `null`, booleans, finite numbers, strings, arrays and plain objects are accepted; a `NaN` or `Infinity`, a `bigint`, a `Date`, `Map`, `Set` or `RegExp`, a function, a symbol, a class instance, a typed array or buffer, or a circular reference, anywhere in a non-header argument, throws `ToolArgumentsError` naming the path. 2.x let some of these through `JSON.stringify` silently converted (a `Date` to a string, a `Map` to `{}`), which sent the model a value it never supplied. An object property set to `undefined` is still treated as absent; `undefined` inside an array now throws, where 2.x sent it as `null`. Header arguments follow different rules — see "Header arguments are allowlisted" below.
 
@@ -181,7 +181,7 @@ console.log(tool.parameters.properties);
 await tool.execute({ body: { variables: { first: 25 } } });
 ```
 
-**Header arguments are allowlisted.** A header argument is an entry of a `headers` object argument, or a top-level `headers_<name>` argument. Each one is forwarded only if the tool's schema declares it in the same form: under `headers.properties`, or as a `headers_<name>` property. An open `headers` object — `type: "object"`, no `properties`, and `additionalProperties` not `false` — declares every name; without `type: "object"`, or with `additionalProperties: false` and no `properties`, it declares none. `Authorization`, `x-account-id` and `User-Agent` are never forwarded, even when declared, because the SDK sets them itself. Anything dropped is logged as a warning. Every other argument is sent unchanged.
+**Header arguments are allowlisted.** A header argument is an entry of a `headers` object argument, or a top-level `headers_<name>` argument. Each one is forwarded only if the tool's schema declares it in the same form: under `headers.properties`, or as a `headers_<name>` property. An open `headers` object — `type: "object"`, no `properties`, and `additionalProperties` not `false` — declares every name; without `type: "object"`, or with `additionalProperties: false` and no `properties`, it declares none. `Authorization`, `x-account-id`, `User-Agent` and `x-end-user-id` are never forwarded, even when declared, because the SDK sets them itself. Anything dropped is logged as a warning. Every other argument is sent unchanged.
 
 A top-level `headers` argument skips header filtering when the schema declares `headers` itself as a non-object field — it's an ordinary argument that happens to be named `headers`, so it is sent as given, subject to the same JSON-value check as every other argument. Otherwise, a `headers` argument that isn't a plain object is dropped with a warning. A `headers_<name>` argument is dropped with a warning when its value is an array or object.
 
@@ -194,6 +194,8 @@ await toolset.execute('linear_list_comments', { headers: { 'x-request-id': 'abc'
 ## Accounts
 
 **With no account id, the SDK discovers your accounts.** In 2.x, calling `fetchTools()` with no account listed tools without an `x-account-id`, which the API refuses. In 3.0 it asks `GET /accounts` (also available as `toolset.fetchAccounts()`) and lists the catalog of every active account. If you have many accounts, pass `accountId`, `accountIds` or call `setAccounts()` so the SDK does not fetch every catalog.
+
+**Non-shared accounts get `x-end-user-id` automatically.** The API refuses an MCP request for a non-shared account unless `x-end-user-id` carries that account's end user. Whenever the SDK calls `GET /accounts` (discovery or `fetchAccounts()`), it records the `origin_username` of every account with `shared: false` and sends it as `x-end-user-id` on every MCP request for that account, overriding a value from the `headers` option. With explicit account ids the SDK makes no `GET /accounts` and sends no `x-end-user-id` of its own: call `fetchAccounts()` once, or set it in `headers`, which is passed through as given.
 
 **`STACKONE_ACCOUNT_ID` is no longer read.** Pass the account id as `accountId` or `accountIds`. Since an unset account now means every active account, an environment variable that set it implicitly could widen or narrow a toolset's scope without the code saying so. `STACKONE_API_KEY` is still read. A toolset constructed with no account while `STACKONE_ACCOUNT_ID` is set to a non-empty value warns that it is ignored. To keep the variable, read it yourself; unset, it is `undefined` and the toolset discovers your accounts:
 

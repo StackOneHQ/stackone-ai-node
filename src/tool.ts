@@ -368,6 +368,7 @@ export class StackOneMcpTool extends StackOneTool {
 	readonly #endpoint: string;
 	readonly #apiKey: string;
 	readonly #extraHeaders: Record<string, string>;
+	readonly #endUserIdFor: (accountId: string) => string | undefined;
 	readonly #timeout: number;
 	readonly #declaredHeaders: DeclaredHeaders;
 
@@ -380,6 +381,11 @@ export class StackOneMcpTool extends StackOneTool {
 		accountId?: string;
 		timeout: number;
 		extraHeaders?: Record<string, string>;
+		/**
+		 * The end user of an account, sent as `x-end-user-id`. Looked up per call, so a tool
+		 * rebound with `setAccountId` sends its new account's end user.
+		 */
+		endUserIdFor?: (accountId: string) => string | undefined;
 	}) {
 		const executeConfig = {
 			kind: 'mcp',
@@ -391,6 +397,7 @@ export class StackOneMcpTool extends StackOneTool {
 		this.#endpoint = options.endpoint;
 		this.#apiKey = options.apiKey;
 		this.#extraHeaders = { ...options.extraHeaders };
+		this.#endUserIdFor = options.endUserIdFor ?? (() => undefined);
 		this.#timeout = options.timeout;
 		this.#declaredHeaders = declaredHeaders(options.parameters.properties);
 	}
@@ -401,8 +408,9 @@ export class StackOneMcpTool extends StackOneTool {
 	 * Arguments are sent as given; the server maps them onto the action. Header arguments — the
 	 * entries of a `headers` object, and `headers_<name>` arguments — are the exception: these
 	 * arguments are model-controlled, so each is forwarded only if this tool's own schema declares
-	 * it, and `Authorization`, `x-account-id` and `User-Agent` never are. A `headers` property
-	 * served as an object with no `properties`, as on `*_execute_action`, declares every name.
+	 * it, and `Authorization`, `x-account-id`, `User-Agent` and `x-end-user-id` never are. A
+	 * `headers` property served as an object with no `properties`, as on `*_execute_action`,
+	 * declares every name.
 	 *
 	 * @returns The result as the server wrote it: for an action tool, an `ActionResult`,
 	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
@@ -427,12 +435,14 @@ export class StackOneMcpTool extends StackOneTool {
 			return { url: this.#endpoint, method: 'tools/call', name: this.name, arguments: args };
 		}
 
+		const accountId = this.getAccountId();
 		return callMcpTool(
 			{
 				endpoint: this.#endpoint,
 				headers: buildRequestHeaders({
 					apiKey: this.#apiKey,
-					accountId: this.getAccountId(),
+					accountId,
+					endUserId: accountId ? this.#endUserIdFor(accountId) : undefined,
 					extraHeaders: this.#extraHeaders,
 				}),
 				timeout: this.#timeout,

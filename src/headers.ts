@@ -10,6 +10,15 @@ import { setEntry } from './utils/set-entry';
  */
 const SDK_OWNED_HEADERS = ['authorization', 'x-account-id', 'user-agent'] as const;
 
+/**
+ * The header the API checks a non-shared account's end user against. The SDK sets it, after
+ * every other header, for an account whose end user `GET /accounts` reported. It is not
+ * SDK-owned for the `headers` option — a caller with explicit account ids and no discovery may
+ * set it there — but it is never taken from a tool call: a model choosing the end user is a
+ * model choosing whose data it reads.
+ */
+const END_USER_ID_HEADER = 'x-end-user-id';
+
 const isPlainObject = (value: unknown): value is JsonObject =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -17,6 +26,9 @@ const isPlainObject = (value: unknown): value is JsonObject =>
 export function isSdkOwnedHeader(name: string): boolean {
 	return (SDK_OWNED_HEADERS as readonly string[]).includes(name.trim().toLowerCase());
 }
+
+const isEndUserIdHeader = (name: string): boolean =>
+	name.trim().toLowerCase() === END_USER_ID_HEADER;
 
 /**
  * HTTP Basic credentials for an API key, as every StackOne endpoint expects them.
@@ -27,20 +39,23 @@ function buildAuthHeader(apiKey: string): string {
 
 /**
  * The HTTP headers for a request to StackOne: the caller's extra headers first, then the SDK's
- * own, so `Authorization`, `x-account-id` and `User-Agent` are always the SDK's.
+ * own, so `Authorization`, `x-account-id` and `User-Agent` are always the SDK's — and so is
+ * `x-end-user-id` when an `endUserId` is given.
  *
  * Case variants of the owned names are removed before they are set — `fetch` joins
  * `authorization` and `Authorization` into one comma-separated value rather than letting either
- * win. With no `accountId`, no `x-account-id` is sent at all.
+ * win. With no `accountId`, no `x-account-id` is sent at all; with no `endUserId`, a caller's
+ * `x-end-user-id` is passed through as given.
  */
 export function buildRequestHeaders(options: {
 	apiKey: string;
 	accountId?: string;
+	endUserId?: string;
 	extraHeaders?: Record<string, string>;
 }): Record<string, string> {
 	const headers: Record<string, string> = {};
 	for (const [name, value] of Object.entries(options.extraHeaders ?? {})) {
-		if (!isSdkOwnedHeader(name)) {
+		if (!isSdkOwnedHeader(name) && !(options.endUserId && isEndUserIdHeader(name))) {
 			setEntry(headers, name, value);
 		}
 	}
@@ -48,6 +63,9 @@ export function buildRequestHeaders(options: {
 	headers.Authorization = buildAuthHeader(options.apiKey);
 	if (options.accountId) {
 		headers['x-account-id'] = options.accountId;
+	}
+	if (options.endUserId) {
+		headers[END_USER_ID_HEADER] = options.endUserId;
 	}
 	return headers;
 }
@@ -152,12 +170,12 @@ export function declaredHeaders(properties: Record<string, unknown>): DeclaredHe
 /**
  * Why a header argument must not be forwarded, or `undefined` if it may be.
  *
- * `Authorization`, `x-account-id` and `User-Agent` are refused even when declared, because the
- * SDK sets them itself. The value check runs only for a declared header, which is exactly where
- * a model-supplied value needs it.
+ * `Authorization`, `x-account-id`, `User-Agent` and `x-end-user-id` are refused even when
+ * declared, because the SDK sets them itself. The value check runs only for a declared header,
+ * which is exactly where a model-supplied value needs it.
  */
 function refuseHeader(name: string, value: string, declared: boolean): string | undefined {
-	if (isSdkOwnedHeader(name)) {
+	if (isSdkOwnedHeader(name) || isEndUserIdHeader(name)) {
 		return 'set by the SDK';
 	}
 	if (!declared) {
@@ -179,7 +197,7 @@ function refuseHeader(name: string, value: string, declared: boolean): string | 
  * `X-Api-Key`, …) and is wrong the moment one is missed.
  *
  * Names are compared trimmed and case-insensitively: `" x-account-id "` and `"X-ACCOUNT-ID"`
- * are the same header to any server.
+ * are the same header to any server. `x-end-user-id` is refused like the SDK-owned names.
  */
 export function sanitiseHeaders(
 	supplied: JsonObject | undefined,

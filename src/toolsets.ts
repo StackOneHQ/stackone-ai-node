@@ -82,7 +82,9 @@ interface StackOneToolSetBaseConfig {
 	baseUrl?: string;
 	/**
 	 * Extra HTTP headers sent with every request. `Authorization`, `x-account-id` and
-	 * `User-Agent` are always the SDK's own and cannot be set here.
+	 * `User-Agent` are always the SDK's own and cannot be set here. `x-end-user-id` can: it is
+	 * passed through as given, unless `GET /accounts` reported the account's end user, which
+	 * then replaces it.
 	 */
 	headers?: Record<string, string>;
 	/**
@@ -354,6 +356,13 @@ export class StackOneToolSet {
 	#discoveredAccountIds: string[] | undefined;
 	#discovering: Promise<string[]> | undefined;
 	/**
+	 * The end user of each non-shared account, as the last successful `GET /accounts` reported it,
+	 * sent as `x-end-user-id` on every MCP request for that account: the API refuses a non-shared
+	 * account's request without it. Replaced whole on each successful `GET /accounts`, and kept
+	 * by {@link clearCatalogCache} — it describes the accounts, not the catalog.
+	 */
+	#endUserIds: ReadonlyMap<string, string> = new Map();
+	/**
 	 * Bumped by {@link clearCatalogCache}. A listing already in flight when the cache is cleared
 	 * captured the generation it started under, and refuses to write back if it has moved —
 	 * otherwise the stale catalog would land after the clear and be served for the life of the
@@ -469,6 +478,10 @@ export class StackOneToolSet {
 	 * Each entry carries at least `id`, `provider` and `status`. Only accounts with
 	 * `status === 'active'` can serve tools.
 	 *
+	 * Also records the end user of every non-shared account (`shared: false`, with an
+	 * `origin_username`), which the toolset then sends as `x-end-user-id` on that account's MCP
+	 * requests.
+	 *
 	 * @throws StackOneAPIError If the API answers with an error status, including a 429 that
 	 *   outlasted its retries or timed out while being retried.
 	 * @throws ToolSetLoadError If the API cannot be reached, or answers with something that is
@@ -547,6 +560,7 @@ export class StackOneToolSet {
 				`Unexpected /accounts response shape: expected a list, got ${jsonType(accounts)}`,
 			);
 		}
+		this.#endUserIds = endUserIdsOf(accounts);
 		return accounts as StackOneAccount[];
 	}
 
@@ -707,6 +721,7 @@ export class StackOneToolSet {
 				headers: buildRequestHeaders({
 					apiKey: this.#apiKey,
 					accountId,
+					endUserId: this.#endUserIds.get(accountId),
 					extraHeaders: this.#headers,
 				}),
 				timeout: this.#timeout,
@@ -774,6 +789,7 @@ export class StackOneToolSet {
 			accountId,
 			timeout: this.#timeout,
 			extraHeaders: this.#headers,
+			endUserIdFor: (id) => this.#endUserIds.get(id),
 		});
 	}
 
@@ -956,8 +972,8 @@ export class StackOneToolSet {
 	 * pinned last, so a model-supplied `action_id` in `args` cannot replace it.
 	 *
 	 * `args.headers` is forwarded to the action: `*_execute_action` serves `headers` as an open
-	 * object, so any header name is declared — except `Authorization`, `x-account-id` and
-	 * `User-Agent`, which the SDK sets itself and drops here with a warning.
+	 * object, so any header name is declared — except `Authorization`, `x-account-id`,
+	 * `User-Agent` and `x-end-user-id`, which the SDK sets itself and drops here with a warning.
 	 *
 	 * @param actionId The action to run, e.g. `linear_list_issues`.
 	 * @param args The action's arguments.
@@ -1110,6 +1126,27 @@ export class StackOneToolSet {
 		}
 		return (await tool.execute(args)) as ActionResult;
 	}
+}
+
+/**
+ * The end user of each non-shared account in a `GET /accounts` listing: one with `shared: false`
+ * and a non-empty `origin_username`. A shared account has no single end user to send.
+ */
+function endUserIdsOf(accounts: readonly unknown[]): Map<string, string> {
+	const endUserIds = new Map<string, string>();
+	for (const account of accounts) {
+		if (
+			isPlainObject(account) &&
+			typeof account.id === 'string' &&
+			account.id &&
+			account.shared === false &&
+			typeof account.origin_username === 'string' &&
+			account.origin_username
+		) {
+			endUserIds.set(account.id, account.origin_username);
+		}
+	}
+	return endUserIds;
 }
 
 /**

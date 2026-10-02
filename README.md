@@ -75,6 +75,8 @@ for (const account of await toolset.fetchAccounts()) {
 
 > If your organisation has many linked accounts, discovery lists the catalog of every one of them. Pass explicit `accountIds` to avoid the round trips and the model context they cost.
 
+A non-shared account (`shared: false` in `GET /accounts`) belongs to one end user, and the API refuses its MCP requests unless they carry that user's id in `x-end-user-id`. Whenever the toolset calls `GET /accounts` — for discovery, or through `fetchAccounts()` — it records each non-shared account's `origin_username` and sends it as `x-end-user-id` on every MCP request for that account, replacing any value from the `headers` option. With explicit account ids and no `GET /accounts`, it sends none: call `fetchAccounts()` once, or pass `headers: { 'x-end-user-id': '…' }` yourself.
+
 ### Account IDs
 
 StackOne uses account IDs to identify different integrations. You can specify the account ID at different levels (a per-call `accountIds` wins, then `setAccounts()`, then the constructor's `accountIds`, then `accountId`, then discovery). The SDK never reads an account id from the environment, so an environment variable cannot silently change which accounts a toolset reaches. To keep yours in `STACKONE_ACCOUNT_ID`, read it yourself:
@@ -403,7 +405,7 @@ A tool call's header arguments — the entries of a `headers` object argument, a
 
 A top-level `headers` argument that isn't a plain object is dropped with a warning, unless the served schema declares `headers` itself as a non-object field (for example `type: "string"`), in which case it's an ordinary argument that happens to be named `headers` and is sent as given. A `headers_<name>` argument is dropped with a warning when its value is an array or object — only a string, number or boolean can be a header value.
 
-`Authorization`, `x-account-id` and `User-Agent` are always the SDK's own: they are dropped from header arguments even when declared, and ignored with a warning in the `headers` constructor option, so nothing can replace the credential or run a call against another account.
+`Authorization`, `x-account-id` and `User-Agent` are always the SDK's own: they are dropped from header arguments even when declared, and ignored with a warning in the `headers` constructor option, so nothing can replace the credential or run a call against another account. `x-end-user-id` is dropped from header arguments the same way, so a model cannot choose the end user; in the `headers` option it is sent as given, unless `GET /accounts` reported the account's end user (see [Authentication](#authentication)), which replaces it.
 
 ```typescript
 // Extra headers for every request (for example, tracing)

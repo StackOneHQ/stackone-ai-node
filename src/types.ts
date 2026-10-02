@@ -190,6 +190,13 @@ export type StackOneAccount = JsonObject & {
 	id: string;
 	provider?: string;
 	status?: string;
+	/** Whether the account is shared across end users. */
+	shared?: boolean;
+	/**
+	 * The account's end user. For a non-shared account, the toolset sends it as `x-end-user-id` on
+	 * every MCP request for that account.
+	 */
+	origin_username?: string | null;
 };
 
 /**
