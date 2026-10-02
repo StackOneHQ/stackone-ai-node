@@ -290,6 +290,23 @@ describe('sanitiseHeaderArguments', () => {
 		expect(console.warn).not.toHaveBeenCalled();
 	});
 
+	it('opens headers declared as ["object", "null"] with no properties', () => {
+		const nullableObjectSchema = declaredHeaders({ headers: { type: ['object', 'null'] } });
+		expect(nullableObjectSchema.nested).toBe('any');
+		expect(sanitiseHeaderArguments({ headers: { 'x-custom': 'a' } }, nullableObjectSchema)).toEqual(
+			{ headers: { 'x-custom': 'a' } },
+		);
+		expect(console.warn).not.toHaveBeenCalled();
+	});
+
+	it('forwards a string headers argument unchanged when headers is typed []', () => {
+		const emptyTypeSchema = declaredHeaders({ headers: { type: [] } });
+		expect(sanitiseHeaderArguments({ headers: 'abc' }, emptyTypeSchema)).toEqual({
+			headers: 'abc',
+		});
+		expect(console.warn).not.toHaveBeenCalled();
+	});
+
 	it('forwards a string headers argument unchanged when headers is declared as ["string", "null"]', () => {
 		const nullableStringHeadersSchema = declaredHeaders({ headers: { type: ['string', 'null'] } });
 		expect(
