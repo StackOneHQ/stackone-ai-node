@@ -348,6 +348,8 @@ export class StackOneToolSet {
 	/**
 	 * Falls back to `STACKONE_API_KEY` and `STACKONE_BASE_URL`, but never reads an account id from
 	 * the environment: `accountId` / `accountIds` must be passed, or every active account is used.
+	 * When `STACKONE_ACCOUNT_ID` is set and no account is passed, that is warned about, since 2.x
+	 * read it.
 	 *
 	 * @throws ToolSetConfigError If no API key is given or found in `STACKONE_API_KEY`, or both
 	 *   `accountId` and `accountIds` are given, or `accountId` is an empty string.
@@ -387,6 +389,19 @@ export class StackOneToolSet {
 		this.#toolMode = config.toolMode;
 		this.#accountId = config.accountId;
 		this.#accountIds = [...(config.accountIds ?? config.execute?.accountIds ?? [])];
+
+		// 2.x read STACKONE_ACCOUNT_ID. An upgrade that keeps relying on it would silently widen to
+		// every account on the key — other end users' accounts included — so say so, once.
+		if (
+			process.env.STACKONE_ACCOUNT_ID &&
+			config.accountId == null &&
+			config.accountIds == null &&
+			config.execute?.accountIds == null
+		) {
+			warn(
+				'STACKONE_ACCOUNT_ID is set but ignored: with no account passed, the toolset uses every active account linked to the API key. Pass accountId (or accountIds) to choose.',
+			);
+		}
 	}
 
 	/**

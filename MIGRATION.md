@@ -195,7 +195,7 @@ await toolset.execute('linear_list_comments', { headers: { 'x-request-id': 'abc'
 
 **With no account id, the SDK discovers your accounts.** In 2.x, calling `fetchTools()` with no account listed tools without an `x-account-id`, which the API refuses. In 3.0 it asks `GET /accounts` (also available as `toolset.fetchAccounts()`) and lists the catalog of every active account. If you have many accounts, pass `accountId`, `accountIds` or call `setAccounts()` so the SDK does not fetch every catalog.
 
-**`STACKONE_ACCOUNT_ID` is no longer read.** Pass the account id as `accountId` or `accountIds`. Since an unset account now means every active account, an environment variable that set it implicitly could widen or narrow a toolset's scope without the code saying so. `STACKONE_API_KEY` is still read. To keep the variable, read it yourself; unset, it is `undefined` and the toolset discovers your accounts:
+**`STACKONE_ACCOUNT_ID` is no longer read.** Pass the account id as `accountId` or `accountIds`. Since an unset account now means every active account, an environment variable that set it implicitly could widen or narrow a toolset's scope without the code saying so. `STACKONE_API_KEY` is still read. A toolset constructed with no account while `STACKONE_ACCOUNT_ID` is set warns that it is ignored. To keep the variable, read it yourself; unset, it is `undefined` and the toolset discovers your accounts:
 
 ```typescript
 // 2.x: STACKONE_ACCOUNT_ID picked up implicitly

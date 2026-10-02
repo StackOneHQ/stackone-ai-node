@@ -86,6 +86,28 @@ describe('configuration', () => {
 		expect(listMock.mock.calls.map(([request]) => accountOf(request))).toEqual(['default', 'acc1']);
 	});
 
+	// 2.x read it, so an upgrade that still relies on it would widen to every account unwarned.
+	it('warns once when STACKONE_ACCOUNT_ID is set and no account is passed', () => {
+		vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc3');
+
+		newToolSet();
+
+		expect(warnSpy.mock.calls.map(([message]: unknown[]) => String(message))).toEqual([
+			'[@stackone/ai] STACKONE_ACCOUNT_ID is set but ignored: with no account passed, the toolset uses every active account linked to the API key. Pass accountId (or accountIds) to choose.',
+		]);
+	});
+
+	it.each([
+		['an empty STACKONE_ACCOUNT_ID', '', {}],
+		['accountId', 'acc3', { accountId: 'acc1' }],
+		['accountIds', 'acc3', { accountIds: ['acc1'] }],
+		['execute.accountIds', 'acc3', { execute: { accountIds: ['acc1'] } }],
+	])('does not warn about STACKONE_ACCOUNT_ID given %s', (_name, value, config) => {
+		vi.stubEnv('STACKONE_ACCOUNT_ID', value);
+		newToolSet(config);
+		expect(warnSpy).not.toHaveBeenCalled();
+	});
+
 	it('refuses both accountId and accountIds', () => {
 		expect(() => newToolSet({ accountId: 'a', accountIds: ['b'] } as never)).toThrow(
 			/Cannot provide both accountId and accountIds/,
