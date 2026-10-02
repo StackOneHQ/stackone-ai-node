@@ -91,7 +91,7 @@ if (!hit) throw new Error('No action matched');
 const result = await toolset.execute(
 	hit.action_id,
 	{ query: { page_size: 25 } }, // the nested form hit.input_schema describes
-	{ sessionId: hit.session_id },
+	{ accountIds: [hit.account_id], sessionId: hit.session_id },
 );
 ```
 
@@ -195,7 +195,7 @@ await toolset.execute('linear_list_comments', { headers: { 'x-request-id': 'abc'
 
 **With no account id, the SDK discovers your accounts.** In 2.x, calling `fetchTools()` with no account listed tools without an `x-account-id`, which the API refuses. In 3.0 it asks `GET /accounts` (also available as `toolset.fetchAccounts()`) and lists the catalog of every active account. If you have many accounts, pass `accountId`, `accountIds` or call `setAccounts()` so the SDK does not fetch every catalog.
 
-**`STACKONE_ACCOUNT_ID` is no longer read.** Pass the account id as `accountId` or `accountIds`. Since an unset account now means every active account, an environment variable that set it implicitly could widen or narrow a toolset's scope without the code saying so. `STACKONE_API_KEY` is still read. A toolset constructed with no account while `STACKONE_ACCOUNT_ID` is set warns that it is ignored. To keep the variable, read it yourself; unset, it is `undefined` and the toolset discovers your accounts:
+**`STACKONE_ACCOUNT_ID` is no longer read.** Pass the account id as `accountId` or `accountIds`. Since an unset account now means every active account, an environment variable that set it implicitly could widen or narrow a toolset's scope without the code saying so. `STACKONE_API_KEY` is still read. A toolset constructed with no account while `STACKONE_ACCOUNT_ID` is set to a non-empty value warns that it is ignored. To keep the variable, read it yourself; unset, it is `undefined` and the toolset discovers your accounts:
 
 ```typescript
 // 2.x: STACKONE_ACCOUNT_ID picked up implicitly
@@ -209,7 +209,7 @@ const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID
 
 **Listings are merged in sorted account order.** When two accounts serve the same tool name, `getTool()` returns the first one listed — now the one on the lowest account id, where 2.x followed the order you passed — and so do `executeOpenAIToolCalls()` and every adapter (`toOpenAI()`, `toAISDK()`, `toClaudeAgentSdk()` and the rest), which build one tool per name. A warning names the clashing tools. Pass `accountIds` to choose the account yourself.
 
-**`fetchTools()` returns fresh tool instances on every call**, never the cached `Tools`, so `setAccountId()` on one tool no longer changes what later callers get. An account whose listing fails is skipped with a warning, and left out of the cached catalog for 30 seconds, unless every account fails: then the accounts' shared `StackOneAPIError` is thrown when they all failed with one status, and otherwise a `ToolSetLoadError` with each account's error as its `cause`.
+**`fetchTools()` returns fresh tool instances on every call**, never the cached `Tools`, so `setAccountId()` on one tool no longer changes what later callers get. In a multi-account scope, an account whose listing fails with anything other than a 429 is skipped with a warning: the healthy accounts' listings are cached, and the failed account is retried after 30 seconds. A 429 that outlasts its retries instead rejects the whole call, since a rate limit on one account is likely to hit the others too. A single-account call throws its failure rather than skipping it, since there is no other account's catalog to fall back to.
 
 ## Feedback
 

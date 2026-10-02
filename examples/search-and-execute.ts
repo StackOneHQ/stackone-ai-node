@@ -47,11 +47,13 @@ const searchAndExecute = async (): Promise<void> => {
 	console.log(`\ninput_schema for ${best.action_id}:`);
 	console.log(JSON.stringify(best.input_schema ?? {}, null, 2).slice(0, 600));
 
-	// Passing the hit's session_id links this call to the search that found it.
+	// accountIds pins the call to the account that found the hit; session_id links it to the
+	// search.
 	const result = await toolset.execute(
 		best.action_id,
 		{ query: { limit: 2 } },
 		{
+			accountIds: [best.account_id],
 			sessionId: best.session_id,
 		},
 	);

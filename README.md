@@ -302,6 +302,7 @@ const [best] = actions;
 if (!best) throw new Error('No action matched');
 // `input_schema` describes what the action accepts; `example_request` shows the shape
 const result = await toolset.execute(best.action_id, best.example_request, {
+	accountIds: [best.account_id],
 	sessionId: best.session_id,
 });
 ```
