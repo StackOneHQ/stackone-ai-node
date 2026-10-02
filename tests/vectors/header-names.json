@@ -1,6 +1,6 @@
 {
     "$schema": "./schema/header-names.schema.json",
-    "description": "How a nested header name — an entry of a top-level `headers` object argument whose served schema is open (`{\"type\": \"object\"}`), with the value \"v\" — is treated. The name is trimmed of what JavaScript's String.prototype.trim() strips, then refused if it is SDK-owned (authorization, x-account-id, user-agent, case-insensitively), then if it is not an RFC 9110 token. A forwarded name is the trimmed one.",
+    "description": "How a nested header name — an entry of a top-level `headers` object argument whose served schema is open (`{\"type\": \"object\"}`), with the value \"v\" — is treated. The name is trimmed of what JavaScript's String.prototype.trim() strips, then refused if it is SDK-owned (authorization, x-account-id, user-agent, x-end-user-id, case-insensitively — x-end-user-id unconditionally, whether or not the SDK has an end user id recorded for the call's account), then if it is not an RFC 9110 token. A forwarded name is the trimmed one.",
     "version": 1,
     "cases": [
         {
@@ -268,6 +268,14 @@
             }
         },
         {
+            "id": "owned-end-user",
+            "description": "SDK-owned end-user tenant selector, dropped whether or not the SDK has an end user id recorded for the account",
+            "name": "X-End-User-Id",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
             "id": "owned-ua",
             "description": "SDK-owned client identity",
             "name": "User-Agent",
@@ -295,6 +303,14 @@
             "id": "owned-nbsp",
             "description": "SDK-owned once U+00A0 is trimmed",
             "name": "\u00a0User-Agent",
+            "expected": {
+                "dropped": "set-by-sdk"
+            }
+        },
+        {
+            "id": "owned-end-user-padded",
+            "description": "SDK-owned once trimmed",
+            "name": " x-end-user-id\t",
             "expected": {
                 "dropped": "set-by-sdk"
             }
@@ -337,6 +353,14 @@
             "name": "x-account-id-2",
             "expected": {
                 "forwarded": "x-account-id-2"
+            }
+        },
+        {
+            "id": "not-owned-end-user-similar",
+            "description": "a name that merely starts with x-end-user-id is not owned",
+            "name": "x-end-user-id-2",
+            "expected": {
+                "forwarded": "x-end-user-id-2"
             }
         },
         {

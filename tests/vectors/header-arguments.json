@@ -1,6 +1,6 @@
 {
     "$schema": "./schema/header-arguments.schema.json",
-    "description": "Invariant 4 as data: a tool's served inputSchema, the model's arguments, the arguments that reach tools/call, and the warnings the SDK emits, in argument order. A warning is {argument, header?, reason}: `argument` is the top-level key (`headers` or `headers_<name>`); `header` is the trimmed nested name, for an entry of a `headers` object. `reason` is one of `reasons`; messages.json renders it.",
+    "description": "Invariant 4 as data: a tool's served inputSchema, the model's arguments, the arguments that reach tools/call, and the warnings the SDK emits, in argument order. A warning is {argument, header?, reason}: `argument` is the top-level key (`headers` or `headers_<name>`); `header` is the trimmed nested name, for an entry of a `headers` object. `reason` is one of `reasons`; messages.json renders it. `x-end-user-id` is SDK-owned like authorization, x-account-id and user-agent, and dropped unconditionally — whether or not the SDK has an end user id recorded for the call's account (SDK-UCA-CONTRACT.md §9): these cases carry no account context, since the owned-name check runs the same regardless.",
     "version": 1,
     "reasons": ["set-by-sdk", "not-declared", "malformed", "not-an-object", "not-a-scalar"],
     "cases": [
@@ -1280,6 +1280,72 @@
                 "x_headers_y": 1
             },
             "expected_warnings": []
+        },
+        {
+            "id": "nested-end-user-id-is-owned",
+            "description": "a declared nested x-end-user-id is never forwarded, whatever the schema declares, since it is SDK-owned",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "headers": {
+                        "type": "object",
+                        "properties": {
+                            "x-custom": {
+                                "type": "string"
+                            },
+                            "x-end-user-id": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "arguments": {
+                "headers": {
+                    "x-custom": "a",
+                    "x-end-user-id": "evil-user"
+                }
+            },
+            "expected_arguments": {
+                "headers": {
+                    "x-custom": "a"
+                }
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers",
+                    "header": "x-end-user-id",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "flat-end-user-id-is-owned",
+            "description": "a declared flat headers_x-end-user-id is never forwarded, whatever its case or surrounding space",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_x-end-user-id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers_x-end-user-id": "evil-user"
+            },
+            "expected_arguments": {
+                "path_id": "e"
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers_x-end-user-id",
+                    "reason": "set-by-sdk"
+                }
+            ]
         },
         {
             "id": "flat-and-nested-together",
