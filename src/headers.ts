@@ -206,19 +206,20 @@ export function sanitiseHeaders(
  * `headers_<name>` argument. Every other argument is returned unchanged. A declared
  * `headers_<name>` keeps its value as given; nested entries are stringified.
  *
- * A top-level `headers` argument that isn't a plain object is forwarded unchanged when the
- * schema declares `headers` as something other than an object (it's an ordinary field that
- * happens to be named `headers`), and dropped otherwise. A flat `headers_<name>` whose value is
- * an array or object is dropped too — only a string, number or boolean can be a header value.
+ * A top-level `headers` argument is forwarded unchanged, whatever its value, when the schema
+ * declares `headers` as something other than an object (it's an ordinary field that happens to
+ * be named `headers`). Otherwise it's sanitised as a headers object if it is a plain object, and
+ * dropped if it isn't. A flat `headers_<name>` whose value is an array or object is dropped too
+ * — only a string, number or boolean can be a header value.
  */
 export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHeaders): JsonObject {
 	const clean: JsonObject = {};
 	for (const [key, value] of Object.entries(args)) {
 		if (key === 'headers') {
-			if (isPlainObject(value)) {
-				clean.headers = sanitiseHeaders(value, declared.nested);
-			} else if (declared.ordinaryHeadersField) {
+			if (declared.ordinaryHeadersField) {
 				setEntry(clean, key, value);
+			} else if (isPlainObject(value)) {
+				clean.headers = sanitiseHeaders(value, declared.nested);
 			} else {
 				warn(`Dropping header argument ${JSON.stringify(key)} from a tool call: not an object`);
 			}
