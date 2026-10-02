@@ -603,6 +603,13 @@ const emitters: Record<
 			vi.unstubAllEnvs();
 		}
 	},
+	'toolset-headers-ignored': async () => {
+		newToolSet({ headers: { Authorization: 'x', 'x-account-id': 'y' } });
+		return {
+			emitted: { warnings: warnings() },
+			values: { names: '"Authorization", "x-account-id"' },
+		};
+	},
 	'mcp-timeout': async () => {
 		const endpoint = `${TEST_BASE_URL}/mcp`;
 		return {

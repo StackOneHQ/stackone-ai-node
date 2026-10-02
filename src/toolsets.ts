@@ -403,7 +403,7 @@ export class StackOneToolSet {
 		const ignoredHeaders = Object.keys(config.headers ?? {}).filter(isSdkOwnedHeader);
 		if (ignoredHeaders.length > 0) {
 			warn(
-				`Ignoring headers ${ignoredHeaders.map((name) => `"${name}"`).join(', ')}: the SDK sets them itself. Use the apiKey and accountId options instead.`,
+				`Ignoring headers ${ignoredHeaders.map((name) => `"${name}"`).join(', ')}: the SDK sets them itself. Pass the API key and account ids through their own options instead.`,
 			);
 		}
 
