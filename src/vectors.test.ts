@@ -3,7 +3,7 @@
  * (scripts/sync-vectors.sh), run against the SDK's own code. The Python SDK runs the same files.
  * `unresolved` cases are not graded; every other case must pass.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { http, HttpResponse } from 'msw';
@@ -62,6 +62,24 @@ function loadFile<File>(name: string): File {
 	return decodeNumbers(JSON.parse(readFileSync(join(VECTORS, name), 'utf8'))) as File;
 }
 const load = <Case>(name: string): VectorFile<Case> => loadFile<VectorFile<Case>>(name);
+
+/** Every vector file a describe() below grades. */
+const GRADED = [
+	'account-ids.json',
+	'argument-encoding.json',
+	'backoff.json',
+	'header-arguments.json',
+	'header-names.json',
+	'header-values.json',
+	'messages.json',
+	'retry-after.json',
+];
+
+// A new vector file fails here until a test loads it, rather than passing ungraded.
+it('grades every vector file', () => {
+	const files = readdirSync(VECTORS).filter((name) => name.endsWith('.json'));
+	expect(files.sort()).toEqual([...GRADED].sort());
+});
 
 /** Seconds are compared with a relative tolerance of 1e-9 (README, "Reading the values"). */
 const expectSeconds = (actual: number | null, expected: number | null): void => {
