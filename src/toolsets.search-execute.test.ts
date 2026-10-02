@@ -407,7 +407,9 @@ describe('execute()', () => {
 
 		expect(error).toBeInstanceOf(ToolSetConfigError);
 		expect((error as Error).message).toMatch(
-			/^"linear_list_issues" matches 2 connectors \(linear_acc1_execute_action, linear_acc2_execute_action\)/,
+			new RegExp(
+				'^"linear_list_issues" matches 2 connectors on different accounts \\(linear_acc1_execute_action on acc1, linear_acc2_execute_action on acc2\\)\\. Pass the account id to use',
+			),
 		);
 		expect(calls).toEqual([]);
 	});

@@ -136,6 +136,19 @@
             "notes": "When the next wait would not finish before the call's deadline, the SDK ends the call with the 429 it already has instead of sleeping, and warns this in place of rate-limit-retry."
         },
         {
+            "id": "account-id-env-ignored",
+            "kind": "warning",
+            "template": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
+            "placeholders": {},
+            "python": "",
+            "node": "",
+            "matches": {
+                "python": false,
+                "node": false
+            },
+            "notes": "Emitted once, when the toolset is constructed, if the STACKONE_ACCOUNT_ID environment variable is set and non-empty and neither an account id nor account ids were passed. Neither SDK emits it today."
+        },
+        {
             "id": "skip-account",
             "kind": "warning",
             "template": "Skipping account that failed to list tools — {account_id}: {error}",
@@ -181,7 +194,7 @@
         {
             "id": "duplicate-tool-names",
             "kind": "warning",
-            "template": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
+            "template": "{count} tool name(s) are served by more than one account ({names}). The first one listed, from the lowest account id, is used — pass account ids to choose.",
             "placeholders": {
                 "count": {
                     "format": "integer",
@@ -195,15 +208,19 @@
             "python": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
             "node": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
             "matches": {
-                "python": true,
-                "node": true
+                "python": false,
+                "node": false
             },
-            "notes": "Language-neutral wording: neither SDK's method or parameter names."
+            "notes": "Language-neutral wording: neither SDK's method or parameter names. Emitted once when a fetched collection holds a clashing name, and again by every adapter that keeps the first tool per name and drops the rest: OpenAI, LangChain, Pydantic AI, AI SDK and Claude Agent SDK. Listing order is ascending account id, so the first is the lowest account id's."
         },
         {
             "id": "ambiguous-connector",
-            "kind": "warning",
-            "template": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
             "placeholders": {
                 "action_id": {
                     "format": "json",
@@ -211,23 +228,20 @@
                 },
                 "count": {
                     "format": "integer",
-                    "description": "how many connectors match"
+                    "description": "how many connectors match: the longest connector prefix, linked on more than one account"
                 },
                 "tools": {
                     "format": "text",
-                    "description": "the matching *_execute_action tools, joined by \", \""
-                },
-                "tool": {
-                    "format": "text",
-                    "description": "the one used"
+                    "description": "each matching *_execute_action tool as \"{tool} on {account_id}\", in ascending account-id order, joined by \", \""
                 }
             },
             "python": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
             "node": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
             "matches": {
-                "python": true,
-                "node": true
-            }
+                "python": false,
+                "node": false
+            },
+            "notes": "Raised by execute() when the action's connector is linked on more than one account in scope — no account id passed, or several; nothing is called. Was a warning that ran the first match; today's text names the one used as {tool}."
         },
         {
             "id": "mcp-timeout",
@@ -468,25 +482,26 @@
             "notes": "A missing provider or status is written None by Python and undefined by Node; neither is canonical yet."
         },
         {
-            "id": "no-account-returned-tools",
+            "id": "all-accounts-failed",
             "kind": "error",
             "error": {
                 "python": "ToolsetLoadError",
                 "node": "ToolSetLoadError"
             },
-            "template": "No account returned tools. {failures}",
+            "template": "Every account failed to list tools: {failures}",
             "placeholders": {
                 "failures": {
                     "format": "text",
-                    "description": "each as \"{account_id}: {error}\", joined by \" | \""
+                    "description": "each failed account as \"{account_id}: {error}\", where {error} is the failure's own message (as in skip-account), in ascending account-id order, joined by \"; \" — e.g. \"acc-1: <message>; acc-2: <message>\""
                 }
             },
             "python": "No account returned tools. {failures}",
             "node": "No account returned tools. {failures}",
             "matches": {
-                "python": true,
-                "node": true
-            }
+                "python": false,
+                "node": false
+            },
+            "notes": "Only when every account in scope failed to list, and only when the failures do not all share one HTTP status: if they do, the SDK rethrows the StackOneAPIError itself (e.g. two accounts both answering 401 raise StackOneAPIError 401). The failures are the error's cause: Python raises it `from ExceptionGroup(...)` of them, Node passes `{ cause: new AggregateError(...) }`. An account that listed zero tools has not failed. Today both SDKs join the failures with \" | \", and also raise when some accounts failed and the rest listed zero tools. Replaces no-account-returned-tools."
         },
         {
             "id": "no-connector-returned-results",

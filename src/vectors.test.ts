@@ -580,16 +580,27 @@ const emitters: Record<
 	'ambiguous-connector': async () => {
 		listByAccount(['linear_acc1_execute_action', 'linear_acc2_execute_action']);
 		respondToCalls(() => ({ data: {} }));
-		await newToolSet({ accountIds: ['acc1', 'acc2'] }).execute('linear_list_issues');
 		return {
-			emitted: { warnings: warnings() },
+			emitted: {
+				error: await errorOf(() =>
+					newToolSet({ accountIds: ['acc2', 'acc1'] }).execute('linear_list_issues'),
+				),
+			},
 			values: {
 				action_id: 'linear_list_issues',
 				count: 2,
-				tools: 'linear_acc1_execute_action, linear_acc2_execute_action',
-				tool: 'linear_acc1_execute_action',
+				tools: 'linear_acc1_execute_action on acc1, linear_acc2_execute_action on acc2',
 			},
 		};
+	},
+	'account-id-env-ignored': async () => {
+		vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc-1');
+		try {
+			newToolSet();
+			return { emitted: { warnings: warnings() }, values: {} };
+		} finally {
+			vi.unstubAllEnvs();
+		}
 	},
 	'mcp-timeout': async () => {
 		const endpoint = `${TEST_BASE_URL}/mcp`;
@@ -691,7 +702,7 @@ const emitters: Record<
 			values: { count: 1, accounts: 'hibob (error)' },
 		};
 	},
-	'no-account-returned-tools': async () => {
+	'all-accounts-failed': async () => {
 		listMock.mockImplementation(async ({ headers }) => {
 			throw new Error(`down ${headers['x-account-id']}`);
 		});
@@ -699,7 +710,7 @@ const emitters: Record<
 			emitted: {
 				error: await errorOf(() => newToolSet().fetchTools({ accountIds: ['acc-1', 'acc-2'] })),
 			},
-			values: { failures: 'acc-1: down acc-1 | acc-2: down acc-2' },
+			values: { failures: 'acc-1: down acc-1; acc-2: down acc-2' },
 		};
 	},
 	'no-connector-returned-results': async () => {

@@ -9,6 +9,7 @@ import type {
 import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resources/responses/responses';
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
+import { SUBMIT_FEEDBACK_TOOL_NAME } from './consts';
 import {
 	type DeclaredHeaders,
 	buildRequestHeaders,
@@ -32,6 +33,7 @@ import type {
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolArgumentsError } from './utils/error-tool-arguments';
+import { warn } from './utils/logger';
 import { serializeToolResult } from './utils/serialize';
 import { tryImport } from './utils/try-import';
 
@@ -647,6 +649,7 @@ export class Tools implements Iterable<BaseTool> {
 	 * Claude Agent SDK refuses the second outright.
 	 */
 	#uniqueTools(): BaseTool[] {
+		warnOnDuplicateNames(this.tools);
 		const seen = new Set<string>();
 		return this.tools.filter((tool) => !seen.has(tool.name) && seen.add(tool.name));
 	}
@@ -875,5 +878,27 @@ export class Tools implements Iterable<BaseTool> {
 	 */
 	forEach(callback: (tool: BaseTool) => void): void {
 		this.tools.forEach(callback);
+	}
+}
+
+/**
+ * Two accounts on one provider serve identically named tools. Every lookup and adapter keeps the
+ * first one listed — the lowest account id — and drops the rest, so warn that the others are
+ * unreachable by name: once when the tools are fetched, and again from each adapter that drops
+ * them.
+ */
+export function warnOnDuplicateNames(tools: readonly BaseTool[]): void {
+	const counts = new Map<string, number>();
+	for (const tool of tools) {
+		counts.set(tool.name, (counts.get(tool.name) ?? 0) + 1);
+	}
+	const clashing = [...counts]
+		.filter(([name, count]) => count > 1 && name !== SUBMIT_FEEDBACK_TOOL_NAME)
+		.map(([name]) => name)
+		.sort();
+	if (clashing.length > 0) {
+		warn(
+			`${clashing.length} tool name(s) are served by more than one account (${clashing.slice(0, 5).join(', ')}). The first one listed, from the lowest account id, is used — pass account ids to choose.`,
+		);
 	}
 }

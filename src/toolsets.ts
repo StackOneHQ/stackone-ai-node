@@ -10,7 +10,7 @@ import {
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
 import { type McpToolDefinition, isRateLimitFailure, listMcpTools } from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
-import { StackOneMcpTool, type StackOneTool, Tools } from './tool';
+import { StackOneMcpTool, type StackOneTool, Tools, warnOnDuplicateNames } from './tool';
 import type {
 	ActionResult,
 	FeedbackCategory,
@@ -408,7 +408,7 @@ export class StackOneToolSet {
 			config.execute?.accountIds == null
 		) {
 			warn(
-				'STACKONE_ACCOUNT_ID is set but ignored: with no account passed, the toolset uses every active account linked to the API key. Pass accountId (or accountIds) to choose.',
+				'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
 			);
 		}
 	}
@@ -973,7 +973,7 @@ export class StackOneToolSet {
 			// The same provider linked twice, which discovery makes common. Picking one would run the
 			// action against an account the caller never chose — another end user's, possibly.
 			throw new ToolSetConfigError(
-				`${JSON.stringify(actionId)} matches ${finalists.length} connectors (${finalists.map((t) => t.name).join(', ')}). Pass account ids to choose — a search hit's account_id names its account.`,
+				`${JSON.stringify(actionId)} matches ${finalists.length} connectors on different accounts (${finalists.map((t) => `${t.name} on ${t.getAccountId()}`).join(', ')}). Pass the account id to use, such as a search hit's account_id.`,
 			);
 		}
 
@@ -1094,28 +1094,7 @@ function allAccountsFailed(failures: readonly [accountId: string, reason: unknow
 		return first;
 	}
 	return new ToolSetLoadError(
-		`No account returned tools. ${failures.map(([accountId, reason]) => `${accountId}: ${describeError(reason)}`).join(' | ')}`,
+		`Every account failed to list tools: ${failures.map(([accountId, reason]) => `${accountId}: ${describeError(reason)}`).join('; ')}`,
 		{ cause: new AggregateError(reasons, 'Every account failed to list tools') },
 	);
-}
-
-/**
- * Two accounts on one provider serve identically named tools. Every lookup and adapter keeps the
- * first one listed — the lowest account id — and drops the rest, so warn that the others are
- * unreachable by name.
- */
-function warnOnDuplicateNames(tools: readonly StackOneTool[]): void {
-	const counts = new Map<string, number>();
-	for (const tool of tools) {
-		counts.set(tool.name, (counts.get(tool.name) ?? 0) + 1);
-	}
-	const clashing = [...counts]
-		.filter(([name, count]) => count > 1 && name !== SUBMIT_FEEDBACK_TOOL_NAME)
-		.map(([name]) => name)
-		.sort();
-	if (clashing.length > 0) {
-		warn(
-			`${clashing.length} tool name(s) are served by more than one account (${clashing.slice(0, 5).join(', ')}). Looking a tool up by name returns the first one listed — pass account ids to choose.`,
-		);
-	}
 }

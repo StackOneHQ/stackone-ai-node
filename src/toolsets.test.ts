@@ -95,7 +95,7 @@ describe('configuration', () => {
 		newToolSet();
 
 		expect(warnSpy.mock.calls.map(([message]: unknown[]) => String(message))).toEqual([
-			'[@stackone/ai] STACKONE_ACCOUNT_ID is set but ignored: with no account passed, the toolset uses every active account linked to the API key. Pass accountId (or accountIds) to choose.',
+			'[@stackone/ai] STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
 		]);
 	});
 
@@ -535,7 +535,7 @@ describe('listing', () => {
 			.catch((caught: unknown) => caught);
 
 		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe('No account returned tools. a: boom for a | b: gone');
+		expect((error as Error).message).toBe('Every account failed to list tools: a: boom for a; b: gone');
 		expect((error as Error).cause).toBeInstanceOf(AggregateError);
 		expect(((error as Error).cause as AggregateError).errors).toEqual([failures.a, failures.b]);
 	});
@@ -836,7 +836,7 @@ describe('duplicate tool names', () => {
 		expect(tools.length).toBe(4);
 		expect((tools.getTool('hibob_list_employees') as StackOneTool).getAccountId()).toBe('a');
 		expect(String(warnSpy.mock.calls[0]?.[0])).toBe(
-			'[@stackone/ai] 2 tool name(s) are served by more than one account (hibob_get_employee, hibob_list_employees). Looking a tool up by name returns the first one listed — pass account ids to choose.',
+			'[@stackone/ai] 2 tool name(s) are served by more than one account (hibob_get_employee, hibob_list_employees). The first one listed, from the lowest account id, is used — pass account ids to choose.',
 		);
 	});
 
@@ -874,7 +874,9 @@ describe('duplicate tool names', () => {
 		expect(Object.keys(aiSdk)).toEqual(expected);
 		expect(aiSdk.hibob_list_employees?.description).toBe('on a');
 		await expect(tools.toClaudeAgentSdk()).resolves.toBeDefined();
-		expect(warnSpy).toHaveBeenCalledOnce();
+		// Once from fetchTools(), then once from each adapter call that dropped a duplicate.
+		expect(warnSpy).toHaveBeenCalledTimes(8);
+		expect(new Set(warnSpy.mock.calls.map(([message]: unknown[]) => message)).size).toBe(1);
 	});
 
 	it('stays quiet when names are unique', async () => {
