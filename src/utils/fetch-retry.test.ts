@@ -216,6 +216,13 @@ describe('fetchWithRetry', () => {
 				Date.parse('2028-02-29T00:00:00Z') - now,
 			);
 		});
+
+		it('reads a leap second that rolls over into the next year', () => {
+			const yearEnd = Date.parse('9999-12-31T00:00:00Z');
+			expect(retryAfterMs('Fri, 31 Dec 9999 23:59:60 GMT', yearEnd)).toBe(
+				Date.UTC(10000, 0, 1) - yearEnd,
+			);
+		});
 	});
 
 	describe('without Retry-After', () => {
