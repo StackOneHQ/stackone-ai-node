@@ -265,7 +265,9 @@ describe('fetchWithRetry', () => {
 			expect(await response.json()).toEqual({ message: 'too long' });
 			expect(seen.requests).toBe(1);
 			expect(delays).toEqual([]);
-			expect(warnSpy).not.toHaveBeenCalled();
+			expect(warnSpy.mock.calls.map(([message]: unknown[]) => message)).toEqual([
+				`[@stackone/ai] GET ${url} was rate limited (429) on attempt 1 of 4; not retrying, because waiting 3s would pass the deadline`,
+			]);
 		});
 
 		it('counts every earlier wait against the deadline', async () => {

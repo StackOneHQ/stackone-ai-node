@@ -283,7 +283,9 @@ describe('a 429 whose wait would outlast the timeout', () => {
 		expect((error as StackOneAPIError).statusCode).toBe(429);
 		expect(requests).toBe(1);
 		expect(waits).toEqual([]);
-		expect(retryWarnings()).toEqual([]);
+		expect(retryWarnings()).toEqual([
+			`[@stackone/ai] GET ${TEST_BASE_URL}/accounts was rate limited (429) on attempt 1 of 4; not retrying, because waiting 3s would pass the deadline`,
+		]);
 	});
 
 	it('measures the GET /accounts deadline from the first attempt', async () => {

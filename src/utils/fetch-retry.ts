@@ -202,15 +202,17 @@ export async function fetchWithRetry(
 			retryAfterMs(response.headers.get('retry-after')),
 			timing.random,
 		);
+		const limited = `${init?.method ?? 'GET'} ${String(input)} was rate limited (429) on attempt ${retry} of ${RATE_LIMIT_MAX_RETRIES + 1}`;
 		if (deadline !== undefined && !waitsForRetry(delay, deadline - timing.now())) {
+			warn(
+				`${limited}; not retrying, because waiting ${formatSeconds(delay)}s would pass the deadline`,
+			);
 			return response;
 		}
 		// Discarded unread: only the final 429's body is reported. Not awaited, since a cancel can
 		// wait on a producer that never settles (MSW's, for one), and the retry need not wait.
 		void response.body?.cancel().catch(() => undefined);
-		warn(
-			`${init?.method ?? 'GET'} ${String(input)} was rate limited (429) on attempt ${retry} of ${RATE_LIMIT_MAX_RETRIES + 1}; retrying in ${formatSeconds(delay)}s`,
-		);
+		warn(`${limited}; retrying in ${formatSeconds(delay)}s`);
 		if (delay > 0) {
 			await timing.sleep(delay, init?.signal);
 		}
