@@ -535,7 +535,9 @@ describe('listing', () => {
 			.catch((caught: unknown) => caught);
 
 		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe('Every account failed to list tools: a: boom for a; b: gone');
+		expect((error as Error).message).toBe(
+			'Every account failed to list tools: a: boom for a; b: gone',
+		);
 		expect((error as Error).cause).toBeInstanceOf(AggregateError);
 		expect(((error as Error).cause as AggregateError).errors).toEqual([failures.a, failures.b]);
 	});
