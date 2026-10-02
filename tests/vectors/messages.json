@@ -140,13 +140,13 @@
             "kind": "warning",
             "template": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
             "placeholders": {},
-            "python": "",
-            "node": "",
+            "python": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
+            "node": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Emitted once, when the toolset is constructed, if the STACKONE_ACCOUNT_ID environment variable is set and non-empty and neither an account id nor account ids were passed. Neither SDK emits it today."
+            "notes": "Emitted once, when the toolset is constructed, if the STACKONE_ACCOUNT_ID environment variable is set and non-empty and neither an account id nor account ids were passed."
         },
         {
             "id": "skip-account",
@@ -205,11 +205,11 @@
                     "description": "up to five of them, sorted, joined by \", \""
                 }
             },
-            "python": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
-            "node": "{count} tool name(s) are served by more than one account ({names}). Looking a tool up by name returns the first one listed — pass account ids to choose.",
+            "python": "{count} tool name(s) are served by more than one account ({names}). The first one listed, from the lowest account id, is used — pass account ids to choose.",
+            "node": "{count} tool name(s) are served by more than one account ({names}). The first one listed, from the lowest account id, is used — pass account ids to choose.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
             "notes": "Language-neutral wording: neither SDK's method or parameter names. Emitted once when a fetched collection holds a clashing name, and again by every adapter that keeps the first tool per name and drops the rest: OpenAI, LangChain, Pydantic AI, AI SDK and Claude Agent SDK. Listing order is ascending account id, so the first is the lowest account id's."
         },
@@ -235,13 +235,13 @@
                     "description": "each matching *_execute_action tool as \"{tool} on {account_id}\", in ascending account-id order, joined by \", \""
                 }
             },
-            "python": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
-            "node": "{action_id} matches {count} connectors ({tools}); using {tool}. Pass account ids to choose.",
+            "python": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
+            "node": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Raised by execute() when the action's connector is linked on more than one account in scope — no account id passed, or several; nothing is called. Was a warning that ran the first match; today's text names the one used as {tool}."
+            "notes": "Raised by execute() when the action's connector is linked on more than one account in scope — no account id passed, or several; nothing is called. Was a warning that ran the first match."
         },
         {
             "id": "mcp-timeout",
@@ -547,13 +547,13 @@
                     "description": "each failed account as \"{account_id}: {error}\", where {error} is the failure's own message (as in skip-account), in ascending account-id order, joined by \"; \" — e.g. \"acc-1: <message>; acc-2: <message>\""
                 }
             },
-            "python": "No account returned tools. {failures}",
-            "node": "No account returned tools. {failures}",
+            "python": "Every account failed to list tools: {failures}",
+            "node": "Every account failed to list tools: {failures}",
             "matches": {
-                "python": false,
-                "node": false
+                "python": true,
+                "node": true
             },
-            "notes": "Only when every account in scope failed to list, and only when the failures do not all share one HTTP status: if they do, the SDK rethrows the StackOneAPIError itself (e.g. two accounts both answering 401 raise StackOneAPIError 401). The failures are the error's cause: Python raises it `from ExceptionGroup(...)` of them, Node passes `{ cause: new AggregateError(...) }`. An account that listed zero tools has not failed. Today both SDKs join the failures with \" | \", and also raise when some accounts failed and the rest listed zero tools. Replaces no-account-returned-tools."
+            "notes": "Only when every account in scope failed to list, and only when the failures do not all share one HTTP status: if they do, the SDK rethrows the StackOneAPIError itself (e.g. two accounts both answering 401 raise StackOneAPIError 401). The failures are the error's cause: Python raises it `from ExceptionGroup(...)` of them, Node passes `{ cause: new AggregateError(...) }`. An account that listed zero tools has not failed. Both SDKs join the failures with \"; \", and also raise when some accounts failed and the rest listed zero tools. Replaces no-account-returned-tools."
         },
         {
             "id": "no-connector-returned-results",
