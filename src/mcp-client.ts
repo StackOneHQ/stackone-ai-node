@@ -73,10 +73,7 @@ export function describeMcpFailure(error: unknown, endpoint: string, timeout: nu
 			{ cause: error },
 		);
 	}
-	if (
-		error instanceof McpDeadlineError ||
-		(error instanceof McpError && error.code === ErrorCode.RequestTimeout)
-	) {
+	if (isTimeout(error)) {
 		// In seconds, written as a number (0.5s, 60s), as the Python SDK writes it.
 		return new ToolSetLoadError(`MCP request to ${endpoint} timed out after ${timeout / 1000}s`, {
 			cause: error,
@@ -103,9 +100,21 @@ export function isRateLimitFailure(error: unknown): boolean {
 	return (
 		error instanceof StackOneAPIError &&
 		error.statusCode === 429 &&
-		error.cause instanceof StreamableHTTPError
+		(error.cause instanceof StreamableHTTPError || error.cause instanceof RateLimitTimeoutError)
 	);
 }
+
+/** A session that timed out while a 429 was being retried. */
+class RateLimitTimeoutError extends Error {
+	constructor(options: ErrorOptions) {
+		super('timed out while retrying a 429', options);
+		this.name = 'RateLimitTimeoutError';
+	}
+}
+
+const isTimeout = (error: unknown): boolean =>
+	error instanceof McpDeadlineError ||
+	(error instanceof McpError && error.code === ErrorCode.RequestTimeout);
 
 /**
  * Open an MCP session, run `work` in it and close it, all within one deadline.
@@ -120,11 +129,18 @@ async function withMcpSession<T>(
 	work: (client: Client) => Promise<T>,
 ): Promise<T> {
 	const expiresAt = retryTiming.now() + timeout;
+	let rateLimited = false;
 	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
 		requestInit: { headers },
 		// Every request the client sends, handshake included, so it never sees a 429 it could
 		// have waited out — but never one that would outlast the session's deadline.
-		fetch: (url, init) => fetchWithRetry(url, init, { deadline: expiresAt }),
+		fetch: (url, init) =>
+			fetchWithRetry(url, init, {
+				deadline: expiresAt,
+				onRetry: () => {
+					rateLimited = true;
+				},
+			}),
 	});
 	const client = new Client({ name: 'stackone-ai-node', version });
 	let timer: ReturnType<typeof setTimeout> | undefined;
@@ -138,6 +154,18 @@ async function withMcpSession<T>(
 		})();
 		return await Promise.race([session, deadline]);
 	} catch (error) {
+		// A timeout while a 429 was being retried is the rate limit's doing, not the account's:
+		// reported as a timeout, it would skip the account and return a partial result, which a
+		// 429 must never do.
+		if (rateLimited && isTimeout(error)) {
+			throw new StackOneAPIError(
+				`MCP request to ${endpoint} was rate limited (429) and timed out after ${timeout / 1000}s while retrying`,
+				429,
+				null,
+				undefined,
+				{ cause: new RateLimitTimeoutError({ cause: error }) },
+			);
+		}
 		throw describeMcpFailure(error, endpoint, timeout);
 	} finally {
 		clearTimeout(timer);

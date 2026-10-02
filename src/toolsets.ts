@@ -455,13 +455,14 @@ export class StackOneToolSet {
 	 * `status === 'active'` can serve tools.
 	 *
 	 * @throws StackOneAPIError If the API answers with an error status, including a 429 that
-	 *   outlasted its retries.
+	 *   outlasted its retries or timed out while being retried.
 	 * @throws ToolSetLoadError If the API cannot be reached, or answers with something that is
 	 *   not a JSON list (including a body that is not valid UTF-8).
 	 */
 	async fetchAccounts(): Promise<StackOneAccount[]> {
 		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
 		let response: Response;
+		let rateLimited = false;
 		try {
 			response = await fetchWithRetry(
 				url,
@@ -469,9 +470,24 @@ export class StackOneToolSet {
 					headers: buildRequestHeaders({ apiKey: this.#apiKey, extraHeaders: this.#headers }),
 					signal: AbortSignal.timeout(this.#timeout),
 				},
-				{ deadline: retryTiming.now() + this.#timeout },
+				{
+					deadline: retryTiming.now() + this.#timeout,
+					onRetry: () => {
+						rateLimited = true;
+					},
+				},
 			);
 		} catch (error) {
+			// Timing out while a 429 is retried is still the rate limit, as it is over MCP.
+			if (rateLimited && error instanceof DOMException && error.name === 'TimeoutError') {
+				throw new StackOneAPIError(
+					`Listing accounts at ${url} was rate limited (429) and timed out after ${this.#timeout / 1000}s while retrying`,
+					429,
+					null,
+					undefined,
+					{ cause: error },
+				);
+			}
 			throw new ToolSetLoadError(`Could not reach ${url}: ${describeError(error)}`, {
 				cause: error,
 			});

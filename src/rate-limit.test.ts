@@ -3,7 +3,7 @@
  * retries fails the whole call rather than costing one account. The retry timing itself is
  * covered in utils/fetch-retry.test.ts; here every 429 carries `Retry-After: 0`, so nothing waits.
  */
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { mockAccounts } from '../mocks/handlers.stackone-accounts';
 import { type RecordedToolCall, accountMcpTools, createMcpApp } from '../mocks/mcp-server';
@@ -305,6 +305,61 @@ describe('a 429 whose wait would outlast the timeout', () => {
 		expect((error as StackOneAPIError).statusCode).toBe(429);
 		expect(waits).toEqual([1_000, 1_000]);
 		expect(requests).toBe(3);
+	});
+});
+
+// A retry that times out is still the rate limit's doing: reported as a timeout, it would skip
+// the account and return a partial catalog, which a 429 never does.
+describe('a timeout while a 429 is retried', () => {
+	it('fails a multi-account listing with a 429', async () => {
+		let acc2Requests = 0;
+		const app = createMcpApp({ accountTools: accountMcpTools });
+		server.use(
+			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+				if (request.headers.get('x-account-id') === 'acc2') {
+					if (acc2Requests++ === 0) {
+						return HttpResponse.json(RATE_LIMITED, {
+							status: 429,
+							headers: { 'Retry-After': '0' },
+						});
+					}
+					await delay('infinite');
+				}
+				return app.fetch(request);
+			}),
+		);
+
+		const error = await newToolSet({ timeout: 300 })
+			.fetchTools({ accountIds: ['acc1', 'acc2'] })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect((error as Error).message).toBe(
+			`MCP request to ${TEST_BASE_URL}/mcp was rate limited (429) and timed out after 0.3s while retrying`,
+		);
+		expect(warnings().filter((message) => message.includes('Skipping'))).toEqual([]);
+	});
+
+	it('fails GET /accounts with a 429', async () => {
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, async () => {
+				if (requests++ === 0) {
+					return HttpResponse.json(RATE_LIMITED, { status: 429, headers: { 'Retry-After': '0' } });
+				}
+				await delay('infinite');
+				return HttpResponse.json([]);
+			}),
+		);
+
+		const error = await newToolSet({ timeout: 300 })
+			.fetchAccounts()
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect(requests).toBe(2);
 	});
 });
 

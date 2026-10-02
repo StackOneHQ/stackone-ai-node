@@ -21,6 +21,8 @@ interface RetryOptions {
 	 */
 	deadline?: number;
 	timing?: RetryTiming;
+	/** Called with each 429 about to be retried, before the wait. */
+	onRetry?: (response: Response) => void;
 }
 
 const sleep = (ms: number, signal?: AbortSignal | null): Promise<void> =>
@@ -190,7 +192,7 @@ const formatSeconds = (ms: number): string => String(Math.floor((ms / 1000) * 10
 export async function fetchWithRetry(
 	input: string | URL,
 	init?: RequestInit,
-	{ deadline, timing = retryTiming }: RetryOptions = {},
+	{ deadline, timing = retryTiming, onRetry }: RetryOptions = {},
 ): Promise<Response> {
 	for (let retry = 1; ; retry++) {
 		const response = await fetch(input, init);
@@ -212,6 +214,7 @@ export async function fetchWithRetry(
 		// Discarded unread: only the final 429's body is reported. Not awaited, since a cancel can
 		// wait on a producer that never settles (MSW's, for one), and the retry need not wait.
 		void response.body?.cancel().catch(() => undefined);
+		onRetry?.(response);
 		warn(`${limited}; retrying in ${formatSeconds(delay)}s`);
 		if (delay > 0) {
 			await timing.sleep(delay, init?.signal);
