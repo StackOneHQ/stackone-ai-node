@@ -106,10 +106,10 @@
         },
         {
             "id": "two-digit-year-imf",
-            "description": "an IMF-fixdate with a two-digit year (26) is read as 2026",
+            "description": "an IMF-fixdate requires a four-digit year, so a two-digit one is unreadable and falls back to the backoff",
             "header": "Thu, 01 Oct 26 12:00:30 GMT",
             "now": "2026-10-01T12:00:00Z",
-            "expected_seconds": 30
+            "expected_seconds": null
         },
         {
             "id": "rfc850-year-49",
@@ -120,17 +120,17 @@
         },
         {
             "id": "rfc850-year-70",
-            "description": "RFC 850 two-digit year 70 is read as 1970 by both (RFC 9110's 50-year rule would say 2070: both SDKs agree on 1970 today)",
+            "description": "RFC 850 two-digit year 70 is 2070: 44 years ahead is within RFC 9110 §5.6.7's 50-year window",
             "header": "Wednesday, 01-Oct-70 12:00:00 GMT",
             "now": "2026-10-01T12:00:00Z",
-            "expected_seconds": 0
+            "expected_seconds": 1388534400
         },
         {
             "id": "offset-zone",
-            "description": "a numeric zone offset is honoured: 13:00:30 +0100 is 12:00:30 GMT",
+            "description": "an IMF-fixdate is always GMT; a numeric offset is unreadable and falls back to the backoff",
             "header": "Thu, 01 Oct 2026 13:00:30 +0100",
             "now": "2026-10-01T12:00:00Z",
-            "expected_seconds": 30
+            "expected_seconds": null
         },
         {
             "id": "day-32",
@@ -288,10 +288,10 @@
         },
         {
             "id": "no-zone",
-            "description": "an IMF-fixdate without its GMT suffix is read as UTC, never local time.",
+            "description": "an IMF-fixdate without its GMT suffix is unreadable and falls back to the backoff (only the asctime form has no zone, and is read as UTC)",
             "header": "Thu, 01 Oct 2026 12:00:30",
             "now": "2026-10-01T12:00:00Z",
-            "expected_seconds": 30
+            "expected_seconds": null
         },
         {
             "id": "trailing-garbage",

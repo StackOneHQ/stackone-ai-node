@@ -205,31 +205,10 @@ describe('retry-after.json', () => {
 		expect(file.version).toBe(1);
 	});
 
-	/**
-	 * Cases these tests cannot pass, each with why. Run with `it.fails`, so a fixed vector fails
-	 * here until it is taken off the list.
-	 */
-	const CONTRADICTED: Record<string, string> = {
-		// 01-Oct-70 is 44 years ahead of `now`, not more than 50, so RFC 9110 §5.6.7 — and this
-		// file's own rfc850-year-60, -76 and -77 — put it in 2070, not 1970.
-		'rfc850-year-70': 'contradicts rfc850-year-60/76/77',
-	};
-
-	it.each(file.cases.filter(({ id }) => !(id in CONTRADICTED)))(
-		'$id',
-		({ header, now, expected_seconds }) => {
-			const ms = retryAfterMs(header, Date.parse(now));
-			expectSeconds(ms === undefined ? null : ms / 1000, expected_seconds);
-		},
-	);
-
-	it.fails.each(file.cases.filter(({ id }) => id in CONTRADICTED))(
-		'$id (contradicted by the vectors themselves)',
-		({ header, now, expected_seconds }) => {
-			const ms = retryAfterMs(header, Date.parse(now));
-			expectSeconds(ms === undefined ? null : ms / 1000, expected_seconds);
-		},
-	);
+	it.each(file.cases)('$id', ({ header, now, expected_seconds }) => {
+		const ms = retryAfterMs(header, Date.parse(now));
+		expectSeconds(ms === undefined ? null : ms / 1000, expected_seconds);
+	});
 });
 
 describe('backoff.json', () => {
