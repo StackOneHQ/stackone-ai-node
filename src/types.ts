@@ -218,7 +218,7 @@ export type SearchResult = JsonObject & {
 	 * The account whose connector found this hit. The same action linked on two accounts is two
 	 * hits; pass this in `execute()`'s `accountIds` to run the action on this one.
 	 */
-	account_id?: string;
+	account_id: string;
 };
 
 /**
