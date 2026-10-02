@@ -110,6 +110,20 @@ describe('configuration', () => {
 		expect(warnSpy).not.toHaveBeenCalled();
 	});
 
+	it.each([
+		['an empty accountIds array', { accountIds: [] }],
+		['an empty execute.accountIds array', { execute: { accountIds: [] } }],
+	])(
+		'still warns about STACKONE_ACCOUNT_ID given %s, since it counts as unset',
+		(_name, config) => {
+			vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc3');
+			newToolSet(config);
+			expect(warnSpy.mock.calls.map(([message]: unknown[]) => String(message))).toEqual([
+				'[@stackone/ai] STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
+			]);
+		},
+	);
+
 	it('refuses both accountId and accountIds', () => {
 		expect(() => newToolSet({ accountId: 'a', accountIds: ['b'] } as never)).toThrow(
 			/Cannot provide both accountId and accountIds/,
@@ -506,6 +520,53 @@ describe('listing', () => {
 			'tool_b',
 			'tool_c',
 		]);
+	});
+
+	it('coalesces concurrent listings for the same scope into one request per account', async () => {
+		let inFlight = 0;
+		let peak = 0;
+		fakeListing(async (request) => {
+			inFlight += 1;
+			peak = Math.max(peak, inFlight);
+			await new Promise((resolve) => setTimeout(resolve, 20));
+			inFlight -= 1;
+			return [def(`tool_${accountOf(request)}`)];
+		});
+
+		const toolset = newToolSet();
+		const [first, second] = await Promise.all([
+			toolset.fetchTools({ accountIds: ['a', 'b'] }),
+			toolset.fetchTools({ accountIds: ['a', 'b'] }),
+		]);
+
+		expect(peak).toBe(2);
+		expect(listMock.mock.calls.length).toBe(2);
+		expect(names(first)).toEqual(['tool_a', 'tool_b']);
+		expect(names(second)).toEqual(['tool_a', 'tool_b']);
+	});
+
+	it('does not let one coalesced caller’s partial failure overwrite another’s healthy catalog', async () => {
+		let callsForB = 0;
+		fakeListing(async (request) => {
+			if (accountOf(request) === 'b') {
+				callsForB += 1;
+				await new Promise((resolve) => setTimeout(resolve, 10));
+				throw new Error('boom');
+			}
+			await new Promise((resolve) => setTimeout(resolve, 20));
+			return [def(`tool_${accountOf(request)}`)];
+		});
+
+		const toolset = newToolSet();
+		const [first, second] = await Promise.all([
+			toolset.fetchTools({ accountIds: ['a', 'b'] }),
+			toolset.fetchTools({ accountIds: ['a', 'b'] }),
+		]);
+
+		// One listing per account, not one per concurrent caller.
+		expect(callsForB).toBe(1);
+		expect(names(first)).toEqual(['tool_a']);
+		expect(names(second)).toEqual(['tool_a']);
 	});
 
 	it('keeps the healthy accounts when one fails, and says which failed', async () => {

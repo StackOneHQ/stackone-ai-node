@@ -344,6 +344,13 @@ export class StackOneToolSet {
 	 * caller silently rescope every later caller's tools.
 	 */
 	readonly #catalogCache = new Map<string, CachedCatalog>();
+	/**
+	 * Listings in flight, keyed the same as {@link #catalogCache}. Concurrent calls for the same
+	 * scope share this promise instead of each listing and storing independently — two callers
+	 * racing to `store()` would let whichever finished last overwrite the other's catalog, which
+	 * could hide a healthy account's tools behind a partial one.
+	 */
+	readonly #catalogInFlight = new Map<string, Promise<CachedCatalog>>();
 	#discoveredAccountIds: string[] | undefined;
 	#discovering: Promise<string[]> | undefined;
 	/**
@@ -403,9 +410,8 @@ export class StackOneToolSet {
 		// every account on the key — other end users' accounts included — so say so, once.
 		if (
 			process.env.STACKONE_ACCOUNT_ID &&
-			config.accountId == null &&
-			config.accountIds == null &&
-			config.execute?.accountIds == null
+			this.#accountId == null &&
+			this.#accountIds.length === 0
 		) {
 			warn(
 				'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
@@ -651,6 +657,8 @@ export class StackOneToolSet {
 	 */
 	async #catalog(scope: readonly string[], mode: ToolMode | undefined): Promise<CatalogEntry[]> {
 		const key = this.#cacheKey(scope, mode);
+		const inScopeOrder = (listings: CachedCatalog['listings']): CatalogEntry[] =>
+			scope.flatMap((accountId) => listings.get(accountId) ?? []);
 		const cached = this.#catalogCache.get(key);
 		const now = retryTiming.now();
 		const due = cached
@@ -658,12 +666,39 @@ export class StackOneToolSet {
 					.filter(([, failedAt]) => now - failedAt >= FAILED_ACCOUNT_RETRY_MS)
 					.map(([accountId]) => accountId)
 			: scope;
-		const inScopeOrder = (listings: CachedCatalog['listings']): CatalogEntry[] =>
-			scope.flatMap((accountId) => listings.get(accountId) ?? []);
 		if (cached && due.length === 0) {
 			return inScopeOrder(cached.listings);
 		}
 
+		const inFlight = this.#catalogInFlight.get(key);
+		if (inFlight) {
+			return inScopeOrder((await inFlight).listings);
+		}
+
+		const listing = this.#listCatalog(key, scope, due, cached, mode);
+		this.#catalogInFlight.set(key, listing);
+		try {
+			return inScopeOrder((await listing).listings);
+		} finally {
+			if (this.#catalogInFlight.get(key) === listing) {
+				this.#catalogInFlight.delete(key);
+			}
+		}
+	}
+
+	/**
+	 * Lists every due account and stores the merged result under `key`, run at most once
+	 * concurrently per key — see {@link #catalogInFlight}. Returns the listings it computed
+	 * regardless of whether {@link #cacheGeneration} let them be cached, so a clear mid-flight
+	 * cannot make a coalesced caller read back nothing.
+	 */
+	async #listCatalog(
+		key: string,
+		scope: readonly string[],
+		due: readonly string[],
+		cached: CachedCatalog | undefined,
+		mode: ToolMode | undefined,
+	): Promise<CachedCatalog> {
 		const generation = this.#cacheGeneration;
 		const endpoint = this.#endpoint(mode);
 		const listAccount = async (accountId: string): Promise<CatalogEntry[]> => {
@@ -687,8 +722,9 @@ export class StackOneToolSet {
 		if (scope.length === 1) {
 			const accountId = scope[0] as string;
 			const listings = new Map([[accountId, await listAccount(accountId)]]);
-			store({ listings, failedAt: new Map() });
-			return inScopeOrder(listings);
+			const catalog = { listings, failedAt: new Map() };
+			store(catalog);
+			return catalog;
 		}
 
 		const settled = await settleWithConcurrency(
@@ -717,8 +753,9 @@ export class StackOneToolSet {
 			warn(`Skipping account that failed to list tools — ${accountId}: ${describeError(reason)}`);
 			failedAt.set(accountId, failedNow);
 		}
-		store({ listings, failedAt });
-		return inScopeOrder(listings);
+		const catalog = { listings, failedAt };
+		store(catalog);
+		return catalog;
 	}
 
 	/**
