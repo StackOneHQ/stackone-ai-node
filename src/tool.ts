@@ -475,6 +475,19 @@ function describeUnencodableType(value: unknown): string {
 	return `an instance of ${(value as object).constructor?.name ?? typeof value}`;
 }
 
+/** A ToolArgumentsError for arguments that cannot be encoded as JSON. */
+const unencodable = (toolName: string, detail: string): ToolArgumentsError =>
+	new ToolArgumentsError(
+		`Arguments for ${JSON.stringify(toolName)} could not be encoded as JSON: ${detail}`,
+	);
+
+/**
+ * A UTF-16 surrogate without its other half: what a model emits when a token boundary splits an
+ * emoji. `JSON.stringify` escapes it as `\ud800` rather than refusing it, but it is not Unicode
+ * text, so it cannot be encoded as UTF-8 — Python refuses it, and so does this.
+ */
+const LONE_SURROGATE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
 /**
  * Walk `value`, throwing if it, or anything nested inside it, is not a JSON value.
  *
@@ -482,34 +495,41 @@ function describeUnencodableType(value: unknown): string {
  * `JSON.stringify` quietly converts some of what this refuses — a `Date` to a string, a `Map`
  * or `Set` to `{}` — rather than refuse it, which would silently send the model a value it
  * never supplied. `undefined` is dropped, as `JSON.stringify` drops it from an object, but is
- * refused inside an array, where `JSON.stringify` would send it as `null`.
+ * refused inside an array, where `JSON.stringify` would send it as `null`. A string or key
+ * holding a lone surrogate is refused too.
  *
  * @throws ToolArgumentsError If `value` is not a JSON value.
  */
 function assertJsonValue(value: unknown, path: string, toolName: string, seen: Set<object>): void {
-	if (value === null || typeof value === 'boolean' || typeof value === 'string') {
+	if (value === null || typeof value === 'boolean') {
+		return;
+	}
+	if (typeof value === 'string') {
+		if (LONE_SURROGATE.test(value)) {
+			throw unencodable(
+				toolName,
+				`a string holding a lone surrogate is not Unicode text (at ${JSON.stringify(path)})`,
+			);
+		}
 		return;
 	}
 	if (typeof value === 'number') {
 		if (!Number.isFinite(value)) {
-			throw new ToolArgumentsError(
-				`Arguments for "${toolName}" could not be encoded as JSON: Out of range number values are not JSON compliant: ${value} (at ${JSON.stringify(path)})`,
-			);
+			throw unencodable(toolName, `${value} is not a JSON number`);
 		}
 		return;
 	}
 	if (Array.isArray(value)) {
 		if (seen.has(value)) {
-			throw new ToolArgumentsError(
-				`Arguments for "${toolName}" could not be encoded as JSON: circular reference (at ${JSON.stringify(path)})`,
-			);
+			throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
 		}
 		seen.add(value);
 		value.forEach((item, index) => {
 			const itemPath = `${path}[${index}]`;
 			if (item === undefined) {
-				throw new ToolArgumentsError(
-					`Arguments for "${toolName}" could not be encoded as JSON: undefined is not a JSON value (at ${JSON.stringify(itemPath)})`,
+				throw unencodable(
+					toolName,
+					`undefined is not a JSON value (at ${JSON.stringify(itemPath)})`,
 				);
 			}
 			assertJsonValue(item, itemPath, toolName, seen);
@@ -519,9 +539,7 @@ function assertJsonValue(value: unknown, path: string, toolName: string, seen: S
 	}
 	if (isPlainObject(value)) {
 		if (seen.has(value)) {
-			throw new ToolArgumentsError(
-				`Arguments for "${toolName}" could not be encoded as JSON: circular reference (at ${JSON.stringify(path)})`,
-			);
+			throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
 		}
 		seen.add(value);
 		for (const [key, entry] of Object.entries(value)) {
@@ -529,14 +547,28 @@ function assertJsonValue(value: unknown, path: string, toolName: string, seen: S
 			if (entry === undefined) {
 				continue;
 			}
+			assertJsonKey(key, path, toolName);
 			assertJsonValue(entry, `${path}.${key}`, toolName, seen);
 		}
 		seen.delete(value);
 		return;
 	}
-	throw new ToolArgumentsError(
-		`Arguments for "${toolName}" could not be encoded as JSON: ${describeUnencodableType(value)} is not a JSON value (at ${JSON.stringify(path)})`,
+	throw unencodable(
+		toolName,
+		`${describeUnencodableType(value)} is not a JSON value (at ${JSON.stringify(path)})`,
 	);
+}
+
+/**
+ * Throw if an object key holds a lone surrogate. `path` is where the object is, if anywhere.
+ *
+ * @throws ToolArgumentsError If the key is not Unicode text.
+ */
+function assertJsonKey(key: string, path: string | undefined, toolName: string): void {
+	if (LONE_SURROGATE.test(key)) {
+		const where = path === undefined ? '' : ` (in ${JSON.stringify(path)})`;
+		throw unencodable(toolName, `a key holding a lone surrogate is not Unicode text${where}`);
+	}
 }
 
 /**
@@ -549,6 +581,7 @@ function assertEncodable(toolName: string, args: JsonObject): void {
 		if (value === undefined) {
 			continue;
 		}
+		assertJsonKey(key, undefined, toolName);
 		assertJsonValue(value, key, toolName, new Set());
 	}
 }

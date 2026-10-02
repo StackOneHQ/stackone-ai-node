@@ -386,17 +386,25 @@ describe('StackOneMcpTool as an action tool', () => {
 
 	// JSON.stringify, and so the MCP client, would send each of these as null.
 	it.each([
-		['NaN at the top level', { amount: Number.NaN }],
-		['Infinity nested in an object', { body: { name: 'Ada', score: Number.POSITIVE_INFINITY } }],
-		['-Infinity nested in an array', { query: { ids: [1, Number.NEGATIVE_INFINITY] } }],
-	])('rejects %s without calling the server', async (_name, args) => {
+		['NaN at the top level', { amount: Number.NaN }, 'NaN'],
+		[
+			'Infinity nested in an object',
+			{ body: { name: 'Ada', score: Number.POSITIVE_INFINITY } },
+			'Infinity',
+		],
+		[
+			'-Infinity nested in an array',
+			{ query: { ids: [1, Number.NEGATIVE_INFINITY] } },
+			'-Infinity',
+		],
+	])('rejects %s without calling the server', async (_name, args, value) => {
 		const error = await actionTool()
 			.execute(args as JsonObject)
 			.catch((caught: unknown) => caught);
 
 		expect(error).toBeInstanceOf(StackOneError);
-		expect((error as Error).message).toMatch(
-			/^Arguments for "crm_update_contact" could not be encoded as JSON: Out of range number values are not JSON compliant/,
+		expect((error as Error).message).toBe(
+			`Arguments for "crm_update_contact" could not be encoded as JSON: ${value} is not a JSON number`,
 		);
 		expect(calls).toEqual([]);
 	});
@@ -443,6 +451,44 @@ describe('StackOneMcpTool as an action tool', () => {
 			expect(error).toBeInstanceOf(ToolArgumentsError);
 			expect((error as Error).message).toContain(
 				`Arguments for "crm_update_contact" could not be encoded as JSON: ${hint}`,
+			);
+			expect(calls).toEqual([]);
+		},
+	);
+
+	// What a model emits when a token boundary splits an emoji: not Unicode text, so not UTF-8.
+	it.each([
+		['a lone high surrogate in a value', { name: 'Ada\uD83D' }],
+		['a lone low surrogate nested in an array', { query: { ids: ['\uDE00x'] } }],
+		['a lone surrogate in a key', { body: { '\uD800': 'x' } }],
+		['a lone surrogate in a top-level key', { '\uDFFF': 'x' }],
+	])('rejects %s without calling the server', async (_name, args) => {
+		const error = await actionTool()
+			.execute(args as JsonObject)
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toMatch(
+			/^Arguments for "crm_update_contact" could not be encoded as JSON: a (string|key) holding a lone surrogate is not Unicode text/,
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('accepts a surrogate pair', async () => {
+		await actionTool().execute({ name: 'Ada \uD83D\uDE00' });
+		expect(calls).toHaveLength(1);
+	});
+
+	it.each([['{"a": NaN}'], ['NaN'], ['{"a": Infinity}']])(
+		'rejects the JSON text %s as invalid JSON',
+		async (text) => {
+			const error = await actionTool()
+				.execute(text)
+				.catch((caught: unknown) => caught);
+
+			expect(error).toBeInstanceOf(ToolArgumentsError);
+			expect((error as Error).message).toMatch(
+				/^Invalid JSON in arguments for "crm_update_contact": /,
 			);
 			expect(calls).toEqual([]);
 		},
