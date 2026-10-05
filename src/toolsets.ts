@@ -10,6 +10,7 @@ import {
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
 import {
 	type EndUserSource,
+	HttpRateLimitError,
 	type McpToolDefinition,
 	isRateLimitFailure,
 	listMcpTools,
@@ -603,6 +604,8 @@ export class StackOneToolSet {
 				`${`Listing accounts at ${url} failed with ${response.status} ${response.statusText}`.trimEnd()}: ${text}`,
 				response.status,
 				text,
+				undefined,
+				response.status === 429 ? { cause: new HttpRateLimitError(url) } : undefined,
 			);
 		}
 
@@ -1141,9 +1144,23 @@ export class StackOneToolSet {
 		// An account that failed to list may serve this action too: its own connector's, or one we
 		// cannot tell. Running on whichever account did list would pick for the caller — possibly
 		// another end user's account — so refuse until it lists, or the caller names an account.
+		// The action's connector is the longest prefix among those listed and the providers
+		// `GET /accounts` named, as execute() routes: a failed `browser` account cannot serve
+		// `browser_linkedin_search`.
+		const connectors = [
+			...tools.map((tool) => connectorOf(tool, suffix)),
+			...[...this.#providers.values()].map((provider) => provider.toLowerCase()),
+		];
+		const connector = connectors
+			.filter((candidate) => lowered.startsWith(`${candidate}_`))
+			.reduce<string | undefined>(
+				(longest, candidate) =>
+					longest === undefined || candidate.length > longest.length ? candidate : longest,
+				undefined,
+			);
 		const unlisted = failed.filter(([accountId]) => {
 			const provider = this.#providers.get(accountId);
-			return provider === undefined || lowered.startsWith(`${provider.toLowerCase()}_`);
+			return provider === undefined || provider.toLowerCase() === connector;
 		});
 		if (unlisted.length > 0) {
 			throw new ToolSetLoadError(

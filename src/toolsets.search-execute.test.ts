@@ -764,6 +764,20 @@ describe('execute() while an account in scope has failed to list', () => {
 		expect(calls.map(({ tool }) => tool)).toEqual(['linear_acc1_execute_action']);
 	});
 
+	it('is not blocked by a failed account on a shorter provider prefix', async () => {
+		// acc2's provider `linear` prefixes `linear_beta_list_items`, but the action's connector is
+		// `linear_beta`, the longest prefix, so acc2 could not serve it.
+		const calls = serve([
+			{ id: 'acc1', provider: 'linear_beta', status: 'active' },
+			{ id: 'acc2', provider: 'linear', status: 'active' },
+		]);
+		failing.add('acc2');
+
+		await newToolSet().execute('linear_beta_list_items');
+
+		expect(calls.map(({ tool }) => tool)).toEqual(['linear_beta_acc1_execute_action']);
+	});
+
 	it('refuses when the failed account’s provider is unknown, listing failures by account id', async () => {
 		const calls = serve(ACCOUNTS);
 		failing.add('acc3');

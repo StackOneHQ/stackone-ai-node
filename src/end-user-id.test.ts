@@ -604,6 +604,50 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([['initialize', 'carol']]);
 	});
 
+	it('stays fatal to a fan-out when the lookup is rate limited', async () => {
+		serve(ACCOUNTS, { acc1: 'alice' });
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json(
+					{ statusCode: 429, message: 'Too many requests' },
+					{ status: 429, headers: { 'Retry-After': '0' } },
+				),
+			),
+		);
+
+		// acc2 lists fine; acc1 needs the lookup, which is rate limited. Skipping acc1 would hand
+		// back a partial catalog, so the call fails with the 429 instead.
+		const error = await newToolSet({ accountIds: ['acc1', 'acc2'] })
+			.fetchTools()
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+	});
+
+	it('is looked up whatever the refusal names the account as', async () => {
+		serve(ACCOUNTS, { acc1: 'alice' });
+		server.use(
+			// With the header, fall through to serve()'s own guard and catalog.
+			http.all(`${TEST_BASE_URL}/mcp`, ({ request }) =>
+				request.headers.get('x-end-user-id')
+					? undefined
+					: HttpResponse.json(
+							{
+								statusCode: 400,
+								message:
+									'x-end-user-id header does not match account end user id for account "acc1"',
+							},
+							{ status: 400 },
+						),
+			),
+		);
+
+		// Without the lookup, the reworded refusal would be thrown; with it, acc1 lists.
+		const tools = await newToolSet({ accountId: 'acc1' }).fetchTools();
+		expect(tools.toArray().length).toBeGreaterThan(0);
+	});
+
 	it('is not looked up for any other 400', async () => {
 		const { accountRequests } = serve();
 		server.use(

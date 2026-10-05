@@ -100,23 +100,39 @@ export function isRateLimitFailure(error: unknown): boolean {
 	return (
 		error instanceof StackOneAPIError &&
 		error.statusCode === 429 &&
-		(error.cause instanceof StreamableHTTPError || error.cause instanceof RateLimitTimeoutError)
+		(error.cause instanceof StreamableHTTPError ||
+			error.cause instanceof RateLimitTimeoutError ||
+			error.cause instanceof HttpRateLimitError)
 	);
+}
+
+/**
+ * The cause of a `StackOneAPIError` 429 that a plain HTTP request (`GET /accounts`) was answered
+ * with after its retries, so {@link isRateLimitFailure} reads it as the rate limit it is.
+ */
+export class HttpRateLimitError extends Error {
+	constructor(url: string) {
+		super(`${url} answered 429 after every retry`);
+		this.name = 'HttpRateLimitError';
+	}
 }
 
 /**
  * Whether an MCP request was refused by the API's end-user check on `accountId`: the 400 it
  * answers a non-shared account's request with when `x-end-user-id` does not name its end user.
  */
-function isEndUserMismatch(error: unknown, accountId: string): boolean {
+function isEndUserMismatch(error: unknown): boolean {
 	if (!(error instanceof StackOneAPIError) || error.statusCode !== 400) {
 		return false;
 	}
 	const body = error.responseBody;
 	const message =
 		typeof body === 'object' && body !== null && 'message' in body ? body.message : body;
+	// Matched on the guard's fixed wording, not the account id it ends with, so a change to how
+	// the id is written does not silently turn the lookup off.
 	return (
-		message === `x-end-user-id header does not match account end user id for account ${accountId}`
+		typeof message === 'string' &&
+		message.startsWith('x-end-user-id header does not match account end user id')
 	);
 }
 
@@ -145,10 +161,17 @@ export async function withEndUser<T>(
 	try {
 		return await request(recorded);
 	} catch (error) {
-		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error, accountId)) {
+		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error)) {
 			throw error;
 		}
-		const endUserId = await source.lookUp(accountId).catch(() => undefined);
+		// A failed lookup leaves the refusal to be thrown, except a rate limit: that is the key's,
+		// not the account's, and must stay fatal to a fan-out.
+		const endUserId = await source.lookUp(accountId).catch((lookupError: unknown) => {
+			if (isRateLimitFailure(lookupError)) {
+				throw lookupError;
+			}
+			return undefined;
+		});
 		if (endUserId === undefined) {
 			throw error;
 		}
