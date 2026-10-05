@@ -185,7 +185,7 @@ await tool.execute({ body: { variables: { first: 25 } } });
 
 A top-level `headers` argument skips header filtering when the schema declares `headers` itself as a non-object field — it's an ordinary argument that happens to be named `headers`, so it is sent as given, subject to the same JSON-value check as every other argument. Otherwise, a `headers` argument that isn't a plain object is dropped with a warning. A `headers_<name>` argument is dropped with a warning when its value is an array or object.
 
-`*_execute_action` serves an open `headers` object, so `toolset.execute()` passes your own headers on to the action, with the exception of those three:
+`*_execute_action` serves an open `headers` object, so `toolset.execute()` passes your own headers on to the action, with the exception of those four:
 
 ```typescript
 await toolset.execute('linear_list_comments', { headers: { 'x-request-id': 'abc' } });
