@@ -847,6 +847,19 @@ describe('execute() while an account in scope has failed to list', () => {
 		expect(calls.map(({ tool }) => tool)).toEqual(['linear_acc1_execute_action']);
 	});
 
+	it('does not re-list an account that failed during the same call', async () => {
+		serve([ACCOUNTS[0], ACCOUNTS[1]] as typeof ACCOUNTS);
+		failing.add('acc1');
+
+		// A fresh toolset: acc1 fails in this call's own listing, so listing it again at once
+		// would only double the wait.
+		await newToolSet()
+			.execute('linear_list_issues')
+			.catch(() => undefined);
+
+		expect(listed).toEqual(['acc1', 'acc2']);
+	});
+
 	it('does not re-list when no account has failed', async () => {
 		serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
 		const toolset = newToolSet();

@@ -231,8 +231,8 @@ interface CachedCatalog {
 /** The catalog of an account scope: its tools, and each account left out because it failed. */
 interface ScopedCatalog {
 	entries: CatalogEntry[];
-	/** In ascending account id order, with each failure's message. */
-	failed: [accountId: string, message: string][];
+	/** In ascending account id order, with each failure's message and when it failed. */
+	failed: [accountId: string, message: string, at: number][];
 }
 
 const describeError = (error: unknown): string =>
@@ -789,7 +789,7 @@ export class StackOneToolSet {
 			entries: scope.flatMap((accountId) => listings.get(accountId) ?? []),
 			failed: scope.flatMap((accountId): ScopedCatalog['failed'] => {
 				const failure = failed.get(accountId);
-				return failure ? [[accountId, failure.message]] : [];
+				return failure ? [[accountId, failure.message, failure.at]] : [];
 			}),
 		});
 		if (scope.length === 0) {
@@ -1160,6 +1160,7 @@ export class StackOneToolSet {
 
 		const suffix = '_execute_action';
 		const lowered = actionId.toLowerCase();
+		const started = retryTiming.now();
 		let { tools, failed } = await this.#metaTools(suffix, options.accountIds);
 
 		// An account that failed to list may serve this action too: its own connector's, or one we
@@ -1184,9 +1185,10 @@ export class StackOneToolSet {
 		if (failed.some(([accountId]) => !this.#providers.has(accountId))) {
 			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch(() => undefined);
 		}
-		// Listed again now rather than when due, but only those that could serve the action:
-		// re-listing an account on another provider would make this call wait out its timeout.
-		const retry = inReach();
+		// Listed again now rather than when due, but only those that could serve the action and did
+		// not just fail for this call: re-listing an account on another provider would make this
+		// call wait out its timeout.
+		const retry = inReach().filter(([, , at]) => at < started);
 		if (retry.length > 0) {
 			({ tools, failed } = await this.#metaTools(
 				suffix,
