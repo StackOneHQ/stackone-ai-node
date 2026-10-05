@@ -1348,6 +1348,62 @@
             ]
         },
         {
+            "id": "flat-end-user-id-is-owned-uppercase",
+            "description": "a declared flat headers_X-End-User-Id is dropped the same as the lowercase form: the owned-name check is case-insensitive",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_X-End-User-Id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers_X-End-User-Id": "evil-user"
+            },
+            "expected_arguments": {
+                "path_id": "e"
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers_X-End-User-Id",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
+            "id": "flat-end-user-id-is-owned-padded",
+            "description": "a declared flat headers_ x-end-user-id is dropped the same as the untrimmed form: the owned-name check trims surrounding space",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "path_id": {
+                        "type": "string"
+                    },
+                    "headers_ x-end-user-id": {
+                        "type": "string"
+                    }
+                }
+            },
+            "arguments": {
+                "path_id": "e",
+                "headers_ x-end-user-id": "evil-user"
+            },
+            "expected_arguments": {
+                "path_id": "e"
+            },
+            "expected_warnings": [
+                {
+                    "argument": "headers_ x-end-user-id",
+                    "reason": "set-by-sdk"
+                }
+            ]
+        },
+        {
             "id": "flat-and-nested-together",
             "description": "nested and flat header arguments are filtered independently",
             "schema": {

@@ -365,7 +365,7 @@
         },
         {
             "id": "proxy-authorization",
-            "description": "only the three names are owned; others are declared by the open schema",
+            "description": "only the four names are owned; others are declared by the open schema",
             "name": "Proxy-Authorization",
             "expected": {
                 "forwarded": "Proxy-Authorization"
