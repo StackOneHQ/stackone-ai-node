@@ -1049,6 +1049,54 @@
                 "node": true
             },
             "notes": "Emitted once at construction when the toolset's headers option names Authorization, x-account-id or User-Agent (any case, surrounding whitespace ignored). x-end-user-id is allowed in this option and is not warned about. The option's other headers go on every request, GET /accounts included, beneath the SDK's own."
+        },
+        {
+            "id": "connector-account-unavailable",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
+            "placeholders": {
+                "action_id": {
+                    "format": "json",
+                    "description": "the action id execute() was called with, JSON-quoted as in ambiguous-connector"
+                },
+                "failures": {
+                    "format": "text",
+                    "description": "each failed account as \"{account_id}: {error}\", where {error} is the failure's own message (as in skip-account), in ascending account-id order, joined by \"; \" — same format as all-accounts-failed"
+                }
+            },
+            "python": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
+            "node": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised by execute() when an account in scope is marked failed and, after an immediate re-list, still fails, and that account's provider (from GET /accounts) matches the action's connector or is unknown (no GET /accounts record). A failed account on a different known provider does not block routing to the remaining account."
+        },
+        {
+            "id": "non-shared-accounts-skipped",
+            "kind": "warning",
+            "template": "Discovery skipped {count} non-shared account(s) ({accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many non-shared accounts were skipped"
+                },
+                "accounts": {
+                    "format": "text",
+                    "description": "the skipped accounts' ids, ascending, joined by \", \""
+                }
+            },
+            "python": "Discovery skipped {count} non-shared account(s) ({accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "node": "Discovery skipped {count} non-shared account(s) ({accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Emitted once per discovery (fetchTools / search) that skips any account with shared === false from GET /accounts, unless the toolset opts in: Python include_non_shared=True, Node includeNonShared: true. End-user ids are still recorded from every GET /accounts regardless."
         }
     ],
     "unshared": [

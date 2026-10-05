@@ -594,6 +594,51 @@ const emitters: Record<
 			},
 		};
 	},
+	'connector-account-unavailable': async () => {
+		listMock.mockImplementation(async ({ headers }) => {
+			const account = headers['x-account-id'];
+			if (account === 'acc2') {
+				throw new Error('boom');
+			}
+			return [{ name: `linear_${account}_execute_action`, description: '', inputSchema: {} }];
+		});
+		respondToCalls(() => ({ data: {} }));
+		// Explicit ids: no GET /accounts, so acc2's provider is unknown and it blocks.
+		return {
+			emitted: {
+				error: await errorOf(() =>
+					newToolSet({ accountIds: ['acc1', 'acc2'] }).execute('linear_list_issues'),
+				),
+			},
+			values: { action_id: 'linear_list_issues', failures: 'acc2: boom' },
+		};
+	},
+	'non-shared-accounts-skipped': async () => {
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json([
+					{ id: 'acc1', provider: 'linear', status: 'active', shared: true },
+					{
+						id: 'acc3',
+						provider: 'linear',
+						status: 'active',
+						shared: false,
+						origin_username: 'u3',
+					},
+					{
+						id: 'acc2',
+						provider: 'linear',
+						status: 'active',
+						shared: false,
+						origin_username: 'u2',
+					},
+				]),
+			),
+		);
+		listByAccount(['linear_acc1_execute_action']);
+		await newToolSet().fetchTools();
+		return { emitted: { warnings: warnings() }, values: { count: 2, accounts: 'acc2, acc3' } };
+	},
 	'account-id-env-ignored': async () => {
 		vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc-1');
 		try {
