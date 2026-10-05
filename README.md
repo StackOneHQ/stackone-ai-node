@@ -75,7 +75,7 @@ for (const account of await toolset.fetchAccounts()) {
 
 > If your organisation has many linked accounts, discovery lists the catalog of every one of them. Pass explicit `accountIds` to avoid the round trips and the model context they cost.
 
-A non-shared account (`shared: false` in `GET /accounts`) belongs to one end user, and the API refuses its MCP requests unless they carry that user's id in `x-end-user-id`. Whenever the toolset calls `GET /accounts` — for discovery, or through `fetchAccounts()` — it records each non-shared account's `origin_username` and sends it as `x-end-user-id` on every MCP request for that account, replacing any value from the `headers` option. With explicit account ids and no `GET /accounts`, it sends none: call `fetchAccounts()` once, or pass `headers: { 'x-end-user-id': '…' }` yourself.
+A non-shared account (`shared: false` in `GET /accounts`) belongs to one end user, and the API refuses its MCP requests unless they carry that user's id in `x-end-user-id`. Discovery skips non-shared accounts, with a warning naming them, so a toolset built with only an API key never puts every end user's accounts in one context: pass their account ids, or `includeNonShared: true`, to use them. Whenever the toolset calls `GET /accounts` — for discovery, or through `fetchAccounts()` — it records each non-shared account's `origin_username` and sends it as `x-end-user-id` on every MCP request for that account, replacing any value from the `headers` option. With explicit account ids and nothing recorded for one, the API's refusal makes the toolset call `GET /accounts` once and, if that names the account's end user, send the request again with it; otherwise the API's 400 is thrown. Overlapping `GET /accounts` calls are recorded in the order they started.
 
 ### Account IDs
 
@@ -313,7 +313,7 @@ const result = await toolset.execute(best.action_id, best.example_request, {
 - The connector is the longest one whose name prefixes the action id, so `browser_linkedin_*` actions are not routed to `browser`.
 - `action_id` is always the one you pass: an `action_id` inside `args` — for example, one a prompt-injected model put there — is ignored.
 - Each hit carries the `session_id` of the search that found it, when the server issued one. Pass it back as `sessionId` to link the calls together.
-- Each hit carries the `account_id` of the account that found it, and the same action linked on two accounts is two hits. When an action's connector is linked on more than one account, `execute()` throws `ToolSetConfigError` rather than pick one: pass the hit's account as `{ accountIds: [hit.account_id] }`.
+- Each hit carries the `account_id` of the account that found it, and the same action linked on two accounts is two hits. When an action's connector is linked on more than one account, `execute()` throws `ToolSetConfigError` rather than pick one: pass the hit's account as `{ accountIds: [hit.account_id] }`. Likewise, if an account in scope failed to list, `execute()` lists it again at once, and if it still fails and its provider is the action's connector or unknown, throws `ToolSetLoadError` rather than run the action on whichever account did list.
 - `topK` (1–50, default 10) caps the whole result, after ranking across every connector. A connector that fails to search is skipped with a warning, unless every connector fails.
 
 [View full example](examples/search-and-execute.ts)
@@ -386,7 +386,7 @@ This is especially useful when you want to:
 - Focus on specific HR/CRM/ATS providers
 - Get only certain types of operations (e.g., all "list" operations)
 
-The catalog is cached per account scope and mode, so changing a filter never refetches it. Call `clearCatalogCache()` after linking or unlinking accounts. An account that fails to list tools is skipped with a warning and left out of the cached catalog for 30 seconds, after which the next call lists it again. If every account fails with the same HTTP status (a revoked key's 401, say), that `StackOneAPIError` is thrown; otherwise a `ToolSetLoadError` whose `cause` holds each account's error.
+The catalog is cached per account scope and mode, so changing a filter never refetches it. Call `clearCatalogCache()` after linking or unlinking accounts; a listing already in flight is neither cached nor shared with later calls. An account that fails to list tools is skipped with a warning and left out of the cached catalog for 30 seconds, after which the next call lists it again. If every account fails with the same HTTP status (a revoked key's 401, say), that `StackOneAPIError` is thrown; otherwise a `ToolSetLoadError` whose `cause` holds each account's error.
 
 ### Tool schemas
 
