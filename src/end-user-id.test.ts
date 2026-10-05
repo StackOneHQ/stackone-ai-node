@@ -232,6 +232,51 @@ describe('x-end-user-id after fetchAccounts()', () => {
 		expect(await lastEndUserId()).toBeNull();
 	});
 
+	it('keeps the end user from the most recently started GET /accounts, even if an older one resolves later', async () => {
+		const exchanges: McpExchange[] = [];
+		const app = createMcpApp({ accountTools: { acc1: accountMcpTools.acc1 } });
+		let requests = 0;
+		let releaseFirst!: () => void;
+		const firstReleased = new Promise<void>((resolve) => {
+			releaseFirst = resolve;
+		});
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, async () => {
+				requests += 1;
+				if (requests === 1) {
+					await firstReleased;
+					return HttpResponse.json([{ ...ACCOUNTS[0], origin_username: 'alice' }]);
+				}
+				return HttpResponse.json([{ ...ACCOUNTS[0], origin_username: 'carol' }]);
+			}),
+			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+				if (request.method === 'POST') {
+					const body = (await request.clone().json()) as unknown;
+					for (const message of Array.isArray(body) ? body : [body]) {
+						exchanges.push({
+							method: String((message as { method?: unknown }).method),
+							accountId: request.headers.get('x-account-id'),
+							endUserId: request.headers.get('x-end-user-id'),
+						});
+					}
+				}
+				return app.fetch(request);
+			}),
+		);
+
+		const toolset = newToolSet({ accountId: 'acc1' });
+		const older = toolset.fetchAccounts();
+		await vi.waitFor(() => expect(requests).toBe(1));
+		await toolset.fetchAccounts();
+		releaseFirst();
+		await older;
+
+		const tools = await toolset.fetchTools();
+		await getTool(tools, 'acc1_tool_1').execute({});
+
+		expect(exchanges.at(-1)?.endUserId).toBe('carol');
+	});
+
 	it('is kept by clearCatalogCache()', async () => {
 		const { exchanges, accountRequests } = serve();
 		const toolset = newToolSet({ accountId: 'acc1' });

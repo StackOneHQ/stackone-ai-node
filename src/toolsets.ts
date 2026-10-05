@@ -363,6 +363,13 @@ export class StackOneToolSet {
 	 */
 	#endUserIds: ReadonlyMap<string, string> = new Map();
 	/**
+	 * Bumped on every {@link fetchAccounts} call. Overlapping calls (it is public, and not
+	 * deduplicated the way {@link #discoverAccountIds} is) can resolve out of order; capturing this
+	 * at the start of each call and refusing to write {@link #endUserIds} back once a later call has
+	 * started keeps the published identities from regressing to a stale response.
+	 */
+	#endUserIdsGeneration = 0;
+	/**
 	 * Bumped by {@link clearCatalogCache}. A listing already in flight when the cache is cleared
 	 * captured the generation it started under, and refuses to write back if it has moved —
 	 * otherwise the stale catalog would land after the clear and be served for the life of the
@@ -489,6 +496,8 @@ export class StackOneToolSet {
 	 */
 	async fetchAccounts(): Promise<StackOneAccount[]> {
 		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
+		const cacheGeneration = this.#cacheGeneration;
+		const requestGeneration = ++this.#endUserIdsGeneration;
 		let response: Response;
 		let rateLimited = false;
 		try {
@@ -560,7 +569,12 @@ export class StackOneToolSet {
 				`Unexpected /accounts response shape: expected a list, got ${jsonType(accounts)}`,
 			);
 		}
-		this.#endUserIds = endUserIdsOf(accounts);
+		if (
+			requestGeneration === this.#endUserIdsGeneration &&
+			cacheGeneration === this.#cacheGeneration
+		) {
+			this.#endUserIds = endUserIdsOf(accounts);
+		}
 		return accounts as StackOneAccount[];
 	}
 
