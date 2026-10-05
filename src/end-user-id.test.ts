@@ -591,6 +591,26 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([['initialize', null]]);
 	});
 
+	it('throws the 400 with the failed lookup as its cause', async () => {
+		serve(() => HttpResponse.json({ message: 'missing scope platform.read' }, { status: 403 }), {
+			acc1: 'alice',
+		});
+
+		const error = await newToolSet({ accountId: 'acc1' })
+			.fetchTools()
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(400);
+		expect((error as Error).message).toContain(
+			'x-end-user-id header does not match account end user id for account acc1',
+		);
+		const cause = (error as Error).cause;
+		expect(cause).toBeInstanceOf(StackOneAPIError);
+		expect((cause as StackOneAPIError).statusCode).toBe(403);
+		expect((cause as Error).message).toContain('missing scope platform.read');
+	});
+
 	it('is not looked up again when one is already recorded', async () => {
 		const { exchanges, accountRequests } = serve([{ ...ACCOUNTS[0], origin_username: 'carol' }], {
 			acc1: 'alice',

@@ -159,7 +159,8 @@ export interface EndUserSource {
  * An account id passed explicitly has no end user recorded until something calls
  * `GET /accounts`, so a non-shared one is refused with a 400. When that happens to an account
  * with nothing recorded, its end user is looked up once and, if there is one, the request is sent
- * again with it. Otherwise the 400 is thrown as it came.
+ * again with it. Otherwise the 400 is thrown as it came — with the lookup's error as its `cause`,
+ * if the lookup failed.
  */
 export async function withEndUser<T>(
 	accountId: string | undefined,
@@ -173,14 +174,26 @@ export async function withEndUser<T>(
 		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error, accountId)) {
 			throw error;
 		}
-		// A failed lookup leaves the refusal to be thrown, except a rate limit: that is the key's,
-		// not the account's, and must stay fatal to a fan-out.
-		const endUserId = await source.lookUp(accountId).catch((lookupError: unknown) => {
+		// A failed lookup leaves the refusal to be thrown, with the lookup's error as its cause —
+		// a key without platform.read would otherwise be told only that the header is wrong. A rate
+		// limit is thrown instead: that is the key's, not the account's, and must stay fatal to a
+		// fan-out.
+		let endUserId: string | undefined;
+		try {
+			endUserId = await source.lookUp(accountId);
+		} catch (lookupError) {
 			if (isRateLimitFailure(lookupError)) {
 				throw lookupError;
 			}
-			return undefined;
-		});
+			const refusal = error as StackOneAPIError;
+			throw new StackOneAPIError(
+				refusal.message,
+				refusal.statusCode,
+				refusal.responseBody,
+				refusal.requestBody,
+				{ cause: lookupError },
+			);
+		}
 		if (endUserId === undefined) {
 			throw error;
 		}
