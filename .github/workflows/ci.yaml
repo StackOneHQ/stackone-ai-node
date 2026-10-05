@@ -167,7 +167,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: StackOneHQ/sdk-conformance
-          ref: 27796bb9da96c0c7e1d58db45c2a84b316be7b00
+          ref: 7369b74f43ac7c2691650cc9e3a16cc6c7256f4e
           token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
           path: sdk-conformance
           persist-credentials: false
