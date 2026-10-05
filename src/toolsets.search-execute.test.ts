@@ -811,6 +811,27 @@ describe('execute() while an account in scope has failed to list', () => {
 		expect(calls).toEqual([]);
 	});
 
+	it('does not re-list a failed account on another provider', async () => {
+		const calls = serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
+		// acc3 never answers: listing it again would make every linear action wait out its timeout.
+		const listOnce = listMock.getMockImplementation() as typeof listMcpTools;
+		listMock.mockImplementation(async (request) => {
+			if (request.headers['x-account-id'] === 'acc3' && listed.includes('acc3')) {
+				listed.push('acc3');
+				return new Promise<never>(() => {});
+			}
+			return listOnce(request);
+		});
+		failing.add('acc3');
+		const toolset = newToolSet();
+		await toolset.fetchTools({ mode: 'search_execute' });
+
+		await toolset.execute('linear_list_issues');
+
+		expect(listed).toEqual(['acc1', 'acc3']);
+		expect(calls.map(({ tool }) => tool)).toEqual(['linear_acc1_execute_action']);
+	});
+
 	it('does not re-list when no account has failed', async () => {
 		serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
 		const toolset = newToolSet();

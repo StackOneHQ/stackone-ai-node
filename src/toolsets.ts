@@ -295,6 +295,17 @@ function matchGlob(value: string, pattern: string): boolean {
 const isPlainObject = (value: unknown): value is JsonObject =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
 
+/** The longest of `connectors` that prefixes `actionId` (both lowercase), as execute() routes. */
+function longestConnector(actionId: string, connectors: string[]): string | undefined {
+	return connectors
+		.filter((connector) => actionId.startsWith(`${connector}_`))
+		.reduce<string | undefined>(
+			(longest, connector) =>
+				longest === undefined || connector.length > longest.length ? connector : longest,
+			undefined,
+		);
+}
+
 /**
  * The connector a meta tool belongs to: its name minus the account id and the suffix.
  *
@@ -752,16 +763,15 @@ export class StackOneToolSet {
 	 * whole listing instead: skipping it would hand back a catalog missing whichever accounts
 	 * happened to be throttled. When every account fails, see {@link allAccountsFailed}.
 	 *
-	 * With `retryFailed`, every failed account is listed again now, due or not. A listing already
-	 * in flight is joined either way: the failed accounts all failed in one listing, so they fall
-	 * due together, and it is listing every one of them. A scope with no accounts — discovery
-	 * skipped them all — has an empty catalog.
+	 * The failed accounts in `retry` are listed again now, due or not. A listing already in flight
+	 * is joined either way, and its result stands even if it was not listing them. A scope with no
+	 * accounts — discovery skipped them all — has an empty catalog.
 	 */
 	async #catalog(
 		scope: readonly string[],
 		mode: ToolMode | undefined,
 		generation: number,
-		retryFailed = false,
+		retry: ReadonlySet<string> = new Set(),
 	): Promise<ScopedCatalog> {
 		const inScope = ({ listings, failed }: CachedCatalog): ScopedCatalog => ({
 			entries: scope.flatMap((accountId) => listings.get(accountId) ?? []),
@@ -778,7 +788,9 @@ export class StackOneToolSet {
 		const now = retryTiming.now();
 		const due = cached
 			? [...cached.failed]
-					.filter(([, { at }]) => retryFailed || now - at >= FAILED_ACCOUNT_RETRY_MS)
+					.filter(
+						([accountId, { at }]) => retry.has(accountId) || now - at >= FAILED_ACCOUNT_RETRY_MS,
+					)
 					.map(([accountId]) => accountId)
 			: scope;
 		if (cached && due.length === 0) {
@@ -928,12 +940,12 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * {@link fetchTools}, also returning the accounts left out because they failed to list. With
-	 * `retryFailed`, those are listed again first — see {@link #catalog}.
+	 * {@link fetchTools}, also returning the accounts left out because they failed to list. Those in
+	 * `retry` are listed again first — see {@link #catalog}.
 	 */
 	async #fetchTools(
 		options: FetchToolsOptions,
-		retryFailed = false,
+		retry?: ReadonlySet<string>,
 	): Promise<{ tools: Tools; failed: ScopedCatalog['failed'] }> {
 		try {
 			const mode = options.mode === undefined ? this.#toolMode : (options.mode ?? undefined);
@@ -941,7 +953,7 @@ export class StackOneToolSet {
 			// listing being cached, as it was scoped by accounts discovered before the clear.
 			const generation = this.#cacheGeneration;
 			const scope = await this.#resolveAccountScope(options.accountIds);
-			const { entries, failed } = await this.#catalog(scope, mode, generation, retryFailed);
+			const { entries, failed } = await this.#catalog(scope, mode, generation, retry);
 
 			let seenFeedbackTool = false;
 			let tools = entries
@@ -989,12 +1001,9 @@ export class StackOneToolSet {
 	async #metaTools(
 		suffix: string,
 		accountIds: string[] | null | undefined,
-		retryFailed = false,
+		retry?: ReadonlySet<string>,
 	): Promise<{ tools: StackOneTool[]; failed: ScopedCatalog['failed'] }> {
-		const { tools, failed } = await this.#fetchTools(
-			{ accountIds, mode: 'search_execute' },
-			retryFailed,
-		);
+		const { tools, failed } = await this.#fetchTools({ accountIds, mode: 'search_execute' }, retry);
 		return {
 			tools: tools.getStackOneTools().filter((tool) => tool.name.endsWith(suffix)),
 			failed,
@@ -1139,7 +1148,7 @@ export class StackOneToolSet {
 
 		const suffix = '_execute_action';
 		const lowered = actionId.toLowerCase();
-		const { tools, failed } = await this.#metaTools(suffix, options.accountIds, true);
+		let { tools, failed } = await this.#metaTools(suffix, options.accountIds);
 
 		// An account that failed to list may serve this action too: its own connector's, or one we
 		// cannot tell. Running on whichever account did list would pick for the caller — possibly
@@ -1147,21 +1156,27 @@ export class StackOneToolSet {
 		// The action's connector is the longest prefix among those listed and the providers
 		// `GET /accounts` named, as execute() routes: a failed `browser` account cannot serve
 		// `browser_linkedin_search`.
-		const connectors = [
-			...tools.map((tool) => connectorOf(tool, suffix)),
-			...[...this.#providers.values()].map((provider) => provider.toLowerCase()),
-		];
-		const connector = connectors
-			.filter((candidate) => lowered.startsWith(`${candidate}_`))
-			.reduce<string | undefined>(
-				(longest, candidate) =>
-					longest === undefined || candidate.length > longest.length ? candidate : longest,
-				undefined,
-			);
-		const unlisted = failed.filter(([accountId]) => {
-			const provider = this.#providers.get(accountId);
-			return provider === undefined || provider.toLowerCase() === connector;
-		});
+		const inReach = (): ScopedCatalog['failed'] => {
+			const connector = longestConnector(lowered, [
+				...tools.map((tool) => connectorOf(tool, suffix)),
+				...[...this.#providers.values()].map((provider) => provider.toLowerCase()),
+			]);
+			return failed.filter(([accountId]) => {
+				const provider = this.#providers.get(accountId);
+				return provider === undefined || provider.toLowerCase() === connector;
+			});
+		};
+		// Listed again now rather than when due, but only those that could serve the action:
+		// re-listing an account on another provider would make this call wait out its timeout.
+		const retry = inReach();
+		if (retry.length > 0) {
+			({ tools, failed } = await this.#metaTools(
+				suffix,
+				options.accountIds,
+				new Set(retry.map(([accountId]) => accountId)),
+			));
+		}
+		const unlisted = inReach();
 		if (unlisted.length > 0) {
 			throw new ToolSetLoadError(
 				`${JSON.stringify(actionId)} may be served by an account that failed to list (${unlisted.map(([accountId, message]) => `${accountId}: ${message}`).join('; ')}). Pass the account id to use, such as a search hit's account_id.`,
