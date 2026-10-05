@@ -299,6 +299,35 @@ describe('account discovery', () => {
 		expect(requests).toBe(2);
 	});
 
+	it('does not cache a listing scoped by a discovery from before a clear', async () => {
+		let release!: () => void;
+		const released = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		let requests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, async () => {
+				requests += 1;
+				if (requests === 1) {
+					await released;
+				}
+				return HttpResponse.json([{ id: 'acc1', status: 'active' }]);
+			}),
+		);
+		fakeListing((request) => [def(`${accountOf(request)}_tool`)]);
+		const toolset = newToolSet();
+
+		// The clear lands while GET /accounts is out, so the listing starts after it.
+		const before = toolset.fetchTools();
+		await vi.waitFor(() => expect(requests).toBe(1));
+		toolset.clearCatalogCache();
+		release();
+		await before;
+		await toolset.fetchTools();
+
+		expect(listMock.mock.calls.map(([request]) => accountOf(request))).toEqual(['acc1', 'acc1']);
+	});
+
 	it('shares the discovery started after a clear, even once the one before it settles', async () => {
 		let requests = 0;
 		const releases: Array<() => void> = [];

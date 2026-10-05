@@ -757,6 +757,7 @@ export class StackOneToolSet {
 	async #catalog(
 		scope: readonly string[],
 		mode: ToolMode | undefined,
+		generation: number,
 		retryFailed = false,
 	): Promise<ScopedCatalog> {
 		const inScope = ({ listings, failed }: CachedCatalog): ScopedCatalog => ({
@@ -781,13 +782,17 @@ export class StackOneToolSet {
 			return inScope(cached);
 		}
 
+		// A listing that started before a clear is not joined: it belongs to the old generation.
 		const inFlight = this.#catalogInFlight.get(key);
-		if (inFlight) {
+		if (inFlight && generation === this.#cacheGeneration) {
 			return inScope(await inFlight);
 		}
 
-		const listing = this.#listCatalog(key, scope, due, cached, mode);
-		this.#catalogInFlight.set(key, listing);
+		const listing = this.#listCatalog(key, scope, due, cached, mode, generation);
+		// Only a current listing is shared, so no later call can join one from before a clear.
+		if (generation === this.#cacheGeneration) {
+			this.#catalogInFlight.set(key, listing);
+		}
 		try {
 			return inScope(await listing);
 		} finally {
@@ -809,8 +814,8 @@ export class StackOneToolSet {
 		due: readonly string[],
 		cached: CachedCatalog | undefined,
 		mode: ToolMode | undefined,
+		generation: number,
 	): Promise<CachedCatalog> {
-		const generation = this.#cacheGeneration;
 		const endpoint = this.#endpoint(mode);
 		const listAccount = async (accountId: string): Promise<CatalogEntry[]> => {
 			const definitions = await withEndUser(accountId, this.#endUsers, (endUserId) =>
@@ -929,8 +934,11 @@ export class StackOneToolSet {
 	): Promise<{ tools: Tools; failed: ScopedCatalog['failed'] }> {
 		try {
 			const mode = options.mode === undefined ? this.#toolMode : (options.mode ?? undefined);
+			// Taken before discovery: a clear while GET /accounts is out must stop this call's
+			// listing being cached, as it was scoped by accounts discovered before the clear.
+			const generation = this.#cacheGeneration;
 			const scope = await this.#resolveAccountScope(options.accountIds);
-			const { entries, failed } = await this.#catalog(scope, mode, retryFailed);
+			const { entries, failed } = await this.#catalog(scope, mode, generation, retryFailed);
 
 			let seenFeedbackTool = false;
 			let tools = entries
