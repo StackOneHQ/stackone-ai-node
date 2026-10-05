@@ -10,6 +10,7 @@ import { server } from '../mocks/node';
 import { StackOneToolSet } from './toolsets';
 import type { StackOneTool, Tools } from './tool';
 import { StackOneAPIError } from './utils/error-stackone-api';
+import { ToolSetConfigError } from './utils/error-toolset';
 
 /** One JSON-RPC message that reached `/mcp`, with the headers it came with. */
 interface McpExchange {
@@ -470,13 +471,16 @@ describe('non-shared accounts in discovery', () => {
 		expect(warnings().filter((warning) => warning.includes('non-shared'))).toEqual([]);
 	});
 
-	it('leave an empty catalog when they are all there is', async () => {
-		serve([ACCOUNTS[0]]);
+	it('fail discovery, without a warning, when they are all there is', async () => {
+		serve([ACCOUNTS[0], { ...ACCOUNTS[0], id: 'acc0', origin_username: 'dan' }]);
 		const toolset = newToolSet();
+		const message =
+			"None of this API key's 2 active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.";
 
-		expect((await toolset.fetchTools()).toArray()).toEqual([]);
-		expect(await toolset.search('list items')).toEqual([]);
-		expect(warnings()).toEqual([skipped('acc1')]);
+		await expect(toolset.fetchTools()).rejects.toBeInstanceOf(ToolSetConfigError);
+		await expect(toolset.fetchTools()).rejects.toThrow(message);
+		await expect(toolset.search('list items')).rejects.toThrow(message);
+		expect(warnings()).toEqual([]);
 	});
 });
 

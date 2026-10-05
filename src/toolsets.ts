@@ -658,7 +658,8 @@ export class StackOneToolSet {
 	 * Non-shared accounts are skipped, with a warning, unless `includeNonShared` is set: each
 	 * belongs to a single end user, and one context should not mix every end user's accounts.
 	 *
-	 * @throws ToolSetConfigError If the key has no accounts, or none are active.
+	 * @throws ToolSetConfigError If the key has no accounts, none are active, or every active one is
+	 *   non-shared and `includeNonShared` is not set.
 	 */
 	async #discoverAccountIds(): Promise<string[]> {
 		if (this.#discoveredAccountIds) {
@@ -702,6 +703,13 @@ export class StackOneToolSet {
 			accounts.filter((account) => account?.shared === false).map((account) => account.id),
 		);
 		const usable = this.#includeNonShared ? active : active.filter((id) => !nonShared.has(id));
+		// A key with nothing usable fails, as one with no active accounts does, rather than leave
+		// fetchTools() empty and execute() pointing at search().
+		if (usable.length === 0) {
+			throw new ToolSetConfigError(
+				`None of this API key's ${active.length} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`,
+			);
+		}
 		const skipped = active.filter((id) => !usable.includes(id)).sort();
 		if (skipped.length > 0) {
 			warn(
@@ -765,7 +773,7 @@ export class StackOneToolSet {
 	 *
 	 * The failed accounts in `retry` are listed again now, due or not. A listing already in flight
 	 * is joined either way, and its result stands even if it was not listing them. A scope with no
-	 * accounts — discovery skipped them all — has an empty catalog.
+	 * accounts has an empty catalog.
 	 */
 	async #catalog(
 		scope: readonly string[],
