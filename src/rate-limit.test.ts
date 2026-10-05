@@ -342,6 +342,42 @@ describe('a timeout while a 429 is retried', () => {
 		expect(warnings().filter((message) => message.includes('Skipping'))).toEqual([]);
 	});
 
+	// The client's own event-stream GET overlaps the tools/list: answered while the retry hangs, it
+	// must not clear the tools/list's 429.
+	it('fails the listing with a 429 when another request is answered meanwhile', async () => {
+		let listAttempts = 0;
+		let answeredMeanwhile = false;
+		const app = createMcpApp({ accountTools: accountMcpTools });
+		server.use(
+			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+				if (request.method === 'GET') {
+					await delay(100);
+					answeredMeanwhile = listAttempts === 2;
+					return new HttpResponse(null, { status: 405 });
+				}
+				const message = (await request.clone().json()) as { method?: string };
+				if (message.method === 'tools/list') {
+					if (listAttempts++ === 0) {
+						return HttpResponse.json(RATE_LIMITED, {
+							status: 429,
+							headers: { 'Retry-After': '0' },
+						});
+					}
+					await delay('infinite');
+				}
+				return app.fetch(request);
+			}),
+		);
+
+		const error = await newToolSet({ timeout: 300 })
+			.fetchTools({ accountIds: ['acc1'] })
+			.catch((caught: unknown) => caught);
+
+		expect(answeredMeanwhile).toBe(true);
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+	});
+
 	it('fails GET /accounts with a 429', async () => {
 		let requests = 0;
 		server.use(

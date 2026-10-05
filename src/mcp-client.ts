@@ -226,24 +226,29 @@ async function withMcpSession<T>(
 	work: (client: Client) => Promise<T>,
 ): Promise<T> {
 	const expiresAt = retryTiming.now() + timeout;
-	// Whether the request currently in flight is waiting out a 429. Cleared as soon as a retry is
-	// answered with anything else, as in Python: a 429 that cleared must not make a later timeout
-	// — a stalled stream on that same response, or an unrelated request — look like a rate limit.
-	let rateLimited = false;
+	// How many requests are waiting out a 429. One leaves the count as soon as a retry is answered
+	// with anything else, as in Python: a 429 that cleared must not make a later timeout — a
+	// stalled stream on that same response, or an unrelated request — look like a rate limit. It
+	// is counted per request because the client's requests overlap: its event-stream GET, say,
+	// answered while a tools/list retry hangs, must not clear the tools/list's 429.
+	let rateLimited = 0;
 	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
 		requestInit: { headers },
 		// Every request the client sends, handshake included, so it never sees a 429 it could
 		// have waited out — but never one that would outlast the session's deadline.
 		fetch: async (url, init) => {
-			rateLimited = false;
+			let retrying = false;
 			const response = await fetchWithRetry(url, init, {
 				deadline: expiresAt,
 				onRetry: () => {
-					rateLimited = true;
+					if (!retrying) {
+						retrying = true;
+						rateLimited += 1;
+					}
 				},
 			});
-			if (response.status !== 429) {
-				rateLimited = false;
+			if (retrying && response.status !== 429) {
+				rateLimited -= 1;
 			}
 			return response;
 		},
@@ -263,7 +268,7 @@ async function withMcpSession<T>(
 		// A timeout while a 429 was being retried is the rate limit's doing, not the account's:
 		// reported as a timeout, it would skip the account and return a partial result, which a
 		// 429 must never do.
-		if (rateLimited && isTimeout(error)) {
+		if (rateLimited > 0 && isTimeout(error)) {
 			throw new StackOneAPIError(
 				`MCP request to ${endpoint} was rate limited (429) and timed out after ${timeout / 1000}s while retrying`,
 				429,
