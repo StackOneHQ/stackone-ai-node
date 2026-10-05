@@ -1097,6 +1097,28 @@
                 "node": true
             },
             "notes": "Emitted once per discovery (fetchTools / search) that skips any account with shared === false from GET /accounts, unless the toolset opts in: Python include_non_shared=True, Node includeNonShared: true. End-user ids are still recorded from every GET /accounts regardless."
+        },
+        {
+            "id": "no-shared-accounts",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "None of this API key's {count} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many active accounts this API key has"
+                }
+            },
+            "python": "None of this API key's {count} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "node": "None of this API key's {count} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised by discovery (fetchTools / search) instead of non-shared-accounts-skipped when every active account on this API key is non-shared and the toolset has not opted in. With no shared account to serve a catalog, discovery fails outright rather than warning and returning an empty one."
         }
     ],
     "unshared": [

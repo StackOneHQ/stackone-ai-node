@@ -789,6 +789,21 @@ const emitters: Record<
 			values: { count: 1, accounts: 'hibob (error)' },
 		};
 	},
+	'no-shared-accounts': async () => {
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json([
+					{ id: 'a', provider: 'linear', status: 'active', shared: false, origin_username: 'u1' },
+					{ id: 'b', provider: 'jira', status: 'active', shared: false, origin_username: 'u2' },
+					{ id: 'c', provider: 'jira', status: 'error', shared: true },
+				]),
+			),
+		);
+		return {
+			emitted: { error: await errorOf(() => newToolSet().fetchTools()) },
+			values: { count: 2 },
+		};
+	},
 	'all-accounts-failed': async () => {
 		listMock.mockImplementation(async ({ headers }) => {
 			throw new Error(`down ${headers['x-account-id']}`);
