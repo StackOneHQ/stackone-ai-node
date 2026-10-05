@@ -778,12 +778,27 @@ describe('execute() while an account in scope has failed to list', () => {
 		expect(calls.map(({ tool }) => tool)).toEqual(['linear_beta_acc1_execute_action']);
 	});
 
+	it('looks up the providers of failed accounts named explicitly, then runs the action', async () => {
+		const calls = serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
+		failing.add('acc3');
+
+		// Explicit ids, so only the lookup can say acc3 is hibob, which cannot serve a linear action.
+		await newToolSet({ accountIds: ['acc1', 'acc3'] }).execute('linear_list_issues');
+
+		expect(calls.map(({ tool }) => tool)).toEqual(['linear_acc1_execute_action']);
+	});
+
 	it('refuses when the failed account’s provider is unknown, listing failures by account id', async () => {
 		const calls = serve(ACCOUNTS);
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json({ error: 'forbidden' }, { status: 403 }),
+			),
+		);
 		failing.add('acc3');
 		failing.add('acc2');
 
-		// Explicit ids, so no GET /accounts has said what either failed account's provider is.
+		// Explicit ids, and GET /accounts fails, so neither failed account's provider is known.
 		const error = await newToolSet({ accountIds: ['acc3', 'acc1', 'acc2'] })
 			.execute('linear_list_issues')
 			.catch((caught: unknown) => caught);

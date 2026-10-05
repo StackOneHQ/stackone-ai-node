@@ -1166,6 +1166,12 @@ export class StackOneToolSet {
 				return provider === undefined || provider.toLowerCase() === connector;
 			});
 		};
+		// With explicit account ids no GET /accounts has named the failed accounts' providers, so
+		// one dead account would refuse every action. Ask once — joining a lookup in flight — and
+		// treat the provider as unknown still if that fails too.
+		if (failed.some(([accountId]) => !this.#providers.has(accountId))) {
+			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch(() => undefined);
+		}
 		// Listed again now rather than when due, but only those that could serve the action:
 		// re-listing an account on another provider would make this call wait out its timeout.
 		const retry = inReach();
