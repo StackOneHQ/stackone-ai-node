@@ -707,3 +707,103 @@ it('keeps every search/execute error inside the StackOneError hierarchy', async 
 	serveMock();
 	await expect(newToolSet().execute('mock_nope')).rejects.toBeInstanceOf(StackOneError);
 });
+
+describe('execute() while an account in scope has failed to list', () => {
+	const ACCOUNTS = [
+		{ id: 'acc1', provider: 'linear', status: 'active' },
+		{ id: 'acc2', provider: 'linear', status: 'active' },
+		{ id: 'acc3', provider: 'hibob', status: 'active' },
+	];
+	const failing = new Set<string>();
+	const listed: string[] = [];
+
+	/** Serve `accounts` from GET /accounts, and meta tools for each, failing those in `failing`. */
+	const serve = (accounts: typeof ACCOUNTS) => {
+		server.use(http.get(`${TEST_BASE_URL}/accounts`, () => HttpResponse.json(accounts)));
+		const calls = fakeMetaTools(
+			accounts.map(({ id, provider }) => `${provider}_${id}_execute_action`),
+		);
+		const serveListing = listMock.getMockImplementation();
+		listMock.mockImplementation(async (request) => {
+			const accountId = request.headers['x-account-id'] as string;
+			listed.push(accountId);
+			if (failing.has(accountId)) {
+				throw new Error(`${accountId} is down`);
+			}
+			return (serveListing as typeof listMcpTools)(request);
+		});
+		return calls;
+	};
+
+	beforeEach(() => {
+		failing.clear();
+		listed.length = 0;
+	});
+
+	it('refuses when the failed account is on the action’s connector', async () => {
+		const calls = serve([ACCOUNTS[0], ACCOUNTS[1]] as typeof ACCOUNTS);
+		failing.add('acc1');
+
+		const error = await newToolSet()
+			.execute('linear_list_issues')
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetLoadError);
+		expect((error as Error).message).toBe(
+			`"linear_list_issues" may be served by an account that failed to list (acc1: acc1 is down). Pass the account id to use, such as a search hit's account_id.`,
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('runs the action when the failed account is on another provider', async () => {
+		const calls = serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
+		failing.add('acc3');
+
+		await newToolSet().execute('linear_list_issues');
+
+		expect(calls.map(({ tool }) => tool)).toEqual(['linear_acc1_execute_action']);
+	});
+
+	it('refuses when the failed account’s provider is unknown, listing failures by account id', async () => {
+		const calls = serve(ACCOUNTS);
+		failing.add('acc3');
+		failing.add('acc2');
+
+		// Explicit ids, so no GET /accounts has said what either failed account's provider is.
+		const error = await newToolSet({ accountIds: ['acc3', 'acc1', 'acc2'] })
+			.execute('linear_list_issues')
+			.catch((caught: unknown) => caught);
+
+		expect((error as Error).message).toBe(
+			`"linear_list_issues" may be served by an account that failed to list (acc2: acc2 is down; acc3: acc3 is down). Pass the account id to use, such as a search hit's account_id.`,
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('lists a failed account again at once, and then applies to whatever it serves', async () => {
+		const calls = serve([ACCOUNTS[0], ACCOUNTS[1]] as typeof ACCOUNTS);
+		failing.add('acc1');
+		const toolset = newToolSet();
+		await toolset.fetchTools({ mode: 'search_execute' });
+		expect(listed).toEqual(['acc1', 'acc2']);
+
+		failing.clear();
+		const error = await toolset.execute('linear_list_issues').catch((caught: unknown) => caught);
+
+		// Long before the failed account would be due again.
+		expect(listed).toEqual(['acc1', 'acc2', 'acc1']);
+		expect(error).toBeInstanceOf(ToolSetConfigError);
+		expect((error as Error).message).toMatch(/^"linear_list_issues" matches 2 connectors/);
+		expect(calls).toEqual([]);
+	});
+
+	it('does not re-list when no account has failed', async () => {
+		serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
+		const toolset = newToolSet();
+
+		await toolset.execute('linear_list_issues');
+		await toolset.execute('hibob_list_employees');
+
+		expect(listed).toEqual(['acc1', 'acc3']);
+	});
+});

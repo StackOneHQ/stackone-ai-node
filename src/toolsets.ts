@@ -8,7 +8,13 @@ import {
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
-import { type McpToolDefinition, isRateLimitFailure, listMcpTools } from './mcp-client';
+import {
+	type EndUserSource,
+	type McpToolDefinition,
+	isRateLimitFailure,
+	listMcpTools,
+	withEndUser,
+} from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
 import { StackOneMcpTool, type StackOneTool, Tools, warnOnDuplicateNames } from './tool';
 import type {
@@ -103,6 +109,13 @@ interface StackOneToolSetBaseConfig {
 	 * Defaults to the server's own default (`'individual'`).
 	 */
 	toolMode?: ToolMode;
+	/**
+	 * Whether account discovery — used when no account id is passed — includes non-shared accounts
+	 * (`shared: false`). Each belongs to a single end user, so by default discovery skips them,
+	 * with a warning, rather than put every end user's accounts in one context. Account ids
+	 * passed explicitly are always used. Default: `false`.
+	 */
+	includeNonShared?: boolean;
 }
 
 /**
@@ -205,11 +218,18 @@ interface CatalogEntry {
 	endpoint: string;
 }
 
-/** A cached catalog: each healthy account's listing, and when each failing one last failed. */
+/** A cached catalog: each healthy account's listing, and when and why each failing one failed. */
 interface CachedCatalog {
 	listings: ReadonlyMap<string, readonly CatalogEntry[]>;
-	/** On {@link retryTiming}'s clock. */
-	failedAt: ReadonlyMap<string, number>;
+	/** `at` is on {@link retryTiming}'s clock. */
+	failed: ReadonlyMap<string, { at: number; message: string }>;
+}
+
+/** The catalog of an account scope: its tools, and each account left out because it failed. */
+interface ScopedCatalog {
+	entries: CatalogEntry[];
+	/** In ascending account id order, with each failure's message. */
+	failed: [accountId: string, message: string][];
 }
 
 const describeError = (error: unknown): string =>
@@ -337,6 +357,7 @@ export class StackOneToolSet {
 	readonly #headers: Record<string, string>;
 	readonly #timeout: number;
 	readonly #toolMode: ToolMode | undefined;
+	readonly #includeNonShared: boolean;
 	readonly #accountId: string | undefined;
 	#accountIds: string[];
 
@@ -355,20 +376,39 @@ export class StackOneToolSet {
 	readonly #catalogInFlight = new Map<string, Promise<CachedCatalog>>();
 	#discoveredAccountIds: string[] | undefined;
 	#discovering: Promise<string[]> | undefined;
+	/** The `GET /accounts` in flight, if any, so an end-user lookup can share it. */
+	#fetchingAccounts: Promise<StackOneAccount[]> | undefined;
 	/**
-	 * The end user of each non-shared account, as the last successful `GET /accounts` reported it,
+	 * The end user of each non-shared account, as the last recorded `GET /accounts` reported it,
 	 * sent as `x-end-user-id` on every MCP request for that account: the API refuses a non-shared
-	 * account's request without it. Replaced whole on each successful `GET /accounts`, and kept
-	 * by {@link clearCatalogCache} — it describes the accounts, not the catalog.
+	 * account's request without it. Replaced whole, with {@link #providers}, by each successful
+	 * `GET /accounts`, and kept by {@link clearCatalogCache} — it describes the accounts, not the
+	 * catalog.
 	 */
 	#endUserIds: ReadonlyMap<string, string> = new Map();
+	/** The provider of each account, recorded with {@link #endUserIds}. */
+	#providers: ReadonlyMap<string, string> = new Map();
 	/**
-	 * Bumped on every {@link fetchAccounts} call. Overlapping calls (it is public, and not
-	 * deduplicated the way {@link #discoverAccountIds} is) can resolve out of order; capturing this
-	 * at the start of each call and refusing to write {@link #endUserIds} back once a later call has
-	 * started keeps the published identities from regressing to a stale response.
+	 * Bumped at the start of every {@link fetchAccounts} call. Overlapping calls (it is public, and
+	 * not deduplicated the way {@link #discoverAccountIds} is) can resolve out of order, so each
+	 * records only if it started after the call whose result was last recorded
+	 * ({@link #accountsRecorded}): a stale response never replaces a newer one, and a newer call
+	 * that fails does not stop an older one from recording.
 	 */
-	#endUserIdsGeneration = 0;
+	#accountsStarted = 0;
+	#accountsRecorded = 0;
+
+	/**
+	 * Where tools and listings find an account's end user: as recorded, or by looking it up with a
+	 * `GET /accounts` — the one in flight, if there is one.
+	 */
+	readonly #endUsers: EndUserSource = {
+		recorded: (accountId) => this.#endUserIds.get(accountId),
+		lookUp: async (accountId) => {
+			await (this.#fetchingAccounts ?? this.fetchAccounts());
+			return this.#endUserIds.get(accountId);
+		},
+	};
 	/**
 	 * Bumped by {@link clearCatalogCache}. A listing already in flight when the cache is cleared
 	 * captured the generation it started under, and refuses to write back if it has moved —
@@ -419,6 +459,7 @@ export class StackOneToolSet {
 		this.#headers = { ...config.headers };
 		this.#timeout = config.timeout ?? config.execute?.timeout ?? DEFAULT_TIMEOUT_MS;
 		this.#toolMode = config.toolMode;
+		this.#includeNonShared = config.includeNonShared ?? false;
 		this.#accountId = config.accountId;
 		this.#accountIds = [...(config.accountIds ?? config.execute?.accountIds ?? [])];
 
@@ -452,11 +493,12 @@ export class StackOneToolSet {
 	 *
 	 * Call when linked accounts change outside of {@link setAccounts} or when you need to force a
 	 * fresh fetch from the StackOne MCP endpoint. A listing already in flight will not write its
-	 * result back into the cache.
+	 * result back into the cache, and no later call joins it.
 	 */
 	clearCatalogCache(): void {
 		this.#cacheGeneration += 1;
 		this.#catalogCache.clear();
+		this.#catalogInFlight.clear();
 		this.#discoveredAccountIds = undefined;
 		this.#discovering = undefined;
 	}
@@ -487,7 +529,8 @@ export class StackOneToolSet {
 	 *
 	 * Also records the end user of every non-shared account (`shared: false`, with an
 	 * `origin_username`), which the toolset then sends as `x-end-user-id` on that account's MCP
-	 * requests.
+	 * requests, and every account's provider. Overlapping calls record in the order they started:
+	 * a call's result is recorded unless one started after it has already been.
 	 *
 	 * @throws StackOneAPIError If the API answers with an error status, including a 429 that
 	 *   outlasted its retries or timed out while being retried.
@@ -495,9 +538,20 @@ export class StackOneToolSet {
 	 *   not a JSON list (including a body that is not valid UTF-8).
 	 */
 	async fetchAccounts(): Promise<StackOneAccount[]> {
+		const fetching = this.#requestAccounts();
+		this.#fetchingAccounts = fetching;
+		const settled = (): void => {
+			if (this.#fetchingAccounts === fetching) {
+				this.#fetchingAccounts = undefined;
+			}
+		};
+		fetching.then(settled, settled);
+		return fetching;
+	}
+
+	async #requestAccounts(): Promise<StackOneAccount[]> {
 		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
-		const cacheGeneration = this.#cacheGeneration;
-		const requestGeneration = ++this.#endUserIdsGeneration;
+		const started = ++this.#accountsStarted;
 		let response: Response;
 		let rateLimited = false;
 		try {
@@ -569,11 +623,10 @@ export class StackOneToolSet {
 				`Unexpected /accounts response shape: expected a list, got ${jsonType(accounts)}`,
 			);
 		}
-		if (
-			requestGeneration === this.#endUserIdsGeneration &&
-			cacheGeneration === this.#cacheGeneration
-		) {
+		if (started > this.#accountsRecorded) {
+			this.#accountsRecorded = started;
 			this.#endUserIds = endUserIdsOf(accounts);
+			this.#providers = providersOf(accounts);
 		}
 		return accounts as StackOneAccount[];
 	}
@@ -587,6 +640,9 @@ export class StackOneToolSet {
 	 *
 	 * For organisations with many linked accounts, discovery lists the catalog of every one of
 	 * them: pass explicit `accountIds` to avoid the round trips and the context they cost.
+	 *
+	 * Non-shared accounts are skipped, with a warning, unless `includeNonShared` is set: each
+	 * belongs to a single end user, and one context should not mix every end user's accounts.
 	 *
 	 * @throws ToolSetConfigError If the key has no accounts, or none are active.
 	 */
@@ -628,10 +684,20 @@ export class StackOneToolSet {
 				`None of this API key's ${accounts.length} linked accounts are active: ${listed}. Re-link them in the StackOne dashboard, or pass an account id explicitly.`,
 			);
 		}
-		if (generation === this.#cacheGeneration) {
-			this.#discoveredAccountIds = active;
+		const nonShared = new Set(
+			accounts.filter((account) => account?.shared === false).map((account) => account.id),
+		);
+		const usable = this.#includeNonShared ? active : active.filter((id) => !nonShared.has(id));
+		const skipped = active.filter((id) => !usable.includes(id)).sort();
+		if (skipped.length > 0) {
+			warn(
+				`Discovery skipped ${skipped.length} non-shared account(s) (${skipped.join(', ')}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`,
+			);
 		}
-		return active;
+		if (generation === this.#cacheGeneration) {
+			this.#discoveredAccountIds = usable;
+		}
+		return usable;
 	}
 
 	/**
@@ -682,31 +748,48 @@ export class StackOneToolSet {
 	 * A 429 that outlasted its retries is not the account's fault but the key's, so it fails the
 	 * whole listing instead: skipping it would hand back a catalog missing whichever accounts
 	 * happened to be throttled. When every account fails, see {@link allAccountsFailed}.
+	 *
+	 * With `retryFailed`, every failed account is listed again now, due or not. A listing already
+	 * in flight is joined either way: the failed accounts all failed in one listing, so they fall
+	 * due together, and it is listing every one of them. A scope with no accounts — discovery
+	 * skipped them all — has an empty catalog.
 	 */
-	async #catalog(scope: readonly string[], mode: ToolMode | undefined): Promise<CatalogEntry[]> {
+	async #catalog(
+		scope: readonly string[],
+		mode: ToolMode | undefined,
+		retryFailed = false,
+	): Promise<ScopedCatalog> {
+		const inScope = ({ listings, failed }: CachedCatalog): ScopedCatalog => ({
+			entries: scope.flatMap((accountId) => listings.get(accountId) ?? []),
+			failed: scope.flatMap((accountId): ScopedCatalog['failed'] => {
+				const failure = failed.get(accountId);
+				return failure ? [[accountId, failure.message]] : [];
+			}),
+		});
+		if (scope.length === 0) {
+			return { entries: [], failed: [] };
+		}
 		const key = this.#cacheKey(scope, mode);
-		const inScopeOrder = (listings: CachedCatalog['listings']): CatalogEntry[] =>
-			scope.flatMap((accountId) => listings.get(accountId) ?? []);
 		const cached = this.#catalogCache.get(key);
 		const now = retryTiming.now();
 		const due = cached
-			? [...cached.failedAt]
-					.filter(([, failedAt]) => now - failedAt >= FAILED_ACCOUNT_RETRY_MS)
+			? [...cached.failed]
+					.filter(([, { at }]) => retryFailed || now - at >= FAILED_ACCOUNT_RETRY_MS)
 					.map(([accountId]) => accountId)
 			: scope;
 		if (cached && due.length === 0) {
-			return inScopeOrder(cached.listings);
+			return inScope(cached);
 		}
 
 		const inFlight = this.#catalogInFlight.get(key);
 		if (inFlight) {
-			return inScopeOrder((await inFlight).listings);
+			return inScope(await inFlight);
 		}
 
 		const listing = this.#listCatalog(key, scope, due, cached, mode);
 		this.#catalogInFlight.set(key, listing);
 		try {
-			return inScopeOrder((await listing).listings);
+			return inScope(await listing);
 		} finally {
 			if (this.#catalogInFlight.get(key) === listing) {
 				this.#catalogInFlight.delete(key);
@@ -730,16 +813,18 @@ export class StackOneToolSet {
 		const generation = this.#cacheGeneration;
 		const endpoint = this.#endpoint(mode);
 		const listAccount = async (accountId: string): Promise<CatalogEntry[]> => {
-			const definitions = await listMcpTools({
-				endpoint,
-				headers: buildRequestHeaders({
-					apiKey: this.#apiKey,
-					accountId,
-					endUserId: this.#endUserIds.get(accountId),
-					extraHeaders: this.#headers,
+			const definitions = await withEndUser(accountId, this.#endUsers, (endUserId) =>
+				listMcpTools({
+					endpoint,
+					headers: buildRequestHeaders({
+						apiKey: this.#apiKey,
+						accountId,
+						endUserId,
+						extraHeaders: this.#headers,
+					}),
+					timeout: this.#timeout,
 				}),
-				timeout: this.#timeout,
-			});
+			);
 			return definitions.map((definition) => ({ definition, accountId, endpoint }));
 		};
 		const store = (catalog: CachedCatalog): void => {
@@ -751,7 +836,7 @@ export class StackOneToolSet {
 		if (scope.length === 1) {
 			const accountId = scope[0] as string;
 			const listings = new Map([[accountId, await listAccount(accountId)]]);
-			const catalog = { listings, failedAt: new Map() };
+			const catalog = { listings, failed: new Map() };
 			store(catalog);
 			return catalog;
 		}
@@ -763,13 +848,13 @@ export class StackOneToolSet {
 			isRateLimitFailure,
 		);
 		const listings = new Map(cached?.listings);
-		const failedAt = new Map(cached?.failedAt);
+		const failed = new Map(cached?.failed);
 		const failures: [accountId: string, reason: unknown][] = [];
 		settled.forEach((outcome, index) => {
 			const accountId = due[index] as string;
 			if (outcome.status === 'fulfilled') {
 				listings.set(accountId, outcome.value);
-				failedAt.delete(accountId);
+				failed.delete(accountId);
 			} else {
 				failures.push([accountId, outcome.reason]);
 			}
@@ -779,10 +864,11 @@ export class StackOneToolSet {
 		}
 		const failedNow = retryTiming.now();
 		for (const [accountId, reason] of failures) {
-			warn(`Skipping account that failed to list tools — ${accountId}: ${describeError(reason)}`);
-			failedAt.set(accountId, failedNow);
+			const message = describeError(reason);
+			warn(`Skipping account that failed to list tools — ${accountId}: ${message}`);
+			failed.set(accountId, { at: failedNow, message });
 		}
-		const catalog = { listings, failedAt };
+		const catalog = { listings, failed };
 		store(catalog);
 		return catalog;
 	}
@@ -803,7 +889,7 @@ export class StackOneToolSet {
 			accountId,
 			timeout: this.#timeout,
 			extraHeaders: this.#headers,
-			endUserIdFor: (id) => this.#endUserIds.get(id),
+			endUsers: this.#endUsers,
 		});
 	}
 
@@ -830,13 +916,24 @@ export class StackOneToolSet {
 	 *   differing reasons, its `cause` is an `AggregateError` of each account's error.
 	 */
 	async fetchTools(options: FetchToolsOptions = {}): Promise<Tools> {
+		return (await this.#fetchTools(options)).tools;
+	}
+
+	/**
+	 * {@link fetchTools}, also returning the accounts left out because they failed to list. With
+	 * `retryFailed`, those are listed again first — see {@link #catalog}.
+	 */
+	async #fetchTools(
+		options: FetchToolsOptions,
+		retryFailed = false,
+	): Promise<{ tools: Tools; failed: ScopedCatalog['failed'] }> {
 		try {
 			const mode = options.mode === undefined ? this.#toolMode : (options.mode ?? undefined);
 			const scope = await this.#resolveAccountScope(options.accountIds);
-			const listing = await this.#catalog(scope, mode);
+			const { entries, failed } = await this.#catalog(scope, mode, retryFailed);
 
 			let seenFeedbackTool = false;
-			let tools = listing
+			let tools = entries
 				.filter(({ definition }) => {
 					// Global rather than account-scoped, so every account's listing carries an
 					// identical copy. Keep the first.
@@ -859,7 +956,7 @@ export class StackOneToolSet {
 			}
 
 			warnOnDuplicateNames(tools);
-			return new Tools(tools);
+			return { tools: new Tools(tools), failed };
 		} catch (error) {
 			// StackOneAPIError carries the HTTP status. Re-wrapping it would throw that away, so a
 			// caller could not tell a 401 from a 429.
@@ -881,9 +978,16 @@ export class StackOneToolSet {
 	async #metaTools(
 		suffix: string,
 		accountIds: string[] | null | undefined,
-	): Promise<StackOneTool[]> {
-		const tools = await this.fetchTools({ accountIds, mode: 'search_execute' });
-		return tools.getStackOneTools().filter((tool) => tool.name.endsWith(suffix));
+		retryFailed = false,
+	): Promise<{ tools: StackOneTool[]; failed: ScopedCatalog['failed'] }> {
+		const { tools, failed } = await this.#fetchTools(
+			{ accountIds, mode: 'search_execute' },
+			retryFailed,
+		);
+		return {
+			tools: tools.getStackOneTools().filter((tool) => tool.name.endsWith(suffix)),
+			failed,
+		};
 	}
 
 	/**
@@ -921,7 +1025,7 @@ export class StackOneToolSet {
 			throw new ToolSetConfigError(`query must be a string, got ${typeof query}`);
 		}
 
-		const tools = await this.#metaTools('_search_actions', options.accountIds);
+		const { tools } = await this.#metaTools('_search_actions', options.accountIds);
 		if (tools.length === 0) {
 			return [];
 		}
@@ -997,7 +1101,9 @@ export class StackOneToolSet {
 	 *   `account_id` to run the action on the account that found it.
 	 * @throws ToolSetConfigError If the arguments are malformed, or the action's connector is
 	 *   linked on more than one account and the call names none.
-	 * @throws ToolSetLoadError If no linked connector serves the action.
+	 * @throws ToolSetLoadError If no linked connector serves the action, or an account in scope
+	 *   failed to list — after being listed again now — and its provider is the action's
+	 *   connector or unknown.
 	 * @throws StackOneAPIError If the action fails.
 	 */
 	async execute(
@@ -1022,9 +1128,22 @@ export class StackOneToolSet {
 
 		const suffix = '_execute_action';
 		const lowered = actionId.toLowerCase();
-		const matches = (await this.#metaTools(suffix, options.accountIds)).filter((tool) =>
-			lowered.startsWith(`${connectorOf(tool, suffix)}_`),
-		);
+		const { tools, failed } = await this.#metaTools(suffix, options.accountIds, true);
+
+		// An account that failed to list may serve this action too: its own connector's, or one we
+		// cannot tell. Running on whichever account did list would pick for the caller — possibly
+		// another end user's account — so refuse until it lists, or the caller names an account.
+		const unlisted = failed.filter(([accountId]) => {
+			const provider = this.#providers.get(accountId);
+			return provider === undefined || lowered.startsWith(`${provider.toLowerCase()}_`);
+		});
+		if (unlisted.length > 0) {
+			throw new ToolSetLoadError(
+				`${JSON.stringify(actionId)} may be served by an account that failed to list (${unlisted.map(([accountId, message]) => `${accountId}: ${message}`).join('; ')}). Pass the account id to use, such as a search hit's account_id.`,
+			);
+		}
+
+		const matches = tools.filter((tool) => lowered.startsWith(`${connectorOf(tool, suffix)}_`));
 		if (matches.length === 0) {
 			throw new ToolSetLoadError(
 				`No connector found for ${JSON.stringify(actionId)}. Use search() to discover valid action ids.`,
@@ -1161,6 +1280,23 @@ function endUserIdsOf(accounts: readonly unknown[]): Map<string, string> {
 		}
 	}
 	return endUserIds;
+}
+
+/** The provider of each account in a `GET /accounts` listing that names one. */
+function providersOf(accounts: readonly unknown[]): Map<string, string> {
+	const providers = new Map<string, string>();
+	for (const account of accounts) {
+		if (
+			isPlainObject(account) &&
+			typeof account.id === 'string' &&
+			account.id &&
+			typeof account.provider === 'string' &&
+			account.provider
+		) {
+			providers.set(account.id, account.provider);
+		}
+	}
+	return providers;
 }
 
 /**

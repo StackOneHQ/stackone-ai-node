@@ -400,6 +400,41 @@ describe('a 429 that clears on retry, followed by an unrelated timeout', () => {
 			`MCP request to ${TEST_BASE_URL}/mcp timed out after 0.3s`,
 		);
 	});
+
+	// The same request this time: its retry is answered 200, and then the stream stalls. That is
+	// the account's timeout, so a multi-account listing skips it, as Python does.
+	it('reports a stalled stream on the retried request as a timeout, skipping the account', async () => {
+		const app = createMcpApp({ accountTools: accountMcpTools });
+		let listAttempts = 0;
+		server.use(
+			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+				const message =
+					request.method === 'POST'
+						? ((await request.clone().json()) as { method?: string })
+						: undefined;
+				if (request.headers.get('x-account-id') === 'acc2' && message?.method === 'tools/list') {
+					if (listAttempts++ === 0) {
+						return HttpResponse.json(RATE_LIMITED, {
+							status: 429,
+							headers: { 'Retry-After': '0' },
+						});
+					}
+					return new HttpResponse(new ReadableStream({ start() {} }), {
+						headers: { 'Content-Type': 'text/event-stream' },
+					});
+				}
+				return app.fetch(request);
+			}),
+		);
+
+		const tools = await newToolSet({ timeout: 300 }).fetchTools({ accountIds: ['acc1', 'acc2'] });
+
+		expect(listAttempts).toBe(2);
+		expect(tools.toArray().map((tool) => tool.name)).toEqual(['acc1_tool_1', 'acc1_tool_2']);
+		expect(warnings().filter((message) => message.includes('Skipping'))).toEqual([
+			`[@stackone/ai] Skipping account that failed to list tools — acc2: MCP request to ${TEST_BASE_URL}/mcp timed out after 0.3s`,
+		]);
+	});
 });
 
 describe('other statuses', () => {

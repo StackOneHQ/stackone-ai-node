@@ -23,11 +23,26 @@ const ACCOUNTS = [
 	{ id: 'acc2', provider: 'mock', status: 'active', shared: true, origin_username: 'bob' },
 ];
 
+/** The 400 UCA's ActiveAccountGuard answers a request without the account's end user with. */
+const endUserMismatch = (accountId: string) =>
+	HttpResponse.json(
+		{
+			statusCode: 400,
+			message: `x-end-user-id header does not match account end user id for account ${accountId}`,
+			timestamp: '2026-01-01T00:00:00.000Z',
+		},
+		{ status: 400 },
+	);
+
 /**
  * Serve `GET /accounts` and `/mcp`, recording every MCP message. `accounts` is read per request,
- * so a test can change what the next `GET /accounts` reports.
+ * so a test can change what the next `GET /accounts` reports. `guard` maps accounts to the end
+ * user `/mcp` requires, as UCA's ActiveAccountGuard does.
  */
-const serve = (initial: unknown[] | (() => Response) = ACCOUNTS) => {
+const serve = (
+	initial: unknown[] | (() => Response | Promise<Response>) = ACCOUNTS,
+	guard: Record<string, string> = {},
+) => {
 	const exchanges: McpExchange[] = [];
 	let accounts = initial;
 	let accountRequests = 0;
@@ -55,13 +70,18 @@ const serve = (initial: unknown[] | (() => Response) = ACCOUNTS) => {
 					});
 				}
 			}
+			const accountId = request.headers.get('x-account-id') ?? '';
+			const required = guard[accountId];
+			if (required !== undefined && request.headers.get('x-end-user-id') !== required) {
+				return endUserMismatch(accountId);
+			}
 			return app.fetch(request);
 		}),
 	);
 	return {
 		exchanges,
 		accountRequests: () => accountRequests,
-		setAccounts: (next: unknown[] | (() => Response)) => {
+		setAccounts: (next: unknown[] | (() => Response | Promise<Response>)) => {
 			accounts = next;
 		},
 	};
@@ -95,7 +115,7 @@ afterEach(() => {
 describe('x-end-user-id after account discovery', () => {
 	it('is sent on every MCP request for a non-shared account, and never for a shared one', async () => {
 		const { exchanges } = serve();
-		const tools = await newToolSet().fetchTools();
+		const tools = await newToolSet({ includeNonShared: true }).fetchTools();
 
 		await getTool(tools, 'acc1_tool_1').execute({ fields: 'name' });
 		await getTool(tools, 'acc2_tool_1').execute({ fields: 'name' });
@@ -116,7 +136,7 @@ describe('x-end-user-id after account discovery', () => {
 
 	it('is sent on search(), execute() and submitFeedback()', async () => {
 		const { exchanges } = serve();
-		const toolset = newToolSet();
+		const toolset = newToolSet({ includeNonShared: true });
 
 		await toolset.search('list items');
 		await toolset.execute('mock_list_items', {}, { accountIds: ['acc1'] });
@@ -150,7 +170,7 @@ describe('x-end-user-id after account discovery', () => {
 
 	it('follows a tool rebound with setAccountId to its new account', async () => {
 		const { exchanges } = serve();
-		const toolset = newToolSet();
+		const toolset = newToolSet({ includeNonShared: true });
 		await toolset.fetchAccounts();
 		const tool = getTool(await toolset.fetchTools({ accountIds: ['acc2'] }), 'acc1_tool_1');
 
@@ -175,7 +195,7 @@ describe('x-end-user-id after account discovery', () => {
 		['origin_username is not a string', { shared: false, origin_username: 42 }],
 	])('is not sent when %s', async (_case, fields) => {
 		const { exchanges } = serve([{ id: 'acc1', status: 'active', ...fields }]);
-		const tools = await newToolSet().fetchTools();
+		const tools = await newToolSet({ includeNonShared: true }).fetchTools();
 		await getTool(tools, 'acc1_tool_1').execute({});
 
 		expect(exchanges.length).toBeGreaterThan(0);
@@ -277,6 +297,35 @@ describe('x-end-user-id after fetchAccounts()', () => {
 		expect(exchanges.at(-1)?.endUserId).toBe('carol');
 	});
 
+	it('is recorded by an older GET /accounts when a newer one fails', async () => {
+		let requests = 0;
+		let releaseFirst!: () => void;
+		const firstReleased = new Promise<void>((resolve) => {
+			releaseFirst = resolve;
+		});
+		const { exchanges } = serve(async () => {
+			requests += 1;
+			if (requests === 1) {
+				await firstReleased;
+				return HttpResponse.json(ACCOUNTS);
+			}
+			return HttpResponse.json({ message: 'boom' }, { status: 500 });
+		});
+		const toolset = newToolSet({ includeNonShared: true });
+
+		const discovering = toolset.fetchTools();
+		await vi.waitFor(() => expect(requests).toBe(1));
+		await expect(toolset.fetchAccounts()).rejects.toThrow(StackOneAPIError);
+		releaseFirst();
+		await discovering;
+
+		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([
+			['initialize', 'alice'],
+			['notifications/initialized', 'alice'],
+			['tools/list', 'alice'],
+		]);
+	});
+
 	it('is kept by clearCatalogCache()', async () => {
 		const { exchanges, accountRequests } = serve();
 		const toolset = newToolSet({ accountId: 'acc1' });
@@ -373,5 +422,197 @@ describe('x-end-user-id as a model-supplied header argument', () => {
 			'[@stackone/ai] Dropping header argument "headers_x-end-user-id" from a tool call: set by the SDK',
 			'[@stackone/ai] Dropping header argument "headers_X-End-User-Id " from a tool call: set by the SDK',
 		]);
+	});
+});
+
+describe('non-shared accounts in discovery', () => {
+	const skipped = (accounts: string) =>
+		`[@stackone/ai] Discovery skipped ${accounts.split(', ').length} non-shared account(s) (${accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`;
+	const warnings = (): string[] => warnSpy.mock.calls.map((args: unknown[]) => String(args[0]));
+	const accountsOf = (tools: Tools) =>
+		[...new Set(tools.getStackOneTools().map((tool) => String(tool.getAccountId())))].sort();
+
+	it('are skipped by default, with one warning per discovery', async () => {
+		const { exchanges } = serve([
+			...ACCOUNTS,
+			{ id: 'acc0', provider: 'mock', status: 'active', shared: false, origin_username: 'dan' },
+		]);
+		const toolset = newToolSet();
+
+		expect(accountsOf(await toolset.fetchTools())).toEqual(['acc2']);
+		await toolset.search('list items');
+		expect(warnings()).toEqual([skipped('acc0, acc1')]);
+		expect(exchanges.every((exchange) => exchange.accountId === 'acc2')).toBe(true);
+
+		toolset.clearCatalogCache();
+		await toolset.fetchTools();
+		expect(warnings()).toEqual([skipped('acc0, acc1'), skipped('acc0, acc1')]);
+	});
+
+	it('still have their end user recorded, for when their id is passed', async () => {
+		const { exchanges, accountRequests } = serve();
+		const toolset = newToolSet();
+		await toolset.fetchTools();
+
+		await toolset.fetchTools({ accountIds: ['acc1'] });
+
+		expect(accountRequests()).toBe(1);
+		expect(endUserIdsFor(exchanges, 'acc1').every(([, endUserId]) => endUserId === 'alice')).toBe(
+			true,
+		);
+	});
+
+	it('are included, without a warning, with includeNonShared', async () => {
+		serve();
+		const tools = await newToolSet({ includeNonShared: true }).fetchTools();
+
+		expect(accountsOf(tools)).toEqual(['acc1', 'acc2']);
+		expect(warnings().filter((warning) => warning.includes('non-shared'))).toEqual([]);
+	});
+
+	it('leave an empty catalog when they are all there is', async () => {
+		serve([ACCOUNTS[0]]);
+		const toolset = newToolSet();
+
+		expect((await toolset.fetchTools()).toArray()).toEqual([]);
+		expect(await toolset.search('list items')).toEqual([]);
+		expect(warnings()).toEqual([skipped('acc1')]);
+	});
+});
+
+describe('x-end-user-id for an explicit account the API says is not shared', () => {
+	it('is looked up once and the listing sent again with it', async () => {
+		const { exchanges, accountRequests } = serve(ACCOUNTS, { acc1: 'alice' });
+		const toolset = newToolSet({ accountId: 'acc1' });
+
+		const tools = await toolset.fetchTools();
+		await getTool(tools, 'acc1_tool_1').execute({});
+
+		expect(accountRequests()).toBe(1);
+		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([
+			['initialize', null],
+			['initialize', 'alice'],
+			['notifications/initialized', 'alice'],
+			['tools/list', 'alice'],
+			['initialize', 'alice'],
+			['notifications/initialized', 'alice'],
+			['tools/call', 'alice'],
+		]);
+	});
+
+	it('is looked up once and the tools/call sent again with it', async () => {
+		const { exchanges, accountRequests } = serve(ACCOUNTS, { acc1: 'alice' });
+		const toolset = newToolSet({ accountId: 'acc2' });
+		const tool = getTool(await toolset.fetchTools(), 'acc1_tool_1').setAccountId('acc1');
+
+		await tool.execute({});
+
+		expect(accountRequests()).toBe(1);
+		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([
+			['initialize', null],
+			['initialize', 'alice'],
+			['notifications/initialized', 'alice'],
+			['tools/call', 'alice'],
+		]);
+	});
+
+	it('shares a GET /accounts already in flight', async () => {
+		let release!: () => void;
+		const released = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const { accountRequests } = serve(
+			async () => {
+				await released;
+				return HttpResponse.json(ACCOUNTS);
+			},
+			{ acc1: 'alice' },
+		);
+		const toolset = newToolSet({ accountId: 'acc1' });
+
+		const fetching = toolset.fetchAccounts();
+		const listing = toolset.fetchTools();
+		await new Promise((resolve) => setTimeout(resolve, 20));
+		release();
+		await Promise.all([fetching, listing]);
+
+		expect(accountRequests()).toBe(1);
+	});
+
+	it('shares the newest GET /accounts in flight, even once an older one settles', async () => {
+		const releases: Array<() => void> = [];
+		let requests = 0;
+		const { accountRequests } = serve(
+			async () => {
+				requests += 1;
+				if (requests === 1) {
+					await new Promise<void>((resolve) => releases.push(resolve));
+					return HttpResponse.json([ACCOUNTS[1]]);
+				}
+				if (requests === 2) {
+					await new Promise<void>((resolve) => releases.push(resolve));
+				}
+				return HttpResponse.json(ACCOUNTS);
+			},
+			{ acc1: 'alice' },
+		);
+		const toolset = newToolSet({ accountId: 'acc1' });
+
+		const older = toolset.fetchAccounts();
+		await vi.waitFor(() => expect(requests).toBe(1));
+		const newer = toolset.fetchAccounts();
+		await vi.waitFor(() => expect(requests).toBe(2));
+		releases[0]?.();
+		await older;
+		const listing = toolset.fetchTools();
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		releases[1]?.();
+		await Promise.all([newer, listing]);
+
+		expect(accountRequests()).toBe(2);
+	});
+
+	it.each([
+		['GET /accounts reports no end user for it', () => HttpResponse.json([ACCOUNTS[1]])],
+		['GET /accounts fails', () => HttpResponse.json({ message: 'boom' }, { status: 500 })],
+	])('throws the 400 as it came when %s', async (_case, accounts) => {
+		const { exchanges, accountRequests } = serve(accounts, { acc1: 'alice' });
+
+		const error = await newToolSet({ accountId: 'acc1' })
+			.fetchTools()
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(400);
+		expect((error as Error).message).toContain(
+			'x-end-user-id header does not match account end user id for account acc1',
+		);
+		expect(accountRequests()).toBe(1);
+		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([['initialize', null]]);
+	});
+
+	it('is not looked up again when one is already recorded', async () => {
+		const { exchanges, accountRequests } = serve([{ ...ACCOUNTS[0], origin_username: 'carol' }], {
+			acc1: 'alice',
+		});
+		const toolset = newToolSet({ accountId: 'acc1' });
+		await toolset.fetchAccounts();
+
+		await expect(toolset.fetchTools()).rejects.toThrow(StackOneAPIError);
+
+		expect(accountRequests()).toBe(1);
+		expect(endUserIdsFor(exchanges, 'acc1')).toEqual([['initialize', 'carol']]);
+	});
+
+	it('is not looked up for any other 400', async () => {
+		const { accountRequests } = serve();
+		server.use(
+			http.all(`${TEST_BASE_URL}/mcp`, () =>
+				HttpResponse.json({ statusCode: 400, message: 'Bad request' }, { status: 400 }),
+			),
+		);
+
+		await expect(newToolSet({ accountId: 'acc1' }).fetchTools()).rejects.toThrow(StackOneAPIError);
+		expect(accountRequests()).toBe(0);
 	});
 });

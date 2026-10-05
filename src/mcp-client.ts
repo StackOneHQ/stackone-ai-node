@@ -104,6 +104,58 @@ export function isRateLimitFailure(error: unknown): boolean {
 	);
 }
 
+/**
+ * Whether an MCP request was refused by the API's end-user check on `accountId`: the 400 it
+ * answers a non-shared account's request with when `x-end-user-id` does not name its end user.
+ */
+function isEndUserMismatch(error: unknown, accountId: string): boolean {
+	if (!(error instanceof StackOneAPIError) || error.statusCode !== 400) {
+		return false;
+	}
+	const body = error.responseBody;
+	const message =
+		typeof body === 'object' && body !== null && 'message' in body ? body.message : body;
+	return (
+		message === `x-end-user-id header does not match account end user id for account ${accountId}`
+	);
+}
+
+/** How a request finds the end user to send as `x-end-user-id` for an account. */
+export interface EndUserSource {
+	/** The end user recorded for the account, if any. */
+	recorded: (accountId: string) => string | undefined;
+	/** Look the account's end user up with `GET /accounts`, and return what is then recorded. */
+	lookUp: (accountId: string) => Promise<string | undefined>;
+}
+
+/**
+ * Run an MCP request for `accountId` with its recorded end user, if any.
+ *
+ * An account id passed explicitly has no end user recorded until something calls
+ * `GET /accounts`, so a non-shared one is refused with a 400. When that happens to an account
+ * with nothing recorded, its end user is looked up once and, if there is one, the request is sent
+ * again with it. Otherwise the 400 is thrown as it came.
+ */
+export async function withEndUser<T>(
+	accountId: string | undefined,
+	source: EndUserSource | undefined,
+	request: (endUserId: string | undefined) => Promise<T>,
+): Promise<T> {
+	const recorded = accountId && source ? source.recorded(accountId) : undefined;
+	try {
+		return await request(recorded);
+	} catch (error) {
+		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error, accountId)) {
+			throw error;
+		}
+		const endUserId = await source.lookUp(accountId).catch(() => undefined);
+		if (endUserId === undefined) {
+			throw error;
+		}
+		return request(endUserId);
+	}
+}
+
 /** A session that timed out while a 429 was being retried. */
 class RateLimitTimeoutError extends Error {
 	constructor(options: ErrorOptions) {
@@ -129,23 +181,26 @@ async function withMcpSession<T>(
 	work: (client: Client) => Promise<T>,
 ): Promise<T> {
 	const expiresAt = retryTiming.now() + timeout;
-	// Whether the request currently in flight is waiting out a 429, reset at the start of every
-	// request the transport sends: a 429 retried successfully on an earlier request (the
-	// handshake, say) must not make a later, unrelated timeout (on `tools/list`, say) look like
-	// a rate limit too.
+	// Whether the request currently in flight is waiting out a 429. Cleared as soon as a retry is
+	// answered with anything else, as in Python: a 429 that cleared must not make a later timeout
+	// — a stalled stream on that same response, or an unrelated request — look like a rate limit.
 	let rateLimited = false;
 	const transport = new StreamableHTTPClientTransport(new URL(endpoint), {
 		requestInit: { headers },
 		// Every request the client sends, handshake included, so it never sees a 429 it could
 		// have waited out — but never one that would outlast the session's deadline.
-		fetch: (url, init) => {
+		fetch: async (url, init) => {
 			rateLimited = false;
-			return fetchWithRetry(url, init, {
+			const response = await fetchWithRetry(url, init, {
 				deadline: expiresAt,
 				onRetry: () => {
 					rateLimited = true;
 				},
 			});
+			if (response.status !== 429) {
+				rateLimited = false;
+			}
+			return response;
 		},
 	});
 	const client = new Client({ name: 'stackone-ai-node', version });

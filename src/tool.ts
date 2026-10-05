@@ -16,7 +16,7 @@ import {
 	declaredHeaders,
 	sanitiseHeaderArguments,
 } from './headers';
-import { callMcpTool } from './mcp-client';
+import { type EndUserSource, callMcpTool, withEndUser } from './mcp-client';
 import { cloneJson, foldRootComposition } from './schema';
 import type {
 	AISDKToolDefinition,
@@ -368,7 +368,7 @@ export class StackOneMcpTool extends StackOneTool {
 	readonly #endpoint: string;
 	readonly #apiKey: string;
 	readonly #extraHeaders: Record<string, string>;
-	readonly #endUserIdFor: (accountId: string) => string | undefined;
+	readonly #endUsers: EndUserSource | undefined;
 	readonly #timeout: number;
 	readonly #declaredHeaders: DeclaredHeaders;
 
@@ -382,10 +382,10 @@ export class StackOneMcpTool extends StackOneTool {
 		timeout: number;
 		extraHeaders?: Record<string, string>;
 		/**
-		 * The end user of an account, sent as `x-end-user-id`. Looked up per call, so a tool
-		 * rebound with `setAccountId` sends its new account's end user.
+		 * Where the end user of an account, sent as `x-end-user-id`, comes from. Read per call, so
+		 * a tool rebound with `setAccountId` sends its new account's end user.
 		 */
-		endUserIdFor?: (accountId: string) => string | undefined;
+		endUsers?: EndUserSource;
 	}) {
 		const executeConfig = {
 			kind: 'mcp',
@@ -397,7 +397,7 @@ export class StackOneMcpTool extends StackOneTool {
 		this.#endpoint = options.endpoint;
 		this.#apiKey = options.apiKey;
 		this.#extraHeaders = { ...options.extraHeaders };
-		this.#endUserIdFor = options.endUserIdFor ?? (() => undefined);
+		this.#endUsers = options.endUsers;
 		this.#timeout = options.timeout;
 		this.#declaredHeaders = declaredHeaders(options.parameters.properties);
 	}
@@ -436,19 +436,21 @@ export class StackOneMcpTool extends StackOneTool {
 		}
 
 		const accountId = this.getAccountId();
-		return callMcpTool(
-			{
-				endpoint: this.#endpoint,
-				headers: buildRequestHeaders({
-					apiKey: this.#apiKey,
-					accountId,
-					endUserId: accountId ? this.#endUserIdFor(accountId) : undefined,
-					extraHeaders: this.#extraHeaders,
-				}),
-				timeout: this.#timeout,
-			},
-			this.name,
-			args,
+		return withEndUser(accountId, this.#endUsers, (endUserId) =>
+			callMcpTool(
+				{
+					endpoint: this.#endpoint,
+					headers: buildRequestHeaders({
+						apiKey: this.#apiKey,
+						accountId,
+						endUserId,
+						extraHeaders: this.#extraHeaders,
+					}),
+					timeout: this.#timeout,
+				},
+				this.name,
+				args,
+			),
 		);
 	}
 }

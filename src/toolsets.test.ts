@@ -271,6 +271,60 @@ describe('account discovery', () => {
 		expect(requests).toBe(2);
 	});
 
+	it('does not keep a discovery that was in flight when the cache was cleared', async () => {
+		let requests = 0;
+		let release!: () => void;
+		const released = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, async () => {
+				requests += 1;
+				if (requests === 1) {
+					await released;
+					return HttpResponse.json([{ id: 'acc1', status: 'active' }]);
+				}
+				return HttpResponse.json([{ id: 'acc3', status: 'active' }]);
+			}),
+		);
+		const toolset = newToolSet();
+
+		const before = toolset.fetchTools();
+		await vi.waitFor(() => expect(requests).toBe(1));
+		toolset.clearCatalogCache();
+		release();
+		await before;
+
+		expect(names(await toolset.fetchTools())).toEqual(['acc3_tool_1']);
+		expect(requests).toBe(2);
+	});
+
+	it('shares the discovery started after a clear, even once the one before it settles', async () => {
+		let requests = 0;
+		const releases: Array<() => void> = [];
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, async () => {
+				requests += 1;
+				await new Promise<void>((resolve) => releases.push(resolve));
+				return HttpResponse.json([{ id: 'acc1', status: 'active' }]);
+			}),
+		);
+		const toolset = newToolSet();
+
+		const first = toolset.fetchTools();
+		await vi.waitFor(() => expect(requests).toBe(1));
+		toolset.clearCatalogCache();
+		const second = toolset.fetchTools();
+		await vi.waitFor(() => expect(requests).toBe(2));
+		releases[0]?.();
+		await first;
+		const third = toolset.fetchTools();
+		releases[1]?.();
+		await Promise.all([second, third]);
+
+		expect(requests).toBe(2);
+	});
+
 	it('shares one discovery between concurrent calls', async () => {
 		let requests = 0;
 		server.use(
@@ -621,6 +675,26 @@ describe('listing', () => {
 		expect(many).toBe(revoked);
 	});
 
+	it('summarises rather than rethrows when every account fails, with differing statuses', async () => {
+		const failures = {
+			a: new StackOneAPIError('revoked', 401, null),
+			b: new StackOneAPIError('forbidden', 403, null),
+		};
+		fakeListing((request) => {
+			throw failures[accountOf(request) as 'a' | 'b'];
+		});
+
+		const error = await newToolSet()
+			.fetchTools({ accountIds: ['a', 'b'] })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolSetLoadError);
+		expect((error as Error).message).toBe(
+			'Every account failed to list tools: a: revoked; b: forbidden',
+		);
+		expect(((error as Error).cause as AggregateError).errors).toEqual([failures.a, failures.b]);
+	});
+
 	describe('an account that fails', () => {
 		let now = 0;
 		let failB = true;
@@ -830,6 +904,64 @@ describe('catalog cache', () => {
 		fakeListing(() => [def('fresh_tool')]);
 
 		expect(names(await toolset.fetchTools())).toEqual(['fresh_tool']);
+	});
+
+	it('is not repopulated by a multi-account listing that was in flight when it was cleared', async () => {
+		const toolset = newToolSet({ accountIds: ['acc1', 'acc2'] });
+		fakeListing((request) => {
+			toolset.clearCatalogCache();
+			return [def(`stale_${accountOf(request)}`)];
+		});
+
+		await toolset.fetchTools();
+		fakeListing((request) => [def(`fresh_${accountOf(request)}`)]);
+
+		expect(names(await toolset.fetchTools())).toEqual(['fresh_acc1', 'fresh_acc2']);
+	});
+
+	it('does not hand a later call a listing that was in flight when it was cleared', async () => {
+		const toolset = newToolSet({ accountId: 'acc1' });
+		let release!: () => void;
+		const released = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		fakeListing(async () => {
+			await released;
+			return [def('stale_tool')];
+		});
+		const before = toolset.fetchTools();
+		await vi.waitFor(() => expect(listMock).toHaveBeenCalledOnce());
+
+		toolset.clearCatalogCache();
+		fakeListing(() => [def('fresh_tool')]);
+		const after = toolset.fetchTools();
+		release();
+
+		expect(names(await after)).toEqual(['fresh_tool']);
+		expect(names(await before)).toEqual(['stale_tool']);
+		expect(names(await toolset.fetchTools())).toEqual(['fresh_tool']);
+	});
+
+	it('shares the listing started after a clear, even once the one before it settles', async () => {
+		const toolset = newToolSet({ accountId: 'acc1' });
+		const releases: Array<() => void> = [];
+		fakeListing(async () => {
+			await new Promise<void>((resolve) => releases.push(resolve));
+			return [def('tool')];
+		});
+
+		const first = toolset.fetchTools();
+		await vi.waitFor(() => expect(listMock).toHaveBeenCalledTimes(1));
+		toolset.clearCatalogCache();
+		const second = toolset.fetchTools();
+		await vi.waitFor(() => expect(listMock).toHaveBeenCalledTimes(2));
+		releases[0]?.();
+		await first;
+		const third = toolset.fetchTools();
+		releases[1]?.();
+		await Promise.all([second, third]);
+
+		expect(listMock).toHaveBeenCalledTimes(2);
 	});
 
 	it('hands every caller fresh tools, so rebinding one never rescopes another', async () => {
