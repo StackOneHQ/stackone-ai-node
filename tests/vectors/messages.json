@@ -138,10 +138,10 @@
         {
             "id": "account-id-env-ignored",
             "kind": "warning",
-            "template": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
+            "template": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.",
             "placeholders": {},
-            "python": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
-            "node": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.",
+            "python": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.",
+            "node": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.",
             "matches": {
                 "python": true,
                 "node": true

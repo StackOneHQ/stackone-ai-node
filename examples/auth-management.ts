@@ -53,7 +53,7 @@ const accountIdFromEnv = async (): Promise<void> => {
 	console.log('=== 2. Account ID from environment ===\n');
 
 	// The SDK only reads the API key from env; read the account id yourself and pass it.
-	// Unset or empty, it is undefined and the toolset discovers every active account instead.
+	// Unset or empty, it is undefined and the toolset discovers every active shared account instead.
 	const accountId = process.env.STACKONE_ACCOUNT_ID || undefined;
 	console.log(`  STACKONE_ACCOUNT_ID is ${accountId ? 'set' : 'not set'}`);
 

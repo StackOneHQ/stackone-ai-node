@@ -18,7 +18,7 @@ if (!process.env.OPENAI_API_KEY) {
 
 const openaiIntegration = async (): Promise<void> => {
 	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
-	// without one, the toolset uses every active account linked to the key
+	// without one, the toolset uses every active shared account linked to the key
 	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 	// Filter to specific tools to stay within OpenAI's 128-tool limit

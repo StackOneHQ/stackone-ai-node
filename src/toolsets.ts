@@ -42,7 +42,8 @@ interface SingleAccountConfig {
 	/**
 	 * Single account ID for StackOne API operations
 	 * Use this when working with a single account. Never read from the environment: with no
-	 * account configured, the toolset uses every active account linked to the API key.
+	 * account configured, the toolset uses every active shared account linked to the API key
+	 * (non-shared ones too with `includeNonShared`).
 	 */
 	accountId: string;
 }
@@ -131,7 +132,8 @@ export type StackOneToolSetConfig = StackOneToolSetBaseConfig & Partial<AccountC
 export interface FetchToolsOptions {
 	/**
 	 * The accounts to list tools for. Defaults to the toolset's accounts, then its `accountId`,
-	 * then every active account linked to the API key. `null` is the same as leaving it unset.
+	 * then every active shared account linked to the API key (non-shared ones too with
+	 * `includeNonShared`). `null` is the same as leaving it unset.
 	 */
 	accountIds?: string[] | null;
 
@@ -162,8 +164,8 @@ export interface SearchOptions {
 	/** Maximum results, 1–50, across every connector searched. Default: 10. */
 	topK?: number;
 	/**
-	 * Restrict to these accounts. Defaults to the toolset's accounts, then every active one.
-	 * `null` is the same as leaving it unset.
+	 * Restrict to these accounts. Defaults to the toolset's accounts, then every active shared
+	 * one (non-shared ones too with `includeNonShared`). `null` is the same as leaving it unset.
 	 */
 	accountIds?: string[] | null;
 }
@@ -360,8 +362,8 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
  * its `tools/call`; the only other request is `GET /accounts`, to discover accounts. Schemas and
  * arguments are passed through as served, never rewritten, filtered or invented.
  *
- * An API key is enough: with no account configured, the toolset lists every active account
- * linked to the key.
+ * An API key is enough: with no account configured, the toolset lists every active shared
+ * account linked to the key, and non-shared ones too with `includeNonShared`.
  */
 export class StackOneToolSet {
 	readonly #apiKey: string;
@@ -431,7 +433,8 @@ export class StackOneToolSet {
 
 	/**
 	 * Falls back to `STACKONE_API_KEY` and `STACKONE_BASE_URL`, but never reads an account id from
-	 * the environment: `accountId` / `accountIds` must be passed, or every active account is used.
+	 * the environment: `accountId` / `accountIds` must be passed, or every active shared account is
+	 * used (non-shared ones too with `includeNonShared`).
 	 * When `STACKONE_ACCOUNT_ID` is set and no account is passed, that is warned about, since 2.x
 	 * read it.
 	 *
@@ -445,7 +448,7 @@ export class StackOneToolSet {
 			);
 		}
 		// An empty accountId is usually an unset variable, and treating it as unset would silently
-		// widen every call to all active accounts.
+		// widen every call to every discovered account.
 		if (config.accountId === '') {
 			throw new ToolSetConfigError('accountId must not be an empty string');
 		}
@@ -483,7 +486,7 @@ export class StackOneToolSet {
 			this.#accountIds.length === 0
 		) {
 			warn(
-				'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
+				'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.',
 			);
 		}
 	}
@@ -724,7 +727,8 @@ export class StackOneToolSet {
 
 	/**
 	 * The accounts a call is scoped to, in the order they were given: the call's own, then the
-	 * toolset's, then its single account, then every active account in `GET /accounts` order.
+	 * toolset's, then its single account, then every discovered account — active and shared, or
+	 * non-shared too with `includeNonShared` — in `GET /accounts` order.
 	 */
 	async #accountsInOrder(accountIds: string[] | null | undefined): Promise<string[]> {
 		assertAccountIdList(accountIds, 'accountIds');
@@ -1242,7 +1246,8 @@ export class StackOneToolSet {
 	 * feedback that went nowhere. Unset optional fields are omitted, never sent as null.
 	 *
 	 * Makes exactly one `tools/call`, on the account with the lowest id among those the call is
-	 * scoped to: `accountIds` when given, otherwise the toolset's, otherwise every active one.
+	 * scoped to: `accountIds` when given, otherwise the toolset's, otherwise every active shared
+	 * one (non-shared ones too with `includeNonShared`).
 	 *
 	 * @example
 	 * ```typescript

@@ -95,7 +95,7 @@ describe('configuration', () => {
 		newToolSet();
 
 		expect(warnSpy.mock.calls.map(([message]: unknown[]) => String(message))).toEqual([
-			'[@stackone/ai] STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
+			'[@stackone/ai] STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.',
 		]);
 	});
 
@@ -119,7 +119,7 @@ describe('configuration', () => {
 			vi.stubEnv('STACKONE_ACCOUNT_ID', 'acc3');
 			newToolSet(config);
 			expect(warnSpy.mock.calls.map(([message]: unknown[]) => String(message))).toEqual([
-				'[@stackone/ai] STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active account on this API key is used. Pass an account id to scope the toolset.',
+				'[@stackone/ai] STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.',
 			]);
 		},
 	);
