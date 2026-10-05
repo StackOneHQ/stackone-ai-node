@@ -121,18 +121,27 @@ export class HttpRateLimitError extends Error {
  * Whether an MCP request was refused by the API's end-user check on `accountId`: the 400 it
  * answers a non-shared account's request with when `x-end-user-id` does not name its end user.
  */
-function isEndUserMismatch(error: unknown): boolean {
+function isEndUserMismatch(error: unknown, accountId: string): boolean {
 	if (!(error instanceof StackOneAPIError) || error.statusCode !== 400) {
 		return false;
 	}
 	const body = error.responseBody;
 	const message =
 		typeof body === 'object' && body !== null && 'message' in body ? body.message : body;
-	// Matched on the guard's fixed wording, not the account id it ends with, so a change to how
-	// the id is written does not silently turn the lookup off.
+	// The guard's fixed wording, ending with this account's id, quoted or not: not an exact string,
+	// so a change to how the id is written does not silently turn the lookup off.
+	if (
+		typeof message !== 'string' ||
+		!message.startsWith('x-end-user-id header does not match account end user id')
+	) {
+		return false;
+	}
 	return (
-		typeof message === 'string' &&
-		message.startsWith('x-end-user-id header does not match account end user id')
+		message
+			.trimEnd()
+			.split(' ')
+			.pop()
+			?.replace(/^["']|["']$/g, '') === accountId
 	);
 }
 
@@ -161,7 +170,7 @@ export async function withEndUser<T>(
 	try {
 		return await request(recorded);
 	} catch (error) {
-		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error)) {
+		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error, accountId)) {
 			throw error;
 		}
 		// A failed lookup leaves the refusal to be thrown, except a rate limit: that is the key's,
