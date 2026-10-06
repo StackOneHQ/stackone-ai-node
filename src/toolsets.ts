@@ -403,6 +403,13 @@ export class StackOneToolSet {
 	/** The provider of each account, recorded with {@link #endUserIds}. */
 	#providers: ReadonlyMap<string, string> = new Map();
 	/**
+	 * When {@link execute}'s provider lookup last failed to name each failed account, on
+	 * {@link retryTiming}'s clock. For {@link FAILED_ACCOUNT_RETRY_MS} after, `execute()` neither
+	 * looks the account up nor lists it again early, so a key that cannot name it does not cost
+	 * every call a `GET /accounts` and a listing. Forgotten by {@link clearCatalogCache}.
+	 */
+	readonly #providerMisses = new Map<string, number>();
+	/**
 	 * Bumped at the start of every {@link fetchAccounts} call. Overlapping calls (it is public, and
 	 * not deduplicated the way {@link #discoverAccountIds} is) can resolve out of order, so each
 	 * records only if it started after the call whose result was last recorded
@@ -516,6 +523,7 @@ export class StackOneToolSet {
 		this.#catalogInFlight.clear();
 		this.#discoveredAccountIds = undefined;
 		this.#discovering = undefined;
+		this.#providerMisses.clear();
 	}
 
 	/**
@@ -1134,8 +1142,8 @@ export class StackOneToolSet {
 	 * @throws ToolSetConfigError If the arguments are malformed, or the action's connector is
 	 *   linked on more than one account and the call names none.
 	 * @throws ToolSetLoadError If no linked connector serves the action, or an account in scope
-	 *   failed to list — after being listed again now — and its provider is the action's
-	 *   connector or unknown.
+	 *   failed to list — after being listed again now, unless the provider lookup failed to name
+	 *   it in the last 30 seconds — and its provider is the action's connector or unknown.
 	 * @throws StackOneAPIError If the action fails, or the lookup of a failed account's provider
 	 *   is rate limited.
 	 */
@@ -1183,18 +1191,38 @@ export class StackOneToolSet {
 		// With explicit account ids no GET /accounts has named the failed accounts' providers, so
 		// one dead account would refuse every action. Ask once — joining a lookup in flight — and
 		// treat the provider as unknown still if that fails too, unless it was rate limited: the
-		// key's 429 is fatal, as it is to the end-user lookup.
-		if (failed.some(([accountId]) => !this.#providers.has(accountId))) {
+		// key's 429 is fatal, as it is to the end-user lookup. An account the lookup recently
+		// failed to name is not asked about again until its window is up.
+		const failedIds = failed.map(([accountId]) => accountId);
+		const missedRecently = new Set(
+			failedIds.filter(
+				(accountId) =>
+					started - (this.#providerMisses.get(accountId) ?? -Infinity) < FAILED_ACCOUNT_RETRY_MS,
+			),
+		);
+		const unknown = failedIds.filter(
+			(accountId) => !this.#providers.has(accountId) && !missedRecently.has(accountId),
+		);
+		if (unknown.length > 0) {
 			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch((error: unknown) => {
 				if (isRateLimitFailure(error)) {
 					throw error;
 				}
 			});
+			const missedAt = retryTiming.now();
+			for (const accountId of unknown) {
+				if (!this.#providers.has(accountId)) {
+					this.#providerMisses.set(accountId, missedAt);
+				}
+			}
 		}
-		// Listed again now rather than when due, but only those that could serve the action and did
-		// not just fail for this call: re-listing an account on another provider would make this
-		// call wait out its timeout.
-		const retry = inReach().filter(([, , at]) => at < started);
+		// Listed again now rather than when due, but only those that could serve the action, did
+		// not just fail for this call, and were not recently missed by the lookup: re-listing an
+		// account on another provider would make this call wait out its timeout, and re-listing one
+		// the lookup cannot name would make every call wait it out.
+		const retry = inReach().filter(
+			([accountId, , at]) => at < started && !missedRecently.has(accountId),
+		);
 		if (retry.length > 0) {
 			({ tools, failed } = await this.#metaTools(
 				suffix,

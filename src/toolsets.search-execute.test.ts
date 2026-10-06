@@ -17,6 +17,7 @@ import { StackOneToolSet } from './toolsets';
 import type { JsonObject } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
+import { retryTiming } from './utils/fetch-retry';
 import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
 
 vi.mock('./mcp-client', async (importOriginal) => {
@@ -827,6 +828,63 @@ describe('execute() while an account in scope has failed to list', () => {
 
 		expect(error).toBeInstanceOf(StackOneAPIError);
 		expect((error as StackOneAPIError).statusCode).toBe(429);
+	});
+
+	describe('when the provider lookup cannot name a failed account', () => {
+		let now = 0;
+		let accountRequests = 0;
+		/** acc2 always fails to list, and GET /accounts always answers 403. */
+		const serveUnnameable = () => {
+			serve([ACCOUNTS[0], ACCOUNTS[1]] as typeof ACCOUNTS);
+			server.use(
+				http.get(`${TEST_BASE_URL}/accounts`, () => {
+					accountRequests += 1;
+					return HttpResponse.json({ error: 'forbidden' }, { status: 403 });
+				}),
+			);
+			failing.add('acc2');
+			return newToolSet({ accountIds: ['acc1', 'acc2'] });
+		};
+		/** A second after the last call, so its failures are no longer this call's own. */
+		const refuses = async (toolset: StackOneToolSet) => {
+			now += 1_000;
+			const error = await toolset.execute('linear_x').catch((caught: unknown) => caught);
+			expect((error as Error).message).toMatch(/may be served by an account that failed to list/);
+		};
+		const listings = (accountId: string) => listed.filter((id) => id === accountId).length;
+
+		beforeEach(() => {
+			now = 0;
+			accountRequests = 0;
+			vi.spyOn(retryTiming, 'now').mockImplementation(() => now);
+		});
+
+		it('neither looks it up nor re-lists it again for 30 seconds', async () => {
+			const toolset = serveUnnameable();
+
+			await refuses(toolset);
+			await refuses(toolset);
+			await refuses(toolset);
+
+			expect(accountRequests).toBe(1);
+			expect(listings('acc2')).toBe(1);
+
+			now += 30_000;
+			await refuses(toolset);
+
+			expect(accountRequests).toBe(2);
+			expect(listings('acc2')).toBe(2);
+		});
+
+		it('forgets the miss when the cache is cleared', async () => {
+			const toolset = serveUnnameable();
+			await refuses(toolset);
+
+			toolset.clearCatalogCache();
+			await refuses(toolset);
+
+			expect(accountRequests).toBe(2);
+		});
 	});
 
 	it('lists a failed account again at once, and then applies to whatever it serves', async () => {
