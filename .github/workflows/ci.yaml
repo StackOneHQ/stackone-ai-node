@@ -144,10 +144,9 @@ jobs:
     if: needs.check-secret.outputs.can-skip != 'true'
     runs-on: ubuntu-latest
     env:
-      # Pinned to a commit rather than the branch while StackOneHQ/stackone-ai-python#210 is
-      # open, so this only moves when we bump it deliberately. Switch to a main commit once it
-      # merges.
-      PYTHON_SDK_REF: 441a0caecd11079aafe6bd94299be47e00780605
+      # Pinned to a commit on stackone-ai-python's main, not the branch, so a Python change never
+      # silently changes what this job grades. Bump it deliberately.
+      PYTHON_SDK_REF: 049abf548c7f5448a89e7999e95336980d23afc3
     steps:
       - name: Check conformance token is configured
         env:
@@ -167,7 +166,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: StackOneHQ/sdk-conformance
-          ref: 55bd126b0187a0f28f187803ecf48e791d157bfc
+          ref: 5f60cc0dfdf4d1a25afad93a68eeefe30e89568d
           token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
           path: sdk-conformance
           persist-credentials: false
