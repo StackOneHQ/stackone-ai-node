@@ -809,6 +809,26 @@ describe('execute() while an account in scope has failed to list', () => {
 		expect(calls).toEqual([]);
 	});
 
+	it('throws the 429 when the provider lookup is rate limited', async () => {
+		serve([ACCOUNTS[0], ACCOUNTS[1]] as typeof ACCOUNTS);
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, () =>
+				HttpResponse.json(
+					{ statusCode: 429, message: 'Too many requests' },
+					{ status: 429, headers: { 'Retry-After': '0' } },
+				),
+			),
+		);
+		failing.add('acc2');
+
+		const error = await newToolSet({ accountIds: ['acc1', 'acc2'] })
+			.execute('linear_list_issues')
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		expect((error as StackOneAPIError).statusCode).toBe(429);
+	});
+
 	it('lists a failed account again at once, and then applies to whatever it serves', async () => {
 		const calls = serve([ACCOUNTS[0], ACCOUNTS[1]] as typeof ACCOUNTS);
 		failing.add('acc1');

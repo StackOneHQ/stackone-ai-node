@@ -1136,7 +1136,8 @@ export class StackOneToolSet {
 	 * @throws ToolSetLoadError If no linked connector serves the action, or an account in scope
 	 *   failed to list — after being listed again now — and its provider is the action's
 	 *   connector or unknown.
-	 * @throws StackOneAPIError If the action fails.
+	 * @throws StackOneAPIError If the action fails, or the lookup of a failed account's provider
+	 *   is rate limited.
 	 */
 	async execute(
 		actionId: string,
@@ -1181,9 +1182,14 @@ export class StackOneToolSet {
 		};
 		// With explicit account ids no GET /accounts has named the failed accounts' providers, so
 		// one dead account would refuse every action. Ask once — joining a lookup in flight — and
-		// treat the provider as unknown still if that fails too.
+		// treat the provider as unknown still if that fails too, unless it was rate limited: the
+		// key's 429 is fatal, as it is to the end-user lookup.
 		if (failed.some(([accountId]) => !this.#providers.has(accountId))) {
-			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch(() => undefined);
+			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch((error: unknown) => {
+				if (isRateLimitFailure(error)) {
+					throw error;
+				}
+			});
 		}
 		// Listed again now rather than when due, but only those that could serve the action and did
 		// not just fail for this call: re-listing an account on another provider would make this
