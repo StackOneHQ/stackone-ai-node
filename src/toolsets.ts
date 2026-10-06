@@ -652,6 +652,10 @@ export class StackOneToolSet {
 			this.#accountsRecorded = started;
 			this.#endUserIds = endUserIdsOf(accounts);
 			this.#providers = providersOf(accounts);
+			// An account this response names is no longer one the lookup missed.
+			for (const accountId of this.#providers.keys()) {
+				this.#providerMisses.delete(accountId);
+			}
 		}
 		return accounts as StackOneAccount[];
 	}
@@ -1204,15 +1208,21 @@ export class StackOneToolSet {
 			(accountId) => !this.#providers.has(accountId) && !missedRecently.has(accountId),
 		);
 		if (unknown.length > 0) {
+			const generation = this.#cacheGeneration;
 			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch((error: unknown) => {
 				if (isRateLimitFailure(error)) {
 					throw error;
 				}
 			});
+			// A miss is this call's to act on whatever happens, but only recorded for later calls
+			// if no clearCatalogCache() came in between, which promises to forget misses.
 			const missedAt = retryTiming.now();
 			for (const accountId of unknown) {
 				if (!this.#providers.has(accountId)) {
-					this.#providerMisses.set(accountId, missedAt);
+					missedRecently.add(accountId);
+					if (generation === this.#cacheGeneration) {
+						this.#providerMisses.set(accountId, missedAt);
+					}
 				}
 			}
 		}

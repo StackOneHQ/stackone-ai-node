@@ -885,6 +885,57 @@ describe('execute() while an account in scope has failed to list', () => {
 
 			expect(accountRequests).toBe(2);
 		});
+
+		it('does not re-list it in the call whose lookup missed it', async () => {
+			const toolset = serveUnnameable();
+			await toolset.fetchTools({ mode: 'search_execute' });
+
+			// Concurrent calls join the one lookup, and none of them waits out acc2 again.
+			await Promise.all([refuses(toolset), refuses(toolset)]);
+
+			expect(accountRequests).toBe(1);
+			expect(listings('acc2')).toBe(1);
+		});
+
+		it('does not record a miss across a clear made during the lookup', async () => {
+			const toolset = serveUnnameable();
+			let release = () => {};
+			const held = new Promise<void>((resolve) => {
+				release = resolve;
+			});
+			server.use(
+				http.get(`${TEST_BASE_URL}/accounts`, async () => {
+					accountRequests += 1;
+					if (accountRequests === 1) {
+						await held;
+					}
+					return HttpResponse.json({ error: 'forbidden' }, { status: 403 });
+				}),
+			);
+
+			const first = refuses(toolset);
+			await vi.waitFor(() => expect(accountRequests).toBe(1));
+			toolset.clearCatalogCache();
+			release();
+			await first;
+			await refuses(toolset);
+
+			expect(accountRequests).toBe(2);
+		});
+
+		it('forgets the miss once GET /accounts names the account', async () => {
+			const toolset = serveUnnameable();
+			await refuses(toolset);
+			server.use(
+				http.get(`${TEST_BASE_URL}/accounts`, () => HttpResponse.json([ACCOUNTS[0], ACCOUNTS[1]])),
+			);
+			await toolset.fetchAccounts();
+
+			await refuses(toolset);
+
+			// acc2 is linear's, so it is listed again at once rather than after the window.
+			expect(listings('acc2')).toBe(2);
+		});
 	});
 
 	it('lists a failed account again at once, and then applies to whatever it serves', async () => {
