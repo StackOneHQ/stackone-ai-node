@@ -147,7 +147,7 @@ jobs:
       # Pinned to a commit rather than the branch while StackOneHQ/stackone-ai-python#210 is
       # open, so this only moves when we bump it deliberately. Switch to a main commit once it
       # merges.
-      PYTHON_SDK_REF: eeef2c00aeeaddf5d4de70e7e0d2e4b12d60176f
+      PYTHON_SDK_REF: 9a35e2e409b2ba3715c155188f725ff6248ca950
     steps:
       - name: Check conformance token is configured
         env:
