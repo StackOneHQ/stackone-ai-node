@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   gitleaks:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -34,7 +34,7 @@ jobs:
         run: gitleaks detect --source . --config .gitleaks.toml
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -46,7 +46,7 @@ jobs:
         run: pnpm run lint
 
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -76,7 +76,7 @@ jobs:
   # catalog pins, which is the only v7 that moves.
   ai-peer-range:
     name: ai-peer-range (${{ matrix.ai }})
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     strategy:
       fail-fast: false
       matrix:
@@ -121,7 +121,7 @@ jobs:
   # Fork PRs and Dependabot runs cannot access this secret and skip this gate;
   # internal branches and PRs require the secret and fail if it is absent or expired.
   check-secret:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-2x
     outputs:
       can-skip: ${{ steps.check.outputs.can-skip }}
     steps:
@@ -142,7 +142,7 @@ jobs:
   conformance:
     needs: check-secret
     if: needs.check-secret.outputs.can-skip != 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     env:
       # Pinned to a commit on stackone-ai-python's main, not the branch, so a Python change never
       # silently changes what this job grades. Bump it deliberately.
@@ -232,7 +232,7 @@ jobs:
   ci-ok:
     if: always()
     needs: [check-secret, gitleaks, lint, build-and-test, ai-peer-range, conformance]
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-2x
     steps:
       - name: Require every job to have passed
         run: |
@@ -246,7 +246,7 @@ jobs:
           fi
 
   coverage:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
@@ -267,7 +267,7 @@ jobs:
 
   deploy-coverage:
     needs: coverage
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-2x
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

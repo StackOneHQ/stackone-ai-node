@@ -21,7 +21,7 @@ concurrency:
 jobs:
   # Check flake syntax and structure
   flake-check:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   dependabot-auto-merge:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-2x
     if: github.actor == 'dependabot[bot]'
     steps:
       - name: Fetch Dependabot metadata
