@@ -1,5 +1,84 @@
 # Changelog
 
+## [3.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.10.0...v3.0.0) (2026-10-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* StackOneRpcTool, RpcExecuteConfig, BinaryDownloadResult and isBinaryDownloadResult are removed. Action results are the server's { isError, result, ... } object rather than the /actions/rpc body. A file action's `result` is the server's single-use { download_url, expires_at, file } instead of bytes, and the call raises StackOneAPIError with status 501 when no link can be issued. The /mcp URL no longer pins param-style=flat_prefixed, so tool argument names follow the server's own param style. dryRun returns { url, method: 'tools/call', name, arguments }.
+* RequestBuilder and direct-HTTP execution are removed: ExecuteConfig has no http kind, ParameterLocation is no longer exported, and BaseTool#execute throws unless overridden. BaseTool no longer takes headers and loses getHeaders()/setHeaders() and connector; Tools#getConnectors() is removed. StackOneTool's fifth constructor argument is the account id. StackOneToolSetConfig loses authentication, strict and rpcClient. The constructor throws ToolSetConfigError without an API key. fetchTools() returns fresh tool instances on every call, ordered by account id, and discovers accounts when none is configured.
+* AuthenticationConfig and BaseToolSetConfig are no longer exported. Pass apiKey in StackOneToolSetConfig.
+* ToolExecution, the execution metadata toAISDK() can attach, no longer carries headers, so it can no longer expose the request credential.
+* searchTools(), searchActionNames(), getSearchTool(), SearchTool, the tool_search/tool_execute meta tools, openai({ mode: 'search_and_execute' }) and the search constructor option are removed. Use the server-side search() instead.
+* SemanticSearchClient, SemanticSearchError and the SemanticSearchOptions, SemanticSearchResponse and SemanticSearchResult types are no longer exported. search() runs on the server and returns SearchResult objects.
+* the SearchMode, SearchToolsOptions, SearchActionNamesOptions and SearchConfig types are no longer exported. Use SearchOptions with search().
+* StackOneToolSet#getSearchConfig() and StackOneToolSet#getTools() are removed. For search and execute meta tools, construct the toolset with toolMode: 'search_execute' and call fetchTools().
+* DefenderConfig, DefenderMode and DEFAULT_DEFENDER_CONFIG are no longer exported, and the defender option and StackOneToolSet#defenderMode are removed. Configure Defender in the StackOne dashboard.
+* createFeedbackTool is no longer exported and fetchTools() no longer appends a tool_feedback tool. Use submitFeedback() or the served stackone_submit_feedback tool.
+* **toolsets:** headers a tool call supplies are dropped unless the tool's served schema declares them.
+* **tools:** a header argument (an entry of a nested headers object, or a top-level headers_<name> argument) is forwarded only if the served schema declares it in the same form: headers.properties.<name>, any name when headers is an open map (type "object", no properties, and additionalProperties not false), or the headers_<name> property. Authorization, x-account-id and User-Agent are never forwarded as header arguments, even when declared. A top-level headers argument that is not a plain object is dropped unless the served schema declares headers as a non-object field, in which case it is an ordinary argument sent as given. A headers_<name> argument whose value is an array or object is dropped. Every other argument is sent unchanged.
+* **toolsets:** Authorization, x-account-id and User-Agent in the headers constructor option are ignored with a warning; the SDK always sets them itself. Use apiKey and accountId/accountIds instead.
+* ToolSetError (and so ToolSetConfigError and ToolSetLoadError) now extends StackOneError.
+* **errors:** StackOneAPIError no longer appends responseBody.message to its message. Read the server's explanation from error.responseBody.
+* **toolsets:** the STACKONE_ACCOUNT_ID environment variable is no longer read. Pass the account id as accountId or accountIds; without one, the toolset discovers every active account linked to the API key.
+* **toolsets:** accountId: '' and an empty id in accountIds, execute.accountIds, setAccounts() or a call's accountIds now throw ToolSetConfigError. Before, an empty accountId fell back to STACKONE_ACCOUNT_ID or to account discovery. accountId: process.env.STACKONE_ACCOUNT_ID now throws when the variable is set but empty; pass process.env.STACKONE_ACCOUNT_ID || undefined to discover accounts instead.
+
+### Features
+
+* add search(), execute() and submitFeedback() with session ids ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **errors:** add ToolArgumentsError ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **feedback:** add actionRunId, and send feedback on the lowest account id ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* retry HTTP 429 with Retry-After or backoff, and fail the whole call when a 429 persists ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **retry:** warn when a 429's wait would pass the deadline ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **search:** tag each search hit with its account_id, and apply topK to the merged ranking ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **tool:** preserve root schema keywords in toJsonSchema pass-through ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **tools:** add executeOpenAIToolCalls() ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** send x-end-user-id for non-shared accounts ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** skip non-shared accounts during discovery unless includeNonShared ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** warn when STACKONE_ACCOUNT_ID is set but ignored ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **types:** type execute() and submitFeedback() results as ActionResult ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+
+
+### Bug Fixes
+
+* align error and warning messages with the Python SDK ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **errors:** keep the message StackOneAPIError is given ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **execute:** refuse an action whose connector is linked on more than one account ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **mcp-client:** give the end-user refusal the failed lookup as its cause ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **mcp-client:** keep a retried 429 on record while another request in the session is answered ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **retry:** clear the rate-limit flag once a retry succeeds ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **retry:** report a timeout while retrying a 429 as the 429 ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **tools:** build every adapter from the first tool of each name ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** cache healthy accounts and keep each failure when every account fails ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** fail discovery when every active account is non-shared ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** ignore SDK-owned names in the headers option ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** look up a non-shared account's end user when the API asks for it ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** look up the providers of failed accounts named explicitly before refusing an action ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** re-list only the failed accounts that could serve the action ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** refuse to execute while a matching account failed to list ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** reject an empty account id instead of widening to every account ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** remember when execute()'s provider lookup cannot name a failed account ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** rethrow a rate-limited provider lookup from execute() ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** say shared accounts are used in the STACKONE_ACCOUNT_ID warning ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** stop model-supplied headers from switching tenant ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **tools:** forward only the header arguments a served schema declares ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+
+
+### Code Refactoring
+
+* execute every tool over MCP tools/call ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* rebuild the toolset on the served MCP catalog ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove AuthenticationConfig and BaseToolSetConfig ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove client-side search from the Node SDK ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove getSearchConfig() and getTools() ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove SDK-side defender configuration ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove SemanticSearchClient and its types ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove the client-side feedback tool ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove the client-side search option types ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* remove ToolExecution#headers ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* root every SDK error at StackOneError ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+* **toolsets:** stop reading STACKONE_ACCOUNT_ID ([c41b100](https://github.com/StackOneHQ/stackone-ai-node/commit/c41b1009b10287057ac72070f69ee147fad3be6b))
+
 ## [2.10.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.9.2...v2.10.0) (2026-07-27)
 
 
