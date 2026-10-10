@@ -529,3 +529,14 @@ nix develop
 ```
 
 The flake provides all necessary development dependencies including Node.js, pnpm, and other build tools.
+
+### TypeScript compilers
+
+`pnpm test` runs Vitest type checks with stable native TypeScript 7 through the
+explicit `@typescript/native` executable path. The pinned TypeScript 5.9.3 package
+remains available for compiler API consumers and the published-package consumer
+compatibility test. `pnpm build` retains its existing native-preview declaration
+compiler.
+
+Use these scripts or an explicit compiler path when adding checks: both compiler
+packages expose a `tsc` command, so bare `tsc` and `pnpm exec tsc` are ambiguous.
