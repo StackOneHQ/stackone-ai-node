@@ -1,0 +1,1172 @@
+{
+    "$schema": "./schema/messages.schema.json",
+    "description": "The canonical wording of every user-facing warning and error message both SDKs emit. `template` is the canonical text; `python` and `node` are each SDK's text today, written with the same placeholders, so an SDK can see what changes. A prefix the language adds — Node's `[@stackone/ai] `, Python's logger name — is outside the template. An error's class is in `error`. `matches` says whether an SDK's text is already the canonical one; `notes` say where the text depends on more than the template.",
+    "version": 1,
+    "prefixes": {
+        "node": "Every warning goes through console.warn, prefixed `[@stackone/ai] ` — outside the template.",
+        "python": "Every warning is a WARNING record on a `stackone.*` logger; its getMessage() is the template, rendered."
+    },
+    "formats": {
+        "text": "Inserted as is.",
+        "json": "Compact JSON text: JSON.stringify(value), json.dumps(value, ensure_ascii=False, separators=(\",\", \":\")). A string comes out in double quotes.",
+        "integer": "Decimal digits.",
+        "seconds": "A number of seconds as JavaScript's String(number) writes it: 1, 0.5, 1.25 — never 1.0, never padded, never exponent form for values in [1e-6, 1e21).",
+        "seconds-2dp": "The seconds rounded half up to two decimals, Math.floor(x * 100 + 0.5) / 100, then written as `seconds`: 0, 0.75, 1.5.",
+        "json-type": "The JSON type of the value: object, array, string, number, boolean or null.",
+        "reason": "The text for a header reason code, from `reasons`."
+    },
+    "reasons": {
+        "set-by-sdk": "set by the SDK",
+        "not-declared": "not declared by the schema",
+        "malformed": "malformed",
+        "not-an-object": "not an object",
+        "not-a-scalar": "not a string, number or boolean"
+    },
+    "messages": [
+        {
+            "id": "header-dropped",
+            "kind": "warning",
+            "template": "Dropping header {header} from a tool call: {reason}",
+            "placeholders": {
+                "header": {
+                    "format": "json",
+                    "description": "the nested header name, trimmed"
+                },
+                "reason": {
+                    "format": "reason",
+                    "description": "set-by-sdk, not-declared or malformed"
+                }
+            },
+            "python": "Dropping header {header} from a tool call: {reason}",
+            "node": "Dropping header {header} from a tool call: {reason}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "The name is JSON text, so a quote, a backslash or a control character in it is escaped."
+        },
+        {
+            "id": "header-argument-dropped",
+            "kind": "warning",
+            "template": "Dropping header argument {argument} from a tool call: {reason}",
+            "placeholders": {
+                "argument": {
+                    "format": "json",
+                    "description": "the top-level argument: headers, or headers_<name> as supplied"
+                },
+                "reason": {
+                    "format": "reason",
+                    "description": "any reason code"
+                }
+            },
+            "python": "Dropping header argument {argument} from a tool call: {reason}",
+            "node": "Dropping header argument {argument} from a tool call: {reason}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "The argument is JSON text, as the name in header-dropped is."
+        },
+        {
+            "id": "rate-limit-retry",
+            "kind": "warning",
+            "template": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; retrying in {delay}s",
+            "placeholders": {
+                "method": {
+                    "format": "text",
+                    "description": "the HTTP method"
+                },
+                "url": {
+                    "format": "text",
+                    "description": "the request URL"
+                },
+                "attempt": {
+                    "format": "integer",
+                    "description": "the attempt that was answered 429, 1-based"
+                },
+                "max_attempts": {
+                    "format": "integer",
+                    "description": "4"
+                },
+                "delay": {
+                    "format": "seconds-2dp",
+                    "description": "the wait before the next attempt"
+                }
+            },
+            "python": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; retrying in {delay}s",
+            "node": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; retrying in {delay}s",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Names the attempt that was answered 429, not the one about to be made."
+        },
+        {
+            "id": "rate-limit-deadline",
+            "kind": "warning",
+            "template": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; not retrying, because waiting {delay}s would pass the deadline",
+            "placeholders": {
+                "method": {
+                    "format": "text",
+                    "description": "the HTTP method"
+                },
+                "url": {
+                    "format": "text",
+                    "description": "the request URL"
+                },
+                "attempt": {
+                    "format": "integer",
+                    "description": "the attempt that was answered 429, 1-based"
+                },
+                "max_attempts": {
+                    "format": "integer",
+                    "description": "4"
+                },
+                "delay": {
+                    "format": "seconds-2dp",
+                    "description": "the wait before the next attempt that would pass the deadline"
+                }
+            },
+            "python": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; not retrying, because waiting {delay}s would pass the deadline",
+            "node": "{method} {url} was rate limited (429) on attempt {attempt} of {max_attempts}; not retrying, because waiting {delay}s would pass the deadline",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "When the next wait would not finish before the call's deadline, the SDK ends the call with the 429 it already has instead of sleeping, and warns this in place of rate-limit-retry."
+        },
+        {
+            "id": "account-id-env-ignored",
+            "kind": "warning",
+            "template": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.",
+            "placeholders": {},
+            "python": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.",
+            "node": "STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Emitted once, when the toolset is constructed, if the STACKONE_ACCOUNT_ID environment variable is set and non-empty and neither an account id nor account ids were passed."
+        },
+        {
+            "id": "skip-account",
+            "kind": "warning",
+            "template": "Skipping account that failed to list tools — {account_id}: {error}",
+            "placeholders": {
+                "account_id": {
+                    "format": "text",
+                    "description": "the account's id"
+                },
+                "error": {
+                    "format": "text",
+                    "description": "the failure's own message"
+                }
+            },
+            "python": "Skipping account that failed to list tools — {account_id}: {error}",
+            "node": "Skipping account that failed to list tools — {account_id}: {error}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "The error part is whichever message the failure carries, so the whole text is the same in both SDKs only where that message is."
+        },
+        {
+            "id": "skip-connector",
+            "kind": "warning",
+            "template": "Skipping connector that failed to search — {tool}: {error}",
+            "placeholders": {
+                "tool": {
+                    "format": "text",
+                    "description": "the *_search_actions tool's name"
+                },
+                "error": {
+                    "format": "text",
+                    "description": "the failure's own message"
+                }
+            },
+            "python": "Skipping connector that failed to search — {tool}: {error}",
+            "node": "Skipping connector that failed to search — {tool}: {error}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "duplicate-tool-names",
+            "kind": "warning",
+            "template": "{count} tool name(s) are served by more than one account ({names}). The first one listed, from the lowest account id, is used — pass account ids to choose.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many names clash"
+                },
+                "names": {
+                    "format": "text",
+                    "description": "up to five of them, sorted, joined by \", \""
+                }
+            },
+            "python": "{count} tool name(s) are served by more than one account ({names}). The first one listed, from the lowest account id, is used — pass account ids to choose.",
+            "node": "{count} tool name(s) are served by more than one account ({names}). The first one listed, from the lowest account id, is used — pass account ids to choose.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Language-neutral wording: neither SDK's method or parameter names. Emitted once when a fetched collection holds a clashing name, and again by every adapter that keeps the first tool per name and drops the rest: OpenAI, LangChain, Pydantic AI, AI SDK and Claude Agent SDK. Listing order is ascending account id, so the first is the lowest account id's."
+        },
+        {
+            "id": "ambiguous-connector",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
+            "placeholders": {
+                "action_id": {
+                    "format": "json",
+                    "description": "the action id"
+                },
+                "count": {
+                    "format": "integer",
+                    "description": "how many connectors match: the longest connector prefix, linked on more than one account"
+                },
+                "tools": {
+                    "format": "text",
+                    "description": "each matching *_execute_action tool as \"{tool} on {account_id}\", in ascending account-id order, joined by \", \""
+                }
+            },
+            "python": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
+            "node": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised by execute() when the action's connector is linked on more than one account in scope — no account id passed, or several; nothing is called. Was a warning that ran the first match."
+        },
+        {
+            "id": "mcp-timeout",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "MCP request to {endpoint} timed out after {timeout}s",
+            "placeholders": {
+                "endpoint": {
+                    "format": "text",
+                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                },
+                "timeout": {
+                    "format": "seconds",
+                    "description": "the toolset's timeout"
+                }
+            },
+            "python": "MCP request to {endpoint} timed out after {timeout}s",
+            "node": "MCP request to {endpoint} timed out after {timeout}s",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Seconds, written as a number: 1s, 0.5s, 60s."
+        },
+        {
+            "id": "mcp-rate-limit-timeout",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "MCP request to {endpoint} was rate limited (429) and timed out after {timeout}s while retrying",
+            "placeholders": {
+                "endpoint": {
+                    "format": "text",
+                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                },
+                "timeout": {
+                    "format": "seconds",
+                    "description": "the toolset's timeout"
+                }
+            },
+            "python": "MCP request to {endpoint} was rate limited (429) and timed out after {timeout}s while retrying",
+            "node": "MCP request to {endpoint} was rate limited (429) and timed out after {timeout}s while retrying",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised in place of mcp-timeout when the request that timed out was retrying a 429. Its status is 429, so a multi-account call fails with it rather than skipping the account (invariant 14)."
+        },
+        {
+            "id": "accounts-rate-limit-timeout",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "Listing accounts at {url} was rate limited (429) and timed out after {timeout}s while retrying",
+            "placeholders": {
+                "url": {
+                    "format": "text",
+                    "description": "the /accounts URL"
+                },
+                "timeout": {
+                    "format": "seconds",
+                    "description": "the toolset's timeout"
+                }
+            },
+            "python": "Listing accounts at {url} was rate limited (429) and timed out after {timeout}s while retrying",
+            "node": "Listing accounts at {url} was rate limited (429) and timed out after {timeout}s while retrying",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "GET /accounts' counterpart of mcp-rate-limit-timeout; status 429."
+        },
+        {
+            "id": "mcp-http-failure",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "MCP request to {endpoint} failed with {status} {reason_phrase}: {body}",
+            "placeholders": {
+                "endpoint": {
+                    "format": "text",
+                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                },
+                "status": {
+                    "format": "integer",
+                    "description": "the HTTP status"
+                },
+                "reason_phrase": {
+                    "format": "text",
+                    "description": "the status's reason phrase"
+                },
+                "body": {
+                    "format": "text",
+                    "description": "the response body, trimmed; with an empty body the \": {body}\" suffix is omitted"
+                }
+            },
+            "python": "MCP request to {endpoint} failed with {status} {reason_phrase}: {body}",
+            "node": "MCP request to {endpoint} failed with {status} {reason_phrase}: {body}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "For a status with no reason phrase, the space before it is left out too (`failed with 599: …`), as is the `: {body}` suffix for an empty body."
+        },
+        {
+            "id": "mcp-failure",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "MCP request to {endpoint} failed: {error_type}: {error_message}",
+            "placeholders": {
+                "endpoint": {
+                    "format": "text",
+                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                },
+                "error_type": {
+                    "format": "text",
+                    "description": "the innermost cause's class name, which is the language's own"
+                },
+                "error_message": {
+                    "format": "text",
+                    "description": "its message"
+                }
+            },
+            "python": "MCP request to {endpoint} failed: {error_type}: {error_message}",
+            "node": "MCP request to {endpoint} failed: {error_type}: {error_message}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "accounts-http-failure",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "Listing accounts at {url} failed with {status} {reason_phrase}: {body}",
+            "placeholders": {
+                "url": {
+                    "format": "text",
+                    "description": "the /accounts URL"
+                },
+                "status": {
+                    "format": "integer",
+                    "description": "the HTTP status"
+                },
+                "reason_phrase": {
+                    "format": "text",
+                    "description": "the reason phrase"
+                },
+                "body": {
+                    "format": "text",
+                    "description": "the response body, trimmed"
+                }
+            },
+            "python": "Listing accounts at {url} failed with {status} {reason_phrase}: {body}",
+            "node": "Listing accounts at {url} failed with {status} {reason_phrase}: {body}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "For a status with no reason phrase, Node leaves out the space before the colon and Python keeps it; with an empty body, both keep the trailing `: `. Neither is canonical yet."
+        },
+        {
+            "id": "accounts-unreachable",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "Could not reach {url}: {detail}",
+            "placeholders": {
+                "url": {
+                    "format": "text",
+                    "description": "the /accounts URL"
+                },
+                "detail": {
+                    "format": "text",
+                    "description": "the transport's own message"
+                }
+            },
+            "python": "Could not reach {url}: {detail}",
+            "node": "Could not reach {url}: {detail}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "accounts-invalid-json",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "Invalid JSON returned by {url}: {detail}",
+            "placeholders": {
+                "url": {
+                    "format": "text",
+                    "description": "the /accounts URL"
+                },
+                "detail": {
+                    "format": "text",
+                    "description": "the parser's own message"
+                }
+            },
+            "python": "Invalid JSON returned by {url}: {detail}",
+            "node": "Invalid JSON returned by {url}: {detail}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "accounts-unexpected-shape",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "Unexpected /accounts response shape: expected a list, got {json_type}",
+            "placeholders": {
+                "json_type": {
+                    "format": "json-type",
+                    "description": "object, string, number, boolean or null"
+                }
+            },
+            "python": "Unexpected /accounts response shape: expected a list, got {json_type}",
+            "node": "Unexpected /accounts response shape: expected a list, got {json_type}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Names the JSON type, not either language's own type name."
+        },
+        {
+            "id": "no-linked-accounts",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.",
+            "placeholders": {},
+            "python": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.",
+            "node": "This API key has no linked accounts. Link one in the StackOne dashboard, or pass an account id explicitly.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Language-neutral wording: neither SDK's parameter name."
+        },
+        {
+            "id": "no-active-accounts",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass an account id explicitly.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many accounts are linked"
+                },
+                "accounts": {
+                    "format": "text",
+                    "description": "each as \"{provider} ({status})\", joined by \", \""
+                }
+            },
+            "python": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass an account id explicitly.",
+            "node": "None of this API key's {count} linked accounts are active: {accounts}. Re-link them in the StackOne dashboard, or pass an account id explicitly.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "A missing provider or status is written None by Python and undefined by Node; neither is canonical yet."
+        },
+        {
+            "id": "all-accounts-failed",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "Every account failed to list tools: {failures}",
+            "placeholders": {
+                "failures": {
+                    "format": "text",
+                    "description": "each failed account as \"{account_id}: {error}\", where {error} is the failure's own message (as in skip-account), in ascending account-id order, joined by \"; \" — e.g. \"acc-1: <message>; acc-2: <message>\""
+                }
+            },
+            "python": "Every account failed to list tools: {failures}",
+            "node": "Every account failed to list tools: {failures}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Only when every account in scope failed to list, and only when the failures do not all share one HTTP status: if they do, the SDK rethrows the StackOneAPIError itself (e.g. two accounts both answering 401 raise StackOneAPIError 401). The failures are the error's cause: Python raises it `from ExceptionGroup(...)` of them, Node passes `{ cause: new AggregateError(...) }`. An account that listed zero tools has not failed. Both SDKs join the failures with \"; \", and also raise when some accounts failed and the rest listed zero tools. Replaces no-account-returned-tools."
+        },
+        {
+            "id": "no-connector-returned-results",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "No connector returned results. {failures}",
+            "placeholders": {
+                "failures": {
+                    "format": "text",
+                    "description": "each as \"{tool}: {error}\", joined by \" | \""
+                }
+            },
+            "python": "No connector returned results. {failures}",
+            "node": "No connector returned results. {failures}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "fetch-tools-failed",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "Error fetching tools: {detail}",
+            "placeholders": {
+                "detail": {
+                    "format": "text",
+                    "description": "the unexpected failure's message"
+                }
+            },
+            "python": "Error fetching tools: {detail}",
+            "node": "Error fetching tools: {detail}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "missing-api-key",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable",
+            "placeholders": {},
+            "python": "An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable",
+            "node": "An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Language-neutral wording: neither SDK's parameter name."
+        },
+        {
+            "id": "empty-account-id",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must not be an empty string",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "account_id / accountId"
+                }
+            },
+            "python": "{parameter} must not be an empty string",
+            "node": "{parameter} must not be an empty string",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Each SDK names the parameter in its own spelling."
+        },
+        {
+            "id": "account-ids-not-a-list",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must be a list of account ids, not a string. Did you mean [{value}]?",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "the parameter's name in the SDK's own spelling: account_ids / accountIds"
+                },
+                "value": {
+                    "format": "json",
+                    "description": "the string given"
+                }
+            },
+            "python": "{parameter} must be a list of account ids, not a string. Did you mean [{value}]?",
+            "node": "{parameter} must be a list of account ids, not a string. Did you mean [{value}]?",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "\"list\", not \"array\": the language-neutral word. The suggestion is JSON, so it reads the same in both."
+        },
+        {
+            "id": "account-ids-not-strings",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must be a list of account id strings",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "the parameter's name in the SDK's own spelling: account_ids / accountIds"
+                }
+            },
+            "python": "{parameter} must be a list of account id strings",
+            "node": "{parameter} must be a list of account id strings",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "The list given is not echoed: not every value it could hold is JSON."
+        },
+        {
+            "id": "account-ids-empty-id",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must not contain an empty account id",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "the parameter's name in the SDK's own spelling: account_ids / accountIds"
+                }
+            },
+            "python": "{parameter} must not contain an empty account id",
+            "node": "{parameter} must not contain an empty account id",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "invalid-session-id",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must be a non-empty string, got {value}",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "session_id / sessionId"
+                },
+                "value": {
+                    "format": "json",
+                    "description": "the value given"
+                }
+            },
+            "python": "{parameter} must be a non-empty string, got {value}",
+            "node": "{parameter} must be a non-empty string, got {value}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "null (None) means the session id was not given, and does not raise this."
+        },
+        {
+            "id": "invalid-action-id",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must be a non-empty string, got {value}",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "action_id / actionId"
+                },
+                "value": {
+                    "format": "json",
+                    "description": "the value given"
+                }
+            },
+            "python": "{parameter} must be a non-empty string, got {value}",
+            "node": "{parameter} must be a non-empty string, got {value}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "execute-arguments-not-an-object",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "arguments must be a JSON object, got {json_type}",
+            "placeholders": {
+                "json_type": {
+                    "format": "json-type",
+                    "description": "array, string, number, boolean or null"
+                }
+            },
+            "python": "arguments must be a JSON object, got {json_type}",
+            "node": "arguments must be a JSON object, got {json_type}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Names the JSON type; no object reaches this message."
+        },
+        {
+            "id": "top-k-out-of-range",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must be an integer between 1 and {max}, got {value}",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "top_k / topK"
+                },
+                "max": {
+                    "format": "integer",
+                    "description": "50"
+                },
+                "value": {
+                    "format": "json",
+                    "description": "the value given"
+                }
+            },
+            "python": "{parameter} must be an integer between 1 and {max}, got {value}",
+            "node": "{parameter} must be an integer between 1 and {max}, got {value}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "tool-names-not-a-list",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{parameter} must be a list of tool names, not a string. Did you mean [{value}]?",
+            "placeholders": {
+                "parameter": {
+                    "format": "text",
+                    "description": "tool_names / toolNames"
+                },
+                "value": {
+                    "format": "json",
+                    "description": "the string given"
+                }
+            },
+            "python": "{parameter} must be a list of tool names, not a string. Did you mean [{value}]?",
+            "node": "{parameter} must be a list of tool names, not a string. Did you mean [{value}]?",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "feedback-not-enabled",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "The server did not serve stackone_submit_feedback: feedback is not enabled for this project.",
+            "placeholders": {},
+            "python": "The server did not serve stackone_submit_feedback: feedback is not enabled for this project.",
+            "node": "The server did not serve stackone_submit_feedback: feedback is not enabled for this project.",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "no-connector-for-action",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "No connector found for {action_id}. Use search() to discover valid action ids.",
+            "placeholders": {
+                "action_id": {
+                    "format": "json",
+                    "description": "the action id"
+                }
+            },
+            "python": "No connector found for {action_id}. Use search() to discover valid action ids.",
+            "node": "No connector found for {action_id}. Use search() to discover valid action ids.",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "arguments-not-finite",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "Arguments for {tool} could not be encoded as JSON: {value} is not a JSON number",
+            "placeholders": {
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name"
+                },
+                "value": {
+                    "format": "text",
+                    "description": "NaN, Infinity or -Infinity"
+                }
+            },
+            "python": "Arguments for {tool} could not be encoded as JSON: {value} is not a JSON number",
+            "node": "Arguments for {tool} could not be encoded as JSON: {value} is not a JSON number",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "The value is in JavaScript's spelling, and the message leaves out where in the arguments it is, which Python's encoder does not report."
+        },
+        {
+            "id": "arguments-not-encodable",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "Arguments for {tool} could not be encoded as JSON: {detail}",
+            "placeholders": {
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name"
+                },
+                "detail": {
+                    "format": "text",
+                    "description": "the SDK's own explanation: a circular reference, a non-JSON type, …"
+                }
+            },
+            "python": "Arguments for {tool} could not be encoded as JSON: {detail}",
+            "node": "Arguments for {tool} could not be encoded as JSON: {detail}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "For every reason but a non-finite number, which has its own message above."
+        },
+        {
+            "id": "arguments-invalid-json",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "Invalid JSON in arguments for {tool}: {detail}",
+            "placeholders": {
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name"
+                },
+                "detail": {
+                    "format": "text",
+                    "description": "the JSON parser's own message"
+                }
+            },
+            "python": "Invalid JSON in arguments for {tool}: {detail}",
+            "node": "Invalid JSON in arguments for {tool}: {detail}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "arguments-not-an-object",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "Tool arguments for {tool} must be a JSON object",
+            "placeholders": {
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name"
+                }
+            },
+            "python": "Tool arguments for {tool} must be a JSON object",
+            "node": "Tool arguments for {tool} must be a JSON object",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "For every value that is not an object, including one that is not a string either."
+        },
+        {
+            "id": "tool-call-failed",
+            "kind": "error",
+            "error": {
+                "python": "StackOneAPIError",
+                "node": "StackOneAPIError"
+            },
+            "template": "Tool {tool} failed: {detail}",
+            "placeholders": {
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name"
+                },
+                "detail": {
+                    "format": "text",
+                    "description": "the result's text, or its structured content as compact JSON"
+                }
+            },
+            "python": "Tool {tool} failed: {detail}",
+            "node": "Tool {tool} failed: {detail}",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "no-executor",
+            "kind": "error",
+            "error": {
+                "python": "StackOneError",
+                "node": "StackOneError"
+            },
+            "template": "Tool {tool} has no executor. Override execute() to run a hand-built tool.",
+            "placeholders": {
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name"
+                }
+            },
+            "python": "Tool {tool} has no executor. Override execute() to run a hand-built tool.",
+            "node": "Tool {tool} has no executor. Override execute() to run a hand-built tool.",
+            "matches": {
+                "python": true,
+                "node": true
+            }
+        },
+        {
+            "id": "unknown-tool",
+            "kind": "tool-result",
+            "template": "Unknown tool {name}",
+            "placeholders": {
+                "name": {
+                    "format": "json",
+                    "description": "the tool call's function name"
+                }
+            },
+            "python": "Unknown tool {name}",
+            "node": "Unknown tool {name}",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Not raised: the `error` of the tool message execute_openai_tool_calls / executeOpenAIToolCalls returns for a call to a tool not in the collection."
+        },
+        {
+            "id": "toolset-headers-ignored",
+            "kind": "warning",
+            "template": "Ignoring headers {names}: the SDK sets them itself. Pass the API key and account ids through their own options instead.",
+            "placeholders": {
+                "names": {
+                    "format": "text",
+                    "description": "each ignored name as given, in double quotes, joined with \", \", in the order supplied"
+                }
+            },
+            "python": "Ignoring headers {names}: the SDK sets them itself. Pass the API key and account ids through their own options instead.",
+            "node": "Ignoring headers {names}: the SDK sets them itself. Pass the API key and account ids through their own options instead.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Emitted once at construction when the toolset's headers option names Authorization, x-account-id or User-Agent (any case, surrounding whitespace ignored). x-end-user-id is allowed in this option and is not warned about. The option's other headers go on every request, GET /accounts included, beneath the SDK's own."
+        },
+        {
+            "id": "connector-account-unavailable",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetLoadError",
+                "node": "ToolSetLoadError"
+            },
+            "template": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
+            "placeholders": {
+                "action_id": {
+                    "format": "json",
+                    "description": "the action id execute() was called with, JSON-quoted as in ambiguous-connector"
+                },
+                "failures": {
+                    "format": "text",
+                    "description": "each failed account as \"{account_id}: {error}\", where {error} is the failure's own message (as in skip-account), in ascending account-id order, joined by \"; \" — same format as all-accounts-failed"
+                }
+            },
+            "python": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
+            "node": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised by execute() when an account in scope is marked failed and, after an immediate re-list, still fails, and that account's provider (from GET /accounts) matches the action's connector or is unknown (no GET /accounts record). A failed account on a different known provider does not block routing to the remaining account."
+        },
+        {
+            "id": "non-shared-accounts-skipped",
+            "kind": "warning",
+            "template": "Discovery skipped {count} non-shared account(s) ({accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many non-shared accounts were skipped"
+                },
+                "accounts": {
+                    "format": "text",
+                    "description": "the skipped accounts' ids, ascending, joined by \", \""
+                }
+            },
+            "python": "Discovery skipped {count} non-shared account(s) ({accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "node": "Discovery skipped {count} non-shared account(s) ({accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Emitted once per discovery (fetchTools / search) that skips any account with shared === false from GET /accounts, unless the toolset opts in: Python include_non_shared=True, Node includeNonShared: true. End-user ids are still recorded from every GET /accounts regardless."
+        },
+        {
+            "id": "no-shared-accounts",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "None of this API key's {count} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many active accounts this API key has"
+                }
+            },
+            "python": "None of this API key's {count} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "node": "None of this API key's {count} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised by discovery (fetchTools / search) instead of non-shared-accounts-skipped when every active account on this API key is non-shared and the toolset has not opted in. With no shared account to serve a catalog, discovery fails outright rather than warning and returning an empty one."
+        }
+    ],
+    "unshared": [
+        {
+            "sdk": "python",
+            "kind": "error",
+            "text": "Cannot provide both positional and keyword arguments",
+            "notes": "call() only; Node has no call()."
+        },
+        {
+            "sdk": "python",
+            "kind": "error",
+            "text": "Only one positional argument is allowed"
+        },
+        {
+            "sdk": "python",
+            "kind": "error",
+            "text": "Tool \"{tool}\" has no API key to authenticate with."
+        },
+        {
+            "sdk": "node",
+            "kind": "error",
+            "text": "Cannot provide both accountId and accountIds. Use accountId for a single account or accountIds for multiple accounts."
+        },
+        {
+            "sdk": "node",
+            "kind": "error",
+            "text": "query must be a string, got {typeof}"
+        },
+        {
+            "sdk": "node",
+            "kind": "error",
+            "text": "toolNames must be an array of tool names"
+        },
+        {
+            "sdk": "node",
+            "kind": "error",
+            "text": "Could not read the response from {url}: {detail}"
+        },
+        {
+            "sdk": "node",
+            "kind": "tool-result",
+            "text": "Unsupported tool call type \"{type}\""
+        },
+        {
+            "sdk": "node",
+            "kind": "error",
+            "text": "Tool {name} is not a StackOne tool"
+        }
+    ]
+}

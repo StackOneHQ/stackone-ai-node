@@ -13,7 +13,8 @@ export default {
 		},
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
-	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx'],
+	// `test:node` is a script of StackOneHQ/sdk-conformance, run from its checkout in CI.
+	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx', 'test:node'],
 	ignoreDependencies: ['@typescript/native-preview'],
 	rules: {
 		optionalPeerDependencies: 'off',

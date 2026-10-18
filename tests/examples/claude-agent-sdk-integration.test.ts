@@ -136,6 +136,6 @@ describe('claude-agent-sdk-integration example e2e', () => {
 		const textContent = result.content[0];
 		assert(textContent?.type === 'text');
 		const data = JSON.parse(textContent.text) as unknown;
-		expect(data).toHaveProperty('data');
+		expect(data).toMatchObject({ isError: false, result: { data: {} } });
 	});
 });

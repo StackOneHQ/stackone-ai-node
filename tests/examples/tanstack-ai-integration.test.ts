@@ -73,6 +73,6 @@ describe('tanstack-ai-integration example e2e', () => {
 		});
 
 		expect(result).toBeDefined();
-		expect(result).toHaveProperty('data');
+		expect(result).toMatchObject({ isError: false, result: { data: {} } });
 	});
 });

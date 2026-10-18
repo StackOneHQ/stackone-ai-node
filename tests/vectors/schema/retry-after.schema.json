@@ -1,0 +1,128 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/retry-after.schema.json",
+    "title": "Retry-After vectors",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "max_delay_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "The cap the caller applies to the value afterwards."
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        }
+    },
+    "required": ["description", "version", "cases", "max_delay_seconds"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "number": {
+            "description": "A number JSON cannot hold, as a marker an SDK decodes before use.",
+            "type": "object",
+            "properties": {
+                "$number": {
+                    "enum": ["NaN", "Infinity", "-Infinity"]
+                }
+            },
+            "required": ["$number"],
+            "additionalProperties": false
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "header": {
+                    "type": ["string", "null"],
+                    "description": "The Retry-After value; null when the response carries no Retry-After header."
+                },
+                "now": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The current time the header is read at, RFC 3339."
+                },
+                "expected_seconds": {
+                    "description": "Seconds from `now`, before the cap; null when absent or unreadable.",
+                    "oneOf": [
+                        {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "$ref": "#/$defs/number"
+                        }
+                    ]
+                }
+            },
+            "required": ["id", "description", "header", "now", "expected_seconds"],
+            "additionalProperties": false
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "header": {
+                    "type": ["string", "null"],
+                    "description": "The Retry-After value; null when the response carries no Retry-After header."
+                },
+                "now": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "The current time the header is read at, RFC 3339."
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                }
+            },
+            "required": ["id", "description", "header", "now", "python", "node"],
+            "additionalProperties": false
+        }
+    }
+}

@@ -1,0 +1,241 @@
+{
+    "$schema": "./schema/backoff.schema.json",
+    "description": "The delay before a retry of a 429, and whether the deadline allows it. Before retry `retry` (1-based), the delay is `retry_after_seconds` when the 429 carried a readable Retry-After, else `backoff_seconds[retry - 1] * (jitter.min + (jitter.max - jitter.min) * random)`; either way capped at `max_delay_seconds`. `random` is the injected uniform value in [0, 1) — Node's Math.random(), and in Python the value random.uniform(0.5, 1.0) is built from. Deadline cases take the delay after the cap.",
+    "version": 1,
+    "constants": {
+        "max_retries": 3,
+        "max_attempts": 4,
+        "backoff_seconds": [1, 2, 4],
+        "jitter": {
+            "min": 0.5,
+            "max": 1,
+            "max_exclusive": true
+        },
+        "max_delay_seconds": 30
+    },
+    "cases": [
+        {
+            "id": "backoff-retry-1-random-0",
+            "description": "no Retry-After: backoff 1s x jitter 0.5",
+            "retry": 1,
+            "random": 0,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 0.5
+        },
+        {
+            "id": "backoff-retry-1-random-0.25",
+            "description": "no Retry-After: backoff 1s x jitter 0.625",
+            "retry": 1,
+            "random": 0.25,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 0.625
+        },
+        {
+            "id": "backoff-retry-1-random-0.5",
+            "description": "no Retry-After: backoff 1s x jitter 0.75",
+            "retry": 1,
+            "random": 0.5,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 0.75
+        },
+        {
+            "id": "backoff-retry-1-random-0.9375",
+            "description": "no Retry-After: backoff 1s x jitter 0.96875",
+            "retry": 1,
+            "random": 0.9375,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 0.96875
+        },
+        {
+            "id": "backoff-retry-2-random-0",
+            "description": "no Retry-After: backoff 2s x jitter 0.5",
+            "retry": 2,
+            "random": 0,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 1
+        },
+        {
+            "id": "backoff-retry-2-random-0.25",
+            "description": "no Retry-After: backoff 2s x jitter 0.625",
+            "retry": 2,
+            "random": 0.25,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 1.25
+        },
+        {
+            "id": "backoff-retry-2-random-0.5",
+            "description": "no Retry-After: backoff 2s x jitter 0.75",
+            "retry": 2,
+            "random": 0.5,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 1.5
+        },
+        {
+            "id": "backoff-retry-2-random-0.9375",
+            "description": "no Retry-After: backoff 2s x jitter 0.96875",
+            "retry": 2,
+            "random": 0.9375,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 1.9375
+        },
+        {
+            "id": "backoff-retry-3-random-0",
+            "description": "no Retry-After: backoff 4s x jitter 0.5",
+            "retry": 3,
+            "random": 0,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 2
+        },
+        {
+            "id": "backoff-retry-3-random-0.25",
+            "description": "no Retry-After: backoff 4s x jitter 0.625",
+            "retry": 3,
+            "random": 0.25,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 2.5
+        },
+        {
+            "id": "backoff-retry-3-random-0.5",
+            "description": "no Retry-After: backoff 4s x jitter 0.75",
+            "retry": 3,
+            "random": 0.5,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 3
+        },
+        {
+            "id": "backoff-retry-3-random-0.9375",
+            "description": "no Retry-After: backoff 4s x jitter 0.96875",
+            "retry": 3,
+            "random": 0.9375,
+            "retry_after_seconds": null,
+            "expected_delay_seconds": 3.875
+        },
+        {
+            "id": "retry-after-0",
+            "description": "Retry-After 0s is honoured as given",
+            "retry": 1,
+            "random": 0.5,
+            "retry_after_seconds": 0,
+            "expected_delay_seconds": 0
+        },
+        {
+            "id": "retry-after-5",
+            "description": "Retry-After 5s is honoured as given",
+            "retry": 1,
+            "random": 0.5,
+            "retry_after_seconds": 5,
+            "expected_delay_seconds": 5
+        },
+        {
+            "id": "retry-after-30",
+            "description": "Retry-After 30s is honoured as given",
+            "retry": 1,
+            "random": 0.5,
+            "retry_after_seconds": 30,
+            "expected_delay_seconds": 30
+        },
+        {
+            "id": "retry-after-31",
+            "description": "Retry-After 31s is capped at 30s",
+            "retry": 1,
+            "random": 0.5,
+            "retry_after_seconds": 31,
+            "expected_delay_seconds": 30
+        },
+        {
+            "id": "retry-after-3600",
+            "description": "Retry-After 3600s is capped at 30s",
+            "retry": 1,
+            "random": 0.5,
+            "retry_after_seconds": 3600,
+            "expected_delay_seconds": 30
+        },
+        {
+            "id": "retry-after-on-retry-3",
+            "description": "Retry-After 7s is honoured as given",
+            "retry": 3,
+            "random": 0,
+            "retry_after_seconds": 7,
+            "expected_delay_seconds": 7
+        }
+    ],
+    "deadline_cases": [
+        {
+            "id": "delay-5-remaining-10",
+            "description": "a 5s wait with 10s left: the wait is less than the time left",
+            "delay_seconds": 5,
+            "remaining_seconds": 10,
+            "expected": "wait"
+        },
+        {
+            "id": "delay-10-remaining-10",
+            "description": "a 10s wait with 10s left: the wait is equal to the time left — the boundary: an equal wait does not finish before the deadline",
+            "delay_seconds": 10,
+            "remaining_seconds": 10,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-10-remaining-5",
+            "description": "a 10s wait with 5s left: the wait is more than the time left",
+            "delay_seconds": 10,
+            "remaining_seconds": 5,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-0-remaining-0",
+            "description": "a 0s wait with 0s left: the wait is equal to the time left — the boundary: an equal wait does not finish before the deadline",
+            "delay_seconds": 0,
+            "remaining_seconds": 0,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-0-remaining-1",
+            "description": "a 0s wait with 1s left: the wait is less than the time left",
+            "delay_seconds": 0,
+            "remaining_seconds": 1,
+            "expected": "wait"
+        },
+        {
+            "id": "delay-1-remaining-1",
+            "description": "a 1s wait with 1s left: the wait is equal to the time left — the boundary: an equal wait does not finish before the deadline",
+            "delay_seconds": 1,
+            "remaining_seconds": 1,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-2-remaining-1",
+            "description": "a 2s wait with 1s left: the wait is more than the time left",
+            "delay_seconds": 2,
+            "remaining_seconds": 1,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-10-remaining-2",
+            "description": "a 10s wait with 2s left: the wait is more than the time left",
+            "delay_seconds": 10,
+            "remaining_seconds": 2,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-0-remaining--1",
+            "description": "a 0s wait with -1s left: the wait is more than the time left",
+            "delay_seconds": 0,
+            "remaining_seconds": -1,
+            "expected": "return-429"
+        },
+        {
+            "id": "delay-30-remaining-30.5",
+            "description": "a 30s wait with 30.5s left: the wait is less than the time left",
+            "delay_seconds": 30,
+            "remaining_seconds": 30.5,
+            "expected": "wait"
+        },
+        {
+            "id": "delay-29-remaining-29.001",
+            "description": "a 29s wait with 29.001s left: the wait is less than the time left",
+            "delay_seconds": 29,
+            "remaining_seconds": 29.001,
+            "expected": "wait"
+        }
+    ]
+}

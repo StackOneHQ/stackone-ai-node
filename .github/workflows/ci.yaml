@@ -60,6 +60,191 @@ jobs:
       - name: Run Tests
         run: pnpm test
 
+  # The `ai` peer range spans three majors whose tool types differ, so the
+  # single build-and-test job above only ever proves whichever version the dev
+  # catalog pins. This job covers the declared range independently of that pin.
+  #
+  # Every entry is an exact version, not a range. A range resolves to whatever
+  # the lockfile already holds unless the lockfile is deleted, and deleting it
+  # re-resolves every dependency to its newest in-range version, which trips
+  # this repo's `trustPolicy: no-downgrade` on unrelated packages. Each pin is
+  # therefore a boundary worth holding still:
+  #   v5 - the lower bound of the declared peer range
+  #   v6 - the last v6 the dev catalog shipped
+  #   v7 - the major boundary where the AI SDK tool types changed shape
+  # The newest v7 is not covered here; build-and-test covers whatever the dev
+  # catalog pins, which is the only v7 that moves.
+  ai-peer-range:
+    name: ai-peer-range (${{ matrix.ai }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ai:
+          - 5.0.108 # lower bound of the peer range
+          - 6.0.7 # last v6 the dev catalog shipped
+          - 7.0.0 # first v7, where Tool became a union
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+        with:
+          skip-pnpm-install: 'true'
+
+      # `--filter .` keeps the examples workspace out of resolution; it pulls a
+      # dependency that `blockExoticSubdeps` rejects on any lockfile update.
+      #
+      # Assert the resolved version, not just that the edit looked applied. A
+      # `sed` that stops matching would otherwise leave the catalog untouched
+      # and the job would pass while silently testing the version it was meant
+      # to replace.
+      - name: Install with ai@${{ matrix.ai }}
+        run: |
+          sed -i -E "/^  dev:/,/^  [a-z]+:/ s|^    ai: .*|    ai: '${{ matrix.ai }}'|" pnpm-workspace.yaml
+          pnpm install --no-frozen-lockfile --filter .
+          resolved=$(node -p "require('./node_modules/ai/package.json').version")
+          echo "resolved ai@$resolved"
+          if [ "$resolved" != "${{ matrix.ai }}" ]; then
+            echo "::error::expected ai@${{ matrix.ai }} but resolved ai@$resolved"
+            exit 1
+          fi
+
+      # Type errors are the failure mode here, and vitest type-checks the suite
+      # via the root project's `typecheck` config.
+      - name: Run Tests
+        run: pnpm exec vitest run --project root
+
+  # Enforces the wire contract shared with the Python SDK (StackOneHQ/sdk-conformance).
+  # StackOneHQ/sdk-conformance is private and requires CONFORMANCE_REPO_TOKEN.
+  # Fork PRs and Dependabot runs cannot access this secret and skip this gate;
+  # internal branches and PRs require the secret and fail if it is absent or expired.
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      can-skip: ${{ steps.check.outputs.can-skip }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork == true }}
+          IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
+        run: |
+          if [ -z "$TOKEN" ] && { [ "$IS_FORK" = "true" ] || [ "$IS_DEPENDABOT" = "true" ]; }; then
+            echo "can-skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can-skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Runs the full suite, both SDKs side by side, so a change here that the Python SDK does not
+  # match fails here rather than drifting.
+  conformance:
+    needs: check-secret
+    if: needs.check-secret.outputs.can-skip != 'true'
+    runs-on: ubuntu-latest
+    env:
+      # Pinned to a commit on stackone-ai-python's main, not the branch, so a Python change never
+      # silently changes what this job grades. Bump it deliberately.
+      PYTHON_SDK_REF: 049abf548c7f5448a89e7999e95336980d23afc3
+    steps:
+      - name: Check conformance token is configured
+        env:
+          TOKEN: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::CONFORMANCE_REPO_TOKEN is not set or has expired."
+            exit 1
+          fi
+
+      - name: Checkout SDK
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: sdk
+
+      - name: Checkout conformance suite
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: StackOneHQ/sdk-conformance
+          ref: 5f60cc0dfdf4d1a25afad93a68eeefe30e89568d
+          token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
+          path: sdk-conformance
+          persist-credentials: false
+
+      # Public, so no token.
+      - name: Checkout Python SDK
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: StackOneHQ/stackone-ai-python
+          ref: ${{ env.PYTHON_SDK_REF }}
+          path: stackone-ai-python
+          persist-credentials: false
+
+      # tests/vectors is a copy of the suite's vectors/ (scripts/sync-vectors.sh), which the unit
+      # tests run. An edit to the copy, or a pin moved without a re-copy, fails here.
+      - name: Vendored vectors match the pinned sdk-conformance
+        run: diff -r sdk/tests/vectors sdk-conformance/vectors
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        with:
+          version: 10.26.0
+          package_json_file: sdk-conformance/package.json
+
+      # 24, not 22: the SDK's devEngines pins Node ^24.11.0, and the suite runs on it too.
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Install SDK dependencies
+        working-directory: sdk
+        run: pnpm install --frozen-lockfile
+
+      # The runner imports the built dist, not src, so the harness grades the
+      # publishable artifact. It refuses a dist older than src.
+      - name: Build SDK
+        working-directory: sdk
+        run: pnpm run build
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: '3.13'
+
+      - name: Install Python SDK dependencies
+        working-directory: stackone-ai-python
+        run: uv sync --all-extras --locked
+
+      - name: Install conformance dependencies
+        working-directory: sdk-conformance
+        run: pnpm install --frozen-lockfile
+
+      - name: Run conformance suite
+        working-directory: sdk-conformance
+        env:
+          NODE_SDK_DIST: ${{ github.workspace }}/sdk/dist/index.mjs
+          PYTHON_SDK_DIR: ${{ github.workspace }}/stackone-ai-python
+        run: pnpm test -- --strict-schema
+
+  # Make this the one required status check. Individually required checks go
+  # missing when a job is renamed or a matrix entry is added, and nothing notices.
+  ci-ok:
+    if: always()
+    needs: [check-secret, gitleaks, lint, build-and-test, ai-peer-range, conformance]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to have passed
+        run: |
+          if [ "${{ needs.gitleaks.result != 'success' || needs.lint.result != 'success' || needs.build-and-test.result != 'success' || needs.ai-peer-range.result != 'success' }}" = "true" ]; then
+            echo "::error::A required job did not pass (gitleaks: ${{ needs.gitleaks.result }}, lint: ${{ needs.lint.result }}, build-and-test: ${{ needs.build-and-test.result }}, ai-peer-range: ${{ needs.ai-peer-range.result }})"
+            exit 1
+          fi
+          if [ "${{ needs.conformance.result != 'success' && needs.check-secret.outputs.can-skip != 'true' }}" = "true" ]; then
+            echo "::error::Conformance check did not pass (result: ${{ needs.conformance.result }})"
+            exit 1
+          fi
+
   coverage:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
@@ -89,4 +274,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
