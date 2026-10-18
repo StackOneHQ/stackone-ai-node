@@ -40,7 +40,6 @@
       allowlist = agentLib.allowlistFor {
         inherit catalog sources;
         enable = [
-          "orama-integration"
           "release-please"
         ];
       };

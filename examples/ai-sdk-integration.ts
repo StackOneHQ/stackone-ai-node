@@ -6,8 +6,10 @@
  * can autonomously call tools and reason over results until the stop condition
  * is met.
  *
- * In AI SDK v6+, you can use the `ToolLoopAgent` class for more explicit
- * agent functionality.
+ * Compatible with AI SDK v5–v7 (`ai` peer `>=5.0.108 <8.0.0`). Uses
+ * `stepCountIs`, which exists in v5/v6 and remains available as an alias in v7.
+ * AI SDK v7 requires Node.js 22+. On v6+ you can also use the `ToolLoopAgent`
+ * class for more explicit agent functionality; v5 has no such export.
  */
 
 import process from 'node:process';
@@ -26,8 +28,9 @@ if (!process.env.OPENAI_API_KEY) {
 }
 
 const aiSdkIntegration = async (): Promise<void> => {
-	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
-	const toolset = new StackOneToolSet();
+	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
+	// without one, the toolset uses every active shared account linked to the key
+	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 	// Filter to specific tools to keep token usage manageable
 	const tools = await toolset.fetchTools({

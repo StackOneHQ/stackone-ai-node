@@ -69,5 +69,19 @@ describe('openai-integration example e2e', () => {
 		const args: unknown = JSON.parse(toolCall.function.arguments);
 		assert(typeof args === 'object' && args !== null && 'id' in args);
 		expect(args.id).toBe('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA');
+
+		// Run the tool calls and turn them into the messages to send back
+		const toolMessages = await tools.executeOpenAIToolCalls(choice.message.tool_calls);
+		expect(toolMessages).toHaveLength(1);
+		expect(toolMessages[0]).toMatchObject({ role: 'tool', tool_call_id: 'call_mock' });
+		expect(JSON.parse(toolMessages[0]?.content as string)).toMatchObject({
+			isError: false,
+			result: {
+				data: {
+					action: 'bamboohr_get_employee',
+					arguments: { id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA' },
+				},
+			},
+		});
 	});
 });

@@ -3,5 +3,6 @@
 	"useTabs": true,
 	"semi": true,
 	"singleQuote": true,
-	"ignorePatterns": [".claude/settings.local.json", "CHANGELOG.md"],
+	// tests/vectors is vendored byte for byte from sdk-conformance: CI diffs it against the source.
+	"ignorePatterns": [".claude/settings.local.json", "CHANGELOG.md", "tests/vectors/**"],
 }

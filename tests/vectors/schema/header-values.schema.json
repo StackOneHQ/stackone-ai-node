@@ -1,0 +1,175 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/header-values.schema.json",
+    "title": "Nested header value vectors",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        },
+        "known_differences": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/known_difference"
+            },
+            "description": "A case where the SDKs differ for a reason outside this rule (for example, their JSON parser already produced different values). Not graded."
+        }
+    },
+    "required": ["description", "version", "cases"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "value": {
+            "description": "Any JSON value, in which an object with a `$number` key is a marker for a number JSON cannot hold, and nothing else.",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "null"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/value"
+                    }
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "$number": {
+                            "enum": ["NaN", "Infinity", "-Infinity"]
+                        }
+                    },
+                    "required": ["$number"],
+                    "additionalProperties": false
+                },
+                {
+                    "type": "object",
+                    "not": {
+                        "required": ["$number"]
+                    },
+                    "additionalProperties": {
+                        "$ref": "#/$defs/value"
+                    }
+                }
+            ]
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "value": {
+                    "$ref": "#/$defs/value"
+                },
+                "expected": {
+                    "oneOf": [
+                        {
+                            "type": "string",
+                            "description": "The header text forwarded."
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "dropped": {
+                                    "const": true
+                                }
+                            },
+                            "required": ["dropped"],
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "required": ["id", "description", "value", "expected"],
+            "additionalProperties": false
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "value": {
+                    "$ref": "#/$defs/value"
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                }
+            },
+            "required": ["id", "description", "value", "python", "node"],
+            "additionalProperties": false
+        },
+        "known_difference": {
+            "description": "A case that is settled, but not identical across SDKs for a reason outside this rule. Not graded.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "value": {
+                    "$ref": "#/$defs/value"
+                },
+                "python": {
+                    "description": "What the Python SDK does."
+                },
+                "node": {
+                    "description": "What the Node SDK does."
+                }
+            },
+            "required": ["id", "description", "value", "python", "node"],
+            "additionalProperties": false
+        }
+    }
+}
