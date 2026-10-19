@@ -59,18 +59,18 @@ catalogs:
       specifier: ^0.2.12
       version: 0.2.12
     '@tanstack/ai':
-      specifier: ^0.3.0
-      version: 0.3.0
+      specifier: ^0.14.0
+      version: 0.14.0
     '@tanstack/ai-openai':
-      specifier: ^0.3.0
-      version: 0.3.0
+      specifier: ^0.8.2
+      version: 0.8.2
   peer:
     '@anthropic-ai/claude-agent-sdk':
       specifier: ^0.2.12
       version: 0.2.12
     '@anthropic-ai/sdk':
-      specifier: ^0.72.1
-      version: 0.72.1
+      specifier: ^0.92.0
+      version: 0.92.0
     ai:
       specifier: '>=5.0.108 <8.0.0'
       version: 7.0.47
@@ -91,7 +91,7 @@ importers:
         version: 0.2.12(zod@4.3.5)
       '@anthropic-ai/sdk':
         specifier: catalog:peer
-        version: 0.72.1(zod@4.3.5)
+        version: 0.92.0(zod@4.3.5)
       '@modelcontextprotocol/sdk':
         specifier: catalog:prod
         version: 1.24.3(zod@4.3.5)
@@ -155,7 +155,7 @@ importers:
         version: 0.2.12(zod@4.3.5)
       '@anthropic-ai/sdk':
         specifier: catalog:peer
-        version: 0.72.1(zod@4.3.5)
+        version: 0.92.0(zod@4.3.5)
       '@clack/prompts':
         specifier: catalog:dev
         version: 0.11.0
@@ -164,10 +164,10 @@ importers:
         version: link:..
       '@tanstack/ai':
         specifier: catalog:examples
-        version: 0.3.0
+        version: 0.14.0
       '@tanstack/ai-openai':
         specifier: catalog:examples
-        version: 0.3.0(@tanstack/ai@0.3.0)(zod@4.3.5)
+        version: 0.8.2(@tanstack/ai-client@0.8.0)(@tanstack/ai@0.14.0)(zod@4.3.5)
       ai:
         specifier: catalog:peer
         version: 7.0.47(zod@4.3.5)
@@ -189,6 +189,9 @@ importers:
         version: runtime:24.21.0
 
 packages:
+
+  '@ag-ui/core@0.0.49':
+    resolution: {integrity: sha512-9ywypwjUGtIvTxJ2eKQjhPZgLnSFAfNK7vZUcT7Bz4ur4yAIB+lAFtzvu7VDYe6jsUx/6N/71Dh4R0zX5woNVw==}
 
   '@ai-sdk/gateway@4.0.36':
     resolution: {integrity: sha512-N1P6bdW/aC5rxLeuGYgx3X4el3DoZy8UWlky+g+AeIZSmxaEi/AToHJL4cmZ6nCPHk1byqJWwC+PaOZG0hK0dw==}
@@ -218,8 +221,8 @@ packages:
     peerDependencies:
       zod: ^4.0.0
 
-  '@anthropic-ai/sdk@0.72.1':
-    resolution: {integrity: sha512-MiUnue7qN7DvLIoYHgkedN2z05mRf2CutBzjXXY2krzOhG2r/rIfISS2uVkNLikgToB5hYIzw+xp2jdOtRkqYQ==}
+  '@anthropic-ai/sdk@0.92.0':
+    resolution: {integrity: sha512-l653JFC83wCglH8H83t1xpgDurCyPyslYW1maPRdCsfuNuGbLvQjQ81sWd3Go3LWRm0jNspzAhuqAYV8r9joSw==}
     hasBin: true
     peerDependencies:
       zod: ^3.25.0 || ^4.0.0
@@ -1106,19 +1109,29 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tanstack/ai-openai@0.3.0':
-    resolution: {integrity: sha512-ZaMYUiU97LLDhJFbCQgtTVzCitMQSXFe4j1WGsXrz5fPe9ZUqYzMFSJRozONluM+vuI6z02XF2PJPzQldGKbMQ==}
+  '@tanstack/ai-client@0.8.0':
+    resolution: {integrity: sha512-8G3mKwVWn/lwZlUcZgm1aTYWB96otFmr6LsYT+dOehOq1SrR8SiSbkSOVzozQXkfZFviHSueZXlLe/J6LrbVOg==}
+
+  '@tanstack/ai-event-client@0.2.8':
+    resolution: {integrity: sha512-pdvT1hh7UorwBiDLrXnI5BFDfc7JSqnN06LaQHG4TGRl/621UnUrh16hQKOMn/msArKiCj+n+TG+cw4mDwMaLw==}
     peerDependencies:
-      '@tanstack/ai': ^0.2.2
+      '@tanstack/ai': 0.14.0
+
+  '@tanstack/ai-openai@0.8.2':
+    resolution: {integrity: sha512-fnrY2nPhn+KZzBbMU84vmuaK74+SAOjs5XtsW/2eX1Ke3Gj3ItGrXDks7Gt9pDrDADjYK6ZSsgtUCm9F++OFOg==}
+    peerDependencies:
+      '@tanstack/ai': ^0.14.0
+      '@tanstack/ai-client': ^0.8.0
       zod: ^4.0.0
 
-  '@tanstack/ai@0.3.0':
-    resolution: {integrity: sha512-+MmqvLFmM1XvzGzVm2Pwgj8TmN8l3AV5NikDgam+B1HZY0MGdj5Pz7QFFYDEjTmzcFrDSDOAIobxR7Qp2iuKog==}
+  '@tanstack/ai@0.14.0':
+    resolution: {integrity: sha512-oiyYHcWMmyVoKDf018xZMEX62BaJVhdgeeRQeRbqP3p5Nvar2UZUhKzFkUiE4L9KzklPqrtI5aYhVdAp9Z142g==}
     engines: {node: '>=18'}
 
-  '@tanstack/devtools-event-client@0.4.0':
-    resolution: {integrity: sha512-RPfGuk2bDZgcu9bAJodvO2lnZeHuz4/71HjZ0bGb/SPg8+lyTA+RLSKQvo7fSmPSi8/vcH3aKQ8EM9ywf1olaw==}
+  '@tanstack/devtools-event-client@0.4.3':
+    resolution: {integrity: sha512-OZI6QyULw0FI0wjgmeYzCIfbgPsOEzwJtCpa69XrfLMtNXLGnz3d/dIabk7frg0TmHo+Ah49w5I4KC7Tufwsvw==}
     engines: {node: '>=18'}
+    hasBin: true
 
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
@@ -2355,10 +2368,17 @@ packages:
     peerDependencies:
       zod: ^3.25 || ^4
 
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
   zod@4.3.5:
     resolution: {integrity: sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g==}
 
 snapshots:
+
+  '@ag-ui/core@0.0.49':
+    dependencies:
+      zod: 3.25.76
 
   '@ai-sdk/gateway@4.0.36(zod@4.3.5)':
     dependencies:
@@ -2399,7 +2419,7 @@ snapshots:
       '@img/sharp-linuxmusl-x64': 0.33.5
       '@img/sharp-win32-x64': 0.33.5
 
-  '@anthropic-ai/sdk@0.72.1(zod@4.3.5)':
+  '@anthropic-ai/sdk@0.92.0(zod@4.3.5)':
     dependencies:
       json-schema-to-ts: 3.1.1
     optionalDependencies:
@@ -2969,20 +2989,32 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tanstack/ai-openai@0.3.0(@tanstack/ai@0.3.0)(zod@4.3.5)':
+  '@tanstack/ai-client@0.8.0':
     dependencies:
-      '@tanstack/ai': 0.3.0
+      '@tanstack/ai': 0.14.0
+      '@tanstack/ai-event-client': 0.2.8(@tanstack/ai@0.14.0)
+
+  '@tanstack/ai-event-client@0.2.8(@tanstack/ai@0.14.0)':
+    dependencies:
+      '@tanstack/ai': 0.14.0
+      '@tanstack/devtools-event-client': 0.4.3
+
+  '@tanstack/ai-openai@0.8.2(@tanstack/ai-client@0.8.0)(@tanstack/ai@0.14.0)(zod@4.3.5)':
+    dependencies:
+      '@tanstack/ai': 0.14.0
+      '@tanstack/ai-client': 0.8.0
       openai: 6.9.1(zod@4.3.5)
       zod: 4.3.5
     transitivePeerDependencies:
       - ws
 
-  '@tanstack/ai@0.3.0':
+  '@tanstack/ai@0.14.0':
     dependencies:
-      '@tanstack/devtools-event-client': 0.4.0
+      '@ag-ui/core': 0.0.49
+      '@tanstack/ai-event-client': 0.2.8(@tanstack/ai@0.14.0)
       partial-json: 0.1.7
 
-  '@tanstack/devtools-event-client@0.4.0': {}
+  '@tanstack/devtools-event-client@0.4.3': {}
 
   '@tybys/wasm-util@0.10.1':
     dependencies:
@@ -4156,5 +4188,7 @@ snapshots:
   zod-to-json-schema@3.25.0(zod@4.3.5):
     dependencies:
       zod: 4.3.5
+
+  zod@3.25.76: {}
 
   zod@4.3.5: {}
