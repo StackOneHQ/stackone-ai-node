@@ -123,9 +123,12 @@ describe('published package output', () => {
 			try {
 				const consumerDir = await createConsumerFixture(tempDir);
 				try {
-					// The consumer fixture has no TypeScript install of its own, so tsc
-					// runs from the repository's pnpm context.
-					await execFileAsync('pnpm', ['exec', 'tsc', '-p', consumerDir], { cwd: rootDir });
+					// Keep consumer compatibility covered by the pinned JavaScript compiler.
+					await execFileAsync(
+						process.execPath,
+						[path.join(rootDir, 'node_modules/typescript/bin/tsc'), '-p', consumerDir],
+						{ cwd: rootDir },
+					);
 				} catch (error) {
 					const execError = (error ?? {}) as { stdout?: string; stderr?: string };
 					const details =
