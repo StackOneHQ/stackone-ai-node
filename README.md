@@ -297,7 +297,7 @@ for await (const message of result) {
 
 ### Search and execute
 
-`search()` asks every linked connector for actions matching a natural-language query and ranks the results together, best first. `execute()` runs one by id, through the connector that serves it.
+`search()` makes one call to StackOne's `stackone_search_actions` tool, which searches every linked connector for actions matching a natural-language query and ranks them together, best first. `execute()` runs one by id with one call to `stackone_execute_action`. Each call spans every account in scope.
 
 ```typescript
 const actions = await toolset.search('create a time-off request', { topK: 5 });
@@ -309,17 +309,16 @@ const [best] = actions;
 if (!best) throw new Error('No action matched');
 // `input_schema` describes what the action accepts; `example_request` shows the shape
 const result = await toolset.execute(best.action_id, best.example_request, {
-	accountIds: [best.account_id],
 	sessionId: best.session_id,
 });
 ```
 
 - `execute()` takes the nested envelope an action's `example_request` shows: `{ path, query, body }`. (A `fetchTools()` tool takes the keys its own served schema names instead: read them from `tool.parameters.properties`.)
-- The connector is the longest one whose name prefixes the action id, so `browser_linkedin_*` actions are not routed to `browser`.
 - `action_id` is always the one you pass: an `action_id` inside `args` — for example, one a prompt-injected model put there — is ignored.
 - Each hit carries the `session_id` of the search that found it, when the server issued one. Pass it back as `sessionId` to link the calls together.
-- Each hit carries the `account_id` of the account that found it, and the same action linked on two accounts is two hits. When an action's connector is linked on more than one account, `execute()` throws `ToolSetConfigError` rather than pick one: pass the hit's account as `{ accountIds: [hit.account_id] }`. Likewise, if an account in scope failed to list and its provider is the action's connector or unknown, `execute()` lists it again at once (asking `GET /accounts` first for any provider it does not know, and throwing its 429 if rate limited; an account that lookup failed to name is neither asked about nor listed early again for 30 seconds), and if it still fails, throws `ToolSetLoadError` rather than run the action on whichever account did list. A failed account on another provider is not listed again early, so it never costs the call a listing timeout, though learning its provider with explicit ids takes one `GET /accounts`; like any account, it is listed again once its 30 seconds are up.
-- `topK` (1–50, default 10) caps the whole result, after ranking across every connector. A connector that fails to search is skipped with a warning, unless every connector fails.
+- Each hit names the accounts that can run it in `available_accounts`, so an action linked on two accounts is one hit. When the action's connector is linked on more than one account in scope, the server refuses to pick one and `execute()` throws `StackOneAPIError`: pass the account to use as `{ accountIds: [id] }`, one of the hit's `available_accounts`.
+- `topK` (1–50, default 10) caps the whole result.
+- If the server does not serve the search or execute tool (the project's policy disables search and execute), `search()` and `execute()` throw `ToolSetLoadError`.
 
 [View full example](examples/search-and-execute.ts)
 
@@ -346,7 +345,8 @@ await toolset.submitFeedback({
 // One tool per action (the server default)
 const toolset = new StackOneToolSet();
 
-// Two meta tools per connector instead: `*_search_actions` and `*_execute_action`
+// StackOne's search and execute tools instead: `stackone_search_actions`,
+// `stackone_execute_action` and `stackone_list_accounts`, spanning every account in scope
 const compact = new StackOneToolSet({ toolMode: 'search_execute' });
 const metaTools = await compact.fetchTools();
 ```
@@ -406,7 +406,7 @@ The catalog is cached per account scope and mode, so changing a filter never ref
 
 ### Headers
 
-A tool call's header arguments — the entries of a `headers` object argument, and `headers_<name>` arguments — are forwarded only if the tool's served schema declares them: `<name>` under `properties.headers.properties`, or a `headers_<name>` property. A `headers` property served as an open object — `type: "object"`, no `properties`, and `additionalProperties` not `false` — as on every `*_execute_action`, declares any name, so `toolset.execute(id, { headers: { 'x-custom': '…' } })` forwards it. Anything undeclared is dropped with a warning; every other argument is sent unchanged.
+A tool call's header arguments — the entries of a `headers` object argument, and `headers_<name>` arguments — are forwarded only if the tool's served schema declares them: `<name>` under `properties.headers.properties`, or a `headers_<name>` property. A `headers` property served as an open object — `type: "object"`, no `properties`, and `additionalProperties` not `false` — as on `stackone_execute_action`, declares any name, so `toolset.execute(id, { headers: { 'x-custom': '…' } })` forwards it. Anything undeclared is dropped with a warning; every other argument is sent unchanged.
 
 A top-level `headers` argument that isn't a plain object is dropped with a warning, unless the served schema declares `headers` itself as a non-object field (for example `type: "string"`), in which case it's an ordinary argument that happens to be named `headers` and is sent as given. A `headers_<name>` argument is dropped with a warning when its value is an array or object — only a string, number or boolean can be a header value.
 

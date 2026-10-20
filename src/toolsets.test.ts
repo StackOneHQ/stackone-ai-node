@@ -365,7 +365,9 @@ describe('account discovery', () => {
 		fakeListing(() => []);
 		const toolset = newToolSet();
 
-		await Promise.all([toolset.search('x'), toolset.fetchTools(), toolset.fetchTools()]);
+		// The listing serves no search tool, so search() raises; only its discovery matters here.
+		const search = toolset.search('x').catch(() => undefined);
+		await Promise.all([search, toolset.fetchTools(), toolset.fetchTools()]);
 
 		expect(requests).toBe(1);
 	});
@@ -1026,13 +1028,13 @@ describe('tool mode', () => {
 		);
 	});
 
-	it('builds MCP tools under search_execute, and requests it on the URL', async () => {
+	it('builds MCP tools under search_execute, naming the scope on the URL', async () => {
 		fakeListing(() => [def('t')]);
 		const tools = await newToolSet({ accountId: 'acc1', toolMode: 'search_execute' }).fetchTools();
 
 		expect(tools.getTool('t')).toBeInstanceOf(StackOneMcpTool);
 		expect(listMock.mock.calls[0]?.[0].endpoint).toBe(
-			`${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1`,
 		);
 	});
 

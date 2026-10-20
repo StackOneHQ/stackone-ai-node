@@ -223,8 +223,9 @@ describe('a 429 that outlasts its retries', () => {
 		expect((error as StackOneAPIError).responseBody).toBe(JSON.stringify(RATE_LIMITED));
 	});
 
-	it('fails a search instead of skipping the throttled connector', async () => {
-		serveThrottled({ method: 'tools/call', accountId: 'acc2' });
+	it('fails a search over several accounts with the 429', async () => {
+		// One search call spans both accounts, so the throttled call is the whole search.
+		serveThrottled({ method: 'tools/call' });
 
 		const error = await newToolSet()
 			.search('list items', { accountIds: ['acc1', 'acc2'] })

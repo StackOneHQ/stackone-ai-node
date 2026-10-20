@@ -118,31 +118,29 @@ export class HttpRateLimitError extends Error {
 }
 
 /**
- * Whether an MCP request was refused by the API's end-user check on `accountId`: the 400 it
- * answers a non-shared account's request with when `x-end-user-id` does not name its end user.
+ * The account an MCP request was refused for by the API's end-user check: the 400 it answers a
+ * non-shared account's request with when `x-end-user-id` does not name its end user.
  */
-function isEndUserMismatch(error: unknown, accountId: string): boolean {
+function endUserRefusalOf(error: unknown): string | undefined {
 	if (!(error instanceof StackOneAPIError) || error.statusCode !== 400) {
-		return false;
+		return undefined;
 	}
 	const body = error.responseBody;
 	const message =
 		typeof body === 'object' && body !== null && 'message' in body ? body.message : body;
-	// The guard's fixed wording, ending with this account's id, quoted or not: not an exact string,
+	// The guard's fixed wording, ending with the account's id, quoted or not: not an exact string,
 	// so a change to how the id is written does not silently turn the lookup off.
 	if (
 		typeof message !== 'string' ||
 		!message.startsWith('x-end-user-id header does not match account end user id')
 	) {
-		return false;
+		return undefined;
 	}
-	return (
-		message
-			.trimEnd()
-			.split(' ')
-			.pop()
-			?.replace(/^["']|["']$/g, '') === accountId
-	);
+	return message
+		.trimEnd()
+		.split(' ')
+		.pop()
+		?.replace(/^["']|["']$/g, '');
 }
 
 /** How a request finds the end user to send as `x-end-user-id` for an account. */
@@ -154,24 +152,38 @@ export interface EndUserSource {
 }
 
 /**
- * Run an MCP request for `accountId` with its recorded end user, if any.
- *
- * An account id passed explicitly has no end user recorded until something calls
- * `GET /accounts`, so a non-shared one is refused with a 400. When that happens to an account
- * with nothing recorded, its end user is looked up once and, if there is one, the request is sent
- * again with it. Otherwise the 400 is thrown as it came — with the lookup's error as its `cause`,
- * if the lookup failed.
+ * Run an MCP request for `accountId` with its recorded end user, if any. See {@link withEndUsers}.
  */
 export async function withEndUser<T>(
 	accountId: string | undefined,
 	source: EndUserSource | undefined,
 	request: (endUserId: string | undefined) => Promise<T>,
 ): Promise<T> {
-	const recorded = accountId && source ? source.recorded(accountId) : undefined;
+	return withEndUsers(accountId ? [accountId] : [], source, () =>
+		request(accountId ? source?.recorded(accountId) : undefined),
+	);
+}
+
+/**
+ * Run an MCP request for `accountIds`, which reads their recorded end users itself.
+ *
+ * An account id passed explicitly has no end user recorded until something calls
+ * `GET /accounts`, so a non-shared one is refused with a 400. When that happens to one of these
+ * accounts with nothing recorded, its end user is looked up once and, if there is one, the request
+ * is sent again. Otherwise the 400 is thrown as it came — with the lookup's error as its `cause`,
+ * if the lookup failed.
+ */
+export async function withEndUsers<T>(
+	accountIds: readonly string[],
+	source: EndUserSource | undefined,
+	request: () => Promise<T>,
+): Promise<T> {
+	const unrecorded = new Set(accountIds.filter((id) => source?.recorded(id) === undefined));
 	try {
-		return await request(recorded);
+		return await request();
 	} catch (error) {
-		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error, accountId)) {
+		const refused = endUserRefusalOf(error);
+		if (!source || refused === undefined || !unrecorded.has(refused)) {
 			throw error;
 		}
 		// A failed lookup leaves the refusal to be thrown, with the lookup's error as its cause —
@@ -180,7 +192,7 @@ export async function withEndUser<T>(
 		// fan-out.
 		let endUserId: string | undefined;
 		try {
-			endUserId = await source.lookUp(accountId);
+			endUserId = await source.lookUp(refused);
 		} catch (lookupError) {
 			if (isRateLimitFailure(lookupError)) {
 				throw lookupError;
@@ -197,7 +209,7 @@ export async function withEndUser<T>(
 		if (endUserId === undefined) {
 			throw error;
 		}
-		return request(endUserId);
+		return request();
 	}
 }
 

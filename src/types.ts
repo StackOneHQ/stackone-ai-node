@@ -68,10 +68,10 @@ export type JsonSchemaProperties = Record<string, JSONSchema>;
  * How the MCP endpoint lists tools.
  *
  * `'individual'` (the server default) lists one tool per action — hundreds per account.
- * `'search_execute'` lists two meta tools per connector instead: a `*_search_actions` that ranks
- * actions for a natural-language query and an `*_execute_action` that runs one by id. The
- * catalog stays small however many accounts are linked, which is what keeps it inside a model's
- * context.
+ * `'search_execute'` lists three tools spanning every account in scope instead:
+ * `stackone_list_accounts`, `stackone_search_actions`, which ranks actions for a natural-language
+ * query, and `stackone_execute_action`, which runs one by id. The catalog stays small however many
+ * accounts are linked, which is what keeps it inside a model's context.
  */
 export type ToolMode = 'individual' | 'search_execute';
 
@@ -205,6 +205,13 @@ export type StackOneAccount = JsonObject & {
  */
 export type SearchResult = JsonObject & {
 	action_id: string;
+	/** The connector the action belongs to. */
+	provider?: string;
+	/**
+	 * The accounts in scope that can run the action. When there is more than one, pass the chosen
+	 * one's `id` in `execute()`'s `accountIds`.
+	 */
+	available_accounts?: SearchHitAccount[];
 	/** What the action does. */
 	description?: string;
 	/** How well the action matched the query; results are ranked on it, highest first. */
@@ -221,11 +228,13 @@ export type SearchResult = JsonObject & {
 	 * to `execute()` and `submitFeedback()` to link those calls to this search.
 	 */
 	session_id?: string;
-	/**
-	 * The account whose connector found this hit. The same action linked on two accounts is two
-	 * hits; pass this in `execute()`'s `accountIds` to run the action on this one.
-	 */
-	account_id: string;
+};
+
+/** An account a search hit can run on, as `stackone_search_actions` lists it. */
+export type SearchHitAccount = JsonObject & {
+	id: string;
+	/** The account's label, its owner's name, or its id. */
+	name: string;
 };
 
 /**

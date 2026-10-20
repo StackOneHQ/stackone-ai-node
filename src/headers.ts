@@ -123,7 +123,7 @@ const FLAT_HEADER_PREFIX = 'headers_';
 export interface DeclaredHeaders {
 	/**
 	 * Names declared under the nested `headers` object, lower-cased, or `'any'` when `headers` is
-	 * an open map, as on `*_execute_action`: `type: "object"` (or a type list that includes
+	 * an open map, as on `stackone_execute_action`: `type: "object"` (or a type list that includes
 	 * `"object"`, such as `["object", "null"]`), no `properties` key, and `additionalProperties`
 	 * anything but `false`. A schema not typed as an object, or one that closes
 	 * `additionalProperties` without listing `properties`, declares no names.

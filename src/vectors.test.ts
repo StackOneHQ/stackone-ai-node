@@ -470,11 +470,11 @@ const listByAccount = (names: string[]) => {
 
 /** Answer every tools/call with `respond`, without a server. */
 const respondToCalls = (respond: (tool: StackOneMcpTool) => JsonObject | Promise<JsonObject>) => {
-	vi.spyOn(StackOneMcpTool.prototype, 'execute').mockImplementation(
-		async function (this: StackOneMcpTool) {
-			return respond(this);
-		},
-	);
+	vi.spyOn(StackOneMcpTool.prototype, 'execute').mockImplementation(async function (
+		this: StackOneMcpTool,
+	) {
+		return respond(this);
+	});
 };
 
 const errorOf = (act: () => unknown): Promise<Error> =>
@@ -559,59 +559,10 @@ const emitters: Record<
 		await newToolSet().fetchTools({ accountIds: ['acc-1', 'acc-2'] });
 		return { emitted: { warnings: warnings() }, values: { account_id: 'acc-2', error: 'boom' } };
 	},
-	'skip-connector': async () => {
-		listByAccount(['a_acc-1_search_actions', 'b_acc-1_search_actions']);
-		respondToCalls((tool) => {
-			if (tool.name.startsWith('b_')) {
-				throw new Error('boom');
-			}
-			return { actions: [{ action_id: 'a_x' }] };
-		});
-		await newToolSet({ accountId: 'acc-1' }).search('q');
-		return {
-			emitted: { warnings: warnings() },
-			values: { tool: 'b_acc-1_search_actions', error: 'boom' },
-		};
-	},
 	'duplicate-tool-names': async () => {
 		listMock.mockResolvedValue([{ name: 'dup', description: '', inputSchema: {} }]);
 		await newToolSet().fetchTools({ accountIds: ['acc-1', 'acc-2'] });
 		return { emitted: { warnings: warnings() }, values: { count: 1, names: 'dup' } };
-	},
-	'ambiguous-connector': async () => {
-		listByAccount(['linear_acc1_execute_action', 'linear_acc2_execute_action']);
-		respondToCalls(() => ({ data: {} }));
-		return {
-			emitted: {
-				error: await errorOf(() =>
-					newToolSet({ accountIds: ['acc2', 'acc1'] }).execute('linear_list_issues'),
-				),
-			},
-			values: {
-				action_id: 'linear_list_issues',
-				count: 2,
-				tools: 'linear_acc1_execute_action on acc1, linear_acc2_execute_action on acc2',
-			},
-		};
-	},
-	'connector-account-unavailable': async () => {
-		listMock.mockImplementation(async ({ headers }) => {
-			const account = headers['x-account-id'];
-			if (account === 'acc2') {
-				throw new Error('boom');
-			}
-			return [{ name: `linear_${account}_execute_action`, description: '', inputSchema: {} }];
-		});
-		respondToCalls(() => ({ data: {} }));
-		// Explicit ids: no GET /accounts, so acc2's provider is unknown and it blocks.
-		return {
-			emitted: {
-				error: await errorOf(() =>
-					newToolSet({ accountIds: ['acc1', 'acc2'] }).execute('linear_list_issues'),
-				),
-			},
-			values: { action_id: 'linear_list_issues', failures: 'acc2: boom' },
-		};
 	},
 	'non-shared-accounts-skipped': async () => {
 		server.use(
@@ -815,19 +766,6 @@ const emitters: Record<
 			values: { failures: 'acc-1: down acc-1; acc-2: down acc-2' },
 		};
 	},
-	'no-connector-returned-results': async () => {
-		listByAccount(['a_acc-1_search_actions', 'b_acc-1_search_actions']);
-		respondToCalls((tool) => {
-			throw new Error(`down ${tool.name}`);
-		});
-		return {
-			emitted: { error: await errorOf(() => newToolSet({ accountId: 'acc-1' }).search('q')) },
-			values: {
-				failures:
-					'a_acc-1_search_actions: down a_acc-1_search_actions | b_acc-1_search_actions: down b_acc-1_search_actions',
-			},
-		};
-	},
 	'fetch-tools-failed': async () => {
 		listMock.mockRejectedValue(new Error('boom'));
 		return {
@@ -908,13 +846,12 @@ const emitters: Record<
 			values: {},
 		};
 	},
-	'no-connector-for-action': async () => {
-		listByAccount(['linear_acc1_execute_action']);
+	'trio-tool-not-served': async () => {
+		// The policy-disabled shape: a search_execute request answered with individual tools.
+		listMock.mockResolvedValue([{ name: 'jira_list_issues', description: '', inputSchema: {} }]);
 		return {
-			emitted: {
-				error: await errorOf(() => newToolSet({ accountId: 'acc1' }).execute('jira_list_issues')),
-			},
-			values: { action_id: 'jira_list_issues' },
+			emitted: { error: await errorOf(() => newToolSet({ accountId: 'acc-1' }).search('issues')) },
+			values: { tool: 'stackone_search_actions' },
 		};
 	},
 	'arguments-not-finite': async () => ({
