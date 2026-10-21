@@ -297,7 +297,7 @@ for await (const message of result) {
 
 ### Search and execute
 
-`search()` makes one call to StackOne's `stackone_search_actions` tool, which searches every linked connector for actions matching a natural-language query and ranks them together, best first. `execute()` runs one by id with one call to `stackone_execute_action`. Each call spans every account in scope.
+`search()` makes one call to StackOne's `stackone_search_actions` tool, which searches every linked connector for actions matching a natural-language query and ranks them together, best first. `execute()` runs one by id with one call to `stackone_execute_action`. Each call spans every account in scope, up to 50; more throws `ToolSetConfigError` before any request, so pass `accountIds` to narrow the scope.
 
 ```typescript
 const actions = await toolset.search('create a time-off request', { topK: 5 });
@@ -316,7 +316,7 @@ const result = await toolset.execute(best.action_id, best.example_request, {
 - `execute()` takes the nested envelope an action's `example_request` shows: `{ path, query, body }`. (A `fetchTools()` tool takes the keys its own served schema names instead: read them from `tool.parameters.properties`.)
 - `action_id` is always the one you pass: an `action_id` inside `args` — for example, one a prompt-injected model put there — is ignored.
 - Each hit carries the `session_id` of the search that found it, when the server issued one. Pass it back as `sessionId` to link the calls together.
-- Each hit names the accounts that can run it in `available_accounts`, so an action linked on two accounts is one hit. When the action's connector is linked on more than one account in scope, the server refuses to pick one and `execute()` throws `StackOneAPIError`: pass the account to use as `{ accountIds: [id] }`, one of the hit's `available_accounts`.
+- Each hit names its `provider` and the accounts that can run it in `available_accounts`, so an action linked on two accounts is one hit. With one account in scope, `available_accounts` holds just that account's `id`. When the action's connector is linked on more than one account in scope, the server refuses to pick one and `execute()` throws `StackOneAPIError`: pass the account to use as `{ accountIds: [id] }`, one of the hit's `available_accounts`.
 - `topK` (1–50, default 10) caps the whole result.
 - If the server does not serve the search or execute tool (the project's policy disables search and execute), `search()` and `execute()` throw `ToolSetLoadError`.
 
@@ -345,13 +345,15 @@ await toolset.submitFeedback({
 // One tool per action (the server default)
 const toolset = new StackOneToolSet();
 
-// StackOne's search and execute tools instead: `stackone_search_actions`,
-// `stackone_execute_action` and `stackone_list_accounts`, spanning every account in scope
+// StackOne's search and execute tools instead: `stackone_search_actions` and
+// `stackone_execute_action`, spanning every account in scope
 const compact = new StackOneToolSet({ toolMode: 'search_execute' });
 const metaTools = await compact.fetchTools();
 ```
 
 `search_execute` keeps the catalog small however many accounts are linked, which suits handing the tools to a model directly. A single call can override the mode with `fetchTools({ mode })`.
+
+The tools have the same names whatever the scope. With several accounts the server also serves `stackone_list_accounts`, and the two tools take a `stackone_account_id` to choose among them. With one account the server serves a pair named for that account (`<provider>_<accountId>_search_actions` and `_execute_action`), and the SDK presents it as `stackone_search_actions` and `stackone_execute_action`, with those names in its descriptions and results. A `stackone_account_id` or `provider` that names the account or its connector is dropped; any other throws `ToolArgumentsError` before any request.
 
 ### Filtering Tools with fetchTools()
 

@@ -799,6 +799,84 @@
             "notes": "Raised by search() and execute() before any tools/call, when the account scope's search_execute listing does not carry the tool — the project's mcp_search_execute policy is disabled, say, so individual tools are served."
         },
         {
+            "id": "too-many-accounts",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{count} accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many distinct accounts are in scope"
+                }
+            },
+            "python": "{count} accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.",
+            "node": "{count} accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised before any request when a search_execute listing would name more than 50 accounts, which UCA refuses with a 400."
+        },
+        {
+            "id": "account-outside-scope",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "stackone_account_id {value} is not an account {tool} can run on; it runs on {account_id}.",
+            "placeholders": {
+                "value": {
+                    "format": "json",
+                    "description": "the stackone_account_id given"
+                },
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name as exposed: stackone_search_actions or stackone_execute_action"
+                },
+                "account_id": {
+                    "format": "json",
+                    "description": "the one account the served pair is bound to"
+                }
+            },
+            "python": "stackone_account_id {value} is not an account {tool} can run on; it runs on {account_id}.",
+            "node": "stackone_account_id {value} is not an account {tool} can run on; it runs on {account_id}.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised before any tools/call by a one-account scope's search or execute tool, which runs the account's own served pair: a stackone_account_id naming that account is dropped, any other raises this."
+        },
+        {
+            "id": "provider-outside-scope",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "provider {value} is not linked in this account scope, which has {provider}.",
+            "placeholders": {
+                "value": {
+                    "format": "json",
+                    "description": "the provider given"
+                },
+                "provider": {
+                    "format": "json",
+                    "description": "the account's connector: the served search tool's name minus _<accountId>_search_actions"
+                }
+            },
+            "python": "provider {value} is not linked in this account scope, which has {provider}.",
+            "node": "provider {value} is not linked in this account scope, which has {provider}.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised before any tools/call by a one-account scope's search tool: a provider equal to the account's connector, compared case-insensitively, is dropped, any other raises this."
+        },
+        {
             "id": "arguments-not-finite",
             "kind": "error",
             "error": {

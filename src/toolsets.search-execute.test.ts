@@ -12,6 +12,7 @@ import { StackOneToolSet } from './toolsets';
 import type { JsonObject } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
+import { ToolArgumentsError } from './utils/error-tool-arguments';
 import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
 
 vi.mock('./mcp-client', async (importOriginal) => {
@@ -103,7 +104,7 @@ const serveAccounts = (accounts: JsonObject[]) =>
 const listedEndpoints = () => listMock.mock.calls.map(([request]) => request.endpoint);
 
 describe('the search_execute listing', () => {
-	it('lists the trio once for the whole scope, every account as a repeated query parameter', async () => {
+	it('lists the trio once for the whole scope, the accounts as one comma-separated query value', async () => {
 		const { requests } = serveMock({ accountTools: { acc1: [], acc2: [], acc3: [] } });
 
 		const tools = await newToolSet({ accountIds: ['acc3', 'acc1', 'acc3', 'acc2'] }).fetchTools({
@@ -112,10 +113,34 @@ describe('the search_execute listing', () => {
 
 		expect(tools.toArray().map((tool) => tool.name)).toEqual(SESSION_TOOL_NAMES);
 		expect(listedEndpoints()).toEqual([
-			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1&x-account-id=acc2&x-account-id=acc3`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2%2Cacc3`,
 		]);
-		// Fetch would join repeated headers into one value, so the accounts go in the query only.
 		expect(requests.every((request) => request.headers.get('x-account-id') === null)).toBe(true);
+	});
+
+	it('refuses more than 50 accounts before any request', async () => {
+		const accountIds = Array.from({ length: 51 }, (_, index) => `acc${index}`);
+
+		const error = await newToolSet({ accountIds })
+			.fetchTools({ mode: 'search_execute' })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toEqual(
+			new ToolSetConfigError(
+				'51 accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.',
+			),
+		);
+		expect(error).toBeInstanceOf(ToolSetConfigError);
+		expect(listMock).not.toHaveBeenCalled();
+	});
+
+	it('lists 50 accounts in one request', async () => {
+		fakeSessionTools();
+		const accountIds = Array.from({ length: 50 }, (_, index) => `acc${index}`);
+
+		await newToolSet({ accountIds }).search('x');
+
+		expect(listMock).toHaveBeenCalledOnce();
 	});
 
 	it('binds its tools to no account, executing on the endpoint that listed them', async () => {
@@ -149,7 +174,7 @@ describe('the search_execute listing', () => {
 		await toolset.fetchTools({ mode: 'search_execute' });
 
 		expect(listedEndpoints()).toEqual([
-			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1&x-account-id=acc2&x-account-id=acc3&x-end-user-id=bob`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2%2Cacc3&x-end-user-id=bob`,
 		]);
 	});
 
@@ -184,7 +209,7 @@ describe('the search_execute listing', () => {
 		expect(tools.toArray().map((tool) => tool.name)).toEqual(SESSION_TOOL_NAMES);
 		expect(accountRequests).toBe(1);
 		expect(listedEndpoints().at(-1)).toBe(
-			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1&x-account-id=acc2&x-end-user-id=eve`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2&x-end-user-id=eve`,
 		);
 	});
 
@@ -209,7 +234,7 @@ describe('the search_execute listing', () => {
 		await toolset.fetchTools({ mode: 'search_execute', accountIds: ['acc1'] });
 
 		expect(listedEndpoints()).toEqual([
-			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1&x-account-id=acc2`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2`,
 			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1`,
 		]);
 	});
@@ -229,7 +254,7 @@ describe('the search_execute listing', () => {
 
 		expect(tools.toArray().map((tool) => tool.name)).toEqual(SESSION_TOOL_NAMES);
 		expect(listedEndpoints()).toEqual([
-			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1&x-account-id=acc2`,
+			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2`,
 		]);
 	});
 
@@ -253,6 +278,221 @@ describe('the search_execute listing', () => {
 			actions: ['*_search_actions'],
 		});
 		expect(tools.toArray().map((tool) => tool.name)).toEqual(['stackone_search_actions']);
+	});
+});
+
+/**
+ * Contract v2 rule 3: for one account the server serves `<provider>_<accountId>_search_actions` and
+ * `_execute_action`, which the SDK presents under the trio's names.
+ */
+describe('one account: the served pair under the trio’s names', () => {
+	const pairTool = async (name: string, accountId = 'acc1') => {
+		const tools = await newToolSet({ accountId }).fetchTools({ mode: 'search_execute' });
+		return tools.getStackOneTool(name);
+	};
+
+	it('presents the pair as stackone_search_actions and stackone_execute_action', async () => {
+		serveMock({ submitFeedback: true });
+
+		const tools = await newToolSet({ accountId: 'acc1' }).fetchTools({ mode: 'search_execute' });
+
+		expect(tools.toArray().map((tool) => tool.name)).toEqual([
+			'stackone_submit_feedback',
+			'stackone_search_actions',
+			'stackone_execute_action',
+		]);
+	});
+
+	it('shows a model the same tools for one account as for several, but stackone_list_accounts', async () => {
+		serveMock({ accountTools: { acc1: [], acc2: [] } });
+		const toolset = newToolSet();
+
+		const one = await toolset.fetchTools({ mode: 'search_execute', accountIds: ['acc1'] });
+		const many = await toolset.fetchTools({ mode: 'search_execute', accountIds: ['acc1', 'acc2'] });
+
+		expect(one.toArray().map((tool) => tool.name)).toEqual(
+			many
+				.toArray()
+				.map((tool) => tool.name)
+				.filter((name) => name !== 'stackone_list_accounts'),
+		);
+	});
+
+	it('reads the trio’s names wherever its description and schema name the served tools', async () => {
+		serveMock();
+
+		const search = await pairTool('stackone_search_actions');
+		const execute = await pairTool('stackone_execute_action');
+
+		expect(search.description).toBe(
+			'Search the mock actions of account acc1. Run one with stackone_execute_action.',
+		);
+		expect(execute.description).toBe('Execute an action found by stackone_search_actions.');
+		expect(execute.toJsonSchema().properties?.action_id?.description).toBe(
+			'An action_id exactly as stackone_search_actions returned it.',
+		);
+		expect(JSON.stringify([search.toJsonSchema(), execute.toJsonSchema()])).not.toMatch(
+			/mock_acc1_/,
+		);
+	});
+
+	it('calls the served tool on the same endpoint, and renames it in the result’s strings', async () => {
+		const { calls } = serveMock();
+		const search = await pairTool('stackone_search_actions');
+
+		const result = await search.execute({ query: 'list items' });
+
+		expect(calls.map((call) => [call.name, call.accountId])).toEqual([
+			['mock_acc1_search_actions', 'acc1'],
+		]);
+		expect(result.hint).toBe(
+			'To run an action, call stackone_execute_action with its action_id exactly as shown above.',
+		);
+	});
+
+	it('gives each hit the account and connector it runs on', async () => {
+		serveMock();
+
+		const hits = await newToolSet({ accountId: 'acc1' }).search('list items');
+
+		expect(hits).toEqual([
+			{
+				action_id: 'mock_list_items',
+				description: 'List items',
+				similarity_score: 0.8,
+				example_request: { query: { page_size: 25 } },
+				provider: 'mock',
+				available_accounts: [{ id: 'acc1' }],
+				session_id: MOCK_SEARCH_SESSION_ID,
+			},
+		]);
+	});
+
+	it('keeps the account and connector a hit already names', async () => {
+		fakeSessionTools(
+			(): JsonObject => ({
+				actions: [
+					{
+						action_id: 'linear_a',
+						provider: 'Linear',
+						available_accounts: [{ id: 'acc1', name: 'A' }],
+					},
+					{ action_id: 'linear_b' },
+				],
+			}),
+			['linear_acc1_search_actions', 'linear_acc1_execute_action'],
+		);
+
+		const hits = await newToolSet({ accountId: 'acc1' }).search('x');
+
+		expect(hits).toEqual([
+			{
+				action_id: 'linear_a',
+				provider: 'Linear',
+				available_accounts: [{ id: 'acc1', name: 'A' }],
+			},
+			{ action_id: 'linear_b', provider: 'linear', available_accounts: [{ id: 'acc1' }] },
+		]);
+	});
+
+	it('runs execute() on the one account, dropping the stackone_account_id it names', async () => {
+		const { calls } = serveMock({ accountTools: { acc1: [], acc2: [] } });
+
+		const result = await newToolSet({ accountIds: ['acc1', 'acc2'] }).execute(
+			'mock_list_items',
+			{ query: { page_size: 1 } },
+			{ sessionId: MOCK_SEARCH_SESSION_ID, accountIds: ['acc2'] },
+		);
+
+		expect((result.result as JsonObject).account_id).toBe('acc2');
+		expect(calls).toEqual([
+			{
+				accountId: 'acc2',
+				toolMode: 'search_execute',
+				name: 'mock_acc2_execute_action',
+				arguments: {
+					query: { page_size: 1 },
+					session_id: MOCK_SEARCH_SESSION_ID,
+					action_id: 'mock_list_items',
+				},
+			},
+		]);
+	});
+
+	it.each([
+		['stackone_search_actions', { query: 'x' }],
+		['stackone_execute_action', { action_id: 'mock_list_items' }],
+	])(
+		'%s drops a stackone_account_id and provider naming its own account and connector',
+		async (name, args) => {
+			const { calls } = serveMock();
+			const tool = await pairTool(name);
+
+			await tool.execute({ ...args, stackone_account_id: 'acc1', provider: 'MOCK' });
+			await tool.execute({ ...args, stackone_account_id: null, provider: null });
+
+			expect(calls.map((call) => call.arguments)).toEqual([args, args]);
+		},
+	);
+
+	it('reports a failed call in the trio’s names', async () => {
+		serveMock();
+		const tool = await pairTool('stackone_execute_action');
+
+		const error = await tool
+			.execute({ action_id: 'mock_unknown' })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(StackOneAPIError);
+		const text = `${(error as Error).message} ${JSON.stringify((error as StackOneAPIError).responseBody)}`;
+		expect(text).not.toContain('mock_acc1_');
+		expect((error as Error).message).toContain('"stackone_execute_action"');
+		expect((error as StackOneAPIError).statusCode).toBe(404);
+	});
+
+	it('refuses a stackone_account_id outside the scope, before any call', async () => {
+		const { calls } = serveMock();
+		const tool = await pairTool('stackone_execute_action');
+
+		const error = await tool
+			.execute({ action_id: 'mock_list_items', stackone_account_id: 'acc2' })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toBe(
+			'stackone_account_id "acc2" is not an account "stackone_execute_action" can run on; it runs on "acc1".',
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('refuses a provider outside the scope, before any call', async () => {
+		const { calls } = serveMock();
+		const tool = await pairTool('stackone_search_actions');
+
+		const error = await tool
+			.execute({ query: 'x', provider: 'jira' })
+			.catch((caught: unknown) => caught);
+
+		expect(error).toBeInstanceOf(ToolArgumentsError);
+		expect((error as Error).message).toBe(
+			'provider "jira" is not linked in this account scope, which has "mock".',
+		);
+		expect(calls).toEqual([]);
+	});
+
+	it('reads the connector of a provider whose name holds underscores', async () => {
+		const { calls } = serveMock({ accountProviders: { acc1: 'browser_linkedin' } });
+		const tool = await pairTool('stackone_search_actions');
+
+		const result = await tool.execute({ query: 'x', provider: 'browser_linkedin' });
+
+		expect(calls.map((call) => call.name)).toEqual(['browser_linkedin_acc1_search_actions']);
+		expect(result.actions).toEqual([
+			expect.objectContaining({
+				provider: 'browser_linkedin',
+				available_accounts: [{ id: 'acc1' }],
+			}),
+		]);
 	});
 });
 
@@ -387,21 +627,21 @@ describe('execute()', () => {
 
 	// Contract §5: stackone_account_id for exactly one account, session_id when given, action_id last.
 	it('sends the one account as stackone_account_id, then session_id, then action_id', async () => {
-		const { calls } = serveMock({ accountTools: { acc1: [], acc2: [] } });
+		const calls = fakeSessionTools();
 
-		const result = await newToolSet({ accountIds: ['acc1', 'acc2'] }).execute(
+		await newToolSet({ accountIds: ['acc1', 'acc2'] }).execute(
 			'mock_list_items',
 			{ query: { page_size: 1 }, stackone_account_id: 'acc1' },
 			{ sessionId: MOCK_SEARCH_SESSION_ID, accountIds: ['acc2', 'acc2'] },
 		);
 
-		expect(Object.entries(calls[0]?.arguments ?? {})).toEqual([
+		expect(calls.map((call) => call.tool)).toEqual(['stackone_execute_action']);
+		expect(Object.entries(calls[0]?.args ?? {})).toEqual([
 			['query', { page_size: 1 }],
 			['stackone_account_id', 'acc2'],
 			['session_id', MOCK_SEARCH_SESSION_ID],
 			['action_id', 'mock_list_items'],
 		]);
-		expect((result.result as JsonObject).account_id).toBe('acc2');
 		expect(listedEndpoints()).toEqual([
 			`${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc2`,
 		]);
@@ -536,7 +776,7 @@ describe('execute()', () => {
 
 	it('raises the server’s error for an action no linked connector serves', async () => {
 		serveMock();
-		const error = (await newToolSet()
+		const error = (await newToolSet({ accountIds: ['default', 'acc1'] })
 			.execute('jira_list_issues')
 			.catch((caught: unknown) => caught)) as StackOneAPIError;
 
@@ -741,8 +981,8 @@ describe('submitFeedback()', () => {
 		await toolset.submitFeedback({ rating: 'positive', toolNames: ['a'], accountIds: null });
 
 		expect(calls.map((call) => [call.name, call.accountId])).toEqual([
-			['stackone_search_actions', 'acc1'],
-			['stackone_execute_action', 'acc1'],
+			['mock_acc1_search_actions', 'acc1'],
+			['mock_acc1_execute_action', 'acc1'],
 			['stackone_submit_feedback', 'acc1'],
 		]);
 	});
@@ -797,19 +1037,11 @@ describe('submitFeedback()', () => {
 		});
 
 		expect(calls.map((call) => [call.name, call.arguments.session_id])).toEqual([
-			['stackone_search_actions', undefined],
-			['stackone_execute_action', MOCK_SEARCH_SESSION_ID],
+			['mock_default_search_actions', undefined],
+			['mock_default_execute_action', MOCK_SEARCH_SESSION_ID],
 			['stackone_submit_feedback', MOCK_SEARCH_SESSION_ID],
 		]);
 	});
-});
-
-it('keeps every search/execute error inside the StackOneError hierarchy', async () => {
-	await expect(newToolSet({ accountId: 'acc1' }).search('x', { topK: 0 })).rejects.toBeInstanceOf(
-		StackOneError,
-	);
-	serveMock();
-	await expect(newToolSet().execute('mock_nope')).rejects.toBeInstanceOf(StackOneError);
 });
 
 it('keeps every search/execute error inside the StackOneError hierarchy', async () => {

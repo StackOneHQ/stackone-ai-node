@@ -22,10 +22,14 @@ export const SUBMIT_FEEDBACK_TOOL_NAME = 'stackone_submit_feedback';
 
 /**
  * The account-spanning search and execute tools the MCP endpoint serves under
- * `tool-mode=search_execute`, beside `stackone_list_accounts`.
+ * `tool-mode=search_execute`, beside `stackone_list_accounts`. For one account the server serves
+ * a pair named for its connector and account instead, which the SDK presents under these names.
  */
 export const SEARCH_ACTIONS_TOOL_NAME = 'stackone_search_actions';
 export const EXECUTE_ACTION_TOOL_NAME = 'stackone_execute_action';
+
+/** The most accounts one `search_execute` request may name; the server refuses more with a 400. */
+export const MAX_SCOPE_ACCOUNTS = 50;
 
 /** Upper bound on how many accounts' catalogs are listed at once. */
 export const MAX_CONCURRENCY = 10;

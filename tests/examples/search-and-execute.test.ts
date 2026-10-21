@@ -50,8 +50,9 @@ describe('search-and-execute example e2e', () => {
 				call.arguments.session_id,
 			]),
 		).toEqual([
-			['stackone_search_actions', undefined, undefined],
-			['stackone_execute_action', 'default', MOCK_SEARCH_SESSION_ID],
+			// One account: the server's pair, its stackone_account_id dropped as the pair's own.
+			['mock_default_search_actions', undefined, undefined],
+			['mock_default_execute_action', undefined, MOCK_SEARCH_SESSION_ID],
 			['stackone_submit_feedback', undefined, MOCK_SEARCH_SESSION_ID],
 		]);
 	});

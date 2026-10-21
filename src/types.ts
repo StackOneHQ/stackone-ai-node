@@ -68,10 +68,11 @@ export type JsonSchemaProperties = Record<string, JSONSchema>;
  * How the MCP endpoint lists tools.
  *
  * `'individual'` (the server default) lists one tool per action — hundreds per account.
- * `'search_execute'` lists three tools spanning every account in scope instead:
- * `stackone_list_accounts`, `stackone_search_actions`, which ranks actions for a natural-language
- * query, and `stackone_execute_action`, which runs one by id. The catalog stays small however many
- * accounts are linked, which is what keeps it inside a model's context.
+ * `'search_execute'` lists two tools spanning every account in scope instead:
+ * `stackone_search_actions`, which ranks actions for a natural-language query, and
+ * `stackone_execute_action`, which runs one by id, with `stackone_list_accounts` when there are
+ * several accounts. The catalog stays small however many accounts are linked, which is what keeps
+ * it inside a model's context.
  */
 export type ToolMode = 'individual' | 'search_execute';
 
@@ -233,8 +234,11 @@ export type SearchResult = JsonObject & {
 /** An account a search hit can run on, as `stackone_search_actions` lists it. */
 export type SearchHitAccount = JsonObject & {
 	id: string;
-	/** The account's label, its owner's name, or its id. */
-	name: string;
+	/**
+	 * The account's label, its owner's name, or its id. Absent when only one account is in scope:
+	 * the server's one-account search names none, so the SDK fills in the id alone.
+	 */
+	name?: string;
 };
 
 /**

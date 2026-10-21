@@ -37,12 +37,14 @@ const endUserMismatch = (accountId: string) =>
 
 /**
  * Every value of a header or query parameter, as UCA's ActiveAccountGuard collects them: a
- * search_execute listing names its accounts and end users as repeated query parameters.
+ * search_execute listing names its accounts as one comma-separated query value, and its end users
+ * as repeated query parameters.
  */
-const valuesOf = (request: Request, name: string): string[] => [
-	...(request.headers.get(name) ? [request.headers.get(name) as string] : []),
-	...new URL(request.url).searchParams.getAll(name),
-];
+const valuesOf = (request: Request, name: string): string[] =>
+	[
+		...(request.headers.get(name) ? [request.headers.get(name) as string] : []),
+		...new URL(request.url).searchParams.getAll(name),
+	].flatMap((value) => (name === 'x-account-id' ? value.split(',') : [value]));
 
 /** Several values as one, comma-joined, so an exchange reads as the scope it was sent for. */
 const joined = (values: string[]): string | null => (values.length > 0 ? values.join(',') : null);

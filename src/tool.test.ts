@@ -580,8 +580,11 @@ describe('StackOneMcpTool', () => {
 	const calls: RecordedToolCall[] = [];
 	beforeEach(() => {
 		calls.length = 0;
+		// Two accounts on different providers: the server serves the trio, and routes each action to
+		// the one account on its provider.
 		const app = createMcpApp({
-			accountTools: { acc1: [] },
+			accountTools: { acc1: [], acc2: [] },
+			accountProviders: { acc2: 'other' },
 			onToolCall: (call) => calls.push(call),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
@@ -592,7 +595,7 @@ describe('StackOneMcpTool', () => {
 			name: 'stackone_execute_action',
 			description: 'Execute',
 			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
-			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1`,
+			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2`,
 			apiKey: 'test-key',
 			timeout: 5_000,
 		});
@@ -609,7 +612,7 @@ describe('StackOneMcpTool', () => {
 		});
 		expect(calls).toEqual([
 			{
-				accountId: 'acc1',
+				accountId: 'acc1,acc2',
 				toolMode: 'search_execute',
 				name: 'stackone_execute_action',
 				arguments: { action_id: 'mock_list_items', query: { page_size: 2 } },

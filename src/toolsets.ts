@@ -1,10 +1,12 @@
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
+import { type AccountPair, StackOneAccountPairTool, accountPairOf } from './account-pair';
 import {
 	DEFAULT_BASE_URL,
 	DEFAULT_TIMEOUT_MS,
 	EXECUTE_ACTION_TOOL_NAME,
 	FAILED_ACCOUNT_RETRY_MS,
 	MAX_CONCURRENCY,
+	MAX_SCOPE_ACCOUNTS,
 	MAX_TOP_K,
 	SEARCH_ACTIONS_TOOL_NAME,
 	SUBMIT_FEEDBACK_TOOL_NAME,
@@ -110,9 +112,9 @@ interface StackOneToolSetBaseConfig {
 	execute?: ExecuteToolsConfig;
 	/**
 	 * How the endpoint lists tools. `'search_execute'` returns one `stackone_search_actions` and
-	 * one `stackone_execute_action` spanning every account in scope (with `stackone_list_accounts`)
-	 * instead of one tool per action, keeping the catalog small enough for a model's context.
-	 * Defaults to the server's own default (`'individual'`).
+	 * one `stackone_execute_action` spanning every account in scope (with `stackone_list_accounts`
+	 * when there are several) instead of one tool per action, keeping the catalog small enough for
+	 * a model's context. Defaults to the server's own default (`'individual'`).
 	 */
 	toolMode?: ToolMode;
 	/**
@@ -224,12 +226,14 @@ export interface SubmitFeedbackOptions {
 
 /**
  * One served tool, with the endpoint and account it was listed for. A `search_execute` tool spans
- * every account named in its endpoint, so it has no account of its own.
+ * every account named in its endpoint, so it has no account of its own. A one-account
+ * `search_execute` listing carries the pair it serves, to present it under the trio's names.
  */
 interface CatalogEntry {
 	definition: McpToolDefinition;
 	accountId?: string;
 	endpoint: string;
+	pair?: AccountPair;
 }
 
 /** A cached catalog: each healthy account's listing, and when and why each failing one failed. */
@@ -733,16 +737,16 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * The `search_execute` endpoint for an account scope: every account as a repeated
+	 * The `search_execute` endpoint for an account scope: the accounts as one comma-separated
 	 * `x-account-id` query parameter, then the recorded end user of each non-shared one as a
-	 * repeated `x-end-user-id`. Query parameters rather than headers, since `fetch` joins repeated
-	 * headers into one comma-separated value.
+	 * repeated `x-end-user-id`. End users go as query parameters rather than headers: the server
+	 * matches each value exactly, and `fetch` joins repeated headers into one.
 	 */
 	#sessionEndpoint(scope: readonly string[]): string {
-		const params = new URLSearchParams({ 'tool-mode': 'search_execute' });
-		for (const accountId of scope) {
-			params.append('x-account-id', accountId);
-		}
+		const params = new URLSearchParams({
+			'tool-mode': 'search_execute',
+			'x-account-id': scope.join(','),
+		});
 		const endUserIds = new Set(scope.flatMap((accountId) => this.#endUserIds.get(accountId) ?? []));
 		for (const endUserId of endUserIds) {
 			params.append('x-end-user-id', endUserId);
@@ -781,11 +785,18 @@ export class StackOneToolSet {
 	 * The `search_execute` listing of a scope: one request, whose tools span every account in it.
 	 * There is no account to skip, so a failure fails the call. Concurrent calls share the listing
 	 * in flight, as {@link #accountCatalog}'s do.
+	 *
+	 * @throws ToolSetConfigError If the scope holds more accounts than one request may name.
 	 */
 	async #sessionCatalog(
 		scope: readonly string[],
 		generation: number,
 	): Promise<readonly CatalogEntry[]> {
+		if (scope.length > MAX_SCOPE_ACCOUNTS) {
+			throw new ToolSetConfigError(
+				`${scope.length} accounts are in scope, but search and execute span at most ${MAX_SCOPE_ACCOUNTS} in one request. Pass account ids to narrow the scope.`,
+			);
+		}
 		const key = this.#cacheKey(scope, 'search_execute');
 		const cached = this.#sessionCache.get(key);
 		if (cached) {
@@ -817,7 +828,7 @@ export class StackOneToolSet {
 	/**
 	 * List a scope's `search_execute` tools. The endpoint is built per attempt, so a retry after an
 	 * end-user lookup names the end user it found; its tools execute on the endpoint that listed
-	 * them.
+	 * them. For one account the server serves that account's pair rather than the trio.
 	 */
 	async #listSession(scope: readonly string[]): Promise<CatalogEntry[]> {
 		const { endpoint, definitions } = await withEndUsers(scope, this.#endUsers, async () => {
@@ -829,7 +840,8 @@ export class StackOneToolSet {
 			});
 			return { endpoint, definitions };
 		});
-		return definitions.map((definition) => ({ definition, endpoint }));
+		const pair = scope.length === 1 ? accountPairOf(definitions, scope[0] as string) : undefined;
+		return definitions.map((definition) => ({ definition, endpoint, pair }));
 	}
 
 	/**
@@ -963,11 +975,11 @@ export class StackOneToolSet {
 	/**
 	 * Build an executable tool from a served catalog entry, on a deep copy of its schema. Every
 	 * tool — per-action, meta or feedback — executes over `tools/call` on the endpoint and account
-	 * that listed it.
+	 * that listed it. A one-account pair's tools are presented under the trio's names.
 	 */
 	#createTool(entry: CatalogEntry): StackOneTool {
-		const { definition, accountId, endpoint } = entry;
-		return new StackOneMcpTool({
+		const { definition, accountId, endpoint, pair } = entry;
+		const options = {
 			name: definition.name,
 			description: definition.description ?? '',
 			parameters: toolParametersFromInputSchema(cloneJson(definition.inputSchema)),
@@ -977,7 +989,10 @@ export class StackOneToolSet {
 			timeout: this.#timeout,
 			extraHeaders: this.#headers,
 			endUsers: this.#endUsers,
-		});
+		};
+		return pair?.names.has(definition.name)
+			? new StackOneAccountPairTool(options, pair)
+			: new StackOneMcpTool(options);
 	}
 
 	/**
@@ -986,9 +1001,11 @@ export class StackOneToolSet {
 	 * The listing is cached per account scope and mode; filters are applied in memory, and every
 	 * call builds fresh tool instances, so mutating one caller's tools never affects another's.
 	 *
-	 * In `search_execute` mode one request lists `stackone_list_accounts`, `stackone_search_actions`
-	 * and `stackone_execute_action` spanning every account in scope; they are bound to no account
-	 * and execute on that same endpoint. `providers` narrows the scope to accounts on those
+	 * In `search_execute` mode one request lists `stackone_search_actions` and
+	 * `stackone_execute_action` spanning every account in scope, with `stackone_list_accounts` when
+	 * there are several; they are bound to no account and execute on that same endpoint. For one
+	 * account the server serves a pair named for its connector and account, presented under the
+	 * same two names, so a model sees the same tools either way. At most 50 accounts fit one request. `providers` narrows the scope to accounts on those
 	 * providers, looking them up with `GET /accounts` if one is not yet known. In individual mode
 	 * each account is listed on its own, one tool per action.
 	 *
@@ -1002,7 +1019,8 @@ export class StackOneToolSet {
 	 * a partial catalog. In `search_execute` mode there is one request, so any failure fails the
 	 * call.
 	 *
-	 * @throws ToolSetConfigError If no account is configured and none can be discovered.
+	 * @throws ToolSetConfigError If no account is configured and none can be discovered, or a
+	 *   `search_execute` scope holds more than 50 accounts.
 	 * @throws StackOneAPIError With status 429 if any request is still rate limited after the
 	 *   retries; or with the API's status when the listing fails (in individual mode: every
 	 *   account fails with that same status), so a caller can tell a revoked key's 401 from a 429.
@@ -1109,7 +1127,8 @@ export class StackOneToolSet {
 	 *   `provider`, the `available_accounts` that can run it — plus the `session_id` of the search
 	 *   when the server issued one. Pass `session_id` to {@link execute} and {@link submitFeedback}
 	 *   to link the calls, and one of `available_accounts` in `accountIds` to choose the account.
-	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50.
+	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50, or more than 50
+	 *   accounts are in scope.
 	 * @throws StackOneAPIError If the search fails, including a 429 that outlasted its retries.
 	 * @throws ToolSetLoadError If the server did not serve `stackone_search_actions`.
 	 */
@@ -1162,7 +1181,8 @@ export class StackOneToolSet {
 	 * @param options.accountIds The accounts the action may run on. Exactly one is sent as
 	 *   `stackone_account_id`, choosing it.
 	 * @returns The action's result as the server wrote it: `{ isError: false, result, … }`.
-	 * @throws ToolSetConfigError If the arguments are malformed.
+	 * @throws ToolSetConfigError If the arguments are malformed, or more than 50 accounts are in
+	 *   scope.
 	 * @throws ToolSetLoadError If the server did not serve `stackone_execute_action`.
 	 * @throws StackOneAPIError If the action fails, or the server cannot choose its account.
 	 */

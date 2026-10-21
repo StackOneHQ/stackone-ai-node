@@ -477,6 +477,19 @@ const respondToCalls = (respond: (tool: StackOneMcpTool) => JsonObject | Promise
 	});
 };
 
+/** A tool of the pair the server serves for the one account `acc-1`, on connector `linear`. */
+const onePairTool = async (name: string) => {
+	listMock.mockResolvedValue(
+		['linear_acc-1_search_actions', 'linear_acc-1_execute_action'].map((served) => ({
+			name: served,
+			description: '',
+			inputSchema: {},
+		})),
+	);
+	const tools = await newToolSet({ accountId: 'acc-1' }).fetchTools({ mode: 'search_execute' });
+	return tools.getStackOneTool(name);
+};
+
 const errorOf = (act: () => unknown): Promise<Error> =>
 	Promise.resolve()
 		.then(act)
@@ -852,6 +865,31 @@ const emitters: Record<
 		return {
 			emitted: { error: await errorOf(() => newToolSet({ accountId: 'acc-1' }).search('issues')) },
 			values: { tool: 'stackone_search_actions' },
+		};
+	},
+	'too-many-accounts': async () => {
+		const accountIds = Array.from({ length: 51 }, (_, index) => `acc-${index}`);
+		return {
+			emitted: { error: await errorOf(() => newToolSet({ accountIds }).search('issues')) },
+			values: { count: 51 },
+		};
+	},
+	'account-outside-scope': async () => {
+		const execute = await onePairTool('stackone_execute_action');
+		return {
+			emitted: {
+				error: await errorOf(() =>
+					execute.execute({ action_id: 'linear_list_issues', stackone_account_id: 'acc-2' }),
+				),
+			},
+			values: { value: 'acc-2', tool: 'stackone_execute_action', account_id: 'acc-1' },
+		};
+	},
+	'provider-outside-scope': async () => {
+		const search = await onePairTool('stackone_search_actions');
+		return {
+			emitted: { error: await errorOf(() => search.execute({ query: 'x', provider: 'jira' })) },
+			values: { value: 'jira', provider: 'linear' },
 		};
 	},
 	'arguments-not-finite': async () => ({

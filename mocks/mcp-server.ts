@@ -6,10 +6,12 @@
  * It refuses what the real endpoint refuses — an unscoped request, an unknown account — so a
  * client bug that sends no account, or the wrong one, fails here instead of in production.
  *
- * Under `tool-mode=search_execute` it serves the account-spanning trio the real endpoint serves —
- * `stackone_list_accounts`, `stackone_search_actions`, `stackone_execute_action` — over every
- * account named in a repeated `x-account-id` query parameter, with the real handlers' shapes and
- * error texts.
+ * `x-account-id` may name several accounts, comma-separated, in the header or the query, as the
+ * real endpoint allows; more than 50 is refused with a 400. Under `tool-mode=search_execute` it
+ * serves what the real endpoint serves, with its handlers' shapes and error texts: for two or more
+ * accounts the account-spanning trio — `stackone_list_accounts`, `stackone_search_actions`,
+ * `stackone_execute_action` — and for one account that account's pair,
+ * `<provider>_<accountId>_search_actions` and `<provider>_<accountId>_execute_action`.
  */
 import type { Hono as HonoApp } from 'hono';
 import { StreamableHTTPTransport } from '@hono/mcp';
@@ -36,7 +38,7 @@ export interface McpToolDefinition {
 
 /** A `tools/call` exactly as it reached the server. */
 export interface RecordedToolCall {
-	/** The request's account; under `search_execute`, every account it named, comma-joined. */
+	/** Every account the request named, deduplicated and comma-joined. */
 	accountId: string;
 	toolMode: string | undefined;
 	name: string;
@@ -87,7 +89,7 @@ const submitFeedbackTool = {
 	},
 } as const satisfies McpToolDefinition;
 
-/** The account-spanning tools the real endpoint serves under `tool-mode=search_execute`. */
+/** The account-spanning tools the real endpoint serves under `tool-mode=search_execute`, for 2+ accounts. */
 const sessionTools: McpToolDefinition[] = [
 	{
 		name: 'stackone_list_accounts',
@@ -177,11 +179,11 @@ const requestedAccount = (args: Record<string, unknown>): string | undefined =>
 		: undefined;
 
 /**
- * A `search_execute` tool call, answered as the real session handlers answer it: search ranks one
+ * A trio tool call, answered as the real session handlers answer it: search ranks one
  * `<provider>_list_items` per provider in scope; execute routes an action to the one account on
  * its provider, or asks for `stackone_account_id` when there are several.
  */
-const callSessionTool = (
+const callTrioTool = (
 	name: string,
 	args: Record<string, unknown>,
 	accounts: readonly SessionAccount[],
@@ -279,6 +281,94 @@ const callSessionTool = (
 };
 
 /**
+ * The pair the real endpoint serves for a single account under `search_execute`: named for the
+ * account's provider and id, each description naming the other tool, and with no
+ * `stackone_account_id` or `provider` argument.
+ */
+const pairTools = ({ id, provider }: SessionAccount): McpToolDefinition[] => [
+	{
+		name: `${provider}_${id}_search_actions`,
+		description: `Search the ${provider} actions of account ${id}. Run one with ${provider}_${id}_execute_action.`,
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: { type: 'string' },
+				top_k: { type: 'integer', minimum: 1, maximum: 50 },
+				session_id: { type: 'string' },
+			},
+			required: ['query'],
+		},
+	},
+	{
+		name: `${provider}_${id}_execute_action`,
+		description: `Execute an action found by ${provider}_${id}_search_actions.`,
+		inputSchema: {
+			type: 'object',
+			properties: {
+				action_id: {
+					type: 'string',
+					description: `An action_id exactly as ${provider}_${id}_search_actions returned it.`,
+				},
+				path: { type: 'object', additionalProperties: {} },
+				query: { type: 'object', additionalProperties: {} },
+				body: { type: 'object', additionalProperties: {} },
+				headers: { type: 'object', additionalProperties: { type: 'string' } },
+				session_id: { type: 'string' },
+			},
+			required: ['action_id'],
+		},
+	},
+];
+
+/**
+ * A pair tool call, answered as the real per-account handlers answer it: search returns the
+ * account's one action, without `provider` or `available_accounts` on the hit; execute runs it on
+ * the account. An argument the pair does not serve is refused, so a client that forwards the
+ * trio's `stackone_account_id` or `provider` fails here.
+ */
+const callPairTool = (
+	name: string,
+	args: Record<string, unknown>,
+	{ id, provider }: SessionAccount,
+): CallToolResult | undefined => {
+	const unserved = ['stackone_account_id', 'provider'].find((key) => Object.hasOwn(args, key));
+	if (unserved !== undefined) {
+		return invalid(`Unexpected argument "${unserved}"`, 'INVALID_ARGUMENT');
+	}
+
+	if (name === `${provider}_${id}_search_actions`) {
+		return text({
+			provider,
+			session_id: MOCK_SEARCH_SESSION_ID,
+			actions: [
+				{
+					action_id: `${provider}_list_items`,
+					description: 'List items',
+					similarity_score: 0.8,
+					example_request: { query: { page_size: 25 } },
+				},
+			],
+			total_count: 1,
+			hint: `To run an action, call ${provider}_${id}_execute_action with its action_id exactly as shown above.`,
+		});
+	}
+
+	if (name === `${provider}_${id}_execute_action`) {
+		const actionId = typeof args.action_id === 'string' ? args.action_id.trim() : '';
+		if (actionId !== `${provider}_list_items`) {
+			return text({ error: `Unknown action ${actionId}`, status_code: 404 }, true);
+		}
+		return wrapped({
+			data: { nodes: [] },
+			account_id: id,
+			echoed_query: args.query ?? null,
+			echoed_session_id: args.session_id ?? null,
+		});
+	}
+	return undefined;
+};
+
+/**
  * Creates a Hono app speaking the MCP protocol at `/mcp`, for use from an MSW handler.
  *
  * @example
@@ -316,7 +406,14 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		// permissive than production and hid a fatal SDK bug: an SDK that never sent the header
 		// still got a full catalog.
 		const headerAccountId = c.req.header('x-account-id');
-		const accountIds = headerAccountId ? [headerAccountId] : (c.req.queries('x-account-id') ?? []);
+		const accountIds = [
+			...new Set(
+				(headerAccountId ? [headerAccountId] : (c.req.queries('x-account-id') ?? []))
+					.flatMap((value) => value.split(','))
+					.map((id) => id.trim())
+					.filter(Boolean),
+			),
+		];
 		if (accountIds.length === 0) {
 			return c.json(
 				{ statusCode: 400, message: 'Missing x-account-id header or query parameter in request' },
@@ -325,21 +422,26 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		}
 		// No fallback catalog either: serving one for an account that does not exist would hide
 		// any bug that sends a wrong, stale or mangled account id.
+		if (accountIds.length > 50) {
+			return c.json({ statusCode: 400, message: 'x-account-id names more than 50 accounts' }, 400);
+		}
 		const unknown = accountIds.find((id) => !Object.hasOwn(accountTools, id));
 		if (unknown !== undefined) {
 			return c.json({ statusCode: 404, message: `Unknown account ${unknown}` }, 404);
 		}
 		const accountId = accountIds.join(',');
-		const sessionAccounts = [...new Set(accountIds)].map((id) => ({
+		const sessionAccounts = accountIds.map((id) => ({
 			id,
 			provider: accountProviders[id] ?? 'mock',
 		}));
+		const [onlyAccount] = sessionAccounts.length === 1 ? sessionAccounts : [];
 
 		const toolMode = c.req.query('tool-mode');
+		const searchExecuteTools = onlyAccount ? pairTools(onlyAccount) : sessionTools;
 		const listed: McpToolDefinition[] = [
 			...(submitFeedback ? [submitFeedbackTool] : []),
 			...(toolMode === 'search_execute'
-				? sessionTools
+				? searchExecuteTools
 				: accountIds.flatMap((id) => accountTools[id] ?? [])),
 		];
 
@@ -373,9 +475,11 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 			}
 			// An action tool echoes what reached it, so a test can see the arguments and account.
 			return (
-				(toolMode === 'search_execute'
-					? callSessionTool(name, args, sessionAccounts)
-					: undefined) ??
+				(toolMode !== 'search_execute'
+					? undefined
+					: onlyAccount
+						? callPairTool(name, args, onlyAccount)
+						: callTrioTool(name, args, sessionAccounts)) ??
 				wrapped({ data: { action: name, account_id: accountId, arguments: args } })
 			);
 		});
