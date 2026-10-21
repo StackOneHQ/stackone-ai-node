@@ -580,8 +580,11 @@ describe('StackOneMcpTool', () => {
 	const calls: RecordedToolCall[] = [];
 	beforeEach(() => {
 		calls.length = 0;
+		// Two accounts on different providers: the server serves the trio, and routes each action to
+		// the one account on its provider.
 		const app = createMcpApp({
-			accountTools: { acc1: [] },
+			accountTools: { acc1: [], acc2: [] },
+			accountProviders: { acc2: 'other' },
 			onToolCall: (call) => calls.push(call),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
@@ -589,12 +592,11 @@ describe('StackOneMcpTool', () => {
 
 	const mcpTool = (properties: Record<string, JSONSchema> = {}) =>
 		new StackOneMcpTool({
-			name: 'mock_acc1_execute_action',
+			name: 'stackone_execute_action',
 			description: 'Execute',
 			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
-			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
+			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2`,
 			apiKey: 'test-key',
-			accountId: 'acc1',
 			timeout: 5_000,
 		});
 
@@ -610,15 +612,15 @@ describe('StackOneMcpTool', () => {
 		});
 		expect(calls).toEqual([
 			{
-				accountId: 'acc1',
+				accountId: 'acc1,acc2',
 				toolMode: 'search_execute',
-				name: 'mock_acc1_execute_action',
+				name: 'stackone_execute_action',
 				arguments: { action_id: 'mock_list_items', query: { page_size: 2 } },
 			},
 		]);
 	});
 
-	// The meta tools take a `headers` object the server unpacks, and these arguments are
+	// stackone_execute_action takes a `headers` object the server unpacks, and these arguments are
 	// model-controlled. This schema declares no headers at all, so nothing survives.
 	it('drops every model-supplied header', async () => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});

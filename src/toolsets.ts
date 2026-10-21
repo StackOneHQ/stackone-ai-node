@@ -1,10 +1,14 @@
 import type { MergeExclusive, SimplifyDeep } from 'type-fest';
+import { type AccountPair, StackOneAccountPairTool, accountPairOf } from './account-pair';
 import {
 	DEFAULT_BASE_URL,
 	DEFAULT_TIMEOUT_MS,
+	EXECUTE_ACTION_TOOL_NAME,
 	FAILED_ACCOUNT_RETRY_MS,
 	MAX_CONCURRENCY,
+	MAX_SCOPE_ACCOUNTS,
 	MAX_TOP_K,
+	SEARCH_ACTIONS_TOOL_NAME,
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
@@ -15,6 +19,7 @@ import {
 	isRateLimitFailure,
 	listMcpTools,
 	withEndUser,
+	withEndUsers,
 } from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
 import { StackOneMcpTool, type StackOneTool, Tools, warnOnDuplicateNames } from './tool';
@@ -106,9 +111,10 @@ interface StackOneToolSetBaseConfig {
 	 */
 	execute?: ExecuteToolsConfig;
 	/**
-	 * How the endpoint lists tools. `'search_execute'` returns two meta tools per connector
-	 * instead of one tool per action, keeping the catalog small enough for a model's context.
-	 * Defaults to the server's own default (`'individual'`).
+	 * How the endpoint lists tools. `'search_execute'` returns one `stackone_search_actions` and
+	 * one `stackone_execute_action` spanning every account in scope (with `stackone_list_accounts`
+	 * when there are several) instead of one tool per action, keeping the catalog small enough for
+	 * a model's context. Defaults to the server's own default (`'individual'`).
 	 */
 	toolMode?: ToolMode;
 	/**
@@ -138,8 +144,10 @@ export interface FetchToolsOptions {
 	accountIds?: string[] | null;
 
 	/**
-	 * Filter tools by provider names (case-insensitive, matched as a full prefix of the tool
-	 * name, so `browser_linkedin` matches `browser_linkedin_search_people`).
+	 * Filter tools by provider names (case-insensitive). In individual mode a provider is matched
+	 * as a full prefix of the tool name, so `browser_linkedin` matches
+	 * `browser_linkedin_search_people`. In `search_execute` mode it narrows the account scope to
+	 * the accounts `GET /accounts` reports on one of these providers.
 	 * @example ['hibob', 'bamboohr']
 	 */
 	providers?: string[];
@@ -161,7 +169,7 @@ export interface FetchToolsOptions {
  * Options for {@link StackOneToolSet.search}.
  */
 export interface SearchOptions {
-	/** Maximum results, 1–50, across every connector searched. Default: 10. */
+	/** Maximum results, 1–50. Default: 10. */
 	topK?: number;
 	/**
 	 * Restrict to these accounts. Defaults to the toolset's accounts, then every active shared
@@ -180,8 +188,10 @@ export interface ExecuteActionOptions {
 	 */
 	sessionId?: string | null;
 	/**
-	 * Restrict routing to these accounts. Defaults as for {@link StackOneToolSet.search}; `null` is
-	 * the same as leaving it unset.
+	 * The accounts the call may run on. Defaults as for {@link StackOneToolSet.search}; `null` is
+	 * the same as leaving it unset. Exactly one (distinct) id is sent as `stackone_account_id`,
+	 * choosing the account; the server asks for one when the action's connector is linked on
+	 * several accounts in scope and none is chosen.
 	 */
 	accountIds?: string[] | null;
 }
@@ -214,11 +224,16 @@ export interface SubmitFeedbackOptions {
 	accountIds?: string[] | null;
 }
 
-/** One served tool, with the account it was listed for. What the catalog cache holds. */
+/**
+ * One served tool, with the endpoint and account it was listed for. A `search_execute` tool spans
+ * every account named in its endpoint, so it has no account of its own. A one-account
+ * `search_execute` listing carries the pair it serves, to present it under the trio's names.
+ */
 interface CatalogEntry {
 	definition: McpToolDefinition;
-	accountId: string;
+	accountId?: string;
 	endpoint: string;
+	pair?: AccountPair;
 }
 
 /** A cached catalog: each healthy account's listing, and when and why each failing one failed. */
@@ -226,13 +241,6 @@ interface CachedCatalog {
 	listings: ReadonlyMap<string, readonly CatalogEntry[]>;
 	/** `at` is on {@link retryTiming}'s clock. */
 	failed: ReadonlyMap<string, { at: number; message: string }>;
-}
-
-/** The catalog of an account scope: its tools, and each account left out because it failed. */
-interface ScopedCatalog {
-	entries: CatalogEntry[];
-	/** In ascending account id order, with each failure's message and when it failed. */
-	failed: [accountId: string, message: string, at: number][];
 }
 
 const describeError = (error: unknown): string =>
@@ -297,40 +305,6 @@ function matchGlob(value: string, pattern: string): boolean {
 const isPlainObject = (value: unknown): value is JsonObject =>
 	typeof value === 'object' && value !== null && !Array.isArray(value);
 
-/** The longest of `connectors` that prefixes `actionId` (both lowercase), as execute() routes. */
-function longestConnector(actionId: string, connectors: string[]): string | undefined {
-	return connectors
-		.filter((connector) => actionId.startsWith(`${connector}_`))
-		.reduce<string | undefined>(
-			(longest, connector) =>
-				longest === undefined || connector.length > longest.length ? connector : longest,
-			undefined,
-		);
-}
-
-/**
- * The connector a meta tool belongs to: its name minus the account id and the suffix.
- *
- * The account id is stripped by identity, not by splitting on the last underscore. Account ids
- * are nanoid-shaped and nanoid's alphabet includes `_`, so splitting turned
- * `mock_acc_1_execute_action` into connector `mock_acc` and made every action on that account
- * unroutable — with an error blaming the caller's action id.
- */
-function connectorOf(tool: StackOneTool, suffix: string): string {
-	let stem = tool.name.endsWith(suffix) ? tool.name.slice(0, -suffix.length) : tool.name;
-	const account = tool.getAccountId();
-	if (account && stem.endsWith(`_${account}`)) {
-		stem = stem.slice(0, -(account.length + 1));
-	}
-	return stem.toLowerCase();
-}
-
-/** A search hit's score, or 0 for one without a numeric score, so it sorts last. */
-function scoreOf(action: SearchResult): number {
-	const score = action.similarity_score;
-	return typeof score === 'number' && !Number.isNaN(score) ? score : 0;
-}
-
 /** The JSON type of a value, as the messages shared with the Python SDK name it. */
 const jsonType = (value: unknown): string =>
 	value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value;
@@ -358,8 +332,8 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
 /**
  * The StackOne toolset: lists the served tool catalog and exposes it to agent frameworks.
  *
- * A thin client over the MCP endpoint. Tools are listed from it, per account, and executed over
- * its `tools/call`; the only other request is `GET /accounts`, to discover accounts. Schemas and
+ * A thin client over the MCP endpoint. Tools are listed from it — per account, or in
+ * `search_execute` mode once for every account in scope — and executed over its `tools/call`; the only other request is `GET /accounts`, to discover accounts. Schemas and
  * arguments are passed through as served, never rewritten, filtered or invented.
  *
  * An API key is enough: with no account configured, the toolset lists every active shared
@@ -388,6 +362,13 @@ export class StackOneToolSet {
 	 * could hide a healthy account's tools behind a partial one.
 	 */
 	readonly #catalogInFlight = new Map<string, Promise<CachedCatalog>>();
+	/**
+	 * The `search_execute` listing per account scope, and the listings in flight, keyed as
+	 * {@link #catalogCache} is. One request lists the whole scope, so there is nothing to keep per
+	 * account.
+	 */
+	readonly #sessionCache = new Map<string, readonly CatalogEntry[]>();
+	readonly #sessionInFlight = new Map<string, Promise<readonly CatalogEntry[]>>();
 	#discoveredAccountIds: string[] | undefined;
 	#discovering: Promise<string[]> | undefined;
 	/** The `GET /accounts` in flight, if any, so an end-user lookup can share it. */
@@ -402,13 +383,6 @@ export class StackOneToolSet {
 	#endUserIds: ReadonlyMap<string, string> = new Map();
 	/** The provider of each account, recorded with {@link #endUserIds}. */
 	#providers: ReadonlyMap<string, string> = new Map();
-	/**
-	 * When {@link execute}'s provider lookup last failed to name each failed account, on
-	 * {@link retryTiming}'s clock. For {@link FAILED_ACCOUNT_RETRY_MS} after, `execute()` neither
-	 * looks the account up nor lists it again early, so a key that cannot name it does not cost
-	 * every call a `GET /accounts` and a listing. Forgotten by {@link clearCatalogCache}.
-	 */
-	readonly #providerMisses = new Map<string, number>();
 	/**
 	 * Bumped at the start of every {@link fetchAccounts} call. Overlapping calls (it is public, and
 	 * not deduplicated the way {@link #discoverAccountIds} is) can resolve out of order, so each
@@ -521,9 +495,10 @@ export class StackOneToolSet {
 		this.#cacheGeneration += 1;
 		this.#catalogCache.clear();
 		this.#catalogInFlight.clear();
+		this.#sessionCache.clear();
+		this.#sessionInFlight.clear();
 		this.#discoveredAccountIds = undefined;
 		this.#discovering = undefined;
-		this.#providerMisses.clear();
 	}
 
 	/**
@@ -652,10 +627,6 @@ export class StackOneToolSet {
 			this.#accountsRecorded = started;
 			this.#endUserIds = endUserIdsOf(accounts);
 			this.#providers = providersOf(accounts);
-			// An account this response names is no longer one the lookup missed.
-			for (const accountId of this.#providers.keys()) {
-				this.#providerMisses.delete(accountId);
-			}
 		}
 		return accounts as StackOneAccount[];
 	}
@@ -766,6 +737,24 @@ export class StackOneToolSet {
 	}
 
 	/**
+	 * The `search_execute` endpoint for an account scope: the accounts as one comma-separated
+	 * `x-account-id` query parameter, then the recorded end user of each non-shared one as a
+	 * repeated `x-end-user-id`. End users go as query parameters rather than headers: the server
+	 * matches each value exactly, and `fetch` joins repeated headers into one.
+	 */
+	#sessionEndpoint(scope: readonly string[]): string {
+		const params = new URLSearchParams({
+			'tool-mode': 'search_execute',
+			'x-account-id': scope.join(','),
+		});
+		const endUserIds = new Set(scope.flatMap((accountId) => this.#endUserIds.get(accountId) ?? []));
+		for (const endUserId of endUserIds) {
+			params.append('x-end-user-id', endUserId);
+		}
+		return `${this.#baseUrl.replace(/\/+$/, '')}/mcp?${params}`;
+	}
+
+	/**
 	 * Keyed on what was fetched, not on how it is filtered: providers and actions narrow the list
 	 * in memory, so they must not force a refetch. The base URL and API key belong in it, so a
 	 * catalog is never served for a host or key other than the one it was listed from.
@@ -775,7 +764,88 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * The catalog of every scoped account, from the cache where it can be.
+	 * The served catalog of an account scope, from the cache where it can be: one listing for the
+	 * whole scope in `search_execute` mode, one per account otherwise. A scope with no accounts has
+	 * an empty catalog.
+	 */
+	async #catalog(
+		scope: readonly string[],
+		mode: ToolMode | undefined,
+		generation: number,
+	): Promise<readonly CatalogEntry[]> {
+		if (scope.length === 0) {
+			return [];
+		}
+		return mode === 'search_execute'
+			? this.#sessionCatalog(scope, generation)
+			: this.#accountCatalog(scope, mode, generation);
+	}
+
+	/**
+	 * The `search_execute` listing of a scope: one request, whose tools span every account in it.
+	 * There is no account to skip, so a failure fails the call. Concurrent calls share the listing
+	 * in flight, as {@link #accountCatalog}'s do.
+	 *
+	 * @throws ToolSetConfigError If the scope holds more accounts than one request may name.
+	 */
+	async #sessionCatalog(
+		scope: readonly string[],
+		generation: number,
+	): Promise<readonly CatalogEntry[]> {
+		if (scope.length > MAX_SCOPE_ACCOUNTS) {
+			throw new ToolSetConfigError(
+				`${scope.length} accounts are in scope, but search and execute span at most ${MAX_SCOPE_ACCOUNTS} in one request. Pass account ids to narrow the scope.`,
+			);
+		}
+		const key = this.#cacheKey(scope, 'search_execute');
+		const cached = this.#sessionCache.get(key);
+		if (cached) {
+			return cached;
+		}
+		const inFlight = this.#sessionInFlight.get(key);
+		if (inFlight && generation === this.#cacheGeneration) {
+			return inFlight;
+		}
+
+		const listing = this.#listSession(scope).then((entries) => {
+			if (generation === this.#cacheGeneration) {
+				this.#sessionCache.set(key, entries);
+			}
+			return entries;
+		});
+		if (generation === this.#cacheGeneration) {
+			this.#sessionInFlight.set(key, listing);
+		}
+		try {
+			return await listing;
+		} finally {
+			if (this.#sessionInFlight.get(key) === listing) {
+				this.#sessionInFlight.delete(key);
+			}
+		}
+	}
+
+	/**
+	 * List a scope's `search_execute` tools. The endpoint is built per attempt, so a retry after an
+	 * end-user lookup names the end user it found; its tools execute on the endpoint that listed
+	 * them. For one account the server serves that account's pair rather than the trio.
+	 */
+	async #listSession(scope: readonly string[]): Promise<CatalogEntry[]> {
+		const { endpoint, definitions } = await withEndUsers(scope, this.#endUsers, async () => {
+			const endpoint = this.#sessionEndpoint(scope);
+			const definitions = await listMcpTools({
+				endpoint,
+				headers: buildRequestHeaders({ apiKey: this.#apiKey, extraHeaders: this.#headers }),
+				timeout: this.#timeout,
+			});
+			return { endpoint, definitions };
+		});
+		const pair = scope.length === 1 ? accountPairOf(definitions, scope[0] as string) : undefined;
+		return definitions.map((definition) => ({ definition, endpoint, pair }));
+	}
+
+	/**
+	 * The catalog of every scoped account, listed one account at a time.
 	 *
 	 * One unusable account must not cost the caller every other account's tools, so a failing
 	 * account is skipped with a warning. The healthy accounts' listings are cached all the same,
@@ -786,35 +856,20 @@ export class StackOneToolSet {
 	 * A 429 that outlasted its retries is not the account's fault but the key's, so it fails the
 	 * whole listing instead: skipping it would hand back a catalog missing whichever accounts
 	 * happened to be throttled. When every account fails, see {@link allAccountsFailed}.
-	 *
-	 * The failed accounts in `retry` are listed again now, due or not. A listing already in flight
-	 * is joined either way, and its result stands even if it was not listing them. A scope with no
-	 * accounts has an empty catalog.
 	 */
-	async #catalog(
+	async #accountCatalog(
 		scope: readonly string[],
 		mode: ToolMode | undefined,
 		generation: number,
-		retry: ReadonlySet<string> = new Set(),
-	): Promise<ScopedCatalog> {
-		const inScope = ({ listings, failed }: CachedCatalog): ScopedCatalog => ({
-			entries: scope.flatMap((accountId) => listings.get(accountId) ?? []),
-			failed: scope.flatMap((accountId): ScopedCatalog['failed'] => {
-				const failure = failed.get(accountId);
-				return failure ? [[accountId, failure.message, failure.at]] : [];
-			}),
-		});
-		if (scope.length === 0) {
-			return { entries: [], failed: [] };
-		}
+	): Promise<readonly CatalogEntry[]> {
+		const inScope = ({ listings }: CachedCatalog): CatalogEntry[] =>
+			scope.flatMap((accountId) => listings.get(accountId) ?? []);
 		const key = this.#cacheKey(scope, mode);
 		const cached = this.#catalogCache.get(key);
 		const now = retryTiming.now();
 		const due = cached
 			? [...cached.failed]
-					.filter(
-						([accountId, { at }]) => retry.has(accountId) || now - at >= FAILED_ACCOUNT_RETRY_MS,
-					)
+					.filter(([, { at }]) => now - at >= FAILED_ACCOUNT_RETRY_MS)
 					.map(([accountId]) => accountId)
 			: scope;
 		if (cached && due.length === 0) {
@@ -920,11 +975,11 @@ export class StackOneToolSet {
 	/**
 	 * Build an executable tool from a served catalog entry, on a deep copy of its schema. Every
 	 * tool — per-action, meta or feedback — executes over `tools/call` on the endpoint and account
-	 * that listed it.
+	 * that listed it. A one-account pair's tools are presented under the trio's names.
 	 */
 	#createTool(entry: CatalogEntry): StackOneTool {
-		const { definition, accountId, endpoint } = entry;
-		return new StackOneMcpTool({
+		const { definition, accountId, endpoint, pair } = entry;
+		const options = {
 			name: definition.name,
 			description: definition.description ?? '',
 			parameters: toolParametersFromInputSchema(cloneJson(definition.inputSchema)),
@@ -934,7 +989,10 @@ export class StackOneToolSet {
 			timeout: this.#timeout,
 			extraHeaders: this.#headers,
 			endUsers: this.#endUsers,
-		});
+		};
+		return pair?.names.has(definition.name)
+			? new StackOneAccountPairTool(options, pair)
+			: new StackOneMcpTool(options);
 	}
 
 	/**
@@ -943,41 +1001,44 @@ export class StackOneToolSet {
 	 * The listing is cached per account scope and mode; filters are applied in memory, and every
 	 * call builds fresh tool instances, so mutating one caller's tools never affects another's.
 	 *
-	 * `stackone_submit_feedback` is served once per account listing; it is returned once.
+	 * In `search_execute` mode one request lists `stackone_search_actions` and
+	 * `stackone_execute_action` spanning every account in scope, with `stackone_list_accounts` when
+	 * there are several; they are bound to no account and execute on that same endpoint. For one
+	 * account the server serves a pair named for its connector and account, presented under the
+	 * same two names, so a model sees the same tools either way. At most 50 accounts fit one request. `providers` narrows the scope to accounts on those
+	 * providers, looking them up with `GET /accounts` if one is not yet known. In individual mode
+	 * each account is listed on its own, one tool per action.
+	 *
+	 * `stackone_submit_feedback` is served once per listing; it is returned once.
 	 *
 	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
 	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff, unless that wait would outlast the
 	 * `timeout`. One still rate limited after that — or that times out while waiting to retry —
-	 * fails the whole call: an account that fails any other way is skipped with a warning, and
-	 * left out for the next {@link FAILED_ACCOUNT_RETRY_MS}, but a 429 never yields a partial
-	 * catalog.
+	 * fails the whole call. In individual mode an account that fails any other way is skipped with
+	 * a warning, and left out for the next {@link FAILED_ACCOUNT_RETRY_MS}, but a 429 never yields
+	 * a partial catalog. In `search_execute` mode there is one request, so any failure fails the
+	 * call.
 	 *
-	 * @throws ToolSetConfigError If no account is configured and none can be discovered.
-	 * @throws StackOneAPIError With status 429 if any account is still rate limited after the
-	 *   retries; or with the API's status when every account fails with that same status, so a
-	 *   caller can tell a revoked key's 401 from a 429.
+	 * @throws ToolSetConfigError If no account is configured and none can be discovered, or a
+	 *   `search_execute` scope holds more than 50 accounts.
+	 * @throws StackOneAPIError With status 429 if any request is still rate limited after the
+	 *   retries; or with the API's status when the listing fails (in individual mode: every
+	 *   account fails with that same status), so a caller can tell a revoked key's 401 from a 429.
 	 * @throws ToolSetLoadError If the catalog cannot be loaded. When every account fails for
 	 *   differing reasons, its `cause` is an `AggregateError` of each account's error.
 	 */
 	async fetchTools(options: FetchToolsOptions = {}): Promise<Tools> {
-		return (await this.#fetchTools(options)).tools;
-	}
-
-	/**
-	 * {@link fetchTools}, also returning the accounts left out because they failed to list. Those in
-	 * `retry` are listed again first — see {@link #catalog}.
-	 */
-	async #fetchTools(
-		options: FetchToolsOptions,
-		retry?: ReadonlySet<string>,
-	): Promise<{ tools: Tools; failed: ScopedCatalog['failed'] }> {
 		try {
 			const mode = options.mode === undefined ? this.#toolMode : (options.mode ?? undefined);
 			// Taken before discovery: a clear while GET /accounts is out must stop this call's
 			// listing being cached, as it was scoped by accounts discovered before the clear.
 			const generation = this.#cacheGeneration;
-			const scope = await this.#resolveAccountScope(options.accountIds);
-			const { entries, failed } = await this.#catalog(scope, mode, generation, retry);
+			const providers = options.providers?.length ? options.providers : undefined;
+			let scope = await this.#resolveAccountScope(options.accountIds);
+			if (mode === 'search_execute' && providers) {
+				scope = await this.#accountsOnProviders(scope, providers);
+			}
+			const entries = await this.#catalog(scope, mode, generation);
 
 			let seenFeedbackTool = false;
 			let tools = entries
@@ -993,8 +1054,7 @@ export class StackOneToolSet {
 				})
 				.map((entry) => this.#createTool(entry));
 
-			if (options.providers?.length) {
-				const providers = options.providers;
+			if (mode !== 'search_execute' && providers) {
 				tools = tools.filter((tool) => matchesProvider(tool.name, providers));
 			}
 			if (options.actions?.length) {
@@ -1003,7 +1063,7 @@ export class StackOneToolSet {
 			}
 
 			warnOnDuplicateNames(tools);
-			return { tools: new Tools(tools), failed };
+			return new Tools(tools);
 		} catch (error) {
 			// StackOneAPIError carries the HTTP status. Re-wrapping it would throw that away, so a
 			// caller could not tell a 401 from a 429.
@@ -1017,49 +1077,65 @@ export class StackOneToolSet {
 	}
 
 	/**
-	 * The server's per-connector meta tools, whatever this toolset's own mode.
-	 *
-	 * The mode is passed down rather than switched on the instance, so a concurrent
-	 * `fetchTools()` can never read the switched mode and cache meta tools under the wrong key.
+	 * The accounts in `scope` whose provider, as `GET /accounts` reports it, is one of `providers`
+	 * (case-insensitive). Accounts are looked up — joining a lookup in flight — when one in scope
+	 * has no provider recorded; one the lookup does not name is left out.
 	 */
-	async #metaTools(
-		suffix: string,
-		accountIds: string[] | null | undefined,
-		retry?: ReadonlySet<string>,
-	): Promise<{ tools: StackOneTool[]; failed: ScopedCatalog['failed'] }> {
-		const { tools, failed } = await this.#fetchTools({ accountIds, mode: 'search_execute' }, retry);
-		return {
-			tools: tools.getStackOneTools().filter((tool) => tool.name.endsWith(suffix)),
-			failed,
-		};
+	async #accountsOnProviders(
+		scope: readonly string[],
+		providers: readonly string[],
+	): Promise<string[]> {
+		if (scope.some((accountId) => !this.#providers.has(accountId))) {
+			await (this.#fetchingAccounts ?? this.fetchAccounts());
+		}
+		const wanted = new Set(providers.map((provider) => provider.toLowerCase()));
+		return scope.filter((accountId) => {
+			const provider = this.#providers.get(accountId);
+			return provider !== undefined && wanted.has(provider.toLowerCase());
+		});
+	}
+
+	/**
+	 * A tool of the `search_execute` listing for `accountIds`, whatever this toolset's own mode.
+	 *
+	 * The mode is passed down rather than switched on the instance, so a concurrent `fetchTools()`
+	 * can never read the switched mode and cache these tools under the wrong key.
+	 *
+	 * @throws ToolSetLoadError If the server did not serve it.
+	 */
+	async #sessionTool(name: string, accountIds: string[] | null | undefined): Promise<StackOneTool> {
+		const tools = await this.fetchTools({ accountIds, mode: 'search_execute' });
+		const tool = tools.getStackOneTools().find((candidate) => candidate.name === name);
+		if (!tool) {
+			throw new ToolSetLoadError(`The server did not serve ${name} for this account scope.`);
+		}
+		return tool;
 	}
 
 	/**
 	 * Find actions matching a natural-language query.
 	 *
-	 * Searches every linked connector and ranks the results together, so a catalog of hundreds of
-	 * tools never has to fit in a model's context. A connector that fails to search is skipped
-	 * with a warning, unless they all fail.
+	 * One `stackone_search_actions` call searches every connector linked on the accounts in scope,
+	 * ranked by the server, so a catalog of hundreds of tools never has to fit in a model's context.
 	 *
 	 * Rate limits: a request answered 429 is retried up to 3 times, after the server's
 	 * `Retry-After` (capped at 30s) or a 1s/2s/4s backoff, unless that wait would outlast the
-	 * `timeout`. One still rate limited after that fails the whole search rather than being
-	 * skipped.
+	 * `timeout`.
 	 *
 	 * @param query What you want to do, e.g. "list recent comments".
-	 * @returns At most `topK` actions, best first across every connector, each carrying
-	 *   `action_id`, the `account_id` of the account whose connector found it, and the
-	 *   `session_id` of the search when the server issued one. The same action linked on two
-	 *   accounts is two hits. Pass `session_id` to {@link execute} and {@link submitFeedback} to
-	 *   link the calls, and `account_id` in `accountIds` to run the action on that account.
-	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50.
-	 * @throws StackOneAPIError With status 429 if a request is still rate limited after retries.
-	 * @throws ToolSetLoadError If every connector fails.
+	 * @returns At most `topK` actions, best first, each as the server returned it — `action_id`,
+	 *   `provider`, the `available_accounts` that can run it — plus the `session_id` of the search
+	 *   when the server issued one. Pass `session_id` to {@link execute} and {@link submitFeedback}
+	 *   to link the calls, and one of `available_accounts` in `accountIds` to choose the account.
+	 * @throws ToolSetConfigError If `topK` is not an integer between 1 and 50, or more than 50
+	 *   accounts are in scope.
+	 * @throws StackOneAPIError If the search fails, including a 429 that outlasted its retries.
+	 * @throws ToolSetLoadError If the server did not serve `stackone_search_actions`.
 	 */
 	async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
 		const topK = options.topK === undefined ? 10 : options.topK;
-		// The server rejects anything outside 1..50, but only after a round trip per connector —
-		// and that reads like an outage rather than a typo. Fail here, where the caller can see why.
+		// The server rejects anything outside 1..50, but only after a round trip — and that reads
+		// like an outage rather than a typo. Fail here, where the caller can see why.
 		if (typeof topK !== 'number' || !Number.isInteger(topK) || topK < 1 || topK > MAX_TOP_K) {
 			throw new ToolSetConfigError(
 				`topK must be an integer between 1 and ${MAX_TOP_K}, got ${JSON.stringify(topK) ?? String(topK)}`,
@@ -1069,87 +1145,46 @@ export class StackOneToolSet {
 			throw new ToolSetConfigError(`query must be a string, got ${typeof query}`);
 		}
 
-		const { tools } = await this.#metaTools('_search_actions', options.accountIds);
-		if (tools.length === 0) {
-			return [];
-		}
-
-		const searchOne = async (tool: StackOneTool): Promise<SearchResult[]> => {
-			const found = await tool.execute({ query, top_k: topK });
-			const actions = (Array.isArray(found.actions) ? found.actions : []).filter(
-				(action): action is SearchResult => isPlainObject(action),
-			);
-			// The server returns session_id once per search, beside the actions. Results from every
-			// connector are merged and re-ranked below, so this is the last point at which a hit can
-			// still be traced to the search, and the account, that produced it.
-			const sessionId = found.session_id;
-			const traced = typeof sessionId === 'string' && sessionId ? { session_id: sessionId } : {};
-			const accountId = tool.getAccountId();
-			return actions.map((action) => ({
-				...action,
-				...traced,
-				...(accountId ? { account_id: accountId } : {}),
-			}));
-		};
-
-		// Fan out the way fetchTools() does: serially, a dozen connectors would cost the sum of
-		// their latencies on the headline call.
-		const settled = await settleWithConcurrency(
-			tools,
-			MAX_CONCURRENCY,
-			searchOne,
-			isRateLimitFailure,
-		);
-		const results: SearchResult[] = [];
-		const failures: string[] = [];
-		settled.forEach((outcome, index) => {
-			if (outcome.status === 'fulfilled') {
-				results.push(...outcome.value);
-			} else {
-				failures.push(`${tools[index]?.name}: ${describeError(outcome.reason)}`);
-			}
-		});
-		if (failures.length > 0 && results.length === 0) {
-			throw new ToolSetLoadError(`No connector returned results. ${failures.join(' | ')}`);
-		}
-		for (const failure of failures) {
-			warn(`Skipping connector that failed to search — ${failure}`);
-		}
-
-		// Concatenating per-connector results would leave them grouped by connector, so results[0]
-		// would be the best hit of whichever connector answered first rather than the best hit
-		// overall. The server scores every action on the same scale, so rank globally, then cut to
-		// topK: each connector was asked for topK, so the merged list can hold many more.
-		return results.sort((left, right) => scoreOf(right) - scoreOf(left)).slice(0, topK);
+		const tool = await this.#sessionTool(SEARCH_ACTIONS_TOOL_NAME, options.accountIds);
+		const found = await tool.execute({ query, top_k: topK });
+		// The server returns session_id once per search, beside the actions. Each hit carries it, so
+		// a caller holding one hit can still link its execute() to this search.
+		const sessionId = found.session_id;
+		const traced = typeof sessionId === 'string' && sessionId ? { session_id: sessionId } : {};
+		// Cut to topK: the server lists a synced copy, or a prerequisite, beside the hits it ranked.
+		return (Array.isArray(found.actions) ? found.actions : [])
+			.slice(0, topK)
+			.filter((action): action is SearchResult => isPlainObject(action))
+			.map((action) => ({ ...action, ...traced }));
 	}
 
 	/**
 	 * Execute an action by id, as returned by {@link search}.
 	 *
-	 * Always runs through the connector's `*_execute_action` meta tool, so `args` is the nested
-	 * envelope every action's `example_request` shows — `{ query: {...}, path: {...}, body: {...} }`.
-	 * A `fetchTools()` tool takes the keys its own served schema names instead; routing by whether
+	 * Always runs through `stackone_execute_action`, so `args` is the nested envelope every
+	 * action's `example_request` shows — `{ query: {...}, path: {...}, body: {...} }`. A
+	 * `fetchTools()` tool takes the keys its own served schema names instead; routing by whether
 	 * an id happened to be in the catalog would make the argument shape depend on something the
-	 * caller cannot see. The connector is the longest one whose name prefixes `actionId`, and `actionId` is
-	 * pinned last, so a model-supplied `action_id` in `args` cannot replace it.
+	 * caller cannot see. `actionId` is pinned last, so a model-supplied `action_id` in `args`
+	 * cannot replace it.
 	 *
-	 * `args.headers` is forwarded to the action: `*_execute_action` serves `headers` as an open
-	 * object, so any header name is declared — except `Authorization`, `x-account-id`,
+	 * The server routes the action to the account in scope on its connector. When several are,
+	 * it answers with an error naming them: pass one in `accountIds`.
+	 *
+	 * `args.headers` is forwarded to the action: `stackone_execute_action` serves `headers` as an
+	 * open object, so any header name is declared — except `Authorization`, `x-account-id`,
 	 * `User-Agent` and `x-end-user-id`, which the SDK sets itself and drops here with a warning.
 	 *
 	 * @param actionId The action to run, e.g. `linear_list_issues`.
 	 * @param args The action's arguments.
 	 * @param options.sessionId The `session_id` a search hit carries, to link this call to it.
+	 * @param options.accountIds The accounts the action may run on. Exactly one is sent as
+	 *   `stackone_account_id`, choosing it.
 	 * @returns The action's result as the server wrote it: `{ isError: false, result, … }`.
-	 * @param options.accountIds Restrict routing to these accounts. Pass a search hit's
-	 *   `account_id` to run the action on the account that found it.
-	 * @throws ToolSetConfigError If the arguments are malformed, or the action's connector is
-	 *   linked on more than one account and the call names none.
-	 * @throws ToolSetLoadError If no linked connector serves the action, or an account in scope
-	 *   failed to list — after being listed again now, unless the provider lookup failed to name
-	 *   it in the last 30 seconds — and its provider is the action's connector or unknown.
-	 * @throws StackOneAPIError If the action fails, or the lookup of a failed account's provider
-	 *   is rate limited.
+	 * @throws ToolSetConfigError If the arguments are malformed, or more than 50 accounts are in
+	 *   scope.
+	 * @throws ToolSetLoadError If the server did not serve `stackone_execute_action`.
+	 * @throws StackOneAPIError If the action fails, or the server cannot choose its account.
 	 */
 	async execute(
 		actionId: string,
@@ -1171,115 +1206,27 @@ export class StackOneToolSet {
 			);
 		}
 
-		const suffix = '_execute_action';
-		const lowered = actionId.toLowerCase();
-		const started = retryTiming.now();
-		let { tools, failed } = await this.#metaTools(suffix, options.accountIds);
+		const tool = await this.#sessionTool(EXECUTE_ACTION_TOOL_NAME, options.accountIds);
+		const chosen = [...new Set(options.accountIds ?? [])];
 
-		// An account that failed to list may serve this action too: its own connector's, or one we
-		// cannot tell. Running on whichever account did list would pick for the caller — possibly
-		// another end user's account — so refuse until it lists, or the caller names an account.
-		// The action's connector is the longest prefix among those listed and the providers
-		// `GET /accounts` named, as execute() routes: a failed `browser` account cannot serve
-		// `browser_linkedin_search`.
-		const inReach = (): ScopedCatalog['failed'] => {
-			const connector = longestConnector(lowered, [
-				...tools.map((tool) => connectorOf(tool, suffix)),
-				...[...this.#providers.values()].map((provider) => provider.toLowerCase()),
-			]);
-			return failed.filter(([accountId]) => {
-				const provider = this.#providers.get(accountId);
-				return provider === undefined || provider.toLowerCase() === connector;
-			});
-		};
-		// With explicit account ids no GET /accounts has named the failed accounts' providers, so
-		// one dead account would refuse every action. Ask once — joining a lookup in flight — and
-		// treat the provider as unknown still if that fails too, unless it was rate limited: the
-		// key's 429 is fatal, as it is to the end-user lookup. An account the lookup recently
-		// failed to name is not asked about again until its window is up.
-		const failedIds = failed.map(([accountId]) => accountId);
-		const missedRecently = new Set(
-			failedIds.filter(
-				(accountId) =>
-					started - (this.#providerMisses.get(accountId) ?? -Infinity) < FAILED_ACCOUNT_RETRY_MS,
-			),
-		);
-		const unknown = failedIds.filter(
-			(accountId) => !this.#providers.has(accountId) && !missedRecently.has(accountId),
-		);
-		if (unknown.length > 0) {
-			const generation = this.#cacheGeneration;
-			await (this.#fetchingAccounts ?? this.fetchAccounts()).catch((error: unknown) => {
-				if (isRateLimitFailure(error)) {
-					throw error;
-				}
-			});
-			// A miss is this call's to act on whatever happens, but only recorded for later calls
-			// if no clearCatalogCache() came in between, which promises to forget misses.
-			const missedAt = retryTiming.now();
-			for (const accountId of unknown) {
-				if (!this.#providers.has(accountId)) {
-					missedRecently.add(accountId);
-					if (generation === this.#cacheGeneration) {
-						this.#providerMisses.set(accountId, missedAt);
-					}
-				}
-			}
-		}
-		// Listed again now rather than when due, but only those that could serve the action, did
-		// not just fail for this call, and were not recently missed by the lookup: re-listing an
-		// account on another provider would make this call wait out its timeout, and re-listing one
-		// the lookup cannot name would make every call wait it out.
-		const retry = inReach().filter(
-			([accountId, , at]) => at < started && !missedRecently.has(accountId),
-		);
-		if (retry.length > 0) {
-			({ tools, failed } = await this.#metaTools(
-				suffix,
-				options.accountIds,
-				new Set(retry.map(([accountId]) => accountId)),
-			));
-		}
-		const unlisted = inReach();
-		if (unlisted.length > 0) {
-			throw new ToolSetLoadError(
-				`${JSON.stringify(actionId)} may be served by an account that failed to list (${unlisted.map(([accountId, message]) => `${accountId}: ${message}`).join('; ')}). Pass the account id to use, such as a search hit's account_id.`,
-			);
-		}
-
-		const matches = tools.filter((tool) => lowered.startsWith(`${connectorOf(tool, suffix)}_`));
-		if (matches.length === 0) {
-			throw new ToolSetLoadError(
-				`No connector found for ${JSON.stringify(actionId)}. Use search() to discover valid action ids.`,
-			);
-		}
-
-		// Longest connector wins: with both `browser` and `browser_linkedin` linked, the first
-		// token alone would route every browser_linkedin action to browser.
-		const longest = Math.max(...matches.map((tool) => connectorOf(tool, suffix).length));
-		const finalists = matches.filter((tool) => connectorOf(tool, suffix).length === longest);
-		const [tool] = finalists as [StackOneTool, ...StackOneTool[]];
-		if (finalists.length > 1) {
-			// The same provider linked twice, which discovery makes common. Picking one would run the
-			// action against an account the caller never chose — another end user's, possibly.
-			throw new ToolSetConfigError(
-				`${JSON.stringify(actionId)} matches ${finalists.length} connectors on different accounts (${finalists.map((t) => `${t.name} on ${t.getAccountId()}`).join(', ')}). Pass the account id to use, such as a search hit's account_id.`,
-			);
-		}
-
-		// action_id LAST, deleted first so it is last in key order too. Spreading the arguments
-		// over it would let a model-supplied "action_id" replace the action the caller pinned — the
-		// exact thing a host app pins it for. session_id only when given: the served schema makes
-		// it an optional string, so an absent key is valid and a null is not.
+		// Each option the caller set replaces the argument of its name, deleted first so it lands
+		// after the caller's keys, and action_id last of all: spreading the arguments over it would
+		// let a model-supplied "action_id" replace the action the caller pinned — the exact thing a
+		// host app pins it for. Optional ones only when given: the served schema makes them optional
+		// strings, so an absent key is valid and a null is not.
 		const callArguments: JsonObject = { ...args };
-		delete callArguments.action_id;
+		if (chosen.length === 1) {
+			delete callArguments.stackone_account_id;
+			callArguments.stackone_account_id = chosen[0] as string;
+		}
 		if (sessionId != null) {
 			delete callArguments.session_id;
 			callArguments.session_id = sessionId;
 		}
+		delete callArguments.action_id;
 		callArguments.action_id = actionId;
 
-		// `*_execute_action` answers with the action's result wrapper; see ActionResult.
+		// stackone_execute_action answers with the action's result wrapper; see ActionResult.
 		return (await tool.execute(callArguments)) as ActionResult;
 	}
 
@@ -1337,8 +1284,8 @@ export class StackOneToolSet {
 
 		// One account, one tools/call: the tool is global, so every account's copy records the same
 		// feedback, and calling each would record it once per account. The lowest id is the one a
-		// caller can predict, whatever order GET /accounts lists them in. search_execute lists two
-		// meta tools per connector where individual mode lists every action.
+		// caller can predict, whatever order GET /accounts lists them in. search_execute lists three
+		// tools where individual mode lists every action.
 		const accountIds = (await this.#resolveAccountScope(options.accountIds)).slice(0, 1);
 		const tool = (await this.fetchTools({ accountIds, mode: 'search_execute' })).getTool(
 			SUBMIT_FEEDBACK_TOOL_NAME,

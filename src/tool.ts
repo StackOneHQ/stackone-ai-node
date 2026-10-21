@@ -359,12 +359,32 @@ export class StackOneTool extends BaseTool {
 	}
 }
 
+/** What a {@link StackOneMcpTool} is built from. */
+export interface StackOneMcpToolOptions {
+	name: string;
+	/** The name the server serves the tool under, when it is presented under another. */
+	servedName?: string;
+	description: string;
+	parameters: ToolParameters;
+	endpoint: string;
+	apiKey: string;
+	accountId?: string;
+	timeout: number;
+	extraHeaders?: Record<string, string>;
+	/**
+	 * Where the end user of an account, sent as `x-end-user-id`, comes from. Read per call, so a
+	 * tool rebound with `setAccountId` sends its new account's end user.
+	 */
+	endUsers?: EndUserSource;
+}
+
 /**
  * A tool executed over MCP `tools/call`, on the endpoint and account that listed it. Every tool a
- * {@link StackOneToolSet} returns is one: per-action tools, the `search_execute` meta tools, and
+ * {@link StackOneToolSet} returns is one: per-action tools, the `search_execute` tools, and
  * `stackone_submit_feedback`.
  */
 export class StackOneMcpTool extends StackOneTool {
+	readonly #servedName: string;
 	readonly #endpoint: string;
 	readonly #apiKey: string;
 	readonly #extraHeaders: Record<string, string>;
@@ -372,28 +392,16 @@ export class StackOneMcpTool extends StackOneTool {
 	readonly #timeout: number;
 	readonly #declaredHeaders: DeclaredHeaders;
 
-	constructor(options: {
-		name: string;
-		description: string;
-		parameters: ToolParameters;
-		endpoint: string;
-		apiKey: string;
-		accountId?: string;
-		timeout: number;
-		extraHeaders?: Record<string, string>;
-		/**
-		 * Where the end user of an account, sent as `x-end-user-id`, comes from. Read per call, so
-		 * a tool rebound with `setAccountId` sends its new account's end user.
-		 */
-		endUsers?: EndUserSource;
-	}) {
+	constructor(options: StackOneMcpToolOptions) {
+		const servedName = options.servedName ?? options.name;
 		const executeConfig = {
 			kind: 'mcp',
 			url: options.endpoint,
-			toolName: options.name,
+			toolName: servedName,
 		} as const satisfies McpExecuteConfig;
 		super(options.name, options.description, options.parameters, executeConfig, options.accountId);
 		this.setExposeExecutionMetadata(false);
+		this.#servedName = servedName;
 		this.#endpoint = options.endpoint;
 		this.#apiKey = options.apiKey;
 		this.#extraHeaders = { ...options.extraHeaders };
@@ -409,13 +417,13 @@ export class StackOneMcpTool extends StackOneTool {
 	 * entries of a `headers` object, and `headers_<name>` arguments — are the exception: these
 	 * arguments are model-controlled, so each is forwarded only if this tool's own schema declares
 	 * it, and `Authorization`, `x-account-id`, `User-Agent` and `x-end-user-id` never are. A
-	 * `headers` property served as an object with no `properties`, as on `*_execute_action`,
+	 * `headers` property served as an object with no `properties`, as on `stackone_execute_action`,
 	 * declares every name.
 	 *
 	 * @returns The result as the server wrote it: for an action tool, an `ActionResult`,
 	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
 	 *   is the server's single-use `download_url`, not the file. Typed `JsonObject` rather than
-	 *   `ActionResult`, since a `*_search_actions` meta tool returns bare JSON and `dryRun` the
+	 *   `ActionResult`, since `stackone_search_actions` returns bare JSON and `dryRun` the
 	 *   call it would send: assert `ActionResult` on an action tool.
 	 * @throws ToolArgumentsError If the arguments are not a JSON object or cannot be encoded as
 	 *   JSON.
@@ -432,7 +440,7 @@ export class StackOneMcpTool extends StackOneTool {
 		assertEncodable(this.name, args);
 
 		if (options?.dryRun) {
-			return { url: this.#endpoint, method: 'tools/call', name: this.name, arguments: args };
+			return { url: this.#endpoint, method: 'tools/call', name: this.#servedName, arguments: args };
 		}
 
 		const accountId = this.getAccountId();
@@ -448,7 +456,7 @@ export class StackOneMcpTool extends StackOneTool {
 					}),
 					timeout: this.#timeout,
 				},
-				this.name,
+				this.#servedName,
 				args,
 			),
 		);

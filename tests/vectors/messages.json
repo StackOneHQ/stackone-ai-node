@@ -168,28 +168,7 @@
                 "python": true,
                 "node": true
             },
-            "notes": "The error part is whichever message the failure carries, so the whole text is the same in both SDKs only where that message is."
-        },
-        {
-            "id": "skip-connector",
-            "kind": "warning",
-            "template": "Skipping connector that failed to search — {tool}: {error}",
-            "placeholders": {
-                "tool": {
-                    "format": "text",
-                    "description": "the *_search_actions tool's name"
-                },
-                "error": {
-                    "format": "text",
-                    "description": "the failure's own message"
-                }
-            },
-            "python": "Skipping connector that failed to search — {tool}: {error}",
-            "node": "Skipping connector that failed to search — {tool}: {error}",
-            "matches": {
-                "python": true,
-                "node": true
-            }
+            "notes": "Individual mode only: a search_execute listing is one request for the whole scope, and its failure raises. The error part is whichever message the failure carries, so the whole text is the same in both SDKs only where that message is."
         },
         {
             "id": "duplicate-tool-names",
@@ -214,36 +193,6 @@
             "notes": "Language-neutral wording: neither SDK's method or parameter names. Emitted once when a fetched collection holds a clashing name, and again by every adapter that keeps the first tool per name and drops the rest: OpenAI, LangChain, Pydantic AI, AI SDK and Claude Agent SDK. Listing order is ascending account id, so the first is the lowest account id's."
         },
         {
-            "id": "ambiguous-connector",
-            "kind": "error",
-            "error": {
-                "python": "ToolsetConfigError",
-                "node": "ToolSetConfigError"
-            },
-            "template": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
-            "placeholders": {
-                "action_id": {
-                    "format": "json",
-                    "description": "the action id"
-                },
-                "count": {
-                    "format": "integer",
-                    "description": "how many connectors match: the longest connector prefix, linked on more than one account"
-                },
-                "tools": {
-                    "format": "text",
-                    "description": "each matching *_execute_action tool as \"{tool} on {account_id}\", in ascending account-id order, joined by \", \""
-                }
-            },
-            "python": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
-            "node": "{action_id} matches {count} connectors on different accounts ({tools}). Pass the account id to use, such as a search hit's account_id.",
-            "matches": {
-                "python": true,
-                "node": true
-            },
-            "notes": "Raised by execute() when the action's connector is linked on more than one account in scope — no account id passed, or several; nothing is called. Was a warning that ran the first match."
-        },
-        {
             "id": "mcp-timeout",
             "kind": "error",
             "error": {
@@ -254,7 +203,7 @@
             "placeholders": {
                 "endpoint": {
                     "format": "text",
-                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                    "description": "the MCP endpoint URL with its whole query as sent: ?tool-mode when it has one and, for search_execute, each x-account-id then each x-end-user-id parameter"
                 },
                 "timeout": {
                     "format": "seconds",
@@ -280,7 +229,7 @@
             "placeholders": {
                 "endpoint": {
                     "format": "text",
-                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                    "description": "the MCP endpoint URL with its whole query as sent: ?tool-mode when it has one and, for search_execute, each x-account-id then each x-end-user-id parameter"
                 },
                 "timeout": {
                     "format": "seconds",
@@ -332,7 +281,7 @@
             "placeholders": {
                 "endpoint": {
                     "format": "text",
-                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                    "description": "the MCP endpoint URL with its whole query as sent: ?tool-mode when it has one and, for search_execute, each x-account-id then each x-end-user-id parameter"
                 },
                 "status": {
                     "format": "integer",
@@ -366,7 +315,7 @@
             "placeholders": {
                 "endpoint": {
                     "format": "text",
-                    "description": "the MCP endpoint URL, with its ?tool-mode query when it has one"
+                    "description": "the MCP endpoint URL with its whole query as sent: ?tool-mode when it has one and, for search_execute, each x-account-id then each x-end-user-id parameter"
                 },
                 "error_type": {
                     "format": "text",
@@ -554,27 +503,6 @@
                 "node": true
             },
             "notes": "Only when every account in scope failed to list, and only when the failures do not all share one HTTP status: if they do, the SDK rethrows the StackOneAPIError itself (e.g. two accounts both answering 401 raise StackOneAPIError 401). The failures are the error's cause: Python raises it `from ExceptionGroup(...)` of them, Node passes `{ cause: new AggregateError(...) }`. An account that listed zero tools has not failed. Both SDKs join the failures with \"; \", and also raise when some accounts failed and the rest listed zero tools. Replaces no-account-returned-tools."
-        },
-        {
-            "id": "no-connector-returned-results",
-            "kind": "error",
-            "error": {
-                "python": "ToolsetLoadError",
-                "node": "ToolSetLoadError"
-            },
-            "template": "No connector returned results. {failures}",
-            "placeholders": {
-                "failures": {
-                    "format": "text",
-                    "description": "each as \"{tool}: {error}\", joined by \" | \""
-                }
-            },
-            "python": "No connector returned results. {failures}",
-            "node": "No connector returned results. {failures}",
-            "matches": {
-                "python": true,
-                "node": true
-            }
         },
         {
             "id": "fetch-tools-failed",
@@ -849,25 +777,104 @@
             }
         },
         {
-            "id": "no-connector-for-action",
+            "id": "trio-tool-not-served",
             "kind": "error",
             "error": {
                 "python": "ToolsetLoadError",
                 "node": "ToolSetLoadError"
             },
-            "template": "No connector found for {action_id}. Use search() to discover valid action ids.",
+            "template": "The server did not serve {tool} for this account scope.",
             "placeholders": {
-                "action_id": {
-                    "format": "json",
-                    "description": "the action id"
+                "tool": {
+                    "format": "text",
+                    "description": "the tool the call needs and the search_execute listing lacks: stackone_search_actions for search(), stackone_execute_action for execute()"
                 }
             },
-            "python": "No connector found for {action_id}. Use search() to discover valid action ids.",
-            "node": "No connector found for {action_id}. Use search() to discover valid action ids.",
+            "python": "The server did not serve {tool} for this account scope.",
+            "node": "The server did not serve {tool} for this account scope.",
             "matches": {
                 "python": true,
                 "node": true
-            }
+            },
+            "notes": "Raised by search() and execute() before any tools/call, when the account scope's search_execute listing does not carry the tool — the project's mcp_search_execute policy is disabled, say, so individual tools are served."
+        },
+        {
+            "id": "too-many-accounts",
+            "kind": "error",
+            "error": {
+                "python": "ToolsetConfigError",
+                "node": "ToolSetConfigError"
+            },
+            "template": "{count} accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.",
+            "placeholders": {
+                "count": {
+                    "format": "integer",
+                    "description": "how many distinct accounts are in scope"
+                }
+            },
+            "python": "{count} accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.",
+            "node": "{count} accounts are in scope, but search and execute span at most 50 in one request. Pass account ids to narrow the scope.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised before any request when a search_execute listing would name more than 50 accounts, which UCA refuses with a 400."
+        },
+        {
+            "id": "account-outside-scope",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "stackone_account_id {value} is not an account {tool} can run on; it runs on {account_id}.",
+            "placeholders": {
+                "value": {
+                    "format": "json",
+                    "description": "the stackone_account_id given"
+                },
+                "tool": {
+                    "format": "json",
+                    "description": "the tool's name as exposed: stackone_search_actions or stackone_execute_action"
+                },
+                "account_id": {
+                    "format": "json",
+                    "description": "the one account the served pair is bound to"
+                }
+            },
+            "python": "stackone_account_id {value} is not an account {tool} can run on; it runs on {account_id}.",
+            "node": "stackone_account_id {value} is not an account {tool} can run on; it runs on {account_id}.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised before any tools/call by a one-account scope's search or execute tool, which runs the account's own served pair: a stackone_account_id naming that account is dropped, any other raises this."
+        },
+        {
+            "id": "provider-outside-scope",
+            "kind": "error",
+            "error": {
+                "python": "ToolArgumentsError",
+                "node": "ToolArgumentsError"
+            },
+            "template": "provider {value} is not linked in this account scope, which has {provider}.",
+            "placeholders": {
+                "value": {
+                    "format": "json",
+                    "description": "the provider given"
+                },
+                "provider": {
+                    "format": "json",
+                    "description": "the account's connector: the served search tool's name minus _<accountId>_search_actions"
+                }
+            },
+            "python": "provider {value} is not linked in this account scope, which has {provider}.",
+            "node": "provider {value} is not linked in this account scope, which has {provider}.",
+            "matches": {
+                "python": true,
+                "node": true
+            },
+            "notes": "Raised before any tools/call by a one-account scope's search tool: a provider equal to the account's connector, compared case-insensitively, is dropped, any other raises this."
         },
         {
             "id": "arguments-not-finite",
@@ -1049,32 +1056,6 @@
                 "node": true
             },
             "notes": "Emitted once at construction when the toolset's headers option names Authorization, x-account-id or User-Agent (any case, surrounding whitespace ignored). x-end-user-id is allowed in this option and is not warned about. The option's other headers go on every request, GET /accounts included, beneath the SDK's own."
-        },
-        {
-            "id": "connector-account-unavailable",
-            "kind": "error",
-            "error": {
-                "python": "ToolsetLoadError",
-                "node": "ToolSetLoadError"
-            },
-            "template": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
-            "placeholders": {
-                "action_id": {
-                    "format": "json",
-                    "description": "the action id execute() was called with, JSON-quoted as in ambiguous-connector"
-                },
-                "failures": {
-                    "format": "text",
-                    "description": "each failed account as \"{account_id}: {error}\", where {error} is the failure's own message (as in skip-account), in ascending account-id order, joined by \"; \" — same format as all-accounts-failed"
-                }
-            },
-            "python": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
-            "node": "{action_id} may be served by an account that failed to list ({failures}). Pass the account id to use, such as a search hit's account_id.",
-            "matches": {
-                "python": true,
-                "node": true
-            },
-            "notes": "Raised by execute() when an account in scope is marked failed and, after an immediate re-list, still fails, and that account's provider (from GET /accounts) matches the action's connector or is unknown (no GET /accounts record). A failed account on a different known provider does not block routing to the remaining account."
         },
         {
             "id": "non-shared-accounts-skipped",
