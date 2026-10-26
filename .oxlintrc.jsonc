@@ -139,7 +139,7 @@
 		// Import Rules
 		// ===================
 		// Enforce top-level type specifier style
-		"import/consistent-type-specifier-style": ["error", "top-level"],
+		"import/consistent-type-specifier-style": ["error", "prefer-top-level"],
 		// ===================
 		// Unicorn Rules
 		// ===================
