@@ -470,11 +470,11 @@ const listByAccount = (names: string[]) => {
 
 /** Answer every tools/call with `respond`, without a server. */
 const respondToCalls = (respond: (tool: StackOneMcpTool) => JsonObject | Promise<JsonObject>) => {
-	vi.spyOn(StackOneMcpTool.prototype, 'execute').mockImplementation(
-		async function (this: StackOneMcpTool) {
-			return respond(this);
-		},
-	);
+	vi.spyOn(StackOneMcpTool.prototype, 'execute').mockImplementation(async function (
+		this: StackOneMcpTool,
+	) {
+		return respond(this);
+	});
 };
 
 const errorOf = (act: () => unknown): Promise<Error> =>
