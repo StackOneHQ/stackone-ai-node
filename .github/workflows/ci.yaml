@@ -191,11 +191,11 @@ jobs:
           version: 10.26.0
           package_json_file: sdk-conformance/package.json
 
-      # 24, not 22: the SDK's devEngines pins Node ^24.11.0, and the suite runs on it too.
+      # The SDK's devEngines pins the exact Node version, and the suite runs on it too.
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version-file: sdk/package.json
 
       - name: Install SDK dependencies
         working-directory: sdk
