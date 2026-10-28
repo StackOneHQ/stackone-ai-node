@@ -8,22 +8,18 @@ import {
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
-import {
-	type EndUserSource,
-	HttpRateLimitError,
-	type McpToolDefinition,
-	isRateLimitFailure,
-	listMcpTools,
-	withEndUser,
-} from './mcp-client';
+import { HttpRateLimitError, isRateLimitFailure, listMcpTools, withEndUser } from './mcp-client';
+import type { EndUserSource, McpToolDefinition } from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
-import { StackOneMcpTool, type StackOneTool, Tools, warnOnDuplicateNames } from './tool';
+import { StackOneMcpTool, Tools, warnOnDuplicateNames } from './tool';
+import type { StackOneTool } from './tool';
 import type {
 	ActionResult,
 	FeedbackCategory,
 	FeedbackRating,
 	FeedbackSource,
 	JsonObject,
+	JsonValue,
 	SearchResult,
 	StackOneAccount,
 	ToolMode,
@@ -34,6 +30,8 @@ import { ToolSetConfigError, ToolSetLoadError } from './utils/error-toolset';
 import { settleWithConcurrency } from './utils/concurrency';
 import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
 import { warn } from './utils/logger';
+import { sorted } from './utils/array';
+import { isNonEmpty, isTruthy, isTruthyString } from './utils/type';
 
 /**
  * Configuration with a single account ID
@@ -258,33 +256,17 @@ function matchesProvider(toolName: string, providers: readonly string[]): boolea
 function matchGlob(value: string, pattern: string): boolean {
 	let source = '';
 	for (let index = 0; index < pattern.length; index++) {
-		const char = pattern[index] as string;
+		const char = pattern[index];
 		if (char === '*') {
 			source += '.*';
 		} else if (char === '?') {
 			source += '.';
 		} else if (char === '[') {
-			let end = index + 1;
-			if (pattern[end] === '!') {
-				end++;
-			}
-			if (pattern[end] === ']') {
-				end++;
-			}
-			end = pattern.indexOf(']', end);
+			const end = characterClassEnd(pattern, index);
 			if (end === -1) {
 				source += '\\[';
 			} else {
-				let body = pattern
-					.slice(index + 1, end)
-					.replaceAll('\\', '\\\\')
-					.replaceAll(']', '\\]');
-				if (body.startsWith('!')) {
-					body = `^${body.slice(1)}`;
-				} else if (body.startsWith('^')) {
-					body = `\\${body}`;
-				}
-				source += `[${body}]`;
+				source += characterClass(pattern.slice(index + 1, end));
 				index = end;
 			}
 		} else {
@@ -292,6 +274,29 @@ function matchGlob(value: string, pattern: string): boolean {
 		}
 	}
 	return new RegExp(`^${source}$`, 's').test(value);
+}
+
+/** Where the `[` at `start` closes, as `fnmatch` reads it: a leading `!` or `]` is in the class. */
+function characterClassEnd(pattern: string, start: number): number {
+	let end = start + 1;
+	if (pattern[end] === '!') {
+		end++;
+	}
+	if (pattern[end] === ']') {
+		end++;
+	}
+	return pattern.indexOf(']', end);
+}
+
+/** A glob character class's body as a regular-expression class: `!` negates, `^` is literal. */
+function characterClass(glob: string): string {
+	let body = glob.replaceAll('\\', '\\\\').replaceAll(']', '\\]');
+	if (body.startsWith('!')) {
+		body = `^${body.slice(1)}`;
+	} else if (body.startsWith('^')) {
+		body = `\\${body}`;
+	}
+	return `[${body}]`;
 }
 
 const isPlainObject = (value: unknown): value is JsonObject =>
@@ -319,7 +324,7 @@ function longestConnector(actionId: string, connectors: string[]): string | unde
 function connectorOf(tool: StackOneTool, suffix: string): string {
 	let stem = tool.name.endsWith(suffix) ? tool.name.slice(0, -suffix.length) : tool.name;
 	const account = tool.getAccountId();
-	if (account && stem.endsWith(`_${account}`)) {
+	if (isTruthyString(account) && stem.endsWith(`_${account}`)) {
 		stem = stem.slice(0, -(account.length + 1));
 	}
 	return stem.toLowerCase();
@@ -334,6 +339,9 @@ function scoreOf(action: SearchResult): number {
 /** The JSON type of a value, as the messages shared with the Python SDK name it. */
 const jsonType = (value: unknown): string =>
 	value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value;
+
+/** A caller's value as JSON, or as `String` writes it when JSON cannot (`undefined`, a function). */
+const describeValue = (value: unknown): string => JSON.stringify(value) ?? String(value);
 
 /** Refuse an account-id list the toolset cannot use. `null`, like `undefined`, is not given. */
 const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
@@ -354,6 +362,169 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
 		throw new ToolSetConfigError(`${parameter} must not contain an empty account id`);
 	}
 };
+
+/** Refuse an action id that is not a non-empty string, or arguments that are not a JSON object. */
+function assertExecuteArguments(actionId: unknown, args: unknown): void {
+	if (typeof actionId !== 'string' || actionId === '') {
+		throw new ToolSetConfigError(
+			`actionId must be a non-empty string, got ${describeValue(actionId)}`,
+		);
+	}
+	if (args !== undefined && !isPlainObject(args)) {
+		throw new ToolSetConfigError(`arguments must be a JSON object, got ${jsonType(args)}`);
+	}
+}
+
+/** Refuse a session id that is given but is not a non-empty string. `null` is not given. */
+function assertSessionId(sessionId: unknown): void {
+	if (sessionId != null && (typeof sessionId !== 'string' || sessionId === '')) {
+		throw new ToolSetConfigError(
+			`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
+		);
+	}
+}
+
+/**
+ * Refuse a search the server would reject. It rejects a `topK` outside 1..50, but only after a
+ * round trip per connector — and that reads like an outage rather than a typo. Fail here, where
+ * the caller can see why.
+ */
+function assertSearchArguments(query: unknown, topK: unknown): void {
+	if (typeof topK !== 'number' || !Number.isInteger(topK) || topK < 1 || topK > MAX_TOP_K) {
+		throw new ToolSetConfigError(
+			`topK must be an integer between 1 and ${MAX_TOP_K}, got ${describeValue(topK)}`,
+		);
+	}
+	if (typeof query !== 'string') {
+		throw new ToolSetConfigError(`query must be a string, got ${typeof query}`);
+	}
+}
+
+/** Search one connector, tagging each hit with the search's session and the connector's account. */
+async function searchConnector(
+	tool: StackOneTool,
+	query: string,
+	topK: number,
+): Promise<SearchResult[]> {
+	const found = await tool.execute({ query, top_k: topK });
+	const actions = (Array.isArray(found.actions) ? found.actions : []).filter(
+		(action): action is SearchResult => isPlainObject(action),
+	);
+	// The server returns session_id once per search, beside the actions. Results from every
+	// connector are merged and re-ranked, so this is the last point at which a hit can still be
+	// traced to the search, and the account, that produced it.
+	const sessionId = found.session_id;
+	const traced = typeof sessionId === 'string' && sessionId !== '' ? { session_id: sessionId } : {};
+	const accountId = tool.getAccountId();
+	const owner = isTruthyString(accountId) ? { account_id: accountId } : {};
+	return actions.map((action) => Object.assign(action, traced, owner));
+}
+
+/**
+ * Whether a tool is one of the providers and matches one of the action patterns a fetch asked
+ * for. An absent or empty list asks for every tool.
+ */
+function isAskedFor(toolName: string, { providers, actions }: FetchToolsOptions): boolean {
+	const providerAsked =
+		providers == null || providers.length === 0 || matchesProvider(toolName, providers);
+	return (
+		providerAsked &&
+		(actions == null ||
+			actions.length === 0 ||
+			actions.some((pattern) => matchGlob(toolName, pattern)))
+	);
+}
+
+/** A cached catalog narrowed to the accounts in `scope`, in scope order. */
+function catalogInScope(
+	{ listings, failed }: CachedCatalog,
+	scope: readonly string[],
+): ScopedCatalog {
+	return {
+		entries: scope.flatMap((accountId) => listings.get(accountId) ?? []),
+		failed: scope.flatMap((accountId): ScopedCatalog['failed'] => {
+			const failure = failed.get(accountId);
+			return failure === undefined ? [] : [[accountId, failure.message, failure.at]];
+		}),
+	};
+}
+
+/** The failed accounts of a cached catalog to list again: those in `retry`, and those due at `now`. */
+function dueAccounts(cached: CachedCatalog, retry: ReadonlySet<string>, now: number): string[] {
+	return [...cached.failed]
+		.filter(([accountId, { at }]) => retry.has(accountId) || now - at >= FAILED_ACCOUNT_RETRY_MS)
+		.map(([accountId]) => accountId);
+}
+
+/**
+ * Refuse account options the toolset cannot use: both `accountId` and `accountIds`, an empty
+ * `accountId`, or a malformed id list.
+ */
+function assertAccountConfig(config: StackOneToolSetConfig): void {
+	if (config.accountId != null && config.accountIds != null) {
+		throw new ToolSetConfigError(
+			'Cannot provide both accountId and accountIds. Use accountId for a single account or accountIds for multiple accounts.',
+		);
+	}
+	// An empty accountId is usually an unset variable, and treating it as unset would silently
+	// widen every call to every discovered account.
+	if (config.accountId === '') {
+		throw new ToolSetConfigError('accountId must not be an empty string');
+	}
+	assertAccountIdList(config.accountIds, 'accountIds');
+	assertAccountIdList(config.execute?.accountIds, 'execute.accountIds');
+}
+
+/** The first of `values` that is a non-empty string. */
+const firstNonEmpty = (...values: Array<string | undefined>): string | undefined =>
+	values.find(isNonEmpty);
+
+/** The API key given, or else `STACKONE_API_KEY`. */
+function apiKeyOf(config: StackOneToolSetConfig): string {
+	const apiKey = firstNonEmpty(config.apiKey, process.env.STACKONE_API_KEY);
+	if (apiKey === undefined) {
+		throw new ToolSetConfigError(
+			'An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable',
+		);
+	}
+	return apiKey;
+}
+
+const timeoutOf = (config: StackOneToolSetConfig): number =>
+	config.timeout ?? config.execute?.timeout ?? DEFAULT_TIMEOUT_MS;
+
+const accountIdsOf = (config: StackOneToolSetConfig): string[] => [
+	...(config.accountIds ?? config.execute?.accountIds ?? []),
+];
+
+/** Warn about caller headers the SDK sets itself, which are ignored. */
+function warnOnIgnoredHeaders(headers: Record<string, string> | undefined): void {
+	const ignoredHeaders = Object.keys(headers ?? {}).filter(isSdkOwnedHeader);
+	if (ignoredHeaders.length > 0) {
+		warn(
+			`Ignoring headers ${ignoredHeaders.map((name) => `"${name}"`).join(', ')}: the SDK sets them itself. Pass the API key and account ids through their own options instead.`,
+		);
+	}
+}
+
+/**
+ * 2.x read STACKONE_ACCOUNT_ID. An upgrade that keeps relying on it would silently widen to
+ * every account on the key — other end users' accounts included — so say so, once.
+ */
+function warnOnUnreadAccountIdVariable(
+	accountId: string | undefined,
+	accountIds: readonly string[],
+): void {
+	if (
+		isTruthyString(process.env.STACKONE_ACCOUNT_ID) &&
+		accountId == null &&
+		accountIds.length === 0
+	) {
+		warn(
+			'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.',
+		);
+	}
+}
 
 /**
  * The StackOne toolset: lists the served tool catalog and exposes it to agent frameworks.
@@ -449,53 +620,20 @@ export class StackOneToolSet {
 	 *   `accountId` and `accountIds` are given, or `accountId` is an empty string.
 	 */
 	constructor(config: StackOneToolSetConfig = {}) {
-		if (config.accountId != null && config.accountIds != null) {
-			throw new ToolSetConfigError(
-				'Cannot provide both accountId and accountIds. Use accountId for a single account or accountIds for multiple accounts.',
-			);
-		}
-		// An empty accountId is usually an unset variable, and treating it as unset would silently
-		// widen every call to every discovered account.
-		if (config.accountId === '') {
-			throw new ToolSetConfigError('accountId must not be an empty string');
-		}
-		assertAccountIdList(config.accountIds, 'accountIds');
-		assertAccountIdList(config.execute?.accountIds, 'execute.accountIds');
-
-		const apiKey = config.apiKey || process.env.STACKONE_API_KEY;
-		if (!apiKey) {
-			throw new ToolSetConfigError(
-				'An API key must be provided, either to the toolset or in the STACKONE_API_KEY environment variable',
-			);
-		}
-
-		const ignoredHeaders = Object.keys(config.headers ?? {}).filter(isSdkOwnedHeader);
-		if (ignoredHeaders.length > 0) {
-			warn(
-				`Ignoring headers ${ignoredHeaders.map((name) => `"${name}"`).join(', ')}: the SDK sets them itself. Pass the API key and account ids through their own options instead.`,
-			);
-		}
+		assertAccountConfig(config);
+		const apiKey = apiKeyOf(config);
+		warnOnIgnoredHeaders(config.headers);
 
 		this.#apiKey = apiKey;
-		this.#baseUrl = config.baseUrl || process.env.STACKONE_BASE_URL || DEFAULT_BASE_URL;
+		this.#baseUrl =
+			firstNonEmpty(config.baseUrl, process.env.STACKONE_BASE_URL) ?? DEFAULT_BASE_URL;
 		this.#headers = { ...config.headers };
-		this.#timeout = config.timeout ?? config.execute?.timeout ?? DEFAULT_TIMEOUT_MS;
+		this.#timeout = timeoutOf(config);
 		this.#toolMode = config.toolMode;
 		this.#includeNonShared = config.includeNonShared ?? false;
 		this.#accountId = config.accountId;
-		this.#accountIds = [...(config.accountIds ?? config.execute?.accountIds ?? [])];
-
-		// 2.x read STACKONE_ACCOUNT_ID. An upgrade that keeps relying on it would silently widen to
-		// every account on the key — other end users' accounts included — so say so, once.
-		if (
-			process.env.STACKONE_ACCOUNT_ID &&
-			this.#accountId == null &&
-			this.#accountIds.length === 0
-		) {
-			warn(
-				'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.',
-			);
-		}
+		this.#accountIds = accountIdsOf(config);
+		warnOnUnreadAccountIdVariable(this.#accountId, this.#accountIds);
 	}
 
 	/**
@@ -572,6 +710,7 @@ export class StackOneToolSet {
 		return fetching;
 	}
 
+	// oxlint-disable-next-line eslint/complexity -- one request's failure modes, each with its own error; split, the order they are checked in is lost
 	async #requestAccounts(): Promise<StackOneAccount[]> {
 		const url = `${this.#baseUrl.replace(/\/+$/, '')}/accounts`;
 		const started = ++this.#accountsStarted;
@@ -641,7 +780,7 @@ export class StackOneToolSet {
 		}
 		const accounts =
 			typeof body === 'object' && body !== null && !Array.isArray(body) && 'data' in body
-				? (body as { data: unknown }).data
+				? body.data
 				: body;
 		if (!Array.isArray(accounts)) {
 			throw new ToolSetLoadError(
@@ -657,6 +796,7 @@ export class StackOneToolSet {
 				this.#providerMisses.delete(accountId);
 			}
 		}
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served JSON: the accounts are read field by field where used
 		return accounts as StackOneAccount[];
 	}
 
@@ -677,12 +817,12 @@ export class StackOneToolSet {
 	 *   non-shared and `includeNonShared` is not set.
 	 */
 	async #discoverAccountIds(): Promise<string[]> {
-		if (this.#discoveredAccountIds) {
+		if (this.#discoveredAccountIds !== undefined) {
 			return this.#discoveredAccountIds;
 		}
 		// Shared while in flight, so concurrent search() and fetchTools() calls on a fresh toolset
 		// make one GET /accounts between them rather than one each.
-		if (!this.#discovering) {
+		if (this.#discovering === undefined) {
 			const discovering = this.#fetchActiveAccountIds().finally(() => {
 				if (this.#discovering === discovering) {
 					this.#discovering = undefined;
@@ -698,7 +838,8 @@ export class StackOneToolSet {
 		const accounts = await this.fetchAccounts();
 		const active = accounts
 			.filter(
-				(account) => account?.status === 'active' && typeof account.id === 'string' && account.id,
+				(account) =>
+					account?.status === 'active' && typeof account.id === 'string' && account.id !== '',
 			)
 			.map((account) => account.id);
 		if (active.length === 0) {
@@ -725,7 +866,7 @@ export class StackOneToolSet {
 				`None of this API key's ${active.length} active account(s) are shared: each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`,
 			);
 		}
-		const skipped = active.filter((id) => !usable.includes(id)).sort();
+		const skipped = sorted(active.filter((id) => !usable.includes(id)));
 		if (skipped.length > 0) {
 			warn(
 				`Discovery skipped ${skipped.length} non-shared account(s) (${skipped.join(', ')}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`,
@@ -744,8 +885,8 @@ export class StackOneToolSet {
 	 */
 	async #accountsInOrder(accountIds: string[] | null | undefined): Promise<string[]> {
 		assertAccountIdList(accountIds, 'accountIds');
-		let scope = accountIds?.length ? accountIds : this.#accountIds;
-		if (scope.length === 0 && this.#accountId) {
+		let scope = accountIds != null && accountIds.length > 0 ? accountIds : this.#accountIds;
+		if (scope.length === 0 && isTruthyString(this.#accountId)) {
 			scope = [this.#accountId];
 		}
 		if (scope.length === 0) {
@@ -757,12 +898,12 @@ export class StackOneToolSet {
 	async #resolveAccountScope(accountIds: string[] | null | undefined): Promise<string[]> {
 		// Sorted and deduplicated: the listing order, and the cache key, must not depend on the
 		// order the caller happened to name the accounts in.
-		return [...new Set(await this.#accountsInOrder(accountIds))].sort();
+		return sorted(new Set(await this.#accountsInOrder(accountIds)));
 	}
 
 	#endpoint(mode: ToolMode | undefined): string {
 		const endpoint = `${this.#baseUrl.replace(/\/+$/, '')}/mcp`;
-		return mode ? `${endpoint}?tool-mode=${mode}` : endpoint;
+		return isTruthy(mode) ? `${endpoint}?tool-mode=${mode}` : endpoint;
 	}
 
 	/**
@@ -797,34 +938,34 @@ export class StackOneToolSet {
 		generation: number,
 		retry: ReadonlySet<string> = new Set(),
 	): Promise<ScopedCatalog> {
-		const inScope = ({ listings, failed }: CachedCatalog): ScopedCatalog => ({
-			entries: scope.flatMap((accountId) => listings.get(accountId) ?? []),
-			failed: scope.flatMap((accountId): ScopedCatalog['failed'] => {
-				const failure = failed.get(accountId);
-				return failure ? [[accountId, failure.message, failure.at]] : [];
-			}),
-		});
 		if (scope.length === 0) {
 			return { entries: [], failed: [] };
 		}
 		const key = this.#cacheKey(scope, mode);
 		const cached = this.#catalogCache.get(key);
-		const now = retryTiming.now();
-		const due = cached
-			? [...cached.failed]
-					.filter(
-						([accountId, { at }]) => retry.has(accountId) || now - at >= FAILED_ACCOUNT_RETRY_MS,
-					)
-					.map(([accountId]) => accountId)
-			: scope;
-		if (cached && due.length === 0) {
-			return inScope(cached);
+		const due = cached === undefined ? scope : dueAccounts(cached, retry, retryTiming.now());
+		if (cached !== undefined && due.length === 0) {
+			return catalogInScope(cached, scope);
 		}
+		return catalogInScope(await this.#joinOrList(key, scope, due, cached, mode, generation), scope);
+	}
 
+	/**
+	 * The listing in flight for `key`, if it is of the current generation, or else a new one,
+	 * shared while it runs.
+	 */
+	async #joinOrList(
+		key: string,
+		scope: readonly string[],
+		due: readonly string[],
+		cached: CachedCatalog | undefined,
+		mode: ToolMode | undefined,
+		generation: number,
+	): Promise<CachedCatalog> {
 		// A listing that started before a clear is not joined: it belongs to the old generation.
 		const inFlight = this.#catalogInFlight.get(key);
-		if (inFlight && generation === this.#cacheGeneration) {
-			return inScope(await inFlight);
+		if (inFlight !== undefined && generation === this.#cacheGeneration) {
+			return inFlight;
 		}
 
 		const listing = this.#listCatalog(key, scope, due, cached, mode, generation);
@@ -833,7 +974,7 @@ export class StackOneToolSet {
 			this.#catalogInFlight.set(key, listing);
 		}
 		try {
-			return inScope(await listing);
+			return await listing;
 		} finally {
 			if (this.#catalogInFlight.get(key) === listing) {
 				this.#catalogInFlight.delete(key);
@@ -878,7 +1019,7 @@ export class StackOneToolSet {
 		};
 
 		if (scope.length === 1) {
-			const accountId = scope[0] as string;
+			const accountId = scope[0];
 			const listings = new Map([[accountId, await listAccount(accountId)]]);
 			const catalog = { listings, failed: new Map() };
 			store(catalog);
@@ -895,7 +1036,7 @@ export class StackOneToolSet {
 		const failed = new Map(cached?.failed);
 		const failures: [accountId: string, reason: unknown][] = [];
 		settled.forEach((outcome, index) => {
-			const accountId = due[index] as string;
+			const accountId = due[index];
 			if (outcome.status === 'fulfilled') {
 				listings.set(accountId, outcome.value);
 				failed.delete(accountId);
@@ -980,7 +1121,7 @@ export class StackOneToolSet {
 			const { entries, failed } = await this.#catalog(scope, mode, generation, retry);
 
 			let seenFeedbackTool = false;
-			let tools = entries
+			const tools = entries
 				.filter(({ definition }) => {
 					// Global rather than account-scoped, so every account's listing carries an
 					// identical copy. Keep the first.
@@ -991,16 +1132,8 @@ export class StackOneToolSet {
 					seenFeedbackTool = true;
 					return first;
 				})
-				.map((entry) => this.#createTool(entry));
-
-			if (options.providers?.length) {
-				const providers = options.providers;
-				tools = tools.filter((tool) => matchesProvider(tool.name, providers));
-			}
-			if (options.actions?.length) {
-				const actions = options.actions;
-				tools = tools.filter((tool) => actions.some((pattern) => matchGlob(tool.name, pattern)));
-			}
+				.map((entry) => this.#createTool(entry))
+				.filter((tool) => isAskedFor(tool.name, options));
 
 			warnOnDuplicateNames(tools);
 			return { tools: new Tools(tools), failed };
@@ -1058,46 +1191,19 @@ export class StackOneToolSet {
 	 */
 	async search(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
 		const topK = options.topK === undefined ? 10 : options.topK;
-		// The server rejects anything outside 1..50, but only after a round trip per connector —
-		// and that reads like an outage rather than a typo. Fail here, where the caller can see why.
-		if (typeof topK !== 'number' || !Number.isInteger(topK) || topK < 1 || topK > MAX_TOP_K) {
-			throw new ToolSetConfigError(
-				`topK must be an integer between 1 and ${MAX_TOP_K}, got ${JSON.stringify(topK) ?? String(topK)}`,
-			);
-		}
-		if (typeof query !== 'string') {
-			throw new ToolSetConfigError(`query must be a string, got ${typeof query}`);
-		}
+		assertSearchArguments(query, topK);
 
 		const { tools } = await this.#metaTools('_search_actions', options.accountIds);
 		if (tools.length === 0) {
 			return [];
 		}
 
-		const searchOne = async (tool: StackOneTool): Promise<SearchResult[]> => {
-			const found = await tool.execute({ query, top_k: topK });
-			const actions = (Array.isArray(found.actions) ? found.actions : []).filter(
-				(action): action is SearchResult => isPlainObject(action),
-			);
-			// The server returns session_id once per search, beside the actions. Results from every
-			// connector are merged and re-ranked below, so this is the last point at which a hit can
-			// still be traced to the search, and the account, that produced it.
-			const sessionId = found.session_id;
-			const traced = typeof sessionId === 'string' && sessionId ? { session_id: sessionId } : {};
-			const accountId = tool.getAccountId();
-			return actions.map((action) => ({
-				...action,
-				...traced,
-				...(accountId ? { account_id: accountId } : {}),
-			}));
-		};
-
 		// Fan out the way fetchTools() does: serially, a dozen connectors would cost the sum of
 		// their latencies on the headline call.
 		const settled = await settleWithConcurrency(
 			tools,
 			MAX_CONCURRENCY,
-			searchOne,
+			(tool) => searchConnector(tool, query, topK),
 			isRateLimitFailure,
 		);
 		const results: SearchResult[] = [];
@@ -1120,7 +1226,7 @@ export class StackOneToolSet {
 		// would be the best hit of whichever connector answered first rather than the best hit
 		// overall. The server scores every action on the same scale, so rank globally, then cut to
 		// topK: each connector was asked for topK, so the merged list can hold many more.
-		return results.sort((left, right) => scoreOf(right) - scoreOf(left)).slice(0, topK);
+		return sorted(results, (left, right) => scoreOf(right) - scoreOf(left)).slice(0, topK);
 	}
 
 	/**
@@ -1151,25 +1257,15 @@ export class StackOneToolSet {
 	 * @throws StackOneAPIError If the action fails, or the lookup of a failed account's provider
 	 *   is rate limited.
 	 */
+	// oxlint-disable-next-line eslint/complexity -- the routing rules for failed accounts read in order here; split, they would not
 	async execute(
 		actionId: string,
 		args?: JsonObject,
 		options: ExecuteActionOptions = {},
 	): Promise<ActionResult> {
-		if (typeof actionId !== 'string' || !actionId) {
-			throw new ToolSetConfigError(
-				`actionId must be a non-empty string, got ${JSON.stringify(actionId) ?? String(actionId)}`,
-			);
-		}
-		if (args !== undefined && !isPlainObject(args)) {
-			throw new ToolSetConfigError(`arguments must be a JSON object, got ${jsonType(args)}`);
-		}
+		assertExecuteArguments(actionId, args);
 		const { sessionId } = options;
-		if (sessionId != null && (typeof sessionId !== 'string' || !sessionId)) {
-			throw new ToolSetConfigError(
-				`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
-			);
-		}
+		assertSessionId(sessionId);
 
 		const suffix = '_execute_action';
 		const lowered = actionId.toLowerCase();
@@ -1258,6 +1354,7 @@ export class StackOneToolSet {
 		// token alone would route every browser_linkedin action to browser.
 		const longest = Math.max(...matches.map((tool) => connectorOf(tool, suffix).length));
 		const finalists = matches.filter((tool) => connectorOf(tool, suffix).length === longest);
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- matches is non-empty, so finalists, its longest, is too
 		const [tool] = finalists as [StackOneTool, ...StackOneTool[]];
 		if (finalists.length > 1) {
 			// The same provider linked twice, which discovery makes common. Picking one would run the
@@ -1280,6 +1377,7 @@ export class StackOneToolSet {
 		callArguments.action_id = actionId;
 
 		// `*_execute_action` answers with the action's result wrapper; see ActionResult.
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served JSON in the documented ActionResult shape
 		return (await tool.execute(callArguments)) as ActionResult;
 	}
 
@@ -1329,11 +1427,7 @@ export class StackOneToolSet {
 		if (!Array.isArray(toolNames)) {
 			throw new ToolSetConfigError('toolNames must be an array of tool names');
 		}
-		if (sessionId != null && (typeof sessionId !== 'string' || !sessionId)) {
-			throw new ToolSetConfigError(
-				`sessionId must be a non-empty string, got ${JSON.stringify(sessionId)}`,
-			);
-		}
+		assertSessionId(sessionId);
 
 		// One account, one tools/call: the tool is global, so every account's copy records the same
 		// feedback, and calling each would record it once per account. The lowest id is the one a
@@ -1343,25 +1437,24 @@ export class StackOneToolSet {
 		const tool = (await this.fetchTools({ accountIds, mode: 'search_execute' })).getTool(
 			SUBMIT_FEEDBACK_TOOL_NAME,
 		);
-		if (!tool) {
+		if (tool === undefined) {
 			throw new ToolSetLoadError(
 				`The server did not serve ${SUBMIT_FEEDBACK_TOOL_NAME}: feedback is not enabled for this project.`,
 			);
 		}
 
-		const args: JsonObject = { rating, tool_names: [...toolNames] };
-		const optional = {
-			feedback,
-			category,
-			session_id: sessionId,
-			action_run_id: actionRunId,
-			source,
+		const args: JsonObject = {
+			rating,
+			tool_names: [...toolNames],
+			...givenEntries({
+				feedback,
+				category,
+				session_id: sessionId,
+				action_run_id: actionRunId,
+				source,
+			}),
 		};
-		for (const [key, value] of Object.entries(optional)) {
-			if (value !== undefined && value !== null) {
-				args[key] = value;
-			}
-		}
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served JSON in the documented ActionResult shape
 		return (await tool.execute(args)) as ActionResult;
 	}
 }
@@ -1373,32 +1466,44 @@ export class StackOneToolSet {
 function endUserIdsOf(accounts: readonly unknown[]): Map<string, string> {
 	const endUserIds = new Map<string, string>();
 	for (const account of accounts) {
-		if (
-			isPlainObject(account) &&
-			typeof account.id === 'string' &&
-			account.id &&
-			account.shared === false &&
-			typeof account.origin_username === 'string' &&
-			account.origin_username
-		) {
-			endUserIds.set(account.id, account.origin_username);
+		if (!isPlainObject(account) || account.shared !== false) {
+			continue;
+		}
+		const id = nonEmptyText(account.id);
+		const endUserId = nonEmptyText(account.origin_username);
+		if (id !== undefined && endUserId !== undefined) {
+			endUserIds.set(id, endUserId);
 		}
 	}
 	return endUserIds;
 }
 
+/** The entries of `fields` that are given: neither `undefined` nor `null`. */
+function givenEntries(fields: Record<string, string | null | undefined>): JsonObject {
+	const given: JsonObject = {};
+	for (const [key, value] of Object.entries(fields)) {
+		if (value !== undefined && value !== null) {
+			given[key] = value;
+		}
+	}
+	return given;
+}
+
+/** A field's value if it is a non-empty string. */
+const nonEmptyText = (value: JsonValue | undefined): string | undefined =>
+	typeof value === 'string' && value !== '' ? value : undefined;
+
 /** The provider of each account in a `GET /accounts` listing that names one. */
 function providersOf(accounts: readonly unknown[]): Map<string, string> {
 	const providers = new Map<string, string>();
 	for (const account of accounts) {
-		if (
-			isPlainObject(account) &&
-			typeof account.id === 'string' &&
-			account.id &&
-			typeof account.provider === 'string' &&
-			account.provider
-		) {
-			providers.set(account.id, account.provider);
+		if (!isPlainObject(account)) {
+			continue;
+		}
+		const id = nonEmptyText(account.id);
+		const provider = nonEmptyText(account.provider);
+		if (id !== undefined && provider !== undefined) {
+			providers.set(id, provider);
 		}
 	}
 	return providers;

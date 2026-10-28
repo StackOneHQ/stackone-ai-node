@@ -125,7 +125,7 @@ describe('claude-agent-sdk-integration example e2e', () => {
 		// Execute the tool handler directly
 		const result = await getEmployeeTool.handler(
 			{ id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA' },
-			{} as unknown,
+			{},
 		);
 
 		expect(result).toBeDefined();

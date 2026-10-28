@@ -8,11 +8,8 @@
 import { http } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { mockAccountTools } from '../../mocks/handlers.mcp';
-import {
-	type RecordedToolCall,
-	MOCK_SEARCH_SESSION_ID,
-	createMcpApp,
-} from '../../mocks/mcp-server';
+import { MOCK_SEARCH_SESSION_ID, createMcpApp } from '../../mocks/mcp-server';
+import type { RecordedToolCall } from '../../mocks/mcp-server';
 import { server } from '../../mocks/node';
 import { StackOneToolSet, ToolSetLoadError } from '../../src';
 
@@ -35,7 +32,7 @@ describe('search-and-execute example e2e', () => {
 			onToolCall: (call) => calls.push(call),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-		const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+		const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
 		await import('../../examples/search-and-execute');
 
@@ -54,7 +51,7 @@ describe('search-and-execute example e2e', () => {
 		const toolset = new StackOneToolSet();
 
 		const [best] = await toolset.search('list recent comments', { topK: 3 });
-		assert(best);
+		assert(best !== undefined);
 		expect(await toolset.execute(best.action_id, {}, { sessionId: best.session_id })).toMatchObject(
 			{ isError: false, result: { data: { nodes: [] } } },
 		);

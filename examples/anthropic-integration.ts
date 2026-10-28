@@ -7,11 +7,11 @@ import Anthropic from '@anthropic-ai/sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
-if (!apiKey) {
+if (apiKey === undefined || apiKey === '') {
 	console.error('STACKONE_API_KEY environment variable is required');
 	process.exit(1);
 }
-if (!process.env.ANTHROPIC_API_KEY) {
+if ((process.env.ANTHROPIC_API_KEY ?? '') === '') {
 	console.log('Skipping: ANTHROPIC_API_KEY is not set');
 	process.exit(0);
 }
@@ -19,7 +19,8 @@ if (!process.env.ANTHROPIC_API_KEY) {
 const anthropicIntegration = async (): Promise<void> => {
 	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
 	// without one, the toolset uses every active shared account linked to the key
-	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
+	const accountId = process.env.STACKONE_ACCOUNT_ID;
+	const toolset = new StackOneToolSet({ accountId: accountId === '' ? undefined : accountId });
 
 	// Filter for any relevant tools
 	const tools = await toolset.fetchTools({
