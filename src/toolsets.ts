@@ -8,16 +8,11 @@ import {
 	SUBMIT_FEEDBACK_TOOL_NAME,
 } from './consts';
 import { buildRequestHeaders, isSdkOwnedHeader } from './headers';
-import {
-	type EndUserSource,
-	HttpRateLimitError,
-	type McpToolDefinition,
-	isRateLimitFailure,
-	listMcpTools,
-	withEndUser,
-} from './mcp-client';
+import { HttpRateLimitError, isRateLimitFailure, listMcpTools, withEndUser } from './mcp-client';
+import type { EndUserSource, McpToolDefinition } from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
-import { StackOneMcpTool, type StackOneTool, Tools, warnOnDuplicateNames } from './tool';
+import { StackOneMcpTool, Tools, warnOnDuplicateNames } from './tool';
+import type { StackOneTool } from './tool';
 import type {
 	ActionResult,
 	FeedbackCategory,
@@ -258,7 +253,7 @@ function matchesProvider(toolName: string, providers: readonly string[]): boolea
 function matchGlob(value: string, pattern: string): boolean {
 	let source = '';
 	for (let index = 0; index < pattern.length; index++) {
-		const char = pattern[index] as string;
+		const char = pattern[index];
 		if (char === '*') {
 			source += '.*';
 		} else if (char === '?') {
@@ -641,7 +636,7 @@ export class StackOneToolSet {
 		}
 		const accounts =
 			typeof body === 'object' && body !== null && !Array.isArray(body) && 'data' in body
-				? (body as { data: unknown }).data
+				? body.data
 				: body;
 		if (!Array.isArray(accounts)) {
 			throw new ToolSetLoadError(
@@ -878,7 +873,7 @@ export class StackOneToolSet {
 		};
 
 		if (scope.length === 1) {
-			const accountId = scope[0] as string;
+			const accountId = scope[0];
 			const listings = new Map([[accountId, await listAccount(accountId)]]);
 			const catalog = { listings, failed: new Map() };
 			store(catalog);
@@ -895,7 +890,7 @@ export class StackOneToolSet {
 		const failed = new Map(cached?.failed);
 		const failures: [accountId: string, reason: unknown][] = [];
 		settled.forEach((outcome, index) => {
-			const accountId = due[index] as string;
+			const accountId = due[index];
 			if (outcome.status === 'fulfilled') {
 				listings.set(accountId, outcome.value);
 				failed.delete(accountId);

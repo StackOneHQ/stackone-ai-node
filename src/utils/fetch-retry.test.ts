@@ -1,4 +1,5 @@
-import { http, HttpResponse, type JsonBodyType } from 'msw';
+import { http, HttpResponse } from 'msw';
+import type { JsonBodyType } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { server } from '../../mocks/node';
 import { fetchWithRetry, retryAfterMs } from './fetch-retry';

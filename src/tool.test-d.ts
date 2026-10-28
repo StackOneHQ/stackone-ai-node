@@ -32,10 +32,10 @@ test('BaseTool.toAISDK result has typed properties', async () => {
 	const toolDef = result.test_tool;
 
 	// TODO: Remove ts-ignore once AISDKToolDefinition properly types description as required
-	// @ts-ignore - description is optional in Tool but we always set it
+	// @ts-expect-error - description is optional in Tool but we always set it
 	assertType<string>(toolDef.description);
 	// TODO: Remove ts-ignore once AISDKToolDefinition properly types inputSchema.jsonSchema
-	// @ts-ignore - inputSchema is FlexibleSchema which may not have jsonSchema
+	// @ts-expect-error - inputSchema is FlexibleSchema which may not have jsonSchema
 	assertType<{ jsonSchema: unknown }>(toolDef.inputSchema);
 });
 

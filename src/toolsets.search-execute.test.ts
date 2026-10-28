@@ -4,14 +4,11 @@
  */
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
-import {
-	MOCK_SEARCH_SESSION_ID,
-	type RecordedToolCall,
-	accountMcpTools,
-	createMcpApp,
-} from '../mocks/mcp-server';
+import { MOCK_SEARCH_SESSION_ID, accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import type { RecordedToolCall } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
-import { type McpToolDefinition, listMcpTools } from './mcp-client';
+import { listMcpTools } from './mcp-client';
+import type { McpToolDefinition } from './mcp-client';
 import { StackOneMcpTool } from './tool';
 import { StackOneToolSet } from './toolsets';
 import type { JsonObject } from './types';
@@ -275,7 +272,7 @@ describe('execute()', () => {
 		const [hit] = await toolset.search('list items');
 		expect(hit?.example_request).toEqual({ query: { page_size: 25 } });
 
-		const result = await toolset.execute(hit?.action_id ?? '', hit?.example_request as JsonObject);
+		const result = await toolset.execute(hit?.action_id ?? '', hit?.example_request);
 
 		expect((result.result as JsonObject).echoed_query).toEqual({ page_size: 25 });
 	});
@@ -727,7 +724,7 @@ describe('execute() while an account in scope has failed to list', () => {
 		);
 		const serveListing = listMock.getMockImplementation();
 		listMock.mockImplementation(async (request) => {
-			const accountId = request.headers['x-account-id'] as string;
+			const accountId = request.headers['x-account-id'];
 			listed.push(accountId);
 			if (failing.has(accountId)) {
 				throw new Error(`${accountId} is down`);

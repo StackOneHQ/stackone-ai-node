@@ -1,4 +1,5 @@
-import { createServer, type Server as NetServer, type Socket } from 'node:net';
+import { createServer } from 'node:net';
+import type { Server as NetServer, Socket } from 'node:net';
 import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';

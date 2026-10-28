@@ -9,11 +9,8 @@
 import type { Hono as HonoApp } from 'hono';
 import { StreamableHTTPTransport } from '@hono/mcp';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-	CallToolRequestSchema,
-	type CallToolResult,
-	ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
 
@@ -246,7 +243,7 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		// Recorded from the raw body: the server's schema parsing rebuilds the arguments, and drops
 		// a `__proto__` key on the way, so a call recorded after it is not what was sent.
 		if (onToolCall && c.req.method === 'POST') {
-			const body = (await c.req.raw.clone().json()) as unknown;
+			const body = await c.req.raw.clone().json();
 			for (const message of Array.isArray(body) ? body : [body]) {
 				const { method, params } = (message ?? {}) as {
 					method?: string;

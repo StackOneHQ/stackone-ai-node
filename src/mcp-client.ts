@@ -299,7 +299,7 @@ export async function listMcpTools(request: McpRequest): Promise<McpToolDefiniti
 				collected.push({
 					name: tool.name,
 					description: tool.description,
-					inputSchema: (tool.inputSchema ?? {}) as Record<string, unknown>,
+					inputSchema: tool.inputSchema ?? {},
 				});
 			}
 			cursor = page.nextCursor;
@@ -401,6 +401,6 @@ export async function callMcpTool(
 		const result = await client.callTool({ name, arguments: args }, undefined, {
 			timeout: request.timeout,
 		});
-		return parseToolResult(result as Record<string, unknown>, name);
+		return parseToolResult(result, name);
 	});
 }

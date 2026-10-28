@@ -25,12 +25,17 @@
 	// - perf (11 rules): Performance-related issues
 	// - style (168 rules): Code style rules
 	// Note: restriction category should be enabled per-rule basis
+	//
+	// pedantic and style are off. oxlint only reads .oxlintrc.jsonc from 1.52.0, so until the nix
+	// flake moved to 1.88 this file was never loaded and CI ran oxlint's 104 default rules. Turned on
+	// as written, the two categories report about 4,000 findings in code never held to them; adopting
+	// them is its own change. The rules named one by one below still apply.
 	"categories": {
 		"correctness": "error",
 		"suspicious": "error",
-		"pedantic": "error",
+		"pedantic": "off",
 		"perf": "error",
-		"style": "error",
+		"style": "off",
 	},
 	"rules": {
 		// ===================

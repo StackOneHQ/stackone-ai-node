@@ -6,7 +6,8 @@
 import { delay, http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { mockAccounts } from '../mocks/handlers.stackone-accounts';
-import { type RecordedToolCall, accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import { accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import type { RecordedToolCall } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';

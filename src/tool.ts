@@ -10,13 +10,10 @@ import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resourc
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
 import { SUBMIT_FEEDBACK_TOOL_NAME } from './consts';
-import {
-	type DeclaredHeaders,
-	buildRequestHeaders,
-	declaredHeaders,
-	sanitiseHeaderArguments,
-} from './headers';
-import { type EndUserSource, callMcpTool, withEndUser } from './mcp-client';
+import { buildRequestHeaders, declaredHeaders, sanitiseHeaderArguments } from './headers';
+import type { DeclaredHeaders } from './headers';
+import { callMcpTool, withEndUser } from './mcp-client';
+import type { EndUserSource } from './mcp-client';
 import { cloneJson, foldRootComposition } from './schema';
 import type {
 	AISDKToolDefinition,
@@ -834,7 +831,7 @@ export class Tools implements Iterable<BaseTool> {
 					toolDef.name,
 					toolDef.description,
 					toolDef.inputSchema as any,
-					toolDef.handler as any,
+					toolDef.handler,
 				);
 			}),
 		);
@@ -866,7 +863,7 @@ export class Tools implements Iterable<BaseTool> {
 				if (index < tools.length) {
 					return { value: tools[index++], done: false };
 				}
-				return { value: undefined as unknown as BaseTool, done: true };
+				return { value: undefined, done: true };
 			},
 		};
 	}

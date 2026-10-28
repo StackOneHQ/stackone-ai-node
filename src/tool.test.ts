@@ -2,7 +2,8 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { jsonSchema } from 'ai';
 import { http } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
-import { type RecordedToolCall, createMcpApp } from '../mocks/mcp-server';
+import { createMcpApp } from '../mocks/mcp-server';
+import type { RecordedToolCall } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { toolParametersFromInputSchema } from './schema';
 import { BaseTool, StackOneMcpTool, StackOneTool, Tools } from './tool';
@@ -120,7 +121,7 @@ describe('BaseTool', () => {
 
 		const adapters: Array<[string, () => Promise<Record<string, unknown>>]> = [
 			['toOpenAI', async () => tool.toOpenAI().function.parameters as Record<string, unknown>],
-			['toAnthropic', async () => tool.toAnthropic().input_schema as Record<string, unknown>],
+			['toAnthropic', async () => tool.toAnthropic().input_schema],
 			[
 				'toOpenAIResponses (strict)',
 				async () => tool.toOpenAIResponses().parameters as Record<string, unknown>,
@@ -488,7 +489,7 @@ describe('StackOneMcpTool as an action tool', () => {
 		// eslint-disable-next-line @typescript-eslint/no-array-delete -- deliberately punching a hole
 		delete ids[1];
 		const error = await actionTool()
-			.execute({ query: { ids } } as unknown as JsonObject)
+			.execute({ query: { ids } })
 			.catch((caught: unknown) => caught);
 
 		expect(error).toBeInstanceOf(ToolArgumentsError);

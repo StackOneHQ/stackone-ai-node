@@ -3,8 +3,12 @@
  */
 export const extractTextFromInput = (input: unknown): string => {
 	// Handle string input directly (OpenAI Responses API can accept plain strings)
-	if (typeof input === 'string') return input;
-	if (!Array.isArray(input)) return '';
+	if (typeof input === 'string') {
+		return input;
+	}
+	if (!Array.isArray(input)) {
+		return '';
+	}
 	for (const item of input) {
 		if (typeof item === 'object' && item !== null) {
 			const obj = item as Record<string, unknown>;

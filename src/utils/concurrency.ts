@@ -20,7 +20,7 @@ export async function settleWithConcurrency<T, R>(
 		while (!stopped && next < items.length) {
 			const index = next++;
 			try {
-				results[index] = { status: 'fulfilled', value: await work(items[index] as T) };
+				results[index] = { status: 'fulfilled', value: await work(items[index]) };
 			} catch (reason) {
 				if (isFatal(reason)) {
 					stopped = true;

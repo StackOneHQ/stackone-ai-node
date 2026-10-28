@@ -193,7 +193,7 @@ const toolWith = (inputSchema: Record<string, unknown>, name = 'vector_tool') =>
 	new StackOneMcpTool({
 		name,
 		description: '',
-		parameters: toolParametersFromInputSchema(inputSchema as never),
+		parameters: toolParametersFromInputSchema(inputSchema),
 		endpoint: `${TEST_BASE_URL}/mcp`,
 		apiKey: 'test-key',
 		accountId: 'acc-1',

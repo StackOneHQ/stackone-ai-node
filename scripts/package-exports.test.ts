@@ -130,7 +130,9 @@ describe('published package output', () => {
 					const execError = (error ?? {}) as { stdout?: string; stderr?: string };
 					const details =
 						`${execError.stdout ?? ''}${execError.stderr ?? ''}`.trim() || String(error);
-					throw new Error(`tsc failed for the Node16 consumer fixture:\n${details}`);
+					throw new Error(`tsc failed for the Node16 consumer fixture:\n${details}`, {
+						cause: error,
+					});
 				}
 			} finally {
 				await rm(tempDir, { recursive: true, force: true });

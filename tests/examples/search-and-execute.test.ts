@@ -8,11 +8,8 @@
 import { http } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { mockAccountTools } from '../../mocks/handlers.mcp';
-import {
-	type RecordedToolCall,
-	MOCK_SEARCH_SESSION_ID,
-	createMcpApp,
-} from '../../mocks/mcp-server';
+import { MOCK_SEARCH_SESSION_ID, createMcpApp } from '../../mocks/mcp-server';
+import type { RecordedToolCall } from '../../mocks/mcp-server';
 import { server } from '../../mocks/node';
 import { StackOneToolSet, ToolSetLoadError } from '../../src';
 
