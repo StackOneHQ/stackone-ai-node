@@ -651,7 +651,7 @@ function readOpenAIToolCall(call: OpenAIToolCall): {
 	unsupported?: string;
 } {
 	const id = fieldText(call.id ?? '');
-	if (!('function' in call) || !isTruthy(call.function)) {
+	if (!('function' in call) || call.function == null || !isTruthy(call.function)) {
 		return {
 			id,
 			name: '',
@@ -660,7 +660,7 @@ function readOpenAIToolCall(call: OpenAIToolCall): {
 		};
 	}
 	const { name, arguments: args } = call.function;
-	return { id, name: fieldText(name), args: isTruthy(args) ? args : {} };
+	return { id, name: fieldText(name), args: args != null && isTruthy(args) ? args : {} };
 }
 
 /** A tool call's field as text: a call read back from storage has no checked type. */

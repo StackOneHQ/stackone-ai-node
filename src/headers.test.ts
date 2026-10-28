@@ -7,6 +7,19 @@ import {
 } from './headers';
 import type { JsonObject } from './types';
 
+describe('buildRequestHeaders with values the types forbid', () => {
+	it('treats a falsy endUserId as not given, keeping the caller header', () => {
+		const headers = buildRequestHeaders({
+			apiKey: 'k',
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- what a JavaScript caller can pass
+			endUserId: false as unknown as string,
+			extraHeaders: { 'x-end-user-id': 'carol' },
+		});
+
+		expect(headers['x-end-user-id']).toBe('carol');
+	});
+});
+
 describe('normalizeHeaders', () => {
 	it('returns empty object for undefined input', () => {
 		expect(normalizeHeaders(undefined)).toEqual({});

@@ -62,7 +62,7 @@ export class StackOneAPIError extends StackOneError {
 		}
 
 		// Add provider error information if available
-		if (this.providerErrors !== undefined && this.providerErrors.length > 0) {
+		if (this.providerErrors != null && this.providerErrors.length > 0) {
 			errorMessage += formatProviderError(this.providerErrors[0]);
 		}
 

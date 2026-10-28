@@ -31,7 +31,7 @@ import { settleWithConcurrency } from './utils/concurrency';
 import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
 import { warn } from './utils/logger';
 import { sorted } from './utils/array';
-import { isNonEmpty, isTruthy } from './utils/type';
+import { isNonEmpty, isTruthy, isTruthyString } from './utils/type';
 
 /**
  * Configuration with a single account ID
@@ -324,7 +324,7 @@ function longestConnector(actionId: string, connectors: string[]): string | unde
 function connectorOf(tool: StackOneTool, suffix: string): string {
 	let stem = tool.name.endsWith(suffix) ? tool.name.slice(0, -suffix.length) : tool.name;
 	const account = tool.getAccountId();
-	if (isNonEmpty(account) && stem.endsWith(`_${account}`)) {
+	if (isTruthyString(account) && stem.endsWith(`_${account}`)) {
 		stem = stem.slice(0, -(account.length + 1));
 	}
 	return stem.toLowerCase();
@@ -416,7 +416,7 @@ async function searchConnector(
 	const sessionId = found.session_id;
 	const traced = typeof sessionId === 'string' && sessionId !== '' ? { session_id: sessionId } : {};
 	const accountId = tool.getAccountId();
-	const owner = isNonEmpty(accountId) ? { account_id: accountId } : {};
+	const owner = isTruthyString(accountId) ? { account_id: accountId } : {};
 	return actions.map((action) => Object.assign(action, traced, owner));
 }
 
@@ -515,7 +515,11 @@ function warnOnUnreadAccountIdVariable(
 	accountId: string | undefined,
 	accountIds: readonly string[],
 ): void {
-	if (isNonEmpty(process.env.STACKONE_ACCOUNT_ID) && accountId == null && accountIds.length === 0) {
+	if (
+		isTruthyString(process.env.STACKONE_ACCOUNT_ID) &&
+		accountId == null &&
+		accountIds.length === 0
+	) {
 		warn(
 			'STACKONE_ACCOUNT_ID is set, but the SDK does not read it: with no account id passed, every active shared account on this API key is used. Pass an account id to scope the toolset.',
 		);
@@ -882,7 +886,7 @@ export class StackOneToolSet {
 	async #accountsInOrder(accountIds: string[] | null | undefined): Promise<string[]> {
 		assertAccountIdList(accountIds, 'accountIds');
 		let scope = accountIds != null && accountIds.length > 0 ? accountIds : this.#accountIds;
-		if (scope.length === 0 && isNonEmpty(this.#accountId)) {
+		if (scope.length === 0 && isTruthyString(this.#accountId)) {
 			scope = [this.#accountId];
 		}
 		if (scope.length === 0) {

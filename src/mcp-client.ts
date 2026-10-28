@@ -11,7 +11,7 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetLoadError } from './utils/error-toolset';
 import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
-import { isNonEmpty } from './utils/type';
+import { isTruthyString } from './utils/type';
 
 /** A tool exactly as the MCP server listed it. */
 export interface McpToolDefinition {
@@ -186,7 +186,7 @@ export async function withEndUser<T>(
 	source: EndUserSource | undefined,
 	request: (endUserId: string | undefined) => Promise<T>,
 ): Promise<T> {
-	if (!isNonEmpty(accountId) || source === undefined) {
+	if (!isTruthyString(accountId) || source === undefined) {
 		return request(undefined);
 	}
 	const recorded = source.recorded(accountId);
@@ -330,7 +330,7 @@ export async function listMcpTools(request: McpRequest): Promise<McpToolDefiniti
 		let cursor: string | undefined;
 		do {
 			// oxlint-disable-next-line eslint/no-await-in-loop -- each page's cursor comes from the page before
-			const page = await client.listTools(isNonEmpty(cursor) ? { cursor } : undefined, {
+			const page = await client.listTools(isTruthyString(cursor) ? { cursor } : undefined, {
 				timeout: request.timeout,
 			});
 			for (const tool of page.tools) {
@@ -341,7 +341,7 @@ export async function listMcpTools(request: McpRequest): Promise<McpToolDefiniti
 				});
 			}
 			cursor = page.nextCursor;
-		} while (isNonEmpty(cursor));
+		} while (isTruthyString(cursor));
 		return collected;
 	});
 }

@@ -2,7 +2,7 @@ import { USER_AGENT } from './consts';
 import type { JsonObject, JsonValue } from './types';
 import { warn } from './utils/logger';
 import { setEntry } from './utils/set-entry';
-import { isNonEmpty } from './utils/type';
+import { isTruthyString } from './utils/type';
 
 /**
  * Header names the SDK owns. They are applied after every other header is merged, so neither a
@@ -36,7 +36,7 @@ const isEndUserIdHeader = (name: string): boolean =>
  * the SDK sets it from `endUserId`.
  */
 const keepsCallerHeader = (name: string, endUserId: string | undefined): boolean =>
-	!isSdkOwnedHeader(name) && !(isNonEmpty(endUserId) && isEndUserIdHeader(name));
+	!isSdkOwnedHeader(name) && !(isTruthyString(endUserId) && isEndUserIdHeader(name));
 
 /**
  * HTTP Basic credentials for an API key, as every StackOne endpoint expects them.
@@ -69,10 +69,10 @@ export function buildRequestHeaders(options: {
 	}
 	headers['User-Agent'] = USER_AGENT;
 	headers.Authorization = buildAuthHeader(options.apiKey);
-	if (isNonEmpty(options.accountId)) {
+	if (isTruthyString(options.accountId)) {
 		headers['x-account-id'] = options.accountId;
 	}
-	if (isNonEmpty(options.endUserId)) {
+	if (isTruthyString(options.endUserId)) {
 		headers[END_USER_ID_HEADER] = options.endUserId;
 	}
 	return headers;

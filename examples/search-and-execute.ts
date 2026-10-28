@@ -32,7 +32,8 @@ const printAccounts = (accounts: StackOneAccount[]): void => {
 const printRankedMatches = (actions: SearchResult[]): void => {
 	console.log('\nRanked matches:');
 	for (const action of actions) {
-		console.log(`  ${(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
+		// oxlint-disable-next-line typescript/no-unnecessary-type-conversion -- a server can send the score as a numeric string
+		console.log(`  ${Number(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
 	}
 };
 
