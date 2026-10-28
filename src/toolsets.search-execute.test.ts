@@ -25,12 +25,21 @@ const listMock = vi.mocked(listMcpTools);
 const { listMcpTools: realListMcpTools } =
 	await vi.importActual<typeof import('./mcp-client')>('./mcp-client');
 
+/** The listing `listMock` serves now, for a test to wrap in its own. */
+const currentListing = (): typeof listMcpTools => {
+	const listing = listMock.getMockImplementation();
+	assert(listing !== undefined, 'listMcpTools has no implementation');
+	return listing;
+};
+
 const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {}) =>
 	new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
 
+const silence = (): void => undefined;
+
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(silence);
 });
 afterEach(() => {
 	vi.unstubAllEnvs();
@@ -63,8 +72,11 @@ const fakeMetaTools = (
 		this: StackOneMcpTool,
 		args,
 	) {
-		calls.push({ tool: this.name, args: args as JsonObject });
-		return respond(this, args as JsonObject);
+		if (typeof args !== 'object') {
+			throw new TypeError(`${this.name} was called without JSON object arguments`);
+		}
+		calls.push({ tool: this.name, args });
+		return respond(this, args);
 	});
 	return calls;
 };
@@ -229,6 +241,7 @@ describe('search()', () => {
 		'rejects topK=%j before any round trip',
 		async (topK) => {
 			await expect(
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a topK the types forbid, to test the runtime check
 				newToolSet({ accountId: 'acc1' }).search('x', { topK: topK as never }),
 			).rejects.toThrow(/topK must be an integer between 1 and 50/);
 			expect(listMock).not.toHaveBeenCalled();
@@ -274,7 +287,7 @@ describe('execute()', () => {
 
 		const result = await toolset.execute(hit?.action_id ?? '', hit?.example_request);
 
-		expect((result.result as JsonObject).echoed_query).toEqual({ page_size: 25 });
+		expect(result.result).toHaveProperty('echoed_query', { page_size: 25 });
 	});
 
 	// Contract §5: session_id is forwarded as a top-level argument when given, never otherwise,
@@ -303,7 +316,7 @@ describe('execute()', () => {
 
 		await newToolSet().execute(
 			'mock_list_items',
-			JSON.parse('{"__proto__":"p","constructor":"c","action_id":"other","q":1}') as JsonObject,
+			JSON.parse('{"__proto__":"p","constructor":"c","action_id":"other","q":1}'),
 			{ sessionId: 'real' },
 		);
 
@@ -372,11 +385,11 @@ describe('execute()', () => {
 
 	it('raises on an isError result rather than returning it as data', async () => {
 		serveMock();
-		const error = (await newToolSet()
+		const error = await newToolSet()
 			.execute('mock_not_a_real_action')
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
+			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.message).toContain('Unknown action mock_not_a_real_action');
 		expect(error.statusCode).toBe(404);
 	});
@@ -404,8 +417,8 @@ describe('execute()', () => {
 			.execute('linear_list_issues')
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetConfigError);
-		expect((error as Error).message).toMatch(
+		assert.instanceOf(error, ToolSetConfigError);
+		expect(error.message).toMatch(
 			new RegExp(
 				'^"linear_list_issues" matches 2 connectors on different accounts \\(linear_acc1_execute_action on acc1, linear_acc2_execute_action on acc2\\)\\. Pass the account id to use',
 			),
@@ -437,7 +450,8 @@ describe('execute()', () => {
 		);
 
 		const hit = (await toolset.search('x')).find((found) => found.account_id === 'acc2');
-		await toolset.execute('linear_list_issues', {}, { accountIds: [hit?.account_id as string] });
+		assert(hit !== undefined, 'acc2 has no search hit');
+		await toolset.execute('linear_list_issues', {}, { accountIds: [hit.account_id] });
 
 		expect(calls.at(-1)?.tool).toBe('linear_acc2_execute_action');
 	});
@@ -465,6 +479,7 @@ describe('execute()', () => {
 		],
 		[
 			'array arguments',
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- arguments the types forbid, to test the runtime check
 			() => newToolSet({ accountId: 'acc1' }).execute('x_y', [1, 2] as never),
 			/arguments must be a JSON object, got array/,
 		],
@@ -475,6 +490,7 @@ describe('execute()', () => {
 		],
 		[
 			'a numeric sessionId',
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a sessionId the types forbid, to test the runtime check
 			() => newToolSet({ accountId: 'acc1' }).execute('x_y', {}, { sessionId: 42 as never }),
 			/sessionId must be a non-empty string/,
 		],
@@ -621,8 +637,8 @@ describe('submitFeedback()', () => {
 			.submitFeedback({ rating: 'positive', toolNames: ['a'] })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe(
+		assert.instanceOf(error, ToolSetLoadError);
+		expect(error.message).toBe(
 			'The server did not serve stackone_submit_feedback: feedback is not enabled for this project.',
 		);
 	});
@@ -648,8 +664,8 @@ describe('submitFeedback()', () => {
 			.submitFeedback({ rating: 'positive', toolNames: ['a'], accountIds: [''] })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetConfigError);
-		expect((error as Error).message).toBe('accountIds must not contain an empty account id');
+		assert.instanceOf(error, ToolSetConfigError);
+		expect(error.message).toBe('accountIds must not contain an empty account id');
 		expect(calls).toEqual([]);
 	});
 
@@ -657,6 +673,7 @@ describe('submitFeedback()', () => {
 		await expect(
 			newToolSet({ accountId: 'acc1' }).submitFeedback({
 				rating: 'positive',
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- toolNames the types forbid, to test the runtime check
 				toolNames: 'a' as never,
 			}),
 		).rejects.toThrow(
@@ -671,11 +688,12 @@ describe('submitFeedback()', () => {
 		['a number', 42],
 	])('rejects %s as sessionId, as execute() does, before any round trip', async (_name, bad) => {
 		const error = await newToolSet({ accountId: 'acc1' })
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a sessionId the types forbid, to test the runtime check
 			.submitFeedback({ rating: 'positive', toolNames: ['a'], sessionId: bad as never })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetConfigError);
-		expect((error as Error).message).toMatch(/sessionId must be a non-empty string/);
+		assert.instanceOf(error, ToolSetConfigError);
+		expect(error.message).toMatch(/sessionId must be a non-empty string/);
 		expect(listMock).not.toHaveBeenCalled();
 	});
 
@@ -715,6 +733,7 @@ describe('execute() while an account in scope has failed to list', () => {
 	];
 	const failing = new Set<string>();
 	const listed: string[] = [];
+	const listings = (accountId: string) => listed.filter((id) => id === accountId).length;
 
 	/** Serve `accounts` from GET /accounts, and meta tools for each, failing those in `failing`. */
 	const serve = (accounts: typeof ACCOUNTS) => {
@@ -722,14 +741,14 @@ describe('execute() while an account in scope has failed to list', () => {
 		const calls = fakeMetaTools(
 			accounts.map(({ id, provider }) => `${provider}_${id}_execute_action`),
 		);
-		const serveListing = listMock.getMockImplementation();
+		const serveListing = currentListing();
 		listMock.mockImplementation(async (request) => {
 			const accountId = request.headers['x-account-id'];
 			listed.push(accountId);
 			if (failing.has(accountId)) {
 				throw new Error(`${accountId} is down`);
 			}
-			return (serveListing as typeof listMcpTools)(request);
+			return serveListing(request);
 		});
 		return calls;
 	};
@@ -747,8 +766,8 @@ describe('execute() while an account in scope has failed to list', () => {
 			.execute('linear_list_issues')
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe(
+		assert.instanceOf(error, ToolSetLoadError);
+		expect(error.message).toBe(
 			`"linear_list_issues" may be served by an account that failed to list (acc1: acc1 is down). Pass the account id to use, such as a search hit's account_id.`,
 		);
 		expect(calls).toEqual([]);
@@ -802,7 +821,8 @@ describe('execute() while an account in scope has failed to list', () => {
 			.execute('linear_list_issues')
 			.catch((caught: unknown) => caught);
 
-		expect((error as Error).message).toBe(
+		expect(error).toHaveProperty(
+			'message',
 			`"linear_list_issues" may be served by an account that failed to list (acc2: acc2 is down; acc3: acc3 is down). Pass the account id to use, such as a search hit's account_id.`,
 		);
 		expect(calls).toEqual([]);
@@ -824,8 +844,8 @@ describe('execute() while an account in scope has failed to list', () => {
 			.execute('linear_list_issues')
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
 	});
 
 	describe('when the provider lookup cannot name a failed account', () => {
@@ -847,9 +867,11 @@ describe('execute() while an account in scope has failed to list', () => {
 		const refuses = async (toolset: StackOneToolSet) => {
 			now += 1_000;
 			const error = await toolset.execute('linear_x').catch((caught: unknown) => caught);
-			expect((error as Error).message).toMatch(/may be served by an account that failed to list/);
+			expect(error).toHaveProperty(
+				'message',
+				expect.stringMatching(/may be served by an account that failed to list/),
+			);
 		};
-		const listings = (accountId: string) => listed.filter((id) => id === accountId).length;
 
 		beforeEach(() => {
 			now = 0;
@@ -897,7 +919,7 @@ describe('execute() while an account in scope has failed to list', () => {
 
 		it('does not record a miss across a clear made during the lookup', async () => {
 			const toolset = serveUnnameable();
-			let release = () => {};
+			let release: () => void = silence;
 			const held = new Promise<void>((resolve) => {
 				release = resolve;
 			});
@@ -948,19 +970,19 @@ describe('execute() while an account in scope has failed to list', () => {
 
 		// Long before the failed account would be due again.
 		expect(listed).toEqual(['acc1', 'acc2', 'acc1']);
-		expect(error).toBeInstanceOf(ToolSetConfigError);
-		expect((error as Error).message).toMatch(/^"linear_list_issues" matches 2 connectors/);
+		assert.instanceOf(error, ToolSetConfigError);
+		expect(error.message).toMatch(/^"linear_list_issues" matches 2 connectors/);
 		expect(calls).toEqual([]);
 	});
 
 	it('does not re-list a failed account on another provider', async () => {
 		const calls = serve([ACCOUNTS[0], ACCOUNTS[2]] as typeof ACCOUNTS);
 		// acc3 never answers: listing it again would make every linear action wait out its timeout.
-		const listOnce = listMock.getMockImplementation() as typeof listMcpTools;
+		const listOnce = currentListing();
 		listMock.mockImplementation(async (request) => {
 			if (request.headers['x-account-id'] === 'acc3' && listed.includes('acc3')) {
 				listed.push('acc3');
-				return new Promise<never>(() => {});
+				return new Promise<never>(silence);
 			}
 			return listOnce(request);
 		});

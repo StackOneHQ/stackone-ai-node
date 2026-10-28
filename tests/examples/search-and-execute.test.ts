@@ -32,7 +32,7 @@ describe('search-and-execute example e2e', () => {
 			onToolCall: (call) => calls.push(call),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-		const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+		const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
 		await import('../../examples/search-and-execute');
 
@@ -51,7 +51,7 @@ describe('search-and-execute example e2e', () => {
 		const toolset = new StackOneToolSet();
 
 		const [best] = await toolset.search('list recent comments', { topK: 3 });
-		assert(best);
+		assert(best !== undefined);
 		expect(await toolset.execute(best.action_id, {}, { sessionId: best.session_id })).toMatchObject(
 			{ isError: false, result: { data: { nodes: [] } } },
 		);

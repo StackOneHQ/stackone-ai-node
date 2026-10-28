@@ -6,6 +6,7 @@
 import { createServer } from 'node:net';
 import type { Server as NetServer, Socket } from 'node:net';
 import { http, HttpResponse } from 'msw';
+import type { PathParams } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { accountMcpTools, createMcpApp } from '../mocks/mcp-server';
 import type { McpToolDefinition, RecordedToolCall } from '../mocks/mcp-server';
@@ -13,8 +14,8 @@ import { server } from '../mocks/node';
 import { FAILED_ACCOUNT_RETRY_MS } from './consts';
 import { listMcpTools } from './mcp-client';
 import type { McpToolDefinition as ListedTool } from './mcp-client';
-import { StackOneMcpTool } from './tool';
-import type { StackOneTool } from './tool';
+import { StackOneMcpTool, StackOneTool } from './tool';
+import type { BaseTool } from './tool';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
@@ -46,10 +47,15 @@ const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {
 	new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
 const names = (tools: { toArray(): Array<{ name: string }> }) =>
 	tools.toArray().map((tool) => tool.name);
+/** The account a listed tool is bound to; every tool a toolset lists is a StackOneTool. */
+const accountIdOf = (tool: BaseTool | undefined): string | undefined => {
+	assert.instanceOf(tool, StackOneTool);
+	return tool.getAccountId();
+};
 
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 });
 afterEach(() => {
 	vi.unstubAllEnvs();
@@ -124,14 +130,18 @@ describe('configuration', () => {
 	);
 
 	it('refuses both accountId and accountIds', () => {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately invalid config, refused at runtime
 		expect(() => newToolSet({ accountId: 'a', accountIds: ['b'] } as never)).toThrow(
 			/Cannot provide both accountId and accountIds/,
 		);
 	});
 
 	it.each([
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately a string, refused at runtime
 		['accountIds', () => newToolSet({ accountIds: 'acc1' as never })],
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately a string, refused at runtime
 		['setAccounts', () => newToolSet().setAccounts('acc1' as never)],
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately a string, refused at runtime
 		['fetchTools', () => newToolSet().fetchTools({ accountIds: 'acc1' as never })],
 	])('refuses a string where %s expects a list', async (_name, act) => {
 		await expect(async () => act()).rejects.toThrow(
@@ -206,8 +216,8 @@ describe('account scope', () => {
 
 	it('binds each tool to the account it was listed for', async () => {
 		const tools = await newToolSet().fetchTools({ accountIds: ['acc1', 'acc2', 'acc3'] });
-		for (const tool of tools.toArray() as StackOneTool[]) {
-			expect(tool.getAccountId()).toBe(tool.name.split('_')[0]);
+		for (const tool of tools.toArray()) {
+			expect(accountIdOf(tool)).toBe(tool.name.split('_')[0]);
 		}
 	});
 
@@ -218,14 +228,8 @@ describe('account scope', () => {
 			toolset.fetchTools({ accountIds: ['acc2'] }),
 		]);
 
-		expect((acc1.toArray() as StackOneTool[]).map((tool) => tool.getAccountId())).toEqual([
-			'acc1',
-			'acc1',
-		]);
-		expect((acc2.toArray() as StackOneTool[]).map((tool) => tool.getAccountId())).toEqual([
-			'acc2',
-			'acc2',
-		]);
+		expect(acc1.toArray().map(accountIdOf)).toEqual(['acc1', 'acc1']);
+		expect(acc2.toArray().map(accountIdOf)).toEqual(['acc2', 'acc2']);
 	});
 });
 
@@ -421,11 +425,11 @@ describe('account discovery', () => {
 				HttpResponse.json({ message: 'bad key' }, { status: 401, statusText: 'Unauthorized' }),
 			),
 		);
-		const error = (await newToolSet()
+		const error = await newToolSet()
 			.fetchAccounts()
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
+			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(401);
 		expect(error.message).toContain('401 Unauthorized: {"message":"bad key"}');
 	});
@@ -454,8 +458,8 @@ describe('account discovery', () => {
 			.fetchAccounts()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toMatch(message);
+		assert.instanceOf(error, ToolSetLoadError);
+		expect(error.message).toMatch(message);
 	});
 
 	it('reports an unreachable API as a ToolSetLoadError', async () => {
@@ -479,11 +483,11 @@ describe('server refusals', () => {
 	});
 
 	it('refuses an unknown account rather than serving a default catalog', async () => {
-		const error = (await newToolSet()
+		const error = await newToolSet()
 			.fetchTools({ accountIds: ['no-such-account'] })
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
+			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(404);
 	});
 
@@ -493,12 +497,12 @@ describe('server refusals', () => {
 		);
 		tool.setAccountId(undefined);
 
-		const error = (await tool
-			.execute({ foo: 'bar' })
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
-		expect(error.statusCode).toBe(400);
+		const error = await tool.execute({ foo: 'bar' }).catch((caught: unknown) => caught);
+		expect(error).toHaveProperty('statusCode', 400);
 	});
 });
+
+const listedAccounts = () => listMock.mock.calls.map(([request]) => accountOf(request));
 
 describe('listing', () => {
 	// No param-style pin: tools/call arguments are mapped by the server, whichever style it serves.
@@ -668,21 +672,22 @@ describe('listing', () => {
 	});
 
 	it('treats every account failing as a failure, not an empty catalog, keeping each cause', async () => {
-		const failures = { a: new Error('boom for a'), b: new StackOneAPIError('gone', 412, null) };
+		const failures: Record<string, Error> = {
+			a: new Error('boom for a'),
+			b: new StackOneAPIError('gone', 412, null),
+		};
 		fakeListing((request) => {
-			throw failures[accountOf(request) as 'a' | 'b'];
+			throw failures[String(accountOf(request))];
 		});
 
 		const error = await newToolSet()
 			.fetchTools({ accountIds: ['a', 'b'] })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe(
-			'Every account failed to list tools: a: boom for a; b: gone',
-		);
-		expect((error as Error).cause).toBeInstanceOf(AggregateError);
-		expect(((error as Error).cause as AggregateError).errors).toEqual([failures.a, failures.b]);
+		assert.instanceOf(error, ToolSetLoadError);
+		expect(error.message).toBe('Every account failed to list tools: a: boom for a; b: gone');
+		assert.instanceOf(error.cause, AggregateError);
+		expect(error.cause.errors).toEqual([failures.a, failures.b]);
 	});
 
 	// A revoked key is a 401 however many accounts it has, as it is with one.
@@ -704,23 +709,21 @@ describe('listing', () => {
 	});
 
 	it('summarises rather than rethrows when every account fails, with differing statuses', async () => {
-		const failures = {
+		const failures: Record<string, StackOneAPIError> = {
 			a: new StackOneAPIError('revoked', 401, null),
 			b: new StackOneAPIError('forbidden', 403, null),
 		};
 		fakeListing((request) => {
-			throw failures[accountOf(request) as 'a' | 'b'];
+			throw failures[String(accountOf(request))];
 		});
 
 		const error = await newToolSet()
 			.fetchTools({ accountIds: ['a', 'b'] })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe(
-			'Every account failed to list tools: a: revoked; b: forbidden',
-		);
-		expect(((error as Error).cause as AggregateError).errors).toEqual([failures.a, failures.b]);
+		assert.instanceOf(error, ToolSetLoadError);
+		expect(error.message).toBe('Every account failed to list tools: a: revoked; b: forbidden');
+		expect(error.cause).toHaveProperty('errors', [failures.a, failures.b]);
 	});
 
 	describe('an account that fails', () => {
@@ -737,7 +740,6 @@ describe('listing', () => {
 				return [def(`tool_${accountOf(request)}`)];
 			});
 		});
-		const listedAccounts = () => listMock.mock.calls.map(([request]) => accountOf(request));
 
 		// Otherwise one broken account costs every call a re-list of every account — and the full
 		// timeout, if it hangs.
@@ -805,6 +807,7 @@ describe('listing', () => {
 	});
 
 	it('wraps an unexpected error as a ToolSetLoadError', async () => {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately a malformed listing
 		fakeListing(() => [{ name: 'broken' } as ListedTool]);
 		listMock.mockImplementationOnce(() => {
 			throw new TypeError('unexpected');
@@ -815,9 +818,9 @@ describe('listing', () => {
 	});
 });
 
-describe('filtering', () => {
-	const mixed = () => newToolSet({ accountId: 'mixed' });
+const mixed = () => newToolSet({ accountId: 'mixed' });
 
+describe('filtering', () => {
 	it('filters by provider, case-insensitively', async () => {
 		expect(names(await mixed().fetchTools({ providers: ['HiBob', 'bamboohr'] }))).toEqual([
 			'hibob_list_employees',
@@ -868,9 +871,9 @@ describe('filtering', () => {
 	});
 });
 
-describe('catalog cache', () => {
-	const listingCount = () => listMock.mock.calls.length;
+const listingCount = () => listMock.mock.calls.length;
 
+describe('catalog cache', () => {
 	it('lists once for repeated calls', async () => {
 		const toolset = newToolSet({ accountId: 'acc1' });
 		await toolset.fetchTools();
@@ -1009,7 +1012,7 @@ describe('catalog cache', () => {
 
 		const first = (await toolset.fetchTools()).getTool('t');
 		const nested = first?.parameters.properties.body_x?.properties;
-		assert(nested);
+		assert.isDefined(nested);
 		(nested as Record<string, unknown>).injected = { type: 'string' };
 
 		const second = (await toolset.fetchTools()).getTool('t');
@@ -1057,7 +1060,7 @@ describe('duplicate tool names', () => {
 		const tools = await newToolSet().fetchTools({ accountIds: ['a', 'b'] });
 
 		expect(tools.length).toBe(4);
-		expect((tools.getTool('hibob_list_employees') as StackOneTool).getAccountId()).toBe('a');
+		expect(accountIdOf(tools.getTool('hibob_list_employees'))).toBe('a');
 		expect(String(warnSpy.mock.calls[0]?.[0])).toBe(
 			'[@stackone/ai] 2 tool name(s) are served by more than one account (hibob_get_employee, hibob_list_employees). The first one listed, from the lowest account id, is used — pass account ids to choose.',
 		);
@@ -1070,10 +1073,7 @@ describe('duplicate tool names', () => {
 
 		const tools = await newToolSet().fetchTools({ accountIds: ['b', 'a'] });
 
-		expect(tools.toArray().map((tool) => (tool as StackOneTool).getAccountId())).toEqual([
-			'a',
-			'b',
-		]);
+		expect(tools.toArray().map(accountIdOf)).toEqual(['a', 'b']);
 		expect(tools.getTool('hibob_list_employees')).toBe(tools.toArray()[0]);
 	});
 
@@ -1108,23 +1108,26 @@ describe('duplicate tool names', () => {
 	});
 });
 
-describe('stackone_submit_feedback in the catalog', () => {
-	const serveFeedback = (submitFeedback: boolean) => {
-		const rpcRequests: string[] = [];
-		const app = createMcpApp({
-			accountTools: { acc1: accountMcpTools.acc1, acc2: accountMcpTools.acc2 },
-			submitFeedback,
-		});
-		server.use(
-			http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)),
-			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
-				rpcRequests.push(((await request.json()) as { action: string }).action);
+const serveFeedback = (submitFeedback: boolean) => {
+	const rpcRequests: string[] = [];
+	const app = createMcpApp({
+		accountTools: { acc1: accountMcpTools.acc1, acc2: accountMcpTools.acc2 },
+		submitFeedback,
+	});
+	server.use(
+		http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)),
+		http.post<PathParams, { action: string }>(
+			`${TEST_BASE_URL}/actions/rpc`,
+			async ({ request }) => {
+				rpcRequests.push((await request.json()).action);
 				return HttpResponse.json({ data: {} });
-			}),
-		);
-		return rpcRequests;
-	};
+			},
+		),
+	);
+	return rpcRequests;
+};
 
+describe('stackone_submit_feedback in the catalog', () => {
 	it('appears once however many accounts list it, without a duplicate warning', async () => {
 		serveFeedback(true);
 
@@ -1190,26 +1193,26 @@ describe('execution through fetched tools', () => {
 	});
 });
 
-describe('model-supplied headers', () => {
-	const serveTool = (inputSchema: McpToolDefinition['inputSchema']) => {
-		const calls: RecordedToolCall[] = [];
-		const app = createMcpApp({
-			accountTools: {
-				'tenant-a': [{ name: 'crm_list_contacts', description: 'List contacts', inputSchema }],
-			},
-			onToolCall: (call) => calls.push(call),
-		});
-		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-		return calls;
-	};
-	const fetchTool = async () => {
-		const tool = (await newToolSet({ accountId: 'tenant-a' }).fetchTools()).getTool(
-			'crm_list_contacts',
-		);
-		assert(tool, 'tool should be listed');
-		return tool;
-	};
+const serveTool = (inputSchema: McpToolDefinition['inputSchema']) => {
+	const calls: RecordedToolCall[] = [];
+	const app = createMcpApp({
+		accountTools: {
+			'tenant-a': [{ name: 'crm_list_contacts', description: 'List contacts', inputSchema }],
+		},
+		onToolCall: (call) => calls.push(call),
+	});
+	server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+	return calls;
+};
+const fetchTool = async () => {
+	const tool = (await newToolSet({ accountId: 'tenant-a' }).fetchTools()).getTool(
+		'crm_list_contacts',
+	);
+	assert.isDefined(tool, 'tool should be listed');
+	return tool;
+};
 
+describe('model-supplied headers', () => {
 	// Regression: the RPC envelope's headers were merged OVER the tool's own, so a model-supplied
 	// x-account-id replaced the account the tool was fetched for. Over tools/call the tenant is
 	// the transport's x-account-id, which the SDK sets; the argument never reaches the server.
@@ -1344,7 +1347,9 @@ describe('timeouts', () => {
 	beforeAll(async () => {
 		silent = createServer((socket) => sockets.push(socket));
 		await new Promise<void>((resolve) => silent.listen(0, '127.0.0.1', resolve));
-		port = (silent.address() as { port: number }).port;
+		const address = silent.address();
+		assert(typeof address === 'object' && address !== null);
+		port = address.port;
 	});
 	afterAll(async () => {
 		for (const socket of sockets) {

@@ -5,7 +5,7 @@
  */
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
-import { accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import { accountMcpTools, createMcpApp, jsonRpcMethod } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { StackOneToolSet } from './toolsets';
 import type { StackOneTool, Tools } from './tool';
@@ -62,10 +62,10 @@ const serve = (
 		}),
 		http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
 			if (request.method === 'POST') {
-				const body = (await request.clone().json()) as unknown;
+				const body: unknown = await request.clone().json();
 				for (const message of Array.isArray(body) ? body : [body]) {
 					exchanges.push({
-						method: String((message as { method?: unknown }).method),
+						method: String(jsonRpcMethod(message)),
 						accountId: request.headers.get('x-account-id'),
 						endUserId: request.headers.get('x-end-user-id'),
 					});
@@ -99,15 +99,17 @@ const endUserIdsFor = (exchanges: McpExchange[], accountId: string) =>
 
 const getTool = (tools: Tools, name: string): StackOneTool => {
 	const tool = tools.getStackOneTools().find((candidate) => candidate.name === name);
-	if (!tool) {
+	if (tool === undefined) {
 		throw new Error(`${name} was not listed`);
 	}
 	return tool;
 };
 
+const silence = (): void => undefined;
+
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(silence);
 });
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -143,9 +145,8 @@ describe('x-end-user-id after account discovery', () => {
 		await toolset.execute('mock_list_items', {}, { accountIds: ['acc1'] });
 		await toolset.submitFeedback({ rating: 'positive', toolNames: ['mock_list_items'] });
 
-		const calls = exchanges
-			.filter((exchange) => exchange.method === 'tools/call')
-			.sort((left, right) => String(left.accountId).localeCompare(String(right.accountId)));
+		const calls = exchanges.filter((exchange) => exchange.method === 'tools/call');
+		calls.sort((left, right) => String(left.accountId).localeCompare(String(right.accountId)));
 		expect(calls).toEqual([
 			{ method: 'tools/call', accountId: 'acc1', endUserId: 'alice' },
 			{ method: 'tools/call', accountId: 'acc1', endUserId: 'alice' },
@@ -272,10 +273,10 @@ describe('x-end-user-id after fetchAccounts()', () => {
 			}),
 			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
 				if (request.method === 'POST') {
-					const body = (await request.clone().json()) as unknown;
+					const body: unknown = await request.clone().json();
 					for (const message of Array.isArray(body) ? body : [body]) {
 						exchanges.push({
-							method: String((message as { method?: unknown }).method),
+							method: String(jsonRpcMethod(message)),
 							accountId: request.headers.get('x-account-id'),
 							endUserId: request.headers.get('x-end-user-id'),
 						});
@@ -426,13 +427,18 @@ describe('x-end-user-id as a model-supplied header argument', () => {
 	});
 });
 
-describe('non-shared accounts in discovery', () => {
-	const skipped = (accounts: string) =>
-		`[@stackone/ai] Discovery skipped ${accounts.split(', ').length} non-shared account(s) (${accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`;
-	const warnings = (): string[] => warnSpy.mock.calls.map((args: unknown[]) => String(args[0]));
-	const accountsOf = (tools: Tools) =>
-		[...new Set(tools.getStackOneTools().map((tool) => String(tool.getAccountId())))].sort();
+const skipped = (accounts: string) =>
+	`[@stackone/ai] Discovery skipped ${accounts.split(', ').length} non-shared account(s) (${accounts}): each belongs to a single end user. Pass their account ids, or opt in to non-shared accounts, to use them.`;
+const warnings = (): string[] => warnSpy.mock.calls.map((args: unknown[]) => String(args[0]));
+const accountsOf = (tools: Tools) => {
+	const accounts = [
+		...new Set(tools.getStackOneTools().map((tool) => String(tool.getAccountId()))),
+	];
+	accounts.sort();
+	return accounts;
+};
 
+describe('non-shared accounts in discovery', () => {
 	it('are skipped by default, with one warning per discovery', async () => {
 		const { exchanges } = serve([
 			...ACCOUNTS,
@@ -586,9 +592,9 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 			.fetchTools()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(400);
-		expect((error as Error).message).toContain(
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(400);
+		expect(error.message).toContain(
 			'x-end-user-id header does not match account end user id for account acc1',
 		);
 		expect(accountRequests()).toBe(1);
@@ -604,15 +610,15 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 			.fetchTools()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(400);
-		expect((error as Error).message).toContain(
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(400);
+		expect(error.message).toContain(
 			'x-end-user-id header does not match account end user id for account acc1',
 		);
-		const cause = (error as Error).cause;
-		expect(cause).toBeInstanceOf(StackOneAPIError);
-		expect((cause as StackOneAPIError).statusCode).toBe(403);
-		expect((cause as Error).message).toContain('missing scope platform.read');
+		const cause = error.cause;
+		assert.instanceOf(cause, StackOneAPIError);
+		expect(cause.statusCode).toBe(403);
+		expect(cause.message).toContain('missing scope platform.read');
 	});
 
 	it('is not looked up again when one is already recorded', async () => {
@@ -645,8 +651,8 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 			.fetchTools()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
 	});
 
 	it('is looked up whatever the refusal names the account as', async () => {
@@ -654,7 +660,7 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 		server.use(
 			// With the header, fall through to serve()'s own guard and catalog.
 			http.all(`${TEST_BASE_URL}/mcp`, ({ request }) =>
-				request.headers.get('x-end-user-id')
+				(request.headers.get('x-end-user-id') ?? '') !== ''
 					? undefined
 					: HttpResponse.json(
 							{

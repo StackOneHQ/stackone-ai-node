@@ -26,8 +26,8 @@ export class StackOneAPIError extends StackOneError {
 
 		// Extract provider errors if they exist
 		if (
-			responseBody &&
 			typeof responseBody === 'object' &&
+			responseBody !== null &&
 			'provider_errors' in responseBody &&
 			Array.isArray(responseBody.provider_errors)
 		) {
@@ -36,17 +36,17 @@ export class StackOneAPIError extends StackOneError {
 	}
 
 	toString(): string {
-		return this._formatErrorMessage();
+		return this.formatErrorMessage();
 	}
 
 	// Format the error message for better readability
-	private _formatErrorMessage(): string {
+	private formatErrorMessage(): string {
 		// Format the main error message
-		let errorMessage = `API Error: ${this.statusCode} - ${this.message.replace(` for ${this._getUrlFromMessage()}`, '')}`;
+		let errorMessage = `API Error: ${this.statusCode} - ${this.message.replace(` for ${this.getUrlFromMessage()}`, '')}`;
 
 		// Add the URL on a new line for better readability
-		const url = this._getUrlFromMessage();
-		if (url) {
+		const url = this.getUrlFromMessage();
+		if (url !== null && url !== '') {
 			errorMessage += `\nEndpoint: ${url}`;
 		}
 
@@ -56,64 +56,72 @@ export class StackOneAPIError extends StackOneError {
 		errorMessage += `\n- User-Agent: ${USER_AGENT}`;
 
 		// Add request body information if available
-		if (this.requestBody) {
-			errorMessage += '\n\nRequest Body:';
-			try {
-				if (typeof this.requestBody === 'object') {
-					errorMessage += `\n${JSON.stringify(this.requestBody, null, 2)}`;
-				} else if (typeof this.requestBody === 'string') {
-					errorMessage += ` ${this.requestBody}`;
-				} else {
-					errorMessage += ` ${JSON.stringify(this.requestBody)}`;
-				}
-			} catch {
-				errorMessage += ' [Unable to stringify request body]';
-			}
+		const hasRequestBody = Boolean(this.requestBody);
+		if (hasRequestBody) {
+			errorMessage += `\n\nRequest Body:${formatRequestBody(this.requestBody)}`;
 		}
 
 		// Add provider error information if available
-		if (this.providerErrors && this.providerErrors.length > 0) {
-			errorMessage += this._formatProviderErrors();
-		}
-
-		return errorMessage;
-	}
-
-	// Format provider errors
-	private _formatProviderErrors(): string {
-		let errorMessage = '';
-		const providerError = this.providerErrors?.[0];
-
-		if (typeof providerError === 'object' && providerError !== null) {
-			errorMessage += '\n\nProvider Error:';
-
-			if ('status' in providerError && typeof providerError.status === 'number') {
-				errorMessage += ` ${providerError.status}`;
-			}
-
-			// Include raw error message if available
-			if (
-				'raw' in providerError &&
-				typeof providerError.raw === 'object' &&
-				providerError.raw !== null &&
-				'error' in providerError.raw &&
-				typeof providerError.raw.error === 'string'
-			) {
-				errorMessage += ` - ${providerError.raw.error}`;
-			}
-
-			// Add provider URL on a new line
-			if ('url' in providerError && typeof providerError.url === 'string') {
-				errorMessage += `\nProvider Endpoint: ${providerError.url}`;
-			}
+		if (this.providerErrors !== undefined && this.providerErrors.length > 0) {
+			errorMessage += formatProviderError(this.providerErrors[0]);
 		}
 
 		return errorMessage;
 	}
 
 	// Helper method to extract URL from the error message
-	private _getUrlFromMessage(): string | null {
+	private getUrlFromMessage(): string | null {
 		const match = this.message.match(/ for (https?:\/\/[^\s:]+)/);
-		return match ? match[1] : null;
+		return match === null ? null : match[1];
 	}
+}
+
+// Format a request body: an object as indented JSON, a string as is, anything else as JSON
+function formatRequestBody(requestBody: unknown): string {
+	try {
+		if (typeof requestBody === 'object') {
+			return `\n${JSON.stringify(requestBody, null, 2)}`;
+		}
+		if (typeof requestBody === 'string') {
+			return ` ${requestBody}`;
+		}
+		return ` ${JSON.stringify(requestBody)}`;
+	} catch {
+		return ' [Unable to stringify request body]';
+	}
+}
+
+// Format the first provider error: its status, raw error message and endpoint, where present
+function formatProviderError(providerError: unknown): string {
+	if (typeof providerError !== 'object' || providerError === null) {
+		return '';
+	}
+	const status: unknown = Reflect.get(providerError, 'status');
+	const rawError = rawErrorMessage(Reflect.get(providerError, 'raw'));
+	const url: unknown = Reflect.get(providerError, 'url');
+	let errorMessage = '\n\nProvider Error:';
+
+	if (typeof status === 'number') {
+		errorMessage += ` ${status}`;
+	}
+
+	// Include raw error message if available
+	if (rawError !== undefined) {
+		errorMessage += ` - ${rawError}`;
+	}
+
+	// Add provider URL on a new line
+	if (typeof url === 'string') {
+		errorMessage += `\nProvider Endpoint: ${url}`;
+	}
+
+	return errorMessage;
+}
+
+// The `error` string of a provider's raw response, if it has one
+function rawErrorMessage(raw: unknown): string | undefined {
+	if (typeof raw === 'object' && raw !== null && 'error' in raw && typeof raw.error === 'string') {
+		return raw.error;
+	}
+	return undefined;
 }

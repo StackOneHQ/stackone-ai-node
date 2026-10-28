@@ -16,30 +16,39 @@
 
 import process from 'node:process';
 import { StackOneError, StackOneToolSet, ToolSetError } from '@stackone/ai';
+import type { SearchResult, StackOneAccount } from '@stackone/ai';
 
-if (!process.env.STACKONE_API_KEY) {
+if ((process.env.STACKONE_API_KEY ?? '') === '') {
 	console.error('STACKONE_API_KEY environment variable is required');
 	process.exit(1);
 }
 
+const printAccounts = (accounts: StackOneAccount[]): void => {
+	for (const account of accounts) {
+		console.log(`${account.id}  ${account.provider ?? '?'}  ${account.status ?? '?'}`);
+	}
+};
+
+const printRankedMatches = (actions: SearchResult[]): void => {
+	console.log('\nRanked matches:');
+	for (const action of actions) {
+		console.log(`  ${(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
+	}
+};
+
 const searchAndExecute = async (): Promise<void> => {
 	const toolset = new StackOneToolSet();
 
-	for (const account of await toolset.fetchAccounts()) {
-		console.log(`${account.id}  ${account.provider ?? '?'}  ${account.status ?? '?'}`);
-	}
+	printAccounts(await toolset.fetchAccounts());
 
 	const actions = await toolset.search('list recent comments', { topK: 3 });
 	const [best] = actions;
-	if (!best) {
+	if (best === undefined) {
 		console.error('No actions matched. Try a different query, or link an account.');
 		process.exit(1);
 	}
 
-	console.log('\nRanked matches:');
-	for (const action of actions) {
-		console.log(`  ${Number(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
-	}
+	printRankedMatches(actions);
 
 	// input_schema is how you find out what an action accepts. Build the call from it and from
 	// example_request: arguments that do not match are dropped by the server without an error,

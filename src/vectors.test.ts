@@ -13,8 +13,7 @@ import { describeMcpFailure, listMcpTools, parseToolResult } from './mcp-client'
 import { toolParametersFromInputSchema } from './schema';
 import { BaseTool, StackOneMcpTool, Tools } from './tool';
 import { StackOneToolSet } from './toolsets';
-import type { JsonObject } from './types';
-import type { StackOneAPIError } from './utils/error-stackone-api';
+import type { JsonObject, JsonValue } from './types';
 import { fetchWithRetry, rateLimitDelayMs, retryAfterMs, waitsForRetry } from './utils/fetch-retry';
 
 vi.mock('./mcp-client', async (importOriginal) => {
@@ -33,23 +32,26 @@ const decodeNumbers = (value: unknown): unknown => {
 		return value.map(decodeNumbers);
 	}
 	if (typeof value === 'object' && value !== null) {
-		const entries = Object.entries(value);
-		if (entries.length === 1 && entries[0]?.[0] === '$number') {
-			return Number(entries[0][1]);
-		}
-		// defineProperty, so a `__proto__` key stays an own property, as JSON.parse leaves it.
-		const decoded = {};
-		for (const [key, entry] of entries) {
-			Object.defineProperty(decoded, key, {
-				value: decodeNumbers(entry),
-				enumerable: true,
-				writable: true,
-				configurable: true,
-			});
-		}
-		return decoded;
+		return decodeObject(Object.entries(value));
 	}
 	return value;
+};
+
+const decodeObject = (entries: Array<[string, unknown]>): unknown => {
+	if (entries.length === 1 && entries[0]?.[0] === '$number') {
+		return Number(entries[0][1]);
+	}
+	// defineProperty, so a `__proto__` key stays an own property, as JSON.parse leaves it.
+	const decoded = {};
+	for (const [key, entry] of entries) {
+		Object.defineProperty(decoded, key, {
+			value: decodeNumbers(entry),
+			enumerable: true,
+			writable: true,
+			configurable: true,
+		});
+	}
+	return decoded;
 };
 
 interface VectorFile<Case> {
@@ -59,10 +61,25 @@ interface VectorFile<Case> {
 }
 
 /** A vector file, its NaN markers decoded. */
+// oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- the caller names the file's shape
 function loadFile<File>(name: string): File {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- parsed JSON, in the shape the caller names
 	return decodeNumbers(JSON.parse(readFileSync(join(VECTORS, name), 'utf8'))) as File;
 }
 const load = <Case>(name: string): VectorFile<Case> => loadFile<VectorFile<Case>>(name);
+
+/** A sorted copy; `toSorted()` is ES2023, past this package's ES2022 lib. */
+const sorted = (items: readonly string[]): string[] => {
+	const copy = [...items];
+	copy.sort();
+	return copy;
+};
+
+/** A rejection reason, which these tests only ever see as an Error. */
+const asError = (error: unknown): Error => {
+	assert.instanceOf(error, Error);
+	return error;
+};
 
 /** Every vector file a describe() below grades. */
 const GRADED = [
@@ -79,7 +96,7 @@ const GRADED = [
 // A new vector file fails here until a test loads it, rather than passing ungraded.
 it('grades every vector file', () => {
 	const files = readdirSync(VECTORS).filter((name) => name.endsWith('.json'));
-	expect(files.sort()).toEqual([...GRADED].sort());
+	expect(sorted(files)).toEqual(sorted(GRADED));
 });
 
 /** Seconds are compared with a relative tolerance of 1e-9 (README, "Reading the values"). */
@@ -122,11 +139,11 @@ const formatValue = (value: unknown, format: Placeholder['format']): string => {
 		case 'seconds':
 			return String(value);
 		case 'seconds-2dp':
-			return String(Math.floor((value as number) * 100 + 0.5) / 100);
+			return String(Math.floor(Number(value) * 100 + 0.5) / 100);
 		case 'json-type':
 			return jsonType(value);
 		case 'reason': {
-			const text = messages.reasons[value as string];
+			const text = messages.reasons[String(value)];
 			if (text === undefined) {
 				throw new Error(`No reason text for ${String(value)}`);
 			}
@@ -140,25 +157,26 @@ const formatValue = (value: unknown, format: Placeholder['format']): string => {
 /** A message's template, rendered with these values. */
 const render = (id: string, values: Record<string, unknown> = {}): string => {
 	const message = messageById.get(id);
-	if (!message) {
+	if (message === undefined) {
 		throw new Error(`messages.json has no message ${id}`);
 	}
 	return message.template.replace(/\{(\w+)\}/g, (_match, name: string) => {
 		const placeholder = message.placeholders[name];
-		if (!placeholder || !(name in values)) {
+		if (placeholder === undefined || !(name in values)) {
 			throw new Error(`No value for {${name}} in ${id}`);
 		}
 		return formatValue(values[name], placeholder.format);
 	});
 };
 
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /** A message's template as a pattern, with these values and every other placeholder open. */
 const pattern = (id: string, values: Record<string, unknown> = {}): RegExp => {
 	const message = messageById.get(id);
-	if (!message) {
+	if (message === undefined) {
 		throw new Error(`messages.json has no message ${id}`);
 	}
-	const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	const source = message.template
 		.split(/(\{\w+\})/)
 		.map((part) => {
@@ -167,7 +185,7 @@ const pattern = (id: string, values: Record<string, unknown> = {}): RegExp => {
 				return escape(part);
 			}
 			const placeholder = message.placeholders[name];
-			return name in values && placeholder
+			return name in values && placeholder !== undefined
 				? escape(formatValue(values[name], placeholder.format))
 				: '.*';
 		})
@@ -180,7 +198,7 @@ const PREFIX = '[@stackone/ai] ';
 let warnSpy: ReturnType<typeof vi.spyOn>;
 const warnings = (): string[] => warnSpy.mock.calls.map(([message]: unknown[]) => String(message));
 beforeEach(() => {
-	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 });
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -200,15 +218,25 @@ const toolWith = (inputSchema: Record<string, unknown>, name = 'vector_tool') =>
 		timeout: 5_000,
 	});
 
+const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
+
 const sentArguments = async (
 	inputSchema: Record<string, unknown>,
 	args: unknown,
 ): Promise<JsonObject> => {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- vector input, valid or not, as a model would send it
 	const call = await toolWith(inputSchema).execute(args as JsonObject, { dryRun: true });
-	return call.arguments as JsonObject;
+	assert(isJsonObject(call.arguments));
+	return call.arguments;
 };
 
 const OPEN_HEADERS = { type: 'object', properties: { headers: { type: 'object' } } };
+
+const newToolSet = (config: Record<string, unknown> = {}) =>
+	new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
+
+const outcomeOf = (act: () => Promise<unknown>) => act().then(() => 'ok' as const, asError);
 
 // ---------------------------------------------------------------------------------------------
 
@@ -253,12 +281,12 @@ describe('backoff.json', () => {
 	});
 
 	it.each(file.cases)('$id', ({ retry, random, retry_after_seconds, expected_delay_seconds }) => {
-		const delay = rateLimitDelayMs(
+		const delayMs = rateLimitDelayMs(
 			retry,
 			retry_after_seconds === null ? undefined : retry_after_seconds * 1000,
 			() => random,
 		);
-		expectSeconds(delay / 1000, expected_delay_seconds);
+		expectSeconds(delayMs / 1000, expected_delay_seconds);
 	});
 
 	it.each(file.deadline_cases)('$id', ({ delay_seconds, remaining_seconds, expected }) => {
@@ -278,11 +306,10 @@ describe('header-values.json', () => {
 
 	it.each(file.cases)('$id', async ({ value, expected }) => {
 		const sent = await sentArguments(OPEN_HEADERS, { headers: { 'x-probe': value } });
-		const headers = sent.headers as Record<string, string>;
 		if (typeof expected === 'string') {
-			expect(headers).toEqual({ 'x-probe': expected });
+			expect(sent.headers).toEqual({ 'x-probe': expected });
 		} else {
-			expect(headers).toEqual({});
+			expect(sent.headers).toEqual({});
 		}
 	});
 });
@@ -301,7 +328,7 @@ describe('header-names.json', () => {
 	it.each(file.cases)('$id', async ({ name, expected }) => {
 		const sent = await sentArguments(OPEN_HEADERS, { headers: { [name]: 'v' } });
 		if ('forwarded' in expected) {
-			expect(Object.entries(sent.headers as object)).toEqual([[expected.forwarded, 'v']]);
+			expect(Object.entries(sent.headers ?? {})).toEqual([[expected.forwarded, 'v']]);
 			expect(warnings()).toEqual([]);
 		} else {
 			expect(sent.headers).toEqual({});
@@ -360,9 +387,9 @@ describe('argument-encoding.json', () => {
 			case 'invalid-json': {
 				let detail = '';
 				try {
-					JSON.parse(input as string);
+					JSON.parse(String(input));
 				} catch (error) {
-					detail = (error as Error).message;
+					detail = asError(error).message;
 				}
 				return pattern('arguments-invalid-json', { tool: TOOL, detail });
 			}
@@ -382,10 +409,11 @@ describe('argument-encoding.json', () => {
 	it.each(file.cases)('$id', async (testCase) => {
 		const input = 'arguments_json' in testCase ? testCase.arguments_json : testCase.arguments;
 		const outcome = await toolWith({ type: 'object', properties: {} }, TOOL)
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- vector input, valid or not, as a model would send it
 			.execute(input as JsonObject, { dryRun: true })
 			.then(
 				(call) => ({ ok: call }),
-				(error: unknown) => ({ error: error as Error }),
+				(error: unknown) => ({ error: asError(error) }),
 			);
 		if (testCase.expected === 'ok') {
 			expect(outcome).toHaveProperty('ok');
@@ -406,22 +434,15 @@ describe('account-ids.json', () => {
 		expected: 'ok' | { error: { node: string } };
 	}>('account-ids.json');
 
-	const newToolSet = (config: Record<string, unknown> = {}) =>
-		new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
-
 	/** Every place that takes an account-id list, each refusing before any request. */
 	const listTakers: Array<[string, (value: unknown) => Promise<unknown>]> = [
 		['the constructor', async (value) => newToolSet({ accountIds: value })],
 		['execute.accountIds', async (value) => newToolSet({ execute: { accountIds: value } })],
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- vector value, valid or not, as a caller would pass it
 		['setAccounts()', async (value) => newToolSet().setAccounts(value as string[])],
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- vector value, valid or not, as a caller would pass it
 		['fetchTools()', async (value) => newToolSet().fetchTools({ accountIds: value as string[] })],
 	];
-
-	const outcomeOf = (act: () => Promise<unknown>) =>
-		act().then(
-			() => 'ok' as const,
-			(error: unknown) => error as Error,
-		);
 
 	it('is the version these tests were written for', () => {
 		expect(file.version).toBe(1);
@@ -440,7 +461,7 @@ describe('account-ids.json', () => {
 				expect(outcome).toBe('ok');
 			} else {
 				expect(outcome).toBeInstanceOf(Error);
-				expect((outcome as Error).name).toBe(expected.error.node);
+				expect(outcome !== 'ok' && outcome.name).toBe(expected.error.node);
 			}
 			if (expected !== 'ok' || parameter === 'account_id') {
 				expect(listMock).not.toHaveBeenCalled();
@@ -451,9 +472,6 @@ describe('account-ids.json', () => {
 
 // ---------------------------------------------------------------------------------------------
 // messages.json: every shared message, through the code that emits it.
-
-const newToolSet = (config: Record<string, unknown> = {}) =>
-	new StackOneToolSet({ apiKey: 'test-key', baseUrl: TEST_BASE_URL, ...config });
 
 /** Serve these tools on the accounts their names end in, as `<name>_<account>[_<suffix>]`. */
 const listByAccount = (names: string[]) => {
@@ -480,12 +498,9 @@ const respondToCalls = (respond: (tool: StackOneMcpTool) => JsonObject | Promise
 const errorOf = (act: () => unknown): Promise<Error> =>
 	Promise.resolve()
 		.then(act)
-		.then(
-			() => {
-				throw new Error('expected an error');
-			},
-			(error: unknown) => error as Error,
-		);
+		.then(() => {
+			throw new Error('expected an error');
+		}, asError);
 
 type Emitted = { error: Error } | { warnings: string[] } | { toolResult: string };
 
@@ -524,7 +539,7 @@ const emitters: Record<
 		await fetchWithRetry(
 			url,
 			{ method: 'POST' },
-			{ timing: { sleep: async () => {}, random: () => 0.5, now: () => 0 } },
+			{ timing: { sleep: async () => undefined, random: () => 0.5, now: () => 0 } },
 		);
 		return {
 			emitted: { warnings: warnings() },
@@ -541,7 +556,7 @@ const emitters: Record<
 			{ method: 'POST' },
 			{
 				deadline: 1_000,
-				timing: { sleep: async () => {}, random: () => 0.5, now: () => 0 },
+				timing: { sleep: async () => undefined, random: () => 0.5, now: () => 0 },
 			},
 		);
 		return {
@@ -674,16 +689,16 @@ const emitters: Record<
 		let requests = 0;
 		server.use(
 			http.all(endpoint, async () => {
-				if (requests++ === 0) {
-					return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
+				if (requests++ > 0) {
+					await delay('infinite');
 				}
-				await delay('infinite');
+				return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
 			}),
 		);
 		const error = await errorOf(() =>
 			realListMcpTools({ endpoint, headers: { 'x-account-id': 'acc-1' }, timeout }),
 		);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect(error).toHaveProperty('statusCode', 429);
 		return { emitted: { error }, values: { endpoint, timeout: timeout / 1_000 } };
 	},
 	'accounts-rate-limit-timeout': async () => {
@@ -692,14 +707,14 @@ const emitters: Record<
 		let requests = 0;
 		server.use(
 			http.get(url, async () => {
-				if (requests++ === 0) {
-					return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
+				if (requests++ > 0) {
+					await delay('infinite');
 				}
-				await delay('infinite');
+				return HttpResponse.json({}, { status: 429, headers: { 'Retry-After': '0' } });
 			}),
 		);
 		const error = await errorOf(() => newToolSet({ timeout }).fetchAccounts());
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect(error).toHaveProperty('statusCode', 429);
 		return { emitted: { error }, values: { url, timeout: timeout / 1_000 } };
 	},
 	'mcp-http-failure': async () => {
@@ -873,7 +888,10 @@ const emitters: Record<
 	}),
 	'execute-arguments-not-an-object': async () => ({
 		emitted: {
-			error: await errorOf(() => newToolSet({ accountId: 'acc-1' }).execute('x_y', [1] as never)),
+			error: await errorOf(() =>
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately not an object
+				newToolSet({ accountId: 'acc-1' }).execute('x_y', [1] as never),
+			),
 		},
 		values: { json_type: [1] },
 	}),
@@ -888,6 +906,7 @@ const emitters: Record<
 			error: await errorOf(() =>
 				newToolSet({ accountId: 'acc-1' }).submitFeedback({
 					rating: 'positive',
+					// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately not a list
 					toolNames: 'a' as never,
 				}),
 			),
@@ -940,7 +959,7 @@ const emitters: Record<
 		try {
 			JSON.parse('{');
 		} catch (error) {
-			detail = (error as Error).message;
+			detail = asError(error).message;
 		}
 		return {
 			emitted: {
@@ -951,7 +970,10 @@ const emitters: Record<
 	},
 	'arguments-not-an-object': async () => ({
 		emitted: {
-			error: await errorOf(() => toolWith({ type: 'object', properties: {} }).execute(5 as never)),
+			error: await errorOf(() =>
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately not an object
+				toolWith({ type: 'object', properties: {} }).execute(5 as never),
+			),
 		},
 		values: { tool: 'vector_tool' },
 	}),
@@ -966,9 +988,12 @@ const emitters: Record<
 	'no-executor': async () => ({
 		emitted: {
 			error: await errorOf(() =>
-				new BaseTool('hand_built', '', { type: 'object', properties: {} }, {
-					kind: 'local',
-				} as never).execute({}),
+				new BaseTool(
+					'hand_built',
+					'',
+					{ type: 'object', properties: {} },
+					{ kind: 'local' },
+				).execute({}),
 			),
 		},
 		values: { tool: 'hand_built' },
@@ -977,8 +1002,9 @@ const emitters: Record<
 		const [message] = await new Tools([]).executeOpenAIToolCalls([
 			{ id: 'c', type: 'function', function: { name: 'invented', arguments: '{}' } },
 		]);
+		assert(typeof message?.content === 'string');
 		return {
-			emitted: { toolResult: JSON.parse(message?.content as string).error },
+			emitted: { toolResult: JSON.parse(message.content).error },
 			values: { name: 'invented' },
 		};
 	},
@@ -990,14 +1016,14 @@ describe('messages.json', () => {
 	});
 
 	it('has an emitter for every shared message', () => {
-		expect(Object.keys(emitters).sort()).toEqual(
-			messages.messages.map((message) => message.id).sort(),
+		expect(sorted(Object.keys(emitters))).toEqual(
+			sorted(messages.messages.map((message) => message.id)),
 		);
 	});
 
 	it.each(messages.messages)('$id', async ({ id, kind, error: errorClass }) => {
 		const emit = emitters[id];
-		if (!emit) {
+		if (emit === undefined) {
 			throw new Error(`No emitter for ${id}`);
 		}
 		const { emitted, values } = await emit();
@@ -1011,9 +1037,9 @@ describe('messages.json', () => {
 		} else if (kind === 'tool-result') {
 			expect('toolResult' in emitted && emitted.toolResult).toMatch(expected);
 		} else {
-			const { error } = emitted as { error: Error };
-			expect(error.name).toBe(errorClass?.node);
-			expect(error.message).toMatch(expected);
+			assert('error' in emitted);
+			expect(emitted.error.name).toBe(errorClass?.node);
+			expect(emitted.error.message).toMatch(expected);
 		}
 	});
 });

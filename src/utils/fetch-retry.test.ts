@@ -44,7 +44,7 @@ const recordedTiming = (random = () => 0.5) => {
 
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 });
 afterEach(() => {
 	vi.restoreAllMocks();

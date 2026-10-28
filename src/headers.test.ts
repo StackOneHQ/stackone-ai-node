@@ -102,11 +102,13 @@ describe('declaredHeaders', () => {
 	});
 });
 
+const silence = (): void => undefined;
+
 describe('sanitiseHeaders', () => {
 	const allowed = new Set(['x-trace']);
 
 	beforeEach(() => {
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(silence);
 	});
 	afterEach(() => {
 		vi.restoreAllMocks();
@@ -129,10 +131,11 @@ describe('sanitiseHeaders', () => {
 	});
 });
 
+/** An object whose first own key is `__proto__`, as only parsed JSON can make one. */
+const withProto = (rest: string): JsonObject => JSON.parse(`{"__proto__":"p",${rest}}`);
+
 // Assigning to `__proto__` sets the prototype, so each of these once dropped the entry.
 describe('an entry named __proto__', () => {
-	const withProto = (rest: string) => JSON.parse(`{"__proto__":"p",${rest}}`) as JsonObject;
-
 	it('is kept as an own key by sanitiseHeaderArguments', () => {
 		const clean = sanitiseHeaderArguments(withProto('"constructor":"c","q":1'), {
 			nested: new Set(),
@@ -161,7 +164,7 @@ describe('an entry named __proto__', () => {
 	it('is kept by buildRequestHeaders', () => {
 		const headers = buildRequestHeaders({
 			apiKey: 'k',
-			extraHeaders: JSON.parse('{"__proto__":"p"}') as Record<string, string>,
+			extraHeaders: JSON.parse('{"__proto__":"p"}'),
 		});
 		expect(Object.hasOwn(headers, '__proto__')).toBe(true);
 		expect(Object.getPrototypeOf(headers)).toBe(Object.prototype);

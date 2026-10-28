@@ -6,7 +6,7 @@
 import { delay, http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { mockAccounts } from '../mocks/handlers.stackone-accounts';
-import { accountMcpTools, createMcpApp } from '../mocks/mcp-server';
+import { accountMcpTools, createMcpApp, jsonRpcMethod } from '../mocks/mcp-server';
 import type { RecordedToolCall } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { StackOneToolSet } from './toolsets';
@@ -19,9 +19,11 @@ const newToolSet = (config: ConstructorParameters<typeof StackOneToolSet>[0] = {
 
 const RATE_LIMITED = { message: 'Too many requests' };
 
+const silence = (): void => undefined;
+
 let warnSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
-	warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+	warnSpy = vi.spyOn(console, 'warn').mockImplementation(silence);
 });
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -38,6 +40,14 @@ interface Throttle {
 	/** The `Retry-After` each 429 carries. Default: `'0'`. */
 	retryAfter?: string;
 }
+
+/** The JSON-RPC method a request to the MCP endpoint calls: only a POST carries one. */
+const methodOf = async (request: Request): Promise<string | undefined> =>
+	request.method === 'POST' ? jsonRpcMethod(await request.clone().json()) : undefined;
+
+const throttles = (throttle: Throttle, method: string | undefined, accountId: string | undefined) =>
+	(throttle.method === undefined || method === throttle.method) &&
+	(throttle.accountId === undefined || accountId === throttle.accountId);
 
 /**
  * Serve the mock MCP app, answering 429 (with `Retry-After: 0`) to the requests the throttle
@@ -57,13 +67,7 @@ const serveThrottled = (throttle: Throttle) => {
 			if (accountId === 'dead') {
 				return HttpResponse.json({ message: 're-link the account to resume' }, { status: 412 });
 			}
-			const message =
-				request.method === 'POST'
-					? ((await request.clone().json()) as { method?: string })
-					: undefined;
-			const matches =
-				(throttle.method === undefined || message?.method === throttle.method) &&
-				(throttle.accountId === undefined || accountId === throttle.accountId);
+			const matches = throttles(throttle, await methodOf(request), accountId);
 			if (matches && attempts.matched++ < (throttle.times ?? Number.POSITIVE_INFINITY)) {
 				return HttpResponse.json(RATE_LIMITED, {
 					status: 429,
@@ -77,9 +81,9 @@ const serveThrottled = (throttle: Throttle) => {
 };
 
 const expectRateLimited = (error: unknown) => {
-	expect(error).toBeInstanceOf(StackOneAPIError);
-	expect((error as StackOneAPIError).statusCode).toBe(429);
-	expect((error as StackOneAPIError).responseBody).toEqual(RATE_LIMITED);
+	assert.instanceOf(error, StackOneAPIError);
+	expect(error.statusCode).toBe(429);
+	expect(error.responseBody).toEqual(RATE_LIMITED);
 };
 
 describe('a 429 that clears on retry', () => {
@@ -151,9 +155,9 @@ describe('a 429 that outlasts its retries', () => {
 			.fetchAccounts()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
-		expect((error as StackOneAPIError).responseBody).toBe('slow down');
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
+		expect(error.responseBody).toBe('slow down');
 		expect(requests).toBe(4);
 		expect(retryWarnings()).toHaveLength(3);
 	});
@@ -218,10 +222,10 @@ describe('a 429 that outlasts its retries', () => {
 			.fetchTools()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
 		// GET /accounts keeps its error body as text.
-		expect((error as StackOneAPIError).responseBody).toBe(JSON.stringify(RATE_LIMITED));
+		expect(error.responseBody).toBe(JSON.stringify(RATE_LIMITED));
 	});
 
 	it('fails a search instead of skipping the throttled connector', async () => {
@@ -236,22 +240,22 @@ describe('a 429 that outlasts its retries', () => {
 	});
 });
 
-describe('a 429 whose wait would outlast the timeout', () => {
-	/**
-	 * Replace the retry clock with a fake one that each wait advances, so nothing really waits.
-	 * Returns the waits requested.
-	 */
-	const fakeClock = () => {
-		const clock = { now: 0 };
-		const waits: number[] = [];
-		vi.spyOn(retryTiming, 'now').mockImplementation(() => clock.now);
-		vi.spyOn(retryTiming, 'sleep').mockImplementation(async (ms) => {
-			waits.push(ms);
-			clock.now += ms;
-		});
-		return waits;
-	};
+/**
+ * Replace the retry clock with a fake one that each wait advances, so nothing really waits.
+ * Returns the waits requested.
+ */
+const fakeClock = () => {
+	const clock = { now: 0 };
+	const waits: number[] = [];
+	vi.spyOn(retryTiming, 'now').mockImplementation(() => clock.now);
+	vi.spyOn(retryTiming, 'sleep').mockImplementation(async (ms) => {
+		waits.push(ms);
+		clock.now += ms;
+	});
+	return waits;
+};
 
+describe('a 429 whose wait would outlast the timeout', () => {
 	it('fails a multi-account listing with the 429 instead of timing the account out', async () => {
 		const waits = fakeClock();
 		const { attempts } = serveThrottled({ accountId: 'acc2', retryAfter: '2' });
@@ -281,8 +285,8 @@ describe('a 429 whose wait would outlast the timeout', () => {
 			.fetchAccounts()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
 		expect(requests).toBe(1);
 		expect(waits).toEqual([]);
 		expect(retryWarnings()).toEqual([
@@ -304,7 +308,7 @@ describe('a 429 whose wait would outlast the timeout', () => {
 			.fetchAccounts()
 			.catch((caught: unknown) => caught);
 
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		expect(error).toHaveProperty('statusCode', 429);
 		expect(waits).toEqual([1_000, 1_000]);
 		expect(requests).toBe(3);
 	});
@@ -335,9 +339,9 @@ describe('a timeout while a 429 is retried', () => {
 			.fetchTools({ accountIds: ['acc1', 'acc2'] })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
-		expect((error as Error).message).toBe(
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
+		expect(error.message).toBe(
 			`MCP request to ${TEST_BASE_URL}/mcp was rate limited (429) and timed out after 0.3s while retrying`,
 		);
 		expect(warnings().filter((message) => message.includes('Skipping'))).toEqual([]);
@@ -356,8 +360,7 @@ describe('a timeout while a 429 is retried', () => {
 					answeredMeanwhile = listAttempts === 2;
 					return new HttpResponse(null, { status: 405 });
 				}
-				const message = (await request.clone().json()) as { method?: string };
-				if (message.method === 'tools/list') {
+				if (jsonRpcMethod(await request.clone().json()) === 'tools/list') {
 					if (listAttempts++ === 0) {
 						return HttpResponse.json(RATE_LIMITED, {
 							status: 429,
@@ -375,8 +378,8 @@ describe('a timeout while a 429 is retried', () => {
 			.catch((caught: unknown) => caught);
 
 		expect(answeredMeanwhile).toBe(true);
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
 	});
 
 	it('fails GET /accounts with a 429', async () => {
@@ -395,8 +398,8 @@ describe('a timeout while a 429 is retried', () => {
 			.fetchAccounts()
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
-		expect((error as StackOneAPIError).statusCode).toBe(429);
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error.statusCode).toBe(429);
 		expect(requests).toBe(2);
 	});
 });
@@ -410,17 +413,14 @@ describe('a 429 that clears on retry, followed by an unrelated timeout', () => {
 		let initializeAttempts = 0;
 		server.use(
 			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
-				const message =
-					request.method === 'POST'
-						? ((await request.clone().json()) as { method?: string })
-						: undefined;
-				if (message?.method === 'initialize' && initializeAttempts++ === 0) {
+				const method = await methodOf(request);
+				if (method === 'initialize' && initializeAttempts++ === 0) {
 					return HttpResponse.json(RATE_LIMITED, {
 						status: 429,
 						headers: { 'Retry-After': '0' },
 					});
 				}
-				if (message?.method === 'tools/list') {
+				if (method === 'tools/list') {
 					await delay('infinite');
 				}
 				return app.fetch(request);
@@ -431,11 +431,9 @@ describe('a 429 that clears on retry, followed by an unrelated timeout', () => {
 			.fetchTools({ accountIds: ['acc1'] })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
+		assert.instanceOf(error, ToolSetLoadError);
 		expect(error).not.toBeInstanceOf(StackOneAPIError);
-		expect((error as Error).message).toBe(
-			`MCP request to ${TEST_BASE_URL}/mcp timed out after 0.3s`,
-		);
+		expect(error.message).toBe(`MCP request to ${TEST_BASE_URL}/mcp timed out after 0.3s`);
 	});
 
 	// The same request this time: its retry is answered 200, and then the stream stalls. That is
@@ -445,18 +443,15 @@ describe('a 429 that clears on retry, followed by an unrelated timeout', () => {
 		let listAttempts = 0;
 		server.use(
 			http.all(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
-				const message =
-					request.method === 'POST'
-						? ((await request.clone().json()) as { method?: string })
-						: undefined;
-				if (request.headers.get('x-account-id') === 'acc2' && message?.method === 'tools/list') {
+				const method = await methodOf(request);
+				if (request.headers.get('x-account-id') === 'acc2' && method === 'tools/list') {
 					if (listAttempts++ === 0) {
 						return HttpResponse.json(RATE_LIMITED, {
 							status: 429,
 							headers: { 'Retry-After': '0' },
 						});
 					}
-					return new HttpResponse(new ReadableStream({ start() {} }), {
+					return new HttpResponse(new ReadableStream({ start: silence }), {
 						headers: { 'Content-Type': 'text/event-stream' },
 					});
 				}
@@ -488,7 +483,7 @@ describe('other statuses', () => {
 			.fetchAccounts()
 			.catch((caught: unknown) => caught);
 
-		expect((error as StackOneAPIError).statusCode).toBe(status);
+		expect(error).toHaveProperty('statusCode', status);
 		expect(requests).toBe(1);
 		expect(retryWarnings()).toEqual([]);
 	});
@@ -506,7 +501,7 @@ describe('other statuses', () => {
 			.fetchTools({ accountIds: ['acc1'] })
 			.catch((caught: unknown) => caught);
 
-		expect((error as StackOneAPIError).statusCode).toBe(500);
+		expect(error).toHaveProperty('statusCode', 500);
 		expect(requests).toBe(1);
 	});
 });

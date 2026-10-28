@@ -13,6 +13,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
+import { isRecord } from './handlers.utils';
 
 export interface McpToolDefinition {
 	name: string;
@@ -153,6 +154,49 @@ const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResu
 	return undefined;
 };
 
+/** The feedback tool's answer: recorded, against the session it names. */
+const feedbackRecorded = (args: Record<string, unknown>): CallToolResult =>
+	wrapped({
+		message: 'Feedback recorded',
+		submitted_at: new Date(0).toISOString(),
+		session_id: args.session_id ?? null,
+	});
+
+/** The `method` a JSON-RPC message calls, if it names one. */
+export const jsonRpcMethod = (message: unknown): string | undefined =>
+	isRecord(message) && typeof message.method === 'string' ? message.method : undefined;
+
+/** The tool a JSON-RPC message calls, and its arguments, when it is a `tools/call`. */
+const toolCallIn = (message: unknown): Pick<RecordedToolCall, 'name' | 'arguments'> | undefined => {
+	if (jsonRpcMethod(message) !== 'tools/call' || !isRecord(message) || !isRecord(message.params)) {
+		return undefined;
+	}
+	const { name, arguments: args } = message.params;
+	return typeof name === 'string' ? { name, arguments: isRecord(args) ? args : {} } : undefined;
+};
+
+/**
+ * Report each `tools/call` in a POST to `record`. Read from the raw body: the server's schema
+ * parsing rebuilds the arguments, and drops a `__proto__` key on the way, so a call recorded after
+ * it is not what was sent.
+ */
+const recordToolCalls = async (
+	request: Request,
+	record: MockMcpServerOptions['onToolCall'],
+	scope: Pick<RecordedToolCall, 'accountId' | 'toolMode'>,
+): Promise<void> => {
+	if (record === undefined || request.method !== 'POST') {
+		return;
+	}
+	const body: unknown = await request.clone().json();
+	for (const message of Array.isArray(body) ? body : [body]) {
+		const call = toolCallIn(message);
+		if (call !== undefined) {
+			record({ ...scope, ...call });
+		}
+	}
+};
+
 /**
  * Creates a Hono app speaking the MCP protocol at `/mcp`, for use from an MSW handler.
  *
@@ -167,6 +211,10 @@ const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResu
  */
 export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 	const { accountTools, submitFeedback = false, onToolCall, toolResults = {} } = options;
+	const listedTools = (accountId: string, toolMode: string | undefined): McpToolDefinition[] => [
+		...(submitFeedback ? [submitFeedbackTool] : []),
+		...(toolMode === 'search_execute' ? metaTools(accountId) : accountTools[accountId]),
+	];
 
 	// Create a Hono app that handles MCP protocol
 	const app = new Hono();
@@ -185,7 +233,7 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		// permissive than production and hid a fatal SDK bug: an SDK that never sent the header
 		// still got a full catalog.
 		const accountId = c.req.header('x-account-id') ?? c.req.query('x-account-id');
-		if (!accountId) {
+		if (accountId === undefined || accountId === '') {
 			return c.json(
 				{ statusCode: 400, message: 'Missing x-account-id header or query parameter in request' },
 				400,
@@ -198,10 +246,7 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		}
 
 		const toolMode = c.req.query('tool-mode');
-		const listed: McpToolDefinition[] = [
-			...(submitFeedback ? [submitFeedbackTool] : []),
-			...(toolMode === 'search_execute' ? metaTools(accountId) : (accountTools[accountId] ?? [])),
-		];
+		const listed = listedTools(accountId, toolMode);
 
 		// A low-level Server rather than McpServer: McpServer.registerTool expects a Zod shape and
 		// lists a plain JSON Schema as `properties: {}`. The real endpoint serves each schema
@@ -221,15 +266,11 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 				return text({ error: `Unknown tool ${name}`, status_code: 404 }, true);
 			}
 			const literal = toolResults[name];
-			if (literal) {
+			if (literal !== undefined) {
 				return structuredClone(literal);
 			}
 			if (name === submitFeedbackTool.name) {
-				return wrapped({
-					message: 'Feedback recorded',
-					submitted_at: new Date(0).toISOString(),
-					session_id: args.session_id ?? null,
-				});
+				return feedbackRecorded(args);
 			}
 			// An action tool echoes what reached it, so a test can see the arguments and account.
 			// Only search_execute serves meta tools: in individual mode a per-action tool whose
@@ -240,20 +281,7 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 			);
 		});
 
-		// Recorded from the raw body: the server's schema parsing rebuilds the arguments, and drops
-		// a `__proto__` key on the way, so a call recorded after it is not what was sent.
-		if (onToolCall && c.req.method === 'POST') {
-			const body = await c.req.raw.clone().json();
-			for (const message of Array.isArray(body) ? body : [body]) {
-				const { method, params } = (message ?? {}) as {
-					method?: string;
-					params?: { name?: string; arguments?: Record<string, unknown> };
-				};
-				if (method === 'tools/call' && typeof params?.name === 'string') {
-					onToolCall({ accountId, toolMode, name: params.name, arguments: params.arguments ?? {} });
-				}
-			}
-		}
+		await recordToolCalls(c.req.raw, onToolCall, { accountId, toolMode });
 
 		const transport = new StreamableHTTPTransport();
 		await mcp.connect(transport);

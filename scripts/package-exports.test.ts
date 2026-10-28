@@ -16,8 +16,10 @@ const rootDir = fileURLToPath(new URL('..', import.meta.url));
 // map surfaces as a test failure rather than a compile error in this file.
 const rootExport: string | { require?: string; import?: string } = publishConfig.exports['.'];
 const conditions = typeof rootExport === 'string' ? { import: rootExport } : rootExport;
-const cjsEntry = conditions.require ? path.resolve(rootDir, conditions.require) : undefined;
-const esmEntry = conditions.import ? path.resolve(rootDir, conditions.import) : undefined;
+const entryPath = (file: string | undefined) =>
+	file === undefined || file === '' ? undefined : path.resolve(rootDir, file);
+const cjsEntry = entryPath(conditions.require);
+const esmEntry = entryPath(conditions.import);
 
 const cjsReady = cjsEntry !== undefined && existsSync(cjsEntry);
 const esmReady = esmEntry !== undefined && existsSync(esmEntry);
@@ -47,7 +49,7 @@ async function createConsumerFixture(tempDir: string): Promise<string> {
 		{ cwd: rootDir },
 	);
 	const tarballName = (await readdir(tempDir)).find((file) => file.endsWith('.tgz'));
-	if (!tarballName) {
+	if (tarballName === undefined) {
 		throw new Error('pnpm pack did not produce a tarball');
 	}
 	await execFileAsync('tar', ['-xzf', tarballName], { cwd: tempDir });
@@ -100,17 +102,16 @@ describe('published package output', () => {
 
 	it.skipIf(!cjsReady)('exposes the public API from the CJS entry via require()', () => {
 		const requireFromTest = createRequire(import.meta.url);
-		const moduleExports = requireFromTest(String(cjsEntry)) as Record<string, unknown>;
+		const moduleExports: Record<string, unknown> = requireFromTest(String(cjsEntry));
 		for (const exportName of PUBLIC_API_SAMPLE) {
 			expect(moduleExports[exportName], exportName).toBeTypeOf('function');
 		}
 	});
 
 	it.skipIf(!esmReady)('exposes the public API from the ESM entry via import()', async () => {
-		const moduleExports = (await import(pathToFileURL(String(esmEntry)).href)) as Record<
-			string,
-			unknown
-		>;
+		const moduleExports: Record<string, unknown> = await import(
+			pathToFileURL(String(esmEntry)).href
+		);
 		for (const exportName of PUBLIC_API_SAMPLE) {
 			expect(moduleExports[exportName], exportName).toBeTypeOf('function');
 		}
@@ -128,8 +129,8 @@ describe('published package output', () => {
 					await execFileAsync('pnpm', ['exec', 'tsc', '-p', consumerDir], { cwd: rootDir });
 				} catch (error) {
 					const execError = (error ?? {}) as { stdout?: string; stderr?: string };
-					const details =
-						`${execError.stdout ?? ''}${execError.stderr ?? ''}`.trim() || String(error);
+					const output = `${execError.stdout ?? ''}${execError.stderr ?? ''}`.trim();
+					const details = output === '' ? String(error) : output;
 					throw new Error(`tsc failed for the Node16 consumer fixture:\n${details}`, {
 						cause: error,
 					});
