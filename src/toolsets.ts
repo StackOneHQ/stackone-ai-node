@@ -31,7 +31,7 @@ import { settleWithConcurrency } from './utils/concurrency';
 import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
 import { warn } from './utils/logger';
 import { sorted } from './utils/array';
-import { isNonEmpty } from './utils/type';
+import { isNonEmpty, isTruthy } from './utils/type';
 
 /**
  * Configuration with a single account ID
@@ -363,16 +363,6 @@ const assertAccountIdList = (accountIds: unknown, parameter: string): void => {
 	}
 };
 
-/**
- * The StackOne toolset: lists the served tool catalog and exposes it to agent frameworks.
- *
- * A thin client over the MCP endpoint. Tools are listed from it, per account, and executed over
- * its `tools/call`; the only other request is `GET /accounts`, to discover accounts. Schemas and
- * arguments are passed through as served, never rewritten, filtered or invented.
- *
- * An API key is enough: with no account configured, the toolset lists every active shared
- * account linked to the key, and non-shared ones too with `includeNonShared`.
- */
 /** Refuse an action id that is not a non-empty string, or arguments that are not a JSON object. */
 function assertExecuteArguments(actionId: unknown, args: unknown): void {
 	if (typeof actionId !== 'string' || actionId === '') {
@@ -436,10 +426,10 @@ async function searchConnector(
  */
 function isAskedFor(toolName: string, { providers, actions }: FetchToolsOptions): boolean {
 	const providerAsked =
-		providers === undefined || providers.length === 0 || matchesProvider(toolName, providers);
+		providers == null || providers.length === 0 || matchesProvider(toolName, providers);
 	return (
 		providerAsked &&
-		(actions === undefined ||
+		(actions == null ||
 			actions.length === 0 ||
 			actions.some((pattern) => matchGlob(toolName, pattern)))
 	);
@@ -532,6 +522,16 @@ function warnOnUnreadAccountIdVariable(
 	}
 }
 
+/**
+ * The StackOne toolset: lists the served tool catalog and exposes it to agent frameworks.
+ *
+ * A thin client over the MCP endpoint. Tools are listed from it, per account, and executed over
+ * its `tools/call`; the only other request is `GET /accounts`, to discover accounts. Schemas and
+ * arguments are passed through as served, never rewritten, filtered or invented.
+ *
+ * An API key is enough: with no account configured, the toolset lists every active shared
+ * account linked to the key, and non-shared ones too with `includeNonShared`.
+ */
 export class StackOneToolSet {
 	readonly #apiKey: string;
 	readonly #baseUrl: string;
@@ -899,7 +899,7 @@ export class StackOneToolSet {
 
 	#endpoint(mode: ToolMode | undefined): string {
 		const endpoint = `${this.#baseUrl.replace(/\/+$/, '')}/mcp`;
-		return mode === undefined ? endpoint : `${endpoint}?tool-mode=${mode}`;
+		return isTruthy(mode) ? `${endpoint}?tool-mode=${mode}` : endpoint;
 	}
 
 	/**

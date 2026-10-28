@@ -33,6 +33,7 @@ import { warn } from './utils/logger';
 import { sorted } from './utils/array';
 import { serializeToolResult } from './utils/serialize';
 import { tryImport } from './utils/try-import';
+import { isTruthy } from './utils/type';
 
 /**
  * JSON Schema with type narrowed to 'object'
@@ -116,7 +117,7 @@ export class BaseTool {
 		const { required, ...rest } = cloneJson(this.parameters);
 		const schema: Record<string, unknown> = {
 			...rest,
-			type: rest.type === '' || rest.type === undefined ? 'object' : rest.type,
+			type: isTruthy(rest.type) ? rest.type : 'object',
 			properties: rest.properties ?? {},
 		};
 		if (Array.isArray(required) && required.length > 0) {
@@ -650,7 +651,7 @@ function readOpenAIToolCall(call: OpenAIToolCall): {
 	unsupported?: string;
 } {
 	const id = fieldText(call.id ?? '');
-	if (!('function' in call) || call.function == null) {
+	if (!('function' in call) || !isTruthy(call.function)) {
 		return {
 			id,
 			name: '',
@@ -659,7 +660,7 @@ function readOpenAIToolCall(call: OpenAIToolCall): {
 		};
 	}
 	const { name, arguments: args } = call.function;
-	return { id, name: fieldText(name), args: args == null || args === '' ? {} : args };
+	return { id, name: fieldText(name), args: isTruthy(args) ? args : {} };
 }
 
 /** A tool call's field as text: a call read back from storage has no checked type. */
