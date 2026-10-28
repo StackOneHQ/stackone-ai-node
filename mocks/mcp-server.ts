@@ -5,6 +5,13 @@
  *
  * It refuses what the real endpoint refuses — an unscoped request, an unknown account — so a
  * client bug that sends no account, or the wrong one, fails here instead of in production.
+ *
+ * `x-account-id` may name several accounts, comma-separated, in the header or the query, as the
+ * real endpoint allows; more than 50 is refused with a 400. Under `tool-mode=search_execute` it
+ * serves what the real endpoint serves, with its handlers' shapes and error texts: for two or more
+ * accounts the account-spanning trio — `stackone_list_accounts`, `stackone_search_actions`,
+ * `stackone_execute_action` — and for one account that account's pair,
+ * `<provider>_<accountId>_search_actions` and `<provider>_<accountId>_execute_action`.
  */
 import type { Hono as HonoApp } from 'hono';
 import { StreamableHTTPTransport } from '@hono/mcp';
@@ -13,6 +20,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Hono } from 'hono';
 import { basicAuth } from 'hono/basic-auth';
+import { sorted } from '../src/utils/array';
 import { isRecord } from './handlers.utils';
 
 export interface McpToolDefinition {
@@ -29,6 +37,7 @@ export interface McpToolDefinition {
 
 /** A `tools/call` exactly as it reached the server. */
 export interface RecordedToolCall {
+	/** Every account the request named, deduplicated and comma-joined. */
 	accountId: string;
 	toolMode: string | undefined;
 	name: string;
@@ -38,6 +47,11 @@ export interface RecordedToolCall {
 export interface MockMcpServerOptions {
 	/** Tools available per account ID. An account not listed here is refused with a 404. */
 	accountTools: Record<string, readonly McpToolDefinition[]>;
+	/**
+	 * The provider of each account, for `search_execute`: `mock` unless named here. Each provider
+	 * serves one action, `<provider>_list_items`.
+	 */
+	accountProviders?: Record<string, string>;
 	/**
 	 * Serve the global `stackone_submit_feedback` tool, in every tool mode, the way the real
 	 * endpoint does when the org flag and project setting are on. Off models a project without
@@ -74,33 +88,42 @@ const submitFeedbackTool = {
 	},
 } as const satisfies McpToolDefinition;
 
-/** The two meta tools the real endpoint serves per connector under `tool-mode=search_execute`. */
-const metaTools = (accountId: string): McpToolDefinition[] => [
+/** The account-spanning tools the real endpoint serves under `tool-mode=search_execute`, for 2+ accounts. */
+const sessionTools: McpToolDefinition[] = [
 	{
-		name: `mock_${accountId}_search_actions`,
-		description: 'Search for available actions in natural language.',
+		name: 'stackone_list_accounts',
+		description:
+			'Lists the accounts connected to this session as `{ id, name, connector }` objects.',
+		inputSchema: { type: 'object', properties: {} },
+	},
+	{
+		name: 'stackone_search_actions',
+		description: 'Search for available actions across every connected integration.',
 		inputSchema: {
 			type: 'object',
 			properties: {
 				query: { type: 'string' },
 				top_k: { type: 'integer', minimum: 1, maximum: 50 },
 				session_id: { type: 'string' },
+				provider: { type: 'string' },
+				stackone_account_id: { type: 'string' },
 			},
 			required: ['query'],
 		},
 	},
 	{
-		name: `mock_${accountId}_execute_action`,
+		name: 'stackone_execute_action',
 		description: 'Execute an action by its action_id.',
 		inputSchema: {
 			type: 'object',
 			properties: {
 				action_id: { type: 'string' },
-				path: { type: 'object' },
-				query: { type: 'object' },
-				body: { type: 'object' },
-				headers: { type: 'object' },
+				path: { type: 'object', additionalProperties: {} },
+				query: { type: 'object', additionalProperties: {} },
+				body: { type: 'object', additionalProperties: {} },
+				headers: { type: 'object', additionalProperties: { type: 'string' } },
 				session_id: { type: 'string' },
+				stackone_account_id: { type: 'string' },
 			},
 			required: ['action_id'],
 		},
@@ -125,34 +148,288 @@ const wrapped = (result: unknown): CallToolResult => {
 	};
 };
 
-const callMetaTool = (name: string, args: Record<string, unknown>): CallToolResult | undefined => {
-	if (name.endsWith('_search_actions')) {
+/** An account of a `search_execute` session, as the real handlers name it. */
+interface SessionAccount {
+	id: string;
+	provider: string;
+}
+
+/** `name (id)` for each account, as the real handlers list the choices. The mock's name is the id. */
+const choices = (accounts: readonly SessionAccount[]): string =>
+	accounts.map(({ id }) => `${id} (${id})`).join(', ');
+
+/** An `isError` result shaped as the real handlers' `buildErrorCallToolResult`. */
+const invalid = (error: string, errorCode: string): CallToolResult =>
+	text(
+		{
+			error,
+			status_code: 400,
+			error_code: errorCode,
+			error_category: 'validation',
+			retryable: false,
+		},
+		true,
+	);
+
+/** A requested `stackone_account_id`, trimmed, or undefined when none was given. */
+const requestedAccount = (args: Record<string, unknown>): string | undefined =>
+	typeof args.stackone_account_id === 'string' && args.stackone_account_id.trim() !== ''
+		? args.stackone_account_id.trim()
+		: undefined;
+
+/**
+ * A trio tool call, answered as the real session handlers answer it: search ranks one
+ * `<provider>_list_items` per provider in scope; execute routes an action to the one account on
+ * its provider, or asks for `stackone_account_id` when there are several.
+ */
+const callTrioTool = (
+	name: string,
+	args: Record<string, unknown>,
+	accounts: readonly SessionAccount[],
+): CallToolResult | undefined => {
+	switch (name) {
+		case 'stackone_list_accounts':
+			return wrapped({
+				accounts: accounts.map(({ id, provider }) => ({ id, name: id, connector: provider })),
+			});
+		case 'stackone_search_actions':
+			return searchTrio(args, accounts);
+		case 'stackone_execute_action':
+			return executeTrio(args, accounts);
+		default:
+			return undefined;
+	}
+};
+
+/** The refusal of an account id outside the session. */
+const unknownAccount = (accounts: readonly SessionAccount[], id: string): CallToolResult =>
+	invalid(
+		`Account "${id}" is not part of this session. Choose one of [${choices(accounts)}] (or call stackone_list_accounts to list them).`,
+		'INVALID_ACCOUNT',
+	);
+
+/** `stackone_search_actions`: one `<provider>_list_items` hit per provider searched. */
+const searchTrio = (
+	args: Record<string, unknown>,
+	accounts: readonly SessionAccount[],
+): CallToolResult => {
+	const pinned = requestedAccount(args);
+	if (pinned !== undefined && !accounts.some(({ id }) => id === pinned)) {
+		return unknownAccount(accounts, pinned);
+	}
+	const searched = accounts.filter(
+		({ id, provider }) =>
+			(pinned === undefined || id === pinned) &&
+			(typeof args.provider !== 'string' || provider === args.provider),
+	);
+	const searchedProviders = sorted(new Set(searched.map(({ provider }) => provider)));
+	const topK = typeof args.top_k === 'number' ? args.top_k : 10;
+	const actions = searchedProviders.slice(0, topK).map((provider) => ({
+		action_id: `${provider}_list_items`,
+		provider,
+		available_accounts: searched
+			.filter((account) => account.provider === provider)
+			.map(({ id }) => ({ id, name: id })),
+		description: 'List items',
+		similarity_score: 0.8,
+		example_request: { query: { page_size: 25 } },
+	}));
+	return text({
+		providers_searched: searchedProviders,
+		session_id: MOCK_SEARCH_SESSION_ID,
+		actions,
+		total_count: actions.length,
+		hint: 'To run an action, call stackone_execute_action with its action_id exactly as shown above.',
+	});
+};
+
+/** `stackone_execute_action`: the action run on the account it routes to. */
+const executeTrio = (
+	args: Record<string, unknown>,
+	accounts: readonly SessionAccount[],
+): CallToolResult => {
+	const actionId = typeof args.action_id === 'string' ? args.action_id.trim() : '';
+	const providers = sorted(new Set(accounts.map(({ provider }) => provider)));
+	const provider = sorted(
+		providers.filter((candidate) => actionId.startsWith(`${candidate}_`)),
+		(left, right) => right.length - left.length,
+	)[0];
+	if (provider === undefined) {
+		return invalid(
+			`Unknown action_id "${actionId}" — it does not match any integration connected to this session ([${providers.join(', ')}]). Call stackone_search_actions first and use an action_id exactly as returned.`,
+			'INVALID_ACTION',
+		);
+	}
+	const account = executionAccount(requestedAccount(args), actionId, provider, accounts);
+	if ('content' in account) {
+		return account;
+	}
+	// An unknown action must come back as isError — a normal response with the flag set —
+	// the way the real endpoint reports it.
+	if (actionId !== `${provider}_list_items`) {
+		return text({ error: `Unknown action ${actionId}`, status_code: 404 }, true);
+	}
+	return wrapped({
+		data: { nodes: [] },
+		account_id: account.id,
+		echoed_query: args.query ?? null,
+		echoed_session_id: args.session_id ?? null,
+	});
+};
+
+/**
+ * The account an action runs on: the pinned one, or else the one account on its provider. When
+ * there is none, the refusal the real handler answers with.
+ */
+const executionAccount = (
+	pinned: string | undefined,
+	actionId: string,
+	provider: string,
+	accounts: readonly SessionAccount[],
+): SessionAccount | CallToolResult => {
+	if (pinned === undefined) {
+		const onProvider = accounts.filter((account) => account.provider === provider);
+		return onProvider.length === 1
+			? onProvider[0]
+			: invalid(
+					`stackone_execute_action runs against multiple accounts — pass "stackone_account_id", one of [${choices(onProvider)}] (or call stackone_list_accounts to list them).`,
+					'INVALID_ACCOUNT',
+				);
+	}
+	const account = accounts.find(({ id }) => id === pinned);
+	if (account === undefined) {
+		return unknownAccount(accounts, pinned);
+	}
+	if (account.provider !== provider) {
+		return invalid(
+			`Account "${pinned}" belongs to the ${account.provider} integration, but action "${actionId}" belongs to ${provider}. Pass a ${provider} account id (or call stackone_list_accounts to list the connected accounts).`,
+			'INVALID_ACCOUNT',
+		);
+	}
+	return account;
+};
+
+/**
+ * The pair the real endpoint serves for a single account under `search_execute`: named for the
+ * account's provider and id, each description naming the other tool, and with no
+ * `stackone_account_id` or `provider` argument.
+ */
+const pairTools = ({ id, provider }: SessionAccount): McpToolDefinition[] => [
+	{
+		name: `${provider}_${id}_search_actions`,
+		description: `Search the ${provider} actions of account ${id}. Run one with ${provider}_${id}_execute_action.`,
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: { type: 'string' },
+				top_k: { type: 'integer', minimum: 1, maximum: 50 },
+				session_id: { type: 'string' },
+			},
+			required: ['query'],
+		},
+	},
+	{
+		name: `${provider}_${id}_execute_action`,
+		description: `Execute an action found by ${provider}_${id}_search_actions.`,
+		inputSchema: {
+			type: 'object',
+			properties: {
+				action_id: {
+					type: 'string',
+					description: `An action_id exactly as ${provider}_${id}_search_actions returned it.`,
+				},
+				path: { type: 'object', additionalProperties: {} },
+				query: { type: 'object', additionalProperties: {} },
+				body: { type: 'object', additionalProperties: {} },
+				headers: { type: 'object', additionalProperties: { type: 'string' } },
+				session_id: { type: 'string' },
+			},
+			required: ['action_id'],
+		},
+	},
+];
+
+/**
+ * A pair tool call, answered as the real per-account handlers answer it: search returns the
+ * account's one action, without `provider` or `available_accounts` on the hit; execute runs it on
+ * the account. An argument the pair does not serve is refused, so a client that forwards the
+ * trio's `stackone_account_id` or `provider` fails here.
+ */
+const callPairTool = (
+	name: string,
+	args: Record<string, unknown>,
+	{ id, provider }: SessionAccount,
+): CallToolResult | undefined => {
+	const unserved = ['stackone_account_id', 'provider'].find((key) => Object.hasOwn(args, key));
+	if (unserved !== undefined) {
+		return invalid(`Unexpected argument "${unserved}"`, 'INVALID_ARGUMENT');
+	}
+
+	if (name === `${provider}_${id}_search_actions`) {
 		return text({
+			provider,
 			session_id: MOCK_SEARCH_SESSION_ID,
 			actions: [
 				{
-					action_id: 'mock_list_items',
+					action_id: `${provider}_list_items`,
 					description: 'List items',
 					similarity_score: 0.8,
 					example_request: { query: { page_size: 25 } },
 				},
 			],
+			total_count: 1,
+			hint: `To run an action, call ${provider}_${id}_execute_action with its action_id exactly as shown above.`,
 		});
 	}
-	if (name.endsWith('_execute_action')) {
-		// An unknown action must come back as isError — a normal response with the flag set —
-		// the way the real endpoint reports it.
-		if (args.action_id !== 'mock_list_items') {
-			return text({ error: `Unknown action ${String(args.action_id)}`, status_code: 404 }, true);
-		}
-		return wrapped({
-			data: { nodes: [] },
-			echoed_query: args.query ?? null,
-			echoed_session_id: args.session_id ?? null,
-		});
+
+	if (name === `${provider}_${id}_execute_action`) {
+		return executePair(args, { id, provider });
 	}
 	return undefined;
 };
+
+/** A pair's `*_execute_action`: its one action run on its account. */
+const executePair = (
+	args: Record<string, unknown>,
+	{ id, provider }: SessionAccount,
+): CallToolResult => {
+	const actionId = typeof args.action_id === 'string' ? args.action_id.trim() : '';
+	if (actionId !== `${provider}_list_items`) {
+		return text({ error: `Unknown action ${actionId}`, status_code: 404 }, true);
+	}
+	return wrapped({
+		data: { nodes: [] },
+		account_id: id,
+		echoed_query: args.query ?? null,
+		echoed_session_id: args.session_id ?? null,
+	});
+};
+
+/** A `search_execute` tool call: the pair's for one account, the trio's for several. */
+const callSessionTool = (
+	name: string,
+	args: Record<string, unknown>,
+	accounts: readonly SessionAccount[],
+): CallToolResult | undefined =>
+	accounts.length === 1
+		? callPairTool(name, args, accounts[0])
+		: callTrioTool(name, args, accounts);
+
+/**
+ * The accounts a request names: its `x-account-id` header, or else its `x-account-id` query
+ * parameters, each a comma-separated list. Deduplicated, in the order named.
+ */
+const requestedAccountIds = (
+	header: string | undefined,
+	queries: string[] | undefined,
+): string[] => [
+	...new Set(
+		(header !== undefined && header !== '' ? [header] : (queries ?? []))
+			.flatMap((value) => value.split(','))
+			.map((id) => id.trim())
+			.filter((id) => id !== ''),
+	),
+];
 
 /** The feedback tool's answer: recorded, against the session it names. */
 const feedbackRecorded = (args: Record<string, unknown>): CallToolResult =>
@@ -210,10 +487,23 @@ const recordToolCalls = async (
  * ```
  */
 export function createMcpApp(options: MockMcpServerOptions): HonoApp {
-	const { accountTools, submitFeedback = false, onToolCall, toolResults = {} } = options;
-	const listedTools = (accountId: string, toolMode: string | undefined): McpToolDefinition[] => [
+	const {
+		accountTools,
+		accountProviders = {},
+		submitFeedback = false,
+		onToolCall,
+		toolResults = {},
+	} = options;
+	const listedTools = (
+		sessionAccounts: readonly SessionAccount[],
+		toolMode: string | undefined,
+	): McpToolDefinition[] => [
 		...(submitFeedback ? [submitFeedbackTool] : []),
-		...(toolMode === 'search_execute' ? metaTools(accountId) : accountTools[accountId]),
+		...(toolMode === 'search_execute'
+			? sessionAccounts.length === 1
+				? pairTools(sessionAccounts[0])
+				: sessionTools
+			: sessionAccounts.flatMap(({ id }) => accountTools[id] ?? [])),
 	];
 
 	// Create a Hono app that handles MCP protocol
@@ -232,8 +522,11 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		// The real endpoint rejects a request with no account. Defaulting here made the mock more
 		// permissive than production and hid a fatal SDK bug: an SDK that never sent the header
 		// still got a full catalog.
-		const accountId = c.req.header('x-account-id') ?? c.req.query('x-account-id');
-		if (accountId === undefined || accountId === '') {
+		const accountIds = requestedAccountIds(
+			c.req.header('x-account-id'),
+			c.req.queries('x-account-id'),
+		);
+		if (accountIds.length === 0) {
 			return c.json(
 				{ statusCode: 400, message: 'Missing x-account-id header or query parameter in request' },
 				400,
@@ -241,12 +534,21 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 		}
 		// No fallback catalog either: serving one for an account that does not exist would hide
 		// any bug that sends a wrong, stale or mangled account id.
-		if (!Object.hasOwn(accountTools, accountId)) {
-			return c.json({ statusCode: 404, message: `Unknown account ${accountId}` }, 404);
+		if (accountIds.length > 50) {
+			return c.json({ statusCode: 400, message: 'x-account-id names more than 50 accounts' }, 400);
 		}
+		const unknown = accountIds.find((id) => !Object.hasOwn(accountTools, id));
+		if (unknown !== undefined) {
+			return c.json({ statusCode: 404, message: `Unknown account ${unknown}` }, 404);
+		}
+		const accountId = accountIds.join(',');
+		const sessionAccounts = accountIds.map((id) => ({
+			id,
+			provider: accountProviders[id] ?? 'mock',
+		}));
 
 		const toolMode = c.req.query('tool-mode');
-		const listed = listedTools(accountId, toolMode);
+		const listed = listedTools(sessionAccounts, toolMode);
 
 		// A low-level Server rather than McpServer: McpServer.registerTool expects a Zod shape and
 		// lists a plain JSON Schema as `properties: {}`. The real endpoint serves each schema
@@ -273,10 +575,10 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 				return feedbackRecorded(args);
 			}
 			// An action tool echoes what reached it, so a test can see the arguments and account.
-			// Only search_execute serves meta tools: in individual mode a per-action tool whose
-			// name ends in `_execute_action` is still an action.
 			return (
-				(toolMode === 'search_execute' ? callMetaTool(name, args) : undefined) ??
+				(toolMode === 'search_execute'
+					? callSessionTool(name, args, sessionAccounts)
+					: undefined) ??
 				wrapped({ data: { action: name, account_id: accountId, arguments: args } })
 			);
 		});

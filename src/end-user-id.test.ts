@@ -36,6 +36,22 @@ const endUserMismatch = (accountId: string) =>
 	);
 
 /**
+ * Every value of a header or query parameter, as UCA's ActiveAccountGuard collects them: a
+ * search_execute listing names its accounts as one comma-separated query value, and its end users
+ * as repeated query parameters.
+ */
+const valuesOf = (request: Request, name: string): string[] => {
+	const header = request.headers.get(name);
+	return [
+		...(header !== null && header !== '' ? [header] : []),
+		...new URL(request.url).searchParams.getAll(name),
+	].flatMap((value) => (name === 'x-account-id' ? value.split(',') : [value]));
+};
+
+/** Several values as one, comma-joined, so an exchange reads as the scope it was sent for. */
+const joined = (values: string[]): string | null => (values.length > 0 ? values.join(',') : null);
+
+/**
  * Serve `GET /accounts` and `/mcp`, recording every MCP message. `accounts` is read per request,
  * so a test can change what the next `GET /accounts` reports. `guard` maps accounts to the end
  * user `/mcp` requires, as UCA's ActiveAccountGuard does.
@@ -66,15 +82,17 @@ const serve = (
 				for (const message of Array.isArray(body) ? body : [body]) {
 					exchanges.push({
 						method: String(jsonRpcMethod(message)),
-						accountId: request.headers.get('x-account-id'),
-						endUserId: request.headers.get('x-end-user-id'),
+						accountId: joined(valuesOf(request, 'x-account-id')),
+						endUserId: joined(valuesOf(request, 'x-end-user-id')),
 					});
 				}
 			}
-			const accountId = request.headers.get('x-account-id') ?? '';
-			const required = guard[accountId];
-			if (required !== undefined && request.headers.get('x-end-user-id') !== required) {
-				return endUserMismatch(accountId);
+			const endUsers = valuesOf(request, 'x-end-user-id');
+			for (const accountId of valuesOf(request, 'x-account-id')) {
+				const required = guard[accountId];
+				if (required !== undefined && !endUsers.includes(required)) {
+					return endUserMismatch(accountId);
+				}
 			}
 			return app.fetch(request);
 		}),
@@ -147,14 +165,15 @@ describe('x-end-user-id after account discovery', () => {
 
 		const calls = exchanges.filter((exchange) => exchange.method === 'tools/call');
 		calls.sort((left, right) => String(left.accountId).localeCompare(String(right.accountId)));
+		// One search over both accounts, then execute() and feedback on acc1 alone.
 		expect(calls).toEqual([
 			{ method: 'tools/call', accountId: 'acc1', endUserId: 'alice' },
 			{ method: 'tools/call', accountId: 'acc1', endUserId: 'alice' },
-			{ method: 'tools/call', accountId: 'acc1', endUserId: 'alice' },
-			{ method: 'tools/call', accountId: 'acc2', endUserId: null },
+			{ method: 'tools/call', accountId: 'acc1,acc2', endUserId: 'alice' },
 		]);
 		for (const exchange of exchanges) {
-			expect(exchange.endUserId).toBe(exchange.accountId === 'acc1' ? 'alice' : null);
+			const scope = String(exchange.accountId).split(',');
+			expect(exchange.endUserId).toBe(scope.includes('acc1') ? 'alice' : null);
 		}
 	});
 

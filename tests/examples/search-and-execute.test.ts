@@ -38,12 +38,19 @@ describe('search-and-execute example e2e', () => {
 
 		const printed = log.mock.calls.map((args) => String(args[0])).join('\n');
 		expect(printed).toContain('default  testprovider  active');
-		expect(printed).toContain('0.800  mock_list_items');
+		expect(printed).toContain('0.800  mock_list_items  [default]');
 		expect(printed).toContain('Feedback recorded.');
-		expect(calls.map((call) => [call.name, call.arguments.session_id])).toEqual([
-			['mock_default_search_actions', undefined],
-			['mock_default_execute_action', MOCK_SEARCH_SESSION_ID],
-			['stackone_submit_feedback', MOCK_SEARCH_SESSION_ID],
+		expect(
+			calls.map((call) => [
+				call.name,
+				call.arguments.stackone_account_id,
+				call.arguments.session_id,
+			]),
+		).toEqual([
+			// One account: the server's pair, its stackone_account_id dropped as the pair's own.
+			['mock_default_search_actions', undefined, undefined],
+			['mock_default_execute_action', undefined, MOCK_SEARCH_SESSION_ID],
+			['stackone_submit_feedback', undefined, MOCK_SEARCH_SESSION_ID],
 		]);
 	});
 

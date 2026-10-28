@@ -20,10 +20,21 @@ export const DEFAULT_TIMEOUT_MS = 60_000;
  */
 export const SUBMIT_FEEDBACK_TOOL_NAME = 'stackone_submit_feedback';
 
-/** Upper bound on how many accounts' catalogs (or connectors' searches) run at once. */
+/**
+ * The account-spanning search and execute tools the MCP endpoint serves under
+ * `tool-mode=search_execute`, beside `stackone_list_accounts`. For one account the server serves
+ * a pair named for its connector and account instead, which the SDK presents under these names.
+ */
+export const SEARCH_ACTIONS_TOOL_NAME = 'stackone_search_actions';
+export const EXECUTE_ACTION_TOOL_NAME = 'stackone_execute_action';
+
+/** The most accounts one `search_execute` request may name; the server refuses more with a 400. */
+export const MAX_SCOPE_ACCOUNTS = 50;
+
+/** Upper bound on how many accounts' catalogs are listed at once. */
 export const MAX_CONCURRENCY = 10;
 
-/** The `*_search_actions` meta tool's served schema caps `top_k` at 50. */
+/** `stackone_search_actions`'s served schema caps `top_k` at 50. */
 export const MAX_TOP_K = 50;
 
 /** Retries after an HTTP 429, on top of the first attempt: four attempts in all. */

@@ -1,8 +1,9 @@
 /**
  * Find an action in natural language and run it, without loading a tool catalog.
  *
- * This is the recommended way to use the SDK: search() asks every linked connector and returns
- * ranked actions, so a catalog of hundreds of tools never has to fit in a model's context.
+ * This is the recommended way to use the SDK: search() makes one call across every linked account
+ * and returns ranked actions, so a catalog of hundreds of tools never has to fit in a model's
+ * context.
  *
  * Prerequisites: STACKONE_API_KEY and at least one active linked account. No account id is
  * needed — the toolset discovers the ones your key can reach.
@@ -32,8 +33,10 @@ const printAccounts = (accounts: StackOneAccount[]): void => {
 const printRankedMatches = (actions: SearchResult[]): void => {
 	console.log('\nRanked matches:');
 	for (const action of actions) {
+		const accounts = (action.available_accounts ?? []).map((account) => account.id).join(', ');
 		// oxlint-disable-next-line typescript/no-unnecessary-type-conversion -- a server can send the score as a numeric string
-		console.log(`  ${Number(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
+		const score = Number(action.similarity_score ?? 0).toFixed(3);
+		console.log(`  ${score}  ${action.action_id}  [${accounts}]`);
 	}
 };
 
@@ -57,13 +60,14 @@ const searchAndExecute = async (): Promise<void> => {
 	console.log(`\ninput_schema for ${best.action_id}:`);
 	console.log(JSON.stringify(best.input_schema ?? {}, null, 2).slice(0, 600));
 
-	// accountIds pins the call to the account that found the hit; session_id links it to the
-	// search.
+	// The hit lists the accounts that can run it. With more than one, accountIds chooses; with one,
+	// the server picks it. session_id links the call to the search.
+	const [account] = best.available_accounts ?? [];
 	const result = await toolset.execute(
 		best.action_id,
 		{ query: { limit: 2 } },
 		{
-			accountIds: [best.account_id],
+			accountIds: account === undefined ? null : [account.id],
 			sessionId: best.session_id,
 		},
 	);
