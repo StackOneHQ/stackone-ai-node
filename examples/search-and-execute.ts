@@ -1,8 +1,9 @@
 /**
  * Find an action in natural language and run it, without loading a tool catalog.
  *
- * This is the recommended way to use the SDK: search() asks every linked connector and returns
- * ranked actions, so a catalog of hundreds of tools never has to fit in a model's context.
+ * This is the recommended way to use the SDK: search() makes one call across every linked account
+ * and returns ranked actions, so a catalog of hundreds of tools never has to fit in a model's
+ * context.
  *
  * Prerequisites: STACKONE_API_KEY and at least one active linked account. No account id is
  * needed — the toolset discovers the ones your key can reach.
@@ -16,30 +17,42 @@
 
 import process from 'node:process';
 import { StackOneError, StackOneToolSet, ToolSetError } from '@stackone/ai';
+import type { SearchResult, StackOneAccount } from '@stackone/ai';
 
-if (!process.env.STACKONE_API_KEY) {
+if ((process.env.STACKONE_API_KEY ?? '') === '') {
 	console.error('STACKONE_API_KEY environment variable is required');
 	process.exit(1);
 }
 
+const printAccounts = (accounts: StackOneAccount[]): void => {
+	for (const account of accounts) {
+		console.log(`${account.id}  ${account.provider ?? '?'}  ${account.status ?? '?'}`);
+	}
+};
+
+const printRankedMatches = (actions: SearchResult[]): void => {
+	console.log('\nRanked matches:');
+	for (const action of actions) {
+		const accounts = (action.available_accounts ?? []).map((account) => account.id).join(', ');
+		// oxlint-disable-next-line typescript/no-unnecessary-type-conversion -- a server can send the score as a numeric string
+		const score = Number(action.similarity_score ?? 0).toFixed(3);
+		console.log(`  ${score}  ${action.action_id}  [${accounts}]`);
+	}
+};
+
 const searchAndExecute = async (): Promise<void> => {
 	const toolset = new StackOneToolSet();
 
-	for (const account of await toolset.fetchAccounts()) {
-		console.log(`${account.id}  ${account.provider ?? '?'}  ${account.status ?? '?'}`);
-	}
+	printAccounts(await toolset.fetchAccounts());
 
 	const actions = await toolset.search('list recent comments', { topK: 3 });
 	const [best] = actions;
-	if (!best) {
+	if (best === undefined) {
 		console.error('No actions matched. Try a different query, or link an account.');
 		process.exit(1);
 	}
 
-	console.log('\nRanked matches:');
-	for (const action of actions) {
-		console.log(`  ${Number(action.similarity_score ?? 0).toFixed(3)}  ${action.action_id}`);
-	}
+	printRankedMatches(actions);
 
 	// input_schema is how you find out what an action accepts. Build the call from it and from
 	// example_request: arguments that do not match are dropped by the server without an error,
@@ -47,13 +60,14 @@ const searchAndExecute = async (): Promise<void> => {
 	console.log(`\ninput_schema for ${best.action_id}:`);
 	console.log(JSON.stringify(best.input_schema ?? {}, null, 2).slice(0, 600));
 
-	// accountIds pins the call to the account that found the hit; session_id links it to the
-	// search.
+	// The hit lists the accounts that can run it. With more than one, accountIds chooses; with one,
+	// the server picks it. session_id links the call to the search.
+	const [account] = best.available_accounts ?? [];
 	const result = await toolset.execute(
 		best.action_id,
 		{ query: { limit: 2 } },
 		{
-			accountIds: [best.account_id],
+			accountIds: account === undefined ? null : [account.id],
 			sessionId: best.session_id,
 		},
 	);

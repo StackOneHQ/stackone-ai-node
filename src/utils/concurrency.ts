@@ -20,7 +20,8 @@ export async function settleWithConcurrency<T, R>(
 		while (!stopped && next < items.length) {
 			const index = next++;
 			try {
-				results[index] = { status: 'fulfilled', value: await work(items[index] as T) };
+				// oxlint-disable-next-line eslint/no-await-in-loop -- each worker runs its items one at a time; the workers run in parallel
+				results[index] = { status: 'fulfilled', value: await work(items[index]) };
 			} catch (reason) {
 				if (isFatal(reason)) {
 					stopped = true;

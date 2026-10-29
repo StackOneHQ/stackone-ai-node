@@ -13,10 +13,16 @@
 import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 
-if (!process.env.STACKONE_API_KEY) {
+if ((process.env.STACKONE_API_KEY ?? '') === '') {
 	console.error('Set STACKONE_API_KEY to run this example.');
 	process.exit(1);
 }
+
+/** STACKONE_ACCOUNT_ID, or undefined when it is unset or empty. */
+const envAccountId = (): string | undefined => {
+	const accountId = process.env.STACKONE_ACCOUNT_ID;
+	return accountId === '' ? undefined : accountId;
+};
 
 // --- 1. API Key setup ---
 const apiKeyFromEnv = async (): Promise<void> => {
@@ -54,8 +60,8 @@ const accountIdFromEnv = async (): Promise<void> => {
 
 	// The SDK only reads the API key from env; read the account id yourself and pass it.
 	// Unset or empty, it is undefined and the toolset discovers every active shared account instead.
-	const accountId = process.env.STACKONE_ACCOUNT_ID || undefined;
-	console.log(`  STACKONE_ACCOUNT_ID is ${accountId ? 'set' : 'not set'}`);
+	const accountId = envAccountId();
+	console.log(`  STACKONE_ACCOUNT_ID is ${accountId === undefined ? 'not set' : 'set'}`);
 
 	const toolset = new StackOneToolSet({ accountId });
 	const tools = await toolset.fetchTools();
@@ -66,7 +72,7 @@ const accountIdFromEnv = async (): Promise<void> => {
 const accountIdInConstructor = async (): Promise<void> => {
 	console.log('=== 3. Account ID in constructor ===\n');
 
-	const accountId = process.env.STACKONE_ACCOUNT_ID || 'my-account';
+	const accountId = envAccountId() ?? 'my-account';
 	const toolset = new StackOneToolSet({ accountId });
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools for configured account\n`);
@@ -76,7 +82,7 @@ const accountIdInConstructor = async (): Promise<void> => {
 const setAccountsGlobally = async (): Promise<void> => {
 	console.log('=== 4. setAccounts() — global account list ===\n');
 
-	const accountId = process.env.STACKONE_ACCOUNT_ID || 'my-account';
+	const accountId = envAccountId() ?? 'my-account';
 	const toolset = new StackOneToolSet();
 	toolset.setAccounts([accountId]);
 	console.log('  Called setAccounts() with configured account');

@@ -14,8 +14,8 @@
 export function serializeToolResult(result: unknown): string {
 	const serialized: string | undefined = JSON.stringify(
 		result,
-		function replacer(this: unknown, key: string, value: unknown) {
-			const original = (this as Record<string, unknown>)[key];
+		function replacer(this: Record<string, unknown>, key: string, value: unknown) {
+			const original = this[key];
 			if (original instanceof Uint8Array) {
 				return Buffer.from(original).toString('base64');
 			}

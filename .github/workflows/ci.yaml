@@ -146,7 +146,7 @@ jobs:
     env:
       # Pinned to a commit on stackone-ai-python's main, not the branch, so a Python change never
       # silently changes what this job grades. Bump it deliberately.
-      PYTHON_SDK_REF: 049abf548c7f5448a89e7999e95336980d23afc3
+      PYTHON_SDK_REF: d76c26663c9141bf106a19d385252da9a8c7e75d
     steps:
       - name: Check conformance token is configured
         env:
@@ -166,7 +166,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: StackOneHQ/sdk-conformance
-          ref: 5f60cc0dfdf4d1a25afad93a68eeefe30e89568d
+          ref: 4ead1c25bb443ef1fd1986d5f053b2d1475d0e90
           token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
           path: sdk-conformance
           persist-credentials: false
@@ -187,15 +187,16 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        # pnpm from sdk-conformance's packageManager; in each SDK checkout pnpm switches to that
+        # repo's own packageManager version, so one setup serves all three installs.
         with:
-          version: 10.26.0
           package_json_file: sdk-conformance/package.json
 
-      # 24, not 22: the SDK's devEngines pins Node ^24.11.0, and the suite runs on it too.
+      # The SDK's devEngines pins the exact Node version, and the suite runs on it too.
       - name: Setup Node
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: 24
+          node-version-file: sdk/package.json
 
       - name: Install SDK dependencies
         working-directory: sdk

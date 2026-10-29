@@ -27,7 +27,7 @@ interface RetryOptions {
 
 const sleep = (ms: number, signal?: AbortSignal | null): Promise<void> =>
 	new Promise((resolve, reject) => {
-		if (signal?.aborted) {
+		if (signal?.aborted === true) {
 			reject(signal.reason);
 			return;
 		}
@@ -109,30 +109,56 @@ function addYears(time: number, years: number): number {
 function parseHttpDate(value: string, now: number): number | undefined {
 	const rfc850 = RFC850_DATE.exec(value);
 	const fields = (rfc850 ?? IMF_FIXDATE.exec(value) ?? ASCTIME_DATE.exec(value))?.groups;
-	if (!fields) {
+	if (fields === undefined) {
 		return undefined;
 	}
+	if (rfc850 === null) {
+		return httpDateTime(fields, Number(fields.year));
+	}
 	const thisYear = new Date(now).getUTCFullYear();
-	const year = Number(fields.year) + (rfc850 ? thisYear - (thisYear % 100) : 0);
+	const when = httpDateTime(fields, Number(fields.year) + thisYear - (thisYear % 100));
+	return when === undefined ? undefined : nearestRfc850Year(when, now);
+}
+
+/** The time an HTTP-date's fields name in `year`, or undefined if they name no real time. */
+function httpDateTime(
+	fields: Record<string, string | undefined>,
+	year: number,
+): number | undefined {
 	const month = MONTHS.indexOf(fields.month ?? '');
 	const d = Number(fields.day);
 	const h = Number(fields.hour);
 	const m = Number(fields.minute);
 	const s = Number(fields.second);
-	// Second 60 is a leap second: the instant the next minute starts.
-	if (year < 1 || d < 1 || d > daysInMonth(year, month) || h > 23 || m > 59 || s > 60) {
+	if (!isValidDateTime(year, month, d, h, m, s)) {
 		return undefined;
 	}
-	let when = utcTime(year, month, d, h, m, s);
-	if (rfc850) {
-		// RFC 9110 §5.6.7: a two-digit year more than 50 years ahead is the most recent past year
-		// with those digits.
-		const horizon = addYears(now, 50);
-		if (when > horizon) {
-			when = addYears(when, -100);
-		} else if (addYears(when, 100) <= horizon) {
-			when = addYears(when, 100);
-		}
+	return utcTime(year, month, d, h, m, s);
+}
+
+/** Whether the fields name a real day and time. Second 60 is a leap second: the instant the next minute starts. */
+function isValidDateTime(
+	year: number,
+	month: number,
+	d: number,
+	h: number,
+	m: number,
+	s: number,
+): boolean {
+	return !(year < 1 || d < 1 || d > daysInMonth(year, month) || h > 23 || m > 59 || s > 60);
+}
+
+/**
+ * RFC 9110 §5.6.7: a two-digit year more than 50 years ahead is the most recent past year with
+ * those digits.
+ */
+function nearestRfc850Year(when: number, now: number): number {
+	const horizon = addYears(now, 50);
+	if (when > horizon) {
+		return addYears(when, -100);
+	}
+	if (addYears(when, 100) <= horizon) {
+		return addYears(when, 100);
 	}
 	return when;
 }
@@ -144,7 +170,7 @@ function parseHttpDate(value: string, now: number): number | undefined {
  */
 export function retryAfterMs(header: string | null, now: number = Date.now()): number | undefined {
 	const value = header?.trim();
-	if (!value) {
+	if (value === undefined || value === '') {
 		return undefined;
 	}
 	if (/^\d+$/.test(value)) {
@@ -189,12 +215,14 @@ const formatSeconds = (ms: number): string => String(Math.floor((ms / 1000) * 10
  * Waiting anyway would only let the caller's timeout fire, turning a rate limit — which fails a
  * multi-account call — into a timeout, which skips one account and returns a partial result.
  */
+// oxlint-disable-next-line eslint/complexity -- one retry loop; splitting it would scatter the 429 policy
 export async function fetchWithRetry(
 	input: string | URL,
 	init?: RequestInit,
 	{ deadline, timing = retryTiming, onRetry }: RetryOptions = {},
 ): Promise<Response> {
 	for (let retry = 1; ; retry++) {
+		// oxlint-disable-next-line eslint/no-await-in-loop -- each attempt waits on the one before: retries are sequential by design
 		const response = await fetch(input, init);
 		if (response.status !== 429 || retry > RATE_LIMIT_MAX_RETRIES) {
 			return response;
@@ -217,6 +245,7 @@ export async function fetchWithRetry(
 		onRetry?.(response);
 		warn(`${limited}; retrying in ${formatSeconds(delay)}s`);
 		if (delay > 0) {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- the backoff must elapse before the next attempt
 			await timing.sleep(delay, init?.signal);
 		}
 	}

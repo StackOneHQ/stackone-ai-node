@@ -34,7 +34,7 @@ describe('tanstack-ai-integration example e2e', () => {
 
 		// Get a specific tool
 		const employeeTool = tools.getTool('bamboohr_get_employee');
-		assert(employeeTool, 'Expected bamboohr_get_employee tool to exist');
+		assert(employeeTool !== undefined, 'Expected bamboohr_get_employee tool to exist');
 
 		// Create TanStack AI compatible tool wrapper
 		// Use toJsonSchema() to get the parameter schema in JSON Schema format

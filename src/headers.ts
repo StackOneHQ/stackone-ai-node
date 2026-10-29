@@ -2,6 +2,7 @@ import { USER_AGENT } from './consts';
 import type { JsonObject, JsonValue } from './types';
 import { warn } from './utils/logger';
 import { setEntry } from './utils/set-entry';
+import { isTruthyString } from './utils/type';
 
 /**
  * Header names the SDK owns. They are applied after every other header is merged, so neither a
@@ -31,6 +32,13 @@ const isEndUserIdHeader = (name: string): boolean =>
 	name.trim().toLowerCase() === END_USER_ID_HEADER;
 
 /**
+ * Whether a caller's extra header is sent: never an SDK-owned one, and not `x-end-user-id` when
+ * the SDK sets it from `endUserId`.
+ */
+const keepsCallerHeader = (name: string, endUserId: string | undefined): boolean =>
+	!isSdkOwnedHeader(name) && !(isTruthyString(endUserId) && isEndUserIdHeader(name));
+
+/**
  * HTTP Basic credentials for an API key, as every StackOne endpoint expects them.
  */
 function buildAuthHeader(apiKey: string): string {
@@ -55,16 +63,16 @@ export function buildRequestHeaders(options: {
 }): Record<string, string> {
 	const headers: Record<string, string> = {};
 	for (const [name, value] of Object.entries(options.extraHeaders ?? {})) {
-		if (!isSdkOwnedHeader(name) && !(options.endUserId && isEndUserIdHeader(name))) {
+		if (keepsCallerHeader(name, options.endUserId)) {
 			setEntry(headers, name, value);
 		}
 	}
 	headers['User-Agent'] = USER_AGENT;
 	headers.Authorization = buildAuthHeader(options.apiKey);
-	if (options.accountId) {
+	if (isTruthyString(options.accountId)) {
 		headers['x-account-id'] = options.accountId;
 	}
-	if (options.endUserId) {
+	if (isTruthyString(options.endUserId)) {
 		headers[END_USER_ID_HEADER] = options.endUserId;
 	}
 	return headers;
@@ -123,7 +131,7 @@ const FLAT_HEADER_PREFIX = 'headers_';
 export interface DeclaredHeaders {
 	/**
 	 * Names declared under the nested `headers` object, lower-cased, or `'any'` when `headers` is
-	 * an open map, as on `*_execute_action`: `type: "object"` (or a type list that includes
+	 * an open map, as on `stackone_execute_action`: `type: "object"` (or a type list that includes
 	 * `"object"`, such as `["object", "null"]`), no `properties` key, and `additionalProperties`
 	 * anything but `false`. A schema not typed as an object, or one that closes
 	 * `additionalProperties` without listing `properties`, declares no names.
@@ -142,6 +150,14 @@ export interface DeclaredHeaders {
 	ordinaryHeadersField: boolean;
 }
 
+/** Whether a schema's `type` is given: a type name or a list of them. */
+const isTyped = (type: JsonValue | undefined): boolean =>
+	typeof type === 'string' || Array.isArray(type);
+
+/** Whether a schema's `type` is or includes `"object"`. */
+const isObjectTyped = (type: JsonValue | undefined): boolean =>
+	type === 'object' || (Array.isArray(type) && type.includes('object'));
+
 /** The header arguments a served tool schema's `properties` declare. */
 export function declaredHeaders(properties: Record<string, unknown>): DeclaredHeaders {
 	const flat = new Set(
@@ -151,12 +167,9 @@ export function declaredHeaders(properties: Record<string, unknown>): DeclaredHe
 	if (!isPlainObject(schema)) {
 		return { nested: new Set(), flat, ordinaryHeadersField: false };
 	}
-	const typed = typeof schema.type === 'string' || Array.isArray(schema.type);
-	const objectTyped =
-		schema.type === 'object' || (Array.isArray(schema.type) && schema.type.includes('object'));
-	const ordinaryHeadersField = typed && !objectTyped;
+	const ordinaryHeadersField = isTyped(schema.type) && !isObjectTyped(schema.type);
 	if (!('properties' in schema)) {
-		const open = objectTyped && schema.additionalProperties !== false;
+		const open = isObjectTyped(schema.type) && schema.additionalProperties !== false;
 		return { nested: open ? 'any' : new Set(), flat, ordinaryHeadersField };
 	}
 	const nestedProperties = isPlainObject(schema.properties) ? schema.properties : {};
@@ -208,7 +221,7 @@ export function sanitiseHeaders(
 		const name = key.trim();
 		const declared = allowed === 'any' || allowed.has(name.toLowerCase());
 		const reason = refuseHeader(name, value, declared);
-		if (reason) {
+		if (reason !== undefined) {
 			warn(`Dropping header ${JSON.stringify(name)} from a tool call: ${reason}`);
 			continue;
 		}
@@ -234,35 +247,52 @@ export function sanitiseHeaderArguments(args: JsonObject, declared: DeclaredHead
 	const clean: JsonObject = {};
 	for (const [key, value] of Object.entries(args)) {
 		if (key === 'headers') {
-			if (declared.ordinaryHeadersField) {
-				setEntry(clean, key, value);
-			} else if (isPlainObject(value)) {
-				clean.headers = sanitiseHeaders(value, declared.nested);
-			} else {
-				warn(`Dropping header argument ${JSON.stringify(key)} from a tool call: not an object`);
-			}
-			continue;
-		}
-		if (!key.startsWith(FLAT_HEADER_PREFIX)) {
+			sanitiseHeadersArgument(clean, value, declared);
+		} else if (!key.startsWith(FLAT_HEADER_PREFIX) || keepsFlatHeader(key, value, declared.flat)) {
 			setEntry(clean, key, value);
-			continue;
 		}
-		if (isPlainObject(value) || Array.isArray(value)) {
-			warn(
-				`Dropping header argument ${JSON.stringify(key)} from a tool call: not a string, number or boolean`,
-			);
-			continue;
-		}
-		const text = headerText(value);
-		if (text === undefined) {
-			continue;
-		}
-		const reason = refuseHeader(key.slice(FLAT_HEADER_PREFIX.length), text, declared.flat.has(key));
-		if (reason) {
-			warn(`Dropping header argument ${JSON.stringify(key)} from a tool call: ${reason}`);
-			continue;
-		}
-		setEntry(clean, key, value);
 	}
 	return clean;
+}
+
+/**
+ * Copy a top-level `headers` argument into `clean`: unchanged when the schema declares it as an
+ * ordinary field, sanitised when it is a plain object, and otherwise dropped.
+ */
+function sanitiseHeadersArgument(
+	clean: JsonObject,
+	value: JsonValue | undefined,
+	declared: DeclaredHeaders,
+): void {
+	if (declared.ordinaryHeadersField) {
+		setEntry(clean, 'headers', value);
+	} else if (isPlainObject(value)) {
+		clean.headers = sanitiseHeaders(value, declared.nested);
+	} else {
+		warn(`Dropping header argument "headers" from a tool call: not an object`);
+	}
+}
+
+/** Whether a flat `headers_<name>` argument may be forwarded, warning when it is dropped. */
+function keepsFlatHeader(
+	key: string,
+	value: JsonValue | undefined,
+	declaredFlat: ReadonlySet<string>,
+): boolean {
+	if (isPlainObject(value) || Array.isArray(value)) {
+		warn(
+			`Dropping header argument ${JSON.stringify(key)} from a tool call: not a string, number or boolean`,
+		);
+		return false;
+	}
+	const text = headerText(value);
+	if (text === undefined) {
+		return false;
+	}
+	const reason = refuseHeader(key.slice(FLAT_HEADER_PREFIX.length), text, declaredFlat.has(key));
+	if (reason !== undefined) {
+		warn(`Dropping header argument ${JSON.stringify(key)} from a tool call: ${reason}`);
+		return false;
+	}
+	return true;
 }

@@ -6,11 +6,12 @@ import {
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { ErrorCode, McpError } from '@modelcontextprotocol/sdk/types.js';
 import { version } from '../package.json';
-import type { JsonObject } from './types';
+import type { JsonObject, JsonValue } from './types';
 import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolSetLoadError } from './utils/error-toolset';
 import { fetchWithRetry, retryTiming } from './utils/fetch-retry';
+import { isTruthyString } from './utils/type';
 
 /** A tool exactly as the MCP server listed it. */
 export interface McpToolDefinition {
@@ -39,7 +40,7 @@ class McpDeadlineError extends Error {
 const TRANSPORT_ERROR_PREFIX = /^Streamable HTTP error: Error POSTing to endpoint:\s*/;
 
 const parseBody = (text: string): unknown => {
-	if (!text) {
+	if (text === '') {
 		return null;
 	}
 	try {
@@ -62,16 +63,7 @@ export function describeMcpFailure(error: unknown, endpoint: string, timeout: nu
 		return error;
 	}
 	if (error instanceof StreamableHTTPError && typeof error.code === 'number' && error.code > 0) {
-		const text = error.message.replace(TRANSPORT_ERROR_PREFIX, '').trim();
-		const detail = text ? `: ${text}` : '';
-		const reason = STATUS_CODES[error.code] ?? '';
-		return new StackOneAPIError(
-			`MCP request to ${endpoint} failed with ${error.code} ${reason}`.trimEnd() + detail,
-			error.code,
-			parseBody(text),
-			undefined,
-			{ cause: error },
-		);
+		return describeHttpFailure(error, error.code, endpoint);
 	}
 	if (isTimeout(error)) {
 		// In seconds, written as a number (0.5s, 60s), as the Python SDK writes it.
@@ -79,14 +71,39 @@ export function describeMcpFailure(error: unknown, endpoint: string, timeout: nu
 			cause: error,
 		});
 	}
+	return new ToolSetLoadError(
+		`MCP request to ${endpoint} failed: ${describeInnermostCause(error)}`,
+		{
+			cause: error,
+		},
+	);
+}
+
+/** The transport's HTTP error as a {@link StackOneAPIError} with its status and response body. */
+function describeHttpFailure(
+	error: StreamableHTTPError,
+	status: number,
+	endpoint: string,
+): StackOneAPIError {
+	const text = error.message.replace(TRANSPORT_ERROR_PREFIX, '').trim();
+	const detail = text === '' ? '' : `: ${text}`;
+	const reason = STATUS_CODES[status] ?? '';
+	return new StackOneAPIError(
+		`MCP request to ${endpoint} failed with ${status} ${reason}`.trimEnd() + detail,
+		status,
+		parseBody(text),
+		undefined,
+		{ cause: error },
+	);
+}
+
+/** The innermost cause of an error, as `Name: message`. */
+function describeInnermostCause(error: unknown): string {
 	let leaf: unknown = error;
 	while (leaf instanceof Error && leaf.cause !== undefined) {
 		leaf = leaf.cause;
 	}
-	const description = leaf instanceof Error ? `${leaf.name}: ${leaf.message}` : String(leaf);
-	return new ToolSetLoadError(`MCP request to ${endpoint} failed: ${description}`, {
-		cause: error,
-	});
+	return leaf instanceof Error ? `${leaf.name}: ${leaf.message}` : String(leaf);
 }
 
 /**
@@ -118,32 +135,32 @@ export class HttpRateLimitError extends Error {
 }
 
 /**
- * Whether an MCP request was refused by the API's end-user check on `accountId`: the 400 it
- * answers a non-shared account's request with when `x-end-user-id` does not name its end user.
+ * The account an MCP request was refused for by the API's end-user check: the 400 it answers a
+ * non-shared account's request with when `x-end-user-id` does not name its end user.
  */
-function isEndUserMismatch(error: unknown, accountId: string): boolean {
-	if (!(error instanceof StackOneAPIError) || error.statusCode !== 400) {
-		return false;
+function endUserRefusalOf(error: StackOneAPIError): string | undefined {
+	if (error.statusCode !== 400) {
+		return undefined;
 	}
-	const body = error.responseBody;
-	const message =
-		typeof body === 'object' && body !== null && 'message' in body ? body.message : body;
-	// The guard's fixed wording, ending with this account's id, quoted or not: not an exact string,
+	const message = bodyMessage(error.responseBody);
+	// The guard's fixed wording, ending with the account's id, quoted or not: not an exact string,
 	// so a change to how the id is written does not silently turn the lookup off.
 	if (
 		typeof message !== 'string' ||
 		!message.startsWith('x-end-user-id header does not match account end user id')
 	) {
-		return false;
+		return undefined;
 	}
-	return (
-		message
-			.trimEnd()
-			.split(' ')
-			.pop()
-			?.replace(/^["']|["']$/g, '') === accountId
-	);
+	return message
+		.trimEnd()
+		.split(' ')
+		.pop()
+		?.replace(/^["']|["']$/g, '');
 }
+
+/** The `message` of an error body, or the body itself when it has none. */
+const bodyMessage = (body: unknown): unknown =>
+	typeof body === 'object' && body !== null && 'message' in body ? body.message : body;
 
 /** How a request finds the end user to send as `x-end-user-id` for an account. */
 export interface EndUserSource {
@@ -154,50 +171,76 @@ export interface EndUserSource {
 }
 
 /**
- * Run an MCP request for `accountId` with its recorded end user, if any.
- *
- * An account id passed explicitly has no end user recorded until something calls
- * `GET /accounts`, so a non-shared one is refused with a 400. When that happens to an account
- * with nothing recorded, its end user is looked up once and, if there is one, the request is sent
- * again with it. Otherwise the 400 is thrown as it came — with the lookup's error as its `cause`,
- * if the lookup failed.
+ * Run an MCP request for `accountId` with its recorded end user, if any. See {@link withEndUsers}.
  */
 export async function withEndUser<T>(
 	accountId: string | undefined,
 	source: EndUserSource | undefined,
 	request: (endUserId: string | undefined) => Promise<T>,
 ): Promise<T> {
-	const recorded = accountId && source ? source.recorded(accountId) : undefined;
+	return withEndUsers(isTruthyString(accountId) ? [accountId] : [], source, () =>
+		request(isTruthyString(accountId) ? source?.recorded(accountId) : undefined),
+	);
+}
+
+/**
+ * Run an MCP request for `accountIds`, which reads their recorded end users itself.
+ *
+ * An account id passed explicitly has no end user recorded until something calls
+ * `GET /accounts`, so a non-shared one is refused with a 400. When that happens to one of these
+ * accounts with nothing recorded, its end user is looked up once and, if there is one, the request
+ * is sent again. Otherwise the 400 is thrown as it came — with the lookup's error as its `cause`,
+ * if the lookup failed.
+ */
+export async function withEndUsers<T>(
+	accountIds: readonly string[],
+	source: EndUserSource | undefined,
+	request: () => Promise<T>,
+): Promise<T> {
+	const unrecorded = new Set(accountIds.filter((id) => source?.recorded(id) === undefined));
 	try {
-		return await request(recorded);
+		return await request();
 	} catch (error) {
-		if (!accountId || !source || recorded !== undefined || !isEndUserMismatch(error, accountId)) {
+		if (!(error instanceof StackOneAPIError) || source === undefined) {
 			throw error;
 		}
-		// A failed lookup leaves the refusal to be thrown, with the lookup's error as its cause —
-		// a key without platform.read would otherwise be told only that the header is wrong. A rate
-		// limit is thrown instead: that is the key's, not the account's, and must stay fatal to a
-		// fan-out.
-		let endUserId: string | undefined;
-		try {
-			endUserId = await source.lookUp(accountId);
-		} catch (lookupError) {
-			if (isRateLimitFailure(lookupError)) {
-				throw lookupError;
-			}
-			const refusal = error as StackOneAPIError;
-			throw new StackOneAPIError(
-				refusal.message,
-				refusal.statusCode,
-				refusal.responseBody,
-				refusal.requestBody,
-				{ cause: lookupError },
-			);
+		const refused = endUserRefusalOf(error);
+		if (refused === undefined || !unrecorded.has(refused)) {
+			throw error;
 		}
+		const endUserId = await lookUpAfterRefusal(error, refused, source);
 		if (endUserId === undefined) {
 			throw error;
 		}
-		return request(endUserId);
+		return request();
+	}
+}
+
+/**
+ * Look up an account's end user after the API refused a request without one.
+ *
+ * A failed lookup leaves the refusal to be thrown, with the lookup's error as its cause — a key
+ * without platform.read would otherwise be told only that the header is wrong. A rate limit is
+ * thrown instead: that is the key's, not the account's, and must stay fatal to a fan-out.
+ */
+async function lookUpAfterRefusal(
+	refusal: StackOneAPIError,
+	accountId: string,
+	source: EndUserSource,
+): Promise<string | undefined> {
+	try {
+		return await source.lookUp(accountId);
+	} catch (lookupError) {
+		if (isRateLimitFailure(lookupError)) {
+			throw lookupError;
+		}
+		throw new StackOneAPIError(
+			refusal.message,
+			refusal.statusCode,
+			refusal.responseBody,
+			refusal.requestBody,
+			{ cause: lookupError },
+		);
 	}
 }
 
@@ -209,9 +252,12 @@ class RateLimitTimeoutError extends Error {
 	}
 }
 
+/** The MCP request-timeout error code, as the number an {@link McpError} carries. */
+const REQUEST_TIMEOUT_CODE: number = ErrorCode.RequestTimeout;
+
 const isTimeout = (error: unknown): boolean =>
 	error instanceof McpDeadlineError ||
-	(error instanceof McpError && error.code === ErrorCode.RequestTimeout);
+	(error instanceof McpError && error.code === REQUEST_TIMEOUT_CODE);
 
 /**
  * Open an MCP session, run `work` in it and close it, all within one deadline.
@@ -292,18 +338,19 @@ export async function listMcpTools(request: McpRequest): Promise<McpToolDefiniti
 		const collected: McpToolDefinition[] = [];
 		let cursor: string | undefined;
 		do {
-			const page = await client.listTools(cursor ? { cursor } : undefined, {
+			// oxlint-disable-next-line eslint/no-await-in-loop -- each page's cursor comes from the page before
+			const page = await client.listTools(isTruthyString(cursor) ? { cursor } : undefined, {
 				timeout: request.timeout,
 			});
 			for (const tool of page.tools) {
 				collected.push({
 					name: tool.name,
 					description: tool.description,
-					inputSchema: (tool.inputSchema ?? {}) as Record<string, unknown>,
+					inputSchema: tool.inputSchema ?? {},
 				});
 			}
 			cursor = page.nextCursor;
-		} while (cursor);
+		} while (isTruthyString(cursor));
 		return collected;
 	});
 }
@@ -312,6 +359,12 @@ interface ContentPart {
 	type: string;
 	text?: unknown;
 }
+
+const isTextPart = (part: ContentPart): part is ContentPart & { text: string } =>
+	part.type === 'text' && typeof part.text === 'string' && part.text !== '';
+
+const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
 
 /**
  * Dig the HTTP status out of an MCP error payload.
@@ -322,11 +375,11 @@ interface ContentPart {
  */
 function statusOf(parsed: JsonObject): number {
 	for (const candidate of [parsed, parsed.result, parsed.error, parsed.data]) {
-		if (typeof candidate !== 'object' || candidate === null || Array.isArray(candidate)) {
+		if (!isJsonObject(candidate)) {
 			continue;
 		}
 		for (const key of ['status_code', 'statusCode']) {
-			const status = (candidate as JsonObject)[key];
+			const status = candidate[key];
 			if (typeof status === 'number' && Number.isInteger(status)) {
 				return status;
 			}
@@ -349,33 +402,19 @@ function statusOf(parsed: JsonObject): number {
  *   to the caller as though it were a success.
  */
 export function parseToolResult(result: Record<string, unknown>, name: string): JsonObject {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served MCP content, read as the protocol defines it
 	const content = (Array.isArray(result.content) ? result.content : []) as ContentPart[];
-	const texts = content.filter(
-		(part): part is ContentPart & { text: string } =>
-			part.type === 'text' && typeof part.text === 'string' && part.text !== '',
-	);
-	const nonText = content.filter((part) => !texts.includes(part as ContentPart & { text: string }));
-	const payload = texts.map((part) => part.text).join('');
-
-	let parsed: JsonObject = {};
-	if (payload) {
-		let loaded: unknown;
-		try {
-			loaded = JSON.parse(payload);
-		} catch {
-			loaded = payload;
-		}
-		parsed =
-			typeof loaded === 'object' && loaded !== null && !Array.isArray(loaded)
-				? (loaded as JsonObject)
-				: { result: loaded as JsonObject[string] };
-	} else if (typeof result.structuredContent === 'object' && result.structuredContent !== null) {
-		parsed = result.structuredContent as JsonObject;
-	}
+	const payload = content
+		.filter(isTextPart)
+		.map((part) => part.text)
+		.join('');
+	const nonText = content.filter((part) => !isTextPart(part));
+	const parsed =
+		payload === '' ? structuredObject(result.structuredContent) : parsePayload(payload);
 
 	if (result.isError === true) {
 		throw new StackOneAPIError(
-			`Tool ${JSON.stringify(name)} failed: ${payload || JSON.stringify(parsed)}`,
+			`Tool ${JSON.stringify(name)} failed: ${payload === '' ? JSON.stringify(parsed) : payload}`,
 			statusOf(parsed),
 			parsed,
 		);
@@ -384,9 +423,29 @@ export function parseToolResult(result: Record<string, unknown>, name: string): 
 	// A copy, so content_parts below never writes into the caller's structuredContent.
 	const returned = { ...parsed };
 	if (nonText.length > 0) {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served MCP content parts are JSON objects
 		returned.content_parts = nonText as unknown as JsonObject[];
 	}
 	return returned;
+}
+
+/** Joined text parts parsed as JSON; a non-object, or text that is not JSON, is wrapped as `{ result }`. */
+function parsePayload(payload: string): JsonObject {
+	let loaded: JsonValue;
+	try {
+		loaded = JSON.parse(payload);
+	} catch {
+		loaded = payload;
+	}
+	return isJsonObject(loaded) ? loaded : { result: loaded };
+}
+
+/** A result's `structuredContent`, if it is an object. */
+function structuredObject(structuredContent: unknown): JsonObject {
+	return typeof structuredContent === 'object' && structuredContent !== null
+		? // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served MCP structured content is JSON
+			(structuredContent as JsonObject)
+		: {};
 }
 
 /**
@@ -401,6 +460,6 @@ export async function callMcpTool(
 		const result = await client.callTool({ name, arguments: args }, undefined, {
 			timeout: request.timeout,
 		});
-		return parseToolResult(result as Record<string, unknown>, name);
+		return parseToolResult(result, name);
 	});
 }

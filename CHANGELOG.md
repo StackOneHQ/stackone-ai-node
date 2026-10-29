@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v3.0.0...v3.1.0) (2026-10-29)
+
+
+### Features
+
+* one search tool and one execute tool spanning the account scope (ENG-3175) ([#389](https://github.com/StackOneHQ/stackone-ai-node/issues/389)) ([8836040](https://github.com/StackOneHQ/stackone-ai-node/commit/8836040af29f8e99008e0f341230fa84ed7c8915))
+
+
+### Bug Fixes
+
+* **ci:** repair main after the nix flake input update ([#392](https://github.com/StackOneHQ/stackone-ai-node/issues/392)) ([51ffccd](https://github.com/StackOneHQ/stackone-ai-node/commit/51ffccdbfa9f716300de3af3f515e1581dfff13c))
+
 ## [3.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v2.10.0...v3.0.0) (2026-10-09)
 
 
