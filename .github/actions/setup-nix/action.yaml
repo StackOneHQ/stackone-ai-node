@@ -2,9 +2,9 @@ name: 'Setup Nix'
 description: 'Install Nix and configure cache'
 inputs:
   tools:
-    description: 'Space-separated list of nixpkgs packages to install (e.g., "nodejs_24 pnpm_10 oxlint")'
+    description: 'Space-separated list of nixpkgs packages to install (e.g., "nodejs_24 corepack_24 oxlint")'
     required: false
-    default: 'nodejs_24 pnpm_10'
+    default: 'nodejs_24 corepack_24'
   skip-pnpm-install:
     description: 'Skip pnpm install step (useful for jobs that do not need node dependencies)'
     required: false
