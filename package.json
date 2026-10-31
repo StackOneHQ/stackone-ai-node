@@ -68,6 +68,7 @@
 		"@fast-check/vitest": "catalog:dev",
 		"@hono/mcp": "catalog:dev",
 		"@types/node": "catalog:dev",
+		"@typescript/native": "catalog:dev",
 		"@vitest/coverage-v8": "catalog:dev",
 		"ai": "catalog:dev",
 		"hono": "catalog:dev",
@@ -77,6 +78,7 @@
 		"publint": "catalog:dev",
 		"tsdown": "catalog:dev",
 		"type-fest": "catalog:dev",
+		"typescript": "catalog:dev",
 		"unplugin-unused": "catalog:dev",
 		"vitest": "catalog:dev",
 		"zod": "catalog:dev"

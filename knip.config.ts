@@ -15,7 +15,8 @@ export default {
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
 	// `test:node` is a script of StackOneHQ/sdk-conformance, run from its checkout in CI.
 	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx', 'test:node'],
-	ignoreDependencies: ['@typescript/native-preview'],
+	// Vitest spawns the native checker through an explicit file path.
+	ignoreDependencies: ['@typescript/native-preview', '@typescript/native'],
 	rules: {
 		optionalPeerDependencies: 'off',
 		devDependencies: 'warn',
