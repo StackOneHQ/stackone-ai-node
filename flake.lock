@@ -7,11 +7,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791801176,
-        "narHash": "sha256-7yMjYQUjpCy0IhItfGt2EJbOobNu1pkIrBX2GA3yOcU=",
+        "lastModified": 1792594212,
+        "narHash": "sha256-XWx3R/AIeYdyZ3guuZVNqirEUPPpehICrIRV3VabR+U=",
         "owner": "Kyure-A",
         "repo": "agent-skills-nix",
-        "rev": "2948865044b2af55c8c4e4eb2abda7de79d60f0e",
+        "rev": "f48aa227f3d157ae3abda12cd9c4ab867f400419",
         "type": "github"
       },
       "original": {
@@ -22,11 +22,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1792116957,
-        "narHash": "sha256-EjZqHKObBfIOeHZnMRVV87HB3pPq/WBkmRJWyFxmZu8=",
+        "lastModified": 1792842277,
+        "narHash": "sha256-pGPnZGi8y9d76xNeracniXO3dsYVROEmMkMc8jD0Ihc=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f20cd90e28fe0403873f473b29e42662cd86e8c4",
+        "rev": "d3b13ad75cc492690728f9307e443dec9ef9a20e",
         "type": "github"
       },
       "original": {
@@ -46,11 +46,11 @@
     "stackone-skills": {
       "flake": false,
       "locked": {
-        "lastModified": 1792401531,
-        "narHash": "sha256-BUq71mZLcgETcbte5zCDpWRPdkZ2OG40rmdAHPmtotk=",
+        "lastModified": 1793006444,
+        "narHash": "sha256-wpA32Ws3DPvnGuVJYyZE4MI435xGhUr5QuHdrQ36LSk=",
         "owner": "StackOneHQ",
         "repo": "skills",
-        "rev": "dd7c5ffc2cde12f259098f0de4e782f70ecb9672",
+        "rev": "a9d118371851a68ed65833080f424ab32222b287",
         "type": "github"
       },
       "original": {
