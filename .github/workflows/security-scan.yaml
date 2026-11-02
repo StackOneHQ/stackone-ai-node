@@ -1,7 +1,7 @@
 name: Security scan
 
 # Report-only: findings are written to the job summary and never fail the job.
-# A scan that does not complete fails its job, so a broken scan is not reported as clean.
+# A scanner that fails to run fails its job, so a broken scan is not reported as clean.
 # Tighten to blocking once the existing backlog is cleared.
 # Secret scanning already runs in ci.yaml (gitleaks job), so it is not repeated here.
 
@@ -22,6 +22,8 @@ concurrency:
 
 env:
   OSV_SCANNER_VERSION: '2.7.0'
+  # Bump the version and the hash together.
+  OSV_SCANNER_SHA256: 160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b
   ZIZMOR_VERSION: '1.31.1'
 
 jobs:
@@ -43,8 +45,7 @@ jobs:
           cd "$tool_dir"
           base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
           curl -fsSL --retry 3 -o osv-scanner_linux_amd64 "$base/osv-scanner_linux_amd64"
-          curl -fsSL --retry 3 -o osv-scanner_SHA256SUMS "$base/osv-scanner_SHA256SUMS"
-          grep -F "  osv-scanner_linux_amd64" osv-scanner_SHA256SUMS | sha256sum -c -
+          echo "${OSV_SCANNER_SHA256}  osv-scanner_linux_amd64" | sha256sum -c -
           install -m 0755 osv-scanner_linux_amd64 osv-scanner
           echo "$tool_dir" >> "$GITHUB_PATH"
 
@@ -57,14 +58,14 @@ jobs:
           {
             echo "## osv-scanner"
             echo
-            # Exit 0: nothing found. Exit 1: vulnerabilities found. 127 and above: the scan did not complete.
-            if [ "$status" -ge 127 ]; then
-              echo "The scan did not complete (osv-scanner exit code $status). See the step log."
-            else
-              head -c 900000 "$report"
-            fi
+            # Exit 0: nothing found. 1: vulnerabilities found. 128: no packages found. Anything else: the scan failed.
+            case "$status" in
+              0 | 1) head -c 900000 "$report" ;;
+              128) echo "No packages found to scan." ;;
+              *) echo "osv-scanner failed with exit code $status. See the step log." ;;
+            esac
           } >> "$GITHUB_STEP_SUMMARY"
-          [ "$status" -lt 127 ] || exit "$status"
+          case "$status" in 0 | 1 | 128) ;; *) exit "$status" ;; esac
 
   zizmor:
     name: Workflow scan (zizmor)
@@ -80,18 +81,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -uo pipefail
+          set -euo pipefail
           report="$RUNNER_TEMP/zizmor.txt"
-          status=0
-          pipx run "zizmor==${ZIZMOR_VERSION}" --no-exit-codes --format plain .github > "$report" 2>&1 || status=$?
+          pipx run "zizmor==${ZIZMOR_VERSION}" --no-exit-codes --format plain .github > "$report"
           {
             echo "## zizmor"
             echo
-            if [ "$status" -ne 0 ]; then
-              echo "The scan did not complete (exit code $status). See the step log."
-            fi
             echo '```text'
             head -c 900000 "$report"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          exit "$status"
