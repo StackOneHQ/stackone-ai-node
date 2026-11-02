@@ -1,6 +1,7 @@
 name: Security scan
 
 # Report-only: findings are written to the job summary and never fail the job.
+# A scan that does not complete fails its job, so a broken scan is not reported as clean.
 # Tighten to blocking once the existing backlog is cleared.
 # Secret scanning already runs in ci.yaml (gitleaks job), so it is not repeated here.
 
@@ -51,16 +52,19 @@ jobs:
         run: |
           set -uo pipefail
           report="$RUNNER_TEMP/osv.md"
-          osv-scanner scan source -r --format markdown . > "$report" || true
+          status=0
+          osv-scanner scan source -r --format markdown . > "$report" || status=$?
           {
             echo "## osv-scanner"
             echo
-            if [ -s "$report" ]; then
-              head -c 900000 "$report"
+            # Exit 0: nothing found. Exit 1: vulnerabilities found. 127 and above: the scan did not complete.
+            if [ "$status" -ge 127 ]; then
+              echo "The scan did not complete (osv-scanner exit code $status). See the step log."
             else
-              echo "No report produced (no supported lockfiles, or the scan did not complete)."
+              head -c 900000 "$report"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+          [ "$status" -lt 127 ] || exit "$status"
 
   zizmor:
     name: Workflow scan (zizmor)
@@ -78,11 +82,16 @@ jobs:
         run: |
           set -uo pipefail
           report="$RUNNER_TEMP/zizmor.txt"
-          pipx run "zizmor==${ZIZMOR_VERSION}" --format plain .github > "$report" 2>&1 || true
+          status=0
+          pipx run "zizmor==${ZIZMOR_VERSION}" --no-exit-codes --format plain .github > "$report" 2>&1 || status=$?
           {
             echo "## zizmor"
             echo
+            if [ "$status" -ne 0 ]; then
+              echo "The scan did not complete (exit code $status). See the step log."
+            fi
             echo '```text'
             head -c 900000 "$report"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
