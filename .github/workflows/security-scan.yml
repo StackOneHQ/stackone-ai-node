@@ -1,0 +1,89 @@
+name: Security scan
+
+# Report-only: findings are written to the job summary and never fail the job.
+# Tighten to blocking once the existing backlog is cleared.
+# Secret scanning already runs in ci.yaml (gitleaks job), so it is not repeated here.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-scan-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  OSV_SCANNER_VERSION: "2.7.0"
+  ZIZMOR_VERSION: "1.31.1"
+
+jobs:
+  osv-scanner:
+    name: Dependency scan (osv-scanner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install osv-scanner
+        run: |
+          set -euo pipefail
+          tool_dir="$RUNNER_TEMP/osv-scanner"
+          mkdir -p "$tool_dir"
+          cd "$tool_dir"
+          base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
+          curl -fsSL --retry 3 -o osv-scanner_linux_amd64 "$base/osv-scanner_linux_amd64"
+          curl -fsSL --retry 3 -o osv-scanner_SHA256SUMS "$base/osv-scanner_SHA256SUMS"
+          grep -F "  osv-scanner_linux_amd64" osv-scanner_SHA256SUMS | sha256sum -c -
+          install -m 0755 osv-scanner_linux_amd64 osv-scanner
+          rm osv-scanner_linux_amd64
+          echo "$tool_dir" >> "$GITHUB_PATH"
+
+      - name: Scan lockfiles
+        run: |
+          set -uo pipefail
+          report="$RUNNER_TEMP/osv.md"
+          osv-scanner scan source -r --format markdown . > "$report" || true
+          {
+            echo "## osv-scanner"
+            echo
+            if [ -s "$report" ]; then
+              head -c 900000 "$report"
+            else
+              echo "No report produced (no supported lockfiles, or the scan did not complete)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  zizmor:
+    name: Workflow scan (zizmor)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Audit workflows and local actions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          report="$RUNNER_TEMP/zizmor.txt"
+          pipx run "zizmor==${ZIZMOR_VERSION}" --format plain .github > "$report" 2>&1 || true
+          {
+            echo "## zizmor"
+            echo
+            echo '```text'
+            head -c 900000 "$report"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
