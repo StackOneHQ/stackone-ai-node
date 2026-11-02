@@ -45,7 +45,6 @@ jobs:
           curl -fsSL --retry 3 -o osv-scanner_SHA256SUMS "$base/osv-scanner_SHA256SUMS"
           grep -F "  osv-scanner_linux_amd64" osv-scanner_SHA256SUMS | sha256sum -c -
           install -m 0755 osv-scanner_linux_amd64 osv-scanner
-          rm osv-scanner_linux_amd64
           echo "$tool_dir" >> "$GITHUB_PATH"
 
       - name: Scan lockfiles
