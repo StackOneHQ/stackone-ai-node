@@ -8,27 +8,27 @@ catalogs:
   dev:
     '@ai-sdk/openai': ^4.0.27
     ai: ^7.0.47
-    '@fast-check/vitest': ^0.2.0
+    '@fast-check/vitest': ^0.5.0
     '@clack/prompts': ^0.11.0
-    '@hono/mcp': ^0.1.4
+    '@hono/mcp': ^0.3.2
     '@types/node': ^22.13.5
     '@vitest/coverage-v8': ^4.0.15
     hono: ^4.9.10
     knip: ^5.72.0
     msw: ^2.10.4
     publint: ^0.3.12
-    tsdown: ^0.17.2
+    tsdown: ^0.23.2
     type-fest: ^4.41.0
-    unplugin-unused: ^0.5.4
+    unplugin-unused: ^0.6.0
     vitest: ^4.0.15
     zod: ^4.3.0
   examples:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
-    '@tanstack/ai': ^0.3.0
-    '@tanstack/ai-openai': ^0.3.0
+    '@tanstack/ai': ^0.71.0
+    '@tanstack/ai-openai': ^0.31.0
   peer:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
-    '@anthropic-ai/sdk': ^0.72.1
+    '@anthropic-ai/sdk': ^0.137.0
     ai: '>=5.0.108 <8.0.0'
     openai: ^6.2.0
   prod:
