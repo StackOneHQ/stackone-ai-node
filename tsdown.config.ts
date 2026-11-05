@@ -7,9 +7,11 @@ export default defineConfig({
 	clean: true,
 	sourcemap: true,
 	treeshake: true,
-	dts: {
-		tsgo: true,
-		resolve: [/^@types\//, 'type-fest', 'ai'],
+	dts: true,
+	deps: {
+		dts: {
+			alwaysBundle: [/^@types\//, 'type-fest', 'ai'],
+		},
 	},
 	publint: true,
 	unused: true,
