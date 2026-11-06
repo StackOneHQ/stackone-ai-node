@@ -18,5 +18,7 @@ export default defineConfig({
 	unbundle: true,
 	exports: {
 		devExports: true,
+		// tsdown 0.23 would list the dependencies whose types are bundled into dist in package.json.
+		inlinedDependencies: false,
 	},
 });
