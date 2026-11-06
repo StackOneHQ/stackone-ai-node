@@ -587,7 +587,13 @@ export function createMcpApp(options: MockMcpServerOptions): HonoApp {
 
 		const transport = new StreamableHTTPTransport();
 		await mcp.connect(transport);
-		return transport.handleRequest(c);
+		const response = await transport.handleRequest(c);
+		// @hono/mcp accepts a notification with a JSON `null` body. The spec, and the real
+		// endpoint, send none, and under MSW the client's cancel of that body never settles.
+		if (response?.status === 202) {
+			return new Response(null, { status: 202 });
+		}
+		return response;
 	});
 
 	return app;

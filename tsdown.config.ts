@@ -7,14 +7,18 @@ export default defineConfig({
 	clean: true,
 	sourcemap: true,
 	treeshake: true,
-	dts: {
-		tsgo: true,
-		resolve: [/^@types\//, 'type-fest', 'ai'],
+	dts: true,
+	deps: {
+		dts: {
+			alwaysBundle: [/^@types\//, 'type-fest', 'ai'],
+		},
 	},
 	publint: true,
 	unused: true,
 	unbundle: true,
 	exports: {
 		devExports: true,
+		// tsdown 0.23 would list the dependencies whose types are bundled into dist in package.json.
+		inlinedDependencies: false,
 	},
 });
