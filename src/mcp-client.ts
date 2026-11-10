@@ -245,7 +245,7 @@ async function lookUpAfterRefusal(
 }
 
 /** A session that timed out while a 429 was being retried. */
-class RateLimitTimeoutError extends Error {
+export class RateLimitTimeoutError extends Error {
 	constructor(options: ErrorOptions) {
 		super('timed out while retrying a 429', options);
 		this.name = 'RateLimitTimeoutError';

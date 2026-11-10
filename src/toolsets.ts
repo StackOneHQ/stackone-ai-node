@@ -17,6 +17,7 @@ import {
 	HttpRateLimitError,
 	isRateLimitFailure,
 	listMcpTools,
+	RateLimitTimeoutError,
 	withEndUser,
 	withEndUsers,
 } from './mcp-client';
@@ -690,7 +691,7 @@ export class StackOneToolSet {
 					429,
 					null,
 					undefined,
-					{ cause: error },
+					{ cause: new RateLimitTimeoutError({ cause: error }) },
 				);
 			}
 			throw new ToolSetLoadError(`Could not reach ${url}: ${describeError(error)}`, {
