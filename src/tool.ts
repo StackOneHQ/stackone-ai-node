@@ -213,10 +213,11 @@ export class BaseTool {
 	/**
 	 * Convert the tool to a Claude Agent SDK style definition.
 	 *
-	 * The schema is the one {@link toAnthropic} uses, as an AI SDK JSON schema. The SDK's own tool()
-	 * takes only Zod shapes and drops it, so serve tools with {@link Tools.toClaudeAgentSdk}.
-	 * Results are handed back as JSON text, with file bytes base64-encoded.
+	 * The schema is the one {@link toAnthropic} uses, as an AI SDK JSON schema. Results are handed
+	 * back as JSON text, with file bytes base64-encoded.
 	 *
+	 * @deprecated The SDK's own tool() takes only Zod shapes and drops this schema: serve tools with
+	 * {@link Tools.toClaudeAgentSdk} instead. Removed in the next major version.
 	 * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
 	 */
 	async toClaudeAgentSdkTool(): Promise<{
