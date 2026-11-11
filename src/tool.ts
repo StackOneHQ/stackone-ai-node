@@ -819,7 +819,8 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Convert all tools to OpenAI Responses API format
+	 * Convert all tools to OpenAI Responses API format, not strict by default: see
+	 * {@link BaseTool.toOpenAIResponses} for what `{ strict: true }` does.
 	 * @see https://platform.openai.com/docs/api-reference/responses
 	 */
 	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool[] {

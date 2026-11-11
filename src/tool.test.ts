@@ -738,6 +738,7 @@ describe('Tools', () => {
 		]);
 		expect(tools.toOpenAI().map((tool) => tool.function.name)).toEqual(['a', 'b']);
 		expect(tools.toAnthropic().map((tool) => tool.name)).toEqual(['a', 'b']);
+		expect(tools.toOpenAIResponses().map((tool) => tool.strict)).toEqual([false, false]);
 		expect(tools.toOpenAIResponses({ strict: true }).map((tool) => tool.strict)).toEqual([
 			true,
 			true,
