@@ -278,7 +278,7 @@ new StackOneAPIError('Request failed', 400, { message: 'path.id is missing' }).m
 
 ## Schemas given to a model
 
-**`toJsonSchema()` passes the served schema through**: root keywords such as `$schema`, `$defs`, `title` and `additionalProperties` reach the model as the server served them, and `required` is the served list, left out when it is missing or empty. `toOpenAI()`, `toAnthropic()`, `toOpenAIResponses()`, `toAISDK()` and `toClaudeAgentSdkTool()` fold a top-level `oneOf` / `anyOf` / `allOf`, which those APIs reject, into the root.
+**`toJsonSchema()` passes the served schema through**: root keywords such as `$schema`, `$defs`, `title` and `additionalProperties` reach the model as the server served them, and `required` is the served list, left out when it is missing or empty. `toOpenAI()`, `toAnthropic()`, `toOpenAIResponses()`, `toAISDK()` and `toClaudeAgentSdk()` fold a top-level `oneOf` / `anyOf` / `allOf`, which those APIs reject, into the root.
 
 ## Hand-built tools and `ExecuteConfig`
 

@@ -849,12 +849,11 @@ export class Tools implements Iterable<BaseTool> {
 			{ name: serverName, version: serverVersion },
 			{ capabilities: { tools: {} } },
 		);
-		server.server.setRequestHandler(ListToolsRequestSchema, () => ({
-			tools: [...tools.values()].map((tool) => {
-				const { name, description, input_schema } = tool.toAnthropic();
-				return { name, description, inputSchema: input_schema };
-			}),
-		}));
+		const listed = [...tools.values()].map((tool) => {
+			const { name, description, input_schema } = tool.toAnthropic();
+			return { name, description, inputSchema: input_schema };
+		});
+		server.server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: listed }));
 		server.server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
 			const tool = tools.get(params.name);
 			if (tool === undefined) {
