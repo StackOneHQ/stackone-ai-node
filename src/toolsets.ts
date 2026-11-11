@@ -23,7 +23,7 @@ import {
 } from './mcp-client';
 import type { EndUserSource, McpToolDefinition } from './mcp-client';
 import { cloneJson, toolParametersFromInputSchema } from './schema';
-import { StackOneMcpTool, Tools, warnOnDuplicateNames } from './tool';
+import { StackOneMcpTool, Tools } from './tool';
 import type { StackOneTool } from './tool';
 import type {
 	ActionResult,
@@ -1177,7 +1177,6 @@ export class StackOneToolSet {
 					isAskedFor(tool.name, mode === 'search_execute' ? { actions: options.actions } : options),
 				);
 
-			warnOnDuplicateNames(tools);
 			return new Tools(tools);
 		} catch (error) {
 			// StackOneAPIError carries the HTTP status. Re-wrapping it would throw that away, so a

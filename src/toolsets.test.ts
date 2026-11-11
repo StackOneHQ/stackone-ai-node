@@ -14,7 +14,7 @@ import { server } from '../mocks/node';
 import { FAILED_ACCOUNT_RETRY_MS } from './consts';
 import { listMcpTools } from './mcp-client';
 import type { McpToolDefinition as ListedTool } from './mcp-client';
-import { StackOneMcpTool, StackOneTool } from './tool';
+import { StackOneMcpTool, StackOneTool, Tools } from './tool';
 import type { BaseTool } from './tool';
 import { StackOneToolSet } from './toolsets';
 import { StackOneAPIError } from './utils/error-stackone-api';
@@ -1100,6 +1100,19 @@ describe('duplicate tool names', () => {
 		expect(aiSdk.hibob_list_employees?.description).toBe('on a');
 		await expect(tools.toClaudeAgentSdk()).resolves.toBeDefined();
 		// Once from fetchTools(); the adapters drop the duplicate without repeating it.
+		expect(warnSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('warns when collections fetched separately are merged into one', async () => {
+		fakeListing(() => [def('hibob_list_employees')]);
+		const toolset = newToolSet();
+		const a = await toolset.fetchTools({ accountIds: ['a'] });
+		const b = await toolset.fetchTools({ accountIds: ['b'] });
+		expect(warnSpy).not.toHaveBeenCalled();
+
+		const merged = new Tools([...a, ...b]);
+		merged.toOpenAI();
+
 		expect(warnSpy).toHaveBeenCalledTimes(1);
 	});
 

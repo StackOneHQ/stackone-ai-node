@@ -682,6 +682,7 @@ export class Tools implements Iterable<BaseTool> {
 
 	constructor(tools: BaseTool[]) {
 		this.tools = [...tools];
+		warnOnDuplicateNames(this.tools);
 	}
 
 	/**
@@ -950,10 +951,10 @@ export class Tools implements Iterable<BaseTool> {
 
 /**
  * Two accounts on one provider serve identically named tools. Every lookup and adapter keeps the
- * first one listed (the lowest account id) and drops the rest, so warn once, when the tools are
- * fetched, that the others are unreachable by name.
+ * first one listed and drops the rest, so warn once, when the collection is built, that the others
+ * are unreachable by name.
  */
-export function warnOnDuplicateNames(tools: readonly BaseTool[]): void {
+function warnOnDuplicateNames(tools: readonly BaseTool[]): void {
 	const counts = new Map<string, number>();
 	for (const tool of tools) {
 		counts.set(tool.name, (counts.get(tool.name) ?? 0) + 1);
