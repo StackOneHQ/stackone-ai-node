@@ -190,7 +190,7 @@
                 "python": true,
                 "node": true
             },
-            "notes": "Language-neutral wording: neither SDK's method or parameter names. Emitted once when a fetched collection holds a clashing name, and again by every adapter that keeps the first tool per name and drops the rest: OpenAI, LangChain, Pydantic AI, AI SDK and Claude Agent SDK. Listing order is ascending account id, so the first is the lowest account id's."
+            "notes": "Language-neutral wording: neither SDK's method or parameter names. Emitted once, when a fetched collection holds a clashing name. The adapters that keep the first tool per name and drop the rest (OpenAI, LangChain, Pydantic AI, AI SDK and Claude Agent SDK) do not repeat it. Listing order is ascending account id, so the first is the lowest account id's."
         },
         {
             "id": "mcp-timeout",

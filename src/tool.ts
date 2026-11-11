@@ -705,7 +705,6 @@ export class Tools implements Iterable<BaseTool> {
 	 * Claude Agent SDK refuses the second outright.
 	 */
 	#uniqueTools(): BaseTool[] {
-		warnOnDuplicateNames(this.tools);
 		const seen = new Set<string>();
 		return this.tools.filter((tool) => {
 			if (seen.has(tool.name)) {
@@ -951,9 +950,8 @@ export class Tools implements Iterable<BaseTool> {
 
 /**
  * Two accounts on one provider serve identically named tools. Every lookup and adapter keeps the
- * first one listed — the lowest account id — and drops the rest, so warn that the others are
- * unreachable by name: once when the tools are fetched, and again from each adapter that drops
- * them.
+ * first one listed (the lowest account id) and drops the rest, so warn once, when the tools are
+ * fetched, that the others are unreachable by name.
  */
 export function warnOnDuplicateNames(tools: readonly BaseTool[]): void {
 	const counts = new Map<string, number>();
