@@ -211,45 +211,6 @@ export class BaseTool {
 	}
 
 	/**
-	 * Convert the tool to a Claude Agent SDK style definition.
-	 *
-	 * The schema is the one {@link toAnthropic} uses, as an AI SDK JSON schema. Results are handed
-	 * back as JSON text, with file bytes base64-encoded.
-	 *
-	 * @deprecated The SDK's own tool() takes only Zod shapes and drops this schema: serve tools with
-	 * {@link Tools.toClaudeAgentSdk} instead. Removed in the next major version.
-	 * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
-	 */
-	async toClaudeAgentSdkTool(): Promise<{
-		name: string;
-		description: string;
-		inputSchema: Record<string, unknown>;
-		handler: (
-			args: Record<string, unknown>,
-		) => Promise<{ content: Array<{ type: 'text'; text: string }> }>;
-	}> {
-		const ai = await tryImport<typeof import('ai')>(
-			'ai',
-			`npm install ai (requires ${peerDependencies.ai})`,
-		);
-		const inputSchema = ai.jsonSchema(this.#toProviderSchema());
-		const execute = this.execute.bind(this);
-
-		return {
-			name: this.name,
-			description: this.description,
-			inputSchema,
-			handler: async (args: Record<string, unknown>) => {
-				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the SDK hands over the model's parsed JSON arguments
-				const result = await execute(args as JsonObject);
-				return {
-					content: [{ type: 'text' as const, text: serializeToolResult(result) }],
-				};
-			},
-		};
-	}
-
-	/**
 	 * Convert the tool to AI SDK format.
 	 *
 	 * The schema is {@link toJsonSchema} with top-level composition folded (the AI SDK hands it

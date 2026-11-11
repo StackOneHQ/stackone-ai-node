@@ -155,10 +155,6 @@ describe('BaseTool', () => {
 					return aiSdkJsonSchema(aiTool.inputSchema);
 				},
 			],
-			[
-				'toClaudeAgentSdkTool',
-				async () => aiSdkJsonSchema((await tool.toClaudeAgentSdkTool()).inputSchema),
-			],
 		];
 
 		it.each(adapters)(
@@ -262,20 +258,6 @@ describe('BaseTool', () => {
 		tool.setExposeExecutionMetadata(false);
 		expect((await tool.toAISDK()).test_tool?.execution).toBeUndefined();
 		expect((await tool.toAISDK({ executable: false })).test_tool?.execute).toBeUndefined();
-	});
-
-	it('serialises a Claude Agent SDK result for the model, bytes as base64', async () => {
-		const tool = simpleTool();
-		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
-		tool.execute = async () => ({ content: Buffer.from('%PDF') as never, ok: true });
-		const definition = await tool.toClaudeAgentSdkTool();
-
-		const result = await definition.handler({});
-
-		expect(JSON.parse(result.content[0]?.text ?? '')).toEqual({
-			content: Buffer.from('%PDF').toString('base64'),
-			ok: true,
-		});
 	});
 });
 
@@ -762,7 +744,8 @@ describe('Tools', () => {
 		const seen: unknown[] = [];
 		rich.execute = async (args) => {
 			seen.push(args);
-			return { ok: true };
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
+			return { content: Buffer.from('%PDF') as never, ok: true };
 		};
 		const failing = named('c');
 		failing.execute = async () => {
@@ -783,7 +766,9 @@ describe('Tools', () => {
 			[named('a'), rich, failing].map((tool) => tool.toAnthropic().input_schema),
 		);
 		expect(seen).toEqual([{ employee_id: 'emp_1' }]);
-		expect(result).toEqual({ content: [{ type: 'text', text: '{"ok":true}' }] });
+		expect(result).toEqual({
+			content: [{ type: 'text', text: JSON.stringify({ content: 'JVBERg==', ok: true }) }],
+		});
 		expect(failure).toMatchObject({ isError: true, content: [{ type: 'text' }] });
 		expect(JSON.stringify(failure.content)).toContain('Upstream failed');
 	});
