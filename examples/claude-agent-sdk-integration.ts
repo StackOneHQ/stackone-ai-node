@@ -45,6 +45,8 @@ const claudeAgentSdkIntegration = async (): Promise<void> => {
 			},
 			// Disable built-in tools, only use our custom tools
 			tools: [],
+			// Run the StackOne tools without a permission prompt, which a headless query cannot answer
+			allowedTools: ['mcp__stackone-tools'],
 			maxTurns: 3,
 		},
 	});

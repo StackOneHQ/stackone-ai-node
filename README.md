@@ -178,7 +178,7 @@ await openai.responses.create({
 	model: 'gpt-5.1',
 	instructions: 'You are a helpful HR assistant.',
 	input: 'What is the phone number for employee c28xIQ?',
-	tools: tools.toOpenAIResponses(),
+	tools: tools.toOpenAIResponses({ strict: false }),
 });
 ```
 
@@ -280,6 +280,7 @@ const result = query({
 		model: 'claude-sonnet-4-5-20250929',
 		mcpServers: { 'stackone-tools': mcpServer },
 		tools: [], // Disable built-in tools
+		allowedTools: ['mcp__stackone-tools'], // Run the StackOne tools without a permission prompt
 		maxTurns: 3,
 	},
 });

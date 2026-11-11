@@ -57,7 +57,7 @@ const aiSdkIntegration = async (): Promise<void> => {
 		if (step.toolCalls.length > 0) {
 			for (const toolCall of step.toolCalls) {
 				console.log(`  Tool call: ${toolCall.toolName}`);
-				console.log(`  Arguments: ${JSON.stringify((toolCall as Record<string, unknown>).args)}`);
+				console.log(`  Arguments: ${JSON.stringify(toolCall.input)}`);
 			}
 		}
 	}
