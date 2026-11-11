@@ -139,11 +139,11 @@ describe('BaseTool', () => {
 		const adapters: Array<[string, () => Promise<Record<string, unknown>>]> = [
 			['toOpenAI', async () => present(tool.toOpenAI().function.parameters)],
 			['toAnthropic', async () => tool.toAnthropic().input_schema],
-			['toOpenAIResponses (strict)', async () => present(tool.toOpenAIResponses().parameters)],
 			[
-				'toOpenAIResponses (non-strict)',
-				async () => present(tool.toOpenAIResponses({ strict: false }).parameters),
+				'toOpenAIResponses (strict)',
+				async () => present(tool.toOpenAIResponses({ strict: true }).parameters),
 			],
+			['toOpenAIResponses (non-strict)', async () => present(tool.toOpenAIResponses().parameters)],
 			[
 				'toAISDK',
 				async () => {
@@ -196,9 +196,9 @@ describe('BaseTool', () => {
 			expect(open.toJsonSchema().additionalProperties).toBe(true);
 			expect(open.toOpenAI().function.parameters?.additionalProperties).toBe(true);
 			expect(open.toAnthropic().input_schema.additionalProperties).toBe(true);
-			expect(open.toOpenAIResponses({ strict: false }).parameters?.additionalProperties).toBe(true);
+			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(true);
 			// Strict Responses and the AI SDK close the root: documented, and pinned here.
-			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(false);
+			expect(open.toOpenAIResponses({ strict: true }).parameters?.additionalProperties).toBe(false);
 			const aiTools = await open.toAISDK({ executable: false });
 			const aiTool = aiTools.open;
 			assert.isDefined(aiTool);
@@ -206,7 +206,7 @@ describe('BaseTool', () => {
 		});
 
 		it('closes the root in strict mode without rewriting anything nested', () => {
-			const parameters = present(tool.toOpenAIResponses().parameters);
+			const parameters = present(tool.toOpenAIResponses({ strict: true }).parameters);
 			expect(parameters.additionalProperties).toBe(false);
 			expect(parameters).toHaveProperty(['properties', 'address'], richSchema.properties.address);
 		});
@@ -231,13 +231,14 @@ describe('BaseTool', () => {
 		});
 	});
 
-	it('converts to the OpenAI Responses shape, strict by default', () => {
-		const strict = simpleTool().toOpenAIResponses();
-		expect(strict).toMatchObject({ type: 'function', name: 'test_tool', strict: true });
-
-		const lax = simpleTool().toOpenAIResponses({ strict: false });
-		expect(lax.strict).toBe(false);
+	it('converts to the OpenAI Responses shape, not strict by default', () => {
+		const lax = simpleTool().toOpenAIResponses();
+		expect(lax).toMatchObject({ type: 'function', name: 'test_tool', strict: false });
 		expect(lax.parameters).not.toHaveProperty('additionalProperties');
+
+		const strict = simpleTool().toOpenAIResponses({ strict: true });
+		expect(strict.strict).toBe(true);
+		expect(strict.parameters?.additionalProperties).toBe(false);
 	});
 
 	it('builds an AI SDK tool whose schema the ai package accepts', async () => {
@@ -737,9 +738,9 @@ describe('Tools', () => {
 		]);
 		expect(tools.toOpenAI().map((tool) => tool.function.name)).toEqual(['a', 'b']);
 		expect(tools.toAnthropic().map((tool) => tool.name)).toEqual(['a', 'b']);
-		expect(tools.toOpenAIResponses({ strict: false }).map((tool) => tool.strict)).toEqual([
-			false,
-			false,
+		expect(tools.toOpenAIResponses({ strict: true }).map((tool) => tool.strict)).toEqual([
+			true,
+			true,
 		]);
 		expect(Object.keys(await tools.toAISDK())).toEqual(['a', 'b']);
 	});

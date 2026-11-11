@@ -179,18 +179,17 @@ export class BaseTool {
 	/**
 	 * Convert the tool to OpenAI Responses API format.
 	 *
-	 * With `strict` (the default) the root schema is closed with `additionalProperties: false`,
-	 * replacing whatever the server served there. The SDK does not rewrite anything nested:
-	 * OpenAI's strict mode additionally requires every property to be listed in `required` and
-	 * every nested object to be closed, so a served schema with optional fields is rejected by
-	 * OpenAI in strict mode. Pass `{ strict: false }` for those — the served schema then goes
-	 * through unchanged apart from the top-level composition fold.
+	 * Not strict by default: the served schema goes through unchanged apart from the top-level
+	 * composition fold. OpenAI's strict mode requires every property to be listed in `required`
+	 * and every nested object to be closed, and the SDK does not rewrite nested schemas, so OpenAI
+	 * rejects a strict tool with optional or open nested fields. `{ strict: true }` closes only
+	 * the root with `additionalProperties: false`; use it for schemas that already meet the rest.
 	 *
 	 * @see https://platform.openai.com/docs/api-reference/responses
 	 * @see https://platform.openai.com/docs/guides/structured-outputs#supported-schemas
 	 */
 	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool {
-		const { strict = true } = options;
+		const { strict = false } = options;
 		return {
 			type: 'function',
 			name: this.name,
