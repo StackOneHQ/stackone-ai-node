@@ -1,5 +1,12 @@
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import type { McpSdkServerConfigWithInstance } from '@anthropic-ai/claude-agent-sdk';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import {
+	CallToolRequestSchema,
+	ErrorCode,
+	ListToolsRequestSchema,
+	McpError,
+} from '@modelcontextprotocol/sdk/types.js';
 import type {
 	ChatCompletionFunctionTool,
 	ChatCompletionMessageToolCall,
@@ -204,11 +211,11 @@ export class BaseTool {
 	}
 
 	/**
-	 * Convert the tool to Claude Agent SDK format.
-	 * Returns a tool definition compatible with the Claude Agent SDK's tool() function.
+	 * Convert the tool to a Claude Agent SDK style definition.
 	 *
-	 * The schema is the one {@link toAnthropic} uses. Results are handed back as JSON text, with
-	 * file bytes base64-encoded.
+	 * The schema is the one {@link toAnthropic} uses, as an AI SDK JSON schema. The SDK's own tool()
+	 * takes only Zod shapes and drops it, so serve tools with {@link Tools.toClaudeAgentSdk}.
+	 * Results are handed back as JSON text, with file bytes base64-encoded.
 	 *
 	 * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
 	 */
@@ -872,35 +879,37 @@ export class Tools implements Iterable<BaseTool> {
 		options: ClaudeAgentSdkOptions = {},
 	): Promise<McpSdkServerConfigWithInstance> {
 		const { serverName = 'stackone-tools', serverVersion = '1.0.0' } = options;
+		const tools = new Map(this.#uniqueTools().map((tool) => [tool.name, tool]));
 
-		// Import the Claude Agent SDK dynamically
-		const claudeAgentSdk = await tryImport<typeof import('@anthropic-ai/claude-agent-sdk')>(
-			'@anthropic-ai/claude-agent-sdk',
-			`npm install @anthropic-ai/claude-agent-sdk (requires ${peerDependencies['@anthropic-ai/claude-agent-sdk']})`,
+		// The SDK's tool() and createSdkMcpServer() take only Zod shapes: a JSON schema is dropped,
+		// leaving the model no parameters and the handler the request context instead of the arguments
+		const server = new McpServer(
+			{ name: serverName, version: serverVersion },
+			{ capabilities: { tools: {} } },
 		);
-
-		// Convert all tools to Claude Agent SDK format
-		// We use type assertions here because the Zod types from our dynamic import
-		// don't perfectly match the Claude Agent SDK's expected types at compile time
-		const sdkTools = await Promise.all(
-			this.#uniqueTools().map(async (baseTool) => {
-				const toolDef = await baseTool.toClaudeAgentSdkTool();
-				return claudeAgentSdk.tool(
-					toolDef.name,
-					toolDef.description,
-					// oxlint-disable-next-line typescript/no-explicit-any, typescript/no-unsafe-type-assertion -- the SDK types a Zod shape; it is handed the AI SDK's JSON schema
-					toolDef.inputSchema as any,
-					toolDef.handler,
-				);
+		server.server.setRequestHandler(ListToolsRequestSchema, () => ({
+			tools: [...tools.values()].map((tool) => {
+				const { name, description, input_schema } = tool.toAnthropic();
+				return { name, description, inputSchema: input_schema };
 			}),
-		);
-
-		// Create and return the MCP server
-		return claudeAgentSdk.createSdkMcpServer({
-			name: serverName,
-			version: serverVersion,
-			tools: sdkTools,
+		}));
+		server.server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
+			const tool = tools.get(params.name);
+			if (tool === undefined) {
+				throw new McpError(ErrorCode.InvalidParams, `Tool ${params.name} not found`);
+			}
+			try {
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the model's parsed JSON arguments
+				const result = await tool.execute((params.arguments ?? {}) as JsonObject);
+				return { content: [{ type: 'text', text: serializeToolResult(result) }] };
+			} catch (error) {
+				// A tool error goes back to the model as a result it can read, not a protocol error
+				const text = error instanceof Error ? error.message : String(error);
+				return { content: [{ type: 'text', text }], isError: true };
+			}
 		});
+
+		return { type: 'sdk', name: serverName, instance: server };
 	}
 
 	/**
