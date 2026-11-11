@@ -1,3 +1,5 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { jsonSchema } from 'ai';
 import { http } from 'msw';
@@ -153,10 +155,6 @@ describe('BaseTool', () => {
 					return aiSdkJsonSchema(aiTool.inputSchema);
 				},
 			],
-			[
-				'toClaudeAgentSdkTool',
-				async () => aiSdkJsonSchema((await tool.toClaudeAgentSdkTool()).inputSchema),
-			],
 		];
 
 		it.each(adapters)(
@@ -261,20 +259,6 @@ describe('BaseTool', () => {
 		tool.setExposeExecutionMetadata(false);
 		expect((await tool.toAISDK()).test_tool?.execution).toBeUndefined();
 		expect((await tool.toAISDK({ executable: false })).test_tool?.execute).toBeUndefined();
-	});
-
-	it('serialises a Claude Agent SDK result for the model, bytes as base64', async () => {
-		const tool = simpleTool();
-		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
-		tool.execute = async () => ({ content: Buffer.from('%PDF') as never, ok: true });
-		const definition = await tool.toClaudeAgentSdkTool();
-
-		const result = await definition.handler({});
-
-		expect(JSON.parse(result.content[0]?.text ?? '')).toEqual({
-			content: Buffer.from('%PDF').toString('base64'),
-			ok: true,
-		});
 	});
 });
 
@@ -755,6 +739,40 @@ describe('Tools', () => {
 		expect(mcpServer.type).toBe('sdk');
 		expect(mcpServer.name).toBe('custom');
 		expect(mcpServer.instance).toBeDefined();
+	});
+
+	it('serves the Claude Agent SDK each schema and hands the tool the model arguments', async () => {
+		const rich = localTool('b', richSchema);
+		const seen: unknown[] = [];
+		rich.execute = async (args) => {
+			seen.push(args);
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
+			return { content: Buffer.from('%PDF') as never, ok: true };
+		};
+		const failing = named('c');
+		failing.execute = async () => {
+			throw new StackOneAPIError('Upstream failed', 502, null);
+		};
+		const { instance } = await new Tools([named('a'), rich, failing]).toClaudeAgentSdk();
+		const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+		const client = new Client({ name: 'test', version: '1.0.0' });
+		await instance.connect(serverTransport);
+		await client.connect(clientTransport);
+
+		const { tools } = await client.listTools();
+		const result = await client.callTool({ name: 'b', arguments: { employee_id: 'emp_1' } });
+		const failure = await client.callTool({ name: 'c', arguments: {} });
+		await client.close();
+
+		expect(tools.map((tool) => tool.inputSchema)).toEqual(
+			[named('a'), rich, failing].map((tool) => tool.toAnthropic().input_schema),
+		);
+		expect(seen).toEqual([{ employee_id: 'emp_1' }]);
+		expect(result).toEqual({
+			content: [{ type: 'text', text: JSON.stringify({ content: 'JVBERg==', ok: true }) }],
+		});
+		expect(failure).toMatchObject({ isError: true, content: [{ type: 'text' }] });
+		expect(JSON.stringify(failure.content)).toContain('Upstream failed');
 	});
 });
 
