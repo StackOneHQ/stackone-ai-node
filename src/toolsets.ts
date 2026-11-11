@@ -17,7 +17,7 @@ import {
 	HttpRateLimitError,
 	isRateLimitFailure,
 	listMcpTools,
-	RateLimitTimeoutError,
+	rateLimitTimeoutError,
 	withEndUser,
 	withEndUsers,
 } from './mcp-client';
@@ -686,13 +686,7 @@ export class StackOneToolSet {
 		} catch (error) {
 			// Timing out while a 429 is retried is still the rate limit, as it is over MCP.
 			if (rateLimited && error instanceof DOMException && error.name === 'TimeoutError') {
-				throw new StackOneAPIError(
-					`Listing accounts at ${url} was rate limited (429) and timed out after ${this.#timeout / 1000}s while retrying`,
-					429,
-					null,
-					undefined,
-					{ cause: new RateLimitTimeoutError({ cause: error }) },
-				);
+				throw rateLimitTimeoutError(`Listing accounts at ${url}`, this.#timeout, error);
 			}
 			throw new ToolSetLoadError(`Could not reach ${url}: ${describeError(error)}`, {
 				cause: error,

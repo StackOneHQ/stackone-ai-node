@@ -695,10 +695,10 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 			.catch((caught: unknown) => caught);
 
 		assert.instanceOf(error, StackOneAPIError);
-		expect(error.statusCode).toBe(429);
-		expect(error.message).toBe(
-			`Listing accounts at ${TEST_BASE_URL}/accounts was rate limited (429) and timed out after 0.3s while retrying`,
-		);
+		expect(error).toMatchObject({
+			statusCode: 429,
+			message: `Listing accounts at ${TEST_BASE_URL}/accounts was rate limited (429) and timed out after 0.3s while retrying`,
+		});
 	});
 
 	it('is looked up whatever the refusal names the account as', async () => {

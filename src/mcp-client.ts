@@ -107,7 +107,7 @@ function describeInnermostCause(error: unknown): string {
 }
 
 /**
- * Whether an MCP request was still rate limited after its retries: an HTTP 429 from the endpoint.
+ * Whether a request was still rate limited after its retries: an HTTP 429 from the API.
  *
  * Unlike a dead account, this says nothing about one account and everything about the API key,
  * so a fan-out must fail on it rather than skip the account and return a partial catalog. A
@@ -244,12 +244,25 @@ async function lookUpAfterRefusal(
 	}
 }
 
-/** A session that timed out while a 429 was being retried. */
-export class RateLimitTimeoutError extends Error {
+class RateLimitTimeoutError extends Error {
 	constructor(options: ErrorOptions) {
 		super('timed out while retrying a 429', options);
 		this.name = 'RateLimitTimeoutError';
 	}
+}
+
+export function rateLimitTimeoutError(
+	request: string,
+	timeout: number,
+	cause: unknown,
+): StackOneAPIError {
+	return new StackOneAPIError(
+		`${request} was rate limited (429) and timed out after ${timeout / 1000}s while retrying`,
+		429,
+		null,
+		undefined,
+		{ cause: new RateLimitTimeoutError({ cause }) },
+	);
 }
 
 /** The MCP request-timeout error code, as the number an {@link McpError} carries. */
@@ -315,13 +328,7 @@ async function withMcpSession<T>(
 		// reported as a timeout, it would skip the account and return a partial result, which a
 		// 429 must never do.
 		if (rateLimited > 0 && isTimeout(error)) {
-			throw new StackOneAPIError(
-				`MCP request to ${endpoint} was rate limited (429) and timed out after ${timeout / 1000}s while retrying`,
-				429,
-				null,
-				undefined,
-				{ cause: new RateLimitTimeoutError({ cause: error }) },
-			);
+			throw rateLimitTimeoutError(`MCP request to ${endpoint}`, timeout, error);
 		}
 		throw describeMcpFailure(error, endpoint, timeout);
 	} finally {
