@@ -3,7 +3,7 @@
  * account's end user, which only `GET /accounts` reports. Every assertion here is on the headers
  * that actually reached the mock server.
  */
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { accountMcpTools, createMcpApp, jsonRpcMethod } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
@@ -672,6 +672,33 @@ describe('x-end-user-id for an explicit account the API says is not shared', () 
 
 		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(429);
+	});
+
+	it('stays fatal to a fan-out when the lookup times out while a 429 is retried', async () => {
+		serve(ACCOUNTS, { acc1: 'alice' });
+		let accountRequests = 0;
+		server.use(
+			http.get(`${TEST_BASE_URL}/accounts`, async () => {
+				if (accountRequests++ === 0) {
+					return HttpResponse.json(
+						{ statusCode: 429, message: 'Too many requests' },
+						{ status: 429, headers: { 'Retry-After': '0' } },
+					);
+				}
+				await delay('infinite');
+				return HttpResponse.json([]);
+			}),
+		);
+
+		const error = await newToolSet({ accountIds: ['acc1', 'acc2'], timeout: 300 })
+			.fetchTools()
+			.catch((caught: unknown) => caught);
+
+		assert.instanceOf(error, StackOneAPIError);
+		expect(error).toMatchObject({
+			statusCode: 429,
+			message: `Listing accounts at ${TEST_BASE_URL}/accounts was rate limited (429) and timed out after 0.3s while retrying`,
+		});
 	});
 
 	it('is looked up whatever the refusal names the account as', async () => {
