@@ -28,8 +28,8 @@ const claudeAgentSdkIntegration = async (): Promise<void> => {
 	const accountId = process.env.STACKONE_ACCOUNT_ID;
 	const toolset = new StackOneToolSet({ accountId: accountId === '' ? undefined : accountId });
 
-	// Fetch tools from StackOne and convert to Claude Agent SDK format
-	const tools = await toolset.fetchTools();
+	// Fetch only the read actions the agent needs, since allowedTools below runs them without asking
+	const tools = await toolset.fetchTools({ actions: ['*_list_*'] });
 	const mcpServer = await tools.toClaudeAgentSdk();
 	console.log('Claude Agent SDK MCP server created');
 
