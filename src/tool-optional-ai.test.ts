@@ -21,7 +21,7 @@ describe('BaseTool optional ai peer handling', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('rejects toClaudeAgentSdkTool with StackOneError and install hint when ai is unavailable', async () => {
+	it('rejects toAISDK with StackOneError and install hint when ai is unavailable', async () => {
 		vi.doMock('./utils/try-import', () => ({
 			tryImport: vi.fn(async (moduleName: string, installHint: string) => {
 				if (moduleName === 'ai') {
@@ -37,8 +37,8 @@ describe('BaseTool optional ai peer handling', () => {
 		const { BaseTool } = await import('./tool');
 		const tool = new BaseTool('test_tool', 'Test tool', createParameters(), createExecuteConfig());
 
-		await expect(tool.toClaudeAgentSdkTool()).rejects.toBeInstanceOf(StackOneError);
-		await expect(tool.toClaudeAgentSdkTool()).rejects.toThrow(
+		await expect(tool.toAISDK()).rejects.toBeInstanceOf(StackOneError);
+		await expect(tool.toAISDK()).rejects.toThrow(
 			`ai is not installed. Please install it with: npm install ai (requires ${peerDependencies.ai})`,
 		);
 	});

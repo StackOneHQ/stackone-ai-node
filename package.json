@@ -105,7 +105,7 @@
 		"runtime": [
 			{
 				"name": "node",
-				"version": "24.22.1",
+				"version": "24.22.3",
 				"onFail": "download"
 			}
 		]

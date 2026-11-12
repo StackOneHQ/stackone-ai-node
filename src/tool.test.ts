@@ -1,3 +1,5 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { jsonSchema } from 'ai';
 import { http } from 'msw';
@@ -139,11 +141,11 @@ describe('BaseTool', () => {
 		const adapters: Array<[string, () => Promise<Record<string, unknown>>]> = [
 			['toOpenAI', async () => present(tool.toOpenAI().function.parameters)],
 			['toAnthropic', async () => tool.toAnthropic().input_schema],
-			['toOpenAIResponses (strict)', async () => present(tool.toOpenAIResponses().parameters)],
 			[
-				'toOpenAIResponses (non-strict)',
-				async () => present(tool.toOpenAIResponses({ strict: false }).parameters),
+				'toOpenAIResponses (strict)',
+				async () => present(tool.toOpenAIResponses({ strict: true }).parameters),
 			],
+			['toOpenAIResponses (non-strict)', async () => present(tool.toOpenAIResponses().parameters)],
 			[
 				'toAISDK',
 				async () => {
@@ -152,10 +154,6 @@ describe('BaseTool', () => {
 					assert.isDefined(aiTool);
 					return aiSdkJsonSchema(aiTool.inputSchema);
 				},
-			],
-			[
-				'toClaudeAgentSdkTool',
-				async () => aiSdkJsonSchema((await tool.toClaudeAgentSdkTool()).inputSchema),
 			],
 		];
 
@@ -196,9 +194,9 @@ describe('BaseTool', () => {
 			expect(open.toJsonSchema().additionalProperties).toBe(true);
 			expect(open.toOpenAI().function.parameters?.additionalProperties).toBe(true);
 			expect(open.toAnthropic().input_schema.additionalProperties).toBe(true);
-			expect(open.toOpenAIResponses({ strict: false }).parameters?.additionalProperties).toBe(true);
+			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(true);
 			// Strict Responses and the AI SDK close the root: documented, and pinned here.
-			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(false);
+			expect(open.toOpenAIResponses({ strict: true }).parameters?.additionalProperties).toBe(false);
 			const aiTools = await open.toAISDK({ executable: false });
 			const aiTool = aiTools.open;
 			assert.isDefined(aiTool);
@@ -206,7 +204,7 @@ describe('BaseTool', () => {
 		});
 
 		it('closes the root in strict mode without rewriting anything nested', () => {
-			const parameters = present(tool.toOpenAIResponses().parameters);
+			const parameters = present(tool.toOpenAIResponses({ strict: true }).parameters);
 			expect(parameters.additionalProperties).toBe(false);
 			expect(parameters).toHaveProperty(['properties', 'address'], richSchema.properties.address);
 		});
@@ -231,13 +229,14 @@ describe('BaseTool', () => {
 		});
 	});
 
-	it('converts to the OpenAI Responses shape, strict by default', () => {
-		const strict = simpleTool().toOpenAIResponses();
-		expect(strict).toMatchObject({ type: 'function', name: 'test_tool', strict: true });
-
-		const lax = simpleTool().toOpenAIResponses({ strict: false });
-		expect(lax.strict).toBe(false);
+	it('converts to the OpenAI Responses shape, not strict by default', () => {
+		const lax = simpleTool().toOpenAIResponses();
+		expect(lax).toMatchObject({ type: 'function', name: 'test_tool', strict: false });
 		expect(lax.parameters).not.toHaveProperty('additionalProperties');
+
+		const strict = simpleTool().toOpenAIResponses({ strict: true });
+		expect(strict.strict).toBe(true);
+		expect(strict.parameters?.additionalProperties).toBe(false);
 	});
 
 	it('builds an AI SDK tool whose schema the ai package accepts', async () => {
@@ -260,20 +259,6 @@ describe('BaseTool', () => {
 		tool.setExposeExecutionMetadata(false);
 		expect((await tool.toAISDK()).test_tool?.execution).toBeUndefined();
 		expect((await tool.toAISDK({ executable: false })).test_tool?.execute).toBeUndefined();
-	});
-
-	it('serialises a Claude Agent SDK result for the model, bytes as base64', async () => {
-		const tool = simpleTool();
-		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
-		tool.execute = async () => ({ content: Buffer.from('%PDF') as never, ok: true });
-		const definition = await tool.toClaudeAgentSdkTool();
-
-		const result = await definition.handler({});
-
-		expect(JSON.parse(result.content[0]?.text ?? '')).toEqual({
-			content: Buffer.from('%PDF').toString('base64'),
-			ok: true,
-		});
 	});
 });
 
@@ -737,9 +722,10 @@ describe('Tools', () => {
 		]);
 		expect(tools.toOpenAI().map((tool) => tool.function.name)).toEqual(['a', 'b']);
 		expect(tools.toAnthropic().map((tool) => tool.name)).toEqual(['a', 'b']);
-		expect(tools.toOpenAIResponses({ strict: false }).map((tool) => tool.strict)).toEqual([
-			false,
-			false,
+		expect(tools.toOpenAIResponses().map((tool) => tool.strict)).toEqual([false, false]);
+		expect(tools.toOpenAIResponses({ strict: true }).map((tool) => tool.strict)).toEqual([
+			true,
+			true,
 		]);
 		expect(Object.keys(await tools.toAISDK())).toEqual(['a', 'b']);
 	});
@@ -753,6 +739,40 @@ describe('Tools', () => {
 		expect(mcpServer.type).toBe('sdk');
 		expect(mcpServer.name).toBe('custom');
 		expect(mcpServer.instance).toBeDefined();
+	});
+
+	it('serves the Claude Agent SDK each schema and hands the tool the model arguments', async () => {
+		const rich = localTool('b', richSchema);
+		const seen: unknown[] = [];
+		rich.execute = async (args) => {
+			seen.push(args);
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
+			return { content: Buffer.from('%PDF') as never, ok: true };
+		};
+		const failing = named('c');
+		failing.execute = async () => {
+			throw new StackOneAPIError('Upstream failed', 502, null);
+		};
+		const { instance } = await new Tools([named('a'), rich, failing]).toClaudeAgentSdk();
+		const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+		const client = new Client({ name: 'test', version: '1.0.0' });
+		await instance.connect(serverTransport);
+		await client.connect(clientTransport);
+
+		const { tools } = await client.listTools();
+		const result = await client.callTool({ name: 'b', arguments: { employee_id: 'emp_1' } });
+		const failure = await client.callTool({ name: 'c', arguments: {} });
+		await client.close();
+
+		expect(tools.map((tool) => tool.inputSchema)).toEqual(
+			[named('a'), rich, failing].map((tool) => tool.toAnthropic().input_schema),
+		);
+		expect(seen).toEqual([{ employee_id: 'emp_1' }]);
+		expect(result).toEqual({
+			content: [{ type: 'text', text: JSON.stringify({ content: 'JVBERg==', ok: true }) }],
+		});
+		expect(failure).toMatchObject({ isError: true, content: [{ type: 'text' }] });
+		expect(JSON.stringify(failure.content)).toContain('Upstream failed');
 	});
 });
 

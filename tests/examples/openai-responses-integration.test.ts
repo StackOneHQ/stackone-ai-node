@@ -33,6 +33,8 @@ describe('openai-responses-integration example e2e', () => {
 		// Verify tools are in OpenAI Responses format
 		expect(Array.isArray(openAIResponsesTools)).toBe(true);
 		expect(openAIResponsesTools.length).toBeGreaterThan(0);
+		// Strict mode makes OpenAI reject served schemas with optional fields
+		expect(openAIResponsesTools.map((tool) => tool.strict)).not.toContain(true);
 
 		// Initialize OpenAI client
 		const openai = new OpenAI();
