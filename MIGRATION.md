@@ -278,7 +278,7 @@ new StackOneAPIError('Request failed', 400, { message: 'path.id is missing' }).m
 
 ## Schemas given to a model
 
-**`toJsonSchema()` passes the served schema through**: root keywords such as `$schema`, `$defs`, `title` and `additionalProperties` reach the model as the server served them, and `required` is the served list, left out when it is missing or empty. `toOpenAI()`, `toAnthropic()`, `toOpenAIResponses()`, `toAISDK()` and `toClaudeAgentSdkTool()` fold a top-level `oneOf` / `anyOf` / `allOf`, which those APIs reject, into the root.
+**`toJsonSchema()` passes the served schema through**: root keywords such as `$schema`, `$defs`, `title` and `additionalProperties` reach the model as the server served them, and `required` is the served list, left out when it is missing or empty. `toOpenAI()`, `toAnthropic()`, `toOpenAIResponses()`, `toAISDK()` and `toClaudeAgentSdk()` fold a top-level `oneOf` / `anyOf` / `allOf`, which those APIs reject, into the root.
 
 ## Hand-built tools and `ExecuteConfig`
 
@@ -329,3 +329,22 @@ const hibobTools = tools.toArray().filter((tool) => tool.connector === 'hibob');
 // 3.0
 const hibobTools = await toolset.fetchTools({ providers: ['hibob'] });
 ```
+
+# Migrating from 3.x to 4.0
+
+4.0 removes `BaseTool#toClaudeAgentSdkTool()`. `Tools#toClaudeAgentSdk()` keeps its name and arguments, and now returns a server whose tools carry their input schemas and receive the model's arguments.
+
+## Claude Agent SDK
+
+**`BaseTool#toClaudeAgentSdkTool()` is removed.** It built a definition for the Claude Agent SDK's `tool()`, which accepts only a Zod raw shape and drops a JSON schema, so a tool built from it reached Claude with no parameters. Pass the toolset to `toClaudeAgentSdk()` and hand the returned server to `mcpServers`:
+
+```typescript
+// 3.x
+const definition = await tool.toClaudeAgentSdkTool();
+
+// 4.0
+const mcpServer = await tools.toClaudeAgentSdk();
+// query({ prompt, options: { mcpServers: { 'stackone-tools': mcpServer } } })
+```
+
+To expose a subset of tools, filter first: `await tools.filter((tool) => tool.name.startsWith('bamboohr_')).toClaudeAgentSdk()`.
