@@ -28,7 +28,7 @@ catalogs:
     '@tanstack/ai-openai': ^0.31.0
   peer:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
-    '@anthropic-ai/sdk': ^0.137.0
+    '@anthropic-ai/sdk': '>=0.72.1 <2.0.0'
     ai: '>=5.0.108 <8.0.0'
     openai: ^6.2.0
   prod:
