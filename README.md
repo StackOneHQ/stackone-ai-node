@@ -178,7 +178,7 @@ await openai.responses.create({
 	model: 'gpt-5.1',
 	instructions: 'You are a helpful HR assistant.',
 	input: 'What is the phone number for employee c28xIQ?',
-	tools: tools.toOpenAIResponses({ strict: false }),
+	tools: tools.toOpenAIResponses(),
 });
 ```
 

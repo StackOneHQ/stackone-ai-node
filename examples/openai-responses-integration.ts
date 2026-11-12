@@ -26,8 +26,7 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 	const tools = await toolset.fetchTools({
 		actions: ['*_list_*'],
 	});
-	// OpenAI's strict mode rejects schemas with optional fields, which most StackOne actions have
-	const openAIResponsesTools = tools.toOpenAIResponses({ strict: false });
+	const openAIResponsesTools = tools.toOpenAIResponses();
 	console.log(`Loaded ${openAIResponsesTools.length} tools for OpenAI Responses API`);
 
 	// Initialize OpenAI client
