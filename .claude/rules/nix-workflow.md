@@ -14,7 +14,7 @@ To add a new tool to the development environment, add it to `buildInputs` in `fl
 buildInputs = with pkgs; [
   # runtime
   nodejs_24
-  pnpm_10
+  corepack_24  # pnpm at packageManager's version
 
   # formatting and linting tools
   oxlint  # includes tsgolint
@@ -37,7 +37,7 @@ Specify tools in the `tools` input of the setup-nix action:
 - name: Setup Nix
   uses: ./.github/actions/setup-nix
   with:
-    tools: nodejs_24 pnpm_10 oxlint oxfmt
+    tools: nodejs_24 corepack_24 oxlint oxfmt
 ```
 
 The action installs packages using:
@@ -48,7 +48,7 @@ nix profile install --inputs-from . nixpkgs#tool1 nixpkgs#tool2
 
 ### CI Tool Configuration
 
-- **Default tools**: `nodejs_24 pnpm_10` (defined in action.yaml)
+- **Default tools**: `nodejs_24 corepack_24` (defined in action.yaml)
 - **Skip pnpm install**: Set `skip-pnpm-install: 'true'` for jobs that don't need node dependencies
 
 ### Example: Adding a New Tool to Lint Job
@@ -62,7 +62,7 @@ lint:
     - name: Setup Nix
       uses: ./.github/actions/setup-nix
       with:
-        tools: nodejs_24 pnpm_10 oxlint oxfmt new-tool
+        tools: nodejs_24 corepack_24 oxlint oxfmt new-tool
     - name: Run Lint
       run: pnpm run lint
 ```

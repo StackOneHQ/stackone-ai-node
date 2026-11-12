@@ -47,10 +47,11 @@ export function toolParametersFromInputSchema(inputSchema: unknown): ToolParamet
 	const parameters: ToolParameters = {
 		...rest,
 		type: typeof type === 'string' ? type : 'object',
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- served JSON: the property schemas are passed through, not validated
 		properties: (isPlainObject(properties) ? properties : {}) as JsonSchemaProperties,
 	};
 	const required = servedRequired(served);
-	if (required) {
+	if (required !== undefined) {
 		parameters.required = required;
 	}
 	return parameters;
@@ -62,6 +63,43 @@ export function toolParametersFromInputSchema(inputSchema: unknown): ToolParamet
  * oneOf/anyOf/allOf/enum/not at the top level"); Anthropic rejects the three combinators.
  */
 const ROOT_KEYWORDS_PROVIDERS_REJECT = ['oneOf', 'anyOf', 'allOf', 'enum', 'not'] as const;
+
+/** Fold every `allOf`, `oneOf` and `anyOf` branch of `schema` into `properties` and `required`. */
+function foldCombinators(
+	schema: JSONSchema,
+	properties: JsonSchemaProperties,
+	required: Set<string>,
+): void {
+	for (const keyword of ['allOf', 'oneOf', 'anyOf'] as const) {
+		for (const branch of schema[keyword] ?? []) {
+			if (isPlainObject(branch)) {
+				foldBranch(branch, keyword === 'allOf', properties, required);
+			}
+		}
+	}
+}
+
+/**
+ * Fold one combinator branch into the root's `properties` (the root's own definition wins) and,
+ * when every branch must hold, into its `required` names.
+ */
+function foldBranch(
+	branch: JSONSchema,
+	mustHold: boolean,
+	properties: JsonSchemaProperties,
+	required: Set<string>,
+): void {
+	for (const [name, definition] of Object.entries(branch.properties ?? {})) {
+		if (!Object.hasOwn(properties, name)) {
+			setEntry(properties, name, definition);
+		}
+	}
+	if (mustHold) {
+		for (const name of branch.required ?? []) {
+			required.add(name);
+		}
+	}
+}
 
 /**
  * Make a lossless schema acceptable to a provider that requires a plain object at the root.
@@ -81,23 +119,7 @@ export function foldRootComposition(schema: JSONSchema): JSONSchema {
 	const properties: JsonSchemaProperties = { ...folded.properties };
 	const required = new Set(folded.required ?? []);
 
-	for (const keyword of ['allOf', 'oneOf', 'anyOf'] as const) {
-		for (const branch of folded[keyword] ?? []) {
-			if (!isPlainObject(branch)) {
-				continue;
-			}
-			for (const [name, definition] of Object.entries(branch.properties ?? {})) {
-				if (!Object.hasOwn(properties, name)) {
-					setEntry(properties, name, definition);
-				}
-			}
-			if (keyword === 'allOf') {
-				for (const name of branch.required ?? []) {
-					required.add(name);
-				}
-			}
-		}
-	}
+	foldCombinators(folded, properties, required);
 	for (const keyword of ROOT_KEYWORDS_PROVIDERS_REJECT) {
 		delete folded[keyword];
 	}

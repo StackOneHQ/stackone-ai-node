@@ -1,6 +1,12 @@
-import type { JSONSchema7 as AISDKJSONSchema } from 'ai';
 import type { Tool as AnthropicTool } from '@anthropic-ai/sdk/resources';
 import type { McpSdkServerConfigWithInstance } from '@anthropic-ai/claude-agent-sdk';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import {
+	CallToolRequestSchema,
+	ErrorCode,
+	ListToolsRequestSchema,
+	McpError,
+} from '@modelcontextprotocol/sdk/types.js';
 import type {
 	ChatCompletionFunctionTool,
 	ChatCompletionMessageToolCall,
@@ -10,13 +16,10 @@ import type { FunctionTool as OpenAIResponsesFunctionTool } from 'openai/resourc
 import type { OverrideProperties } from 'type-fest';
 import { peerDependencies } from '../package.json';
 import { SUBMIT_FEEDBACK_TOOL_NAME } from './consts';
-import {
-	type DeclaredHeaders,
-	buildRequestHeaders,
-	declaredHeaders,
-	sanitiseHeaderArguments,
-} from './headers';
-import { type EndUserSource, callMcpTool, withEndUser } from './mcp-client';
+import { buildRequestHeaders, declaredHeaders, sanitiseHeaderArguments } from './headers';
+import type { DeclaredHeaders } from './headers';
+import { callMcpTool, withEndUser } from './mcp-client';
+import type { EndUserSource } from './mcp-client';
 import { cloneJson, foldRootComposition } from './schema';
 import type {
 	AISDKToolDefinition,
@@ -34,8 +37,10 @@ import { StackOneAPIError } from './utils/error-stackone-api';
 import { StackOneError } from './utils/error-stackone';
 import { ToolArgumentsError } from './utils/error-tool-arguments';
 import { warn } from './utils/logger';
+import { sorted } from './utils/array';
 import { serializeToolResult } from './utils/serialize';
 import { tryImport } from './utils/try-import';
+import { isTruthy } from './utils/type';
 
 /**
  * JSON Schema with type narrowed to 'object'
@@ -119,12 +124,13 @@ export class BaseTool {
 		const { required, ...rest } = cloneJson(this.parameters);
 		const schema: Record<string, unknown> = {
 			...rest,
-			type: rest.type || 'object',
+			type: isTruthy(rest.type) ? rest.type : 'object',
 			properties: rest.properties ?? {},
 		};
 		if (Array.isArray(required) && required.length > 0) {
 			schema.required = required;
 		}
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the served schema, typed as an object schema for the provider SDKs
 		return schema as ObjectJSONSchema;
 	}
 
@@ -136,6 +142,7 @@ export class BaseTool {
 	 * lost. Everything else is passed through.
 	 */
 	#toProviderSchema(): ObjectJSONSchema {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- folding keeps the root an object schema
 		return foldRootComposition(this.toJsonSchema()) as ObjectJSONSchema;
 	}
 
@@ -179,18 +186,15 @@ export class BaseTool {
 	/**
 	 * Convert the tool to OpenAI Responses API format.
 	 *
-	 * With `strict` (the default) the root schema is closed with `additionalProperties: false`,
-	 * replacing whatever the server served there. The SDK does not rewrite anything nested:
-	 * OpenAI's strict mode additionally requires every property to be listed in `required` and
-	 * every nested object to be closed, so a served schema with optional fields is rejected by
-	 * OpenAI in strict mode. Pass `{ strict: false }` for those — the served schema then goes
-	 * through unchanged apart from the top-level composition fold.
+	 * Not strict by default. `{ strict: true }` closes only the root with `additionalProperties:
+	 * false`: OpenAI's strict mode also needs every property `required` and every nested object
+	 * closed, which the SDK does not rewrite, so it rejects strict tools with optional fields.
 	 *
 	 * @see https://platform.openai.com/docs/api-reference/responses
 	 * @see https://platform.openai.com/docs/guides/structured-outputs#supported-schemas
 	 */
 	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool {
-		const { strict = true } = options;
+		const { strict = false } = options;
 		return {
 			type: 'function',
 			name: this.name,
@@ -199,43 +203,6 @@ export class BaseTool {
 			parameters: {
 				...this.#toProviderSchema(),
 				...(strict ? { additionalProperties: false } : {}),
-			},
-		};
-	}
-
-	/**
-	 * Convert the tool to Claude Agent SDK format.
-	 * Returns a tool definition compatible with the Claude Agent SDK's tool() function.
-	 *
-	 * The schema is the one {@link toAnthropic} uses. Results are handed back as JSON text, with
-	 * file bytes base64-encoded.
-	 *
-	 * @see https://docs.anthropic.com/en/docs/agents-and-tools/claude-agent-sdk
-	 */
-	async toClaudeAgentSdkTool(): Promise<{
-		name: string;
-		description: string;
-		inputSchema: Record<string, unknown>;
-		handler: (
-			args: Record<string, unknown>,
-		) => Promise<{ content: Array<{ type: 'text'; text: string }> }>;
-	}> {
-		const ai = await tryImport<typeof import('ai')>(
-			'ai',
-			`npm install ai (requires ${peerDependencies.ai})`,
-		);
-		const inputSchema = ai.jsonSchema(this.#toProviderSchema() as AISDKJSONSchema);
-		const execute = this.execute.bind(this);
-
-		return {
-			name: this.name,
-			description: this.description,
-			inputSchema,
-			handler: async (args: Record<string, unknown>) => {
-				const result = await execute(args as JsonObject);
-				return {
-					content: [{ type: 'text' as const, text: serializeToolResult(result) }],
-				};
 			},
 		};
 	}
@@ -257,7 +224,7 @@ export class BaseTool {
 		const schema = {
 			...this.#toProviderSchema(),
 			additionalProperties: false,
-		} as AISDKJSONSchema;
+		};
 
 		/** AI SDK is optional dependency, import only when needed */
 		const ai = await tryImport<typeof import('ai')>(
@@ -281,6 +248,7 @@ export class BaseTool {
 				(options.executable ?? true)
 					? async (args: Record<string, unknown>) => {
 							try {
+								// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the AI SDK hands over the model's parsed JSON arguments
 								return await this.execute(args as JsonObject);
 							} catch (error) {
 								return `Error executing tool: ${
@@ -359,12 +327,32 @@ export class StackOneTool extends BaseTool {
 	}
 }
 
+/** What a {@link StackOneMcpTool} is built from. */
+export interface StackOneMcpToolOptions {
+	name: string;
+	/** The name the server serves the tool under, when it is presented under another. */
+	servedName?: string;
+	description: string;
+	parameters: ToolParameters;
+	endpoint: string;
+	apiKey: string;
+	accountId?: string;
+	timeout: number;
+	extraHeaders?: Record<string, string>;
+	/**
+	 * Where the end user of an account, sent as `x-end-user-id`, comes from. Read per call, so a
+	 * tool rebound with `setAccountId` sends its new account's end user.
+	 */
+	endUsers?: EndUserSource;
+}
+
 /**
  * A tool executed over MCP `tools/call`, on the endpoint and account that listed it. Every tool a
- * {@link StackOneToolSet} returns is one: per-action tools, the `search_execute` meta tools, and
+ * {@link StackOneToolSet} returns is one: per-action tools, the `search_execute` tools, and
  * `stackone_submit_feedback`.
  */
 export class StackOneMcpTool extends StackOneTool {
+	readonly #servedName: string;
 	readonly #endpoint: string;
 	readonly #apiKey: string;
 	readonly #extraHeaders: Record<string, string>;
@@ -372,28 +360,16 @@ export class StackOneMcpTool extends StackOneTool {
 	readonly #timeout: number;
 	readonly #declaredHeaders: DeclaredHeaders;
 
-	constructor(options: {
-		name: string;
-		description: string;
-		parameters: ToolParameters;
-		endpoint: string;
-		apiKey: string;
-		accountId?: string;
-		timeout: number;
-		extraHeaders?: Record<string, string>;
-		/**
-		 * Where the end user of an account, sent as `x-end-user-id`, comes from. Read per call, so
-		 * a tool rebound with `setAccountId` sends its new account's end user.
-		 */
-		endUsers?: EndUserSource;
-	}) {
+	constructor(options: StackOneMcpToolOptions) {
+		const servedName = options.servedName ?? options.name;
 		const executeConfig = {
 			kind: 'mcp',
 			url: options.endpoint,
-			toolName: options.name,
+			toolName: servedName,
 		} as const satisfies McpExecuteConfig;
 		super(options.name, options.description, options.parameters, executeConfig, options.accountId);
 		this.setExposeExecutionMetadata(false);
+		this.#servedName = servedName;
 		this.#endpoint = options.endpoint;
 		this.#apiKey = options.apiKey;
 		this.#extraHeaders = { ...options.extraHeaders };
@@ -409,13 +385,13 @@ export class StackOneMcpTool extends StackOneTool {
 	 * entries of a `headers` object, and `headers_<name>` arguments — are the exception: these
 	 * arguments are model-controlled, so each is forwarded only if this tool's own schema declares
 	 * it, and `Authorization`, `x-account-id`, `User-Agent` and `x-end-user-id` never are. A
-	 * `headers` property served as an object with no `properties`, as on `*_execute_action`,
+	 * `headers` property served as an object with no `properties`, as on `stackone_execute_action`,
 	 * declares every name.
 	 *
 	 * @returns The result as the server wrote it: for an action tool, an `ActionResult`,
 	 *   `{ isError: false, result, defenderMetadata?, policyMetadata? }`. A file action's `result`
 	 *   is the server's single-use `download_url`, not the file. Typed `JsonObject` rather than
-	 *   `ActionResult`, since a `*_search_actions` meta tool returns bare JSON and `dryRun` the
+	 *   `ActionResult`, since `stackone_search_actions` returns bare JSON and `dryRun` the
 	 *   call it would send: assert `ActionResult` on an action tool.
 	 * @throws ToolArgumentsError If the arguments are not a JSON object or cannot be encoded as
 	 *   JSON.
@@ -431,8 +407,8 @@ export class StackOneMcpTool extends StackOneTool {
 		const args = sanitiseHeaderArguments(parsed, this.#declaredHeaders);
 		assertEncodable(this.name, args);
 
-		if (options?.dryRun) {
-			return { url: this.#endpoint, method: 'tools/call', name: this.name, arguments: args };
+		if (options?.dryRun === true) {
+			return { url: this.#endpoint, method: 'tools/call', name: this.#servedName, arguments: args };
 		}
 
 		const accountId = this.getAccountId();
@@ -448,7 +424,7 @@ export class StackOneMcpTool extends StackOneTool {
 					}),
 					timeout: this.#timeout,
 				},
-				this.name,
+				this.#servedName,
 				args,
 			),
 		);
@@ -459,32 +435,40 @@ export class StackOneMcpTool extends StackOneTool {
  * Describe why `value` is not a JSON value, for the message {@link assertJsonValue} throws.
  */
 function describeUnencodableType(value: unknown): string {
-	if (typeof value === 'bigint') {
-		return 'a bigint';
+	const primitive = UNENCODABLE_PRIMITIVES[typeof value];
+	if (primitive !== undefined) {
+		return primitive;
 	}
-	if (typeof value === 'symbol') {
-		return 'a symbol';
-	}
-	if (typeof value === 'function') {
-		return 'a function';
-	}
-	if (value instanceof Date) {
-		return 'a Date';
-	}
-	if (value instanceof Map) {
-		return 'a Map';
-	}
-	if (value instanceof Set) {
-		return 'a Set';
-	}
-	if (value instanceof RegExp) {
-		return 'a RegExp';
+	const instance = UNENCODABLE_INSTANCES.find(([type]) => value instanceof type);
+	if (instance !== undefined) {
+		return instance[1];
 	}
 	if (ArrayBuffer.isView(value) || value instanceof ArrayBuffer) {
 		return 'binary data';
 	}
-	return `an instance of ${(value as object).constructor?.name ?? typeof value}`;
+	return `an instance of ${constructorName(value) ?? typeof value}`;
 }
+
+/** The non-JSON types `typeof` names, as {@link describeUnencodableType} describes them. */
+const UNENCODABLE_PRIMITIVES: Partial<Record<string, string>> = {
+	bigint: 'a bigint',
+	symbol: 'a symbol',
+	function: 'a function',
+};
+
+/** Built-in objects `JSON.stringify` would silently convert, as {@link describeUnencodableType} describes them. */
+const UNENCODABLE_INSTANCES: ReadonlyArray<
+	readonly [abstract new (...args: never[]) => unknown, string]
+> = [
+	[Date, 'a Date'],
+	[Map, 'a Map'],
+	[Set, 'a Set'],
+	[RegExp, 'a RegExp'],
+];
+
+/** The name of the class an object was built by, if it has one. */
+const constructorName = (value: unknown): string | undefined =>
+	typeof value === 'object' && value !== null ? value.constructor?.name : undefined;
 
 /** A ToolArgumentsError for arguments that cannot be encoded as JSON. */
 const unencodable = (toolName: string, detail: string): ToolArgumentsError =>
@@ -516,59 +500,82 @@ function assertJsonValue(value: unknown, path: string, toolName: string, seen: S
 		return;
 	}
 	if (typeof value === 'string') {
-		if (LONE_SURROGATE.test(value)) {
-			throw unencodable(
-				toolName,
-				`a string holding a lone surrogate is not Unicode text (at ${JSON.stringify(path)})`,
-			);
-		}
+		assertJsonString(value, path, toolName);
 		return;
 	}
 	if (typeof value === 'number') {
-		if (!Number.isFinite(value)) {
-			throw unencodable(toolName, `${value} is not a JSON number`);
-		}
+		assertJsonNumber(value, toolName);
 		return;
 	}
 	if (Array.isArray(value)) {
-		if (seen.has(value)) {
-			throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
-		}
-		seen.add(value);
-		for (let index = 0; index < value.length; index++) {
-			const item = value[index];
-			const itemPath = `${path}[${index}]`;
-			if (item === undefined) {
-				throw unencodable(
-					toolName,
-					`undefined is not a JSON value (at ${JSON.stringify(itemPath)})`,
-				);
-			}
-			assertJsonValue(item, itemPath, toolName, seen);
-		}
-		seen.delete(value);
+		assertJsonArray(value, path, toolName, seen);
 		return;
 	}
 	if (isPlainObject(value)) {
-		if (seen.has(value)) {
-			throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
-		}
-		seen.add(value);
-		for (const [key, entry] of Object.entries(value)) {
-			// An object property set to undefined is treated as absent, as JSON.stringify treats it.
-			if (entry === undefined) {
-				continue;
-			}
-			assertJsonKey(key, path, toolName);
-			assertJsonValue(entry, `${path}.${key}`, toolName, seen);
-		}
-		seen.delete(value);
+		assertJsonObject(value, path, toolName, seen);
 		return;
 	}
 	throw unencodable(
 		toolName,
 		`${describeUnencodableType(value)} is not a JSON value (at ${JSON.stringify(path)})`,
 	);
+}
+
+function assertJsonString(value: string, path: string, toolName: string): void {
+	if (LONE_SURROGATE.test(value)) {
+		throw unencodable(
+			toolName,
+			`a string holding a lone surrogate is not Unicode text (at ${JSON.stringify(path)})`,
+		);
+	}
+}
+
+function assertJsonNumber(value: number, toolName: string): void {
+	if (!Number.isFinite(value)) {
+		throw unencodable(toolName, `${value} is not a JSON number`);
+	}
+}
+
+function assertJsonArray(
+	value: unknown[],
+	path: string,
+	toolName: string,
+	seen: Set<object>,
+): void {
+	if (seen.has(value)) {
+		throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
+	}
+	seen.add(value);
+	for (let index = 0; index < value.length; index++) {
+		const item = value[index];
+		const itemPath = `${path}[${index}]`;
+		if (item === undefined) {
+			throw unencodable(toolName, `undefined is not a JSON value (at ${JSON.stringify(itemPath)})`);
+		}
+		assertJsonValue(item, itemPath, toolName, seen);
+	}
+	seen.delete(value);
+}
+
+function assertJsonObject(
+	value: JsonObject,
+	path: string,
+	toolName: string,
+	seen: Set<object>,
+): void {
+	if (seen.has(value)) {
+		throw unencodable(toolName, `circular reference (at ${JSON.stringify(path)})`);
+	}
+	seen.add(value);
+	for (const [key, entry] of Object.entries(value)) {
+		// An object property set to undefined is treated as absent, as JSON.stringify treats it.
+		if (entry === undefined) {
+			continue;
+		}
+		assertJsonKey(key, path, toolName);
+		assertJsonValue(entry, `${path}.${key}`, toolName, seen);
+	}
+	seen.delete(value);
 }
 
 /**
@@ -617,8 +624,8 @@ function readOpenAIToolCall(call: OpenAIToolCall): {
 	args: string | JsonObject;
 	unsupported?: string;
 } {
-	const id = String(call.id ?? '');
-	if (!('function' in call) || !call.function) {
+	const id = fieldText(call.id ?? '');
+	if (!('function' in call) || call.function == null || !isTruthy(call.function)) {
 		return {
 			id,
 			name: '',
@@ -627,8 +634,11 @@ function readOpenAIToolCall(call: OpenAIToolCall): {
 		};
 	}
 	const { name, arguments: args } = call.function;
-	return { id, name: String(name), args: args || {} };
+	return { id, name: fieldText(name), args: args != null && isTruthy(args) ? args : {} };
 }
+
+/** A tool call's field as text: a call read back from storage has no checked type. */
+const fieldText = (value: unknown): string => String(value);
 
 /**
  * Collection of tools with utility methods
@@ -663,7 +673,13 @@ export class Tools implements Iterable<BaseTool> {
 	#uniqueTools(): BaseTool[] {
 		warnOnDuplicateNames(this.tools);
 		const seen = new Set<string>();
-		return this.tools.filter((tool) => !seen.has(tool.name) && seen.add(tool.name));
+		return this.tools.filter((tool) => {
+			if (seen.has(tool.name)) {
+				return false;
+			}
+			seen.add(tool.name);
+			return true;
+		});
 	}
 
 	/**
@@ -733,29 +749,34 @@ export class Tools implements Iterable<BaseTool> {
 		const messages: ChatCompletionToolMessageParam[] = [];
 		for (const call of toolCalls ?? []) {
 			const { id, name, args, unsupported } = readOpenAIToolCall(call);
-			const tool = unsupported ? undefined : this.getTool(name);
-			let result: unknown;
-			if (unsupported) {
-				result = { error: unsupported };
-			} else if (!tool) {
-				result = { error: `Unknown tool ${JSON.stringify(name)}` };
-			} else {
-				try {
-					result = await tool.execute(args);
-				} catch (error) {
-					if (!(error instanceof StackOneError)) {
-						throw error;
-					}
-					const body = error instanceof StackOneAPIError ? error.responseBody : undefined;
-					result = {
-						error: error.message,
-						...(body != null && body !== '' ? { response_body: body } : {}),
-					};
-				}
-			}
+			const result =
+				unsupported === undefined
+					? // oxlint-disable-next-line eslint/no-await-in-loop -- calls run one at a time, in order, as documented
+						await this.#runToolCall(name, args)
+					: { error: unsupported };
 			messages.push({ role: 'tool', tool_call_id: id, content: serializeToolResult(result) });
 		}
 		return messages;
+	}
+
+	/** Run one tool call, turning a StackOne error into a result the model can read. */
+	async #runToolCall(name: string, args: string | JsonObject): Promise<unknown> {
+		const tool = this.getTool(name);
+		if (tool === undefined) {
+			return { error: `Unknown tool ${JSON.stringify(name)}` };
+		}
+		try {
+			return await tool.execute(args);
+		} catch (error) {
+			if (!(error instanceof StackOneError)) {
+				throw error;
+			}
+			const body = error instanceof StackOneAPIError ? error.responseBody : undefined;
+			return {
+				error: error.message,
+				...(body != null && body !== '' ? { response_body: body } : {}),
+			};
+		}
 	}
 
 	/**
@@ -767,7 +788,8 @@ export class Tools implements Iterable<BaseTool> {
 	}
 
 	/**
-	 * Convert all tools to OpenAI Responses API format
+	 * Convert all tools to OpenAI Responses API format, not strict by default: see
+	 * {@link BaseTool.toOpenAIResponses} for what `{ strict: true }` does.
 	 * @see https://platform.openai.com/docs/api-reference/responses
 	 */
 	toOpenAIResponses(options: { strict?: boolean } = {}): OpenAIResponsesFunctionTool[] {
@@ -784,6 +806,7 @@ export class Tools implements Iterable<BaseTool> {
 	): Promise<AISDKToolResult> {
 		const result: AISDKToolResult = {};
 		for (const tool of this.#uniqueTools()) {
+			// oxlint-disable-next-line no-await-in-loop -- converted one at a time, as before this lint pass
 			Object.assign(result, await tool.toAISDK(options));
 		}
 		return result;
@@ -816,35 +839,36 @@ export class Tools implements Iterable<BaseTool> {
 		options: ClaudeAgentSdkOptions = {},
 	): Promise<McpSdkServerConfigWithInstance> {
 		const { serverName = 'stackone-tools', serverVersion = '1.0.0' } = options;
+		const tools = new Map(this.#uniqueTools().map((tool) => [tool.name, tool]));
 
-		// Import the Claude Agent SDK dynamically
-		const claudeAgentSdk = await tryImport<typeof import('@anthropic-ai/claude-agent-sdk')>(
-			'@anthropic-ai/claude-agent-sdk',
-			`npm install @anthropic-ai/claude-agent-sdk (requires ${peerDependencies['@anthropic-ai/claude-agent-sdk']})`,
+		// The SDK's tool() and createSdkMcpServer() take only Zod shapes: a JSON schema is dropped,
+		// leaving the model no parameters and the handler the request context instead of the arguments
+		const server = new McpServer(
+			{ name: serverName, version: serverVersion },
+			{ capabilities: { tools: {} } },
 		);
-
-		// Convert all tools to Claude Agent SDK format
-		// We use type assertions here because the Zod types from our dynamic import
-		// don't perfectly match the Claude Agent SDK's expected types at compile time
-		const sdkTools = await Promise.all(
-			this.#uniqueTools().map(async (baseTool) => {
-				const toolDef = await baseTool.toClaudeAgentSdkTool();
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Dynamic Zod schema types
-				return claudeAgentSdk.tool(
-					toolDef.name,
-					toolDef.description,
-					toolDef.inputSchema as any,
-					toolDef.handler as any,
-				);
-			}),
-		);
-
-		// Create and return the MCP server
-		return claudeAgentSdk.createSdkMcpServer({
-			name: serverName,
-			version: serverVersion,
-			tools: sdkTools,
+		const listed = [...tools.values()].map((tool) => {
+			const { name, description, input_schema } = tool.toAnthropic();
+			return { name, description, inputSchema: input_schema };
 		});
+		server.server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: listed }));
+		server.server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
+			const tool = tools.get(params.name);
+			if (tool === undefined) {
+				throw new McpError(ErrorCode.InvalidParams, `Tool ${params.name} not found`);
+			}
+			try {
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the model's parsed JSON arguments
+				const result = await tool.execute((params.arguments ?? {}) as JsonObject);
+				return { content: [{ type: 'text', text: serializeToolResult(result) }] };
+			} catch (error) {
+				// A tool error goes back to the model as a result it can read, not a protocol error
+				const text = error instanceof Error ? error.message : String(error);
+				return { content: [{ type: 'text', text }], isError: true };
+			}
+		});
+
+		return { type: 'sdk', name: serverName, instance: server };
 	}
 
 	/**
@@ -866,7 +890,7 @@ export class Tools implements Iterable<BaseTool> {
 				if (index < tools.length) {
 					return { value: tools[index++], done: false };
 				}
-				return { value: undefined as unknown as BaseTool, done: true };
+				return { value: undefined, done: true };
 			},
 		};
 	}
@@ -904,10 +928,11 @@ export function warnOnDuplicateNames(tools: readonly BaseTool[]): void {
 	for (const tool of tools) {
 		counts.set(tool.name, (counts.get(tool.name) ?? 0) + 1);
 	}
-	const clashing = [...counts]
-		.filter(([name, count]) => count > 1 && name !== SUBMIT_FEEDBACK_TOOL_NAME)
-		.map(([name]) => name)
-		.sort();
+	const clashing = sorted(
+		[...counts]
+			.filter(([name, count]) => count > 1 && name !== SUBMIT_FEEDBACK_TOOL_NAME)
+			.map(([name]) => name),
+	);
 	if (clashing.length > 0) {
 		warn(
 			`${clashing.length} tool name(s) are served by more than one account (${clashing.slice(0, 5).join(', ')}). The first one listed, from the lowest account id, is used — pass account ids to choose.`,

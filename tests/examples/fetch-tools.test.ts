@@ -5,6 +5,7 @@
  */
 
 import { http, HttpResponse } from 'msw';
+import { isRecord } from '../../mocks/handlers.utils';
 import { server } from '../../mocks/node';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { StackOneToolSet } from '../../src';
@@ -23,8 +24,8 @@ describe('fetch-tools example e2e', () => {
 		server.use(
 			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
 				const body: unknown = await request.json();
-				assert(typeof body === 'object' && body !== null);
-				const { action } = body as Record<string, unknown>;
+				assert(isRecord(body));
+				const { action } = body;
 				if (action === 'bamboohr_list_employees') {
 					return HttpResponse.json({
 						data: [
@@ -94,9 +95,11 @@ describe('fetch-tools example e2e', () => {
 		});
 		// The mock echoes what reached tools/call, inside the server's { isError, result }.
 		expect(result.isError).toBe(false);
-		expect((result.result as { data: unknown }).data).toMatchObject({
-			action: 'bamboohr_list_employees',
-			arguments: { query: { limit: 5 } },
+		expect(result.result).toMatchObject({
+			data: {
+				action: 'bamboohr_list_employees',
+				arguments: { query: { limit: 5 } },
+			},
 		});
 	});
 });

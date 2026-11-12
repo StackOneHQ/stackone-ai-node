@@ -29,6 +29,7 @@ export type {
 	FeedbackSource,
 	JsonObject,
 	JsonValue,
+	SearchHitAccount,
 	SearchResult,
 	StackOneAccount,
 	ToolDefinition,

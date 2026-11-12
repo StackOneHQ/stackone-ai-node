@@ -1,5 +1,21 @@
 import { http, HttpResponse } from 'msw';
-import { extractTextFromInput } from './handlers.utils';
+import { bodyField, extractTextFromInput, isRecord, offersTools } from './handlers.utils';
+
+/** The first user message of a chat completion that mentions an employee, or `''`. */
+const employeeQuestion = (messages: unknown): string => {
+	if (!Array.isArray(messages)) {
+		return '';
+	}
+	const candidates: unknown[] = messages;
+	for (const message of candidates) {
+		if (isRecord(message) && message.role === 'user' && typeof message.content === 'string') {
+			if (message.content.includes('employee')) {
+				return message.content;
+			}
+		}
+	}
+	return '';
+};
 
 /**
  * OpenAI API endpoints for AI SDK and OpenAI integration examples
@@ -7,12 +23,9 @@ import { extractTextFromInput } from './handlers.utils';
 export const openaiHandlers = [
 	// OpenAI Responses API (used by AI SDK)
 	http.post('https://api.openai.com/v1/responses', async ({ request }) => {
-		const body = (await request.json()) as {
-			input?: unknown;
-			tools?: Array<{ name?: string }>;
-		};
-		const userMessage = extractTextFromInput(body.input);
-		const hasTools = body.tools && body.tools.length > 0;
+		const body = await request.json();
+		const userMessage = extractTextFromInput(bodyField(body, 'input'));
+		const hasTools = offersTools(body);
 
 		// For ai-sdk-integration.ts
 		if (hasTools && userMessage.includes('Get all details')) {
@@ -115,14 +128,9 @@ export const openaiHandlers = [
 
 	// OpenAI Chat Completions API (used by OpenAI SDK directly)
 	http.post('https://api.openai.com/v1/chat/completions', async ({ request }) => {
-		const body = (await request.json()) as {
-			messages?: Array<{ content?: string; role?: string }>;
-			tools?: Array<{ function?: { name?: string } }>;
-		};
-		const userMessage =
-			body.messages?.find((m) => m.role === 'user' && m.content?.includes('employee'))?.content ??
-			'';
-		const hasTools = body.tools && body.tools.length > 0;
+		const body = await request.json();
+		const userMessage = employeeQuestion(bodyField(body, 'messages'));
+		const hasTools = offersTools(body);
 
 		// For openai-integration.ts - returns tool call for bamboohr_get_employee
 		if (hasTools && userMessage.includes('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA')) {

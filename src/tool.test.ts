@@ -1,8 +1,11 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { jsonSchema } from 'ai';
 import { http } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
-import { type RecordedToolCall, createMcpApp } from '../mocks/mcp-server';
+import { createMcpApp } from '../mocks/mcp-server';
+import type { RecordedToolCall } from '../mocks/mcp-server';
 import { server } from '../mocks/node';
 import { toolParametersFromInputSchema } from './schema';
 import { BaseTool, StackOneMcpTool, StackOneTool, Tools } from './tool';
@@ -20,6 +23,7 @@ const executeAISDKTool = (
 	name: string,
 	args: Record<string, unknown>,
 ): Promise<unknown> => {
+	// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the plain signature above, across ai majors
 	const execute = tools[name]?.execute as unknown as (
 		args: Record<string, unknown>,
 		options?: unknown,
@@ -65,6 +69,21 @@ const richSchema = {
 	required: ['start_date'],
 } as const;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null;
+
+/** The JSON Schema inside an AI SDK `inputSchema`, whose type differs across ai majors. */
+const aiSdkJsonSchema = (inputSchema: unknown): Record<string, unknown> => {
+	assert(isRecord(inputSchema) && isRecord(inputSchema.jsonSchema));
+	return inputSchema.jsonSchema;
+};
+
+/** A value an adapter's types leave optional, though it always sets it. */
+const present = <Value>(value: Value | null | undefined): Value => {
+	assert.exists(value);
+	return value;
+};
+
 const localTool = (name: string, schema: unknown, description = 'Test tool') =>
 	new BaseTool(name, description, toolParametersFromInputSchema(schema), { kind: 'local' });
 
@@ -92,9 +111,10 @@ describe('BaseTool', () => {
 			const tool = localTool('rich', richSchema);
 			const schema = tool.toJsonSchema();
 			const address = schema.properties?.address?.properties;
-			assert(address);
-			(address as Record<string, unknown>).injected = {};
-			(schema.$defs as Record<string, unknown>).Evil = {};
+			assert.isDefined(address);
+			address.injected = {};
+			assert.isDefined(schema.$defs);
+			schema.$defs.Evil = {};
 
 			expect(tool.toJsonSchema()).toEqual(richSchema);
 		});
@@ -119,33 +139,21 @@ describe('BaseTool', () => {
 		const { oneOf: _rejected, ...providerRoot } = richSchema;
 
 		const adapters: Array<[string, () => Promise<Record<string, unknown>>]> = [
-			['toOpenAI', async () => tool.toOpenAI().function.parameters as Record<string, unknown>],
-			['toAnthropic', async () => tool.toAnthropic().input_schema as Record<string, unknown>],
+			['toOpenAI', async () => present(tool.toOpenAI().function.parameters)],
+			['toAnthropic', async () => tool.toAnthropic().input_schema],
 			[
 				'toOpenAIResponses (strict)',
-				async () => tool.toOpenAIResponses().parameters as Record<string, unknown>,
+				async () => present(tool.toOpenAIResponses({ strict: true }).parameters),
 			],
-			[
-				'toOpenAIResponses (non-strict)',
-				async () => tool.toOpenAIResponses({ strict: false }).parameters as Record<string, unknown>,
-			],
+			['toOpenAIResponses (non-strict)', async () => present(tool.toOpenAIResponses().parameters)],
 			[
 				'toAISDK',
 				async () => {
 					const aiTools = await tool.toAISDK({ executable: false });
 					const aiTool = aiTools.hris_rich_probe;
-					assert(aiTool);
-					return (aiTool.inputSchema as { jsonSchema: Record<string, unknown> }).jsonSchema;
+					assert.isDefined(aiTool);
+					return aiSdkJsonSchema(aiTool.inputSchema);
 				},
-			],
-			[
-				'toClaudeAgentSdkTool',
-				async () =>
-					(
-						(await tool.toClaudeAgentSdkTool()).inputSchema as {
-							jsonSchema: Record<string, unknown>;
-						}
-					).jsonSchema,
 			],
 		];
 
@@ -170,10 +178,10 @@ describe('BaseTool', () => {
 				expect(schema).not.toHaveProperty(keyword);
 			}
 			// The nested union is untouched: only the root is a problem for the provider.
-			expect((schema.properties as Record<string, JSONSchema>).identifier?.oneOf).toEqual([
-				{ type: 'string' },
-				{ type: 'integer' },
-			]);
+			expect(schema).toHaveProperty(
+				['properties', 'identifier', 'oneOf'],
+				[{ type: 'string' }, { type: 'integer' }],
+			);
 		});
 
 		it.each(adapters)('%s is otherwise exactly the served root', async (_name, adapt) => {
@@ -186,21 +194,19 @@ describe('BaseTool', () => {
 			expect(open.toJsonSchema().additionalProperties).toBe(true);
 			expect(open.toOpenAI().function.parameters?.additionalProperties).toBe(true);
 			expect(open.toAnthropic().input_schema.additionalProperties).toBe(true);
-			expect(open.toOpenAIResponses({ strict: false }).parameters?.additionalProperties).toBe(true);
+			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(true);
 			// Strict Responses and the AI SDK close the root: documented, and pinned here.
-			expect(open.toOpenAIResponses().parameters?.additionalProperties).toBe(false);
+			expect(open.toOpenAIResponses({ strict: true }).parameters?.additionalProperties).toBe(false);
 			const aiTools = await open.toAISDK({ executable: false });
 			const aiTool = aiTools.open;
-			assert(aiTool);
-			expect(
-				(aiTool.inputSchema as { jsonSchema: JSONSchema }).jsonSchema.additionalProperties,
-			).toBe(false);
+			assert.isDefined(aiTool);
+			expect(aiSdkJsonSchema(aiTool.inputSchema).additionalProperties).toBe(false);
 		});
 
 		it('closes the root in strict mode without rewriting anything nested', () => {
-			const parameters = tool.toOpenAIResponses().parameters as JSONSchema;
+			const parameters = present(tool.toOpenAIResponses({ strict: true }).parameters);
 			expect(parameters.additionalProperties).toBe(false);
-			expect(parameters.properties?.address).toEqual(richSchema.properties.address);
+			expect(parameters).toHaveProperty(['properties', 'address'], richSchema.properties.address);
 		});
 	});
 
@@ -223,19 +229,20 @@ describe('BaseTool', () => {
 		});
 	});
 
-	it('converts to the OpenAI Responses shape, strict by default', () => {
-		const strict = simpleTool().toOpenAIResponses();
-		expect(strict).toMatchObject({ type: 'function', name: 'test_tool', strict: true });
-
-		const lax = simpleTool().toOpenAIResponses({ strict: false });
-		expect(lax.strict).toBe(false);
+	it('converts to the OpenAI Responses shape, not strict by default', () => {
+		const lax = simpleTool().toOpenAIResponses();
+		expect(lax).toMatchObject({ type: 'function', name: 'test_tool', strict: false });
 		expect(lax.parameters).not.toHaveProperty('additionalProperties');
+
+		const strict = simpleTool().toOpenAIResponses({ strict: true });
+		expect(strict.strict).toBe(true);
+		expect(strict.parameters?.additionalProperties).toBe(false);
 	});
 
 	it('builds an AI SDK tool whose schema the ai package accepts', async () => {
 		const aiTools = await simpleTool().toAISDK();
 		expect(typeof aiTools.test_tool?.execute).toBe('function');
-		expect(jsonSchema(simpleTool().toOpenAI().function.parameters as JSONSchema)).toBeDefined();
+		expect(jsonSchema(present(simpleTool().toOpenAI().function.parameters))).toBeDefined();
 	});
 
 	it('returns an AI SDK execution error as a string rather than throwing', async () => {
@@ -252,19 +259,6 @@ describe('BaseTool', () => {
 		tool.setExposeExecutionMetadata(false);
 		expect((await tool.toAISDK()).test_tool?.execution).toBeUndefined();
 		expect((await tool.toAISDK({ executable: false })).test_tool?.execute).toBeUndefined();
-	});
-
-	it('serialises a Claude Agent SDK result for the model, bytes as base64', async () => {
-		const tool = simpleTool();
-		tool.execute = async () => ({ content: Buffer.from('%PDF') as never, ok: true });
-		const definition = await tool.toClaudeAgentSdkTool();
-
-		const result = await definition.handler({});
-
-		expect(JSON.parse(result.content[0]?.text ?? '')).toEqual({
-			content: Buffer.from('%PDF').toString('base64'),
-			ok: true,
-		});
 	});
 });
 
@@ -284,7 +278,7 @@ describe('StackOneMcpTool as an action tool', () => {
 	const serve = (toolResults: Record<string, CallToolResult> = {}) => {
 		const app = createMcpApp({
 			accountTools: { acc1: [listed], acc2: [listed] },
-			onToolCall: (call) => calls.push(call),
+			onToolCall: (recorded) => calls.push(recorded),
 			toolResults,
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
@@ -360,7 +354,7 @@ describe('StackOneMcpTool as an action tool', () => {
 		['x-stackone-account-id', 'victim'],
 		['Cookie', 'session=x'],
 	])('drops a model-supplied %j header', async (name, value) => {
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
 		await actionTool().execute({ headers: { [name]: value } });
 
@@ -370,7 +364,7 @@ describe('StackOneMcpTool as an action tool', () => {
 	});
 
 	it('keeps a header a nested schema declares, and drops one carrying CR/LF', async () => {
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 		await actionTool().execute({ headers: { 'X-Trace': 'abc', 'X-Other': 'no' } });
 		await actionTool().execute({ headers: { 'x-trace': 'a\r\nInjected: 1' } });
 		expect(calls[0]?.arguments.headers).toEqual({ 'X-Trace': 'abc' });
@@ -403,8 +397,8 @@ describe('StackOneMcpTool as an action tool', () => {
 			.execute(value)
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolArgumentsError);
-		expect((error as Error).message).toMatch(/must be a JSON object/);
+		assert.instanceOf(error, ToolArgumentsError);
+		expect(error.message).toMatch(/must be a JSON object/);
 		expect(calls).toEqual([]);
 	});
 
@@ -415,7 +409,7 @@ describe('StackOneMcpTool as an action tool', () => {
 		['a Map', { body: { cache: new Map() } }, 'a Map'],
 		['a Set', { query: { ids: new Set([1, 2]) } }, 'a Set'],
 		['a RegExp', { pattern: /x/ }, 'a RegExp'],
-		['a function', { cb: () => {} }, 'a function'],
+		['a function', { cb: () => undefined }, 'a function'],
 		['a symbol', { tag: Symbol('x') }, 'a symbol'],
 		['a bigint', { amount: 10n }, 'a bigint'],
 		['a Uint8Array', { bytes: new Uint8Array([1]) }, 'binary data'],
@@ -424,11 +418,12 @@ describe('StackOneMcpTool as an action tool', () => {
 		'rejects %s nested in the arguments, without calling the server',
 		async (_name, args, hint) => {
 			const error = await actionTool()
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately not JSON
 				.execute(args as unknown as JsonObject)
 				.catch((caught: unknown) => caught);
 
-			expect(error).toBeInstanceOf(ToolArgumentsError);
-			expect((error as Error).message).toContain(
+			assert.instanceOf(error, ToolArgumentsError);
+			expect(error.message).toContain(
 				`Arguments for "crm_update_contact" could not be encoded as JSON: ${hint}`,
 			);
 			expect(calls).toEqual([]);
@@ -442,11 +437,11 @@ describe('StackOneMcpTool as an action tool', () => {
 		['a lone surrogate in a top-level key', { '\uDFFF': 'x' }],
 	])('rejects %s without calling the server', async (_name, args) => {
 		const error = await actionTool()
-			.execute(args as JsonObject)
+			.execute(args)
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolArgumentsError);
-		expect((error as Error).message).toMatch(
+		assert.instanceOf(error, ToolArgumentsError);
+		expect(error.message).toMatch(
 			/^Arguments for "crm_update_contact" could not be encoded as JSON: a (string|key) holding a lone surrogate is not Unicode text/,
 		);
 		expect(calls).toEqual([]);
@@ -465,21 +460,20 @@ describe('StackOneMcpTool as an action tool', () => {
 				.execute(text)
 				.catch((caught: unknown) => caught);
 
-			expect(error).toBeInstanceOf(ToolArgumentsError);
-			expect((error as Error).message).toMatch(
-				/^Invalid JSON in arguments for "crm_update_contact": /,
-			);
+			assert.instanceOf(error, ToolArgumentsError);
+			expect(error.message).toMatch(/^Invalid JSON in arguments for "crm_update_contact": /);
 			expect(calls).toEqual([]);
 		},
 	);
 
 	it('rejects undefined inside an array', async () => {
 		const error = await actionTool()
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately not JSON
 			.execute({ query: { ids: [1, undefined, 3] } } as unknown as JsonObject)
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolArgumentsError);
-		expect((error as Error).message).toMatch(/undefined is not a JSON value/);
+		assert.instanceOf(error, ToolArgumentsError);
+		expect(error.message).toMatch(/undefined is not a JSON value/);
 		expect(calls).toEqual([]);
 	});
 
@@ -488,11 +482,11 @@ describe('StackOneMcpTool as an action tool', () => {
 		// eslint-disable-next-line @typescript-eslint/no-array-delete -- deliberately punching a hole
 		delete ids[1];
 		const error = await actionTool()
-			.execute({ query: { ids } } as unknown as JsonObject)
+			.execute({ query: { ids } })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolArgumentsError);
-		expect((error as Error).message).toMatch(/undefined is not a JSON value/);
+		assert.instanceOf(error, ToolArgumentsError);
+		expect(error.message).toMatch(/undefined is not a JSON value/);
 		expect(calls).toEqual([]);
 	});
 
@@ -504,23 +498,24 @@ describe('StackOneMcpTool as an action tool', () => {
 			.execute({ body })
 			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolArgumentsError);
-		expect((error as Error).message).toMatch(/circular reference/);
+		assert.instanceOf(error, ToolArgumentsError);
+		expect(error.message).toMatch(/circular reference/);
 		expect(calls).toEqual([]);
 	});
 
 	it('drops an object property set to undefined, rather than rejecting it', async () => {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately not JSON
 		await actionTool().execute({ path: { id: '1' }, extra: undefined } as unknown as JsonObject);
 		expect(calls[0]?.arguments).toEqual({ path: { id: '1' } });
 	});
 
 	it('is refused by the server when it has no account', async () => {
-		const error = (await actionTool()
+		const error = await actionTool()
 			.setAccountId(undefined)
 			.execute({})
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
+			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(400);
 	});
 
@@ -557,11 +552,11 @@ describe('StackOneMcpTool as an action tool', () => {
 			},
 		});
 
-		const error = (await actionTool()
+		const error = await actionTool()
 			.execute({})
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
+			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(501);
 	});
 
@@ -576,27 +571,29 @@ describe('StackOneMcpTool as an action tool', () => {
 	});
 });
 
+const mcpTool = (properties: Record<string, JSONSchema> = {}) =>
+	new StackOneMcpTool({
+		name: 'stackone_execute_action',
+		description: 'Execute',
+		parameters: toolParametersFromInputSchema({ type: 'object', properties }),
+		endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute&x-account-id=acc1%2Cacc2`,
+		apiKey: 'test-key',
+		timeout: 5_000,
+	});
+
 describe('StackOneMcpTool', () => {
 	const calls: RecordedToolCall[] = [];
 	beforeEach(() => {
 		calls.length = 0;
+		// Two accounts on different providers: the server serves the trio, and routes each action to
+		// the one account on its provider.
 		const app = createMcpApp({
-			accountTools: { acc1: [] },
-			onToolCall: (call) => calls.push(call),
+			accountTools: { acc1: [], acc2: [] },
+			accountProviders: { acc2: 'other' },
+			onToolCall: (recorded) => calls.push(recorded),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
 	});
-
-	const mcpTool = (properties: Record<string, JSONSchema> = {}) =>
-		new StackOneMcpTool({
-			name: 'mock_acc1_execute_action',
-			description: 'Execute',
-			parameters: toolParametersFromInputSchema({ type: 'object', properties }),
-			endpoint: `${TEST_BASE_URL}/mcp?tool-mode=search_execute`,
-			apiKey: 'test-key',
-			accountId: 'acc1',
-			timeout: 5_000,
-		});
 
 	it('calls the tool over tools/call and returns the parsed result', async () => {
 		const result = await mcpTool().execute({
@@ -610,18 +607,18 @@ describe('StackOneMcpTool', () => {
 		});
 		expect(calls).toEqual([
 			{
-				accountId: 'acc1',
+				accountId: 'acc1,acc2',
 				toolMode: 'search_execute',
-				name: 'mock_acc1_execute_action',
+				name: 'stackone_execute_action',
 				arguments: { action_id: 'mock_list_items', query: { page_size: 2 } },
 			},
 		]);
 	});
 
-	// The meta tools take a `headers` object the server unpacks, and these arguments are
+	// stackone_execute_action takes a `headers` object the server unpacks, and these arguments are
 	// model-controlled. This schema declares no headers at all, so nothing survives.
 	it('drops every model-supplied header', async () => {
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
 		await mcpTool().execute({
 			action_id: 'mock_list_items',
@@ -640,7 +637,7 @@ describe('StackOneMcpTool', () => {
 	});
 
 	it('keeps a header its own schema declares', async () => {
-		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 		await mcpTool({
 			headers: { type: 'object', properties: { 'x-trace': { type: 'string' } } },
 		}).execute({
@@ -652,11 +649,11 @@ describe('StackOneMcpTool', () => {
 	});
 
 	it('raises when the result carries isError', async () => {
-		const error = (await mcpTool()
+		const error = await mcpTool()
 			.execute({ action_id: 'mock_not_a_real_action' })
-			.catch((caught: unknown) => caught)) as StackOneAPIError;
+			.catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.message).toContain('Unknown action mock_not_a_real_action');
 		expect(error.statusCode).toBe(404);
 	});
@@ -668,9 +665,9 @@ describe('StackOneMcpTool', () => {
 	});
 });
 
-describe('Tools', () => {
-	const named = (name: string) => localTool(name, { type: 'object', properties: {} });
+const named = (name: string) => localTool(name, { type: 'object', properties: {} });
 
+describe('Tools', () => {
 	it('looks tools up by name, first match wins', () => {
 		const first = named('dup');
 		const tools = new Tools([first, named('dup'), named('other')]);
@@ -725,9 +722,10 @@ describe('Tools', () => {
 		]);
 		expect(tools.toOpenAI().map((tool) => tool.function.name)).toEqual(['a', 'b']);
 		expect(tools.toAnthropic().map((tool) => tool.name)).toEqual(['a', 'b']);
-		expect(tools.toOpenAIResponses({ strict: false }).map((tool) => tool.strict)).toEqual([
-			false,
-			false,
+		expect(tools.toOpenAIResponses().map((tool) => tool.strict)).toEqual([false, false]);
+		expect(tools.toOpenAIResponses({ strict: true }).map((tool) => tool.strict)).toEqual([
+			true,
+			true,
 		]);
 		expect(Object.keys(await tools.toAISDK())).toEqual(['a', 'b']);
 	});
@@ -742,6 +740,40 @@ describe('Tools', () => {
 		expect(mcpServer.name).toBe('custom');
 		expect(mcpServer.instance).toBeDefined();
 	});
+
+	it('serves the Claude Agent SDK each schema and hands the tool the model arguments', async () => {
+		const rich = localTool('b', richSchema);
+		const seen: unknown[] = [];
+		rich.execute = async (args) => {
+			seen.push(args);
+			// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
+			return { content: Buffer.from('%PDF') as never, ok: true };
+		};
+		const failing = named('c');
+		failing.execute = async () => {
+			throw new StackOneAPIError('Upstream failed', 502, null);
+		};
+		const { instance } = await new Tools([named('a'), rich, failing]).toClaudeAgentSdk();
+		const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+		const client = new Client({ name: 'test', version: '1.0.0' });
+		await instance.connect(serverTransport);
+		await client.connect(clientTransport);
+
+		const { tools } = await client.listTools();
+		const result = await client.callTool({ name: 'b', arguments: { employee_id: 'emp_1' } });
+		const failure = await client.callTool({ name: 'c', arguments: {} });
+		await client.close();
+
+		expect(tools.map((tool) => tool.inputSchema)).toEqual(
+			[named('a'), rich, failing].map((tool) => tool.toAnthropic().input_schema),
+		);
+		expect(seen).toEqual([{ employee_id: 'emp_1' }]);
+		expect(result).toEqual({
+			content: [{ type: 'text', text: JSON.stringify({ content: 'JVBERg==', ok: true }) }],
+		});
+		expect(failure).toMatchObject({ isError: true, content: [{ type: 'text' }] });
+		expect(JSON.stringify(failure.content)).toContain('Upstream failed');
+	});
 });
 
 describe('ToolParameters typing', () => {
@@ -751,25 +783,30 @@ describe('ToolParameters typing', () => {
 	});
 });
 
-describe('Tools.executeOpenAIToolCalls', () => {
-	const toolsWith = (behaviour: (args: unknown) => Promise<JsonObject>) => {
-		const tool = localTool('linear_list_issues', {
-			type: 'object',
-			properties: { body_variables: { type: 'object' } },
-		});
-		const seen: unknown[] = [];
-		tool.execute = async (args) => {
-			seen.push(args);
-			return behaviour(args);
-		};
-		return { tools: new Tools([tool]), seen };
-	};
-	const call = (name: string, args = '{}', id = 'call_1') => ({
-		id,
-		type: 'function' as const,
-		function: { name, arguments: args },
+const toolsWith = (behaviour: (args: unknown) => Promise<JsonObject>) => {
+	const tool = localTool('linear_list_issues', {
+		type: 'object',
+		properties: { body_variables: { type: 'object' } },
 	});
+	const seen: unknown[] = [];
+	tool.execute = async (args) => {
+		seen.push(args);
+		return behaviour(args);
+	};
+	return { tools: new Tools([tool]), seen };
+};
+/** A tool message's content, which executeOpenAIToolCalls always writes as a string. */
+const contentOf = (message: { content?: unknown } | undefined): string => {
+	assert(typeof message?.content === 'string');
+	return message.content;
+};
+const call = (name: string, args = '{}', id = 'call_1') => ({
+	id,
+	type: 'function' as const,
+	function: { name, arguments: args },
+});
 
+describe('Tools.executeOpenAIToolCalls', () => {
 	it('runs each call and pairs its result with the call id', async () => {
 		const { tools, seen } = toolsWith(async () => ({ data: { n: 1 } }));
 
@@ -784,7 +821,7 @@ describe('Tools.executeOpenAIToolCalls', () => {
 	});
 
 	it('keeps the order of several calls', async () => {
-		const { tools } = toolsWith(async (args) => ({ echoed: args as string }));
+		const { tools } = toolsWith(async (args) => ({ echoed: String(args) }));
 
 		const messages = await tools.executeOpenAIToolCalls([
 			call('linear_list_issues', '{"a":1}', 'c1'),
@@ -811,7 +848,7 @@ describe('Tools.executeOpenAIToolCalls', () => {
 
 		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
 
-		expect(JSON.parse(message?.content as string)).toEqual({
+		expect(JSON.parse(contentOf(message))).toEqual({
 			error: '400 Bad Request: path.id is missing',
 			response_body: { message: 'path.id is missing' },
 		});
@@ -830,13 +867,13 @@ describe('Tools.executeOpenAIToolCalls', () => {
 		const [message] = await new Tools([tool]).executeOpenAIToolCalls([
 			call('linear_list_issues', '{not json'),
 		]);
-		expect(JSON.parse(message?.content as string).error).toMatch(/Invalid JSON in arguments/);
+		expect(JSON.parse(contentOf(message)).error).toMatch(/Invalid JSON in arguments/);
 	});
 
 	it('reports an unknown tool rather than throwing', async () => {
 		const { tools } = toolsWith(async () => ({}));
 		const [message] = await tools.executeOpenAIToolCalls([call('invented_tool')]);
-		expect(JSON.parse(message?.content as string)).toEqual({
+		expect(JSON.parse(contentOf(message))).toEqual({
 			error: 'Unknown tool "invented_tool"',
 		});
 	});
@@ -846,20 +883,22 @@ describe('Tools.executeOpenAIToolCalls', () => {
 		const [message] = await tools.executeOpenAIToolCalls([
 			{ id: 'c', type: 'custom', custom: { name: 'linear_list_issues', input: '' } },
 		]);
-		expect(JSON.parse(message?.content as string)).toEqual({
+		expect(JSON.parse(contentOf(message))).toEqual({
 			error: 'Unsupported tool call type "custom"',
 		});
 	});
 
 	it('serialises file bytes as base64 instead of a byte array', async () => {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately bytes, not JSON
 		const { tools } = toolsWith(async () => ({ content: Buffer.from('%PDF-1.4') as never }));
 		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
-		expect(JSON.parse(message?.content as string)).toEqual({
+		expect(JSON.parse(contentOf(message))).toEqual({
 			content: Buffer.from('%PDF-1.4').toString('base64'),
 		});
 	});
 
 	it('sends "null" for a tool that returns nothing, as the Python SDK does', async () => {
+		// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- deliberately returns nothing
 		const { tools } = toolsWith(async () => undefined as never);
 		const [message] = await tools.executeOpenAIToolCalls([call('linear_list_issues')]);
 		expect(message?.content).toBe('null');

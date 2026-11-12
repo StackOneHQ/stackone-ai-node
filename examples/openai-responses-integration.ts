@@ -7,11 +7,11 @@ import { StackOneToolSet } from '@stackone/ai';
 import OpenAI from 'openai';
 
 const apiKey = process.env.STACKONE_API_KEY;
-if (!apiKey) {
+if (apiKey === undefined || apiKey === '') {
 	console.error('STACKONE_API_KEY environment variable is required');
 	process.exit(1);
 }
-if (!process.env.OPENAI_API_KEY) {
+if ((process.env.OPENAI_API_KEY ?? '') === '') {
 	console.log('Skipping: OPENAI_API_KEY is not set');
 	process.exit(0);
 }
@@ -19,7 +19,8 @@ if (!process.env.OPENAI_API_KEY) {
 const openaiResponsesIntegration = async (): Promise<void> => {
 	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
 	// without one, the toolset uses every active shared account linked to the key
-	const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
+	const accountId = process.env.STACKONE_ACCOUNT_ID;
+	const toolset = new StackOneToolSet({ accountId: accountId === '' ? undefined : accountId });
 
 	// Fetch tools via MCP
 	const tools = await toolset.fetchTools({

@@ -64,8 +64,9 @@
             buildInputs = with pkgs; [
               # runtime
               nodejs_24
-              pnpm_10
-              typescript-go
+              # pnpm at package.json's packageManager version; nixpkgs has no pnpm 11.17.0
+              corepack_24
+              typescript
 
               # formatting and linting tools
               similarity
@@ -79,6 +80,9 @@
               # git hooks
               lefthook
             ];
+
+            # Fetch pnpm on first use without asking; packageManager pins the version
+            COREPACK_ENABLE_DOWNLOAD_PROMPT = "0";
 
             shellHook = ''
               echo "StackOne AI Node SDK development environment"

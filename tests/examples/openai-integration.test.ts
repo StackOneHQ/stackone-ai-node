@@ -74,7 +74,9 @@ describe('openai-integration example e2e', () => {
 		const toolMessages = await tools.executeOpenAIToolCalls(choice.message.tool_calls);
 		expect(toolMessages).toHaveLength(1);
 		expect(toolMessages[0]).toMatchObject({ role: 'tool', tool_call_id: 'call_mock' });
-		expect(JSON.parse(toolMessages[0]?.content as string)).toMatchObject({
+		const content = toolMessages[0]?.content;
+		assert(typeof content === 'string', 'the tool message carries no text');
+		expect(JSON.parse(content)).toMatchObject({
 			isError: false,
 			result: {
 				data: {

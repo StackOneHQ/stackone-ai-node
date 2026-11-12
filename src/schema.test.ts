@@ -23,7 +23,7 @@ describe('toolParametersFromInputSchema', () => {
 		const parameters = toolParametersFromInputSchema(served);
 
 		const nested = parameters.properties.a?.properties;
-		assert(nested);
+		assert(nested !== undefined);
 		(nested as Record<string, unknown>).injected = { type: 'string' };
 
 		expect(served.properties.a.properties).toEqual({});
@@ -61,9 +61,9 @@ describe('toolParametersFromInputSchema', () => {
 
 describe('foldRootComposition', () => {
 	it('keeps a branch property named __proto__', () => {
-		const schema = JSON.parse(
+		const schema: JSONSchema = JSON.parse(
 			'{"type":"object","anyOf":[{"properties":{"__proto__":{"type":"string"},"q":{"type":"string"}}}]}',
-		) as JSONSchema;
+		);
 		const folded = foldRootComposition(schema);
 		expect(Object.keys(folded.properties ?? {})).toEqual(['__proto__', 'q']);
 		expect(Object.getPrototypeOf(folded.properties)).toBe(Object.prototype);

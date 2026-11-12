@@ -1,4 +1,5 @@
-import { createServer, type Server as NetServer, type Socket } from 'node:net';
+import { createServer } from 'node:net';
+import type { Server as NetServer, Socket } from 'node:net';
 import { StreamableHTTPError } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
@@ -26,6 +27,7 @@ describe('listMcpTools', () => {
 		const cursors: unknown[] = [];
 		server.use(
 			http.post(`${TEST_BASE_URL}/mcp`, async ({ request }) => {
+				// oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stand-in server reading the JSON-RPC messages it is sent
 				const message = (await request.json()) as {
 					id?: number;
 					method: string;
@@ -78,11 +80,9 @@ describe('listMcpTools', () => {
 	});
 
 	it('surfaces an unscoped request as a 400 StackOneAPIError', async () => {
-		const error = (await listMcpTools(requestFor(undefined)).catch(
-			(caught: unknown) => caught,
-		)) as StackOneAPIError;
+		const error = await listMcpTools(requestFor(undefined)).catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(400);
 		expect(error.message).toContain('x-account-id');
 	});
@@ -96,11 +96,9 @@ describe('listMcpTools', () => {
 			),
 		);
 
-		const error = (await listMcpTools(requestFor('acc1')).catch(
-			(caught: unknown) => caught,
-		)) as StackOneAPIError;
+		const error = await listMcpTools(requestFor('acc1')).catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(StackOneAPIError);
+		assert.instanceOf(error, StackOneAPIError);
 		expect(error.statusCode).toBe(412);
 		expect(error.responseBody).toEqual({ message: 're-link the account to resume' });
 		expect(error.message).toBe(
@@ -130,11 +128,17 @@ describe('describeMcpFailure', () => {
 			new StreamableHTTPError(503, 'Error POSTing to endpoint: upstream down'),
 			endpoint,
 			1,
-		) as StackOneAPIError;
+		);
 
-		expect(error.statusCode).toBe(503);
-		expect(error.responseBody).toBe('upstream down');
+		expect(error).toHaveProperty('statusCode', 503);
+		expect(error).toHaveProperty('responseBody', 'upstream down');
 	});
+});
+
+/** A tool result the way the server writes it: structured content, mirrored as text. */
+const served = (structuredContent: Record<string, unknown>) => ({
+	content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
+	structuredContent,
 });
 
 describe('parseToolResult', () => {
@@ -191,11 +195,6 @@ describe('parseToolResult', () => {
 	});
 
 	describe('the server’s success wrapper', () => {
-		const served = (structuredContent: Record<string, unknown>) => ({
-			content: [{ type: 'text', text: JSON.stringify(structuredContent) }],
-			structuredContent,
-		});
-
 		// The server wraps every action tool, execute and feedback as { isError: false, result },
 		// with defender and policy metadata beside it. That is returned exactly as written.
 		it('returns { isError: false, result, ...metadata } as the server wrote it', () => {
@@ -239,9 +238,9 @@ describe('parseToolResult', () => {
 			caught = error;
 		}
 
-		expect(caught).toBeInstanceOf(StackOneAPIError);
-		expect((caught as StackOneAPIError).message).toContain('Lambda execution failed');
-		expect((caught as StackOneAPIError).statusCode).toBe(502);
+		assert.instanceOf(caught, StackOneAPIError);
+		expect(caught.message).toContain('Lambda execution failed');
+		expect(caught.statusCode).toBe(502);
 	});
 
 	it.each([
@@ -257,7 +256,7 @@ describe('parseToolResult', () => {
 				{ isError: true, content: [{ type: 'text', text: JSON.stringify(payload) }] },
 				't',
 			),
-		).toThrow(expect.objectContaining({ statusCode: status }) as Error);
+		).toThrow(expect.objectContaining({ statusCode: status }));
 	});
 });
 
@@ -289,7 +288,9 @@ describe('MCP timeouts', () => {
 		// open for far longer than the toolset's timeout.
 		silent = createServer((socket) => sockets.push(socket));
 		await new Promise<void>((resolve) => silent.listen(0, '127.0.0.1', resolve));
-		port = (silent.address() as { port: number }).port;
+		const address = silent.address();
+		assert(typeof address === 'object' && address !== null, 'the silent server has no port');
+		port = address.port;
 	});
 	afterAll(async () => {
 		for (const socket of sockets) {
@@ -308,10 +309,8 @@ describe('MCP timeouts', () => {
 		const started = Date.now();
 		const error = await listMcpTools(silentRequest()).catch((caught: unknown) => caught);
 
-		expect(error).toBeInstanceOf(ToolSetLoadError);
-		expect((error as Error).message).toBe(
-			`MCP request to http://127.0.0.1:${port}/mcp timed out after 0.3s`,
-		);
+		assert.instanceOf(error, ToolSetLoadError);
+		expect(error.message).toBe(`MCP request to http://127.0.0.1:${port}/mcp timed out after 0.3s`);
 		expect(Date.now() - started).toBeLessThan(5_000);
 	});
 

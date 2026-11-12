@@ -8,11 +8,8 @@
 import { http } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { mockAccountTools } from '../../mocks/handlers.mcp';
-import {
-	type RecordedToolCall,
-	MOCK_SEARCH_SESSION_ID,
-	createMcpApp,
-} from '../../mocks/mcp-server';
+import { MOCK_SEARCH_SESSION_ID, createMcpApp } from '../../mocks/mcp-server';
+import type { RecordedToolCall } from '../../mocks/mcp-server';
 import { server } from '../../mocks/node';
 import { StackOneToolSet, ToolSetLoadError } from '../../src';
 
@@ -35,18 +32,25 @@ describe('search-and-execute example e2e', () => {
 			onToolCall: (call) => calls.push(call),
 		});
 		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-		const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+		const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
 
 		await import('../../examples/search-and-execute');
 
 		const printed = log.mock.calls.map((args) => String(args[0])).join('\n');
 		expect(printed).toContain('default  testprovider  active');
-		expect(printed).toContain('0.800  mock_list_items');
+		expect(printed).toContain('0.800  mock_list_items  [default]');
 		expect(printed).toContain('Feedback recorded.');
-		expect(calls.map((call) => [call.name, call.arguments.session_id])).toEqual([
-			['mock_default_search_actions', undefined],
-			['mock_default_execute_action', MOCK_SEARCH_SESSION_ID],
-			['stackone_submit_feedback', MOCK_SEARCH_SESSION_ID],
+		expect(
+			calls.map((call) => [
+				call.name,
+				call.arguments.stackone_account_id,
+				call.arguments.session_id,
+			]),
+		).toEqual([
+			// One account: the server's pair, its stackone_account_id dropped as the pair's own.
+			['mock_default_search_actions', undefined, undefined],
+			['mock_default_execute_action', undefined, MOCK_SEARCH_SESSION_ID],
+			['stackone_submit_feedback', undefined, MOCK_SEARCH_SESSION_ID],
 		]);
 	});
 
@@ -54,7 +58,7 @@ describe('search-and-execute example e2e', () => {
 		const toolset = new StackOneToolSet();
 
 		const [best] = await toolset.search('list recent comments', { topK: 3 });
-		assert(best);
+		assert(best !== undefined);
 		expect(await toolset.execute(best.action_id, {}, { sessionId: best.session_id })).toMatchObject(
 			{ isError: false, result: { data: { nodes: [] } } },
 		);

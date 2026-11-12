@@ -12,7 +12,7 @@ export const mockAccounts = [
 
 export const stackoneAccountsHandlers = [
 	http.get(`${TEST_BASE_URL}/accounts`, ({ request }) => {
-		if (!request.headers.get('Authorization')?.startsWith('Basic ')) {
+		if (request.headers.get('Authorization')?.startsWith('Basic ') !== true) {
 			return HttpResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 		return HttpResponse.json(mockAccounts);
