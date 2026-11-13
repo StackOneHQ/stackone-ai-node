@@ -206,7 +206,7 @@ const tools = await toolset.fetchTools();
 const anthropic = new Anthropic();
 
 await anthropic.messages.create({
-	model: 'claude-haiku-4-5-20241022',
+	model: 'claude-haiku-4-5-20251001',
 	max_tokens: 1024,
 	system: 'You are a helpful HR assistant.',
 	messages: [
@@ -270,7 +270,8 @@ import { StackOneToolSet } from '@stackone/ai';
 const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID || undefined });
 
 // Fetch tools and convert to Claude Agent SDK format
-const tools = await toolset.fetchTools();
+// Only the read actions the agent needs: allowedTools below runs them without asking
+const tools = await toolset.fetchTools({ actions: ['*_list_*'] });
 const mcpServer = await tools.toClaudeAgentSdk();
 
 // Use with Claude Agent SDK query
@@ -280,6 +281,7 @@ const result = query({
 		model: 'claude-sonnet-4-5-20250929',
 		mcpServers: { 'stackone-tools': mcpServer },
 		tools: [], // Disable built-in tools
+		allowedTools: ['mcp__stackone-tools'], // Run the StackOne tools without a permission prompt
 		maxTurns: 3,
 	},
 });
