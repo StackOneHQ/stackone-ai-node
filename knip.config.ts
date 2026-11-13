@@ -14,7 +14,8 @@ export default {
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
 	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx'],
-	ignoreDependencies: ['@typescript/native-preview'],
+	// Vitest spawns the native checker through an explicit file path.
+	ignoreDependencies: ['@typescript/native-preview', '@typescript/native'],
 	rules: {
 		optionalPeerDependencies: 'off',
 		devDependencies: 'warn',
