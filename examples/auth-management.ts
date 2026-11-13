@@ -4,22 +4,31 @@
  * Shows every way to configure API keys and account IDs with the Node SDK.
  *
  * Run with:
- *   STACKONE_API_KEY=xxx STACKONE_ACCOUNT_ID=xxx npx tsx examples/auth-management.ts
+ *   STACKONE_API_KEY=xxx npx tsx examples/auth-management.ts
+ *
+ * STACKONE_ACCOUNT_ID is optional, and only read by this example: the SDK never reads it. Without
+ * it, accounts are discovered from the API key.
  */
 
 import process from 'node:process';
 import { StackOneToolSet } from '@stackone/ai';
 
-if (!process.env.STACKONE_API_KEY) {
+if ((process.env.STACKONE_API_KEY ?? '') === '') {
 	console.error('Set STACKONE_API_KEY to run this example.');
 	process.exit(1);
 }
+
+/** STACKONE_ACCOUNT_ID, or undefined when it is unset or empty. */
+const envAccountId = (): string | undefined => {
+	const accountId = process.env.STACKONE_ACCOUNT_ID;
+	return accountId === '' ? undefined : accountId;
+};
 
 // --- 1. API Key setup ---
 const apiKeyFromEnv = async (): Promise<void> => {
 	console.log('=== 1a. API Key from environment ===\n');
 
-	// Reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env automatically
+	// Reads STACKONE_API_KEY from env automatically. No account is configured, so it discovers them
 	const toolset = new StackOneToolSet();
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools using env API key\n`);
@@ -33,15 +42,28 @@ const apiKeyExplicit = async (): Promise<void> => {
 	console.log(`  Loaded ${tools.toOpenAI().length} tools using explicit API key\n`);
 };
 
+// --- 1c. API key alone: accounts are discovered ---
+const apiKeyAlone = async (): Promise<void> => {
+	console.log('=== 1c. API key alone ===\n');
+
+	// With no account configured, the toolset lists the key's active linked accounts itself.
+	const toolset = new StackOneToolSet({ apiKey: process.env.STACKONE_API_KEY });
+	const accounts = await toolset.fetchAccounts();
+	const active = accounts.filter((account) => account.status === 'active');
+	console.log(`  ${accounts.length} linked account(s), ${active.length} active`);
+	console.log(`  Loaded ${(await toolset.fetchTools()).length} tools across them\n`);
+};
+
 // --- 2. Account ID from environment ---
 const accountIdFromEnv = async (): Promise<void> => {
 	console.log('=== 2. Account ID from environment ===\n');
 
-	// The Node SDK reads STACKONE_ACCOUNT_ID from env automatically
-	const accountId = process.env.STACKONE_ACCOUNT_ID;
-	console.log(`  STACKONE_ACCOUNT_ID is ${accountId ? 'set' : 'not set'}`);
+	// The SDK only reads the API key from env; read the account id yourself and pass it.
+	// Unset or empty, it is undefined and the toolset discovers every active shared account instead.
+	const accountId = envAccountId();
+	console.log(`  STACKONE_ACCOUNT_ID is ${accountId === undefined ? 'not set' : 'set'}`);
 
-	const toolset = new StackOneToolSet();
+	const toolset = new StackOneToolSet({ accountId });
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools for account from env\n`);
 };
@@ -50,7 +72,7 @@ const accountIdFromEnv = async (): Promise<void> => {
 const accountIdInConstructor = async (): Promise<void> => {
 	console.log('=== 3. Account ID in constructor ===\n');
 
-	const accountId = process.env.STACKONE_ACCOUNT_ID ?? 'my-account';
+	const accountId = envAccountId() ?? 'my-account';
 	const toolset = new StackOneToolSet({ accountId });
 	const tools = await toolset.fetchTools();
 	console.log(`  Loaded ${tools.toOpenAI().length} tools for configured account\n`);
@@ -60,7 +82,7 @@ const accountIdInConstructor = async (): Promise<void> => {
 const setAccountsGlobally = async (): Promise<void> => {
 	console.log('=== 4. setAccounts() — global account list ===\n');
 
-	const accountId = process.env.STACKONE_ACCOUNT_ID ?? 'my-account';
+	const accountId = envAccountId() ?? 'my-account';
 	const toolset = new StackOneToolSet();
 	toolset.setAccounts([accountId]);
 	console.log('  Called setAccounts() with configured account');
@@ -91,6 +113,7 @@ const perToolOverride = async (): Promise<void> => {
 // --- Run all sections ---
 await apiKeyFromEnv();
 await apiKeyExplicit();
+await apiKeyAlone();
 await accountIdFromEnv();
 await accountIdInConstructor();
 await setAccountsGlobally();

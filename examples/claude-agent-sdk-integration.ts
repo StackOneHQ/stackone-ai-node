@@ -13,21 +13,23 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
 import { StackOneToolSet } from '@stackone/ai';
 
 const apiKey = process.env.STACKONE_API_KEY;
-if (!apiKey) {
+if (apiKey === undefined || apiKey === '') {
 	console.error('STACKONE_API_KEY environment variable is required');
 	process.exit(1);
 }
-if (!process.env.ANTHROPIC_API_KEY) {
+if ((process.env.ANTHROPIC_API_KEY ?? '') === '') {
 	console.log('Skipping: ANTHROPIC_API_KEY is not set');
 	process.exit(0);
 }
 
 const claudeAgentSdkIntegration = async (): Promise<void> => {
-	// Initialize StackOne — reads STACKONE_API_KEY and STACKONE_ACCOUNT_ID from env
-	const toolset = new StackOneToolSet();
+	// Initialize StackOne — reads STACKONE_API_KEY from env. The account id is passed explicitly;
+	// without one, the toolset uses every active shared account linked to the key
+	const accountId = process.env.STACKONE_ACCOUNT_ID;
+	const toolset = new StackOneToolSet({ accountId: accountId === '' ? undefined : accountId });
 
-	// Fetch tools from StackOne and convert to Claude Agent SDK format
-	const tools = await toolset.fetchTools();
+	// Fetch only the read actions the agent needs, since allowedTools below runs them without asking
+	const tools = await toolset.fetchTools({ actions: ['*_list_*'] });
 	const mcpServer = await tools.toClaudeAgentSdk();
 	console.log('Claude Agent SDK MCP server created');
 
@@ -38,11 +40,13 @@ const claudeAgentSdkIntegration = async (): Promise<void> => {
 		options: {
 			model: 'claude-sonnet-4-5-20250929',
 			mcpServers: {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Compatible MCP server type
+				// oxlint-disable-next-line typescript/no-explicit-any, typescript/no-unsafe-type-assertion -- Compatible MCP server type
 				'stackone-tools': mcpServer as any,
 			},
 			// Disable built-in tools, only use our custom tools
 			tools: [],
+			// Run the StackOne tools without a permission prompt, which a headless query cannot answer
+			allowedTools: ['mcp__stackone-tools'],
 			maxTurns: 3,
 		},
 	});

@@ -8,38 +8,34 @@ catalogs:
   dev:
     '@ai-sdk/openai': ^4.0.27
     ai: ^7.0.47
-    '@fast-check/vitest': ^0.2.0
-    '@clack/prompts': ^0.11.0
-    '@hono/mcp': ^0.1.4
+    '@fast-check/vitest': ^0.5.0
+    '@hono/mcp': ^0.3.2
     '@types/node': ^22.13.5
-    '@vitest/coverage-v8': ^4.0.15
-    hono: ^4.9.10
+    '@typescript/native': npm:typescript@7.0.2
+    '@vitest/coverage-v8': ^4.1.0
+    hono: ^4.13.16
     knip: ^5.72.0
     msw: ^2.10.4
     publint: ^0.3.12
-    tsdown: ^0.17.2
+    tsdown: ^0.23.2
     type-fest: ^4.41.0
-    unplugin-unused: ^0.5.4
-    vitest: ^4.0.15
+    typescript: 5.9.3
+    unplugin-unused: ^0.6.0
+    vitest: ^4.1.0
     zod: ^4.3.0
   examples:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
-    '@tanstack/ai': ^0.3.0
-    '@tanstack/ai-openai': ^0.3.0
   peer:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
-    '@anthropic-ai/sdk': ^0.72.1
+    '@anthropic-ai/sdk': '>=0.72.1 <2.0.0'
     ai: '>=5.0.108 <8.0.0'
     openai: ^6.2.0
-    zod: '>=3.25.0 <5'
   prod:
     '@modelcontextprotocol/sdk': ^1.24.3
-    '@orama/orama': ^3.1.11
-    defu: ^6.1.4
 
 enablePrePostScripts: true
 
-minimumReleaseAge: 1440
+minimumReleaseAge: 10080
 
 minimumReleaseAgeExclude:
   - '@ai-sdk/gateway'
@@ -47,8 +43,6 @@ minimumReleaseAgeExclude:
   - '@ai-sdk/provider'
   - '@ai-sdk/provider-utils'
   - '@anthropic-ai/claude-agent-sdk'
-  - '@tanstack/ai'
-  - '@tanstack/ai-openai'
   - ai
 
 shellEmulator: true

@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
@@ -12,8 +14,6 @@ concurrency:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 jobs:
   gitleaks:
@@ -41,7 +41,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
-          tools: nodejs_24 pnpm_10 oxlint oxfmt
+          tools: nodejs_24 corepack_24 oxlint oxfmt
       - name: Run Lint
         run: pnpm run lint
 
@@ -116,6 +116,136 @@ jobs:
       - name: Run Tests
         run: pnpm exec vitest run --project root
 
+  # Enforces the wire contract shared with the Python SDK (StackOneHQ/sdk-conformance).
+  # StackOneHQ/sdk-conformance is private and requires CONFORMANCE_REPO_TOKEN.
+  # Fork PRs and Dependabot runs cannot access this secret and skip this gate;
+  # internal branches and PRs require the secret and fail if it is absent or expired.
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      can-skip: ${{ steps.check.outputs.can-skip }}
+    steps:
+      - id: check
+        env:
+          TOKEN: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork == true }}
+          IS_DEPENDABOT: ${{ github.actor == 'dependabot[bot]' }}
+        run: |
+          if [ -z "$TOKEN" ] && { [ "$IS_FORK" = "true" ] || [ "$IS_DEPENDABOT" = "true" ]; }; then
+            echo "can-skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "can-skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Runs the full suite, both SDKs side by side, so a change here that the Python SDK does not
+  # match fails here rather than drifting.
+  conformance:
+    needs: check-secret
+    if: needs.check-secret.outputs.can-skip != 'true'
+    runs-on: ubuntu-latest
+    env:
+      # Pinned to a commit on stackone-ai-python's main, not the branch, so a Python change never
+      # silently changes what this job grades. Bump it deliberately.
+      PYTHON_SDK_REF: 05398a3f1e119297beb7e514f92c17601a75583e
+    steps:
+      - name: Check conformance token is configured
+        env:
+          TOKEN: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "::error::CONFORMANCE_REPO_TOKEN is not set or has expired."
+            exit 1
+          fi
+
+      - name: Checkout SDK
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: sdk
+
+      - name: Checkout conformance suite
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: StackOneHQ/sdk-conformance
+          ref: 6aba490ee49b298643e3a0bb9fbbaecf36c0edd7
+          token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
+          path: sdk-conformance
+          persist-credentials: false
+
+      # Public, so no token.
+      - name: Checkout Python SDK
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: StackOneHQ/stackone-ai-python
+          ref: ${{ env.PYTHON_SDK_REF }}
+          path: stackone-ai-python
+          persist-credentials: false
+
+      # tests/vectors is a copy of the suite's vectors/ (scripts/sync-vectors.sh), which the unit
+      # tests run. An edit to the copy, or a pin moved without a re-copy, fails here.
+      - name: Vendored vectors match the pinned sdk-conformance
+        run: diff -r sdk/tests/vectors sdk-conformance/vectors
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+        # pnpm from sdk-conformance's packageManager; in each SDK checkout pnpm switches to that
+        # repo's own packageManager version, so one setup serves all three installs.
+        with:
+          package_json_file: sdk-conformance/package.json
+
+      # The SDK's devEngines pins the exact Node version, and the suite runs on it too.
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: sdk/package.json
+
+      - name: Install SDK dependencies
+        working-directory: sdk
+        run: pnpm install --frozen-lockfile
+
+      # The runner imports the built dist, not src, so the harness grades the
+      # publishable artifact. It refuses a dist older than src.
+      - name: Build SDK
+        working-directory: sdk
+        run: pnpm run build
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          python-version: '3.13'
+
+      - name: Install Python SDK dependencies
+        working-directory: stackone-ai-python
+        run: uv sync --all-extras --locked
+
+      - name: Install conformance dependencies
+        working-directory: sdk-conformance
+        run: pnpm install --frozen-lockfile
+
+      - name: Run conformance suite
+        working-directory: sdk-conformance
+        env:
+          NODE_SDK_DIST: ${{ github.workspace }}/sdk/dist/index.mjs
+          PYTHON_SDK_DIR: ${{ github.workspace }}/stackone-ai-python
+        run: pnpm test -- --strict-schema
+
+  # Make this the one required status check. Individually required checks go
+  # missing when a job is renamed or a matrix entry is added, and nothing notices.
+  ci-ok:
+    if: always()
+    needs: [check-secret, gitleaks, lint, build-and-test, ai-peer-range, conformance]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to have passed
+        run: |
+          if [ "${{ needs.gitleaks.result != 'success' || needs.lint.result != 'success' || needs.build-and-test.result != 'success' || needs.ai-peer-range.result != 'success' }}" = "true" ]; then
+            echo "::error::A required job did not pass (gitleaks: ${{ needs.gitleaks.result }}, lint: ${{ needs.lint.result }}, build-and-test: ${{ needs.build-and-test.result }}, ai-peer-range: ${{ needs.ai-peer-range.result }})"
+            exit 1
+          fi
+          if [ "${{ needs.conformance.result != 'success' && needs.check-secret.outputs.can-skip != 'true' }}" = "true" ]; then
+            echo "::error::Conformance check did not pass (result: ${{ needs.conformance.result }})"
+            exit 1
+          fi
+
   coverage:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
@@ -127,22 +257,25 @@ jobs:
       - name: Run Tests with Coverage
         run: pnpm run coverage
       - name: Create Coverage Badge
-        uses: jaywcjlove/coverage-badges-cli@4e8975aa2628e3329126e7eee36724d07ed86fda # v2.2.0
+        uses: jaywcjlove/coverage-badges-cli@998665f7962b1a3935ba8c3e786171a99436e5d1 # v2.3.0
         with:
           source: coverage/coverage-summary.json
           output: coverage/badges.svg
       - name: Upload coverage artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: coverage
 
   deploy-coverage:
     needs: coverage
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

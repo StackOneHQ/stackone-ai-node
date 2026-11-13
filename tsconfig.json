@@ -22,6 +22,8 @@
 		/* Other */
 		"forceConsistentCasingInFileNames": true,
 		"lib": ["es2022"],
+		/* Examples imported by tests/examples resolve the package to source, installed or not */
+		"paths": { "@stackone/ai": ["./src/index.ts"] },
 		"types": ["node", "vitest/globals", "vitest/importMeta"]
 	},
 	"include": [

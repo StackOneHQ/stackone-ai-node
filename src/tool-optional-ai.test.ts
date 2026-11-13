@@ -2,25 +2,13 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { StackOneError } from './utils/error-stackone';
 import { peerDependencies } from '../package.json';
-import { ParameterLocation, type ExecuteConfig, type ToolParameters } from './types';
+import type { ExecuteConfig, ToolParameters } from './types';
 
-const builtToolEsm = new URL('../dist/src/tool.mjs', import.meta.url);
-const builtToolCjs = new URL('../dist/src/tool.cjs', import.meta.url);
+const builtToolEsm = new URL('../dist/tool.mjs', import.meta.url);
+const builtToolCjs = new URL('../dist/tool.cjs', import.meta.url);
 const distReady = existsSync(builtToolEsm) && existsSync(builtToolCjs);
 
-const createExecuteConfig = (): ExecuteConfig => ({
-	kind: 'http',
-	method: 'GET',
-	url: 'https://api.example.com/test/{id}',
-	bodyType: 'json',
-	params: [
-		{
-			name: 'id',
-			location: ParameterLocation.PATH,
-			type: 'string',
-		},
-	],
-});
+const createExecuteConfig = (): ExecuteConfig => ({ kind: 'local' });
 
 const createParameters = (): ToolParameters => ({
 	type: 'object',
@@ -33,7 +21,7 @@ describe('BaseTool optional ai peer handling', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('rejects toClaudeAgentSdkTool with StackOneError and install hint when ai is unavailable', async () => {
+	it('rejects toAISDK with StackOneError and install hint when ai is unavailable', async () => {
 		vi.doMock('./utils/try-import', () => ({
 			tryImport: vi.fn(async (moduleName: string, installHint: string) => {
 				if (moduleName === 'ai') {
@@ -49,8 +37,8 @@ describe('BaseTool optional ai peer handling', () => {
 		const { BaseTool } = await import('./tool');
 		const tool = new BaseTool('test_tool', 'Test tool', createParameters(), createExecuteConfig());
 
-		await expect(tool.toClaudeAgentSdkTool()).rejects.toBeInstanceOf(StackOneError);
-		await expect(tool.toClaudeAgentSdkTool()).rejects.toThrow(
+		await expect(tool.toAISDK()).rejects.toBeInstanceOf(StackOneError);
+		await expect(tool.toAISDK()).rejects.toThrow(
 			`ai is not installed. Please install it with: npm install ai (requires ${peerDependencies.ai})`,
 		);
 	});

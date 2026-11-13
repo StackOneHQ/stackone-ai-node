@@ -1,19 +1,37 @@
 /**
  * E2E test for claude-agent-sdk-integration.ts example
  *
- * Tests the setup of StackOne tools with Claude Agent SDK.
+ * Tests the MCP server that `tools.toClaudeAgentSdk()` hands to the Claude Agent SDK.
  *
- * This is the one example NOT executed directly (see tests/examples/run-example.ts
- * for how the others are). `query()` spawns a claude-code subprocess, which MSW
- * cannot intercept and which needs a real ANTHROPIC_API_KEY and installation.
- * So this reimplements the example's setup — tool fetch, tool wrapper, MCP server
- * creation and handler execution — and stops short of the query call.
+ * Note: The Claude Agent SDK spawns a subprocess to run claude-code, which
+ * requires the ANTHROPIC_API_KEY environment variable and a running claude-code
+ * installation. This test connects an MCP client to the server instead, which is
+ * what the SDK does, but does not test the actual query execution.
  */
 
-import { tool, createSdkMcpServer } from '@anthropic-ai/claude-agent-sdk';
-import { z } from 'zod';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { StackOneToolSet } from '../../src';
+
+const fetchTools = async () => {
+	const toolset = new StackOneToolSet({
+		accountId: 'your-bamboohr-account-id',
+		baseUrl: TEST_BASE_URL,
+	});
+	return toolset.fetchTools();
+};
+
+/** Connects an MCP client to the server, as the Claude Agent SDK does. */
+const connect = async (tools: Awaited<ReturnType<typeof fetchTools>>): Promise<Client> => {
+	const { instance } = await tools.toClaudeAgentSdk();
+	const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+	const client = new Client({ name: 'claude-agent-sdk', version: '1.0.0' });
+	await instance.connect(serverTransport);
+	await client.connect(clientTransport);
+	return client;
+};
 
 describe('claude-agent-sdk-integration example e2e', () => {
 	beforeEach(() => {
@@ -24,119 +42,39 @@ describe('claude-agent-sdk-integration example e2e', () => {
 		vi.unstubAllEnvs();
 	});
 
-	it('should fetch tools and create Claude Agent SDK tool wrapper', async () => {
-		const toolset = new StackOneToolSet({
-			accountId: 'your-bamboohr-account-id',
-			baseUrl: TEST_BASE_URL,
-		});
+	it('creates an SDK MCP server from the fetched tools', async () => {
+		const mcpServer = await (await fetchTools()).toClaudeAgentSdk();
 
-		// Fetch all tools for this account via MCP
-		const tools = await toolset.fetchTools();
-		expect(tools.length).toBeGreaterThan(0);
-
-		// Get a specific tool
-		const employeeTool = tools.getTool('bamboohr_get_employee');
-		expect(employeeTool).toBeDefined();
-		assert(employeeTool !== undefined);
-
-		// Create Claude Agent SDK tool from StackOne tool
-		const getEmployeeTool = tool(
-			employeeTool.name,
-			employeeTool.description,
-			{
-				id: z.string().describe('The employee ID'),
-			},
-			async (args) => {
-				const result = await employeeTool.execute(args);
-				return {
-					content: [{ type: 'text' as const, text: JSON.stringify(result) }],
-				};
-			},
-		);
-
-		expect(getEmployeeTool.name).toBe('bamboohr_get_employee');
-		expect(getEmployeeTool.description).toContain('employee');
-		expect(getEmployeeTool.inputSchema).toHaveProperty('id');
-		expect(typeof getEmployeeTool.handler).toBe('function');
-	});
-
-	it('should create MCP server with StackOne tools', async () => {
-		const toolset = new StackOneToolSet({
-			accountId: 'your-bamboohr-account-id',
-			baseUrl: TEST_BASE_URL,
-		});
-
-		const tools = await toolset.fetchTools();
-		const employeeTool = tools.getTool('bamboohr_get_employee');
-		assert(employeeTool !== undefined);
-
-		// Create Claude Agent SDK tool
-		const getEmployeeTool = tool(
-			employeeTool.name,
-			employeeTool.description,
-			{
-				id: z.string().describe('The employee ID'),
-			},
-			async (args) => {
-				const result = await employeeTool.execute(args);
-				return {
-					content: [{ type: 'text' as const, text: JSON.stringify(result) }],
-				};
-			},
-		);
-
-		// Create an MCP server with the StackOne tool
-		const mcpServer = createSdkMcpServer({
-			name: 'stackone-tools',
-			version: '1.0.0',
-			tools: [getEmployeeTool],
-		});
-
-		// Verify MCP server was created
-		expect(mcpServer).toBeDefined();
-		expect(mcpServer.name).toBe('stackone-tools');
+		expect(mcpServer).toMatchObject({ type: 'sdk', name: 'stackone-tools' });
 		expect(mcpServer.instance).toBeDefined();
 	});
 
-	it('should execute tool handler directly', async () => {
-		const toolset = new StackOneToolSet({
-			accountId: 'your-bamboohr-account-id',
-			baseUrl: TEST_BASE_URL,
-		});
+	it('serves each tool with its schema', async () => {
+		const tools = await fetchTools();
+		const client = await connect(tools);
 
-		const tools = await toolset.fetchTools();
+		const { tools: listed } = await client.listTools();
+		await client.close();
+
 		const employeeTool = tools.getTool('bamboohr_get_employee');
 		assert(employeeTool !== undefined);
-
-		// Create Claude Agent SDK tool
-		const getEmployeeTool = tool(
-			employeeTool.name,
-			employeeTool.description,
-			{
-				id: z.string().describe('The employee ID'),
-			},
-			async (args) => {
-				const result = await employeeTool.execute(args);
-				return {
-					content: [{ type: 'text' as const, text: JSON.stringify(result) }],
-				};
-			},
+		expect(listed.find((tool) => tool.name === 'bamboohr_get_employee')?.inputSchema).toEqual(
+			employeeTool.toAnthropic().input_schema,
 		);
+	});
 
-		// Execute the tool handler directly
-		const result = await getEmployeeTool.handler(
-			{ id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA' },
-			{} as unknown,
-		);
+	it('runs a tool call with the model arguments against StackOne', async () => {
+		const client = await connect(await fetchTools());
 
-		expect(result).toBeDefined();
-		expect(result.content).toHaveLength(1);
-		expect(result.content[0]?.type).toBe('text');
+		const result = await client.callTool({
+			name: 'bamboohr_get_employee',
+			arguments: { id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA' },
+		});
+		await client.close();
 
-		// Parse the result text and verify it contains employee data
-		const textContent = result.content[0];
-		assert(textContent?.type === 'text');
-		const data = JSON.parse(textContent.text) as unknown;
-		expect(data).toHaveProperty('data');
+		expect(result.isError).toBeUndefined();
+		const [content] = CallToolResultSchema.parse(result).content;
+		assert(content?.type === 'text');
+		expect(JSON.parse(content.text)).toMatchObject({ isError: false, result: { data: {} } });
 	});
 });

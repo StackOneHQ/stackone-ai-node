@@ -1,0 +1,124 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://github.com/StackOneHQ/sdk-conformance/vectors/schema/account-ids.schema.json",
+    "title": "Account id vectors",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Bumped whenever a case's meaning or expected value changes; adding a case does not bump it."
+        },
+        "error_classes": {
+            "$ref": "#/$defs/classes"
+        },
+        "cases": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/$defs/case"
+            }
+        },
+        "unresolved": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/unresolved"
+            }
+        }
+    },
+    "required": ["description", "version", "cases", "error_classes"],
+    "additionalProperties": false,
+    "$defs": {
+        "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*$",
+            "description": "Stable and unique within the file: an SDK test names its case by it."
+        },
+        "description": {
+            "type": "string",
+            "minLength": 1
+        },
+        "classes": {
+            "type": "object",
+            "properties": {
+                "python": {
+                    "const": "ToolsetConfigError"
+                },
+                "node": {
+                    "const": "ToolSetConfigError"
+                }
+            },
+            "required": ["python", "node"],
+            "additionalProperties": false
+        },
+        "case": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "parameter": {
+                    "enum": ["account_ids", "account_id"]
+                },
+                "value": {
+                    "description": "The value passed, as JSON."
+                },
+                "expected": {
+                    "oneOf": [
+                        {
+                            "const": "ok"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "$ref": "#/$defs/classes"
+                                }
+                            },
+                            "required": ["error"],
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "required": ["id", "description", "parameter", "value", "expected"],
+            "additionalProperties": false
+        },
+        "unresolved": {
+            "description": "A case the two SDKs disagree on today. Not graded: each SDK's observed value is recorded so the disagreement can be settled, and the case moved to `cases`.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "$ref": "#/$defs/id"
+                },
+                "description": {
+                    "$ref": "#/$defs/description"
+                },
+                "parameter": {
+                    "enum": ["account_ids", "account_id"]
+                },
+                "value": {
+                    "description": "The value passed, as JSON."
+                },
+                "python": {
+                    "description": "What the Python SDK does today."
+                },
+                "node": {
+                    "description": "What the Node SDK does today."
+                }
+            },
+            "required": ["id", "description", "parameter", "value", "python", "node"],
+            "additionalProperties": false
+        }
+    }
+}

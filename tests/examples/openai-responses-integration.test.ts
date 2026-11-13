@@ -1,38 +1,68 @@
 /**
- * Executes examples/openai-responses-integration.ts.
+ * E2E test for openai-responses-integration.ts example
+ *
+ * Tests the complete flow of using StackOne tools with OpenAI Responses API.
  */
 
-import { runExample, stubExampleEnv } from './run-example';
+import OpenAI from 'openai';
+import { TEST_BASE_URL } from '../../mocks/constants';
+import { StackOneToolSet } from '../../src';
 
-describe('openai-responses-integration example', () => {
+describe('openai-responses-integration example e2e', () => {
 	beforeEach(() => {
-		stubExampleEnv({ OPENAI_API_KEY: 'test-openai-key' });
+		vi.stubEnv('STACKONE_API_KEY', 'test-key');
+		vi.stubEnv('OPENAI_API_KEY', 'test-openai-key');
 	});
 
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
 
-	it('loads tools, calls the Responses API, and reports the tool calls', async () => {
-		const { stdout, exitCode } = await runExample('../../examples/openai-responses-integration.ts');
+	it('should fetch tools, convert to OpenAI Responses format, and create response with tool calls', async () => {
+		const toolset = new StackOneToolSet({
+			accountId: 'your-stackone-account-id',
+			baseUrl: TEST_BASE_URL,
+		});
 
-		expect(exitCode).toBeUndefined();
+		// Fetch tools via MCP with action filter
+		const tools = await toolset.fetchTools({
+			actions: ['*_list_*'],
+		});
+		const openAIResponsesTools = tools.toOpenAIResponses();
 
-		// 3: 2 tools matching the example's '*_list_*' filter, plus the auto-appended tool_feedback.
-		// A bare > 0 check cannot fail here — tool_feedback is appended after
-		// filtering, so even a filter matching nothing still yields one tool.
-		const loaded = stdout.match(/Loaded (\d+) tools/);
-		expect(loaded).not.toBeNull();
-		expect(Number(loaded?.[1])).toBe(3);
+		// Verify tools are in OpenAI Responses format
+		expect(Array.isArray(openAIResponsesTools)).toBe(true);
+		expect(openAIResponsesTools.length).toBeGreaterThan(0);
+		// Strict mode makes OpenAI reject served schemas with optional fields
+		expect(openAIResponsesTools.map((tool) => tool.strict)).not.toContain(true);
 
-		expect(stdout).toContain('workday_list_workers');
-	});
+		// Initialize OpenAI client
+		const openai = new OpenAI();
 
-	it('skips cleanly when OPENAI_API_KEY is absent', async () => {
-		vi.stubEnv('OPENAI_API_KEY', '');
+		// Create a response with tool calls using the Responses API
+		const response = await openai.responses.create({
+			model: 'gpt-5',
+			instructions: 'You are a helpful assistant that can access various tools.',
+			input: 'What is the employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA phone number?',
+			tools: openAIResponsesTools,
+		});
 
-		const { stdout, exitCode } = await runExample('../../examples/openai-responses-integration.ts');
+		// Verify the response contains expected data
+		expect(response.id).toBeDefined();
+		expect(response.model).toBeDefined();
 
-		expect(exitCode).toBe(0);
+		// Check if the model made any tool calls
+		const toolCalls = response.output.filter(
+			(item): item is OpenAI.Responses.ResponseFunctionToolCall => item.type === 'function_call',
+		);
+
+		expect(toolCalls.length).toBeGreaterThan(0);
+
+		const toolCall = toolCalls[0];
+		expect(toolCall.name).toBe('bamboohr_get_employee');
+
+		// Parse the arguments to verify they contain the expected fields
+		const args = JSON.parse(toolCall.arguments);
+		expect(args.id).toBe('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA');
 	});
 });

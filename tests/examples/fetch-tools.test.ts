@@ -6,6 +6,7 @@
  */
 
 import { http, HttpResponse } from 'msw';
+import { isRecord } from '../../mocks/handlers.utils';
 import { server } from '../../mocks/node';
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { StackOneToolSet } from '../../src';
@@ -24,8 +25,8 @@ describe('fetch-tools e2e', () => {
 		server.use(
 			http.post(`${TEST_BASE_URL}/actions/rpc`, async ({ request }) => {
 				const body: unknown = await request.json();
-				assert(typeof body === 'object' && body !== null);
-				const { action } = body as Record<string, unknown>;
+				assert(isRecord(body));
+				const { action } = body;
 				if (action === 'bamboohr_list_employees') {
 					return HttpResponse.json({
 						data: [
@@ -67,9 +68,7 @@ describe('fetch-tools e2e', () => {
 		});
 		expect(toolsByProviders.length).toBeGreaterThan(0);
 		const providerToolNames = toolsByProviders.toArray().map((t) => t.name);
-		expect(
-			providerToolNames.every((name) => name.startsWith('bamboohr_') || name.startsWith('tool_')),
-		).toBe(true);
+		expect(providerToolNames.every((name) => name.startsWith('bamboohr_'))).toBe(true);
 
 		// Example 5: Filter by actions with exact match
 		const toolsByActions = await toolset.fetchTools({
@@ -85,10 +84,7 @@ describe('fetch-tools e2e', () => {
 			accountIds: ['your-bamboohr-account-id'],
 			actions: ['*_list_employees'],
 		});
-		const globToolNames = toolsByGlobPattern
-			.toArray()
-			.filter((t) => !t.name.startsWith('tool_'))
-			.map((t) => t.name);
+		const globToolNames = toolsByGlobPattern.toArray().map((t) => t.name);
 		expect(globToolNames).toContain('bamboohr_list_employees');
 
 		// Execute a tool
@@ -98,7 +94,13 @@ describe('fetch-tools e2e', () => {
 		const result = await tool!.execute({
 			query: { limit: 5 },
 		});
-		expect(result.data).toBeDefined();
-		expect(Array.isArray(result.data)).toBe(true);
+		// The mock echoes what reached tools/call, inside the server's { isError, result }.
+		expect(result.isError).toBe(false);
+		expect(result.result).toMatchObject({
+			data: {
+				action: 'bamboohr_list_employees',
+				arguments: { query: { limit: 5 } },
+			},
+		});
 	});
 });

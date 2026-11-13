@@ -1,0 +1,198 @@
+{
+    "$schema": "./schema/account-ids.schema.json",
+    "description": "Which account ids a toolset accepts. `parameter: \"account_ids\"` is the per-call list (fetch_tools(account_ids=…) / fetchTools({accountIds})), checked by the same validator as set_accounts/setAccounts and the constructor's execute.account_ids; `parameter: \"account_id\"` is the constructor's single id. A refusal raises the language's own config error class, before any request.",
+    "version": 1,
+    "error_classes": {
+        "python": "ToolsetConfigError",
+        "node": "ToolSetConfigError"
+    },
+    "cases": [
+        {
+            "id": "list",
+            "description": "a list of ids",
+            "parameter": "account_ids",
+            "value": ["acc-1", "acc-2"],
+            "expected": "ok"
+        },
+        {
+            "id": "duplicates",
+            "description": "duplicates are allowed (the scope is deduplicated)",
+            "parameter": "account_ids",
+            "value": ["acc-1", "acc-1"],
+            "expected": "ok"
+        },
+        {
+            "id": "whitespace-id",
+            "description": "a whitespace id is not empty, so it is accepted",
+            "parameter": "account_ids",
+            "value": [" "],
+            "expected": "ok"
+        },
+        {
+            "id": "empty-list",
+            "description": "an empty list means not given: the toolset's own accounts, then discovery",
+            "parameter": "account_ids",
+            "value": [],
+            "expected": "ok"
+        },
+        {
+            "id": "empty-string-id",
+            "description": "an empty id would be sent with no x-account-id",
+            "parameter": "account_ids",
+            "value": [""],
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "empty-among-valid",
+            "description": "one empty id among valid ones",
+            "parameter": "account_ids",
+            "value": ["acc-1", ""],
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "bare-string",
+            "description": "a bare string is refused, not iterated as characters",
+            "parameter": "account_ids",
+            "value": "acc-1",
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "bare-empty-string",
+            "description": "a bare empty string is refused as a string",
+            "parameter": "account_ids",
+            "value": "",
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "number-id",
+            "description": "a non-string id",
+            "parameter": "account_ids",
+            "value": [1],
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "null-id",
+            "description": "a null id",
+            "parameter": "account_ids",
+            "value": [null],
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "object-id",
+            "description": "an object id",
+            "parameter": "account_ids",
+            "value": [
+                {
+                    "id": "acc-1"
+                }
+            ],
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "nested-list",
+            "description": "a list id",
+            "parameter": "account_ids",
+            "value": [["acc-1"]],
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "single",
+            "description": "a single account id",
+            "parameter": "account_id",
+            "value": "acc-1",
+            "expected": "ok"
+        },
+        {
+            "id": "single-empty",
+            "description": "an empty single account id is usually an unset variable: refused rather than widened to every account",
+            "parameter": "account_id",
+            "value": "",
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "single-whitespace",
+            "description": "a whitespace single account id is not empty",
+            "parameter": "account_id",
+            "value": " ",
+            "expected": "ok"
+        },
+        {
+            "id": "null",
+            "description": "account_ids=None / accountIds: null means not given, the same as omitting it: the toolset's own accounts, then discovery. In both SDKs.",
+            "parameter": "account_ids",
+            "value": null,
+            "expected": "ok"
+        },
+        {
+            "id": "not-a-list-number",
+            "description": "a number is refused in both: it is not a list of account id strings (account-ids-not-strings).",
+            "parameter": "account_ids",
+            "value": 5,
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        },
+        {
+            "id": "not-a-list-object",
+            "description": "an object is refused in both: it is not a list of account id strings (account-ids-not-strings), not iterated for its keys.",
+            "parameter": "account_ids",
+            "value": {
+                "id": "acc-1"
+            },
+            "expected": {
+                "error": {
+                    "python": "ToolsetConfigError",
+                    "node": "ToolSetConfigError"
+                }
+            }
+        }
+    ]
+}

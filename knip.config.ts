@@ -9,12 +9,13 @@ export default {
 		examples: {
 			entry: ['*.ts'],
 			project: ['*.ts'],
-			ignoreDependencies: ['@clack/prompts', '@tanstack/ai', '@tanstack/ai-openai', 'msw'],
+			ignoreDependencies: ['msw'],
 		},
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
 	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx'],
-	ignoreDependencies: ['@typescript/native-preview'],
+	// Vitest spawns the native checker through an explicit file path.
+	ignoreDependencies: ['@typescript/native-preview', '@typescript/native'],
 	rules: {
 		optionalPeerDependencies: 'off',
 		devDependencies: 'warn',
