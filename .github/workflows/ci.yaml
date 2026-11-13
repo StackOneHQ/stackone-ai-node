@@ -146,7 +146,7 @@ jobs:
     env:
       # Pinned to a commit on stackone-ai-python's main, not the branch, so a Python change never
       # silently changes what this job grades. Bump it deliberately.
-      PYTHON_SDK_REF: d76c26663c9141bf106a19d385252da9a8c7e75d
+      PYTHON_SDK_REF: 05398a3f1e119297beb7e514f92c17601a75583e
     steps:
       - name: Check conformance token is configured
         env:
@@ -166,7 +166,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: StackOneHQ/sdk-conformance
-          ref: 4ead1c25bb443ef1fd1986d5f053b2d1475d0e90
+          ref: 6aba490ee49b298643e3a0bb9fbbaecf36c0edd7
           token: ${{ secrets.CONFORMANCE_REPO_TOKEN }}
           path: sdk-conformance
           persist-credentials: false
