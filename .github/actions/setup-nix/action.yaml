@@ -19,10 +19,11 @@ runs:
 
     - name: Install tools from nixpkgs
       shell: bash
+      env:
+        TOOLS: ${{ inputs.tools }}
       run: |
-        tools="${{ inputs.tools }}"
         packages=""
-        for tool in $tools; do
+        for tool in $TOOLS; do
           packages="$packages nixpkgs#$tool"
         done
         nix profile install --inputs-from . $packages
