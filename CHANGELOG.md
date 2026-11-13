@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.0.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v3.1.0...v4.0.0) (2026-11-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* **tool:** BaseTool.toClaudeAgentSdkTool() is removed. Serve tools to the Claude Agent SDK with `await tools.toClaudeAgentSdk()` and pass the result in `mcpServers`.
+
+### Bug Fixes
+
+* **ci:** pass untrusted workflow inputs through env (template injection) ([#395](https://github.com/StackOneHQ/stackone-ai-node/issues/395)) ([79ea763](https://github.com/StackOneHQ/stackone-ai-node/commit/79ea763cc2b8bf37470c21905ab065122d91bd5a))
+* **examples:** make the framework examples run end to end ([#405](https://github.com/StackOneHQ/stackone-ai-node/issues/405)) ([3e7b2cc](https://github.com/StackOneHQ/stackone-ai-node/commit/3e7b2cc6cf000f07d0628bd4224922f9f2648acd))
+* **tool:** default toOpenAIResponses to non-strict ([#408](https://github.com/StackOneHQ/stackone-ai-node/issues/408)) ([091d23d](https://github.com/StackOneHQ/stackone-ai-node/commit/091d23d498a9247c3f15b09ae839beb7395ace8b))
+* **tool:** serve each schema to the Claude Agent SDK and remove toClaudeAgentSdkTool ([#406](https://github.com/StackOneHQ/stackone-ai-node/issues/406)) ([81e1586](https://github.com/StackOneHQ/stackone-ai-node/commit/81e1586d651dfde6131247e27d55166c076759b6))
+* **toolset:** keep a timed-out 429 on GET /accounts fatal to a fan-out ([#403](https://github.com/StackOneHQ/stackone-ai-node/issues/403)) ([f5e99c8](https://github.com/StackOneHQ/stackone-ai-node/commit/f5e99c8991e2016a034464a99a97c2b229486fe6))
+* **tools:** warn about duplicate tool names once, when a collection is built ([#409](https://github.com/StackOneHQ/stackone-ai-node/issues/409)) ([332be70](https://github.com/StackOneHQ/stackone-ai-node/commit/332be707883c7483a8106fe808fefa968e404acb))
+
+
+### Performance Improvements
+
+* **types:** use native TypeScript for Vitest checks ([#388](https://github.com/StackOneHQ/stackone-ai-node/issues/388)) ([8e4719b](https://github.com/StackOneHQ/stackone-ai-node/commit/8e4719bee020c0c72b4c60abc4e2f4411b3bf6f4))
+
 ## [3.1.0](https://github.com/StackOneHQ/stackone-ai-node/compare/v3.0.0...v3.1.0) (2026-10-29)
 
 
