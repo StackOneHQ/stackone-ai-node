@@ -1,89 +1,42 @@
 /**
- * E2E test for openai-integration.ts example
- *
- * Tests the complete flow of using StackOne tools with OpenAI Chat Completions API.
+ * Runs examples/openai-integration.ts against the mock StackOne and OpenAI APIs.
  */
 
-import OpenAI from 'openai';
-import { TEST_BASE_URL } from '../../mocks/constants';
-import { StackOneToolSet } from '../../src';
+import { EXAMPLE_ANSWER } from '../../mocks/handlers.utils';
+import { recordToolCalls, runExample, stubExampleEnv } from './run-example';
 
-describe('openai-integration example e2e', () => {
-	beforeEach(() => {
-		vi.stubEnv('STACKONE_API_KEY', 'test-key');
-		vi.stubEnv('OPENAI_API_KEY', 'test-openai-key');
-	});
-
+describe('openai-integration example', () => {
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
 
-	it('should fetch tools, convert to OpenAI format, and create chat completion with tool calls', async () => {
-		const toolset = new StackOneToolSet({
-			accountId: 'your-bamboohr-account-id',
-			baseUrl: TEST_BASE_URL,
-		});
+	it('executes the tool the model calls and prints its answer', async () => {
+		stubExampleEnv({ OPENAI_API_KEY: 'test-openai-key' });
+		const calls = recordToolCalls();
 
-		// Fetch all tools for this account via MCP
-		const tools = await toolset.fetchTools();
-		const openAITools = tools.toOpenAI();
+		const { output, exitCode } = await runExample('openai-integration');
 
-		// Verify tools are in OpenAI format
-		expect(Array.isArray(openAITools)).toBe(true);
-		expect(openAITools.length).toBeGreaterThan(0);
-		expect(openAITools[0]).toHaveProperty('type', 'function');
-		expect(openAITools[0]).toHaveProperty('function');
+		expect(exitCode).toBeUndefined();
+		expect(output).toBe(
+			[
+				'Loaded 3 tools for OpenAI',
+				'Tool calls made: 1',
+				'  Tool: workday_list_workers',
+				'  Arguments: {"query":{"limit":5}}',
+				`Answer: ${EXAMPLE_ANSWER}`,
+			].join('\n'),
+		);
+		expect(calls.map(({ name, arguments: args }) => [name, args])).toEqual([
+			['workday_list_workers', { query: { limit: 5 } }],
+		]);
+	});
 
-		// Initialize OpenAI client
-		const openai = new OpenAI();
+	it('skips without OPENAI_API_KEY', async () => {
+		stubExampleEnv({ OPENAI_API_KEY: '' });
 
-		// Create a chat completion with tool calls
-		const response = await openai.chat.completions.create({
-			model: 'gpt-5',
-			messages: [
-				{
-					role: 'system',
-					content: 'You are a helpful assistant that can access BambooHR information.',
-				},
-				{
-					role: 'user',
-					content:
-						'What is the employee with id: c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA phone number?',
-				},
-			],
-			tools: openAITools,
-		});
-
-		// Verify the response contains tool calls
-		expect(response.choices.length).toBeGreaterThan(0);
-
-		const choice = response.choices[0];
-		expect(choice.message.tool_calls).toBeDefined();
-		expect(choice.message.tool_calls!.length).toBeGreaterThan(0);
-
-		const toolCall = choice.message.tool_calls![0];
-		assert(toolCall.type === 'function');
-		expect(toolCall.function.name).toBe('bamboohr_get_employee');
-
-		// Parse the arguments to verify they contain the expected fields
-		const args: unknown = JSON.parse(toolCall.function.arguments);
-		assert(typeof args === 'object' && args !== null && 'id' in args);
-		expect(args.id).toBe('c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA');
-
-		// Run the tool calls and turn them into the messages to send back
-		const toolMessages = await tools.executeOpenAIToolCalls(choice.message.tool_calls);
-		expect(toolMessages).toHaveLength(1);
-		expect(toolMessages[0]).toMatchObject({ role: 'tool', tool_call_id: 'call_mock' });
-		const content = toolMessages[0]?.content;
-		assert(typeof content === 'string', 'the tool message carries no text');
-		expect(JSON.parse(content)).toMatchObject({
-			isError: false,
-			result: {
-				data: {
-					action: 'bamboohr_get_employee',
-					arguments: { id: 'c28xIQaWQ6MzM5MzczMDA2NzMzMzkwNzIwNA' },
-				},
-			},
+		expect(await runExample('openai-integration')).toEqual({
+			output: 'Skipping: OPENAI_API_KEY is not set',
+			exitCode: 0,
 		});
 	});
 });
