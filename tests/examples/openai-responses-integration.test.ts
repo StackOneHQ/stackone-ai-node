@@ -9,7 +9,7 @@ describe('openai-responses-integration example', () => {
 		vi.unstubAllEnvs();
 	});
 
-	it('sends the list tools and prints the tool call the model makes', async () => {
+	it('offers the fetched tools and prints the tool call the model makes', async () => {
 		stubExampleEnv({ OPENAI_API_KEY: 'test-openai-key' });
 
 		const { output, exitCode } = await runExample('openai-responses-integration');

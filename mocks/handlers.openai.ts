@@ -1,21 +1,11 @@
 import { http, HttpResponse } from 'msw';
 import {
 	EXAMPLE_ANSWER,
-	EXAMPLE_PROMPT,
 	EXAMPLE_TOOL_CALL,
 	bodyField,
-	carriesToolResult,
 	extractTextFromInput,
-	offersTools,
+	nextTurn,
 } from './handlers.utils';
-
-/** The model's next turn: the answer once a tool result is back, else a tool call for the prompt. */
-const nextTurn = (body: unknown, userText: string): 'answer' | 'tool_call' | 'default' => {
-	if (carriesToolResult(body)) {
-		return 'answer';
-	}
-	return offersTools(body) && userText.includes(EXAMPLE_PROMPT) ? 'tool_call' : 'default';
-};
 
 const usage = { input_tokens: 100, output_tokens: 50, total_tokens: 150 };
 

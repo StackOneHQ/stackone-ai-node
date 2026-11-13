@@ -12,10 +12,10 @@ export const offersTools = (body: unknown): boolean => {
 	return Array.isArray(tools) && tools.length > 0;
 };
 
-const isInputText = (content: unknown): content is Record<string, unknown> =>
-	isRecord(content) && content.type === 'input_text';
+const isTextPart = (content: unknown): content is Record<string, unknown> =>
+	isRecord(content) && (content.type === 'input_text' || content.type === 'text');
 
-/** The text of a user message: its string content, or the text of its first `input_text` part. */
+/** The text of a user message: its string content, or the text of its first text part. */
 const userMessageText = (item: unknown): string | undefined => {
 	if (!isRecord(item) || item.role !== 'user') {
 		return undefined;
@@ -28,7 +28,7 @@ const userMessageText = (item: unknown): string | undefined => {
 		return undefined;
 	}
 	const parts: unknown[] = item.content;
-	const inputText = parts.find(isInputText);
+	const inputText = parts.find(isTextPart);
 	if (inputText === undefined) {
 		return undefined;
 	}
@@ -82,4 +82,12 @@ export const carriesToolResult = (body: unknown): boolean => {
 			parts.some((part) => isRecord(part) && part.type === 'tool_result')
 		);
 	});
+};
+
+/** The mock model's next turn. Any tool result in the history gets the answer: one tool round. */
+export const nextTurn = (body: unknown, userText: string): 'answer' | 'tool_call' | 'default' => {
+	if (carriesToolResult(body)) {
+		return 'answer';
+	}
+	return offersTools(body) && userText.includes(EXAMPLE_PROMPT) ? 'tool_call' : 'default';
 };

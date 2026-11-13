@@ -32,7 +32,7 @@ class ExampleExit extends Error {
 	}
 }
 
-/** Point every example at the mocks, with the given extra variables (an empty one unsets it). */
+/** Point every example at the mocks, plus the given variables. The examples treat `''` as unset. */
 export function stubExampleEnv(extra: Record<string, string> = {}): void {
 	vi.stubEnv('STACKONE_API_KEY', 'test-key');
 	vi.stubEnv('STACKONE_ACCOUNT_ID', EXAMPLE_ACCOUNT_ID);

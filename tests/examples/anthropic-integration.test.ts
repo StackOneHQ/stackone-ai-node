@@ -9,7 +9,7 @@ describe('anthropic-integration example', () => {
 		vi.unstubAllEnvs();
 	});
 
-	it('sends the list and search tools and prints the tool use the model returns', async () => {
+	it('offers the fetched tools and prints the tool use the model returns', async () => {
 		stubExampleEnv({ ANTHROPIC_API_KEY: 'test-anthropic-key' });
 
 		const { output, exitCode } = await runExample('anthropic-integration');
