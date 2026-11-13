@@ -733,8 +733,7 @@ export const exampleBamboohrTools = [
 			required: ['name'],
 		},
 	},
-	// The examples filter on these three action names. Without them the examples
-	// execute against an empty toolset and assert nothing.
+	// The LLM examples filter on these three actions.
 	{
 		name: 'workday_list_workers',
 		description: 'List workers from Workday',

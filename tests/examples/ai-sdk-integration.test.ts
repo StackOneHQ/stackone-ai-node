@@ -1,36 +1,42 @@
 /**
- * Executes examples/ai-sdk-integration.ts.
+ * Runs examples/ai-sdk-integration.ts against the mock StackOne and OpenAI APIs.
  */
 
-import { runExample, stubExampleEnv } from './run-example';
+import { EXAMPLE_ANSWER } from '../../mocks/handlers.utils';
+import { recordToolCalls, runExample, stubExampleEnv } from './run-example';
 
 describe('ai-sdk-integration example', () => {
-	beforeEach(() => {
-		stubExampleEnv({ OPENAI_API_KEY: 'test-openai-key' });
-	});
-
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
 
-	it('loads tools and drives a Vercel AI SDK generation', async () => {
-		const { stdout, exitCode } = await runExample('../../examples/ai-sdk-integration.ts');
+	it('lets the AI SDK execute the tool, then prints the answer', async () => {
+		stubExampleEnv({ OPENAI_API_KEY: 'test-openai-key' });
+		const calls = recordToolCalls();
+
+		const { output, exitCode } = await runExample('ai-sdk-integration');
 
 		expect(exitCode).toBeUndefined();
-
-		// 4: 3 workday actions the example filters to, plus the auto-appended tool_feedback.
-		// A bare > 0 check cannot fail here — tool_feedback is appended after
-		// filtering, so even a filter matching nothing still yields one tool.
-		const loaded = stdout.match(/Loaded (\d+) tools/);
-		expect(loaded).not.toBeNull();
-		expect(Number(loaded?.[1])).toBe(4);
+		expect(output).toBe(
+			[
+				'Loaded 3 tools for AI SDK',
+				`AI response: ${EXAMPLE_ANSWER}`,
+				'Steps taken: 2',
+				'  Tool call: workday_list_workers',
+				'  Arguments: {"query":{"limit":5}}',
+			].join('\n'),
+		);
+		expect(calls.map(({ name, arguments: args }) => [name, args])).toEqual([
+			['workday_list_workers', { query: { limit: 5 } }],
+		]);
 	});
 
-	it('skips cleanly when OPENAI_API_KEY is absent', async () => {
-		vi.stubEnv('OPENAI_API_KEY', '');
+	it('skips without OPENAI_API_KEY', async () => {
+		stubExampleEnv({ OPENAI_API_KEY: '' });
 
-		const { stdout, exitCode } = await runExample('../../examples/ai-sdk-integration.ts');
-
-		expect(exitCode).toBe(0);
+		expect(await runExample('ai-sdk-integration')).toEqual({
+			output: 'Skipping: OPENAI_API_KEY is not set',
+			exitCode: 0,
+		});
 	});
 });

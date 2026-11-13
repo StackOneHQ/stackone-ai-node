@@ -1,51 +1,42 @@
 /**
- * Executes examples/auth-management.ts.
+ * Runs examples/auth-management.ts against the mock StackOne API.
  */
 
 import { runExample, stubExampleEnv } from './run-example';
 
 describe('auth-management example', () => {
-	beforeEach(() => {
-		stubExampleEnv();
-	});
-
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
 
-	it('runs every auth pattern to completion', async () => {
-		const { stdout, exitCode } = await runExample('../../examples/auth-management.ts');
+	it('loads tools through every way of passing the key and the account', async () => {
+		stubExampleEnv();
+
+		const { output, exitCode } = await runExample('auth-management');
 
 		expect(exitCode).toBeUndefined();
-		expect(stdout).toContain('Done — all auth patterns demonstrated.');
+		expect(output.split('\n').filter((line) => line.startsWith('  '))).toEqual([
+			'  Loaded 2 tools using env API key',
+			'  Loaded 2 tools using explicit API key',
+			'  2 linked account(s), 1 active',
+			'  Loaded 2 tools across them',
+			'  STACKONE_ACCOUNT_ID is set',
+			'  Loaded 6 tools for account from env',
+			'  Loaded 6 tools for configured account',
+			'  Called setAccounts() with configured account',
+			'  Loaded 6 tools after setAccounts()',
+			// The discovered mock account serves no workday tools.
+			'  (workday_list_workers not available — skipping single-tool demo)',
+		]);
+		expect(output).toMatch(/Done — all auth patterns demonstrated\.$/);
 	});
 
-	it('loads tools through each configuration path', async () => {
-		const { stdout } = await runExample('../../examples/auth-management.ts');
+	it('exits 1 without STACKONE_API_KEY', async () => {
+		stubExampleEnv({ STACKONE_API_KEY: '' });
 
-		for (const section of [
-			'1a. API Key from environment',
-			'1b. Explicit API key',
-			'2. Account ID from environment',
-			'3. Account ID in constructor',
-			'4. setAccounts() — global account list',
-			'5. Per-tool account override',
-		]) {
-			expect(stdout).toContain(section);
-		}
-
-		// Every fetchTools() call must return a non-empty toolset; "Loaded 0 tools"
-		// would mean the example ran but silently exercised nothing.
-		const loaded = [...stdout.matchAll(/Loaded (\d+) tools/g)].map((match) => Number(match[1]));
-		expect(loaded.length).toBeGreaterThan(0);
-		expect(loaded.every((count) => count > 0)).toBe(true);
-	});
-
-	it('exits non-zero when STACKONE_API_KEY is absent', async () => {
-		vi.stubEnv('STACKONE_API_KEY', '');
-
-		const { exitCode } = await runExample('../../examples/auth-management.ts');
-
-		expect(exitCode).toBe(1);
+		expect(await runExample('auth-management')).toEqual({
+			output: '[error] Set STACKONE_API_KEY to run this example.',
+			exitCode: 1,
+		});
 	});
 });

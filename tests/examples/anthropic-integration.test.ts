@@ -1,38 +1,36 @@
 /**
- * Executes examples/anthropic-integration.ts.
+ * Runs examples/anthropic-integration.ts against the mock StackOne and Anthropic APIs.
  */
 
 import { runExample, stubExampleEnv } from './run-example';
 
 describe('anthropic-integration example', () => {
-	beforeEach(() => {
-		stubExampleEnv({ ANTHROPIC_API_KEY: 'test-anthropic-key' });
-	});
-
 	afterEach(() => {
 		vi.unstubAllEnvs();
 	});
 
-	it('loads tools, calls Anthropic, and reports the tool use', async () => {
-		const { stdout, exitCode } = await runExample('../../examples/anthropic-integration.ts');
+	it('sends the list and search tools and prints the tool use the model returns', async () => {
+		stubExampleEnv({ ANTHROPIC_API_KEY: 'test-anthropic-key' });
+
+		const { output, exitCode } = await runExample('anthropic-integration');
 
 		expect(exitCode).toBeUndefined();
-
-		// 3: 2 tools matching the example's filters, plus the auto-appended tool_feedback.
-		// A bare > 0 check cannot fail here — tool_feedback is appended after
-		// filtering, so even a filter matching nothing still yields one tool.
-		const loaded = stdout.match(/Loaded (\d+) tools/);
-		expect(loaded).not.toBeNull();
-		expect(Number(loaded?.[1])).toBe(3);
-
-		expect(stdout).toContain('workday_list_workers');
+		expect(output).toBe(
+			[
+				'Loaded 2 tools for Anthropic',
+				'Response content blocks: 1',
+				'  Tool use: workday_list_workers',
+				'  Input: {"query":{"limit":5}}',
+			].join('\n'),
+		);
 	});
 
-	it('skips cleanly when ANTHROPIC_API_KEY is absent', async () => {
-		vi.stubEnv('ANTHROPIC_API_KEY', '');
+	it('skips without ANTHROPIC_API_KEY', async () => {
+		stubExampleEnv({ ANTHROPIC_API_KEY: '' });
 
-		const { stdout, exitCode } = await runExample('../../examples/anthropic-integration.ts');
-
-		expect(exitCode).toBe(0);
+		expect(await runExample('anthropic-integration')).toEqual({
+			output: 'Skipping: ANTHROPIC_API_KEY is not set',
+			exitCode: 0,
+		});
 	});
 });

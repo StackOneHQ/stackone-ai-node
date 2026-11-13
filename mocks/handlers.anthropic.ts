@@ -1,50 +1,40 @@
 import { http, HttpResponse } from 'msw';
+import {
+	EXAMPLE_ANSWER,
+	EXAMPLE_PROMPT,
+	EXAMPLE_TOOL_CALL,
+	bodyField,
+	carriesToolResult,
+	isRecord,
+	offersTools,
+} from './handlers.utils';
 
-/**
- * Anthropic Messages API, for anthropic-integration.ts.
- */
+/** Whether any user message is the example prompt. */
+const asksExamplePrompt = (messages: unknown): boolean => {
+	const items: unknown[] = Array.isArray(messages) ? messages : [];
+	return items.some(
+		(item) => isRecord(item) && item.role === 'user' && item.content === EXAMPLE_PROMPT,
+	);
+};
+
+/** Anthropic Messages, answering the prompt anthropic-integration.ts sends. */
 export const anthropicHandlers = [
 	http.post('https://api.anthropic.com/v1/messages', async ({ request }) => {
-		const body = (await request.json()) as {
-			messages?: Array<{ content?: unknown; role?: string }>;
-			tools?: Array<{ name?: string }>;
-		};
-
-		const userMessage = body.messages
-			?.filter((message) => message.role === 'user')
-			.map((message) =>
-				typeof message.content === 'string' ? message.content : JSON.stringify(message.content),
-			)
-			.join(' ');
-		const hasTools = Boolean(body.tools?.length);
-
-		if (hasTools && userMessage?.includes('List the first 5 employees')) {
-			return HttpResponse.json({
-				id: 'msg_mock_list',
-				type: 'message',
-				role: 'assistant',
-				model: 'claude-haiku-4-5-20241022',
-				content: [
-					{
-						type: 'tool_use',
-						id: 'toolu_mock_list',
-						name: 'workday_list_workers',
-						input: { query: { limit: 5 } },
-					},
-				],
-				stop_reason: 'tool_use',
-				usage: { input_tokens: 100, output_tokens: 50 },
-			});
-		}
-
+		const body = await request.json();
+		const callsTool =
+			!carriesToolResult(body) &&
+			offersTools(body) &&
+			asksExamplePrompt(bodyField(body, 'messages'));
 		return HttpResponse.json({
-			id: 'msg_default',
+			id: 'msg_mock',
 			type: 'message',
 			role: 'assistant',
-			model: 'claude-haiku-4-5-20241022',
-			content: [{ type: 'text', text: 'Mock response' }],
-			stop_reason: 'end_turn',
-			usage: { input_tokens: 10, output_tokens: 10 },
+			model: 'claude-haiku-4-5',
+			content: callsTool
+				? [{ type: 'tool_use', id: 'toolu_mock_list', ...EXAMPLE_TOOL_CALL }]
+				: [{ type: 'text', text: carriesToolResult(body) ? EXAMPLE_ANSWER : 'Mock response' }],
+			stop_reason: callsTool ? 'tool_use' : 'end_turn',
+			usage: { input_tokens: 100, output_tokens: 50 },
 		});
 	}),
 ];

@@ -1,79 +1,38 @@
 /**
- * Executes a real file from `examples/` under MSW.
+ * Runs a real file from `examples/` against the mocks.
  *
- * Examples run their work at import time via top-level await, so importing one
- * *is* running it. Two things make that safe under vitest:
- *
- *   - `STACKONE_BASE_URL` points the SDK at the mock (toolsets.ts reads it), so
- *     examples that construct `new StackOneToolSet()` with no explicit baseUrl
- *     still hit MSW rather than production.
- *   - `process.exit` is swapped for a throw. An example that bails on missing
- *     config would otherwise tear down the whole vitest worker, turning a real
- *     failure into a confusing crash.
+ * An example does its work in top-level await, so importing it runs it. `STACKONE_BASE_URL` points
+ * the toolset at the mock API, and `process.exit` throws instead of ending the vitest worker.
  */
 
 import process from 'node:process';
+import { http } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
+import { mockAccountTools } from '../../mocks/handlers.mcp';
+import { createMcpApp } from '../../mocks/mcp-server';
+import type { MockMcpServerOptions, RecordedToolCall } from '../../mocks/mcp-server';
+import { server } from '../../mocks/node';
 
-/** Account id the MCP mock serves example tools for (mocks/handlers.mcp.ts). */
-export const EXAMPLE_ACCOUNT_ID = 'your-bamboohr-account-id';
+/** An account the MCP mock serves the example tools for (mocks/handlers.mcp.ts). */
+const EXAMPLE_ACCOUNT_ID = 'your-bamboohr-account-id';
 
-export interface ExampleRun {
-	stdout: string;
+interface ExampleRun {
+	/** Everything the example printed, one console call per line, `console.error` prefixed. */
+	output: string;
+	/** The code the example passed to `process.exit`, or undefined when it ran to the end. */
 	exitCode: number | undefined;
 }
 
-export class ExampleExitError extends Error {
-	constructor(readonly code: number | undefined) {
+class ExampleExit extends Error {
+	readonly code: number | undefined;
+
+	constructor(code: number | undefined) {
 		super(`example called process.exit(${code})`);
-		this.name = 'ExampleExitError';
+		this.code = code;
 	}
 }
 
-/**
- * Import and execute an example, capturing its console output.
- *
- * @param specifier module specifier relative to this file, e.g. `../../examples/auth-management.ts`
- */
-export async function runExample(specifier: string): Promise<ExampleRun> {
-	const lines: string[] = [];
-	const record =
-		(stream: 'log' | 'error') =>
-		(...args: unknown[]): void => {
-			lines.push(`${stream === 'error' ? '[stderr] ' : ''}${args.map(String).join(' ')}`);
-		};
-
-	const logSpy = vi.spyOn(console, 'log').mockImplementation(record('log'));
-	const errorSpy = vi.spyOn(console, 'error').mockImplementation(record('error'));
-
-	let exitCode: number | undefined;
-	const realExit = process.exit;
-	// biome-ignore lint/suspicious/noExplicitAny: process.exit's never-returning signature
-	process.exit = ((code?: number): never => {
-		exitCode = code;
-		throw new ExampleExitError(code);
-	}) as any;
-
-	try {
-		// Query param busts vite's module cache so each test executes the example
-		// afresh rather than replaying the first import's side effects.
-		await import(/* @vite-ignore */ `${specifier}?run=${crypto.randomUUID()}`);
-	} catch (error) {
-		// An example bailing via process.exit is a normal outcome to assert on, not
-		// a harness failure — surface it as `exitCode` with its output intact.
-		if (!(error instanceof ExampleExitError)) {
-			throw error;
-		}
-	} finally {
-		process.exit = realExit;
-		logSpy.mockRestore();
-		errorSpy.mockRestore();
-	}
-
-	return { stdout: lines.join('\n'), exitCode };
-}
-
-/** Env every example needs to reach the mock instead of production. */
+/** Point every example at the mocks, with the given extra variables (an empty one unsets it). */
 export function stubExampleEnv(extra: Record<string, string> = {}): void {
 	vi.stubEnv('STACKONE_API_KEY', 'test-key');
 	vi.stubEnv('STACKONE_ACCOUNT_ID', EXAMPLE_ACCOUNT_ID);
@@ -81,4 +40,50 @@ export function stubExampleEnv(extra: Record<string, string> = {}): void {
 	for (const [key, value] of Object.entries(extra)) {
 		vi.stubEnv(key, value);
 	}
+}
+
+/** Run `examples/<name>.ts` afresh and return what it printed and how it exited. */
+export async function runExample(name: string): Promise<ExampleRun> {
+	const lines: string[] = [];
+	const spies = [
+		vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+			lines.push(args.map(String).join(' '));
+		}),
+		vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+			lines.push(`[error] ${args.map(String).join(' ')}`);
+		}),
+		vi.spyOn(process, 'exit').mockImplementation((code) => {
+			throw new ExampleExit(code === undefined || code === null ? undefined : Number(code));
+		}),
+	];
+
+	let exitCode: number | undefined;
+	try {
+		// A fresh query string makes each run evaluate the module again instead of reusing the cache.
+		await import(/* @vite-ignore */ `../../examples/${name}.ts?run=${crypto.randomUUID()}`);
+	} catch (error) {
+		if (!(error instanceof ExampleExit)) {
+			throw error;
+		}
+		exitCode = error.code;
+	} finally {
+		for (const spy of spies) {
+			spy.mockRestore();
+		}
+	}
+	return { output: lines.join('\n'), exitCode };
+}
+
+/** Serve the default mock catalog with these options and record every `tools/call` made. */
+export function recordToolCalls(
+	options: Omit<MockMcpServerOptions, 'accountTools' | 'onToolCall'> = {},
+): RecordedToolCall[] {
+	const calls: RecordedToolCall[] = [];
+	const app = createMcpApp({
+		...options,
+		accountTools: mockAccountTools,
+		onToolCall: (call) => calls.push(call),
+	});
+	server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
+	return calls;
 }
