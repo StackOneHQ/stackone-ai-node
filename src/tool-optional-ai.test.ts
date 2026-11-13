@@ -4,8 +4,8 @@ import { StackOneError } from './utils/error-stackone';
 import { peerDependencies } from '../package.json';
 import type { ExecuteConfig, ToolParameters } from './types';
 
-const builtToolEsm = new URL('../dist/src/tool.mjs', import.meta.url);
-const builtToolCjs = new URL('../dist/src/tool.cjs', import.meta.url);
+const builtToolEsm = new URL('../dist/tool.mjs', import.meta.url);
+const builtToolCjs = new URL('../dist/tool.cjs', import.meta.url);
 const distReady = existsSync(builtToolEsm) && existsSync(builtToolCjs);
 
 const createExecuteConfig = (): ExecuteConfig => ({ kind: 'local' });
