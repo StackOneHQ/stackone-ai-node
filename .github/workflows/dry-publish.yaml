@@ -3,6 +3,8 @@ name: Dry Run Publish Package with pkg.pr.new
 on:
   pull_request:
   push:
+    branches:
+      - main
 
 jobs:
   dry-publish:
