@@ -9,12 +9,11 @@ export default {
 		examples: {
 			entry: ['*.ts'],
 			project: ['*.ts'],
-			ignoreDependencies: ['@clack/prompts', '@tanstack/ai', '@tanstack/ai-openai', 'msw'],
+			ignoreDependencies: ['msw'],
 		},
 	},
 	ignore: ['**/*.test.ts', '**/*.spec.ts', '**/*.test-d.ts'],
-	// `test:node` is a script of StackOneHQ/sdk-conformance, run from its checkout in CI.
-	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx', 'test:node'],
+	ignoreBinaries: ['only-allow', 'oxfmt', 'oxlint', 'tsx'],
 	ignoreDependencies: ['@typescript/native-preview'],
 	rules: {
 		optionalPeerDependencies: 'off',

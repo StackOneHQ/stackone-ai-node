@@ -9,9 +9,6 @@ catalogs:
     '@ai-sdk/openai':
       specifier: ^4.0.27
       version: 4.0.27
-    '@clack/prompts':
-      specifier: ^0.11.0
-      version: 0.11.0
     '@fast-check/vitest':
       specifier: ^0.2.0
       version: 0.2.4
@@ -58,12 +55,6 @@ catalogs:
     '@anthropic-ai/claude-agent-sdk':
       specifier: ^0.2.12
       version: 0.2.12
-    '@tanstack/ai':
-      specifier: ^0.3.0
-      version: 0.3.0
-    '@tanstack/ai-openai':
-      specifier: ^0.3.0
-      version: 0.3.0
   peer:
     '@anthropic-ai/claude-agent-sdk':
       specifier: ^0.2.12
@@ -94,20 +85,20 @@ importers:
         version: 0.72.1(zod@4.3.5)
       '@modelcontextprotocol/sdk':
         specifier: catalog:prod
-        version: 1.24.3(zod@4.3.5)
+        version: 1.24.3(supports-color@7.2.0)(zod@4.3.5)
     devDependencies:
       '@fast-check/vitest':
         specifier: catalog:dev
         version: 0.2.4(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
       '@hono/mcp':
         specifier: catalog:dev
-        version: 0.1.5(@modelcontextprotocol/sdk@1.24.3(zod@4.3.5))(hono@4.10.7)
+        version: 0.1.5(@modelcontextprotocol/sdk@1.24.3(supports-color@7.2.0)(zod@4.3.5))(hono@4.10.7)
       '@types/node':
         specifier: catalog:dev
         version: 22.19.1
       '@vitest/coverage-v8':
         specifier: catalog:dev
-        version: 4.0.15(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.0.15(supports-color@7.2.0)(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))
       ai:
         specifier: catalog:dev
         version: 7.0.47(zod@4.3.5)
@@ -156,18 +147,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: catalog:peer
         version: 0.72.1(zod@4.3.5)
-      '@clack/prompts':
-        specifier: catalog:dev
-        version: 0.11.0
       '@stackone/ai':
         specifier: workspace:*
         version: link:..
-      '@tanstack/ai':
-        specifier: catalog:examples
-        version: 0.3.0
-      '@tanstack/ai-openai':
-        specifier: catalog:examples
-        version: 0.3.0(@tanstack/ai@0.3.0)(zod@4.3.5)
       ai:
         specifier: catalog:peer
         version: 7.0.47(zod@4.3.5)
@@ -255,12 +237,6 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
-
-  '@clack/core@0.5.0':
-    resolution: {integrity: sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow==}
-
-  '@clack/prompts@0.11.0':
-    resolution: {integrity: sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw==}
 
   '@emnapi/core@1.7.1':
     resolution: {integrity: sha512-o1uhUASyo921r2XtHYOHy7gdkGLge8ghBEQHMWmyJFoXlpU58kIrhhN3w26lpQb6dspetweapMn2CSNwQ8I4wg==}
@@ -1106,20 +1082,6 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@tanstack/ai-openai@0.3.0':
-    resolution: {integrity: sha512-ZaMYUiU97LLDhJFbCQgtTVzCitMQSXFe4j1WGsXrz5fPe9ZUqYzMFSJRozONluM+vuI6z02XF2PJPzQldGKbMQ==}
-    peerDependencies:
-      '@tanstack/ai': ^0.2.2
-      zod: ^4.0.0
-
-  '@tanstack/ai@0.3.0':
-    resolution: {integrity: sha512-+MmqvLFmM1XvzGzVm2Pwgj8TmN8l3AV5NikDgam+B1HZY0MGdj5Pz7QFFYDEjTmzcFrDSDOAIobxR7Qp2iuKog==}
-    engines: {node: '>=18'}
-
-  '@tanstack/devtools-event-client@0.4.0':
-    resolution: {integrity: sha512-RPfGuk2bDZgcu9bAJodvO2lnZeHuz4/71HjZ0bGb/SPg8+lyTA+RLSKQvo7fSmPSi8/vcH3aKQ8EM9ywf1olaw==}
-    engines: {node: '>=18'}
-
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
@@ -1891,9 +1853,6 @@ packages:
     resolution: {integrity: sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==}
     engines: {node: '>= 0.8'}
 
-  partial-json@0.1.7:
-    resolution: {integrity: sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA==}
-
   path-key@3.1.1:
     resolution: {integrity: sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==}
     engines: {node: '>=8'}
@@ -2063,9 +2022,6 @@ packages:
   signal-exit@4.1.0:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
-
-  sisteransi@1.0.5:
-    resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
   smol-toml@1.5.2:
     resolution: {integrity: sha512-QlaZEqcAH3/RtNyet1IPIYPsEWAaYyXXv1Krsi+1L/QHppjX4Ifm8MQsBISz9vE8cHicIq3clogsheili5vhaQ==}
@@ -2441,17 +2397,6 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@clack/core@0.5.0':
-    dependencies:
-      picocolors: 1.1.1
-      sisteransi: 1.0.5
-
-  '@clack/prompts@0.11.0':
-    dependencies:
-      '@clack/core': 0.5.0
-      picocolors: 1.1.1
-      sisteransi: 1.0.5
-
   '@emnapi/core@1.7.1':
     dependencies:
       '@emnapi/wasi-threads': 1.1.0
@@ -2629,9 +2574,9 @@ snapshots:
       fast-check: 4.5.2
       vitest: 4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2)
 
-  '@hono/mcp@0.1.5(@modelcontextprotocol/sdk@1.24.3(zod@4.3.5))(hono@4.10.7)':
+  '@hono/mcp@0.1.5(@modelcontextprotocol/sdk@1.24.3(supports-color@7.2.0)(zod@4.3.5))(hono@4.10.7)':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.24.3(zod@4.3.5)
+      '@modelcontextprotocol/sdk': 1.24.3(supports-color@7.2.0)(zod@4.3.5)
       hono: 4.10.7
 
   '@img/sharp-darwin-arm64@0.33.5':
@@ -2740,7 +2685,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@modelcontextprotocol/sdk@1.24.3(zod@4.3.5)':
+  '@modelcontextprotocol/sdk@1.24.3(supports-color@7.2.0)(zod@4.3.5)':
     dependencies:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
@@ -2749,8 +2694,8 @@ snapshots:
       cross-spawn: 7.0.6
       eventsource: 3.0.7
       eventsource-parser: 3.0.6
-      express: 5.2.1
-      express-rate-limit: 7.5.1(express@5.2.1)
+      express: 5.2.1(supports-color@7.2.0)
+      express-rate-limit: 7.5.1(express@5.2.1(supports-color@7.2.0))
       jose: 6.1.3
       pkce-challenge: 5.0.1
       raw-body: 3.0.2
@@ -2980,21 +2925,6 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@tanstack/ai-openai@0.3.0(@tanstack/ai@0.3.0)(zod@4.3.5)':
-    dependencies:
-      '@tanstack/ai': 0.3.0
-      openai: 6.9.1(zod@4.3.5)
-      zod: 4.3.5
-    transitivePeerDependencies:
-      - ws
-
-  '@tanstack/ai@0.3.0':
-    dependencies:
-      '@tanstack/devtools-event-client': 0.4.0
-      partial-json: 0.1.7
-
-  '@tanstack/devtools-event-client@0.4.0': {}
-
   '@tybys/wasm-util@0.10.1':
     dependencies:
       tslib: 2.8.1
@@ -3049,14 +2979,14 @@ snapshots:
 
   '@vercel/oidc@3.2.0': {}
 
-  '@vitest/coverage-v8@4.0.15(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/coverage-v8@4.0.15(supports-color@7.2.0)(vitest@4.0.15(@opentelemetry/api@1.9.0)(@types/node@22.19.1)(jiti@2.6.1)(msw@2.12.3(@types/node@22.19.1)(typescript@5.9.3))(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.0.15
       ast-v8-to-istanbul: 0.3.8
       istanbul-lib-coverage: 3.2.2
       istanbul-lib-report: 3.0.1
-      istanbul-lib-source-maps: 5.0.6
+      istanbul-lib-source-maps: 5.0.6(supports-color@7.2.0)
       istanbul-reports: 3.2.0
       magicast: 0.5.1
       obug: 2.1.1
@@ -3158,11 +3088,11 @@ snapshots:
 
   birpc@3.0.0: {}
 
-  body-parser@2.2.1:
+  body-parser@2.2.1(supports-color@7.2.0):
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       http-errors: 2.0.1
       iconv-lite: 0.7.0
       on-finished: 2.4.1
@@ -3227,9 +3157,11 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  debug@4.4.3:
+  debug@4.4.3(supports-color@7.2.0):
     dependencies:
       ms: 2.1.3
+    optionalDependencies:
+      supports-color: 7.2.0
 
   depd@2.0.0: {}
 
@@ -3342,24 +3274,24 @@ snapshots:
 
   expect-type@1.2.2: {}
 
-  express-rate-limit@7.5.1(express@5.2.1):
+  express-rate-limit@7.5.1(express@5.2.1(supports-color@7.2.0)):
     dependencies:
-      express: 5.2.1
+      express: 5.2.1(supports-color@7.2.0)
 
-  express@5.2.1:
+  express@5.2.1(supports-color@7.2.0):
     dependencies:
       accepts: 2.0.0
-      body-parser: 2.2.1
+      body-parser: 2.2.1(supports-color@7.2.0)
       content-disposition: 1.0.1
       content-type: 1.0.5
       cookie: 0.7.2
       cookie-signature: 1.2.2
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       depd: 2.0.0
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
-      finalhandler: 2.1.1
+      finalhandler: 2.1.1(supports-color@7.2.0)
       fresh: 2.0.0
       http-errors: 2.0.1
       merge-descriptors: 2.0.0
@@ -3370,9 +3302,9 @@ snapshots:
       proxy-addr: 2.0.7
       qs: 6.14.0
       range-parser: 1.2.1
-      router: 2.2.0
-      send: 1.2.0
-      serve-static: 2.2.0
+      router: 2.2.0(supports-color@7.2.0)
+      send: 1.2.0(supports-color@7.2.0)
+      serve-static: 2.2.0(supports-color@7.2.0)
       statuses: 2.0.2
       type-is: 2.0.1
       vary: 1.1.2
@@ -3411,9 +3343,9 @@ snapshots:
     dependencies:
       to-regex-range: 5.0.1
 
-  finalhandler@2.1.1:
+  finalhandler@2.1.1(supports-color@7.2.0):
     dependencies:
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -3530,10 +3462,10 @@ snapshots:
       make-dir: 4.0.0
       supports-color: 7.2.0
 
-  istanbul-lib-source-maps@5.0.6:
+  istanbul-lib-source-maps@5.0.6(supports-color@7.2.0):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
       - supports-color
@@ -3700,8 +3632,6 @@ snapshots:
 
   parseurl@1.3.3: {}
 
-  partial-json@0.1.7: {}
-
   path-key@3.1.1: {}
 
   path-to-regexp@6.3.0: {}
@@ -3830,9 +3760,9 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.53.3
       fsevents: 2.3.3
 
-  router@2.2.0:
+  router@2.2.0(supports-color@7.2.0):
     dependencies:
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       depd: 2.0.0
       is-promise: 4.0.0
       parseurl: 1.3.3
@@ -3852,9 +3782,9 @@ snapshots:
 
   semver@7.7.3: {}
 
-  send@1.2.0:
+  send@1.2.0(supports-color@7.2.0):
     dependencies:
-      debug: 4.4.3
+      debug: 4.4.3(supports-color@7.2.0)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
@@ -3868,12 +3798,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  serve-static@2.2.0:
+  serve-static@2.2.0(supports-color@7.2.0):
     dependencies:
       encodeurl: 2.0.0
       escape-html: 1.0.3
       parseurl: 1.3.3
-      send: 1.2.0
+      send: 1.2.0(supports-color@7.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -3916,8 +3846,6 @@ snapshots:
   siginfo@2.0.0: {}
 
   signal-exit@4.1.0: {}
-
-  sisteransi@1.0.5: {}
 
   smol-toml@1.5.2: {}
 
