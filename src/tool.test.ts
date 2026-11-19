@@ -234,7 +234,12 @@ describe('BaseTool', () => {
 		it.each(adaptersFor(localTool('netbird_create_setup_key', ruleKeywordsSchema)))(
 			'%s hands the model every rule the server advertises',
 			async (_name, adapt) => {
-				expect((await adapt()).properties).toEqual(ruleKeywordsSchema.properties);
+				const { properties, required } = await adapt();
+
+				expect({ properties, required }).toEqual({
+					properties: ruleKeywordsSchema.properties,
+					required: ruleKeywordsSchema.required,
+				});
 			},
 		);
 	});
