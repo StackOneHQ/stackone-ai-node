@@ -57,7 +57,10 @@ const openaiIntegration = async (): Promise<void> => {
 		},
 	];
 	const response = await openai.chat.completions.create({
-		model: 'gpt-5.1',
+		model: 'gpt-6.1-terra',
+		// Chat Completions accepts function tools only with reasoning off; use the Responses API to
+		// combine tools with reasoning (see openai-responses-integration.ts)
+		reasoning_effort: 'none',
 		messages,
 		tools: openAITools,
 	});
@@ -76,7 +79,8 @@ const openaiIntegration = async (): Promise<void> => {
 	messages.push(message, ...(await tools.executeOpenAIToolCalls(toolCalls)));
 
 	const final = await openai.chat.completions.create({
-		model: 'gpt-5.1',
+		model: 'gpt-6.1-terra',
+		reasoning_effort: 'none',
 		messages,
 		tools: openAITools,
 	});

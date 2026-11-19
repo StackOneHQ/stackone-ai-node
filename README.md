@@ -139,7 +139,9 @@ const messages: OpenAI.ChatCompletionMessageParam[] = [
 	{ role: 'user', content: 'Create a time-off request for employee id cxIQ5764hj2' },
 ];
 const response = await openai.chat.completions.create({
-	model: 'gpt-5.1',
+	model: 'gpt-6.1-terra',
+	// Chat Completions takes function tools only with reasoning off; the Responses API takes both
+	reasoning_effort: 'none',
 	messages,
 	tools: tools.toOpenAI(),
 });
@@ -175,7 +177,7 @@ const tools = await toolset.fetchTools();
 const openai = new OpenAI();
 
 await openai.responses.create({
-	model: 'gpt-5.1',
+	model: 'gpt-6.2-sol',
 	instructions: 'You are a helpful HR assistant.',
 	input: 'What is the phone number for employee c28xIQ?',
 	tools: tools.toOpenAIResponses(),
@@ -206,7 +208,7 @@ const tools = await toolset.fetchTools();
 const anthropic = new Anthropic();
 
 await anthropic.messages.create({
-	model: 'claude-haiku-4-5-20251001',
+	model: 'claude-haiku-5-5',
 	max_tokens: 1024,
 	system: 'You are a helpful HR assistant.',
 	messages: [
@@ -244,7 +246,7 @@ const toolset = new StackOneToolSet({ accountId: process.env.STACKONE_ACCOUNT_ID
 const tools = await toolset.fetchTools();
 
 await generateText({
-	model: openai('gpt-5.1'),
+	model: openai('gpt-6.2-sol'),
 	tools: await tools.toAISDK(),
 	stopWhen: stepCountIs(3),
 });
@@ -278,7 +280,7 @@ const mcpServer = await tools.toClaudeAgentSdk();
 const result = query({
 	prompt: 'Get the employee with id: abc123',
 	options: {
-		model: 'claude-sonnet-4-5-20250929',
+		model: 'claude-sonnet-5-5',
 		mcpServers: { 'stackone-tools': mcpServer },
 		tools: [], // Disable built-in tools
 		allowedTools: ['mcp__stackone-tools'], // Run the StackOne tools without a permission prompt

@@ -38,7 +38,7 @@ const claudeAgentSdkIntegration = async (): Promise<void> => {
 	const result = query({
 		prompt: 'List the first 5 employees',
 		options: {
-			model: 'claude-sonnet-4-5-20250929',
+			model: 'claude-sonnet-5-5',
 			mcpServers: {
 				// oxlint-disable-next-line typescript/no-explicit-any, typescript/no-unsafe-type-assertion -- Compatible MCP server type
 				'stackone-tools': mcpServer as any,
