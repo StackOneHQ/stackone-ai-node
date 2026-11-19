@@ -825,7 +825,7 @@ export class Tools implements Iterable<BaseTool> {
 	 * const result = query({
 	 *   prompt: 'Get employee info',
 	 *   options: {
-	 *     model: 'claude-sonnet-4-5-20250929',
+	 *     model: 'claude-sonnet-5-5',
 	 *     mcpServers: {
 	 *       'stackone-tools': mcpServer,
 	 *     },

@@ -34,7 +34,7 @@ const openaiResponsesIntegration = async (): Promise<void> => {
 
 	// Create a response with tool calls using the Responses API
 	const response = await openai.responses.create({
-		model: 'gpt-5.1',
+		model: 'gpt-6.2-sol',
 		instructions: 'You are a helpful assistant that can access various tools.',
 		input: 'List the first 5 employees',
 		tools: openAIResponsesTools,
