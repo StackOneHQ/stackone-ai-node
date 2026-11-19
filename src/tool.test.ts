@@ -87,6 +87,44 @@ const present = <Value>(value: Value | null | undefined): Value => {
 const localTool = (name: string, schema: unknown, description = 'Test tool') =>
 	new BaseTool(name, description, toolParametersFromInputSchema(schema), { kind: 'local' });
 
+/** Each provider-bound adapter, as the parameters schema it hands the provider. */
+const adaptersFor = (tool: BaseTool): Array<[string, () => Promise<Record<string, unknown>>]> => [
+	['toOpenAI', async () => present(tool.toOpenAI().function.parameters)],
+	['toAnthropic', async () => tool.toAnthropic().input_schema],
+	[
+		'toOpenAIResponses (strict)',
+		async () => present(tool.toOpenAIResponses({ strict: true }).parameters),
+	],
+	['toOpenAIResponses (non-strict)', async () => present(tool.toOpenAIResponses().parameters)],
+	[
+		'toAISDK',
+		async () => {
+			const aiTools = await tool.toAISDK({ executable: false });
+			const aiTool = aiTools[tool.name];
+			assert.isDefined(aiTool);
+			return aiSdkJsonSchema(aiTool.inputSchema);
+		},
+	],
+];
+
+/** The keywords the MCP server advertises from a connector's input `rules`, as `tools/list` serves them. */
+const ruleKeywordsSchema = {
+	type: 'object',
+	properties: {
+		name: { type: 'string', minLength: 2, maxLength: 50 },
+		email: { type: 'string', format: 'email' },
+		id: { type: 'string', format: 'uuid' },
+		start_date: { type: 'string', format: 'date' },
+		updated_after: { type: 'string', format: 'date-time' },
+		language: { type: 'string', pattern: '^[a-z]{2}$' },
+		website: { type: 'string', pattern: '^https?:\\/\\/[^\\s/?#]+(?:[/?#]\\S*)?$' },
+		callback: { type: 'string', pattern: '^[a-zA-Z][a-zA-Z0-9+.-]*:\\S+$' },
+		expires_in: { type: 'number', minimum: 86400, maximum: 31536000 },
+		tags: { type: 'array', items: { type: 'string', minLength: 1, maxLength: 10 } },
+	},
+	required: ['name', 'expires_in'],
+} as const;
+
 const simpleTool = () =>
 	localTool('test_tool', {
 		type: 'object',
@@ -137,25 +175,7 @@ describe('BaseTool', () => {
 	describe('root schema pass-through across every adapter', () => {
 		const tool = localTool('hris_rich_probe', richSchema, 'Rich probe');
 		const { oneOf: _rejected, ...providerRoot } = richSchema;
-
-		const adapters: Array<[string, () => Promise<Record<string, unknown>>]> = [
-			['toOpenAI', async () => present(tool.toOpenAI().function.parameters)],
-			['toAnthropic', async () => tool.toAnthropic().input_schema],
-			[
-				'toOpenAIResponses (strict)',
-				async () => present(tool.toOpenAIResponses({ strict: true }).parameters),
-			],
-			['toOpenAIResponses (non-strict)', async () => present(tool.toOpenAIResponses().parameters)],
-			[
-				'toAISDK',
-				async () => {
-					const aiTools = await tool.toAISDK({ executable: false });
-					const aiTool = aiTools.hris_rich_probe;
-					assert.isDefined(aiTool);
-					return aiSdkJsonSchema(aiTool.inputSchema);
-				},
-			],
-		];
+		const adapters = adaptersFor(tool);
 
 		it.each(adapters)(
 			'%s keeps $schema, $defs, $ref, title and every property',
@@ -208,6 +228,15 @@ describe('BaseTool', () => {
 			expect(parameters.additionalProperties).toBe(false);
 			expect(parameters).toHaveProperty(['properties', 'address'], richSchema.properties.address);
 		});
+	});
+
+	describe('input rule keywords across every adapter', () => {
+		it.each(adaptersFor(localTool('netbird_create_setup_key', ruleKeywordsSchema)))(
+			'%s hands the model every rule the server advertises',
+			async (_name, adapt) => {
+				expect((await adapt()).properties).toEqual(ruleKeywordsSchema.properties);
+			},
+		);
 	});
 
 	it('converts to the OpenAI Chat Completions shape', () => {
