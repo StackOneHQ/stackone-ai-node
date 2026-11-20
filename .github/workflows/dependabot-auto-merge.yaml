@@ -15,6 +15,9 @@ jobs:
   dependabot-auto-merge:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
+    # The wait step polls until every other check on the head finishes; cap it so
+    # a check that never finishes cannot hold the runner for the 6 hour default.
+    timeout-minutes: 30
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
