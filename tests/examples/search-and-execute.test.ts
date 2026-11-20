@@ -5,13 +5,10 @@
  * discover the account, search, execute the best hit and try to record feedback.
  */
 
-import { http } from 'msw';
 import { TEST_BASE_URL } from '../../mocks/constants';
-import { mockAccountTools } from '../../mocks/handlers.mcp';
-import { MOCK_SEARCH_SESSION_ID, createMcpApp } from '../../mocks/mcp-server';
-import type { RecordedToolCall } from '../../mocks/mcp-server';
-import { server } from '../../mocks/node';
+import { MOCK_SEARCH_SESSION_ID } from '../../mocks/mcp-server';
 import { StackOneToolSet, ToolSetLoadError } from '../../src';
+import { recordToolCalls, runExample } from './run-example';
 
 describe('search-and-execute example e2e', () => {
 	beforeEach(() => {
@@ -21,25 +18,17 @@ describe('search-and-execute example e2e', () => {
 
 	afterEach(() => {
 		vi.unstubAllEnvs();
-		vi.restoreAllMocks();
 	});
 
 	it('runs the example end to end', async () => {
-		const calls: RecordedToolCall[] = [];
-		const app = createMcpApp({
-			accountTools: mockAccountTools,
-			submitFeedback: true,
-			onToolCall: (call) => calls.push(call),
-		});
-		server.use(http.all(`${TEST_BASE_URL}/mcp`, ({ request }) => app.fetch(request)));
-		const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+		const calls = recordToolCalls({ submitFeedback: true });
 
-		await import('../../examples/search-and-execute');
+		const { output, exitCode } = await runExample('search-and-execute');
 
-		const printed = log.mock.calls.map((args) => String(args[0])).join('\n');
-		expect(printed).toContain('default  testprovider  active');
-		expect(printed).toContain('0.800  mock_list_items  [default]');
-		expect(printed).toContain('Feedback recorded.');
+		expect(exitCode).toBeUndefined();
+		expect(output).toContain('default  testprovider  active');
+		expect(output).toContain('0.800  mock_list_items  [default]');
+		expect(output).toContain('Feedback recorded.');
 		expect(
 			calls.map((call) => [
 				call.name,

@@ -6,7 +6,7 @@ import { http, HttpResponse } from 'msw';
 import { TEST_BASE_URL } from '../mocks/constants';
 import { MOCK_SEARCH_SESSION_ID, createMcpApp } from '../mocks/mcp-server';
 import type { RecordedToolCall } from '../mocks/mcp-server';
-import { server } from '../mocks/node';
+import { serveAccounts, server } from '../mocks/node';
 import { listMcpTools } from './mcp-client';
 import type { McpToolDefinition } from './mcp-client';
 import { StackOneMcpTool } from './tool';
@@ -102,10 +102,6 @@ const serveMock = (
 	);
 	return { calls, requests, rpcRequests: () => rpcRequests };
 };
-
-/** Serve `accounts` from GET /accounts. */
-const serveAccounts = (accounts: JsonObject[]) =>
-	server.use(http.get(`${TEST_BASE_URL}/accounts`, () => HttpResponse.json(accounts)));
 
 /** The endpoint of every listing so far. */
 const listedEndpoints = () => listMock.mock.calls.map(([request]) => request.endpoint);

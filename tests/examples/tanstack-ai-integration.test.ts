@@ -1,7 +1,8 @@
 /**
- * E2E test for tanstack-ai-integration.ts example
+ * E2E coverage for using StackOne tools with TanStack AI.
  *
- * Tests the complete flow of using StackOne tools with TanStack AI.
+ * There is no `examples/tanstack-ai-integration.ts`; this covers the TanStack
+ * conversion path directly.
  *
  * Note: TanStack AI requires Zod schemas for tool input validation.
  * This test validates tool setup and schema conversion, but the actual
@@ -12,7 +13,7 @@
 import { TEST_BASE_URL } from '../../mocks/constants';
 import { StackOneToolSet } from '../../src';
 
-describe('tanstack-ai-integration example e2e', () => {
+describe('tanstack-ai-integration e2e', () => {
 	beforeEach(() => {
 		vi.stubEnv('STACKONE_API_KEY', 'test-key');
 		vi.stubEnv('OPENAI_API_KEY', 'test-openai-key');
