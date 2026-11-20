@@ -22,7 +22,7 @@ catalogs:
     typescript: 5.9.3
     unplugin-unused: ^0.6.0
     vitest: ^4.1.0
-    zod: ^4.3.0
+    zod: ^4.6.7
   examples:
     '@anthropic-ai/claude-agent-sdk': ^0.2.12
   peer:
@@ -70,3 +70,11 @@ trustPolicy: no-downgrade
 
 trustPolicyExclude:
   - undici-types@6.21.0
+
+# Security floors for packages under peer-resolved dependencies (vite under vitest, rollup under
+# unplugin), which `pnpm update` does not re-resolve. Drop an entry once its parents require the fix.
+overrides:
+  nanoid@<3.3.12: ^3.3.12
+  postcss@<8.5.23: ^8.5.23
+  rollup@>=4.0.0 <4.59.0: ^4.59.0
+  vite@>=7.0.0 <7.3.7: ^7.3.7
