@@ -733,6 +733,41 @@ export const exampleBamboohrTools = [
 			required: ['name'],
 		},
 	},
+	// The LLM examples filter on these three actions.
+	{
+		name: 'workday_list_workers',
+		description: 'List workers from Workday',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				query: {
+					type: 'object',
+					properties: {
+						limit: { type: 'number', description: 'Limit the number of results' },
+					},
+				},
+			},
+		},
+	},
+	{
+		name: 'workday_get_worker',
+		description: 'Get a single worker by ID from Workday',
+		inputSchema: {
+			type: 'object',
+			properties: {
+				id: { type: 'string', description: 'The worker ID' },
+			},
+			required: ['id'],
+		},
+	},
+	{
+		name: 'workday_get_current_user',
+		description: 'Get the currently authenticated Workday user',
+		inputSchema: {
+			type: 'object',
+			properties: {},
+		},
+	},
 ] as const satisfies McpToolDefinition[];
 
 /** A per-action tool whose name ends like a meta tool's, served in individual mode. */
